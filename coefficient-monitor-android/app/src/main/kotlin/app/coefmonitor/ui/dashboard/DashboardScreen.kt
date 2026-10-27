@@ -2,6 +2,7 @@ package app.coefmonitor.ui.dashboard
 
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,16 +15,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Pause
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.RestartAlt
+import androidx.compose.material.icons.outlined.Stop
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -73,6 +75,7 @@ import app.coefmonitor.ui.components.Banner
 import app.coefmonitor.ui.components.CoefficientTile
 import app.coefmonitor.ui.components.ConfirmDialog
 import app.coefmonitor.ui.components.InfoRow
+import app.coefmonitor.ui.components.LabelWithInfo
 import app.coefmonitor.ui.components.SectionCard
 import app.coefmonitor.ui.components.StatusPill
 import app.coefmonitor.ui.formatDateTime
@@ -158,6 +161,8 @@ fun DashboardScreen(
     }
 }
 
+private val SmallButtonPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+
 @Composable
 private fun statusColor(status: MonitorStatus): Color {
     val colors = LocalSemanticColors.current
@@ -189,21 +194,23 @@ private fun StatusCard(
             StatusPill(stringResource(Labels.status(runtime.status)), statusColor(runtime.status))
             Spacer(Modifier.weight(1f))
             val confidence = runtime.lastConfidence?.let { String.format(locale, " · %.0f%%", it * 100) }.orEmpty()
-            Text(
+            LabelWithInfo(
                 stringResource(R.string.ocr_label, stringResource(Labels.ocrStatus(runtime.ocrStatus))) + confidence,
-                style = MaterialTheme.typography.bodySmall,
+                info = stringResource(R.string.info_ocr_status),
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
             )
         }
-        runtime.error?.let { Banner(stringResource(Labels.error(it)), semantic.error, Icons.Filled.ErrorOutline) }
+        runtime.error?.let { Banner(stringResource(Labels.error(it)), semantic.error, Icons.Outlined.ErrorOutline) }
         if (state.total == 0) {
-            Banner(stringResource(R.string.banner_no_algorithms), semantic.warning, Icons.Filled.WarningAmber) {
+            Banner(stringResource(R.string.banner_no_algorithms), semantic.warning, Icons.Outlined.WarningAmber) {
                 TextButton(onClick = onOpenAlgorithms) { Text(stringResource(R.string.action_add)) }
             }
         }
         val hasClicks = state.algorithms.any { algorithm -> algorithm.definition.steps.any { it.point != null } }
         if (state.settings.autoClickEnabled && hasClicks && !clickerConnected) {
-            Banner(stringResource(R.string.warning_auto_click_off), semantic.warning, Icons.Filled.WarningAmber) {
+            Banner(stringResource(R.string.warning_auto_click_off), semantic.warning, Icons.Outlined.WarningAmber) {
                 TextButton(onClick = onEnableClicker) { Text(stringResource(R.string.action_enable)) }
             }
         }
@@ -219,16 +226,16 @@ private fun StatusCard(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             when {
                 running -> {
-                    FilledTonalButton(onClick = onPause, modifier = Modifier.weight(1f)) {
-                        Icon(Icons.Filled.Pause, contentDescription = null)
+                    FilledTonalButton(onClick = onPause, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                        Icon(Icons.Outlined.Pause, contentDescription = null)
                         Spacer(Modifier.width(6.dp))
                         Text(stringResource(R.string.action_pause))
                     }
                     StopButton(onStop, Modifier.weight(1f))
                 }
                 paused -> {
-                    Button(onClick = onResume, modifier = Modifier.weight(1f)) {
-                        Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                    Button(onClick = onResume, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                        Icon(Icons.Outlined.PlayArrow, contentDescription = null)
                         Spacer(Modifier.width(6.dp))
                         Text(stringResource(R.string.action_resume))
                     }
@@ -239,7 +246,7 @@ private fun StatusCard(
                     enabled = state.total > 0,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 ) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                    Icon(Icons.Outlined.PlayArrow, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
                     Text(stringResource(R.string.action_start_monitoring))
                 }
@@ -252,10 +259,11 @@ private fun StatusCard(
 private fun StopButton(onStop: () -> Unit, modifier: Modifier) {
     OutlinedButton(
         onClick = onStop,
-        modifier = modifier,
+        modifier = modifier.heightIn(min = 48.dp),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
     ) {
-        Icon(Icons.Filled.Stop, contentDescription = null)
+        Icon(Icons.Outlined.Stop, contentDescription = null)
         Spacer(Modifier.width(6.dp))
         Text(stringResource(R.string.action_stop))
     }
@@ -266,7 +274,7 @@ private fun StopButton(onStop: () -> Unit, modifier: Modifier) {
 private fun ActiveAlgorithmCard(state: DashboardState, onReset: () -> Unit, onChoose: () -> Unit, onManage: () -> Unit) {
     val semantic = LocalSemanticColors.current
     val locale = LocalConfiguration.current.locales[0]
-    SectionCard(title = stringResource(R.string.active_algorithm)) {
+    SectionCard(title = stringResource(R.string.active_algorithm), info = stringResource(R.string.info_active_algorithm)) {
         val active = state.active
         if (active == null) {
             Text(stringResource(R.string.no_algorithms_short), style = MaterialTheme.typography.bodyLarge)
@@ -286,19 +294,25 @@ private fun ActiveAlgorithmCard(state: DashboardState, onReset: () -> Unit, onCh
                     modifier = Modifier.padding(bottom = 6.dp),
                 )
             }
-            Text(active.definition.name, style = MaterialTheme.typography.titleLarge)
+            Text(active.definition.name, style = MaterialTheme.typography.titleMedium)
             if (active.definition.description.isNotBlank()) {
                 Text(
                     active.definition.description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             active.definition.steps.forEachIndexed { i, step ->
                 val delay = DelayPolicy.effective(step, state.settings.globalDelayMs)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("${i + 1}.", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "${i + 1}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.width(18.dp),
+                    )
                     val point = step.point
                     val title = when {
                         step.text.isNotBlank() -> step.text
@@ -309,10 +323,10 @@ private fun ActiveAlgorithmCard(state: DashboardState, onReset: () -> Unit, onCh
                         )
                         else -> "—"
                     }
-                    Text(title, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                    Text(title, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                     Text(
                         stringResource(R.string.delay_ms, delay),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -321,18 +335,20 @@ private fun ActiveAlgorithmCard(state: DashboardState, onReset: () -> Unit, onCh
             NeighborLine(stringResource(R.string.previous_algorithm), state.previous?.let { state.activeIndex to it.definition.name })
             NeighborLine(stringResource(R.string.next_algorithm), state.next?.let { state.activeIndex + 2 to it.definition.name })
             if (state.atLastAlgorithm) {
-                Banner(stringResource(R.string.warning_last_algorithm), semantic.warning, Icons.Filled.WarningAmber) {
+                Banner(stringResource(R.string.warning_last_algorithm), semantic.warning, Icons.Outlined.WarningAmber) {
                     TextButton(onClick = onManage) { Text(stringResource(R.string.action_add)) }
                 }
             }
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = onReset, enabled = state.total > 0) {
-                Icon(Icons.Filled.RestartAlt, contentDescription = null)
+            OutlinedButton(onClick = onReset, enabled = state.total > 0, contentPadding = SmallButtonPadding) {
+                Icon(Icons.Outlined.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(stringResource(R.string.action_reset_to_first))
             }
-            TextButton(onClick = onChoose, enabled = state.total > 0) { Text(stringResource(R.string.action_choose)) }
+            OutlinedButton(onClick = onChoose, enabled = state.total > 0, contentPadding = SmallButtonPadding) {
+                Text(stringResource(R.string.action_choose))
+            }
             TextButton(onClick = onManage) { Text(stringResource(R.string.action_manage)) }
         }
     }
@@ -352,7 +368,7 @@ private fun LastRoundCard(state: DashboardState) {
     val locale = LocalConfiguration.current.locales[0]
     val monitor = state.monitor
     val threshold = state.settings.threshold
-    SectionCard(title = stringResource(R.string.last_round)) {
+    SectionCard(title = stringResource(R.string.last_round), info = stringResource(R.string.info_last_round)) {
         val last = monitor.lastAcceptedHundredths?.let(::Coefficient)
         if (last == null) {
             Text(stringResource(R.string.no_rounds_yet), style = MaterialTheme.typography.bodyMedium)
@@ -379,9 +395,13 @@ private fun LastRoundCard(state: DashboardState) {
                 monitor.lastEventAtMs?.let { formatDateTime(it, locale) } ?: "—",
             )
         }
-        InfoRow(stringResource(R.string.threshold), stringResource(R.string.threshold_rule, threshold.toString()))
+        InfoRow(
+            stringResource(R.string.threshold),
+            stringResource(R.string.threshold_rule, threshold.toString()),
+            info = stringResource(R.string.info_threshold, threshold.toString()),
+        )
         if (enumOrNull<Continuity>(monitor.lastContinuity) == Continuity.GAP_SUSPECTED) {
-            Banner(stringResource(R.string.warning_gap), semantic.warning, Icons.Filled.WarningAmber)
+            Banner(stringResource(R.string.warning_gap), semantic.warning, Icons.Outlined.WarningAmber)
         }
     }
 }
@@ -406,8 +426,9 @@ private fun DetectionCard(
         // Found on the live screen by monitoring itself; null until then (and while it is searched again).
         val row = state.runtime.rowBand
         InfoRow(
-            stringResource(R.string.observation_region),
-            if (row == null) {
+            label = stringResource(R.string.observation_region),
+            info = stringResource(R.string.info_row),
+            value = if (row == null) {
                 stringResource(R.string.row_not_found)
             } else {
                 stringResource(
@@ -419,20 +440,27 @@ private fun DetectionCard(
                 )
             },
         )
-        InfoRow(stringResource(R.string.last_ocr_text), state.runtime.lastRawText?.takeIf { it.isNotBlank() } ?: "—")
+        InfoRow(
+            stringResource(R.string.last_ocr_text),
+            state.runtime.lastRawText?.takeIf { it.isNotBlank() } ?: "—",
+            info = stringResource(R.string.info_last_ocr),
+        )
         InfoRow(
             stringResource(R.string.screen_capture),
             stringResource(if (state.runtime.captureActive) R.string.capture_active else R.string.capture_inactive),
             if (state.runtime.captureActive) semantic.running else Color.Unspecified,
+            info = stringResource(R.string.screen_capture_explainer),
         )
         PermissionRow(
             label = stringResource(R.string.floating_panel),
+            info = stringResource(R.string.floating_panel_hint),
             granted = overlayGranted,
             relevant = state.settings.overlayEnabled,
             onGrant = onGrantOverlay,
         )
         PermissionRow(
             label = stringResource(R.string.notifications),
+            info = stringResource(R.string.info_notifications),
             granted = notificationsGranted,
             relevant = true,
             onGrant = onGrantNotifications,
@@ -442,18 +470,19 @@ private fun DetectionCard(
 }
 
 @Composable
-private fun PermissionRow(label: String, granted: Boolean, relevant: Boolean, onGrant: () -> Unit) {
+private fun PermissionRow(label: String, info: String, granted: Boolean, relevant: Boolean, onGrant: () -> Unit) {
     val semantic = LocalSemanticColors.current
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
+        LabelWithInfo(
             label,
-            style = MaterialTheme.typography.bodyMedium,
+            info,
+            Modifier.weight(1f),
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
         )
         when {
-            granted -> Text(stringResource(R.string.permission_granted), color = semantic.running, style = MaterialTheme.typography.bodyMedium)
-            !relevant -> Text(stringResource(R.string.permission_not_needed), style = MaterialTheme.typography.bodyMedium)
+            granted -> Text(stringResource(R.string.permission_granted), color = semantic.running, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+            !relevant -> Text(stringResource(R.string.permission_not_needed), style = MaterialTheme.typography.bodySmall)
             else -> TextButton(onClick = onGrant) { Text(stringResource(R.string.action_allow)) }
         }
     }
@@ -465,6 +494,7 @@ private fun RecentEventsCard(state: DashboardState, onOpenLog: () -> Unit) {
     val semantic = LocalSemanticColors.current
     SectionCard(
         title = stringResource(R.string.recent_events),
+        info = stringResource(R.string.info_recent_events),
         actions = { TextButton(onClick = onOpenLog) { Text(stringResource(R.string.action_show_all)) } },
     ) {
         if (state.recent.isEmpty()) {
@@ -477,8 +507,8 @@ private fun RecentEventsCard(state: DashboardState, onOpenLog: () -> Unit) {
                 Spacer(Modifier.width(12.dp))
                 Text(
                     Labels.eventLine(context, event).substringAfter(" — "),
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }

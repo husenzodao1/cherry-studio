@@ -14,12 +14,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,7 +53,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.coefmonitor.AppContainer
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.text.font.FontWeight
 import app.coefmonitor.R
+import app.coefmonitor.ui.components.ListCard
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.TransitionReason
@@ -158,7 +159,7 @@ fun EventLogScreen(viewModel: EventLogViewModel = viewModel(factory = EventLogVi
                 title = { Text(stringResource(R.string.nav_log)) },
                 actions = {
                     IconButton(onClick = { menu = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_actions))
+                        Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.more_actions))
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_export_json)) }, onClick = {
@@ -191,7 +192,9 @@ fun EventLogScreen(viewModel: EventLogViewModel = viewModel(factory = EventLogVi
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            TabRow(selectedTabIndex = tab) {
+            TabRow(selectedTabIndex = tab, containerColor = MaterialTheme.colorScheme.background, divider = {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.tab_events, count)) })
                 Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.tab_diagnostics)) })
             }
@@ -199,11 +202,11 @@ fun EventLogScreen(viewModel: EventLogViewModel = viewModel(factory = EventLogVi
                 OutlinedTextField(
                     value = query,
                     onValueChange = { viewModel.query.value = it },
-                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = { viewModel.query.value = "" }) {
-                                Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.action_clear))
+                                Icon(Icons.Outlined.Clear, contentDescription = stringResource(R.string.action_clear))
                             }
                         }
                     },
@@ -212,7 +215,7 @@ fun EventLogScreen(viewModel: EventLogViewModel = viewModel(factory = EventLogVi
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                 )
                 if (events.isEmpty()) {
-                    EmptyState(Icons.Filled.History, stringResource(R.string.log_empty_title), stringResource(R.string.log_empty_text))
+                    EmptyState(Icons.Outlined.History, stringResource(R.string.log_empty_title), stringResource(R.string.log_empty_text))
                 } else {
                     LazyColumn(
                         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
@@ -223,7 +226,7 @@ fun EventLogScreen(viewModel: EventLogViewModel = viewModel(factory = EventLogVi
                 }
             } else {
                 if (diagnostics.isEmpty()) {
-                    EmptyState(Icons.Filled.History, stringResource(R.string.diagnostics_empty_title), stringResource(R.string.diagnostics_empty_text))
+                    EmptyState(Icons.Outlined.History, stringResource(R.string.diagnostics_empty_title), stringResource(R.string.diagnostics_empty_text))
                 } else {
                     LazyColumn(
                         contentPadding = PaddingValues(16.dp),
@@ -262,15 +265,12 @@ private fun EventCard(event: EventEntity) {
     val semantic = LocalSemanticColors.current
     val locale = LocalConfiguration.current.locales[0]
     val value = Coefficient(event.coefficientHundredths)
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        shape = MaterialTheme.shapes.medium,
-    ) {
+    ListCard {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             CoefficientTile(event.coefficientText, if (value <= Coefficient(event.thresholdHundredths)) semantic.low else semantic.high)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(Labels.eventLine(context, event).substringAfter(" — "), style = MaterialTheme.typography.bodyMedium)
+                Text(Labels.eventLine(context, event).substringAfter(" — "), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                 val reason = enumOrNull<TransitionReason>(event.transitionReason)
                 val name = event.newAlgorithmName?.let { " · $it" }.orEmpty()
                 if (reason != null) {

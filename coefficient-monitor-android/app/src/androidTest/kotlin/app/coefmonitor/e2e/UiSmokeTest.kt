@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -129,8 +130,17 @@ class UiSmokeTest {
         nav("Settings")
         compose.onNode(hasSetTextAction() and hasText("2.00")).performTextReplacement("2.5")
         compose.onAllNodes(hasText("Apply") and hasClickAction())[0].performClick()
-        waitText("≤ 2.50x advances · > 2.50x resets to Algorithm 1")
+        waitText("≤ 2.50x → next · > 2.50x → Algorithm 1")
         shot("ui_07_settings")
+
+        // The "!" next to the threshold explains the rule in a small bubble; a tap anywhere closes it.
+        compose.onAllNodesWithContentDescription("More info")[0].performClick()
+        waitText("The coefficient you set (now 2.50x)", substring = true)
+        shot("ui_07a_info_bubble")
+        compose.onNodeWithText("The coefficient you set (now 2.50x)", substring = true).performClick()
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithText("The coefficient you set (now 2.50x)", substring = true).fetchSemanticsNodes().isEmpty()
+        }
 
         // The auto-clicker is on in the app, but its accessibility service is not: the way to turn it on is offered.
         scrollTo("Turn on in Accessibility settings")

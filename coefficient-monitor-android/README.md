@@ -186,6 +186,15 @@ Hold − or + to repeat. Every change is saved at once, exactly as if it was mad
 Changing detection settings while monitoring runs re-initialises the detector (the visible round
 is not processed).
 
+## Design
+
+Minimal on purpose: graphite (dark) or paper (light) surfaces separated by hairlines, one soft
+violet accent, outlined icons and the Inter typeface (bundled in `app/src/main/res/font`, subset to
+Latin and Cyrillic; SIL Open Font License, see `licenses/Inter-OFL.txt`). Screens carry short
+labels only. A tiny **!** next to a label opens a small bubble with the full explanation; tapping
+anywhere closes it. The floating panel uses the same palette, font and pill-shaped buttons, with a
+segmented control for its tabs.
+
 ## Permissions
 
 | Permission | Why |

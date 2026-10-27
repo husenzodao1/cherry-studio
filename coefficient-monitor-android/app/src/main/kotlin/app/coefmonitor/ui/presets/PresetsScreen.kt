@@ -12,15 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmarks
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.FileUpload
+import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -54,7 +51,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.coefmonitor.AppContainer
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import app.coefmonitor.R
+import app.coefmonitor.ui.components.ListCard
 import app.coefmonitor.core.ExportFormats
 import app.coefmonitor.core.ImportResult
 import app.coefmonitor.data.db.PresetEntity
@@ -148,7 +148,7 @@ fun PresetsScreen(viewModel: PresetsViewModel = viewModel(factory = PresetsViewM
                 title = { Text(stringResource(R.string.nav_presets)) },
                 actions = {
                     IconButton(onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) }) {
-                        Icon(Icons.Filled.FileUpload, contentDescription = stringResource(R.string.action_import))
+                        Icon(Icons.Outlined.FileUpload, contentDescription = stringResource(R.string.action_import))
                     }
                 },
             )
@@ -156,7 +156,9 @@ fun PresetsScreen(viewModel: PresetsViewModel = viewModel(factory = PresetsViewM
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showSave = true },
-                icon = { Icon(Icons.Filled.Save, contentDescription = null) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                icon = { Icon(Icons.Outlined.Save, contentDescription = null) },
                 text = { Text(stringResource(R.string.action_save_preset)) },
             )
         },
@@ -164,7 +166,7 @@ fun PresetsScreen(viewModel: PresetsViewModel = viewModel(factory = PresetsViewM
     ) { padding ->
         if (presets.isEmpty()) {
             EmptyState(
-                Icons.Filled.Bookmarks,
+                Icons.Outlined.BookmarkBorder,
                 stringResource(R.string.presets_empty_title),
                 stringResource(R.string.presets_empty_text),
                 modifier = Modifier.padding(padding),
@@ -239,14 +241,18 @@ fun PresetsScreen(viewModel: PresetsViewModel = viewModel(factory = PresetsViewM
 private fun PresetCard(preset: PresetEntity, active: Boolean, onLoad: () -> Unit, onExport: () -> Unit, onDelete: () -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val colors = MaterialTheme.colorScheme
-    Card(
-        colors = CardDefaults.cardColors(containerColor = if (active) colors.primaryContainer else colors.surfaceContainer),
-        shape = MaterialTheme.shapes.medium,
-    ) {
+    ListCard(highlighted = active) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(preset.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                if (active) Icon(Icons.Filled.CheckCircle, contentDescription = stringResource(R.string.active_badge), tint = colors.primary)
+                if (active) {
+                    Icon(
+                        Icons.Outlined.CheckCircle,
+                        contentDescription = stringResource(R.string.active_badge),
+                        tint = colors.primary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
             }
             Text(
                 stringResource(
@@ -257,8 +263,8 @@ private fun PresetCard(preset: PresetEntity, active: Boolean, onLoad: () -> Unit
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 FilledTonalButton(onClick = onLoad) { Text(stringResource(R.string.action_load)) }
-                IconButton(onClick = onExport) { Icon(Icons.Filled.FileDownload, contentDescription = stringResource(R.string.action_export)) }
-                IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete)) }
+                IconButton(onClick = onExport) { Icon(Icons.Outlined.FileDownload, contentDescription = stringResource(R.string.action_export)) }
+                IconButton(onClick = onDelete) { Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.action_delete)) }
             }
         }
     }
@@ -273,7 +279,7 @@ private fun SavePresetDialog(onSave: (String, Boolean) -> Unit, onDismiss: () ->
         title = { Text(stringResource(R.string.action_save_preset)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(R.string.save_preset_text), style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.save_preset_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it.take(60) },

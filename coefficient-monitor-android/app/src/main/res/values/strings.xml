@@ -72,6 +72,7 @@
     <string name="auto_click">Auto-clicker</string>
     <string name="auto_click_hint">After every round the active algorithm\'s clicks are performed one by one at the saved points, with the step times in between. Needs the Accessibility service below. A click lands on whatever is on screen at that moment; Pause or Stop cancels the clicks.</string>
     <string name="auto_click_restricted_hint">Android 13 and newer: if the switch there is greyed out, open App info → ⋮ → “Allow restricted settings” first, then turn it on.</string>
+    <string name="auto_click_restricted_short">Can\'t turn it on?</string>
     <string name="auto_click_service">Accessibility service</string>
     <string name="auto_click_service_description">Taps the points saved in your algorithms one by one: after every round while monitoring runs, or when you press Run clicks on the floating panel. It reads no screen content and does nothing else.</string>
     <string name="auto_click_service_label">Coefficient Monitor: auto-clicker</string>
@@ -111,7 +112,7 @@
     <string name="confirm_restore_defaults_text">Threshold, detection, delays, theme and panel settings return to defaults. Algorithms and the event log are kept.</string>
     <string name="confirm_restore_defaults_title">Restore default settings?</string>
     <string name="continuity_confirmed">Previous tile moved one slot — no rounds missed</string>
-    <string name="continuity_gap">Possible missed rounds — check the game history and adjust the active algorithm if needed</string>
+    <string name="continuity_gap">Possible missed rounds</string>
     <string name="continuity_unknown">Continuity could not be checked</string>
     <string name="cooldown">Minimum time between rounds</string>
     <string name="cooldown_hint">A change sooner than this after a round is treated as a correction, not a new round.</string>
@@ -134,7 +135,7 @@
     <string name="edit_algorithm">Edit algorithm</string>
     <string name="error_capture_denied">Screen capture permission was not granted.</string>
     <string name="error_capture_failed">Screen capture could not start. Try again.</string>
-    <string name="error_capture_revoked">Screen capture was stopped. The active algorithm was kept; start monitoring again to continue.</string>
+    <string name="error_capture_revoked">Screen capture stopped — start again to continue</string>
     <string name="error_no_algorithms">No enabled algorithms.</string>
     <string name="error_ocr">OCR failed on the last frame.</string>
     <string name="field_description">Description</string>
@@ -158,6 +159,16 @@
     <string name="import_text">Found %1$d valid algorithms. Append them to the end, or replace the whole list?</string>
     <string name="import_title">Import algorithms</string>
     <string name="include_algorithms">Include algorithm definitions</string>
+    <string name="info_active_algorithm">The algorithm whose clicks run after the next round. A low coefficient moves on to the next one, a high one goes back to Algorithm 1.</string>
+    <string name="info_first_round">What to do with the result that is already on screen when monitoring starts.</string>
+    <string name="info_last_ocr">The text last read in the newest tile. Useful when a round is not recognised.</string>
+    <string name="info_last_round">The last coefficient read from the game and what it did to the sequence.</string>
+    <string name="info_notifications">Needed for the monitoring notification with pause and stop, and for alerts.</string>
+    <string name="info_ocr_status">What the screen reading is doing now: searching for the row, reading, waiting for a tile to settle, or OK. The percentage is the reading confidence.</string>
+    <string name="info_recent_events">The last rounds processed. The full list with search and export is in Log.</string>
+    <string name="info_recovery">Use these if the sequence got out of step with the game.</string>
+    <string name="info_row">Where the coefficient row is on the screen. Monitoring finds it by itself and follows it when the game scrolls; Find row looks for it again right away.</string>
+    <string name="info_threshold">The coefficient you set (now %1$s). After each round: if the round\'s coefficient is %1$s or lower, the next algorithm runs; if it is higher, the sequence goes back to Algorithm 1.</string>
     <string name="language">Language</string>
     <string name="language_english" translatable="false">English</string>
     <string name="language_russian" translatable="false">Русский</string>
@@ -182,6 +193,7 @@
     <string name="min_confidence">Minimum OCR confidence</string>
     <string name="min_confidence_hint">Readings below this confidence are ignored.</string>
     <string name="more_actions">More actions</string>
+    <string name="more_info">More info</string>
     <string name="motion_sensitivity">Stillness threshold</string>
     <string name="motion_sensitivity_hint">Frame-to-frame similarity needed to treat the tile as still. Higher = more sensitive to motion.</string>
     <string name="nav_algorithms">Algorithms</string>
@@ -240,9 +252,9 @@
     <string name="overlay_tab_status">Status</string>
     <string name="permission_granted">Granted</string>
     <string name="permission_not_needed">Not needed</string>
-    <string name="point_on_reading_band">This point is on the coefficient row being read. Choose another place.</string>
+    <string name="point_on_reading_band">This point is on the row being read — choose another</string>
     <string name="point_picker_hint">Tap where this step should click, or drag the marker to move it. Other drags scroll, use zoom for precision. The red area is the coefficient row being read and cannot be used.</string>
-    <string name="point_picker_no_image">No screen yet. Start monitoring once with the game open — the screen where the row is found is saved and used to pick points.</string>
+    <string name="point_picker_no_image">No screen yet — start monitoring once with the game open.</string>
     <string name="point_picker_title">Step %1$d: pick the click point</string>
     <string name="preset_settings_only">Settings only</string>
     <string name="preset_with_algorithms">Settings + algorithms</string>
@@ -256,7 +268,7 @@
     <string name="problem_step_long">A step is too long.</string>
     <string name="problem_too_many_steps">Too many steps.</string>
     <string name="reason_already_first">Above the threshold, already on Algorithm 1</string>
-    <string name="reason_end">Last configured algorithm reached — add another to continue</string>
+    <string name="reason_end">Last algorithm reached</string>
     <string name="reason_high">Coefficient above the threshold</string>
     <string name="reason_low">Coefficient at or below the threshold</string>
     <string name="reason_no_algorithms">No enabled algorithms</string>
@@ -278,6 +290,7 @@
     <string name="save_preset_text">Saves threshold, detection settings, capture interval and delays.</string>
     <string name="screen_capture">Screen capture</string>
     <string name="screen_capture_explainer">Android asks for consent every time monitoring starts and shows a capture indicator while it runs.</string>
+    <string name="screen_capture_value">Only while monitoring</string>
     <string name="screen_image_description">Screen where the coefficient row was found</string>
     <string name="search_hint">Search: 1.70x, R-000012, RESET, algorithm…</string>
     <string name="settings_about">About</string>
@@ -309,13 +322,13 @@
     <string name="theme_system">System</string>
     <string name="threshold">Threshold</string>
     <string name="threshold_invalid">Enter a value from %1$s to %2$s</string>
-    <string name="threshold_rule">≤ %1$s advances · &gt; %1$s resets to Algorithm 1</string>
+    <string name="threshold_rule">≤ %1$s → next · &gt; %1$s → Algorithm 1</string>
     <string name="transition_advance">Advance</string>
     <string name="transition_none">No position change</string>
     <string name="transition_reset">Reset to Algorithm 1</string>
     <string name="version">Version</string>
-    <string name="warning_auto_click_off">Auto-clicker is off: turn on “Coefficient Monitor: auto-clicker” in Accessibility settings.</string>
-    <string name="warning_gap">Possible missed rounds before the last one. Check the game history and adjust the active algorithm if needed.</string>
-    <string name="warning_last_algorithm">This is the last configured algorithm. Add another algorithm to continue — a low coefficient will not wrap to Algorithm 1.</string>
+    <string name="warning_auto_click_off">Auto-clicker is off — turn it on in Accessibility</string>
+    <string name="warning_gap">Possible missed rounds — check the game history</string>
+    <string name="warning_last_algorithm">Last algorithm — add one more to continue</string>
     <string name="zoom">Zoom</string>
 </resources>

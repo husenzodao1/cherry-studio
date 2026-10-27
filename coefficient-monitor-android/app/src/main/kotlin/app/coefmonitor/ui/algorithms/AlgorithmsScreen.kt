@@ -3,7 +3,6 @@ package app.coefmonitor.ui.algorithms
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,23 +17,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.LibraryAdd
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.ToggleOff
-import androidx.compose.material.icons.filled.ToggleOn
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ArrowDownward
+import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.FileUpload
+import androidx.compose.material.icons.outlined.LibraryAdd
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.ToggleOff
+import androidx.compose.material.icons.outlined.ToggleOn
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,7 +61,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material.icons.outlined.Layers
 import app.coefmonitor.R
+import app.coefmonitor.ui.components.ListCard
 import app.coefmonitor.core.AlgorithmDefinition
 import app.coefmonitor.core.ExportFormats
 import app.coefmonitor.core.ImportResult
@@ -139,13 +136,13 @@ fun AlgorithmsScreen(
                 },
                 actions = {
                     IconButton(onClick = { showBulkAdd = true }) {
-                        Icon(Icons.Filled.LibraryAdd, contentDescription = stringResource(R.string.action_add_many))
+                        Icon(Icons.Outlined.LibraryAdd, contentDescription = stringResource(R.string.action_add_many))
                     }
                     IconButton(onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) }) {
-                        Icon(Icons.Filled.FileUpload, contentDescription = stringResource(R.string.action_import))
+                        Icon(Icons.Outlined.FileUpload, contentDescription = stringResource(R.string.action_import))
                     }
                     IconButton(onClick = { exportLauncher.launch("algorithms.json") }, enabled = algorithms.isNotEmpty()) {
-                        Icon(Icons.Filled.FileDownload, contentDescription = stringResource(R.string.action_export))
+                        Icon(Icons.Outlined.FileDownload, contentDescription = stringResource(R.string.action_export))
                     }
                 },
             )
@@ -153,7 +150,9 @@ fun AlgorithmsScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onEdit(NEW_ALGORITHM_ID) },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
                 text = { Text(stringResource(R.string.action_add_algorithm)) },
             )
         },
@@ -161,7 +160,7 @@ fun AlgorithmsScreen(
     ) { padding ->
         if (algorithms.isEmpty()) {
             EmptyState(
-                icon = Icons.Filled.FormatListNumbered,
+                icon = Icons.Outlined.Layers,
                 title = stringResource(R.string.algorithms_empty_title),
                 text = stringResource(R.string.algorithms_empty_text),
                 modifier = Modifier.padding(padding),
@@ -258,22 +257,18 @@ private fun AlgorithmRow(
 ) {
     var menu by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onEdit),
-        colors = CardDefaults.cardColors(containerColor = if (isActive) colors.primaryContainer else colors.surfaceContainer),
-        shape = MaterialTheme.shapes.medium,
-    ) {
+    ListCard(onClick = onEdit, highlighted = isActive) {
         Row(Modifier.padding(start = 12.dp, top = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier
-                    .size(44.dp)
-                    .background(if (isActive) colors.primary else colors.surfaceContainerHighest, MaterialTheme.shapes.small),
+                    .size(38.dp)
+                    .background(if (isActive) colors.primary else colors.surfaceContainerHigh, MaterialTheme.shapes.medium),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     number?.toString() ?: "—",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
                     color = if (isActive) colors.onPrimary else colors.onSurface,
                 )
             }
@@ -282,7 +277,7 @@ private fun AlgorithmRow(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         item.definition.name,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
@@ -290,10 +285,10 @@ private fun AlgorithmRow(
                     if (isActive) {
                         Spacer(Modifier.width(6.dp))
                         Icon(
-                            Icons.Filled.CheckCircle,
+                            Icons.Outlined.CheckCircle,
                             contentDescription = stringResource(R.string.active_badge),
                             tint = colors.primary,
-                            modifier = Modifier.size(18.dp),
+                            modifier = Modifier.size(16.dp),
                         )
                     }
                 }
@@ -312,21 +307,21 @@ private fun AlgorithmRow(
             }
             Box {
                 IconButton(onClick = { menu = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_actions))
+                    Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.more_actions))
                 }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    MenuItem(stringResource(R.string.action_edit), Icons.Filled.Edit) { menu = false; onEdit() }
+                    MenuItem(stringResource(R.string.action_edit), Icons.Outlined.Edit) { menu = false; onEdit() }
                     if (number != null && !isActive) {
-                        MenuItem(stringResource(R.string.action_set_active), Icons.Filled.CheckCircle) { menu = false; onSetActive() }
+                        MenuItem(stringResource(R.string.action_set_active), Icons.Outlined.CheckCircle) { menu = false; onSetActive() }
                     }
-                    if (!isFirst) MenuItem(stringResource(R.string.action_move_up), Icons.Filled.ArrowUpward) { menu = false; onMove(-1) }
-                    if (!isLast) MenuItem(stringResource(R.string.action_move_down), Icons.Filled.ArrowDownward) { menu = false; onMove(1) }
-                    MenuItem(stringResource(R.string.action_duplicate), Icons.Filled.ContentCopy) { menu = false; onDuplicate() }
+                    if (!isFirst) MenuItem(stringResource(R.string.action_move_up), Icons.Outlined.ArrowUpward) { menu = false; onMove(-1) }
+                    if (!isLast) MenuItem(stringResource(R.string.action_move_down), Icons.Outlined.ArrowDownward) { menu = false; onMove(1) }
+                    MenuItem(stringResource(R.string.action_duplicate), Icons.Outlined.ContentCopy) { menu = false; onDuplicate() }
                     MenuItem(
                         stringResource(if (item.definition.enabled) R.string.action_disable else R.string.action_enable),
-                        if (item.definition.enabled) Icons.Filled.ToggleOff else Icons.Filled.ToggleOn,
+                        if (item.definition.enabled) Icons.Outlined.ToggleOff else Icons.Outlined.ToggleOn,
                     ) { menu = false; onToggle() }
-                    MenuItem(stringResource(R.string.action_delete), Icons.Filled.Delete) { menu = false; onDelete() }
+                    MenuItem(stringResource(R.string.action_delete), Icons.Outlined.Delete) { menu = false; onDelete() }
                 }
             }
         }
@@ -353,7 +348,7 @@ private fun BulkAddDialog(defaultPrefix: String, onConfirm: (Int, String) -> Uni
         title = { Text(stringResource(R.string.bulk_add_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(R.string.bulk_add_text), style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.bulk_add_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OutlinedTextField(
                     value = countText,
                     onValueChange = { countText = it.filter(Char::isDigit).take(3) },

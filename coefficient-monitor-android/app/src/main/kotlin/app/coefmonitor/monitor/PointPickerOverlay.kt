@@ -6,11 +6,9 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PixelFormat
-import android.graphics.drawable.GradientDrawable
 import android.hardware.display.DisplayManager
 import android.provider.Settings
 import android.util.DisplayMetrics
-import android.util.TypedValue
 import android.view.Display
 import android.view.Gravity
 import android.view.MotionEvent
@@ -39,6 +37,7 @@ class PointPickerOverlay(
     private val onDone: (NormalizedPoint?) -> Unit,
 ) {
     private val windowManager = context.getSystemService(WindowManager::class.java)
+    private val style = OverlayStyle(context)
     private var root: FrameLayout? = null
     private var point: NormalizedPoint? = initial
 
@@ -86,28 +85,24 @@ class PointPickerOverlay(
         container.addView(surface, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         bar = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(12), dp(8), dp(12), dp(8))
+            setPadding(dp(14), dp(12), dp(14), dp(12))
             // Touches on the bar must not move the marker underneath.
             isClickable = true
-            background = GradientDrawable().apply {
-                cornerRadius = dp(12).toFloat()
-                setColor(context.getColor(R.color.overlay_background))
-                setStroke(dp(1), context.getColor(R.color.brand_primary))
-            }
+            background = style.card(18)
+            elevation = dp(10).toFloat()
         }
-        info = TextView(context).apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-            setTextColor(Color.WHITE)
+        info = style.text(12.5f, OverlayStyle.TEXT).apply {
             maxWidth = dp(260)
+            setLineSpacing(dp(2).toFloat(), 1f)
         }
         bar.addView(info)
         val buttons = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.END
-            setPadding(0, dp(6), 0, 0)
+            setPadding(0, dp(10), 0, 0)
         }
         buttons.addView(button(context.getString(R.string.action_cancel)) { finish(null) })
-        useButton = button(context.getString(R.string.action_use_point)) { point?.let(::finish) }
+        useButton = button(context.getString(R.string.action_use_point), primary = true) { point?.let(::finish) }
         buttons.addView(useButton)
         bar.addView(buttons)
         container.addView(
@@ -146,33 +141,22 @@ class PointPickerOverlay(
         return metrics.widthPixels.toFloat() to metrics.heightPixels.toFloat()
     }
 
-    private fun button(label: String, onClick: () -> Unit) = TextView(context).apply {
-        text = label
-        setTextColor(Color.WHITE)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-        setPadding(dp(12), dp(6), dp(12), dp(6))
-        minHeight = dp(34)
-        gravity = Gravity.CENTER
-        background = GradientDrawable().apply {
-            cornerRadius = dp(8).toFloat()
-            setColor(Color.rgb(0x2E, 0x2B, 0x55))
-        }
+    private fun button(label: String, primary: Boolean = false, onClick: () -> Unit) = style.button(label, primary, onClick).apply {
+        minHeight = dp(36)
         layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT,
-        ).apply { marginStart = dp(6) }
-        isClickable = true
-        setOnClickListener { onClick() }
+        ).apply { marginStart = dp(8) }
     }
 
-    private fun dp(value: Int): Int = (value * context.resources.displayMetrics.density).toInt()
+    private fun dp(value: Int): Int = style.dp(value)
 
     /** Dims the screen a little, shows the row being read in red and the marker with a crosshair. */
     @SuppressLint("ViewConstructor")
     private inner class PickSurface(context: Context) : View(context) {
         private val dim = Paint().apply { color = Color.argb(60, 0, 0, 0) }
         private val band = Paint().apply { color = Color.argb(90, 0xE5, 0x48, 0x4D) }
-        private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(170, 0xE5, 0x48, 0x4D) }
+        private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = (OverlayStyle.ACCENT and 0x00FFFFFF) or (190 shl 24) }
         private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeWidth = dp(2).toFloat()

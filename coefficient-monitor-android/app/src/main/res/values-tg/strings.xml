@@ -72,6 +72,7 @@
     <string name="auto_click">Автокликер</string>
     <string name="auto_click_hint">Пас аз ҳар давр кликҳои алгоритми фаъол дар нуқтаҳои сабтшуда як ба як, бо вақти қадамҳо байни онҳо, иҷро мешаванд. Хизматрасонии Accessibility (дар поён) лозим аст. Клик ба он чизе мерасад, ки ҳамон лаҳза дар экран аст; «Таваққуф» ё «Қатъ» кликҳоро бекор мекунад.</string>
     <string name="auto_click_restricted_hint">Android 13 ва навтар: агар калид дар он ҷо хира (ғайрифаъол) бошад, аввал «О приложении» → ⋮ -ро кушода, танзимоти маҳдудро иҷозат диҳед (Allow restricted settings), баъд онро фаъол кунед.</string>
+    <string name="auto_click_restricted_short">Фаъол намешавад?</string>
     <string name="auto_click_service">Хизматрасонии Accessibility</string>
     <string name="auto_click_service_description">Нуқтаҳои дар алгоритмҳои шумо сабтшударо як ба як пахш мекунад: пас аз ҳар давр, вақте назорат кор мекунад, ё бо тугмаи «Кликҳо» дар панели шинокунанда. Мундариҷаи экранро намехонад ва дигар коре намекунад.</string>
     <string name="auto_click_service_label">Назорати коэффитсиентҳо: автокликер</string>
@@ -111,7 +112,7 @@
     <string name="confirm_restore_defaults_text">Ҳад, шинохт, таъхирҳо, мавзӯъ ва панел ба ҳолати пешфарз бармегарданд. Алгоритмҳо ва журнал нигоҳ дошта мешаванд.</string>
     <string name="confirm_restore_defaults_title">Танзимоти пешфарзро барқарор кунем?</string>
     <string name="continuity_confirmed">Катаки қаблӣ як ҷой ҷунбид — давре гум нашуд</string>
-    <string name="continuity_gap">Шояд даврҳо гум шуданд — таърихи бозиро санҷед ва дар ҳолати зарурӣ алгоритми фаъолро ислоҳ кунед</string>
+    <string name="continuity_gap">Шояд даврҳо гум шуданд</string>
     <string name="continuity_unknown">Пайвастагиро санҷидан нашуд</string>
     <string name="cooldown">Ҳадди ақали вақт байни даврҳо</string>
     <string name="cooldown_hint">Тағйир пеш аз ин муддат пас аз давр ҳамчун ислоҳ ҳисобида мешавад, на даври нав.</string>
@@ -134,7 +135,7 @@
     <string name="edit_algorithm">Таҳрири алгоритм</string>
     <string name="error_capture_denied">Иҷозати сабти экран дода нашуд.</string>
     <string name="error_capture_failed">Сабти экран оғоз нашуд. Боз кӯшиш кунед.</string>
-    <string name="error_capture_revoked">Сабти экран қатъ шуд. Алгоритми фаъол нигоҳ дошта шуд; барои идома назоратро аз нав оғоз кунед.</string>
+    <string name="error_capture_revoked">Сабти экран қатъ шуд — аз нав оғоз кунед</string>
     <string name="error_no_algorithms">Ягон алгоритми дохилшуда нест.</string>
     <string name="error_ocr">OCR дар кадри охирин нокомӣ кард.</string>
     <string name="field_description">Тавсиф</string>
@@ -158,6 +159,16 @@
     <string name="import_text">Алгоритмҳои дуруст ёфт шуд: %1$d. Онҳоро ба охир илова кунем ё тамоми рӯйхатро иваз кунем?</string>
     <string name="import_title">Импорти алгоритмҳо</string>
     <string name="include_algorithms">Алгоритмҳоро дохил кардан</string>
+    <string name="info_active_algorithm">Алгоритме, ки кликҳояш пас аз даври навбатӣ иҷро мешаванд. Коэффитсиенти паст — гузариш ба навбатӣ, баланд — бозгашт ба Алгоритми 1.</string>
+    <string name="info_first_round">Бо натиҷае, ки ҳангоми оғози мониторинг аллакай дар экран аст, чӣ кор кардан лозим.</string>
+    <string name="info_last_ocr">Матне, ки охирин бор дар катаки нав хонда шуд. Агар давр шинохта нашавад, кӯмак мекунад.</string>
+    <string name="info_last_round">Коэффитсиенти охирини хондашуда ва таъсири он ба пайдарпайӣ.</string>
+    <string name="info_notifications">Барои огоҳиномаи мониторинг бо таваққуф ва қатъ, инчунин барои огоҳиҳо лозим аст.</string>
+    <string name="info_ocr_status">Шинохт ҳозир чӣ кор мекунад: қаторро меҷӯяд, мехонад, интизори истодани катак аст ё OK. Фоиз — эътимоди хониш.</string>
+    <string name="info_recent_events">Даврҳои охирини коркардшуда. Рӯйхати пурра бо ҷустуҷӯ ва содирот — дар «Журнал».</string>
+    <string name="info_recovery">Агар пайдарпайӣ аз бозӣ ҷудо шуда бошад, истифода баред.</string>
+    <string name="info_row">Қатори коэффитсиентҳо дар куҷои экран аст. Мониторинг онро худаш меёбад ва ҳангоми лағжиш пайгирӣ мекунад; «Ёфтани қатор» онро фавран аз нав меҷӯяд.</string>
+    <string name="info_threshold">Коэффитсиенте, ки шумо гузоштаед (ҳозир %1$s). Пас аз ҳар давр: агар коэффитсиенти давр %1$s ё хурдтар бошад — алгоритми навбатӣ иҷро мешавад; агар калонтар бошад — бозгашт ба Алгоритми 1.</string>
     <string name="language">Забон</string>
     <string name="language_system">Системавӣ</string>
     <string name="last_event_time">Вақт</string>
@@ -179,6 +190,7 @@
     <string name="min_confidence">Ҳадди ақали эътимоди OCR</string>
     <string name="min_confidence_hint">Хонишҳо бо эътимоди камтар нодида гирифта мешаванд.</string>
     <string name="more_actions">Амалҳои дигар</string>
+    <string name="more_info">Маълумоти бештар</string>
     <string name="motion_sensitivity">Ҳадди беҳаракатӣ</string>
     <string name="motion_sensitivity_hint">Монандии кадрҳо, ки катак беҳаракат ҳисоб шавад. Баландтар — ба ҳаракат ҳассостар.</string>
     <string name="nav_algorithms">Алгоритмҳо</string>
@@ -237,9 +249,9 @@
     <string name="overlay_tab_status">Ҳолат</string>
     <string name="permission_granted">Иҷозат дода шуд</string>
     <string name="permission_not_needed">Лозим нест</string>
-    <string name="point_on_reading_band">Ин нуқта дар қатори хондашавандаи коэффитсиентҳо аст. Ҷои дигарро интихоб кунед.</string>
+    <string name="point_on_reading_band">Нуқта дар қатори хондашаванда аст — дигарашро интихоб кунед</string>
     <string name="point_picker_hint">Ба ҷое пахш кунед, ки ин қадам бояд клик кунад, ё нишонаро кашед. Дигар ҳаракатҳо расмро мелағжонанд, барои дақиқӣ зумро истифода баред. Минтақаи сурх қатори хондашавандаи коэффитсиентҳост ва онро интихоб кардан мумкин нест.</string>
-    <string name="point_picker_no_image">Ҳоло акси экран нест. Як бор мониторингро бо бозии кушода оғоз кунед — экране, ки дар он қатор ёфт мешавад, нигоҳ дошта шуда барои интихоби нуқтаҳо истифода мешавад.</string>
+    <string name="point_picker_no_image">Акси экран нест — як бор мониторингро бо бозии кушода оғоз кунед.</string>
     <string name="point_picker_title">Қадами %1$d: нуқтаи кликро интихоб кунед</string>
     <string name="preset_settings_only">Танҳо танзимот</string>
     <string name="preset_with_algorithms">Танзимот + алгоритмҳо</string>
@@ -253,7 +265,7 @@
     <string name="problem_step_long">Яке аз қадамҳо хеле дароз аст.</string>
     <string name="problem_too_many_steps">Қадамҳо хеле зиёданд.</string>
     <string name="reason_already_first">Аз ҳад баланд, аллакай дар Алгоритми 1</string>
-    <string name="reason_end">Ба алгоритми охирин расидед — барои идома боз илова кунед</string>
+    <string name="reason_end">Алгоритми охирин</string>
     <string name="reason_high">Коэффитсиент аз ҳад баланд аст</string>
     <string name="reason_low">Коэффитсиент аз ҳад баланд нест</string>
     <string name="reason_no_algorithms">Ягон алгоритми дохилшуда нест</string>
@@ -275,6 +287,7 @@
     <string name="save_preset_text">Ҳад, танзимоти шинохт, фосилаи сабт ва таъхирҳоро нигоҳ медорад.</string>
     <string name="screen_capture">Сабти экран</string>
     <string name="screen_capture_explainer">Android ҳар дафъа ҳангоми оғоз розигӣ мепурсад ва ҳангоми кор нишондиҳандаи сабтро нишон медиҳад.</string>
+    <string name="screen_capture_value">Танҳо ҳангоми мониторинг</string>
     <string name="screen_image_description">Экране, ки дар он қатори коэффитсиентҳо ёфт шуд</string>
     <string name="search_hint">Ҷустуҷӯ: 1.70x, R-000012, RESET, алгоритм…</string>
     <string name="settings_about">Дар бораи барнома</string>
@@ -304,15 +317,15 @@
     <string name="theme_dark">Торик</string>
     <string name="theme_light">Равшан</string>
     <string name="theme_system">Системавӣ</string>
-    <string name="threshold">Ҳад</string>
+    <string name="threshold">Коэффитсиенти вуруд</string>
     <string name="threshold_invalid">Қиматеро аз %1$s то %2$s ворид кунед</string>
-    <string name="threshold_rule">≤ %1$s — ба пеш · &gt; %1$s — бозгашт ба Алгоритми 1</string>
+    <string name="threshold_rule">≤ %1$s → навбатӣ · &gt; %1$s → Алгоритми 1</string>
     <string name="transition_advance">Ба пеш</string>
     <string name="transition_none">Мавқеъ тағйир наёфт</string>
     <string name="transition_reset">Бозгашт ба Алгоритми 1</string>
     <string name="version">Версия</string>
-    <string name="warning_auto_click_off">Автокликер ғайрифаъол аст: «Назорати коэффитсиентҳо: автокликер»-ро дар Accessibility («Специальные возможности») фаъол кунед.</string>
-    <string name="warning_gap">Пеш аз даври охирин шояд даврҳо гум шуданд. Таърихи бозиро санҷед ва дар ҳолати зарурӣ алгоритми фаъолро ислоҳ кунед.</string>
-    <string name="warning_last_algorithm">Ин алгоритми охирини танзимшуда аст. Барои идома боз як алгоритм илова кунед — коэффитсиенти паст ба Алгоритми 1 барнамегардонад.</string>
+    <string name="warning_auto_click_off">Автокликер хомӯш аст — дар Accessibility фаъол кунед</string>
+    <string name="warning_gap">Шояд даврҳо гум шуданд — таърихи бозиро санҷед</string>
+    <string name="warning_last_algorithm">Алгоритми охирин — боз якто илова кунед</string>
     <string name="zoom">Миқёс</string>
 </resources>

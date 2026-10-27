@@ -13,17 +13,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddLocationAlt
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AddLocationAlt
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.ArrowDownward
+import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -47,7 +45,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
 import app.coefmonitor.R
+import app.coefmonitor.ui.components.SettingRow
+import app.coefmonitor.ui.components.SectionTitle
+import app.coefmonitor.ui.components.ListCard
 import app.coefmonitor.core.AlgorithmLimits
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.ui.NEW_ALGORITHM_ID
@@ -68,7 +71,7 @@ fun AlgorithmEditorScreen(algorithmId: Long, onDone: () -> Unit) {
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = onDone) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 title = {
@@ -105,25 +108,16 @@ fun AlgorithmEditorScreen(algorithmId: Long, onDone: () -> Unit) {
                         isError = state.problem == EditorProblem.DESCRIPTION_TOO_LONG,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(stringResource(R.string.field_enabled), style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                stringResource(R.string.field_enabled_hint),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                    SettingRow(stringResource(R.string.field_enabled), stringResource(R.string.field_enabled_hint)) {
                         Switch(checked = state.enabled, onCheckedChange = viewModel::setEnabled)
                     }
                 }
             }
             item {
-                Text(stringResource(R.string.steps_title), style = MaterialTheme.typography.titleMedium)
-                Text(
+                SectionTitle(
+                    stringResource(R.string.steps_title),
                     stringResource(R.string.steps_hint, state.globalDelayMs),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    Modifier.padding(start = 4.dp, top = 4.dp),
                 )
             }
             itemsIndexed(state.steps, key = { _, step -> step.key }) { index, step ->
@@ -137,12 +131,12 @@ fun AlgorithmEditorScreen(algorithmId: Long, onDone: () -> Unit) {
                 )
             }
             item {
-                Button(onClick = viewModel::addPointStep, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Filled.AddLocationAlt, contentDescription = null)
+                Button(onClick = viewModel::addPointStep, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                    Icon(Icons.Outlined.AddLocationAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                     Text(stringResource(R.string.action_add_point_step), modifier = Modifier.padding(start = 6.dp))
                 }
                 TextButton(onClick = viewModel::addStep, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
+                    Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                     Text(stringResource(R.string.action_add_note_step), modifier = Modifier.padding(start = 6.dp))
                 }
             }
@@ -182,11 +176,8 @@ private fun StepCard(
     isLast: Boolean,
     viewModel: AlgorithmEditorViewModel,
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        shape = MaterialTheme.shapes.medium,
-    ) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    ListCard {
+        Column(Modifier.padding(start = 14.dp, end = 4.dp, top = 6.dp, bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     stringResource(R.string.step_number, index + 1),
@@ -194,16 +185,16 @@ private fun StepCard(
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(onClick = { viewModel.moveStep(step.key, -1) }, enabled = !isFirst) {
-                    Icon(Icons.Filled.ArrowUpward, contentDescription = stringResource(R.string.action_move_up))
+                    Icon(Icons.Outlined.ArrowUpward, contentDescription = stringResource(R.string.action_move_up), modifier = Modifier.size(20.dp))
                 }
                 IconButton(onClick = { viewModel.moveStep(step.key, 1) }, enabled = !isLast) {
-                    Icon(Icons.Filled.ArrowDownward, contentDescription = stringResource(R.string.action_move_down))
+                    Icon(Icons.Outlined.ArrowDownward, contentDescription = stringResource(R.string.action_move_down), modifier = Modifier.size(20.dp))
                 }
                 IconButton(onClick = { viewModel.duplicateStep(step.key) }) {
-                    Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.action_duplicate))
+                    Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(R.string.action_duplicate), modifier = Modifier.size(20.dp))
                 }
                 IconButton(onClick = { viewModel.removeStep(step.key) }) {
-                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
+                    Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.action_delete), modifier = Modifier.size(20.dp))
                 }
             }
             StepPointRow(
@@ -215,7 +206,7 @@ private fun StepCard(
                 value = step.text,
                 onValueChange = { viewModel.updateStep(step.key, text = it) },
                 label = { Text(stringResource(R.string.field_step_text)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(end = 10.dp),
             )
             val delay = step.delayText.toLongOrNull()
             val delayInvalid = step.delayText.isNotBlank() && (delay == null || !DelayPolicy.isValid(delay))
@@ -230,7 +221,7 @@ private fun StepCard(
                 isError = delayInvalid,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(end = 10.dp),
             )
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 item {
@@ -258,8 +249,9 @@ private fun StepPointRow(step: StepDraft, onPick: () -> Unit, onClear: () -> Uni
     val point = step.point
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
-            Icons.Filled.LocationOn,
+            Icons.Outlined.LocationOn,
             contentDescription = null,
+            modifier = Modifier.size(18.dp),
             tint = if (point != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(

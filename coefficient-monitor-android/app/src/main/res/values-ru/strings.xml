@@ -72,6 +72,7 @@
     <string name="auto_click">Автокликер</string>
     <string name="auto_click_hint">После каждого раунда клики активного алгоритма выполняются по очереди в сохранённых точках, с временем шагов между ними. Нужна служба специальных возможностей (ниже). Клик попадает в то, что в этот момент на экране; «Пауза» или «Стоп» отменяют клики.</string>
     <string name="auto_click_restricted_hint">Android 13 и новее: если переключатель там неактивен, сначала откройте «О приложении» → ⋮ и разрешите ограниченные настройки, затем включите его.</string>
+    <string name="auto_click_restricted_short">Не включается?</string>
     <string name="auto_click_service">Служба специальных возможностей</string>
     <string name="auto_click_service_description">Нажимает точки, сохранённые в ваших алгоритмах, по очереди: после каждого раунда, пока идёт мониторинг, или по кнопке «Клики» на плавающей панели. Не читает содержимое экрана и больше ничего не делает.</string>
     <string name="auto_click_service_label">Монитор коэффициентов: автокликер</string>
@@ -111,7 +112,7 @@
     <string name="confirm_restore_defaults_text">Порог, распознавание, задержки, тема и панель вернутся к значениям по умолчанию. Алгоритмы и журнал сохранятся.</string>
     <string name="confirm_restore_defaults_title">Восстановить настройки по умолчанию?</string>
     <string name="continuity_confirmed">Предыдущая плитка сдвинулась на одну позицию — пропусков нет</string>
-    <string name="continuity_gap">Возможно, пропущены раунды — проверьте историю игры и при необходимости поправьте активный алгоритм</string>
+    <string name="continuity_gap">Возможны пропуски</string>
     <string name="continuity_unknown">Непрерывность проверить не удалось</string>
     <string name="cooldown">Мин. время между раундами</string>
     <string name="cooldown_hint">Изменение раньше этого срока после раунда считается исправлением, а не новым раундом.</string>
@@ -134,7 +135,7 @@
     <string name="edit_algorithm">Изменить алгоритм</string>
     <string name="error_capture_denied">Разрешение на захват экрана не выдано.</string>
     <string name="error_capture_failed">Не удалось запустить захват экрана. Попробуйте снова.</string>
-    <string name="error_capture_revoked">Захват экрана остановлен. Активный алгоритм сохранён; запустите мониторинг снова.</string>
+    <string name="error_capture_revoked">Захват экрана остановлен — запустите снова</string>
     <string name="error_no_algorithms">Нет включённых алгоритмов.</string>
     <string name="error_ocr">Сбой OCR на последнем кадре.</string>
     <string name="field_description">Описание</string>
@@ -158,6 +159,16 @@
     <string name="import_text">Найдено корректных алгоритмов: %1$d. Добавить их в конец или заменить весь список?</string>
     <string name="import_title">Импорт алгоритмов</string>
     <string name="include_algorithms">Включить алгоритмы</string>
+    <string name="info_active_algorithm">Алгоритм, клики которого выполнятся после следующего раунда. Низкий коэффициент — переход к следующему, высокий — возврат к алгоритму 1.</string>
+    <string name="info_first_round">Что делать с результатом, который уже на экране при запуске мониторинга.</string>
+    <string name="info_last_ocr">Текст, последний раз прочитанный в новой плитке. Помогает, если раунд не распознаётся.</string>
+    <string name="info_last_round">Последний прочитанный коэффициент и что он изменил в последовательности.</string>
+    <string name="info_notifications">Нужны для уведомления мониторинга с паузой и остановкой и для предупреждений.</string>
+    <string name="info_ocr_status">Что сейчас делает распознавание: ищет ряд, читает, ждёт, пока плитка остановится, или OK. Процент — уверенность чтения.</string>
+    <string name="info_recent_events">Последние обработанные раунды. Полный список с поиском и экспортом — в «Журнале».</string>
+    <string name="info_recovery">Используйте, если последовательность разошлась с игрой.</string>
+    <string name="info_row">Где на экране ряд коэффициентов. Мониторинг находит его сам и следует за ним при прокрутке; «Найти ряд» сразу ищет его заново.</string>
+    <string name="info_threshold">Коэффициент, который вы задали (сейчас %1$s). После каждого раунда: если коэффициент раунда %1$s или ниже — выполняется следующий алгоритм; если выше — возврат к алгоритму 1.</string>
     <string name="language">Язык</string>
     <string name="language_system">Системный</string>
     <string name="last_event_time">Время</string>
@@ -179,6 +190,7 @@
     <string name="min_confidence">Минимальная уверенность OCR</string>
     <string name="min_confidence_hint">Чтения с меньшей уверенностью игнорируются.</string>
     <string name="more_actions">Другие действия</string>
+    <string name="more_info">Подробнее</string>
     <string name="motion_sensitivity">Порог неподвижности</string>
     <string name="motion_sensitivity_hint">Сходство кадров, при котором плитка считается неподвижной. Выше — чувствительнее к движению.</string>
     <string name="nav_algorithms">Алгоритмы</string>
@@ -237,9 +249,9 @@
     <string name="overlay_tab_status">Статус</string>
     <string name="permission_granted">Разрешено</string>
     <string name="permission_not_needed">Не требуется</string>
-    <string name="point_on_reading_band">Эта точка на читаемом ряду коэффициентов. Выберите другое место.</string>
+    <string name="point_on_reading_band">Точка на читаемом ряду — выберите другую</string>
     <string name="point_picker_hint">Нажмите туда, где этот шаг должен кликнуть, или перетащите маркер. Остальные движения прокручивают снимок, для точности используйте масштаб. Красная область — читаемый ряд коэффициентов, её выбрать нельзя.</string>
-    <string name="point_picker_no_image">Снимка экрана пока нет. Один раз запустите мониторинг при открытой игре — экран, где найден ряд, сохранится и используется для выбора точек.</string>
+    <string name="point_picker_no_image">Снимка нет — один раз запустите мониторинг при открытой игре.</string>
     <string name="point_picker_title">Шаг %1$d: выберите точку клика</string>
     <string name="preset_settings_only">Только настройки</string>
     <string name="preset_with_algorithms">Настройки + алгоритмы</string>
@@ -253,7 +265,7 @@
     <string name="problem_step_long">Один из шагов слишком длинный.</string>
     <string name="problem_too_many_steps">Слишком много шагов.</string>
     <string name="reason_already_first">Выше порога, уже на алгоритме 1</string>
-    <string name="reason_end">Достигнут последний алгоритм — добавьте ещё, чтобы продолжить</string>
+    <string name="reason_end">Достигнут последний алгоритм</string>
     <string name="reason_high">Коэффициент выше порога</string>
     <string name="reason_low">Коэффициент не выше порога</string>
     <string name="reason_no_algorithms">Нет включённых алгоритмов</string>
@@ -275,6 +287,7 @@
     <string name="save_preset_text">Сохраняет порог, настройки распознавания, интервал захвата и задержки.</string>
     <string name="screen_capture">Захват экрана</string>
     <string name="screen_capture_explainer">Android запрашивает согласие при каждом запуске и показывает индикатор захвата во время работы.</string>
+    <string name="screen_capture_value">Только во время мониторинга</string>
     <string name="screen_image_description">Экран, на котором найден ряд коэффициентов</string>
     <string name="search_hint">Поиск: 1.70x, R-000012, RESET, алгоритм…</string>
     <string name="settings_about">О приложении</string>
@@ -306,13 +319,13 @@
     <string name="theme_system">Системная</string>
     <string name="threshold">Порог</string>
     <string name="threshold_invalid">Введите значение от %1$s до %2$s</string>
-    <string name="threshold_rule">≤ %1$s — вперёд · &gt; %1$s — сброс на алгоритм 1</string>
+    <string name="threshold_rule">≤ %1$s → следующий · &gt; %1$s → алгоритм 1</string>
     <string name="transition_advance">Переход вперёд</string>
     <string name="transition_none">Без изменения позиции</string>
     <string name="transition_reset">Сброс на алгоритм 1</string>
     <string name="version">Версия</string>
-    <string name="warning_auto_click_off">Автокликер выключен: включите «Монитор коэффициентов: автокликер» в настройках специальных возможностей.</string>
-    <string name="warning_gap">Перед последним раундом, возможно, были пропуски. Проверьте историю игры и при необходимости поправьте активный алгоритм.</string>
-    <string name="warning_last_algorithm">Это последний настроенный алгоритм. Добавьте ещё один, чтобы продолжить — низкий коэффициент не вернёт к алгоритму 1.</string>
+    <string name="warning_auto_click_off">Автокликер выключен — включите в спец. возможностях</string>
+    <string name="warning_gap">Возможны пропущенные раунды — проверьте историю игры</string>
+    <string name="warning_last_algorithm">Последний алгоритм — добавьте ещё один</string>
     <string name="zoom">Масштаб</string>
 </resources>

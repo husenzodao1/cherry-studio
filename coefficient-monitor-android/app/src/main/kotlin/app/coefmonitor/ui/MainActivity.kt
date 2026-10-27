@@ -6,20 +6,24 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmarks
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -113,11 +118,11 @@ object Routes {
 private data class TopDestination(val route: String, val label: Int, val icon: ImageVector)
 
 private val topDestinations = listOf(
-    TopDestination(Routes.DASHBOARD, R.string.nav_monitor, Icons.Filled.Dashboard),
-    TopDestination(Routes.ALGORITHMS, R.string.nav_algorithms, Icons.Filled.FormatListNumbered),
-    TopDestination(Routes.LOG, R.string.nav_log, Icons.Filled.History),
-    TopDestination(Routes.PRESETS, R.string.nav_presets, Icons.Filled.Bookmarks),
-    TopDestination(Routes.SETTINGS, R.string.nav_settings, Icons.Filled.Settings),
+    TopDestination(Routes.DASHBOARD, R.string.nav_monitor, Icons.Outlined.Visibility),
+    TopDestination(Routes.ALGORITHMS, R.string.nav_algorithms, Icons.Outlined.Layers),
+    TopDestination(Routes.LOG, R.string.nav_log, Icons.Outlined.History),
+    TopDestination(Routes.PRESETS, R.string.nav_presets, Icons.Outlined.BookmarkBorder),
+    TopDestination(Routes.SETTINGS, R.string.nav_settings, Icons.Outlined.Tune),
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -147,22 +152,34 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
-                    topDestinations.forEach { destination ->
-                        NavigationBarItem(
-                            selected = route == destination.route,
-                            onClick = { navigateTop(destination.route) },
-                            icon = { Icon(destination.icon, contentDescription = null) },
-                            // One line for every label, so long ones ("Алгоритмы", "Настройки") don't push their icon up.
-                            label = {
-                                Text(
-                                    stringResource(destination.label),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            },
-                        )
+                // Flat bar on the page colour, separated by a hairline; the selected item gets the accent.
+                val colors = MaterialTheme.colorScheme
+                Column {
+                    HorizontalDivider(color = colors.outlineVariant)
+                    NavigationBar(containerColor = colors.background, tonalElevation = 0.dp) {
+                        topDestinations.forEach { destination ->
+                            NavigationBarItem(
+                                selected = route == destination.route,
+                                onClick = { navigateTop(destination.route) },
+                                icon = { Icon(destination.icon, contentDescription = null, modifier = Modifier.size(22.dp)) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = colors.primary,
+                                    selectedTextColor = colors.onSurface,
+                                    indicatorColor = colors.primaryContainer,
+                                    unselectedIconColor = colors.onSurfaceVariant,
+                                    unselectedTextColor = colors.onSurfaceVariant,
+                                ),
+                                // One line for every label, so long ones ("Алгоритмы", "Настройки") don't push their icon up.
+                                label = {
+                                    Text(
+                                        stringResource(destination.label),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
             }

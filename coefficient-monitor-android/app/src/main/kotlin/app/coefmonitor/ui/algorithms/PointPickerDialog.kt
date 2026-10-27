@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.coefmonitor.R
+import app.coefmonitor.ui.components.LabelWithInfo
 import app.coefmonitor.core.ClickPlan
 import app.coefmonitor.core.NormalizedPoint
 import kotlin.math.roundToInt
@@ -80,13 +81,14 @@ fun PointPickerDialog(
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
             Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
+                    LabelWithInfo(
                         stringResource(R.string.point_picker_title, stepNumber),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.weight(1f),
+                        stringResource(R.string.point_picker_hint),
+                        Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleMedium,
                     )
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_cancel))
+                        Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.action_cancel))
                     }
                 }
                 when {
@@ -96,11 +98,6 @@ fun PointPickerDialog(
                         TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) }
                     }
                     else -> {
-                        Text(
-                            stringResource(R.string.point_picker_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.zoom), style = MaterialTheme.typography.bodyMedium)
                             Slider(

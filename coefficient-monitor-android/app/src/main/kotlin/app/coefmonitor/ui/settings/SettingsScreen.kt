@@ -13,13 +13,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
@@ -31,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -73,6 +75,8 @@ import app.coefmonitor.ui.accessibilitySettingsIntent
 import app.coefmonitor.ui.appNotificationSettingsIntent
 import app.coefmonitor.ui.components.ConfirmDialog
 import app.coefmonitor.ui.components.InfoRow
+import app.coefmonitor.ui.components.LabelWithInfo
+import app.coefmonitor.ui.components.SettingRow
 import app.coefmonitor.ui.components.SectionCard
 import app.coefmonitor.ui.container
 import app.coefmonitor.ui.hasNotificationPermission
@@ -172,7 +176,7 @@ private fun DetectionSection(settings: AppSettings, viewModel: SettingsViewModel
     SectionCard(title = stringResource(R.string.settings_detection)) {
         ThresholdField(settings.threshold) { value -> viewModel.update { it.copy(threshold = value) } }
         HorizontalDivider()
-        Text(stringResource(R.string.first_round_title), style = MaterialTheme.typography.titleSmall)
+        LabelWithInfo(stringResource(R.string.first_round_title), stringResource(R.string.info_first_round), style = MaterialTheme.typography.titleSmall)
         RadioRow(
             selected = detector.firstRoundPolicy == FirstRoundPolicy.INITIALIZE_ONLY,
             title = stringResource(R.string.first_round_initialize),
@@ -223,7 +227,7 @@ private fun DetectionSection(settings: AppSettings, viewModel: SettingsViewModel
             onCommit = { v -> viewModel.updateDetector { it.copy(minRoundIntervalMs = (v / 500).roundToLong() * 500) } },
         )
         TextButton(onClick = { advanced = !advanced }) {
-            Icon(if (advanced) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, contentDescription = null)
+            Icon(if (advanced) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(stringResource(R.string.advanced_detection))
         }
@@ -265,11 +269,15 @@ private fun ThresholdField(current: Coefficient, onApply: (Coefficient) -> Unit)
     val parsed = Coefficient.parseUserInput(text)
     val valid = parsed != null && Coefficient.isValidThreshold(parsed)
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        LabelWithInfo(
+            stringResource(R.string.threshold),
+            stringResource(R.string.info_threshold, (parsed?.takeIf { valid } ?: current).toString()),
+            style = MaterialTheme.typography.titleSmall,
+        )
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it.take(9) },
-                label = { Text(stringResource(R.string.threshold)) },
                 suffix = { Text("x") },
                 isError = !valid,
                 singleLine = true,
@@ -299,12 +307,7 @@ private fun DelaySection(settings: AppSettings, viewModel: SettingsViewModel) {
     var text by remember(settings.globalDelayMs) { mutableStateOf(settings.globalDelayMs.toString()) }
     val parsed = text.toLongOrNull()
     val valid = parsed != null && DelayPolicy.isValid(parsed)
-    SectionCard(title = stringResource(R.string.settings_delays)) {
-        Text(
-            stringResource(R.string.global_delay_hint),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+    SectionCard(title = stringResource(R.string.settings_delays), info = stringResource(R.string.global_delay_hint)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = text,
@@ -406,7 +409,8 @@ private fun PermissionsSection(settings: AppSettings, viewModel: SettingsViewMod
                 OutlinedButton(onClick = { context.startActivity(accessibilitySettingsIntent()) }) {
                     Text(stringResource(R.string.action_enable_auto_click))
                 }
-                Text(
+                LabelWithInfo(
+                    stringResource(R.string.auto_click_restricted_short),
                     stringResource(R.string.auto_click_restricted_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -433,14 +437,14 @@ private fun PermissionsSection(settings: AppSettings, viewModel: SettingsViewMod
             onChange = { enabled -> viewModel.update { it.copy(logRejectedReadings = enabled) } },
         )
         HorizontalDivider()
-        InfoRow(stringResource(R.string.screen_capture), stringResource(R.string.screen_capture_explainer))
+        InfoRow(stringResource(R.string.screen_capture), stringResource(R.string.screen_capture_value), info = stringResource(R.string.screen_capture_explainer))
         InfoRow(stringResource(R.string.network), stringResource(R.string.network_not_used))
     }
 }
 
 @Composable
 private fun RecoverySection(onConfirm: (ConfirmAction) -> Unit) {
-    SectionCard(title = stringResource(R.string.settings_recovery)) {
+    SectionCard(title = stringResource(R.string.settings_recovery), info = stringResource(R.string.info_recovery)) {
         OutlinedButton(onClick = { onConfirm(ConfirmAction.RESET_SEQUENCE) }, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.action_reset_to_first))
         }
@@ -455,14 +459,11 @@ private fun RecoverySection(onConfirm: (ConfirmAction) -> Unit) {
 
 @Composable
 private fun AboutSection() {
-    SectionCard(title = stringResource(R.string.settings_about)) {
+    SectionCard(
+        title = stringResource(R.string.settings_about),
+        info = stringResource(R.string.about_app) + "\n\n" + stringResource(R.string.about_independent_rounds),
+    ) {
         InfoRow(stringResource(R.string.version), BuildConfig.VERSION_NAME)
-        Text(stringResource(R.string.about_app), style = MaterialTheme.typography.bodySmall)
-        Text(
-            stringResource(R.string.about_independent_rounds),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }
 
@@ -478,8 +479,7 @@ private fun SliderSetting(
 ) {
     var local by remember(value) { mutableFloatStateOf(value.coerceIn(range)) }
     Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        SettingRow(title, hint) {
             Text(label(local), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
         }
         Slider(
@@ -488,21 +488,14 @@ private fun SliderSetting(
             valueRange = range,
             steps = steps,
             onValueChangeFinished = { onCommit(local) },
+            colors = SliderDefaults.colors(inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest),
         )
-        Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 private fun SwitchRow(title: String, hint: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyMedium)
-            Text(hint, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Spacer(Modifier.width(12.dp))
-        Switch(checked = checked, onCheckedChange = onChange)
-    }
+    SettingRow(title, hint) { Switch(checked = checked, onCheckedChange = onChange) }
 }
 
 @Composable
@@ -513,9 +506,6 @@ private fun RadioRow(selected: Boolean, title: String, hint: String, onSelect: (
     ) {
         RadioButton(selected = selected, onClick = null)
         Spacer(Modifier.width(8.dp))
-        Column {
-            Text(title, style = MaterialTheme.typography.bodyMedium)
-            Text(hint, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+        LabelWithInfo(title, hint)
     }
 }

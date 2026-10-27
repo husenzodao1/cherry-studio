@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Handler
 import android.os.Looper
@@ -102,6 +101,7 @@ class OverlayController(
 
     private val windowManager = context.getSystemService(WindowManager::class.java)
     private val repeatHandler = Handler(Looper.getMainLooper())
+    private val style = OverlayStyle(context)
     private var root: FrameLayout? = null
     private var params: WindowManager.LayoutParams? = null
     private var stepsKey: String? = null
@@ -201,12 +201,13 @@ class OverlayController(
         clicksButton.text = context.getString(if (state.clicksRunning) R.string.overlay_stop_clicks else R.string.overlay_clicks_button)
         (bubble.background as GradientDrawable).setColor(
             when {
-                state.clicksRunning -> CLICKING
-                !state.captureActive -> STOPPED
-                state.paused -> PAUSED
-                else -> context.getColor(R.color.brand_primary)
+                state.clicksRunning -> OverlayStyle.DANGER
+                !state.captureActive -> OverlayStyle.STOPPED
+                state.paused -> OverlayStyle.WARNING
+                else -> OverlayStyle.ACCENT_DEEP
             },
         )
+        clicksButton.setTextColor(if (state.clicksRunning) OverlayStyle.DANGER else OverlayStyle.TEXT)
 
         viewedTitle.text = if (state.viewedIsActive) "${state.viewedTitle} ✓" else state.viewedTitle
         viewedName.text = state.viewedName
@@ -222,26 +223,23 @@ class OverlayController(
         captureInterval.text = state.captureInterval
         stableFrames.text = state.stableFrames
         cooldown.text = state.cooldown
-        autoClickToggle.text = toggleLabel(R.string.auto_click, state.autoClickEnabled)
-        notificationsToggle.text = toggleLabel(R.string.round_notifications, state.roundNotifications)
+        autoClickToggle.showToggle(R.string.auto_click, state.autoClickEnabled)
+        notificationsToggle.showToggle(R.string.round_notifications, state.roundNotifications)
         accessibilityButton.visibleIf(!state.clickerConnected)
     }
 
     private fun buildView(): FrameLayout {
         val container = FrameLayout(context)
         panel = column().apply {
-            setPadding(dp(10), dp(8), dp(10), dp(10))
-            background = GradientDrawable().apply {
-                cornerRadius = dp(14).toFloat()
-                setColor(context.getColor(R.color.overlay_background))
-                setStroke(dp(1), context.getColor(R.color.brand_primary))
-            }
+            setPadding(dp(12), dp(8), dp(12), dp(12))
+            background = style.card(20)
+            elevation = dp(10).toFloat()
         }
         val header = row().apply {
             gravity = Gravity.CENTER_VERTICAL
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
-        title = text(14f, Color.WHITE, bold = true).apply {
+        title = text(14f, OverlayStyle.TEXT, bold = true).apply {
             contentDescription = context.getString(R.string.overlay_drag_hint)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             minHeight = dp(30)
@@ -249,8 +247,8 @@ class OverlayController(
             singleLine()
         }
         header.addView(title)
-        header.addView(smallButton("–") { setMinimized(true) }.apply { contentDescription = context.getString(R.string.overlay_minimize) })
-        header.addView(smallButton("✕") { actions.close() }.apply { contentDescription = context.getString(R.string.action_close) })
+        header.addView(headerButton("–") { setMinimized(true) }.apply { contentDescription = context.getString(R.string.overlay_minimize) })
+        header.addView(headerButton("✕") { actions.close() }.apply { contentDescription = context.getString(R.string.action_close) })
         panel.addView(header)
         attachDrag(title) {}
 
@@ -258,13 +256,28 @@ class OverlayController(
         val body = column().apply {
             layoutParams = LinearLayout.LayoutParams(dp(BODY_WIDTH_DP), LinearLayout.LayoutParams.WRAP_CONTENT)
         }
-        val tabs = row().apply { setPadding(0, dp(4), 0, dp(6)) }
+        // Segmented control: a dark track with the selected tab raised on it.
+        val tabs = row().apply {
+            setPadding(dp(3), dp(3), dp(3), dp(3))
+            background = style.pill(OverlayStyle.TRACK)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = dp(4); bottomMargin = dp(10) }
+        }
         listOf(
             Tab.STATUS to R.string.overlay_tab_status,
             Tab.ALGORITHM to R.string.overlay_tab_algorithm,
             Tab.SETTINGS to R.string.overlay_tab_settings,
         ).forEach { (t, label) ->
-            val b = button(context.getString(label)) { select(t) }
+            val b = style.text(12f, OverlayStyle.MUTED, style.medium).apply {
+                text = context.getString(label)
+                gravity = Gravity.CENTER
+                minHeight = dp(28)
+                singleLine()
+                background = style.pill(Color.TRANSPARENT)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                isClickable = true
+                setOnClickListener { select(t) }
+            }
             tabButtons[t] = b
             tabs.addView(b)
         }
@@ -279,10 +292,11 @@ class OverlayController(
         bubble = text(18f, Color.WHITE, bold = true).apply {
             gravity = Gravity.CENTER
             layoutParams = FrameLayout.LayoutParams(dp(BUBBLE_DP), dp(BUBBLE_DP))
+            elevation = dp(8).toFloat()
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
-                setColor(STOPPED)
-                setStroke(dp(2), Color.WHITE)
+                setColor(OverlayStyle.STOPPED)
+                setStroke(dp(1), BUBBLE_RING)
             }
             contentDescription = context.getString(R.string.overlay_expand)
             visibility = View.GONE
@@ -295,21 +309,24 @@ class OverlayController(
 
     private fun buildStatusPage(): View {
         val page = column()
-        name = text(12f, Color.WHITE).apply { singleLine() }
-        coefficient = text(18f, Color.WHITE, bold = true)
-        status = text(11f, MUTED)
-        clickLine = text(12f, Color.rgb(0xFF, 0x8A, 0x8D), bold = true)
-        warning = text(11f, Color.rgb(0xFF, 0xB4, 0x54))
-        log = text(10f, Color.rgb(0xA9, 0xA7, 0xC9))
+        name = text(12f, OverlayStyle.MUTED).apply { singleLine() }
+        coefficient = text(22f, OverlayStyle.TEXT, bold = true).apply { setPadding(0, dp(4), 0, dp(4)) }
+        status = text(11f, OverlayStyle.MUTED)
+        clickLine = text(12f, OverlayStyle.ACCENT, bold = true).apply { setPadding(0, dp(4), 0, 0) }
+        warning = text(11f, OverlayStyle.WARNING).apply { setPadding(0, dp(4), 0, 0) }
+        log = text(10.5f, OverlayStyle.MUTED).apply {
+            setPadding(0, dp(6), 0, 0)
+            setLineSpacing(dp(2).toFloat(), 1f)
+        }
         listOf(name, coefficient, status, clickLine, warning, log).forEach(page::addView)
-        val monitorButtons = row().apply { setPadding(0, dp(6), 0, 0) }
-        startButton = button(context.getString(R.string.overlay_start)) { actions.startMonitoring() }
+        val monitorButtons = row().apply { setPadding(0, dp(10), 0, 0) }
+        startButton = button(context.getString(R.string.overlay_start), primary = true) { actions.startMonitoring() }
         pauseButton = button(context.getString(R.string.action_pause)) { actions.pauseResume() }
         stopButton = button(context.getString(R.string.action_stop)) { actions.stopMonitoring() }
         findRowButton = button(context.getString(R.string.overlay_find_row)) { actions.findRow() }
         listOf(startButton, pauseButton, stopButton, findRowButton).forEach(monitorButtons::addView)
         page.addView(monitorButtons)
-        val clickButtons = row().apply { setPadding(0, dp(4), 0, 0) }
+        val clickButtons = row().apply { setPadding(0, dp(6), 0, 0) }
         clicksButton = button(context.getString(R.string.overlay_clicks_button)) { actions.runOrStopClicks() }
         clickButtons.addView(clicksButton)
         clickButtons.addView(button(context.getString(R.string.overlay_open_app)) { actions.openApp() })
@@ -324,7 +341,7 @@ class OverlayController(
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
         selector.addView(smallButton("◀") { actions.browseAlgorithm(-1) }.apply { contentDescription = context.getString(R.string.overlay_previous) })
-        viewedTitle = text(13f, Color.WHITE, bold = true).apply {
+        viewedTitle = text(13f, OverlayStyle.TEXT, bold = true).apply {
             gravity = Gravity.CENTER
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             singleLine()
@@ -332,8 +349,9 @@ class OverlayController(
         selector.addView(viewedTitle)
         selector.addView(smallButton("▶") { actions.browseAlgorithm(1) }.apply { contentDescription = context.getString(R.string.overlay_next) })
         page.addView(selector)
-        viewedName = text(12f, Color.WHITE).apply {
-            setPadding(0, dp(2), 0, dp(2))
+        viewedName = text(12f, OverlayStyle.MUTED).apply {
+            gravity = Gravity.CENTER
+            setPadding(0, dp(4), 0, dp(8))
             singleLine()
         }
         page.addView(viewedName)
@@ -343,13 +361,10 @@ class OverlayController(
         algorithmButtons.addView(button("↺ 1") { actions.resetToFirst() }.apply { contentDescription = context.getString(R.string.overlay_reset_to_first) })
         algorithmButtons.addView(button(context.getString(R.string.overlay_add_algorithm)) { actions.addAlgorithm() })
         page.addView(algorithmButtons)
-        page.addView(text(11f, MUTED).apply {
-            text = context.getString(R.string.overlay_step_times)
-            setPadding(0, dp(6), 0, dp(2))
-        })
+        page.addView(caption(context.getString(R.string.overlay_step_times)))
         stepList = column()
         page.addView(scroll(stepList, MAX_STEPS_HEIGHT_DP))
-        val addButtons = row().apply { setPadding(0, dp(4), 0, 0) }
+        val addButtons = row().apply { setPadding(0, dp(8), 0, 0) }
         addButtons.addView(button(context.getString(R.string.overlay_add_click)) { actions.addClickStep() })
         addButtons.addView(button(context.getString(R.string.overlay_add_pause)) { actions.addPauseStep() })
         page.addView(addButtons)
@@ -361,7 +376,7 @@ class OverlayController(
         stepList.removeAllViews()
         stepTimes.clear()
         if (steps.isEmpty()) {
-            stepList.addView(text(11f, MUTED).apply { text = context.getString(R.string.overlay_no_steps) })
+            stepList.addView(text(11f, OverlayStyle.MUTED).apply { text = context.getString(R.string.overlay_no_steps) })
             return
         }
         steps.forEachIndexed { index, step ->
@@ -369,7 +384,7 @@ class OverlayController(
                 gravity = Gravity.CENTER_VERTICAL
                 setPadding(0, dp(2), 0, dp(2))
             }
-            line.addView(text(11f, Color.WHITE).apply {
+            line.addView(text(11.5f, OverlayStyle.TEXT).apply {
                 text = step.label
                 singleLine()
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -408,7 +423,7 @@ class OverlayController(
         accessibilityButton = button(context.getString(R.string.action_enable_auto_click)) { actions.openAccessibilitySettings() }
         listOf(autoClickToggle, accessibilityButton, notificationsToggle).forEach { toggle ->
             toggle.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                .apply { topMargin = dp(4) }
+                .apply { topMargin = dp(6) }
             page.addView(toggle)
         }
         return scroll(page, MAX_PAGE_HEIGHT_DP)
@@ -418,9 +433,9 @@ class OverlayController(
     private fun setting(page: LinearLayout, label: Int, value: TextView, minus: () -> Unit, plus: () -> Unit) {
         val line = row().apply {
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, dp(2), 0, dp(2))
+            setPadding(0, dp(3), 0, dp(3))
         }
-        line.addView(text(11f, MUTED).apply {
+        line.addView(text(11.5f, OverlayStyle.MUTED).apply {
             text = context.getString(label)
             singleLine()
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -434,7 +449,8 @@ class OverlayController(
     private fun select(selected: Tab) {
         pages.forEach { (t, page) -> page.visibility = if (t == selected) View.VISIBLE else View.GONE }
         tabButtons.forEach { (t, b) ->
-            (b.background as GradientDrawable).setColor(if (t == selected) context.getColor(R.color.brand_primary) else BUTTON)
+            (b.background as GradientDrawable).setColor(if (t == selected) OverlayStyle.CHIP_SELECTED else Color.TRANSPARENT)
+            b.setTextColor(if (t == selected) OverlayStyle.TEXT else OverlayStyle.MUTED)
         }
     }
 
@@ -485,7 +501,19 @@ class OverlayController(
         }
     }
 
-    private fun toggleLabel(label: Int, on: Boolean) = "${if (on) "✓" else "✗"} ${context.getString(label)}"
+    /** A switch as a chip: accent-tinted with a check while on, plain while off. */
+    private fun TextView.showToggle(label: Int, on: Boolean) {
+        text = "${if (on) "✓" else "✗"} ${context.getString(label)}"
+        setTextColor(if (on) OverlayStyle.ACCENT else OverlayStyle.MUTED)
+        (background as GradientDrawable).setColor(if (on) OverlayStyle.ACCENT_SOFT else OverlayStyle.CHIP)
+    }
+
+    /** Small uppercase label above a group, like the section titles in the app. */
+    private fun caption(label: String) = text(10.5f, OverlayStyle.MUTED).apply {
+        text = label.uppercase()
+        letterSpacing = 0.08f
+        setPadding(0, dp(12), 0, dp(4))
+    }
 
     private fun TextView.showText(value: String?) {
         text = value.orEmpty()
@@ -507,45 +535,37 @@ class OverlayController(
 
     private fun scroll(content: View, maxHeightDp: Int) = MaxHeightScrollView(context, dp(maxHeightDp)).apply { addView(content) }
 
-    private fun valueText(widthDp: Int) = text(12f, Color.WHITE, bold = true).apply {
+    private fun valueText(widthDp: Int) = text(12.5f, OverlayStyle.TEXT, bold = true).apply {
         gravity = Gravity.CENTER
         singleLine()
         layoutParams = LinearLayout.LayoutParams(dp(widthDp), ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
-    private fun text(sizeSp: Float, color: Int, bold: Boolean = false) = TextView(context).apply {
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
-        setTextColor(color)
-        maxWidth = dp(BODY_WIDTH_DP)
-        if (bold) typeface = Typeface.DEFAULT_BOLD
-    }
+    private fun text(sizeSp: Float, color: Int, bold: Boolean = false) =
+        style.text(sizeSp, color, if (bold) style.semibold else style.regular).apply { maxWidth = dp(BODY_WIDTH_DP) }
 
-    private fun button(label: String, onClick: () -> Unit) = TextView(context).apply {
-        text = label
-        setTextColor(Color.WHITE)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-        setPadding(dp(10), dp(5), dp(10), dp(5))
-        minHeight = dp(32)
-        gravity = Gravity.CENTER
-        maxLines = 1
-        background = GradientDrawable().apply {
-            cornerRadius = dp(8).toFloat()
-            setColor(BUTTON)
-        }
+    private fun button(label: String, primary: Boolean = false, onClick: () -> Unit) = style.button(label, primary, onClick).apply {
         layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT,
-        ).apply { marginEnd = dp(4) }
-        isClickable = true
-        setOnClickListener { onClick() }
+        ).apply { marginEnd = dp(6) }
     }
 
-    /** Square icon-sized button for −, +, ◀, ▶, ✕ and the like. */
-    private fun smallButton(label: String, onClick: () -> Unit) = button(label, onClick).apply {
+    /** Round icon-sized button for −, +, ◀, ▶, ✕ and the like. */
+    private fun smallButton(label: String, onClick: () -> Unit) = button(label, onClick = onClick).apply {
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
         setPadding(0, 0, 0, 0)
         minWidth = dp(SMALL_BUTTON_DP)
         minHeight = dp(SMALL_BUTTON_DP)
-        (layoutParams as LinearLayout.LayoutParams).marginEnd = dp(3)
+        (layoutParams as LinearLayout.LayoutParams).marginEnd = dp(4)
+    }
+
+    /** Minimise and close in the header: just the glyph, no fill. */
+    private fun headerButton(label: String, onClick: () -> Unit) = smallButton(label, onClick).apply {
+        setTextColor(OverlayStyle.MUTED)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+        (background as GradientDrawable).setColor(Color.TRANSPARENT)
+        (layoutParams as LinearLayout.LayoutParams).marginEnd = 0
     }
 
     /** Acts once on press and then repeatedly while held, so large changes do not need many taps. */
@@ -579,7 +599,7 @@ class OverlayController(
         isClickable = true
     }
 
-    private fun dp(value: Int): Int = (value * context.resources.displayMetrics.density).toInt()
+    private fun dp(value: Int): Int = style.dp(value)
 
     /** A ScrollView that stops growing at [maxHeightPx], so a long page scrolls inside the panel. */
     private class MaxHeightScrollView(context: Context, private val maxHeightPx: Int) : ScrollView(context) {
@@ -589,14 +609,10 @@ class OverlayController(
     }
 
     private companion object {
-        val MUTED = Color.rgb(0xC7, 0xC5, 0xF0)
-        val BUTTON = Color.rgb(0x2E, 0x2B, 0x55)
-        val STOPPED = Color.rgb(0x4A, 0x47, 0x66)
-        val PAUSED = Color.rgb(0xC7, 0x7C, 0x1E)
-        val CLICKING = Color.rgb(0xE5, 0x48, 0x4D)
+        const val BUBBLE_RING = 0x40FFFFFF
         const val BODY_WIDTH_DP = 264
         const val BUBBLE_DP = 52
-        const val SMALL_BUTTON_DP = 30
+        const val SMALL_BUTTON_DP = 28
         const val VALUE_WIDTH_DP = 64
         const val STEP_VALUE_WIDTH_DP = 58
 
