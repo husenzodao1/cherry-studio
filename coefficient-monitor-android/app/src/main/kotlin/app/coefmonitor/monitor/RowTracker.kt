@@ -44,6 +44,9 @@ class RowTracker(
     /** Called with the whole screen when the row was found there; the bitmap is recycled afterwards. */
     private val onRowFound: suspend (Bitmap, RowCells) -> Unit = { _, _ -> },
 ) {
+    /** The words last read in the strip, and the pictures they were read from. */
+    private class StripCache(val strip: ImageSignature, val newest: ImageSignature, val neighbor: ImageSignature?, val words: List<TextBox>)
+
     private class Grab(
         val generation: Long,
         val width: Int,
@@ -64,8 +67,7 @@ class RowTracker(
     private var frameWidth = 0
     private var frameHeight = 0
     private var lastNewest: ImageSignature? = null
-    private var stripSignature: ImageSignature? = null
-    private var stripWords: List<TextBox> = emptyList()
+    private var stripCache: StripCache? = null
     private var lastFullSearchMs = 0L
     private var movingSinceMs: Long? = null
 
@@ -126,8 +128,7 @@ class RowTracker(
         cells = null
         lastNewest = null
         movingSinceMs = null
-        stripSignature = null
-        stripWords = emptyList()
+        stripCache = null
     }
 
     /** Copies what this tick needs while the frame is locked: the strip and the two cells. */
@@ -151,21 +152,30 @@ class RowTracker(
         )
     }
 
-    /** Words in the strip, read again only when the strip's picture changed. */
+    /**
+     * Words in the strip, read again only when its picture changed. The two tiles are compared on
+     * their own: in a picture of the whole strip a new value in one tile is too small a change.
+     */
     private suspend fun stripWords(grab: Grab): List<TextBox> {
         val strip = grab.strip!!
         val pixels = grab.stripPixels!!
         val signature = ImageSignature.fromArgb(pixels, strip.width, strip.height)
-        val cached = stripSignature
-        if (cached != null && cached.similarity(signature) >= REUSE_SIMILARITY) return stripWords
+        val newest = grab.newest!!
+        val cached = stripCache
+        if (cached != null && same(cached.strip, signature) && same(cached.newest, newest) && same(cached.neighbor, grab.neighbor)) {
+            return cached.words
+        }
         val bitmap = Bitmap.createBitmap(pixels, strip.width, strip.height, Bitmap.Config.ARGB_8888)
         val words = timedOcr { ocr.readWords(bitmap, offsetY = strip.top) }
         // Only recycle after success: if the coroutine was cancelled, ML Kit may still be reading it.
         bitmap.recycle()
-        stripSignature = signature
-        stripWords = words
+        stripCache = StripCache(signature, newest, grab.neighbor, words)
         return words
     }
+
+    /** Practically pixel-identical: OCR would return the same words. */
+    private fun same(a: ImageSignature?, b: ImageSignature?): Boolean =
+        if (a == null || b == null) a == b else a.similarity(b) >= REUSE_SIMILARITY
 
     /**
      * Reads the whole screen and, if the row is there, follows it from now on. Returns null if it
@@ -187,14 +197,14 @@ class RowTracker(
         bitmap.recycle()
         val anchored = near == null || found.movedFrom(near)
         cells = found
-        stripSignature = null
+        stripCache = null
         return PipelineStep.Sample(sample, anchored = anchored, lost = false)
     }
 
     /** The row is in the strip but clearly somewhere else: follow it there. */
     private suspend fun anchor(capturer: ScreenCapturer, found: RowCells, words: List<TextBox>, nowMs: Long): PipelineStep? {
         cells = found
-        stripSignature = null
+        stripCache = null
         val signatures = capturer.withLatestFrame { frame ->
             signature(frame.crop(found.newest), found.newest) to found.neighbor?.let { signature(frame.crop(it), it) }
         } ?: return null
