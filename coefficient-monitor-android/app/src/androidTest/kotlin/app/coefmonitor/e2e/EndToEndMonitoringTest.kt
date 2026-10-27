@@ -37,6 +37,7 @@ import app.coefmonitor.e2e.TestEnv.waitFor
 import app.coefmonitor.monitor.CoefficientOcrEngine
 import app.coefmonitor.monitor.MonitorStatus
 import app.coefmonitor.monitor.MonitoringService
+import app.coefmonitor.monitor.OcrStatus
 import app.coefmonitor.ui.MainActivity
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -281,6 +282,32 @@ class EndToEndMonitoringTest {
         SystemClock.sleep(1_500)
         screenshot("e2e_06_event_log")
         dashboard.close()
+    }
+
+    @Test
+    fun findsTheRowAgainAfterTheGameMoved() {
+        val calibration = onSimulator { it.calibration() }
+        runBlocking { container.settings.update { it.copy(calibration = calibration) } }
+        startCapture(MonitoringService.Mode.MONITOR)
+        awaitStatus(MonitorStatus.MONITORING, timeoutMs = FIRST_READ_TIMEOUT_MS)
+
+        // The game is scrolled and does not come back to exactly the same place: the row is now 60 dp lower.
+        onSimulator { it.board.translationY = 60 * it.resources.displayMetrics.density }
+        val moved = waitFor("row found at its new place", 30_000) {
+            runBlocking { container.settings.current().calibration }?.takeIf { it != calibration }
+        }
+        log("region moved from ${calibration.tile} to ${moved.tile}")
+        assertTrue("region did not move down", moved.tile.top > calibration.tile.top)
+        waitFor("reading again at the new place", 30_000) {
+            TestEnv.runtime().takeIf { it.ocrStatus == OcrStatus.OK && it.lastReadValue == Coefficient(333) }
+        }
+        assertEquals("finding the row again is not a round", 0, eventCount())
+        screenshot("e2e_07_row_found_again")
+
+        // Monitoring goes on by itself: the next round is read at the new place.
+        push("1.70x")
+        awaitEventCount(1)
+        assertEquals("after 1.70x\n${failureContext()}", 2, activeAlgorithm())
     }
 
     @Test
