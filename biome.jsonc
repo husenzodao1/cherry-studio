@@ -29,6 +29,7 @@
       "!**/.vscode/**",
       "!**/.conductor/**",
       "!v2-refactor-temp/**",
+      "!coefficient-monitor-android/**",
       "!resources/**",
       "!**/dist/**"
     ],
