@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import app.coefmonitor.R
 import app.coefmonitor.appContainer
 import app.coefmonitor.core.CalibrationProblem
+import app.coefmonitor.core.ClickPlan
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DelayPolicy
@@ -28,7 +29,6 @@ import app.coefmonitor.core.ProcessResult
 import app.coefmonitor.core.RegionResolution
 import app.coefmonitor.core.RejectionReason
 import app.coefmonitor.core.RoundEvent
-import app.coefmonitor.core.StepGuide
 import app.coefmonitor.core.TransitionReason
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.DiagnosticLevel
@@ -68,11 +68,12 @@ class MonitoringService : LifecycleService() {
     private var loopJob: Job? = null
     private var snapshotJob: Job? = null
     private var overlay: OverlayController? = null
-    private lateinit var guide: StepGuideController
+    private lateinit var clicker: AutoClickController
     private var mode = Mode.MONITOR
     private var inForeground = false
     private var detectorReady = false
     private var lastLoggedRejection: Pair<RejectionReason?, String>? = null
+    private var clickerOffReported = false
 
     @Volatile
     private var settings = AppSettings()
@@ -81,7 +82,11 @@ class MonitoringService : LifecycleService() {
         super.onCreate()
         notifications = MonitorNotifications(this)
         notifications.ensureChannels()
-        guide = StepGuideController(this, lifecycleScope) { progress -> runtime.update { it.copy(guide = progress) } }
+        clicker = AutoClickController(
+            scope = lifecycleScope,
+            onProgress = { progress -> runtime.update { it.copy(clicks = progress) } },
+            onFinished = ::reportClicks,
+        )
         lifecycleScope.launch {
             container.settings.settings.collect {
                 settings = it
@@ -106,7 +111,7 @@ class MonitoringService : LifecycleService() {
     }
 
     override fun onDestroy() {
-        if (::guide.isInitialized) guide.cancel()
+        if (::clicker.isInitialized) clicker.cancel()
         loopJob?.cancel()
         snapshotJob?.cancel()
         releaseCapture()
@@ -173,7 +178,7 @@ class MonitoringService : LifecycleService() {
         if (capturer == null) return stopIfIdle()
         loopJob?.cancel()
         loopJob = null
-        guide.cancel()
+        clicker.cancel()
         runtime.update { it.copy(status = MonitorStatus.PAUSED, ocrStatus = OcrStatus.IDLE) }
         log(DiagnosticLevel.INFO, "MONITOR", "Paused")
     }
@@ -190,7 +195,7 @@ class MonitoringService : LifecycleService() {
 
     /** Stops everything. [error] non-null leaves the dashboard in the Error state with a reason. */
     private fun shutdown(error: MonitorError?) {
-        guide.cancel()
+        clicker.cancel()
         loopJob?.cancel()
         loopJob = null
         snapshotJob?.cancel()
@@ -355,18 +360,43 @@ class MonitoringService : LifecycleService() {
     }
 
     /**
-     * Shows the step points of the algorithm at [activeIndex] (position in the enabled sequence).
-     * Points on the row being read are skipped, and nothing is shown if the screen orientation no
-     * longer matches the calibration screenshot the points were picked on.
+     * Runs the clicks of the algorithm at [activeIndex] (position in the enabled sequence), step by
+     * step with the step times in between. Taps on the row being read are skipped, and nothing is
+     * tapped if the screen orientation no longer matches the calibration screenshot the points
+     * were picked on.
      */
-    private suspend fun playGuide(activeIndex: Int) {
+    private suspend fun runClicks(activeIndex: Int) {
         val s = settings
         val calibration = s.calibration
         val definition = container.algorithms.allDefinitions().filter { it.enabled }.getOrNull(activeIndex) ?: return
-        if (calibration != null && !sameOrientationAs(calibration)) return
         val band = calibration?.let { ObservationRegionManager.readingBand(it) }
-        val markers = StepGuide.plan(definition.steps, s.globalDelayMs, band)
-        withContext(Dispatchers.Main) { guide.play(activeIndex + 1, markers) }
+        val clicks = ClickPlan.plan(definition.steps, s.globalDelayMs, band)
+        if (clicks.isEmpty()) return
+        if (calibration != null && !sameOrientationAs(calibration)) {
+            log(DiagnosticLevel.WARNING, "AUTO_CLICK", "Screen orientation differs from the calibration screenshot; Algorithm ${activeIndex + 1} was not clicked")
+            return
+        }
+        if (!AutoClickService.connected.value) {
+            if (!clickerOffReported) {
+                log(DiagnosticLevel.WARNING, "AUTO_CLICK", "The auto-clicker is off in Accessibility settings; Algorithm ${activeIndex + 1} was not clicked")
+            }
+            clickerOffReported = true
+            return
+        }
+        clickerOffReported = false
+        withContext(Dispatchers.Main) { clicker.play(activeIndex + 1, clicks) }
+    }
+
+    private fun reportClicks(algorithmNumber: Int, tapped: Int, missed: List<Int>) {
+        if (missed.isEmpty()) {
+            log(DiagnosticLevel.INFO, "AUTO_CLICK", "Algorithm $algorithmNumber: $tapped click(s) performed")
+        } else {
+            log(
+                DiagnosticLevel.WARNING,
+                "AUTO_CLICK",
+                "Algorithm $algorithmNumber: $tapped click(s) performed; step(s) ${missed.joinToString()} could not be clicked",
+            )
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -457,7 +487,7 @@ class MonitoringService : LifecycleService() {
                     )
                     else -> Unit
                 }
-                if (s.stepGuideEnabled) playGuide(result.transition.newIndex)
+                if (s.autoClickEnabled) runClicks(result.transition.newIndex)
                 if (s.roundNotifications) {
                     notifications.round(
                         str.getString(R.string.notif_round_title, event.value.toString()),
@@ -508,8 +538,8 @@ class MonitoringService : LifecycleService() {
             context = withAppLocale(),
             onPauseResume = { if (runtime.state.value.status == MonitorStatus.PAUSED) resume() else pause() },
             onStop = { shutdown(error = null) },
-            onShowSteps = {
-                lifecycleScope.launch { playGuide(container.monitor.sequenceState().activeIndex) }
+            onRunClicks = {
+                lifecycleScope.launch { runClicks(container.monitor.sequenceState().activeIndex) }
             },
             onOpenApp = {
                 startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP))
@@ -525,6 +555,7 @@ class MonitoringService : LifecycleService() {
 
     private data class Presentation(
         val runtime: RuntimeState,
+        val clickerConnected: Boolean,
         val state: MonitorStateEntity,
         val algorithms: List<StoredAlgorithm>,
         val recent: List<EventEntity>,
@@ -533,13 +564,13 @@ class MonitoringService : LifecycleService() {
 
     private suspend fun observePresentation() {
         combine(
-            runtime.state,
+            combine(runtime.state, AutoClickService.connected, ::Pair),
             container.monitor.state,
             container.algorithms.algorithms,
             container.events.recent(OVERLAY_LOG_LINES),
             container.settings.settings,
-        ) { rt, state, algorithms, recent, s ->
-            Presentation(rt, state, algorithms.filter { it.definition.enabled }, recent, s)
+        ) { (rt, clickerConnected), state, algorithms, recent, s ->
+            Presentation(rt, clickerConnected, state, algorithms.filter { it.definition.enabled }, recent, s)
         }.collect { render(it) }
     }
 
@@ -568,8 +599,10 @@ class MonitoringService : LifecycleService() {
         }
         val firstStepDelay = active?.steps?.firstOrNull()?.let { DelayPolicy.effective(it, p.settings.globalDelayMs) }
             ?: p.settings.globalDelayMs
+        val clickerOff = p.settings.autoClickEnabled && !p.clickerConnected && active?.steps?.any { it.point != null } == true
         val warning = when {
             p.runtime.calibrationProblem != null -> Labels.calibrationProblem(str, p.runtime.calibrationProblem)
+            clickerOff -> str.getString(R.string.warning_auto_click_off)
             total > 0 && index == total - 1 -> str.getString(R.string.warning_last_algorithm)
             p.runtime.lastContinuity == Continuity.GAP_SUSPECTED -> str.getString(R.string.warning_gap)
             else -> null
@@ -584,7 +617,7 @@ class MonitoringService : LifecycleService() {
                 warning = warning,
                 log = p.recent.map { Labels.eventLine(str, it) },
                 paused = p.runtime.status == MonitorStatus.PAUSED,
-                guideLine = p.runtime.guide?.let { str.getString(R.string.overlay_guide, it.position, it.total, it.delayMs) },
+                clickLine = p.runtime.clicks?.let { str.getString(R.string.overlay_clicks, it.position, it.total, it.delayMs) },
             ),
         )
     }

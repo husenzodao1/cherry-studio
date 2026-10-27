@@ -8,7 +8,7 @@ data class AlgorithmStep(
     val text: String = "",
     /** Time until the next step in ms; null means the global delay applies. */
     val delayMs: Long? = null,
-    /** Point on the screen (normalised to the full display) shown by the step guide; null for a note-only step. */
+    /** Point on the screen (normalised to the full display) the auto-clicker taps; null for a pause-only step. */
     val point: NormalizedPoint? = null,
 )
 

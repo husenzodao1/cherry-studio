@@ -20,6 +20,7 @@ import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.Display
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -34,6 +35,7 @@ import app.coefmonitor.core.NormalizedRect
 import app.coefmonitor.core.ObservationCalibration
 import java.lang.ref.WeakReference
 import java.util.Locale
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -41,7 +43,13 @@ import kotlin.math.sin
 object SimulatorBoard {
     @Volatile
     var results: List<String> = emptyList()
+
+    /** Every touch the simulator screen received, oldest first; lets tests check the auto-clicker. */
+    val taps = CopyOnWriteArrayList<SimulatorTap>()
 }
+
+/** A touch on the simulator, normalised to the full display. */
+data class SimulatorTap(val point: NormalizedPoint, val atMs: Long)
 
 /**
  * Debug-only stand-in for a crash game screen, used by instrumented tests: a "?" tile followed by
@@ -100,6 +108,14 @@ class SimulatorActivity : ComponentActivity() {
     override fun onDestroy() {
         ambientTick?.let { board.rootView.removeCallbacks(it) }
         super.onDestroy()
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            val (width, height) = displaySize()
+            SimulatorBoard.taps += SimulatorTap(NormalizedPoint(event.rawX / width, event.rawY / height), SystemClock.uptimeMillis())
+        }
+        return super.dispatchTouchEvent(event)
     }
 
     /** Asks for screen-capture consent; [callback] receives the activity result. */

@@ -21,6 +21,7 @@ import app.coefmonitor.core.OcrReading
 import app.coefmonitor.core.RegionResolution
 import app.coefmonitor.core.TransitionType
 import app.coefmonitor.debug.SimulatorActivity
+import app.coefmonitor.debug.SimulatorBoard
 import app.coefmonitor.e2e.TestEnv.activeAlgorithm
 import app.coefmonitor.e2e.TestEnv.app
 import app.coefmonitor.e2e.TestEnv.awaitEventCount
@@ -45,6 +46,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.abs
 
 /**
  * Whole app on a device: real MediaProjection capture of the simulator screen → crop of the tile
@@ -69,6 +71,7 @@ class EndToEndMonitoringTest {
     @After
     fun tearDown() {
         TestEnv.stopMonitoring()
+        TestEnv.disableAutoClicker()
         log("final state\n${failureContext()}")
         scenario.close()
     }
@@ -103,28 +106,30 @@ class EndToEndMonitoringTest {
         assertEquals("consent result", Activity.RESULT_OK, delivered.get())
     }
 
-    /** After the first round (→ Algorithm 2) its two points must appear in order, then disappear. */
-    private fun assertGuideShowsAlgorithm2Points() {
-        val seen = mutableListOf<Int>()
-        val deadline = SystemClock.uptimeMillis() + 15_000
+    /** After the first round (→ Algorithm 2) its two points must be tapped on the simulator in order, 1.5 s apart. */
+    private fun assertAlgorithm2Clicked() {
         var screenshotTaken = false
-        while (SystemClock.uptimeMillis() < deadline) {
-            val guide = TestEnv.runtime().guide
-            if (guide != null) {
-                assertEquals(2, guide.algorithmNumber)
-                if (seen.lastOrNull() != guide.stepNumber) seen += guide.stepNumber
-                if (!screenshotTaken) {
-                    screenshot("e2e_01b_step_guide_point_1")
-                    screenshotTaken = true
-                }
-            } else if (seen.isNotEmpty()) {
-                break
+        val taps = waitFor("two auto-clicks on the simulator", 15_000) {
+            val progress = TestEnv.runtime().clicks
+            if (progress != null && !screenshotTaken) {
+                assertEquals(2, progress.algorithmNumber)
+                screenshot("e2e_01b_auto_click_running")
+                screenshotTaken = true
             }
-            SystemClock.sleep(100)
+            SimulatorBoard.taps.toList().takeIf { it.size >= 2 }
         }
-        log("guide steps seen: $seen")
-        assertEquals("guide points in order\n${failureContext()}", listOf(1, 2), seen)
-        assertEquals("the guide must not create rounds", 1, eventCount())
+        log("auto-clicks seen: $taps")
+        assertNear("first click", NormalizedPoint(0.30f, 0.80f), taps[0].point)
+        assertNear("second click", NormalizedPoint(0.70f, 0.86f), taps[1].point)
+        val interval = taps[1].atMs - taps[0].atMs
+        assertTrue("time between the clicks was $interval ms, expected about 1500 ms", interval in 1_300L..2_500L)
+        waitFor("auto-click run to finish", 10_000) { (TestEnv.runtime().clicks == null).takeIf { it } }
+        assertEquals("only the two clicks of Algorithm 2", 2, SimulatorBoard.taps.size)
+        assertEquals("the clicks must not create rounds", 1, eventCount())
+    }
+
+    private fun assertNear(what: String, expected: NormalizedPoint, actual: NormalizedPoint) {
+        assertTrue("$what at $actual, expected $expected", abs(expected.x - actual.x) < 0.01f && abs(expected.y - actual.y) < 0.01f)
     }
 
     /** Next round may only arrive after the detector's cooldown (default 3 s), as in the real game. */
@@ -161,8 +166,8 @@ class EndToEndMonitoringTest {
         val calibration = onSimulator { it.calibration() }
         log("calibration $calibration")
         runBlocking {
-            container.settings.update { it.copy(calibration = calibration, overlayEnabled = true, stepGuideEnabled = true) }
-            // Algorithm 2 has two point steps; the guide must show them one after another.
+            container.settings.update { it.copy(calibration = calibration, overlayEnabled = true, autoClickEnabled = true) }
+            // Algorithm 2 has two click steps; the auto-clicker must tap them one after another.
             val second = container.database.algorithmDao().getAll()[1]
             container.algorithms.update(
                 second.id,
@@ -176,6 +181,8 @@ class EndToEndMonitoringTest {
             )
         }
 
+        TestEnv.enableAutoClicker()
+
         // Start: the visible 3.33x only initialises the detector.
         startCapture(MonitoringService.Mode.MONITOR)
         awaitStatus(MonitorStatus.MONITORING, timeoutMs = FIRST_READ_TIMEOUT_MS)
@@ -186,11 +193,12 @@ class EndToEndMonitoringTest {
         // Specification example.
         val values = listOf("1.70x", "1.60x", "1.20x", "2.10x", "2.30x", "1.50x", "1.70x", "1.90x", "2.50x")
         val expected = listOf(2, 3, 4, 1, 1, 2, 3, 4, 1)
+        SimulatorBoard.taps.clear()
         values.forEachIndexed { i, value ->
             push(value)
             awaitEventCount(i + 1)
             assertEquals("after $value\n${failureContext()}", expected[i], activeAlgorithm())
-            if (i == 0) assertGuideShowsAlgorithm2Points()
+            if (i == 0) assertAlgorithm2Clicked()
             if (i == 3) screenshot("e2e_02_after_reset_2_10x")
             waitCooldown()
         }

@@ -1,16 +1,19 @@
 package app.coefmonitor.e2e
 
+import android.app.UiAutomation
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Configurator
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import app.coefmonitor.AppContainer
 import app.coefmonitor.CoefMonitorApp
 import app.coefmonitor.data.AppSettings
+import app.coefmonitor.monitor.AutoClickService
 import app.coefmonitor.monitor.MonitorStatus
 import app.coefmonitor.monitor.MonitoringService
 import app.coefmonitor.monitor.RuntimeState
@@ -26,6 +29,12 @@ object TestEnv {
     const val PACKAGE = "app.coefmonitor"
     const val TAG = "CoefMonitorTest"
     private const val SHOT_DIR = "/sdcard/Download/coefmonitor"
+    private const val AUTO_CLICK_SERVICE = "$PACKAGE/$PACKAGE.monitor.AutoClickService"
+
+    init {
+        // UiAutomation switches every other accessibility service off by default, the auto-clicker included.
+        Configurator.getInstance().setUiAutomationFlags(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
+    }
 
     val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     val app: CoefMonitorApp get() = ApplicationProvider.getApplicationContext()
@@ -43,6 +52,18 @@ object TestEnv {
         shell("appops set $PACKAGE PROJECT_MEDIA allow")
         shell("appops set $PACKAGE SYSTEM_ALERT_WINDOW allow")
         if (Build.VERSION.SDK_INT >= 33) shell("pm grant $PACKAGE android.permission.POST_NOTIFICATIONS")
+    }
+
+    /** Turns the auto-clicker's accessibility service on, as the user does in system settings. */
+    fun enableAutoClicker() {
+        shell("settings put secure enabled_accessibility_services $AUTO_CLICK_SERVICE")
+        shell("settings put secure accessibility_enabled 1")
+        waitFor("auto-clicker service to connect", 20_000) { AutoClickService.connected.value.takeIf { it } }
+    }
+
+    fun disableAutoClicker() {
+        shell("settings delete secure enabled_accessibility_services")
+        shell("settings put secure accessibility_enabled 0")
     }
 
     /** Full-screen PNG written by the shell user so it survives the app being uninstalled. */

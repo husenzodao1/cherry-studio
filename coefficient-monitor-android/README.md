@@ -6,8 +6,9 @@ on-device OCR, and moves through a user-defined sequence of algorithms:
 - coefficient **≤ threshold** (default `2.00x`) → advance exactly one algorithm;
 - coefficient **> threshold** → back to Algorithm 1 (stay there if already on it).
 
-It is a monitoring tool only. It never taps, places bets or acts inside other apps. Each round
-is independent, and the sequence position does not predict the next result.
+After every round the **auto-clicker** taps the points saved in the now active algorithm, one by
+one, with the step times in between (see [Auto-clicker](#auto-clicker)). Each round is
+independent, and the sequence position does not predict the next result.
 
 ## Modules
 
@@ -30,6 +31,9 @@ test it with plain Maven Central access: `cd core && gradle test`.
   sequence numbers and builds the event record.
 - `ObservationRegionManager` (core): normalised calibration ↔ pixels, plus validation.
 - `MonitoringService` / `ScreenCapturer` / `FramePipeline` / `CoefficientOcrEngine` (app): the capture pipeline.
+- `ClickPlan` (core) / `AutoClickController` / `AutoClickService` (app): the auto-clicker. The plan
+  lists the steps with their times; the controller runs them one after another; the accessibility
+  service performs the taps.
 - `MonitorRepository` (app): writes the new position and the event row in **one Room transaction**.
   The `events.sequence` column has a unique index, so the database itself also rejects a round
   that was already processed.
@@ -100,23 +104,33 @@ restart is never processed again.
   formula injection). A separate diagnostics log records rejected OCR readings, errors and
   manual actions.
 
-## Step points guide
+## Auto-clicker
 
-Each algorithm step can be a **point on the screen** plus the **time until the next point**:
+Each algorithm step is a **click on a point of the screen** plus the **time until the next
+click**:
 
-1. In the algorithm editor, tap **+ Step: pick a point on the screen**. The calibration
-   screenshot opens; tap where the step should point. Use zoom for precision, and set the time
-   in ms. The row being read (shown in red) cannot be chosen, because a marker there would
-   disturb detection.
-2. After every round, the active algorithm's points are shown **one by one** over the game. Each
-   is a numbered circle that stays for its step time; very short times are stretched to 0.7 s so
-   they are visible. The floating panel shows "Point 2 of 3 · next in 250 ms", and its **Steps**
-   button replays the guide.
-3. The markers ignore touches, so you tap the game underneath yourself. **The app never taps,
-   places bets or cashes out**: automated actions in a real-money game are out of scope.
+1. In the algorithm editor, tap **+ Click: pick a point on the screen**. The calibration
+   screenshot opens; tap where the click should land, then **Use this point**. Use zoom for
+   precision, and set the time in ms (empty = the global delay). Add as many clicks as you need
+   and **Save**. The row being read (shown in red) cannot be chosen, because a popup opened by a
+   tap there would hide the coefficient.
+2. **+ Pause (no click)** adds a step that only waits its time, e.g. before the first click while
+   the game gets ready for the next round.
+3. Turn the service on once: Settings → *Auto-clicker* → **Turn on in Accessibility settings**, and
+   enable "Coefficient Monitor: auto-clicker". On Android 13 and newer an APK installed from a file
+   is blocked there at first ("restricted setting"): open App info → ⋮ → *Allow restricted
+   settings*, then enable it.
+4. After every round the active algorithm's clicks run **one after another**: tap step 1, wait its
+   time (counted from the start of the tap), tap step 2, and so on. The floating panel shows
+   "Auto-click: step 2 of 3 · next in 250 ms", and its **Run clicks** button runs the active
+   algorithm's clicks right away. A new round, **Pause** and **Stop** cancel a run in progress.
 
-Points are normalised to the calibration screenshot. If the screen orientation no longer
-matches it, the guide is not shown. The guide can be turned off in Settings.
+Points are normalised to the calibration screenshot and scaled to the current screen. If the
+screen orientation no longer matches the screenshot, nothing is tapped and the diagnostics log
+says so. Every run is logged there too ("Algorithm 2: 3 click(s) performed"), as are taps that
+Android cancelled (for example because you touched the screen at the same moment). A tap lands on
+whatever is on screen at that moment, so keep the game in front while monitoring runs. The
+auto-clicker can be turned off in Settings without touching the accessibility service.
 
 ## Permissions
 
@@ -125,7 +139,8 @@ matches it, the guide is not shown. The guide can be turned off in Settings.
 | Screen capture (MediaProjection consent) | Read the tile. Android asks every time monitoring starts. |
 | `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PROJECTION` | Continuous capture requires a visible foreground service. |
 | `POST_NOTIFICATIONS` | Monitoring status, "add another algorithm", capture stopped. |
-| `SYSTEM_ALERT_WINDOW` (optional) | Floating panel and step-point markers; only if granted in system settings. |
+| `SYSTEM_ALERT_WINDOW` (optional) | Floating panel; only if granted in system settings. |
+| Accessibility service "auto-clicker" (optional) | Performing the clicks; only if turned on in Accessibility settings. It reads no screen content and receives no accessibility events. |
 
 The app makes no network requests itself. OCR uses ML Kit's bundled model (no download at runtime)
 and runs on the device. Network problems therefore cannot affect detection, so there is no network
@@ -151,6 +166,10 @@ GitHub Actions and uploads the debug APK as an artifact.
   as the previous one is only detected through the neighbour tile. Keep the interval at or below
   300 ms.
 - Anything drawn over the observed tile is captured too: notifications, or the floating panel.
-  Keep the panel away from the tile row.
+  Keep the panel away from the tile row, and away from the click points (a click there lands on
+  the panel).
+- The clicks follow the detected rounds. If a round is missed or misread, the active algorithm
+  and therefore the clicks are wrong until you correct the position. Try the setup on a demo or
+  minimum stake first, and watch the diagnostics log.
 - Some Android 14+ devices offer "share one app" for screen capture. Choose the game or the
   entire screen.

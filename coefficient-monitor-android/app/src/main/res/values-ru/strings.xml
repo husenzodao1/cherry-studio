@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="about_app">Приложение читает экран и ведёт вашу последовательность алгоритмов. Если автокликер включён, после каждого раунда оно по очереди нажимает точки, сохранённые в активном алгоритме.</string>
     <string name="about_independent_rounds">Результат каждого раунда независим. Позиция в последовательности отражает только прошлые результаты и не предсказывает следующий коэффициент.</string>
-    <string name="about_monitoring_only">Только мониторинг: приложение читает экран и ведёт вашу последовательность алгоритмов. Оно не нажимает, не делает ставок и не действует в других приложениях.</string>
     <string name="action_add">Добавить</string>
     <string name="action_add_algorithm">Добавить алгоритм</string>
     <string name="action_add_many">Добавить несколько</string>
-    <string name="action_add_note_step">+ Шаг-заметка (без точки)</string>
-    <string name="action_add_point_step">+ Шаг: выберите точку на экране</string>
+    <string name="action_add_note_step">+ Пауза (без клика)</string>
+    <string name="action_add_point_step">+ Клик: выберите точку на экране</string>
     <string name="action_allow">Разрешить</string>
     <string name="action_allow_notifications">Разрешить уведомления</string>
     <string name="action_allow_overlay">Разрешить показ поверх других приложений</string>
@@ -30,6 +30,7 @@
     <string name="action_edit">Изменить</string>
     <string name="action_edit_calibration">Изменить калибровку</string>
     <string name="action_enable">Включить</string>
+    <string name="action_enable_auto_click">Включить в «Специальных возможностях»</string>
     <string name="action_export">Экспорт</string>
     <string name="action_export_csv">Экспорт событий (CSV)</string>
     <string name="action_export_diagnostics">Экспорт диагностики (CSV)</string>
@@ -77,6 +78,14 @@
     <string name="algorithms_empty_text">Создавайте алгоритмы по одному или добавьте сразу несколько. Ограничения на количество нет.</string>
     <string name="algorithms_empty_title">Алгоритмов пока нет</string>
     <string name="app_name">Монитор коэффициентов</string>
+    <string name="auto_click">Автокликер</string>
+    <string name="auto_click_hint">После каждого раунда клики активного алгоритма выполняются по очереди в сохранённых точках, с временем шагов между ними. Нужна служба специальных возможностей (ниже). Клик попадает в то, что в этот момент на экране; «Пауза» или «Стоп» отменяют клики.</string>
+    <string name="auto_click_restricted_hint">Android 13 и новее: если переключатель там неактивен, сначала откройте «О приложении» → ⋮ и разрешите ограниченные настройки, затем включите его.</string>
+    <string name="auto_click_service">Служба специальных возможностей</string>
+    <string name="auto_click_service_description">Нажимает точки, сохранённые в ваших алгоритмах, по очереди после каждого раунда, пока идёт мониторинг. Не читает содержимое экрана и больше ничего не делает.</string>
+    <string name="auto_click_service_label">Монитор коэффициентов: автокликер</string>
+    <string name="auto_click_service_off">Выключена — клики не выполняются</string>
+    <string name="auto_click_service_on">Включена</string>
     <string name="banner_no_algorithms">Добавьте хотя бы один алгоритм, чтобы начать.</string>
     <string name="banner_not_calibrated">Перед запуском откалибруйте первую плитку справа от «?».</string>
     <string name="bulk_add_count">Сколько (1–%1$d)</string>
@@ -164,7 +173,7 @@
     <string name="field_enabled">Включён</string>
     <string name="field_enabled_hint">Отключённые алгоритмы пропускаются в последовательности.</string>
     <string name="field_name">Название</string>
-    <string name="field_step_delay">Время до следующей точки (мс)</string>
+    <string name="field_step_delay">Время до следующего клика (мс)</string>
     <string name="field_step_text">Подпись (необязательно)</string>
     <string name="fine_tune">Точная настройка (2 пикс. за нажатие)</string>
     <string name="first_round_initialize">Только как точку отсчёта (рекомендуется)</string>
@@ -176,7 +185,7 @@
     <string name="floating_panel_hint">Небольшая перемещаемая панель поверх игры с активным алгоритмом и кнопками. Не закрывайте ею ряд плиток.</string>
     <string name="frames_value">Кадров: %1$d</string>
     <string name="global_delay">Общая задержка</string>
-    <string name="global_delay_hint">Задержка по умолчанию для шагов без собственной задержки.</string>
+    <string name="global_delay_hint">Время до следующего клика по умолчанию для шагов без собственного времени.</string>
     <string name="height_minus">Высота −</string>
     <string name="height_plus">Высота +</string>
     <string name="import_text">Найдено корректных алгоритмов: %1$d. Добавить их в конец или заменить весь список?</string>
@@ -249,18 +258,18 @@
     <string name="ocr_transitioning">плитка меняется</string>
     <string name="ocr_waiting">ожидание экрана</string>
     <string name="of_total">из %1$d</string>
+    <string name="overlay_clicks">Автоклик: шаг %1$d из %2$d · следующий через %3$d мс</string>
+    <string name="overlay_clicks_button">Клики</string>
     <string name="overlay_delay">Задержка: %1$d мс</string>
     <string name="overlay_drag_hint">Перетащите, чтобы переместить; нажмите, чтобы свернуть</string>
-    <string name="overlay_guide">Точка %1$d из %2$d · следующая через %3$d мс</string>
     <string name="overlay_last_coefficient">Последний: %1$s</string>
     <string name="overlay_open_app">Открыть</string>
-    <string name="overlay_steps">Шаги</string>
     <string name="permission_granted">Разрешено</string>
     <string name="permission_not_needed">Не требуется</string>
     <string name="point_on_reading_band">Эта точка на читаемом ряду коэффициентов. Выберите другое место.</string>
-    <string name="point_picker_hint">Нажмите туда, куда должен указывать шаг. Перетаскивайте для прокрутки, используйте масштаб для точности. Красная зона — читаемый ряд коэффициентов, её выбрать нельзя.</string>
+    <string name="point_picker_hint">Нажмите туда, куда шаг должен кликнуть. Перетаскивайте для прокрутки, используйте масштаб для точности. Красная зона — читаемый ряд коэффициентов, её выбрать нельзя.</string>
     <string name="point_picker_no_image">Снимка пока нет. Сначала сделайте его в разделе «Калибровка» — тот же снимок используется для выбора точек.</string>
-    <string name="point_picker_title">Шаг %1$d: выберите точку</string>
+    <string name="point_picker_title">Шаг %1$d: выберите точку клика</string>
     <string name="preset_settings_only">Только настройки</string>
     <string name="preset_with_algorithms">Настройки + алгоритмы</string>
     <string name="presets_empty_text">Сохраните текущий порог, настройки распознавания, калибровку и (по желанию) алгоритмы как пресет.</string>
@@ -302,7 +311,7 @@
     <string name="settings_calibration">Калибровка</string>
     <string name="settings_delays">Задержки</string>
     <string name="settings_detection">Распознавание</string>
-    <string name="settings_permissions">Панель, уведомления и журнал</string>
+    <string name="settings_permissions">Панель, автокликер, уведомления и журнал</string>
     <string name="settings_recovery">Сброс и восстановление</string>
     <string name="snapshot_failed">Кадр недоступен. Попробуйте снова.</string>
     <string name="snapshot_pending">Переключитесь в игру — снимок через %1$d с</string>
@@ -313,13 +322,11 @@
     <string name="status_monitoring">Мониторинг</string>
     <string name="status_paused">Пауза</string>
     <string name="status_stopped">Остановлен</string>
-    <string name="step_guide">Подсказки шагов на экране</string>
-    <string name="step_guide_hint">После каждого раунда точки активного алгоритма показываются по очереди поверх игры, каждая на время своего шага. Нажимаете вы сами — приложение никогда не нажимает.</string>
-    <string name="step_no_point">Без точки (только заметка)</string>
+    <string name="step_no_point">Без клика (только пауза)</string>
     <string name="step_number">Шаг %1$d</string>
-    <string name="step_point_value">Точка: %1$s%% · %2$s%%</string>
+    <string name="step_point_value">Клик: %1$s%% · %2$s%%</string>
     <string name="steps_count">Шагов: %1$d</string>
-    <string name="steps_hint">Каждый шаг — точка на экране и время до следующей точки (по умолчанию %1$d мс). Когда алгоритм становится активным, его точки показываются по очереди поверх игры; нажимаете вы сами.</string>
+    <string name="steps_hint">Каждый шаг — клик по точке экрана и время до следующего клика (по умолчанию %1$d мс). Когда алгоритм становится активным, его клики выполняются по очереди. Шаг без точки — пауза.</string>
     <string name="steps_title">Шаги</string>
     <string name="summary_move">Алгоритм %1$d → Алгоритм %2$d</string>
     <string name="summary_remains">Алгоритм %1$d остаётся активным</string>
@@ -336,6 +343,7 @@
     <string name="transition_none">Без изменения позиции</string>
     <string name="transition_reset">Сброс на алгоритм 1</string>
     <string name="version">Версия</string>
+    <string name="warning_auto_click_off">Автокликер выключен: включите «Монитор коэффициентов: автокликер» в настройках специальных возможностей.</string>
     <string name="warning_gap">Перед последним раундом, возможно, были пропуски. Проверьте историю игры и при необходимости поправьте активный алгоритм.</string>
     <string name="warning_last_algorithm">Это последний настроенный алгоритм. Добавьте ещё один, чтобы продолжить — низкий коэффициент не вернёт к алгоритму 1.</string>
     <string name="width_minus">Ширина −</string>

@@ -65,9 +65,11 @@ import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.TransitionReason
 import app.coefmonitor.core.TransitionType
 import app.coefmonitor.data.db.enumOrNull
+import app.coefmonitor.monitor.AutoClickService
 import app.coefmonitor.monitor.MonitorStatus
 import app.coefmonitor.monitor.MonitoringService
 import app.coefmonitor.ui.Labels
+import app.coefmonitor.ui.accessibilitySettingsIntent
 import app.coefmonitor.ui.appNotificationSettingsIntent
 import app.coefmonitor.ui.components.Banner
 import app.coefmonitor.ui.components.CoefficientTile
@@ -90,6 +92,7 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val clickerConnected by AutoClickService.connected.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val startCapture = rememberCaptureStarter()
     var resumeTick by remember { mutableIntStateOf(0) }
@@ -119,12 +122,14 @@ fun DashboardScreen(
             item {
                 StatusCard(
                     state = state,
+                    clickerConnected = clickerConnected,
                     onStart = { startCapture(MonitoringService.Mode.MONITOR, 0L) },
                     onPause = { MonitoringService.command(context, MonitoringService.ACTION_PAUSE) },
                     onResume = { MonitoringService.command(context, MonitoringService.ACTION_RESUME) },
                     onStop = { MonitoringService.command(context, MonitoringService.ACTION_STOP) },
                     onOpenCalibration = onOpenCalibration,
                     onOpenAlgorithms = onOpenAlgorithms,
+                    onEnableClicker = { context.startActivity(accessibilitySettingsIntent()) },
                 )
             }
             item {
@@ -179,12 +184,14 @@ private fun statusColor(status: MonitorStatus): Color {
 @Composable
 private fun StatusCard(
     state: DashboardState,
+    clickerConnected: Boolean,
     onStart: () -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit,
     onOpenCalibration: () -> Unit,
     onOpenAlgorithms: () -> Unit,
+    onEnableClicker: () -> Unit,
 ) {
     val runtime = state.runtime
     val semantic = LocalSemanticColors.current
@@ -214,6 +221,12 @@ private fun StatusCard(
         if (state.total == 0) {
             Banner(stringResource(R.string.banner_no_algorithms), semantic.warning, Icons.Filled.WarningAmber) {
                 TextButton(onClick = onOpenAlgorithms) { Text(stringResource(R.string.action_add)) }
+            }
+        }
+        val hasClicks = state.algorithms.any { algorithm -> algorithm.definition.steps.any { it.point != null } }
+        if (state.settings.autoClickEnabled && hasClicks && !clickerConnected) {
+            Banner(stringResource(R.string.warning_auto_click_off), semantic.warning, Icons.Filled.WarningAmber) {
+                TextButton(onClick = onEnableClicker) { Text(stringResource(R.string.action_enable)) }
             }
         }
         if (runtime.lastRejection != null && runtime.status == MonitorStatus.MONITORING) {

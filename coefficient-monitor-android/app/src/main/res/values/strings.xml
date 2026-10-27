@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="about_app">The app reads the screen and tracks your algorithm sequence. If the auto-clicker is on, after every round it taps the points saved in the active algorithm, one by one.</string>
     <string name="about_independent_rounds">Each round\'s result is independent. The sequence position reflects past results only and does not predict the next coefficient.</string>
-    <string name="about_monitoring_only">Monitoring only: the app reads the screen and tracks your algorithm sequence. It never taps, bets or acts in other apps.</string>
     <string name="action_add">Add</string>
     <string name="action_add_algorithm">Add algorithm</string>
     <string name="action_add_many">Add several</string>
-    <string name="action_add_note_step">+ Note step (no point)</string>
-    <string name="action_add_point_step">+ Step: pick a point on the screen</string>
+    <string name="action_add_note_step">+ Pause (no click)</string>
+    <string name="action_add_point_step">+ Click: pick a point on the screen</string>
     <string name="action_allow">Allow</string>
     <string name="action_allow_notifications">Allow notifications</string>
     <string name="action_allow_overlay">Allow display over other apps</string>
@@ -30,6 +30,7 @@
     <string name="action_edit">Edit</string>
     <string name="action_edit_calibration">Edit calibration</string>
     <string name="action_enable">Enable</string>
+    <string name="action_enable_auto_click">Turn on in Accessibility settings</string>
     <string name="action_export">Export</string>
     <string name="action_export_csv">Export events (CSV)</string>
     <string name="action_export_diagnostics">Export diagnostics (CSV)</string>
@@ -77,6 +78,14 @@
     <string name="algorithms_empty_text">Create algorithms one by one or add many at once. There is no limit on how many you can use.</string>
     <string name="algorithms_empty_title">No algorithms yet</string>
     <string name="app_name">Coefficient Monitor</string>
+    <string name="auto_click">Auto-clicker</string>
+    <string name="auto_click_hint">After every round the active algorithm\'s clicks are performed one by one at the saved points, with the step times in between. Needs the Accessibility service below. A click lands on whatever is on screen at that moment; Pause or Stop cancels the clicks.</string>
+    <string name="auto_click_restricted_hint">Android 13 and newer: if the switch there is greyed out, open App info → ⋮ → “Allow restricted settings” first, then turn it on.</string>
+    <string name="auto_click_service">Accessibility service</string>
+    <string name="auto_click_service_description">Taps the points saved in your algorithms one by one after every round while monitoring runs. It reads no screen content and does nothing else.</string>
+    <string name="auto_click_service_label">Coefficient Monitor: auto-clicker</string>
+    <string name="auto_click_service_off">Off — clicks are not performed</string>
+    <string name="auto_click_service_on">On</string>
     <string name="banner_no_algorithms">Add at least one algorithm to start.</string>
     <string name="banner_not_calibrated">Calibrate the first tile to the right of “?” before starting.</string>
     <string name="bulk_add_count">How many (1–%1$d)</string>
@@ -164,7 +173,7 @@
     <string name="field_enabled">Enabled</string>
     <string name="field_enabled_hint">Disabled algorithms are skipped by the sequence.</string>
     <string name="field_name">Name</string>
-    <string name="field_step_delay">Time until next point (ms)</string>
+    <string name="field_step_delay">Time until next click (ms)</string>
     <string name="field_step_text">Label (optional)</string>
     <string name="fine_tune">Fine-tune (2 px per tap)</string>
     <string name="first_round_initialize">Only use it as the starting point (recommended)</string>
@@ -176,7 +185,7 @@
     <string name="floating_panel_hint">Small movable panel over the game with the active algorithm and controls. Keep it away from the tile row.</string>
     <string name="frames_value">Frames: %1$d</string>
     <string name="global_delay">Global delay</string>
-    <string name="global_delay_hint">Default delay shown for algorithm steps that have no own delay.</string>
+    <string name="global_delay_hint">Default time until the next click for steps that have no own time.</string>
     <string name="height_minus">Height −</string>
     <string name="height_plus">Height +</string>
     <string name="import_text">Found %1$d valid algorithms. Append them to the end, or replace the whole list?</string>
@@ -252,18 +261,18 @@
     <string name="ocr_transitioning">tile is changing</string>
     <string name="ocr_waiting">waiting for screen</string>
     <string name="of_total">of %1$d</string>
+    <string name="overlay_clicks">Auto-click: step %1$d of %2$d · next in %3$d ms</string>
+    <string name="overlay_clicks_button">Run clicks</string>
     <string name="overlay_delay">Delay: %1$d ms</string>
     <string name="overlay_drag_hint">Drag to move, tap to collapse</string>
-    <string name="overlay_guide">Point %1$d of %2$d · next in %3$d ms</string>
     <string name="overlay_last_coefficient">Last: %1$s</string>
     <string name="overlay_open_app">Open</string>
-    <string name="overlay_steps">Steps</string>
     <string name="permission_granted">Granted</string>
     <string name="permission_not_needed">Not needed</string>
     <string name="point_on_reading_band">This point is on the coefficient row being read. Choose another place.</string>
-    <string name="point_picker_hint">Tap where this step should point. Drag to scroll, use zoom for precision. The red area is the coefficient row being read and cannot be used.</string>
+    <string name="point_picker_hint">Tap where this step should click. Drag to scroll, use zoom for precision. The red area is the coefficient row being read and cannot be used.</string>
     <string name="point_picker_no_image">No screenshot yet. Take one in Calibration first — the same screenshot is used to pick points.</string>
-    <string name="point_picker_title">Step %1$d: pick a point</string>
+    <string name="point_picker_title">Step %1$d: pick the click point</string>
     <string name="preset_settings_only">Settings only</string>
     <string name="preset_with_algorithms">Settings + algorithms</string>
     <string name="presets_empty_text">Save the current threshold, detection settings, calibration and (optionally) algorithms as a preset.</string>
@@ -305,7 +314,7 @@
     <string name="settings_calibration">Calibration</string>
     <string name="settings_delays">Delays</string>
     <string name="settings_detection">Detection</string>
-    <string name="settings_permissions">Panel, notifications &amp; logging</string>
+    <string name="settings_permissions">Panel, auto-clicker, notifications &amp; logging</string>
     <string name="settings_recovery">Reset &amp; recovery</string>
     <string name="snapshot_failed">No frame was available. Try again.</string>
     <string name="snapshot_pending">Switch to the game now — capturing in %1$d s</string>
@@ -316,13 +325,11 @@
     <string name="status_monitoring">Monitoring</string>
     <string name="status_paused">Paused</string>
     <string name="status_stopped">Stopped</string>
-    <string name="step_guide">Step guide on screen</string>
-    <string name="step_guide_hint">After every round the active algorithm\'s points are shown one by one over the game, each for its step time. You tap yourself — the app never taps.</string>
-    <string name="step_no_point">No point (note only)</string>
+    <string name="step_no_point">No click (pause only)</string>
     <string name="step_number">Step %1$d</string>
-    <string name="step_point_value">Point: %1$s%% · %2$s%%</string>
+    <string name="step_point_value">Click: %1$s%% · %2$s%%</string>
     <string name="steps_count">Steps: %1$d</string>
-    <string name="steps_hint">Each step is a point on the screen and the time until the next point (default %1$d ms). When this algorithm becomes active, its points are shown one by one over the game; you tap yourself.</string>
+    <string name="steps_hint">Each step is a click on a point of the screen and the time until the next click (default %1$d ms). When this algorithm becomes active, its clicks are performed one by one. A step without a point is a pause.</string>
     <string name="steps_title">Steps</string>
     <string name="summary_move">Algorithm %1$d → Algorithm %2$d</string>
     <string name="summary_remains">Algorithm %1$d remains active</string>
@@ -339,6 +346,7 @@
     <string name="transition_none">No position change</string>
     <string name="transition_reset">Reset to Algorithm 1</string>
     <string name="version">Version</string>
+    <string name="warning_auto_click_off">Auto-clicker is off: turn on “Coefficient Monitor: auto-clicker” in Accessibility settings.</string>
     <string name="warning_gap">Possible missed rounds before the last one. Check the game history and adjust the active algorithm if needed.</string>
     <string name="warning_last_algorithm">This is the last configured algorithm. Add another algorithm to continue — a low coefficient will not wrap to Algorithm 1.</string>
     <string name="width_minus">Width −</string>

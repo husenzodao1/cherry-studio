@@ -37,6 +37,21 @@
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
 
+        <!-- Auto-clicker taps. Android only lets an app tap on other apps through an accessibility
+             service, which the user turns on in system settings; only the system can bind to it. -->
+        <service
+            android:name=".monitor.AutoClickService"
+            android:exported="true"
+            android:label="@string/auto_click_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/auto_click_service" />
+        </service>
+
         <!-- Persists the per-app language on Android 12 and lower. -->
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

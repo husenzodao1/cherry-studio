@@ -129,7 +129,7 @@ class AlgorithmEditorViewModel(private val container: AppContainer, private val 
         mutableState.update { it.copy(canvas = canvas, canvasLoaded = true) }
     }
 
-    /** "+ Step: pick a point on the screen" — adds a step and opens the point picker for it. */
+    /** "+ Click: pick a point on the screen" — adds a step and opens the point picker for it. */
     fun addPointStep() = mutableState.update {
         val key = nextKey++
         it.copy(steps = it.steps + StepDraft(key, "", ""), pickingKey = key, problem = null)
@@ -195,7 +195,7 @@ class AlgorithmEditorViewModel(private val container: AppContainer, private val 
                 return
             }
             AlgorithmStep(draft.text.trim(), delay, draft.point)
-        }.filter { it.text.isNotEmpty() || it.point != null }
+        }.filter { it.text.isNotEmpty() || it.point != null || it.delayMs != null }
         val definition = AlgorithmDefinition(current.name.trim(), current.description.trim(), current.enabled, steps)
         val problem = when {
             definition.name.isEmpty() -> EditorProblem.NAME_EMPTY

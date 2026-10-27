@@ -115,6 +115,9 @@ fun rememberCaptureStarter(): (MonitoringService.Mode, Long) -> Unit {
 fun overlaySettingsIntent(context: Context): Intent =
     Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
 
+/** System Accessibility settings, where the user turns the auto-clicker service on. */
+fun accessibilitySettingsIntent(): Intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+
 fun appNotificationSettingsIntent(context: Context): Intent =
     Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
         .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)

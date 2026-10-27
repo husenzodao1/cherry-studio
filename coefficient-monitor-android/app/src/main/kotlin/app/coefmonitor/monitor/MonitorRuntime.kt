@@ -22,8 +22,8 @@ sealed interface SnapshotState {
     data object Failed : SnapshotState
 }
 
-/** Which step point the on-screen guide is showing right now. */
-data class GuideProgress(
+/** Which step of the active algorithm the auto-clicker is running right now. */
+data class ClickProgress(
     val algorithmNumber: Int,
     val stepNumber: Int,
     val position: Int,
@@ -45,7 +45,7 @@ data class RuntimeState(
     val error: MonitorError? = null,
     val lastContinuity: Continuity? = null,
     val snapshot: SnapshotState = SnapshotState.Idle,
-    val guide: GuideProgress? = null,
+    val clicks: ClickProgress? = null,
 )
 
 class MonitorRuntime {

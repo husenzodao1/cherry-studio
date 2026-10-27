@@ -103,7 +103,7 @@ object ObservationRegionManager {
 
     /**
      * The part of the screen the detector reads: the observed tile plus the neighbour, with a small
-     * margin. Anything drawn there (e.g. a step marker) would disturb round detection.
+     * margin. Anything that covers it (e.g. a popup opened by a tap there) would disturb round detection.
      */
     fun readingBand(calibration: ObservationCalibration, margin: Float = 0.01f): NormalizedRect {
         val tile = calibration.tile

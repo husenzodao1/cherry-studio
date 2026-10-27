@@ -68,6 +68,8 @@ import app.coefmonitor.core.DetectorConfig
 import app.coefmonitor.core.FirstRoundPolicy
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.ThemeMode
+import app.coefmonitor.monitor.AutoClickService
+import app.coefmonitor.ui.accessibilitySettingsIntent
 import app.coefmonitor.ui.appNotificationSettingsIntent
 import app.coefmonitor.ui.components.ConfirmDialog
 import app.coefmonitor.ui.components.InfoRow
@@ -411,17 +413,35 @@ private fun PermissionsSection(settings: AppSettings, viewModel: SettingsViewMod
             checked = settings.overlayEnabled,
             onChange = { enabled -> viewModel.update { it.copy(overlayEnabled = enabled) } },
         )
-        if ((settings.overlayEnabled || settings.stepGuideEnabled) && !overlayGranted) {
+        if (settings.overlayEnabled && !overlayGranted) {
             OutlinedButton(onClick = { context.startActivity(overlaySettingsIntent(context)) }) {
                 Text(stringResource(R.string.action_allow_overlay))
             }
         }
+        HorizontalDivider()
         SwitchRow(
-            title = stringResource(R.string.step_guide),
-            hint = stringResource(R.string.step_guide_hint),
-            checked = settings.stepGuideEnabled,
-            onChange = { enabled -> viewModel.update { it.copy(stepGuideEnabled = enabled) } },
+            title = stringResource(R.string.auto_click),
+            hint = stringResource(R.string.auto_click_hint),
+            checked = settings.autoClickEnabled,
+            onChange = { enabled -> viewModel.update { it.copy(autoClickEnabled = enabled) } },
         )
+        if (settings.autoClickEnabled) {
+            val clickerConnected by AutoClickService.connected.collectAsStateWithLifecycle()
+            InfoRow(
+                stringResource(R.string.auto_click_service),
+                stringResource(if (clickerConnected) R.string.auto_click_service_on else R.string.auto_click_service_off),
+            )
+            if (!clickerConnected) {
+                OutlinedButton(onClick = { context.startActivity(accessibilitySettingsIntent()) }) {
+                    Text(stringResource(R.string.action_enable_auto_click))
+                }
+                Text(
+                    stringResource(R.string.auto_click_restricted_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
         HorizontalDivider()
         SwitchRow(
             title = stringResource(R.string.round_notifications),
@@ -466,7 +486,7 @@ private fun RecoverySection(onConfirm: (ConfirmAction) -> Unit) {
 private fun AboutSection() {
     SectionCard(title = stringResource(R.string.settings_about)) {
         InfoRow(stringResource(R.string.version), BuildConfig.VERSION_NAME)
-        Text(stringResource(R.string.about_monitoring_only), style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(R.string.about_app), style = MaterialTheme.typography.bodySmall)
         Text(
             stringResource(R.string.about_independent_rounds),
             style = MaterialTheme.typography.bodySmall,

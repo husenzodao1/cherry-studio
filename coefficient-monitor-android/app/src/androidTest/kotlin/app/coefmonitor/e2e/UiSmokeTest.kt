@@ -91,18 +91,18 @@ class UiSmokeTest {
         compose.onNodeWithText("Algorithm 1").performClick()
         waitText("Edit algorithm")
         compose.onAllNodes(hasSetTextAction())[1].performTextInput("Plan for low rounds")
-        compose.onNodeWithText("+ Note step (no point)").performClick()
-        compose.onAllNodes(hasSetTextAction())[2].performTextInput("Check the history row")
+        compose.onNodeWithText("+ Pause (no click)").performClick()
+        compose.onAllNodes(hasSetTextAction())[2].performTextInput("Wait for the bet button")
 
-        // Step 2: a point picked on the screenshot.
-        compose.onNodeWithText("+ Step: pick a point on the screen").performClick()
-        waitText("Step 2: pick a point")
+        // Step 2: a click point picked on the screenshot.
+        compose.onNodeWithText("+ Click: pick a point on the screen").performClick()
+        waitText("Step 2: pick the click point")
         compose.onNodeWithContentDescription("Screenshot used for calibration").performTouchInput {
             click(Offset(width * 0.5f, height * 0.15f))
         }
         shot("ui_03a_point_picker")
         compose.onNodeWithText("Use this point").performClick()
-        waitText("Point: ", substring = true)
+        waitText("Click: ", substring = true)
         shot("ui_03_algorithm_editor")
         compose.onNodeWithText("Save").performClick()
         waitText("120 in sequence · 120 total")
@@ -131,6 +131,10 @@ class UiSmokeTest {
         compose.onAllNodes(hasText("Apply") and hasClickAction())[0].performClick()
         waitText("≤ 2.50x advances · > 2.50x resets to Algorithm 1")
         shot("ui_07_settings")
+
+        // The auto-clicker is on in the app, but its accessibility service is not: the way to turn it on is offered.
+        scrollTo("Turn on in Accessibility settings")
+        shot("ui_07b_settings_auto_clicker")
 
         scrollTo("Calibrate")
         compose.onNode(hasText("Calibrate") and hasClickAction()).performClick()

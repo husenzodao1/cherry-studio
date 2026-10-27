@@ -48,14 +48,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.coefmonitor.R
+import app.coefmonitor.core.ClickPlan
 import app.coefmonitor.core.NormalizedPoint
-import app.coefmonitor.core.StepGuide
 import kotlin.math.roundToInt
 
 private val MARKER = Color(0xFFE5484D)
 
 /**
- * Full-screen picker: tap on the calibration screenshot where this step should point.
+ * Full-screen picker: tap on the calibration screenshot where this step should click.
  * Drag scrolls, the slider zooms. The coefficient row being read (red) cannot be chosen.
  */
 @Composable
@@ -114,7 +114,7 @@ fun PointPickerDialog(
                             modifier = Modifier.weight(1f).fillMaxWidth(),
                         )
                         val point = selected
-                        val allowed = point != null && StepGuide.isAllowed(point, canvas.readingBand)
+                        val allowed = point != null && ClickPlan.isAllowed(point, canvas.readingBand)
                         if (point != null && !allowed) {
                             Text(
                                 stringResource(R.string.point_on_reading_band),

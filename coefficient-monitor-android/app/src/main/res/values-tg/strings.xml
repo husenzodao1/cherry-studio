@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="about_app">Барнома экранро мехонад ва пайдарпайии алгоритмҳои шуморо пайгирӣ мекунад. Агар автокликер фаъол бошад, пас аз ҳар давр нуқтаҳои дар алгоритми фаъол сабтшударо як ба як пахш мекунад.</string>
     <string name="about_independent_rounds">Натиҷаи ҳар давр мустақил аст. Мавқеъ дар пайдарпайӣ танҳо натиҷаҳои гузаштаро инъикос мекунад ва коэффитсиенти навбатиро пешгӯӣ намекунад.</string>
-    <string name="about_monitoring_only">Танҳо назорат: барнома экранро мехонад ва пайдарпайии алгоритмҳои шуморо пайгирӣ мекунад. Он ҳеҷ гоҳ пахш намекунад, гарав намегузорад ва дар барномаҳои дигар амал намекунад.</string>
     <string name="action_add">Илова</string>
     <string name="action_add_algorithm">Илова кардани алгоритм</string>
     <string name="action_add_many">Илова кардани якчанд</string>
-    <string name="action_add_note_step">+ Қадами қайд (бе нуқта)</string>
-    <string name="action_add_point_step">+ Қадам: нуқтаро аз экран интихоб кунед</string>
+    <string name="action_add_note_step">+ Таваққуф (бе клик)</string>
+    <string name="action_add_point_step">+ Клик: нуқтаро аз экран интихоб кунед</string>
     <string name="action_allow">Иҷозат додан</string>
     <string name="action_allow_notifications">Иҷозати огоҳиномаҳо</string>
     <string name="action_allow_overlay">Иҷозати намоиш болои барномаҳои дигар</string>
@@ -30,6 +30,7 @@
     <string name="action_edit">Таҳрир</string>
     <string name="action_edit_calibration">Таҳрири калибровка</string>
     <string name="action_enable">Дохил кардан</string>
+    <string name="action_enable_auto_click">Фаъол кардан дар Accessibility («Специальные возможности»)</string>
     <string name="action_export">Экспорт</string>
     <string name="action_export_csv">Экспорти ҳодисаҳо (CSV)</string>
     <string name="action_export_diagnostics">Экспорти ташхис (CSV)</string>
@@ -77,6 +78,14 @@
     <string name="algorithms_empty_text">Алгоритмҳоро якта-якта созед ё якбора чандтоашро илова кунед. Маҳдудияти шумора нест.</string>
     <string name="algorithms_empty_title">Ҳоло алгоритм нест</string>
     <string name="app_name">Назорати коэффитсиентҳо</string>
+    <string name="auto_click">Автокликер</string>
+    <string name="auto_click_hint">Пас аз ҳар давр кликҳои алгоритми фаъол дар нуқтаҳои сабтшуда як ба як, бо вақти қадамҳо байни онҳо, иҷро мешаванд. Хизматрасонии Accessibility (дар поён) лозим аст. Клик ба он чизе мерасад, ки ҳамон лаҳза дар экран аст; «Таваққуф» ё «Қатъ» кликҳоро бекор мекунад.</string>
+    <string name="auto_click_restricted_hint">Android 13 ва навтар: агар калид дар он ҷо хира (ғайрифаъол) бошад, аввал «О приложении» → ⋮ -ро кушода, танзимоти маҳдудро иҷозат диҳед (Allow restricted settings), баъд онро фаъол кунед.</string>
+    <string name="auto_click_service">Хизматрасонии Accessibility</string>
+    <string name="auto_click_service_description">Нуқтаҳои дар алгоритмҳои шумо сабтшударо пас аз ҳар давр, вақте назорат кор мекунад, як ба як пахш мекунад. Мундариҷаи экранро намехонад ва дигар коре намекунад.</string>
+    <string name="auto_click_service_label">Назорати коэффитсиентҳо: автокликер</string>
+    <string name="auto_click_service_off">Ғайрифаъол — кликҳо иҷро намешаванд</string>
+    <string name="auto_click_service_on">Фаъол</string>
     <string name="banner_no_algorithms">Барои оғоз ақаллан як алгоритм илова кунед.</string>
     <string name="banner_not_calibrated">Пеш аз оғоз аввалин катаки рости «?»-ро калибровка кунед.</string>
     <string name="bulk_add_count">Чандто (1–%1$d)</string>
@@ -164,7 +173,7 @@
     <string name="field_enabled">Дохил</string>
     <string name="field_enabled_hint">Алгоритмҳои хомӯш дар пайдарпайӣ гузаронида мешаванд.</string>
     <string name="field_name">Ном</string>
-    <string name="field_step_delay">Вақт то нуқтаи навбатӣ (мс)</string>
+    <string name="field_step_delay">Вақт то клики навбатӣ (мс)</string>
     <string name="field_step_text">Номгузорӣ (ихтиёрӣ)</string>
     <string name="fine_tune">Танзими дақиқ (2 пиксел барои ҳар пахш)</string>
     <string name="first_round_initialize">Танҳо ҳамчун нуқтаи оғоз (тавсия мешавад)</string>
@@ -176,7 +185,7 @@
     <string name="floating_panel_hint">Панели хурди ҷойивазшаванда болои бозӣ бо алгоритми фаъол ва тугмаҳо. Онро аз қатори катакҳо дур нигоҳ доред.</string>
     <string name="frames_value">Кадрҳо: %1$d</string>
     <string name="global_delay">Таъхири умумӣ</string>
-    <string name="global_delay_hint">Таъхири пешфарз барои қадамҳое, ки таъхири худ надоранд.</string>
+    <string name="global_delay_hint">Вақти пешфарз то клики навбатӣ барои қадамҳое, ки вақти худ надоранд.</string>
     <string name="height_minus">Баландӣ −</string>
     <string name="height_plus">Баландӣ +</string>
     <string name="import_text">Алгоритмҳои дуруст ёфт шуд: %1$d. Онҳоро ба охир илова кунем ё тамоми рӯйхатро иваз кунем?</string>
@@ -249,18 +258,18 @@
     <string name="ocr_transitioning">катак тағйир меёбад</string>
     <string name="ocr_waiting">интизори экран</string>
     <string name="of_total">аз %1$d</string>
+    <string name="overlay_clicks">Автоклик: қадами %1$d аз %2$d · навбатӣ баъд аз %3$d мс</string>
+    <string name="overlay_clicks_button">Кликҳо</string>
     <string name="overlay_delay">Таъхир: %1$d мс</string>
     <string name="overlay_drag_hint">Барои ҷойиваз кашед, барои печондан пахш кунед</string>
-    <string name="overlay_guide">Нуқтаи %1$d аз %2$d · навбатӣ баъд аз %3$d мс</string>
     <string name="overlay_last_coefficient">Охирин: %1$s</string>
     <string name="overlay_open_app">Кушодан</string>
-    <string name="overlay_steps">Қадамҳо</string>
     <string name="permission_granted">Иҷозат дода шуд</string>
     <string name="permission_not_needed">Лозим нест</string>
     <string name="point_on_reading_band">Ин нуқта дар қатори хондашавандаи коэффитсиентҳо аст. Ҷои дигарро интихоб кунед.</string>
-    <string name="point_picker_hint">Ба ҷое пахш кунед, ки ин қадам бояд нишон диҳад. Барои варақзанӣ кашед, барои дақиқӣ миқёсро истифода баред. Минтақаи сурх — қатори хондашавандаи коэффитсиентҳо, онро интихоб кардан мумкин нест.</string>
+    <string name="point_picker_hint">Ба ҷое пахш кунед, ки ин қадам бояд клик кунад. Барои варақзанӣ кашед, барои дақиқӣ миқёсро истифода баред. Минтақаи сурх — қатори хондашавандаи коэффитсиентҳо, онро интихоб кардан мумкин нест.</string>
     <string name="point_picker_no_image">Ҳоло скриншот нест. Аввал онро дар «Калибровка» гиред — ҳамон скриншот барои интихоби нуқтаҳо истифода мешавад.</string>
-    <string name="point_picker_title">Қадами %1$d: нуқтаро интихоб кунед</string>
+    <string name="point_picker_title">Қадами %1$d: нуқтаи кликро интихоб кунед</string>
     <string name="preset_settings_only">Танҳо танзимот</string>
     <string name="preset_with_algorithms">Танзимот + алгоритмҳо</string>
     <string name="presets_empty_text">Ҳади ҷорӣ, танзимоти шинохт, калибровка ва (ихтиёрӣ) алгоритмҳоро ҳамчун пресет нигоҳ доред.</string>
@@ -302,7 +311,7 @@
     <string name="settings_calibration">Калибровка</string>
     <string name="settings_delays">Таъхирҳо</string>
     <string name="settings_detection">Шинохт</string>
-    <string name="settings_permissions">Панел, огоҳиномаҳо ва сабт</string>
+    <string name="settings_permissions">Панел, автокликер, огоҳиномаҳо ва сабт</string>
     <string name="settings_recovery">Бозгашт ва барқарорсозӣ</string>
     <string name="snapshot_failed">Кадр дастрас набуд. Боз кӯшиш кунед.</string>
     <string name="snapshot_pending">Ҳозир ба бозӣ гузаред — акс пас аз %1$d с</string>
@@ -313,13 +322,11 @@
     <string name="status_monitoring">Назорат меравад</string>
     <string name="status_paused">Таваққуф</string>
     <string name="status_stopped">Қатъ шуд</string>
-    <string name="step_guide">Роҳнамои қадамҳо дар экран</string>
-    <string name="step_guide_hint">Пас аз ҳар давр нуқтаҳои алгоритми фаъол як ба як болои бозӣ, ҳар кадом ба вақти қадами худ, нишон дода мешаванд. Пахшро худатон мекунед — барнома ҳеҷ гоҳ пахш намекунад.</string>
-    <string name="step_no_point">Бе нуқта (танҳо қайд)</string>
+    <string name="step_no_point">Бе клик (танҳо таваққуф)</string>
     <string name="step_number">Қадами %1$d</string>
-    <string name="step_point_value">Нуқта: %1$s%% · %2$s%%</string>
+    <string name="step_point_value">Клик: %1$s%% · %2$s%%</string>
     <string name="steps_count">Қадамҳо: %1$d</string>
-    <string name="steps_hint">Ҳар қадам — нуқта дар экран ва вақт то нуқтаи навбатӣ (пешфарз %1$d мс). Вақте ин алгоритм фаъол мешавад, нуқтаҳояш як ба як болои бозӣ нишон дода мешаванд; пахшро худатон мекунед.</string>
+    <string name="steps_hint">Ҳар қадам — клик ба нуқтаи экран ва вақт то клики навбатӣ (пешфарз %1$d мс). Вақте ин алгоритм фаъол мешавад, кликҳояш як ба як иҷро мешаванд. Қадами бе нуқта — таваққуф аст.</string>
     <string name="steps_title">Қадамҳо</string>
     <string name="summary_move">Алгоритми %1$d → Алгоритми %2$d</string>
     <string name="summary_remains">Алгоритми %1$d фаъол мемонад</string>
@@ -336,6 +343,7 @@
     <string name="transition_none">Мавқеъ тағйир наёфт</string>
     <string name="transition_reset">Бозгашт ба Алгоритми 1</string>
     <string name="version">Версия</string>
+    <string name="warning_auto_click_off">Автокликер ғайрифаъол аст: «Назорати коэффитсиентҳо: автокликер»-ро дар Accessibility («Специальные возможности») фаъол кунед.</string>
     <string name="warning_gap">Пеш аз даври охирин шояд даврҳо гум шуданд. Таърихи бозиро санҷед ва дар ҳолати зарурӣ алгоритми фаъолро ислоҳ кунед.</string>
     <string name="warning_last_algorithm">Ин алгоритми охирини танзимшуда аст. Барои идома боз як алгоритм илова кунед — коэффитсиенти паст ба Алгоритми 1 барнамегардонад.</string>
     <string name="width_minus">Бар −</string>
