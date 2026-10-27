@@ -62,7 +62,7 @@ jobs:
   emulator:
     name: emulator-api${{ matrix.api-level }}
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 100
     permissions:
       contents: write
     strategy:
@@ -100,6 +100,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           ram-size: 4096M
+          cores: 3
           disable-animations: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           working-directory: coefficient-monitor-android

@@ -5,6 +5,8 @@ import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -268,6 +270,7 @@ private fun StopButton(onStop: () -> Unit, modifier: Modifier) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ActiveAlgorithmCard(state: DashboardState, onReset: () -> Unit, onChoose: () -> Unit, onManage: () -> Unit) {
     val semantic = LocalSemanticColors.current
@@ -321,7 +324,7 @@ private fun ActiveAlgorithmCard(state: DashboardState, onReset: () -> Unit, onCh
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = onReset, enabled = state.total > 0) {
                 Icon(Icons.Filled.RestartAlt, contentDescription = null)
                 Spacer(Modifier.width(6.dp))

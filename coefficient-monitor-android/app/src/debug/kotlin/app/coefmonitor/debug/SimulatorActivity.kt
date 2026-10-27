@@ -15,6 +15,7 @@ import android.graphics.drawable.GradientDrawable
 import android.hardware.display.DisplayManager
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.Display
@@ -23,7 +24,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
-import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
@@ -55,7 +55,7 @@ class SimulatorActivity : ComponentActivity() {
         private set
 
     private var captureCallback: ((Int, Intent?) -> Unit)? = null
-    private var ambient: ValueAnimator? = null
+    private var ambientTick: Runnable? = null
 
     private val consent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         captureCallback?.invoke(result.resultCode, result.data)
@@ -98,7 +98,7 @@ class SimulatorActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        ambient?.cancel()
+        ambientTick?.let { board.rootView.removeCallbacks(it) }
         super.onDestroy()
     }
 
@@ -150,25 +150,31 @@ class SimulatorActivity : ComponentActivity() {
         return metrics.widthPixels to metrics.heightPixels
     }
 
+    /**
+     * Something keeps moving elsewhere on screen, like in a real game. Updated ~8 times per second
+     * rather than every frame so a software-rendered emulator stays responsive.
+     */
     private fun startAmbientAnimation(root: View, plane: View, multiplier: TextView) {
-        ambient = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 2_500
-            repeatCount = ValueAnimator.INFINITE
-            repeatMode = ValueAnimator.REVERSE
-            interpolator = LinearInterpolator()
-            addUpdateListener {
-                val t = it.animatedValue as Float
+        val startedAt = SystemClock.uptimeMillis()
+        val tick = object : Runnable {
+            override fun run() {
+                val cycle = ((SystemClock.uptimeMillis() - startedAt) % AMBIENT_PERIOD_MS) / AMBIENT_PERIOD_MS.toFloat()
+                val t = if (cycle < 0.5f) cycle * 2f else (1f - cycle) * 2f
                 plane.translationX = t * (root.width - plane.width)
                 plane.translationY = root.height * 0.16f + sin(t * PI * 2).toFloat() * root.height * 0.05f
                 multiplier.text = String.format(Locale.US, "%.2fx", 1f + t * 4f)
+                root.postDelayed(this, AMBIENT_TICK_MS)
             }
-            start()
         }
+        ambientTick = tick
+        root.post(tick)
     }
 
     companion object {
         const val BACKGROUND = 0xFF151027.toInt()
         private const val PLANE = 0xFFE5484D.toInt()
+        private const val AMBIENT_PERIOD_MS = 5_000L
+        private const val AMBIENT_TICK_MS = 120L
 
         @Volatile
         var current: WeakReference<SimulatorActivity>? = null

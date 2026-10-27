@@ -247,7 +247,11 @@ class MonitoringService : LifecycleService() {
             settings = container.settings.current()
             if (settings.overlayEnabled) showOverlay()
             val engine = ocr ?: return@launch
-            val pipeline = FramePipeline(engine)
+            val pipeline = FramePipeline(
+                ocr = engine,
+                onOcrStarted = { runtime.update { it.copy(ocrStatus = OcrStatus.READING) } },
+                onOcrFinished = ::reportOcrDuration,
+            )
             var active = settings
             var detector = newDetector(active, forceInitializeOnly)
             withContext(Dispatchers.Default) {
@@ -338,6 +342,17 @@ class MonitoringService : LifecycleService() {
                 applyRound(result.event, s)
             }
         }
+    }
+
+    private var lastSlowOcrReportMs = 0L
+
+    /** OCR is normally tens of milliseconds; report (at most once a minute) when the device is much slower. */
+    private fun reportOcrDuration(durationMs: Long) {
+        if (durationMs < SLOW_OCR_MS) return
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastSlowOcrReportMs < SLOW_OCR_REPORT_INTERVAL_MS) return
+        lastSlowOcrReportMs = now
+        log(DiagnosticLevel.WARNING, "OCR", "OCR took $durationMs ms; rounds are detected later than usual on this device")
     }
 
     private fun markReady(value: Coefficient) {
@@ -552,6 +567,8 @@ class MonitoringService : LifecycleService() {
 
         const val DEFAULT_SNAPSHOT_DELAY_MS = 5_000L
         private const val MIN_IDLE_MS = 30L
+        private const val SLOW_OCR_MS = 2_000L
+        private const val SLOW_OCR_REPORT_INTERVAL_MS = 60_000L
         private const val OVERLAY_LOG_LINES = 3
 
         /** Starts a capture session with the result of the system screen-capture consent dialog. */

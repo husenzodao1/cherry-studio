@@ -1,6 +1,7 @@
 package app.coefmonitor.monitor
 
 import android.graphics.Bitmap
+import android.os.SystemClock
 import app.coefmonitor.core.CalibrationProblem
 import app.coefmonitor.core.FrameSample
 import app.coefmonitor.core.ImageSignature
@@ -21,7 +22,13 @@ sealed interface PipelineStep {
  * runs OCR only when needed. OCR is skipped while the tile is moving and reused while the picture
  * is pixel-identical, so a static screen costs almost nothing.
  */
-class FramePipeline(private val ocr: CoefficientOcrEngine) {
+class FramePipeline(
+    private val ocr: CoefficientOcrEngine,
+    /** Called before an OCR call starts (OCR can take noticeable time on slow devices). */
+    private val onOcrStarted: () -> Unit = {},
+    /** Called with the duration of each completed OCR call in milliseconds. */
+    private val onOcrFinished: (Long) -> Unit = {},
+) {
 
     private class Crop(val pixels: IntArray, val rect: PixelRect)
     private class CachedReading(val signature: ImageSignature, val reading: OcrReading)
@@ -93,10 +100,15 @@ class FramePipeline(private val ocr: CoefficientOcrEngine) {
         val previous = lastSample!!
         val crops = lastCrops
         if (previous.reading != null || crops == null) return previous.copy(timestampMs = nowMs)
+        val reading = readCached(crops.primary, previous.primary, isNeighbor = false)
         val filled = previous.copy(
             timestampMs = nowMs,
-            reading = readCached(crops.primary, previous.primary, isNeighbor = false),
-            neighborReading = crops.neighbor?.let { crop -> previous.neighbor?.let { readCached(crop, it, isNeighbor = true) } },
+            reading = reading,
+            neighborReading = if (reading !is OcrReading.Valid) {
+                null
+            } else {
+                crops.neighbor?.let { crop -> previous.neighbor?.let { readCached(crop, it, isNeighbor = true) } }
+            },
         )
         lastSample = filled
         return filled
@@ -108,7 +120,8 @@ class FramePipeline(private val ocr: CoefficientOcrEngine) {
         val previous = lastSample?.primary
         val moving = previous != null && previous.similarity(primarySignature) < stableSimilarity
         val reading = if (moving) null else readCached(read.primary, primarySignature, isNeighbor = false)
-        val neighborReading = if (moving || read.neighbor == null || neighborSignature == null) {
+        // The neighbour only matters next to a valid reading; skipping it otherwise halves OCR work.
+        val neighborReading = if (reading !is OcrReading.Valid || read.neighbor == null || neighborSignature == null) {
             null
         } else {
             readCached(read.neighbor, neighborSignature, isNeighbor = true)
@@ -120,11 +133,12 @@ class FramePipeline(private val ocr: CoefficientOcrEngine) {
         val cache = if (isNeighbor) neighborCache else primaryCache
         if (cache != null && cache.signature.similarity(signature) >= REUSE_SIMILARITY) return cache.reading
         val bitmap = Bitmap.createBitmap(crop.pixels, crop.rect.width, crop.rect.height, Bitmap.Config.ARGB_8888)
-        val reading = try {
-            ocr.read(bitmap)
-        } finally {
-            bitmap.recycle()
-        }
+        onOcrStarted()
+        val startedAt = SystemClock.elapsedRealtime()
+        val reading = ocr.read(bitmap)
+        onOcrFinished(SystemClock.elapsedRealtime() - startedAt)
+        // Only recycle after success: if the coroutine was cancelled, ML Kit may still be reading it.
+        bitmap.recycle()
         val fresh = CachedReading(signature, reading)
         if (isNeighbor) neighborCache = fresh else primaryCache = fresh
         return reading

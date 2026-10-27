@@ -97,7 +97,7 @@ object TestEnv {
     fun awaitStatus(vararg statuses: MonitorStatus, timeoutMs: Long = 30_000): RuntimeState =
         waitFor("status in ${statuses.toList()}", timeoutMs) { runtime().takeIf { it.status in statuses } }
 
-    fun awaitEventCount(expected: Int, timeoutMs: Long = 20_000) {
+    fun awaitEventCount(expected: Int, timeoutMs: Long = 60_000) {
         waitFor("event count $expected", timeoutMs) { eventCount().takeIf { it >= expected } }
         val actual = eventCount()
         if (actual != expected) fail("Expected $expected events but found $actual\n${failureContext()}")

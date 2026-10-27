@@ -99,9 +99,10 @@ class UiSmokeTest {
         // Presets: save the current configuration including algorithms.
         nav("Presets")
         waitText("No presets")
-        compose.onNode(hasText("Save preset") and hasClickAction()).performClick()
+        // Floating action buttons expose their label on a child node, so click the label itself.
+        compose.onNodeWithText("Save preset").performClick()
         compose.onNode(hasSetTextAction()).performTextInput("Evening")
-        compose.onNode(hasText("Save") and hasClickAction()).performClick()
+        compose.onNodeWithText("Save").performClick()
         waitText("Evening")
         shot("ui_06_presets")
 

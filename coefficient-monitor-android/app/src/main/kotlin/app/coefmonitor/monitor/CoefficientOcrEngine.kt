@@ -49,7 +49,8 @@ class CoefficientOcrEngine : Closeable {
         val elements = text.textBlocks.flatMap { it.lines }.flatMap { it.elements }
             .mapNotNull { element -> element.boundingBox?.let { element.text.trim() to it } }
         val coefficients = elements.filter { (value, _) -> CoefficientParser.parse(value) is OcrReading.Valid }.map { it.second }
-        val marks = elements.filter { (value, _) -> value == "?" }.map { it.second }
+        // "?" is sometimes read together with the pointer under it (e.g. "?^"), so allow one extra symbol.
+        val marks = elements.filter { (value, _) -> value.startsWith("?") && value.length <= 2 }.map { it.second }
         for (mark in marks.sortedBy { it.top }) {
             val next = coefficients
                 .filter { it.left > mark.right && it.centerY() in mark.top..mark.bottom }
