@@ -18,6 +18,7 @@ import app.coefmonitor.e2e.TestEnv.activeAlgorithm
 import app.coefmonitor.e2e.TestEnv.app
 import app.coefmonitor.e2e.TestEnv.container
 import app.coefmonitor.e2e.TestEnv.device
+import app.coefmonitor.e2e.TestEnv.failureContext
 import app.coefmonitor.e2e.TestEnv.log
 import app.coefmonitor.e2e.TestEnv.screenshot
 import app.coefmonitor.e2e.TestEnv.waitFor
@@ -31,6 +32,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.ByteArrayOutputStream
 import kotlin.math.abs
 
 /**
@@ -78,7 +80,14 @@ class FloatingModeTest {
         TestEnv.enableAutoClicker()
         runBlocking { container.settings.update { it.copy(overlayEnabled = true) } }
         FloatingPanelService.sync(app, enabled = true)
-        assertNotNull("floating panel not shown", device.wait(Until.findObject(panel().textContains("1 / 2")), 10_000))
+        // The tab labels are there as soon as the panel is; the title needs the first status update.
+        val shown = device.wait(Until.findObject(panel().text(app.getString(R.string.overlay_tab_status))), 10_000)
+        screenshot("floating_00_shown")
+        if (shown == null) logHierarchy()
+        assertNotNull("floating panel not shown\n${failureContext()}", shown)
+        val title = device.wait(Until.findObject(panel().textContains("1 / 2")), 5_000)
+        if (title == null) logHierarchy()
+        assertNotNull("panel does not show Algorithm 1 / 2\n${failureContext()}", title)
         assertEquals("monitoring must not be running", MonitorStatus.STOPPED, TestEnv.runtime().status)
         screenshot("floating_01_status")
 
@@ -115,6 +124,13 @@ class FloatingModeTest {
     }
 
     private fun panel() = By.pkg(TestEnv.PACKAGE)
+
+    /** What UiAutomator sees, for failures where the panel or its text is not found. */
+    private fun logHierarchy() {
+        val out = ByteArrayOutputStream()
+        device.dumpWindowHierarchy(out)
+        out.toString().lines().forEach { log("hierarchy: $it") }
+    }
 
     private fun button(label: Int): UiObject2 =
         device.wait(Until.findObject(panel().text(app.getString(label))), 5_000) ?: error("button \"${app.getString(label)}\" not found")
