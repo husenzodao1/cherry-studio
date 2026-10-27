@@ -37,7 +37,7 @@ data class OverlayState(
     val clickLine: String?,
     val clicksRunning: Boolean,
     val steps: List<PanelStep>,
-    /** Changes when the step list has to be rebuilt (another algorithm, steps added or removed). */
+    /** Changes when the step list has to be rebuilt (another algorithm, steps added, removed or renamed). */
     val stepsKey: String,
     val threshold: String,
     val globalDelay: String,
@@ -84,7 +84,7 @@ class OverlayController(
     private enum class Tab { STATUS, ALGORITHM, SETTINGS }
 
     private val windowManager = context.getSystemService(WindowManager::class.java)
-    private val handler = Handler(Looper.getMainLooper())
+    private val repeatHandler = Handler(Looper.getMainLooper())
     private var root: LinearLayout? = null
     private var params: WindowManager.LayoutParams? = null
     private var collapsed = false
@@ -152,7 +152,7 @@ class OverlayController(
     }
 
     fun hide() {
-        handler.removeCallbacksAndMessages(null)
+        repeatHandler.removeCallbacksAndMessages(null)
         root?.let { runCatching { windowManager.removeView(it) } }
         root = null
         params = null
@@ -454,7 +454,7 @@ class OverlayController(
         val repeat = object : Runnable {
             override fun run() {
                 onStep()
-                handler.postDelayed(this, REPEAT_INTERVAL_MS)
+                repeatHandler.postDelayed(this, REPEAT_INTERVAL_MS)
             }
         }
         setOnTouchListener { view, event ->
@@ -462,12 +462,12 @@ class OverlayController(
                 MotionEvent.ACTION_DOWN -> {
                     view.isPressed = true
                     onStep()
-                    handler.postDelayed(repeat, REPEAT_START_MS)
+                    repeatHandler.postDelayed(repeat, REPEAT_START_MS)
                     true
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     view.isPressed = false
-                    handler.removeCallbacks(repeat)
+                    repeatHandler.removeCallbacks(repeat)
                     if (event.actionMasked == MotionEvent.ACTION_UP) view.performClick()
                     true
                 }

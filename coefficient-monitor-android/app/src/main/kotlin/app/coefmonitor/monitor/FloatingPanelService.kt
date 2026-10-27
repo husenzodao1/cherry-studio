@@ -173,7 +173,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
                 clickLine = p.runtime.clicks?.let { str.getString(R.string.overlay_clicks, it.position, it.total, it.delayMs) },
                 clicksRunning = p.runtime.clicks != null,
                 steps = steps,
-                stepsKey = "${stored?.id}:${steps.size}",
+                stepsKey = "${stored?.id}:${steps.joinToString("|") { it.label }}",
                 threshold = p.settings.threshold.toString(),
                 globalDelay = str.getString(R.string.delay_ms, p.settings.globalDelayMs),
                 captureInterval = str.getString(R.string.delay_ms, p.settings.captureIntervalMs),
