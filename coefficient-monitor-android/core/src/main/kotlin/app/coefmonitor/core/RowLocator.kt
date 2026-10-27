@@ -85,6 +85,9 @@ object RowLocator {
     /** With a single coefficient, "?" must be within this many text heights. */
     private const val MAX_MARK_GAP_HEIGHTS = 12f
 
+    /** A followed row is still there, partly covered, while this many of its tiles are seen in their slots. */
+    private const val MIN_TILES_STILL_THERE = 2
+
     /** Shifts smaller than this share of a cell or pitch are jitter of the text boxes. */
     private const val SAME_PLACE_TOLERANCE = 0.35f
 
@@ -99,8 +102,8 @@ object RowLocator {
 
     /**
      * [near]: the row's last known cells. While the row is still at that height it is kept there:
-     * a newest tile that was not read this time, or a row partly covered by another window, does
-     * not move it, and the closest row wins over others.
+     * a newest tile that was not read this time, or a row partly covered by another window (two of
+     * its tiles still seen), does not move it, and the closest row wins over others.
      */
     fun locate(boxes: List<TextBox>, frameWidth: Int, frameHeight: Int, near: RowCells? = null): RowCells? {
         val tiles = boxes.filter { it.height > 0 && it.width > 0 && isTile(it.text) }
@@ -113,7 +116,7 @@ object RowLocator {
             when {
                 kept != null && !kept.hasMark && kept.newestX > near.newest.centerX - near.pitch * SAME_PLACE_TOLERANCE -> return near
                 kept != null -> return cellsFor(kept, frameWidth, frameHeight)
-                tiles.any { onRow(it, near) } -> return near
+                tiles.count { onRow(it, near) } >= MIN_TILES_STILL_THERE -> return near
             }
         }
         val best = candidates

@@ -121,9 +121,11 @@ class RowLocatorTest {
         val cells = RowLocator.locate(row("2.03x", "1.00x", "1.51x", "1.16x", withMark = false), width, height)!!
         val newestMissed = row("2.03x", "1.00x", "1.51x", "1.16x", withMark = false).drop(1)
         assertEquals(cells, RowLocator.locate(newestMissed, width, height, near = cells))
-        val covered = listOf(word("1.51x", 660, 101))
+        val covered = listOf(word("1.51x", 660, 101), word("1.16x", 840, 99))
         assertEquals(cells, RowLocator.locate(covered, width, height, near = cells))
-        assertNull(RowLocator.locate(listOf(word("1.51x", 390, 101)), width, height, near = cells))
+        // A single value at that height can be anything (e.g. a panel line): not enough to keep the row.
+        assertNull(RowLocator.locate(listOf(word("1.51x", 660, 101)), width, height, near = cells))
+        assertNull(RowLocator.locate(listOf(word("1.51x", 390, 101), word("1.16x", 570, 99)), width, height, near = cells))
     }
 
     @Test

@@ -74,6 +74,9 @@ class RowTracker(
     /** Where the strip showed the row once; it is followed there only if the next look agrees. */
     private var pendingMove: RowCells? = null
 
+    /** When the current tick started (elapsed realtime); with slow OCR a tick can take seconds. */
+    private var tickStartMs = 0L
+
     /** The row's cells as a share of the screen (where the auto-clicker must not tap), while it is followed. */
     fun rowBand(): NormalizedRect? {
         val tracked = cells ?: return null
@@ -90,6 +93,7 @@ class RowTracker(
     }
 
     suspend fun next(capturer: ScreenCapturer, stableSimilarity: Float, nowMs: Long): PipelineStep {
+        tickStartMs = SystemClock.elapsedRealtime()
         if (forgetRequested) {
             forgetRequested = false
             reset()
@@ -198,6 +202,7 @@ class RowTracker(
         val now = SystemClock.elapsedRealtime()
         if (!force && now - lastFullSearchMs < LOST_SEARCH_INTERVAL_MS) return null
         lastFullSearchMs = now
+        val takenMs = takenAt(nowMs)
         val bitmap = capturer.withLatestFrame { it.toBitmap() } ?: return null
         val words = timedOcr { ocr.readWords(bitmap) }
         val found = RowLocator.locate(words, bitmap.width, bitmap.height, near)
@@ -206,7 +211,7 @@ class RowTracker(
             return null
         }
         onRowFound(bitmap, found)
-        val sample = sampleAt(found, words, bitmap, nowMs)
+        val sample = sampleAt(found, words, bitmap, takenMs)
         bitmap.recycle()
         val anchored = near == null || found.movedFrom(near)
         cells = found
@@ -220,19 +225,26 @@ class RowTracker(
         cells = found
         stripCache = null
         pendingMove = null
+        val takenMs = takenAt(nowMs)
         val signatures = capturer.withLatestFrame { frame ->
             signature(frame.crop(found.newest), found.newest) to found.neighbor?.let { signature(frame.crop(it), it) }
         } ?: return null
         lastNewest = signatures.first
-        val sample = FrameSample(nowMs, signatures.first, signatures.second, found.readNewest(words), found.readNeighbor(words))
+        val sample = FrameSample(takenMs, signatures.first, signatures.second, found.readNewest(words), found.readNeighbor(words))
         return PipelineStep.Sample(sample, anchored = true, lost = false)
     }
 
-    private fun sampleAt(found: RowCells, words: List<TextBox>, bitmap: Bitmap, nowMs: Long): FrameSample {
+    private fun sampleAt(found: RowCells, words: List<TextBox>, bitmap: Bitmap, takenMs: Long): FrameSample {
         val newest = signature(bitmap, found.newest)
         lastNewest = newest
-        return FrameSample(nowMs, newest, found.neighbor?.let { signature(bitmap, it) }, found.readNewest(words), found.readNeighbor(words))
+        return FrameSample(takenMs, newest, found.neighbor?.let { signature(bitmap, it) }, found.readNewest(words), found.readNeighbor(words))
     }
+
+    /**
+     * The time of a picture taken now, on the clock of [next]'s nowMs. A picture taken after a
+     * slow OCR call is seconds newer than the tick: the detector must know how long it looked away.
+     */
+    private fun takenAt(nowMs: Long): Long = nowMs + (SystemClock.elapsedRealtime() - tickStartMs)
 
     private suspend fun timedOcr(block: suspend () -> List<TextBox>): List<TextBox> {
         onOcrStarted()
