@@ -38,6 +38,7 @@ object Labels {
         OcrStatus.PLACEHOLDER -> R.string.ocr_placeholder
         OcrStatus.NO_REGION -> R.string.ocr_no_region
         OcrStatus.FAILED -> R.string.ocr_failed
+        OcrStatus.SEARCHING -> R.string.ocr_searching
     }
 
     @StringRes

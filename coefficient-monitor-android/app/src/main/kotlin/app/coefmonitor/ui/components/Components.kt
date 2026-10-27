@@ -44,12 +44,12 @@ fun SectionCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = MaterialTheme.shapes.large,
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (title != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         title,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f),
                     )
@@ -61,19 +61,20 @@ fun SectionCard(
     }
 }
 
+/** Label and value on one line, in small text, so cards stay compact. */
 @Composable
 fun InfoRow(label: String, value: String, valueColor: Color = Color.Unspecified) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Text(
             label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(0.45f),
         )
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(8.dp))
         Text(
             value,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
             color = valueColor,
             textAlign = TextAlign.End,

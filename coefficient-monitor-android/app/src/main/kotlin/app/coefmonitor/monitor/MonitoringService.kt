@@ -19,6 +19,8 @@ import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectorResult
 import app.coefmonitor.core.FirstRoundPolicy
 import app.coefmonitor.core.NewRoundDetector
+import app.coefmonitor.core.ObservationCalibration
+import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.core.OcrReading
 import app.coefmonitor.core.ProcessResult
 import app.coefmonitor.core.RejectionReason
@@ -65,6 +67,16 @@ class MonitoringService : LifecycleService() {
     private var detectorReady = false
     private var lastLoggedRejection: Pair<RejectionReason?, String>? = null
 
+    /** Since when the observed region has shown no readable coefficient (screen moved or covered, no calibration). */
+    @Volatile
+    private var unreadableSinceMs: Long? = null
+    @Volatile
+    private var lastRowSearchMs = 0L
+
+    /** The region was moved while monitoring; the next first reading tells whether rounds were missed meanwhile. */
+    @Volatile
+    private var checkGapAfterRowSearch = false
+
     @Volatile
     private var settings = AppSettings()
 
@@ -84,6 +96,7 @@ class MonitoringService : LifecycleService() {
             ACTION_RESUME -> resume()
             ACTION_STOP -> shutdown(error = null)
             ACTION_SNAPSHOT -> requestSnapshot(intent.getLongExtra(EXTRA_DELAY_MS, DEFAULT_SNAPSHOT_DELAY_MS))
+            ACTION_FIND_ROW -> if (capturer != null && mode == Mode.MONITOR) lifecycleScope.launch { searchRow(manual = true) } else stopIfIdle()
             else -> stopIfIdle()
         }
         // Never restart automatically: a new capture session always needs fresh user consent.
@@ -287,13 +300,18 @@ class MonitoringService : LifecycleService() {
         }
         when (step) {
             PipelineStep.NoFrame -> runtime.update { it.copy(ocrStatus = OcrStatus.WAITING_FOR_SCREEN) }
-            is PipelineStep.InvalidRegion -> runtime.update {
-                it.copy(
-                    status = MonitorStatus.ERROR,
-                    error = MonitorError.CALIBRATION_INVALID,
-                    calibrationProblem = step.problem,
-                    ocrStatus = OcrStatus.NO_REGION,
-                )
+            is PipelineStep.InvalidRegion -> {
+                runtime.update {
+                    it.copy(
+                        status = MonitorStatus.ERROR,
+                        error = MonitorError.CALIBRATION_INVALID,
+                        calibrationProblem = step.problem,
+                        ocrStatus = OcrStatus.NO_REGION,
+                    )
+                }
+                // No usable region (not calibrated, screen rotated): look for the row on the screen.
+                markUnreadable()
+                searchRowIfStuck()
             }
             is PipelineStep.Sample -> {
                 val reading = step.sample.reading
@@ -315,12 +333,24 @@ class MonitoringService : LifecycleService() {
         when (result) {
             DetectorResult.Transitioning -> runtime.update { it.copy(ocrStatus = OcrStatus.TRANSITIONING) }
             DetectorResult.AwaitingReading -> runtime.update { it.copy(ocrStatus = OcrStatus.READING) }
-            is DetectorResult.Rejected -> onRejected(result.reading, s)
-            is DetectorResult.Stabilizing -> runtime.update {
-                it.copy(ocrStatus = OcrStatus.READING, lastReadValue = result.value, lastRejection = null)
+            is DetectorResult.Rejected -> {
+                onRejected(result.reading, s)
+                markUnreadable()
+                searchRowIfStuck()
+            }
+            is DetectorResult.Stabilizing -> {
+                unreadableSinceMs = null
+                runtime.update { it.copy(ocrStatus = OcrStatus.READING, lastReadValue = result.value, lastRejection = null) }
             }
             is DetectorResult.Initialized -> {
                 markReady(result.value)
+                if (checkGapAfterRowSearch) {
+                    checkGapAfterRowSearch = false
+                    if (container.monitor.baseline().lastObservedValue != result.value) {
+                        runtime.update { it.copy(lastContinuity = Continuity.GAP_SUSPECTED) }
+                        log(DiagnosticLevel.WARNING, "ROW_SEARCH", "The row shows ${result.value} now: rounds were missed while it could not be read")
+                    }
+                }
                 container.monitor.recordObservation(result.value)
                 log(DiagnosticLevel.INFO, "DETECTOR", "Observation initialised at ${result.value} (not processed as a round)")
             }
@@ -348,7 +378,52 @@ class MonitoringService : LifecycleService() {
         log(DiagnosticLevel.WARNING, "OCR", "OCR took $durationMs ms; rounds are detected later than usual on this device")
     }
 
+    private fun markUnreadable() {
+        if (unreadableSinceMs == null) unreadableSinceMs = SystemClock.elapsedRealtime()
+    }
+
+    /** After the region has been unreadable for a while, looks for the row again (at most every few seconds). */
+    private suspend fun searchRowIfStuck() {
+        val since = unreadableSinceMs ?: return
+        val now = SystemClock.elapsedRealtime()
+        if (now - since < ROW_SEARCH_AFTER_MS || now - lastRowSearchMs < ROW_SEARCH_INTERVAL_MS) return
+        searchRow(manual = false)
+    }
+
+    /**
+     * Looks for "?" and the newest coefficient right of it on the whole screen and moves the
+     * observed region there, e.g. after the game was scrolled or moved and brought back a little
+     * off its old place. The detector then re-initialises (the visible round is not processed).
+     */
+    private suspend fun searchRow(manual: Boolean) {
+        val capture = capturer ?: return
+        val engine = ocr ?: return
+        lastRowSearchMs = SystemClock.elapsedRealtime()
+        runtime.update { it.copy(ocrStatus = OcrStatus.SEARCHING) }
+        val bitmap = withContext(Dispatchers.Default) { capture.withLatestFrame { it.toBitmap() } } ?: return
+        val layout = try {
+            engine.detectLayout(bitmap)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            log(DiagnosticLevel.ERROR, "ROW_SEARCH", "Searching the screen failed: ${e.message}")
+            null
+        }
+        val found = layout?.let { ObservationCalibration(it.tile, it.placeholder, bitmap.width, bitmap.height) }
+            ?.takeIf { ObservationRegionManager.validate(it) == null }
+        bitmap.recycle()
+        if (found == null) {
+            if (manual) log(DiagnosticLevel.WARNING, "ROW_SEARCH", "No row of coefficients found on the screen")
+            return
+        }
+        if (found == settings.calibration) return
+        checkGapAfterRowSearch = detectorReady
+        container.settings.update { it.copy(calibration = found) }
+        log(DiagnosticLevel.INFO, "ROW_SEARCH", "Row of coefficients found; the observed region was moved there")
+    }
+
     private fun markReady(value: Coefficient) {
+        unreadableSinceMs = null
         detectorReady = true
         runtime.update {
             it.copy(
@@ -500,6 +575,9 @@ class MonitoringService : LifecycleService() {
         const val ACTION_STOP = "app.coefmonitor.action.STOP"
         const val ACTION_SNAPSHOT = "app.coefmonitor.action.SNAPSHOT"
 
+        /** Looks for the row of coefficients on the screen now and moves the observed region there. */
+        const val ACTION_FIND_ROW = "app.coefmonitor.action.FIND_ROW"
+
         private const val EXTRA_RESULT_CODE = "result_code"
         private const val EXTRA_RESULT_DATA = "result_data"
         private const val EXTRA_MODE = "mode"
@@ -509,6 +587,8 @@ class MonitoringService : LifecycleService() {
         private const val MIN_IDLE_MS = 30L
         private const val SLOW_OCR_MS = 2_000L
         private const val SLOW_OCR_REPORT_INTERVAL_MS = 60_000L
+        private const val ROW_SEARCH_AFTER_MS = 2_000L
+        private const val ROW_SEARCH_INTERVAL_MS = 3_000L
 
         /** Starts a capture session with the result of the system screen-capture consent dialog. */
         fun start(context: Context, resultCode: Int, data: Intent, mode: Mode, delayMs: Long = DEFAULT_SNAPSHOT_DELAY_MS) {

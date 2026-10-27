@@ -11,10 +11,15 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import app.coefmonitor.R
 import app.coefmonitor.appContainer
+import app.coefmonitor.core.AlgorithmDefinition
+import app.coefmonitor.core.AlgorithmLimits
+import app.coefmonitor.core.AlgorithmStep
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
+import app.coefmonitor.core.NormalizedPoint
+import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.StoredAlgorithm
 import app.coefmonitor.data.db.EventEntity
@@ -31,20 +36,24 @@ import kotlinx.coroutines.sync.withLock
 
 /**
  * Floating mode: keeps the floating panel over every app until the user closes it, whether
- * monitoring runs or not. The panel shows the live status, starts and stops monitoring, runs the
- * auto-clicker, and holds the settings (active algorithm and its click times, threshold, delays,
- * capture interval, detection, switches). Turned on and off by [AppSettings.overlayEnabled].
+ * monitoring runs or not. The panel shows the live status, starts and stops monitoring, finds the
+ * coefficient row, runs the auto-clicker, edits the algorithms (clicks picked right on the screen,
+ * their times, new algorithms, which one is active) and holds the settings. Turned on and off by
+ * [AppSettings.overlayEnabled].
  */
 class FloatingPanelService : LifecycleService(), OverlayActions {
 
     private val container by lazy { appContainer }
     private var panel: OverlayController? = null
     private var inForeground = false
-    private val stepEdits = Mutex()
+    private val algorithmEdits = Mutex()
     private var latest: Presentation? = null
+    private var picker: PointPickerOverlay? = null
 
-    /** The active algorithm the panel shows; step time changes apply to it. */
-    @Volatile
+    /** The algorithm open in the panel's Algorithm tab; null follows the active one. */
+    private var viewedId: Long? = null
+
+    /** The algorithm the Algorithm tab currently shows; step edits apply to it. */
     private var shownAlgorithm: StoredAlgorithm? = null
 
     override fun onCreate() {
@@ -81,6 +90,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
     }
 
     override fun onDestroy() {
+        picker?.dismiss()
         panel?.hide()
         panel = null
         super.onDestroy()
@@ -100,6 +110,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
     }
 
     private fun stop() {
+        picker?.dismiss()
         panel?.hide()
         panel = null
         if (inForeground) {
@@ -137,9 +148,10 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
         val str = withAppLocale()
         val total = p.algorithms.size
         val index = if (total == 0) 0 else p.state.activeIndex.coerceIn(0, total - 1)
-        val stored = p.algorithms.getOrNull(index)
-        shownAlgorithm = stored
-        val active = stored?.definition
+        val active = p.algorithms.getOrNull(index)?.definition
+        val viewedIndex = p.algorithms.indexOfFirst { it.id == viewedId }.takeIf { it >= 0 } ?: index
+        val viewed = p.algorithms.getOrNull(viewedIndex)
+        shownAlgorithm = viewed
         val title = if (total == 0) {
             str.getString(R.string.no_algorithms_short)
         } else {
@@ -154,7 +166,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
             p.runtime.lastContinuity == Continuity.GAP_SUSPECTED -> str.getString(R.string.warning_gap)
             else -> null
         }
-        val steps = active?.steps.orEmpty().mapIndexed { i, step ->
+        val steps = viewed?.definition?.steps.orEmpty().mapIndexed { i, step ->
             val label = step.text.ifBlank { str.getString(if (step.point != null) R.string.overlay_step_click else R.string.overlay_step_pause) }
             val time = step.delayMs?.let { str.getString(R.string.delay_ms, it) }
                 ?: str.getString(R.string.overlay_step_time_global, p.settings.globalDelayMs)
@@ -163,6 +175,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
         panel?.update(
             OverlayState(
                 title = title,
+                bubbleText = if (total == 0) "—" else "${index + 1}",
                 algorithmName = active?.name ?: "—",
                 coefficientLine = str.getString(R.string.overlay_last_coefficient, lastValue),
                 statusLine = "${Labels.status(str, p.runtime.status)} · ${Labels.ocrStatus(str, p.runtime.ocrStatus)}",
@@ -172,8 +185,11 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
                 paused = p.runtime.status == MonitorStatus.PAUSED,
                 clickLine = p.runtime.clicks?.let { str.getString(R.string.overlay_clicks, it.position, it.total, it.delayMs) },
                 clicksRunning = p.runtime.clicks != null,
+                viewedTitle = if (total == 0) title else str.getString(R.string.algorithm_position, viewedIndex + 1, total),
+                viewedName = viewed?.definition?.name ?: "—",
+                viewedIsActive = viewedIndex == index,
                 steps = steps,
-                stepsKey = "${stored?.id}:${steps.joinToString("|") { it.label }}",
+                stepsKey = "${viewed?.id}:${steps.joinToString("|") { it.label }}",
                 threshold = p.settings.threshold.toString(),
                 globalDelay = str.getString(R.string.delay_ms, p.settings.globalDelayMs),
                 captureInterval = str.getString(R.string.delay_ms, p.settings.captureIntervalMs),
@@ -200,6 +216,8 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
 
     override fun stopMonitoring() = monitorCommand(MonitoringService.ACTION_STOP)
 
+    override fun findRow() = monitorCommand(MonitoringService.ACTION_FIND_ROW)
+
     private fun monitorCommand(action: String) {
         runCatching { MonitoringService.command(this, action) }
     }
@@ -224,34 +242,87 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
         lifecycleScope.launch { container.settings.update { it.copy(overlayEnabled = false) } }
     }
 
-    override fun selectAlgorithm(delta: Int) {
-        lifecycleScope.launch {
-            val total = container.algorithms.enabledCount()
-            if (total == 0) return@launch
-            val current = container.monitor.sequenceState().activeIndex
-            val target = (current + delta).coerceIn(0, total - 1)
-            if (target != current) container.monitor.selectAlgorithm(target)
-        }
+    /** Shows another algorithm in the Algorithm tab without changing which one is active. */
+    override fun browseAlgorithm(delta: Int) {
+        val p = latest ?: return
+        val current = p.algorithms.indexOfFirst { it.id == shownAlgorithm?.id }.takeIf { it >= 0 } ?: return
+        viewedId = p.algorithms.getOrNull((current + delta).coerceIn(0, p.algorithms.size - 1))?.id
+        render(p)
+    }
+
+    override fun activateViewed() {
+        val p = latest ?: return
+        val index = p.algorithms.indexOfFirst { it.id == shownAlgorithm?.id }.takeIf { it >= 0 } ?: return
+        viewedId = null
+        lifecycleScope.launch { container.monitor.selectAlgorithm(index) }
     }
 
     override fun resetToFirst() {
+        viewedId = null
         lifecycleScope.launch { container.monitor.resetToFirst() }
     }
 
-    override fun changeStepTime(stepIndex: Int, deltaMs: Long) {
+    override fun addAlgorithm() {
+        lifecycleScope.launch {
+            val name = "${withAppLocale().getString(R.string.default_algorithm_prefix)} ${container.algorithms.allDefinitions().size + 1}"
+            viewedId = container.algorithms.add(AlgorithmDefinition(name = name.take(AlgorithmLimits.MAX_NAME_LENGTH)))
+        }
+    }
+
+    override fun changeStepTime(stepIndex: Int, deltaMs: Long) = editSteps { steps ->
+        val step = steps.getOrNull(stepIndex) ?: return@editSteps null
+        val globalDelayMs = container.settings.current().globalDelayMs
+        val time = (DelayPolicy.effective(step, globalDelayMs) + deltaMs).coerceIn(DelayPolicy.MIN_MS, DelayPolicy.MAX_MS)
+        steps.toMutableList().apply { set(stepIndex, step.copy(delayMs = time)) }
+    }
+
+    override fun deleteStep(stepIndex: Int) = editSteps { steps ->
+        steps.filterIndexed { i, _ -> i != stepIndex }.takeIf { it.size < steps.size }
+    }
+
+    override fun addPauseStep() = editSteps { steps ->
+        steps.takeIf { it.size < AlgorithmLimits.MAX_STEPS }?.plus(AlgorithmStep())
+    }
+
+    override fun addClickStep() {
+        pickPoint(initial = null) { point ->
+            editSteps { steps -> steps.takeIf { it.size < AlgorithmLimits.MAX_STEPS }?.plus(AlgorithmStep(point = point)) }
+        }
+    }
+
+    override fun pickStepPoint(stepIndex: Int) {
+        val step = shownAlgorithm?.definition?.steps?.getOrNull(stepIndex) ?: return
+        pickPoint(initial = step.point) { point ->
+            editSteps { steps -> steps.getOrNull(stepIndex)?.let { steps.toMutableList().apply { set(stepIndex, it.copy(point = point)) } } }
+        }
+    }
+
+    /**
+     * Changes the steps of the algorithm open in the Algorithm tab. [transform] returns null for
+     * "no change". One edit at a time: holding a button sends many, each must see the previous one.
+     */
+    private fun editSteps(transform: suspend (List<AlgorithmStep>) -> List<AlgorithmStep>?) {
         val id = shownAlgorithm?.id ?: return
         lifecycleScope.launch {
-            // One edit at a time: holding a button sends many, each must see the previous one.
-            stepEdits.withLock {
+            algorithmEdits.withLock {
                 val stored = container.algorithms.get(id) ?: return@withLock
-                val steps = stored.definition.steps
-                val step = steps.getOrNull(stepIndex) ?: return@withLock
-                val globalDelayMs = container.settings.current().globalDelayMs
-                val time = (DelayPolicy.effective(step, globalDelayMs) + deltaMs).coerceIn(DelayPolicy.MIN_MS, DelayPolicy.MAX_MS)
-                val updated = steps.toMutableList().apply { set(stepIndex, step.copy(delayMs = time)) }
-                container.algorithms.update(id, stored.definition.copy(steps = updated))
+                val steps = transform(stored.definition.steps) ?: return@withLock
+                container.algorithms.update(id, stored.definition.copy(steps = steps))
             }
         }
+    }
+
+    /** Hides the panel and lets the user tap (and drag) the click point right on the screen. */
+    private fun pickPoint(initial: NormalizedPoint?, onPicked: (NormalizedPoint) -> Unit) {
+        if (picker != null) return
+        val band = latest?.settings?.calibration?.let { ObservationRegionManager.readingBand(it) }
+        val overlay = PointPickerOverlay(withAppLocale(), initial, band) { point ->
+            picker = null
+            panel?.setHidden(false)
+            if (point != null) onPicked(point)
+        }
+        panel?.setHidden(true)
+        if (overlay.show()) picker = overlay else panel?.setHidden(false)
     }
 
     override fun changeThreshold(deltaHundredths: Long) = updateSettings {

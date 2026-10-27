@@ -90,6 +90,17 @@ algorithm by hand.
 (default). The other option is *Process it as a round* in Settings. The value last seen before a
 restart is never processed again.
 
+## Finding the row again
+
+The observed region is fixed on the screen. If the game is scrolled or moved and comes back a few
+pixels off, the region cuts the coefficient and every reading is rejected. When the region has
+given no readable coefficient for 2 s (rejected, "?", or no valid region, e.g. not calibrated or
+the screen rotated), monitoring reads the whole screen every 3 s, finds "?" and the coefficient
+right of it (as calibration's *Auto-detect* does), moves the region there and saves it as the new
+calibration. The detector then re-initialises: the visible round is only the starting point. If it
+differs from the last value seen before, rounds were missed meanwhile; the log and the panel say
+so, and you can set the active algorithm by hand. **Find row** on the panel does the same at once.
+
 ## Algorithms, presets, log
 
 - There is no maximum number of algorithms. **Add several** creates numbered algorithms in bulk.
@@ -112,10 +123,11 @@ Each algorithm step is a **click on a point of the screen** plus the **time unti
 click**:
 
 1. In the algorithm editor, tap **+ Click: pick a point on the screen**. The calibration
-   screenshot opens; tap where the click should land, then **Use this point**. Use zoom for
+   screenshot opens; tap where the click should land or drag the marker, then **Use this point**. Use zoom for
    precision, and set the time in ms (empty = the global delay). Add as many clicks as you need
    and **Save**. The row being read (shown in red) cannot be chosen, because a popup opened by a
-   tap there would hide the coefficient.
+   tap there would hide the coefficient. Clicks can also be added and picked right on the live screen from
+   the floating panel's Algorithm tab.
 2. **+ Pause (no click)** adds a step that only waits its time, e.g. before the first click while
    the game gets ready for the next round.
 3. Turn the service on once: Settings → *Auto-clicker* → **Turn on in Accessibility settings**, and
@@ -140,15 +152,22 @@ auto-clicker can be turned off in Settings without touching the accessibility se
 Settings → **Floating mode** puts a movable panel over every app. It stays there until you close it
 with **✕** (or the notification's *Close*), whether monitoring runs or not; it runs in its own
 foreground service, so Android does not remove it when you switch apps or swipe the app away.
-Drag it by the title; tap the title to collapse it. It has three tabs:
+Drag it by the title. **–** (top right) shrinks it to a small circle showing the active
+algorithm's number (coloured by state: running, paused, stopped, clicking); drag the circle anywhere
+and tap it to open the panel again. It has three tabs, each row on one line:
 
 - **Status**: active algorithm, last coefficient, monitoring and OCR status, auto-click progress,
   warnings, the last log lines, and the buttons **Start** (shows Android's screen-capture dialog
-  and starts monitoring without opening the app) or **Pause**/**Resume** and **Stop**, **Run
-  clicks**/**Stop clicks**, and **Open** (the app).
-- **Algorithm**: ◀ ▶ to choose the active algorithm, **Back to Algorithm 1**, and every step of the
-  active algorithm with its time until the next click (− / +, 50 ms per press). Points are still
-  picked in the app's algorithm editor, on the calibration screenshot.
+  and starts monitoring without opening the app) or **Pause**/**Resume**, **Stop** and **Find row**
+  (see [Finding the row again](#finding-the-row-again)), **Run clicks**/**Stop clicks**, and
+  **Open** (the app).
+- **Algorithm**: ◀ ▶ show any algorithm without changing the active one (✓ marks the active one);
+  **Make active**, **↺ 1** (back to Algorithm 1) and **+ Algorithm**. Every step is one line: its
+  time until the next click (− / +, 50 ms per press), **◎** to pick its point again and **✕** to
+  delete it. **+ Click** and **+ Pause** add steps. Points are picked right on the screen over the
+  game: the panel hides, a tap puts the marker, dragging moves it (a drag that starts on the marker
+  keeps its offset so the finger does not cover the point), then **Use this point**. The row
+  being read (red) cannot be chosen.
 - **Settings**: threshold (± 0.01x), global delay and capture interval (± 50 ms), stable frames,
   minimum time between rounds (± 250 ms), the auto-clicker and round-notification switches, and
   a shortcut to the Accessibility settings while the auto-clicker service is off.

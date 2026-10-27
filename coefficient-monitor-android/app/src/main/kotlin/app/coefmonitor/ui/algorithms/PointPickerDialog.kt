@@ -3,7 +3,10 @@ package app.coefmonitor.ui.algorithms
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,9 +57,12 @@ import kotlin.math.roundToInt
 
 private val MARKER = Color(0xFFE5484D)
 
+/** A drag that starts this close to the marker moves the marker instead of scrolling the picture. */
+private val MARKER_GRAB = 36.dp
+
 /**
- * Full-screen picker: tap on the calibration screenshot where this step should click.
- * Drag scrolls, the slider zooms. The coefficient row being read (red) cannot be chosen.
+ * Full-screen picker: tap on the calibration screenshot where this step should click, or drag the
+ * marker. Other drags scroll, the slider zooms. The coefficient row being read (red) cannot be chosen.
  */
 @Composable
 fun PointPickerDialog(
@@ -110,7 +116,7 @@ fun PointPickerDialog(
                             zoom = zoom,
                             selected = selected,
                             others = others,
-                            onTap = { selected = it },
+                            onPick = { selected = it },
                             modifier = Modifier.weight(1f).fillMaxWidth(),
                         )
                         val point = selected
@@ -141,10 +147,11 @@ private fun PickerCanvas(
     zoom: Float,
     selected: NormalizedPoint?,
     others: List<Pair<Int, NormalizedPoint>>,
-    onTap: (NormalizedPoint) -> Unit,
+    onPick: (NormalizedPoint) -> Unit,
     modifier: Modifier,
 ) {
-    val tapCallback by rememberUpdatedState(onTap)
+    val pickCallback by rememberUpdatedState(onPick)
+    val current by rememberUpdatedState(selected)
     val forbidden = MaterialTheme.colorScheme.error
     BoxWithConstraints(modifier.clip(MaterialTheme.shapes.medium).background(Color.Black)) {
         val aspect = canvas.width.toFloat() / canvas.height
@@ -167,8 +174,24 @@ private fun PickerCanvas(
                     Modifier
                         .matchParentSize()
                         .pointerInput(Unit) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                val point = current ?: return@awaitEachGesture
+                                val center = Offset(point.x * size.width, point.y * size.height)
+                                if ((down.position - center).getDistance() > MARKER_GRAB.toPx()) return@awaitEachGesture
+                                // Keep the finger's offset so it does not hide the point while dragging.
+                                val offset = center - down.position
+                                down.consume()
+                                drag(down.id) { change ->
+                                    change.consume()
+                                    val pos = change.position + offset
+                                    pickCallback(NormalizedPoint((pos.x / size.width).coerceIn(0f, 1f), (pos.y / size.height).coerceIn(0f, 1f)))
+                                }
+                            }
+                        }
+                        .pointerInput(Unit) {
                             detectTapGestures { pos ->
-                                tapCallback(
+                                pickCallback(
                                     NormalizedPoint(
                                         (pos.x / size.width).coerceIn(0f, 1f),
                                         (pos.y / size.height).coerceIn(0f, 1f),
