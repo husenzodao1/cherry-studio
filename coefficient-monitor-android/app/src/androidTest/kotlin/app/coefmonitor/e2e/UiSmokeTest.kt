@@ -1,5 +1,7 @@
 package app.coefmonitor.e2e
 
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.SystemClock
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -11,7 +13,10 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -20,6 +25,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import app.coefmonitor.e2e.TestEnv.instrumentation
 import app.coefmonitor.ui.MainActivity
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -38,6 +44,9 @@ class UiSmokeTest {
     fun setUp() {
         TestEnv.grantPermissions()
         TestEnv.resetState()
+        // A plain screenshot so the step point picker has something to show.
+        val screen = Bitmap.createBitmap(1080, 2400, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.rgb(21, 16, 39)) }
+        runBlocking { TestEnv.container.calibrationImages.save(screen) }
     }
 
     @After
@@ -50,8 +59,8 @@ class UiSmokeTest {
         compose.waitForIdle()
     }
 
-    private fun waitText(text: String, timeoutMs: Long = 10_000) {
-        compose.waitUntil(timeoutMs) { compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() }
+    private fun waitText(text: String, timeoutMs: Long = 10_000, substring: Boolean = false) {
+        compose.waitUntil(timeoutMs) { compose.onAllNodesWithText(text, substring = substring).fetchSemanticsNodes().isNotEmpty() }
     }
 
     private fun shot(name: String) {
@@ -82,8 +91,18 @@ class UiSmokeTest {
         compose.onNodeWithText("Algorithm 1").performClick()
         waitText("Edit algorithm")
         compose.onAllNodes(hasSetTextAction())[1].performTextInput("Plan for low rounds")
-        compose.onNodeWithText("Add step").performClick()
+        compose.onNodeWithText("+ Note step (no point)").performClick()
         compose.onAllNodes(hasSetTextAction())[2].performTextInput("Check the history row")
+
+        // Step 2: a point picked on the screenshot.
+        compose.onNodeWithText("+ Step: pick a point on the screen").performClick()
+        waitText("Step 2: pick a point")
+        compose.onNodeWithContentDescription("Screenshot used for calibration").performTouchInput {
+            click(Offset(width * 0.5f, height * 0.15f))
+        }
+        shot("ui_03a_point_picker")
+        compose.onNodeWithText("Use this point").performClick()
+        waitText("Point: ", substring = true)
         shot("ui_03_algorithm_editor")
         compose.onNodeWithText("Save").performClick()
         waitText("120 in sequence · 120 total")
@@ -99,8 +118,8 @@ class UiSmokeTest {
         // Presets: save the current configuration including algorithms.
         nav("Presets")
         waitText("No presets")
-        // Floating action buttons expose their label on a child node, so click the label itself.
-        compose.onNodeWithText("Save preset").performClick()
+        // The extended FAB keeps its label in the unmerged tree only, so click the label itself.
+        compose.onNodeWithText("Save preset", useUnmergedTree = true).performClick()
         compose.onNode(hasSetTextAction()).performTextInput("Evening")
         compose.onNodeWithText("Save").performClick()
         waitText("Evening")

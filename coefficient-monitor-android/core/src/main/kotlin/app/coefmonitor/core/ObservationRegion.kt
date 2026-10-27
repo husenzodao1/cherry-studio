@@ -101,6 +101,21 @@ object ObservationRegionManager {
         return RegionResolution.Ready(primary, neighbor)
     }
 
+    /**
+     * The part of the screen the detector reads: the observed tile plus the neighbour, with a small
+     * margin. Anything drawn there (e.g. a step marker) would disturb round detection.
+     */
+    fun readingBand(calibration: ObservationCalibration, margin: Float = 0.01f): NormalizedRect {
+        val tile = calibration.tile
+        val pitch = (tile.centerX - calibration.placeholder.x).coerceAtLeast(0f)
+        return NormalizedRect(
+            (tile.left - margin).coerceAtLeast(0f),
+            (tile.top - margin).coerceAtLeast(0f),
+            (tile.right + pitch + margin).coerceAtMost(1f),
+            (tile.bottom + margin).coerceAtMost(1f),
+        )
+    }
+
     fun toPixels(rect: NormalizedRect, imageWidth: Int, imageHeight: Int): PixelRect {
         val left = (rect.left * imageWidth).roundToInt().coerceIn(0, imageWidth - 1)
         val top = (rect.top * imageHeight).roundToInt().coerceIn(0, imageHeight - 1)

@@ -1,5 +1,7 @@
 package app.coefmonitor.ui.algorithms
 
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -11,6 +13,9 @@ import app.coefmonitor.core.AlgorithmStep
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.ExportFormats
 import app.coefmonitor.core.ImportResult
+import app.coefmonitor.core.NormalizedPoint
+import app.coefmonitor.core.NormalizedRect
+import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.data.StoredAlgorithm
 import app.coefmonitor.ui.NEW_ALGORITHM_ID
 import app.coefmonitor.ui.container
@@ -64,7 +69,16 @@ class AlgorithmsViewModel(private val container: AppContainer) : ViewModel() {
     }
 }
 
-data class StepDraft(val key: Long, val text: String, val delayText: String)
+data class StepDraft(val key: Long, val text: String, val delayText: String, val point: NormalizedPoint? = null)
+
+/** The screenshot used to pick step points (the same one used for calibration). */
+data class PointCanvas(
+    val image: ImageBitmap,
+    val width: Int,
+    val height: Int,
+    /** Coefficient row being read; points there are refused. */
+    val readingBand: NormalizedRect?,
+)
 
 data class EditorState(
     val loaded: Boolean = false,
@@ -75,6 +89,11 @@ data class EditorState(
     val globalDelayMs: Long = DelayPolicy.DEFAULT_GLOBAL_MS,
     val problem: EditorProblem? = null,
     val saved: Boolean = false,
+    /** Step whose point is being picked, or null. */
+    val pickingKey: Long? = null,
+    /** Null while loading or when no screenshot exists yet. */
+    val canvas: PointCanvas? = null,
+    val canvasLoaded: Boolean = false,
 )
 
 enum class EditorProblem { NAME_EMPTY, NAME_TOO_LONG, DESCRIPTION_TOO_LONG, STEP_TOO_LONG, DELAY_INVALID, TOO_MANY_STEPS }
@@ -94,10 +113,42 @@ class AlgorithmEditorViewModel(private val container: AppContainer, private val 
                 name = definition?.name.orEmpty(),
                 description = definition?.description.orEmpty(),
                 enabled = definition?.enabled ?: true,
-                steps = definition?.steps.orEmpty().map { StepDraft(nextKey++, it.text, it.delayMs?.toString().orEmpty()) },
+                steps = definition?.steps.orEmpty().map { StepDraft(nextKey++, it.text, it.delayMs?.toString().orEmpty(), it.point) },
                 globalDelayMs = globalDelay,
             )
+            loadCanvas()
         }
+    }
+
+    private suspend fun loadCanvas() {
+        val bitmap = container.calibrationImages.load()
+        val calibration = container.settings.current().calibration
+        val canvas = bitmap?.let {
+            PointCanvas(it.asImageBitmap(), it.width, it.height, calibration?.let(ObservationRegionManager::readingBand))
+        }
+        mutableState.update { it.copy(canvas = canvas, canvasLoaded = true) }
+    }
+
+    /** "+ Step: pick a point on the screen" — adds a step and opens the point picker for it. */
+    fun addPointStep() = mutableState.update {
+        val key = nextKey++
+        it.copy(steps = it.steps + StepDraft(key, "", ""), pickingKey = key, problem = null)
+    }
+
+    fun startPicking(key: Long) = mutableState.update { it.copy(pickingKey = key) }
+
+    fun cancelPicking() = mutableState.update { it.copy(pickingKey = null) }
+
+    fun setPoint(key: Long, point: NormalizedPoint) = mutableState.update { state ->
+        state.copy(
+            steps = state.steps.map { if (it.key == key) it.copy(point = point) else it },
+            pickingKey = null,
+            problem = null,
+        )
+    }
+
+    fun clearPoint(key: Long) = mutableState.update { state ->
+        state.copy(steps = state.steps.map { if (it.key == key) it.copy(point = null) else it })
     }
 
     fun setName(value: String) = mutableState.update { it.copy(name = value, problem = null) }
@@ -143,8 +194,8 @@ class AlgorithmEditorViewModel(private val container: AppContainer, private val 
                 mutableState.update { it.copy(problem = EditorProblem.DELAY_INVALID) }
                 return
             }
-            AlgorithmStep(draft.text.trim(), delay)
-        }.filter { it.text.isNotEmpty() }
+            AlgorithmStep(draft.text.trim(), delay, draft.point)
+        }.filter { it.text.isNotEmpty() || it.point != null }
         val definition = AlgorithmDefinition(current.name.trim(), current.description.trim(), current.enabled, steps)
         val problem = when {
             definition.name.isEmpty() -> EditorProblem.NAME_EMPTY

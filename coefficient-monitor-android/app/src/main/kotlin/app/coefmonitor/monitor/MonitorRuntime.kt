@@ -22,6 +22,16 @@ sealed interface SnapshotState {
     data object Failed : SnapshotState
 }
 
+/** Which step point the on-screen guide is showing right now. */
+data class GuideProgress(
+    val algorithmNumber: Int,
+    val stepNumber: Int,
+    val position: Int,
+    val total: Int,
+    val label: String,
+    val delayMs: Long,
+)
+
 /** Live, non-persistent monitoring status shared by the service, dashboard and floating panel. */
 data class RuntimeState(
     val status: MonitorStatus = MonitorStatus.STOPPED,
@@ -35,6 +45,7 @@ data class RuntimeState(
     val error: MonitorError? = null,
     val lastContinuity: Continuity? = null,
     val snapshot: SnapshotState = SnapshotState.Idle,
+    val guide: GuideProgress? = null,
 )
 
 class MonitorRuntime {

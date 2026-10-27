@@ -4,9 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AlgorithmStep(
-    val text: String,
-    /** Per-step delay override in ms; null means the global delay applies. */
+    /** Optional label shown next to the step. */
+    val text: String = "",
+    /** Time until the next step in ms; null means the global delay applies. */
     val delayMs: Long? = null,
+    /** Point on the screen (normalised to the full display) shown by the step guide; null for a note-only step. */
+    val point: NormalizedPoint? = null,
 )
 
 /** A user-defined algorithm (profile entry). The sequence is the ordered list of enabled ones. */
@@ -47,6 +50,8 @@ object AlgorithmLimits {
         definition.steps.any { it.text.length > MAX_STEP_TEXT_LENGTH } -> "step text too long"
         definition.steps.any { step -> step.delayMs?.let { !DelayPolicy.isValid(it) } == true } ->
             "step delay outside ${DelayPolicy.MIN_MS}..${DelayPolicy.MAX_MS} ms"
+        definition.steps.any { step -> step.point?.let { it.x !in 0f..1f || it.y !in 0f..1f } == true } ->
+            "step point outside the screen"
         else -> null
     }
 }

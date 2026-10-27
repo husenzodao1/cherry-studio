@@ -34,6 +34,8 @@ data class AppSettings(
     val logRejectedReadings: Boolean = true,
     val overlayEnabled: Boolean = false,
     val roundNotifications: Boolean = false,
+    /** Show the active algorithm's step points one by one over the game after each round. */
+    val stepGuideEnabled: Boolean = true,
     val activePresetId: Long? = null,
 ) {
     companion object {
@@ -58,6 +60,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val LOG_REJECTED = booleanPreferencesKey("log_rejected")
         val OVERLAY = booleanPreferencesKey("overlay_enabled")
         val ROUND_NOTIFICATIONS = booleanPreferencesKey("round_notifications")
+        val STEP_GUIDE = booleanPreferencesKey("step_guide")
         val ACTIVE_PRESET = longPreferencesKey("active_preset_id")
     }
 
@@ -90,6 +93,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
             logRejectedReadings = this[Keys.LOG_REJECTED] ?: defaults.logRejectedReadings,
             overlayEnabled = this[Keys.OVERLAY] ?: defaults.overlayEnabled,
             roundNotifications = this[Keys.ROUND_NOTIFICATIONS] ?: defaults.roundNotifications,
+            stepGuideEnabled = this[Keys.STEP_GUIDE] ?: defaults.stepGuideEnabled,
             activePresetId = this[Keys.ACTIVE_PRESET],
         )
     }
@@ -109,6 +113,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         this[Keys.LOG_REJECTED] = settings.logRejectedReadings
         this[Keys.OVERLAY] = settings.overlayEnabled
         this[Keys.ROUND_NOTIFICATIONS] = settings.roundNotifications
+        this[Keys.STEP_GUIDE] = settings.stepGuideEnabled
         val presetId = settings.activePresetId
         if (presetId == null) remove(Keys.ACTIVE_PRESET) else this[Keys.ACTIVE_PRESET] = presetId
     }

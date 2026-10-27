@@ -148,7 +148,6 @@ class NewRoundDetector(
     private var transitionLastMs = 0L
     private var shortTransitionSeen = false
     private var longTransitionSeen = false
-    private var stableRejectedFrames = 0
     private var interruptedSinceCommit = false
 
     private data class CommittedRound(
@@ -167,7 +166,6 @@ class NewRoundDetector(
             if (transitionStartMs == null) transitionStartMs = frame.timestampMs
             transitionLastMs = frame.timestampMs
             resetCandidate()
-            stableRejectedFrames = 0
             return DetectorResult.Transitioning
         }
         closeTransition()
@@ -176,11 +174,11 @@ class NewRoundDetector(
         val valid = acceptedOrNull(reading)
         if (valid == null) {
             resetCandidate()
-            stableRejectedFrames++
-            if (stableRejectedFrames >= config.requiredStableFrames) interruptedSinceCommit = true
+            // A still picture without a readable coefficient means something else covered the tile
+            // (another app, a dialog). One such frame is enough: with slow OCR there may be only one.
+            interruptedSinceCommit = true
             return DetectorResult.Rejected(lowConfidenceAsRejection(reading))
         }
-        stableRejectedFrames = 0
 
         if (valid.value == candidateValue) {
             candidateFrames++

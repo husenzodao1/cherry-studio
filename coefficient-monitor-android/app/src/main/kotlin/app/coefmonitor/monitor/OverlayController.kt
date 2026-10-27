@@ -26,6 +26,8 @@ data class OverlayState(
     val warning: String?,
     val log: List<String>,
     val paused: Boolean,
+    /** "Point 2 of 3 · next in 250 ms" while the step guide runs. */
+    val guideLine: String? = null,
 )
 
 /**
@@ -37,6 +39,7 @@ class OverlayController(
     private val context: Context,
     private val onPauseResume: () -> Unit,
     private val onStop: () -> Unit,
+    private val onShowSteps: () -> Unit,
     private val onOpenApp: () -> Unit,
 ) {
     private val windowManager = context.getSystemService(WindowManager::class.java)
@@ -51,6 +54,7 @@ class OverlayController(
     private lateinit var status: TextView
     private lateinit var delay: TextView
     private lateinit var warning: TextView
+    private lateinit var guideLine: TextView
     private lateinit var log: TextView
     private lateinit var pauseButton: TextView
 
@@ -97,6 +101,8 @@ class OverlayController(
         delay.visibility = if (state.delayLine == null) View.GONE else View.VISIBLE
         warning.text = state.warning.orEmpty()
         warning.visibility = if (state.warning == null) View.GONE else View.VISIBLE
+        guideLine.text = state.guideLine.orEmpty()
+        guideLine.visibility = if (state.guideLine == null) View.GONE else View.VISIBLE
         log.text = state.log.joinToString("\n")
         log.visibility = if (state.log.isEmpty()) View.GONE else View.VISIBLE
         pauseButton.text = context.getString(if (state.paused) R.string.action_resume else R.string.action_pause)
@@ -123,8 +129,9 @@ class OverlayController(
         status = text(12f, Color.rgb(0xC7, 0xC5, 0xF0))
         delay = text(12f, Color.rgb(0xC7, 0xC5, 0xF0))
         warning = text(12f, Color.rgb(0xFF, 0xB4, 0x54))
+        guideLine = text(13f, Color.rgb(0xFF, 0x8A, 0x8D), bold = true)
         log = text(11f, Color.rgb(0xA9, 0xA7, 0xC9))
-        listOf(name, coefficient, status, delay, warning, log).forEach(body::addView)
+        listOf(name, coefficient, status, delay, guideLine, warning, log).forEach(body::addView)
         val buttons = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             setPadding(0, dp(8), 0, 0)
@@ -132,6 +139,7 @@ class OverlayController(
         pauseButton = button(context.getString(R.string.action_pause)) { onPauseResume() }
         buttons.addView(pauseButton)
         buttons.addView(button(context.getString(R.string.action_stop)) { onStop() })
+        buttons.addView(button(context.getString(R.string.overlay_steps)) { onShowSteps() })
         buttons.addView(button(context.getString(R.string.overlay_open_app)) { onOpenApp() })
         body.addView(buttons)
         panel.addView(body)

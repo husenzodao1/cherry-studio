@@ -100,6 +100,24 @@ restart is never processed again.
   formula injection). A separate diagnostics log records rejected OCR readings, errors and
   manual actions.
 
+## Step points guide
+
+Each algorithm step can be a **point on the screen** plus the **time until the next point**:
+
+1. In the algorithm editor, tap **+ Step: pick a point on the screen**. The calibration
+   screenshot opens; tap where the step should point. Use zoom for precision, and set the time
+   in ms. The row being read (shown in red) cannot be chosen, because a marker there would
+   disturb detection.
+2. After every round, the active algorithm's points are shown **one by one** over the game. Each
+   is a numbered circle that stays for its step time; very short times are stretched to 0.7 s so
+   they are visible. The floating panel shows "Point 2 of 3 · next in 250 ms", and its **Steps**
+   button replays the guide.
+3. The markers ignore touches, so you tap the game underneath yourself. **The app never taps,
+   places bets or cashes out**: automated actions in a real-money game are out of scope.
+
+Points are normalised to the calibration screenshot. If the screen orientation no longer
+matches it, the guide is not shown. The guide can be turned off in Settings.
+
 ## Permissions
 
 | Permission | Why |
@@ -107,7 +125,7 @@ restart is never processed again.
 | Screen capture (MediaProjection consent) | Read the tile. Android asks every time monitoring starts. |
 | `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PROJECTION` | Continuous capture requires a visible foreground service. |
 | `POST_NOTIFICATIONS` | Monitoring status, "add another algorithm", capture stopped. |
-| `SYSTEM_ALERT_WINDOW` (optional) | Floating panel; only if enabled and granted in system settings. |
+| `SYSTEM_ALERT_WINDOW` (optional) | Floating panel and step-point markers; only if granted in system settings. |
 
 The app makes no network requests itself. OCR uses ML Kit's bundled model (no download at runtime)
 and runs on the device. Network problems therefore cannot affect detection, so there is no network

@@ -274,6 +274,7 @@ private fun StopButton(onStop: () -> Unit, modifier: Modifier) {
 @Composable
 private fun ActiveAlgorithmCard(state: DashboardState, onReset: () -> Unit, onChoose: () -> Unit, onManage: () -> Unit) {
     val semantic = LocalSemanticColors.current
+    val locale = LocalConfiguration.current.locales[0]
     SectionCard(title = stringResource(R.string.active_algorithm)) {
         val active = state.active
         if (active == null) {
@@ -307,7 +308,17 @@ private fun ActiveAlgorithmCard(state: DashboardState, onReset: () -> Unit, onCh
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("${i + 1}.", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(8.dp))
-                    Text(step.text, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                    val point = step.point
+                    val title = when {
+                        step.text.isNotBlank() -> step.text
+                        point != null -> stringResource(
+                            R.string.step_point_value,
+                            String.format(locale, "%.0f", point.x * 100),
+                            String.format(locale, "%.0f", point.y * 100),
+                        )
+                        else -> "—"
+                    }
+                    Text(title, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                     Text(
                         stringResource(R.string.delay_ms, delay),
                         style = MaterialTheme.typography.labelMedium,

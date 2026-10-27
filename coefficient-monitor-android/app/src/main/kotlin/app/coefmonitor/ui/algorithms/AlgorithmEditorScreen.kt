@@ -15,10 +15,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddLocationAlt
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +41,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -133,9 +137,13 @@ fun AlgorithmEditorScreen(algorithmId: Long, onDone: () -> Unit) {
                 )
             }
             item {
-                OutlinedButton(onClick = viewModel::addStep, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = viewModel::addPointStep, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Filled.AddLocationAlt, contentDescription = null)
+                    Text(stringResource(R.string.action_add_point_step), modifier = Modifier.padding(start = 6.dp))
+                }
+                TextButton(onClick = viewModel::addStep, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Filled.Add, contentDescription = null)
-                    Text(stringResource(R.string.action_add_step), modifier = Modifier.padding(start = 6.dp))
+                    Text(stringResource(R.string.action_add_note_step), modifier = Modifier.padding(start = 6.dp))
                 }
             }
             state.problem?.let { problem ->
@@ -148,6 +156,20 @@ fun AlgorithmEditorScreen(algorithmId: Long, onDone: () -> Unit) {
                 }
             }
         }
+    }
+
+    val pickingKey = state.pickingKey
+    if (pickingKey != null) {
+        val pickingIndex = state.steps.indexOfFirst { it.key == pickingKey }
+        PointPickerDialog(
+            canvas = state.canvas,
+            loaded = state.canvasLoaded,
+            stepNumber = pickingIndex + 1,
+            initial = state.steps.getOrNull(pickingIndex)?.point,
+            others = state.steps.mapIndexedNotNull { i, step -> step.point?.takeIf { step.key != pickingKey }?.let { i + 1 to it } },
+            onConfirm = { point -> viewModel.setPoint(pickingKey, point) },
+            onDismiss = viewModel::cancelPicking,
+        )
     }
 }
 
@@ -184,6 +206,11 @@ private fun StepCard(
                     Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
                 }
             }
+            StepPointRow(
+                step = step,
+                onPick = { viewModel.startPicking(step.key) },
+                onClear = { viewModel.clearPoint(step.key) },
+            )
             OutlinedTextField(
                 value = step.text,
                 onValueChange = { viewModel.updateStep(step.key, text = it) },
@@ -221,6 +248,38 @@ private fun StepCard(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun StepPointRow(step: StepDraft, onPick: () -> Unit, onClear: () -> Unit) {
+    val locale = LocalConfiguration.current.locales[0]
+    val point = step.point
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            Icons.Filled.LocationOn,
+            contentDescription = null,
+            tint = if (point != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            if (point == null) {
+                stringResource(R.string.step_no_point)
+            } else {
+                stringResource(
+                    R.string.step_point_value,
+                    String.format(locale, "%.0f", point.x * 100),
+                    String.format(locale, "%.0f", point.y * 100),
+                )
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f).padding(start = 8.dp),
+        )
+        TextButton(onClick = onPick) {
+            Text(stringResource(if (point == null) R.string.action_pick_point else R.string.action_change_point))
+        }
+        if (point != null) {
+            TextButton(onClick = onClear) { Text(stringResource(R.string.action_remove_point)) }
         }
     }
 }

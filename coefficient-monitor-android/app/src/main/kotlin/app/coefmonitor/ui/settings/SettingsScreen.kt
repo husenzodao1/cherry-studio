@@ -411,11 +411,17 @@ private fun PermissionsSection(settings: AppSettings, viewModel: SettingsViewMod
             checked = settings.overlayEnabled,
             onChange = { enabled -> viewModel.update { it.copy(overlayEnabled = enabled) } },
         )
-        if (settings.overlayEnabled && !overlayGranted) {
+        if ((settings.overlayEnabled || settings.stepGuideEnabled) && !overlayGranted) {
             OutlinedButton(onClick = { context.startActivity(overlaySettingsIntent(context)) }) {
                 Text(stringResource(R.string.action_allow_overlay))
             }
         }
+        SwitchRow(
+            title = stringResource(R.string.step_guide),
+            hint = stringResource(R.string.step_guide_hint),
+            checked = settings.stepGuideEnabled,
+            onChange = { enabled -> viewModel.update { it.copy(stepGuideEnabled = enabled) } },
+        )
         HorizontalDivider()
         SwitchRow(
             title = stringResource(R.string.round_notifications),

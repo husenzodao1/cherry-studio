@@ -8,9 +8,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
+import app.coefmonitor.core.AlgorithmDefinition
+import app.coefmonitor.core.AlgorithmStep
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.ImageSignature
+import app.coefmonitor.core.NormalizedPoint
 import app.coefmonitor.core.NormalizedRect
 import app.coefmonitor.core.ObservationCalibration
 import app.coefmonitor.core.ObservationRegionManager
@@ -100,6 +103,30 @@ class EndToEndMonitoringTest {
         assertEquals("consent result", Activity.RESULT_OK, delivered.get())
     }
 
+    /** After the first round (→ Algorithm 2) its two points must appear in order, then disappear. */
+    private fun assertGuideShowsAlgorithm2Points() {
+        val seen = mutableListOf<Int>()
+        val deadline = SystemClock.uptimeMillis() + 15_000
+        var screenshotTaken = false
+        while (SystemClock.uptimeMillis() < deadline) {
+            val guide = TestEnv.runtime().guide
+            if (guide != null) {
+                assertEquals(2, guide.algorithmNumber)
+                if (seen.lastOrNull() != guide.stepNumber) seen += guide.stepNumber
+                if (!screenshotTaken) {
+                    screenshot("e2e_01b_step_guide_point_1")
+                    screenshotTaken = true
+                }
+            } else if (seen.isNotEmpty()) {
+                break
+            }
+            SystemClock.sleep(100)
+        }
+        log("guide steps seen: $seen")
+        assertEquals("guide points in order\n${failureContext()}", listOf(1, 2), seen)
+        assertEquals("the guide must not create rounds", 1, eventCount())
+    }
+
     /** Next round may only arrive after the detector's cooldown (default 3 s), as in the real game. */
     private fun waitCooldown() = SystemClock.sleep(3_400)
 
@@ -133,7 +160,21 @@ class EndToEndMonitoringTest {
     fun fullMonitoringSession() {
         val calibration = onSimulator { it.calibration() }
         log("calibration $calibration")
-        runBlocking { container.settings.update { it.copy(calibration = calibration, overlayEnabled = true) } }
+        runBlocking {
+            container.settings.update { it.copy(calibration = calibration, overlayEnabled = true, stepGuideEnabled = true) }
+            // Algorithm 2 has two point steps; the guide must show them one after another.
+            val second = container.database.algorithmDao().getAll()[1]
+            container.algorithms.update(
+                second.id,
+                AlgorithmDefinition(
+                    name = second.name,
+                    steps = listOf(
+                        AlgorithmStep("Bet", delayMs = 1_500, point = NormalizedPoint(0.30f, 0.80f)),
+                        AlgorithmStep("Confirm", delayMs = 1_200, point = NormalizedPoint(0.70f, 0.86f)),
+                    ),
+                ),
+            )
+        }
 
         // Start: the visible 3.33x only initialises the detector.
         startCapture(MonitoringService.Mode.MONITOR)
@@ -149,6 +190,7 @@ class EndToEndMonitoringTest {
             push(value)
             awaitEventCount(i + 1)
             assertEquals("after $value\n${failureContext()}", expected[i], activeAlgorithm())
+            if (i == 0) assertGuideShowsAlgorithm2Points()
             if (i == 3) screenshot("e2e_02_after_reset_2_10x")
             waitCooldown()
         }

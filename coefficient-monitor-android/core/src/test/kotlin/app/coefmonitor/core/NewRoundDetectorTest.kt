@@ -111,6 +111,20 @@ class NewRoundDetectorTest {
     }
 
     @Test
+    fun `app switch with equal neighbours and slow OCR does not create a round`() {
+        // Row 1.50x | 1.50x (neighbour not informative). The user goes to the home screen; OCR is so
+        // slow that only ONE still frame of the launcher is read before returning to the game.
+        val d = driver()
+        d.still("1.50x", "1.50x")
+        d.waitMs(5_000)
+        d.frame("Launcher", "Wi-Fi", reading = null)
+        d.frame("Launcher", "Wi-Fi", reading = OcrReading.Rejected("", RejectionReason.EMPTY))
+        d.frame("1.50x", "1.50x", reading = null)
+        d.still("1.50x", "1.50x", frames = 10)
+        assertEquals(0, d.newRounds.size)
+    }
+
+    @Test
     fun `E - invalid OCR never produces events`() {
         val d = driver(policy = FirstRoundPolicy.PROCESS_FIRST)
         val bad = listOf(

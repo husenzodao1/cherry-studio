@@ -14,16 +14,21 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import app.coefmonitor.R
 import app.coefmonitor.appContainer
+import app.coefmonitor.core.CalibrationProblem
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorResult
 import app.coefmonitor.core.FirstRoundPolicy
 import app.coefmonitor.core.NewRoundDetector
+import app.coefmonitor.core.ObservationCalibration
+import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.core.OcrReading
 import app.coefmonitor.core.ProcessResult
+import app.coefmonitor.core.RegionResolution
 import app.coefmonitor.core.RejectionReason
 import app.coefmonitor.core.RoundEvent
+import app.coefmonitor.core.StepGuide
 import app.coefmonitor.core.TransitionReason
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.DiagnosticLevel
@@ -63,6 +68,7 @@ class MonitoringService : LifecycleService() {
     private var loopJob: Job? = null
     private var snapshotJob: Job? = null
     private var overlay: OverlayController? = null
+    private lateinit var guide: StepGuideController
     private var mode = Mode.MONITOR
     private var inForeground = false
     private var detectorReady = false
@@ -75,6 +81,7 @@ class MonitoringService : LifecycleService() {
         super.onCreate()
         notifications = MonitorNotifications(this)
         notifications.ensureChannels()
+        guide = StepGuideController(this, lifecycleScope) { progress -> runtime.update { it.copy(guide = progress) } }
         lifecycleScope.launch {
             container.settings.settings.collect {
                 settings = it
@@ -99,6 +106,7 @@ class MonitoringService : LifecycleService() {
     }
 
     override fun onDestroy() {
+        if (::guide.isInitialized) guide.cancel()
         loopJob?.cancel()
         snapshotJob?.cancel()
         releaseCapture()
@@ -165,6 +173,7 @@ class MonitoringService : LifecycleService() {
         if (capturer == null) return stopIfIdle()
         loopJob?.cancel()
         loopJob = null
+        guide.cancel()
         runtime.update { it.copy(status = MonitorStatus.PAUSED, ocrStatus = OcrStatus.IDLE) }
         log(DiagnosticLevel.INFO, "MONITOR", "Paused")
     }
@@ -181,6 +190,7 @@ class MonitoringService : LifecycleService() {
 
     /** Stops everything. [error] non-null leaves the dashboard in the Error state with a reason. */
     private fun shutdown(error: MonitorError?) {
+        guide.cancel()
         loopJob?.cancel()
         loopJob = null
         snapshotJob?.cancel()
@@ -344,6 +354,31 @@ class MonitoringService : LifecycleService() {
         }
     }
 
+    /**
+     * Shows the step points of the algorithm at [activeIndex] (position in the enabled sequence).
+     * Points on the row being read are skipped, and nothing is shown if the screen orientation no
+     * longer matches the calibration screenshot the points were picked on.
+     */
+    private suspend fun playGuide(activeIndex: Int) {
+        val s = settings
+        val calibration = s.calibration
+        val definition = container.algorithms.allDefinitions().filter { it.enabled }.getOrNull(activeIndex) ?: return
+        if (calibration != null && !sameOrientationAs(calibration)) return
+        val band = calibration?.let { ObservationRegionManager.readingBand(it) }
+        val markers = StepGuide.plan(definition.steps, s.globalDelayMs, band)
+        withContext(Dispatchers.Main) { guide.play(activeIndex + 1, markers) }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun sameOrientationAs(calibration: ObservationCalibration): Boolean {
+        val metrics = android.util.DisplayMetrics()
+        getSystemService(android.hardware.display.DisplayManager::class.java)
+            .getDisplay(android.view.Display.DEFAULT_DISPLAY).getRealMetrics(metrics)
+        return ObservationRegionManager.resolve(calibration, metrics.widthPixels, metrics.heightPixels).let {
+            it !is RegionResolution.Invalid || it.problem != CalibrationProblem.GEOMETRY_CHANGED
+        }
+    }
+
     private var lastSlowOcrReportMs = 0L
 
     /** OCR is normally tens of milliseconds; report (at most once a minute) when the device is much slower. */
@@ -422,6 +457,7 @@ class MonitoringService : LifecycleService() {
                     )
                     else -> Unit
                 }
+                if (s.stepGuideEnabled) playGuide(result.transition.newIndex)
                 if (s.roundNotifications) {
                     notifications.round(
                         str.getString(R.string.notif_round_title, event.value.toString()),
@@ -472,6 +508,9 @@ class MonitoringService : LifecycleService() {
             context = withAppLocale(),
             onPauseResume = { if (runtime.state.value.status == MonitorStatus.PAUSED) resume() else pause() },
             onStop = { shutdown(error = null) },
+            onShowSteps = {
+                lifecycleScope.launch { playGuide(container.monitor.sequenceState().activeIndex) }
+            },
             onOpenApp = {
                 startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP))
             },
@@ -545,6 +584,7 @@ class MonitoringService : LifecycleService() {
                 warning = warning,
                 log = p.recent.map { Labels.eventLine(str, it) },
                 paused = p.runtime.status == MonitorStatus.PAUSED,
+                guideLine = p.runtime.guide?.let { str.getString(R.string.overlay_guide, it.position, it.total, it.delayMs) },
             ),
         )
     }
