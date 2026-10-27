@@ -31,12 +31,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Screenshot
@@ -309,8 +309,8 @@ private fun EditorCard(state: CalibrationUiState, viewModel: CalibrationViewMode
         if (state.tile != null) {
             Text(stringResource(R.string.fine_tune), style = MaterialTheme.typography.titleSmall)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                NudgeButton(Icons.Filled.KeyboardArrowLeft, R.string.nudge_left) { viewModel.nudge(dx = -NUDGE_PX) }
-                NudgeButton(Icons.Filled.KeyboardArrowRight, R.string.nudge_right) { viewModel.nudge(dx = NUDGE_PX) }
+                NudgeButton(Icons.AutoMirrored.Filled.KeyboardArrowLeft, R.string.nudge_left) { viewModel.nudge(dx = -NUDGE_PX) }
+                NudgeButton(Icons.AutoMirrored.Filled.KeyboardArrowRight, R.string.nudge_right) { viewModel.nudge(dx = NUDGE_PX) }
                 NudgeButton(Icons.Filled.KeyboardArrowUp, R.string.nudge_up) { viewModel.nudge(dy = -NUDGE_PX) }
                 NudgeButton(Icons.Filled.KeyboardArrowDown, R.string.nudge_down) { viewModel.nudge(dy = NUDGE_PX) }
             }
