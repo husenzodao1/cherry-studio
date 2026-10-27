@@ -66,12 +66,15 @@ Each tick (default 300 ms):
 
 1. Crop the newest tile and its neighbour from the newest frame. Compute small
    brightness-normalised image signatures.
-2. If the tile differs from the previous frame it is **moving** (animation, app switch). Nothing is
-   read and the candidate value is discarded.
-3. On still frames, ML Kit OCR reads the strip around the row; the values are the words inside the
-   two tiles. OCR is skipped while the strip is pixel-identical, so a static screen costs almost
-   nothing. The reading must be valid, meet the minimum
-   confidence, and be identical on **N consecutive still frames** (default 3).
+2. If the tile differs from the previous frame it is **moving** (a tile sliding in, an app
+   switch). For the first 0.5 s of motion nothing is read.
+3. ML Kit OCR reads the strip around the row; the values are the words inside the two tiles. OCR
+   is skipped while the strip and both tiles are pixel-identical, so a static screen costs almost
+   nothing. As when reading by eye, the text decides: the reading must be valid, meet the minimum
+   confidence, and be the same **N times in a row** (default 3), readings taken while the tile
+   still settles included. Nothing is decided while a tile slides in; the first still frame
+   decides. A tile whose picture never stops changing (an animated tile) is decided on after
+   2.5 s of motion.
 4. The trusted value is compared with the last committed round:
    - **different value** → new round;
    - **same value** → new round only if the row visibly shifted. Either the neighbour tile
@@ -100,13 +103,14 @@ When the game is scrolled, the row moves with it. As long as it stays inside the
 tick finds it at its new place; otherwise the whole screen is read in the same tick (and every
 0.7 s while it is not found), so the row is found again as soon as it is back, wherever it is.
 While the row is at the same height it stays put: a newest tile that was not read in one frame,
-or a row partly covered by the floating panel, does not move it.
+or a row partly covered by the floating panel, does not move it. A move is followed only when two
+looks in a row agree, so a glimpse in the middle of an animation never moves the row.
 
 When the row was found at another place, the detector catches up: if the newest tile still shows
 the value seen before, nothing was missed; if it shows another one and the neighbour shows the
 value seen before, the newest is the one missed round; if the neighbour is new too, both are
 processed (neighbour first) and flagged, since more may be missing. If the neighbour cannot be
-read, the visible round is only the starting point and the gap is flagged.
+read, the newest is processed and the gap is flagged.
 
 ## Algorithms, presets, log
 

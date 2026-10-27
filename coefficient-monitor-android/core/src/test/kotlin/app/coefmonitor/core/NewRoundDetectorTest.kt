@@ -43,17 +43,41 @@ class NewRoundDetectorTest {
     }
 
     @Test
-    fun `value must be stable for the configured number of frames`() {
+    fun `value must be read the configured number of times in a row`() {
         val d = driver()
         d.still("2.01x", "1.53x")
         d.frame("1.70x", offsetX = 40, reading = null)
-        // Arriving frame still differs from the previous (moving) one, so it is not counted.
+        // Read while the tile is still settling: it counts, but nothing is decided while it moves.
         assertEquals(DetectorResult.Transitioning, d.frame("1.70x", "2.01x"))
-        d.frame("1.70x", "2.01x")
         d.frame("1.70x", "2.01x")
         assertEquals(0, d.newRounds.size)
         d.frame("1.70x", "2.01x")
         assertEquals(1, d.newRounds.size)
+    }
+
+    @Test
+    fun `a value read during the slide is decided on the first still frame`() {
+        val d = driver()
+        d.still("2.01x", "1.53x")
+        d.frame("1.70x", "2.01x", offsetX = 30)
+        d.frame("1.70x", "2.01x", offsetX = 15)
+        d.frame("1.70x", "2.01x")
+        assertEquals(0, d.newRounds.size)
+        // Already read three times while sliding: no further frames are needed once it stands still.
+        d.frame("1.70x", "2.01x")
+        assertEquals(listOf(170L), d.newRounds.map { it.value.hundredths })
+        assertEquals(Continuity.CONFIRMED, d.newRounds.single().continuity)
+    }
+
+    @Test
+    fun `an animated tile whose picture never settles is still read`() {
+        val d = driver()
+        d.still("2.01x", "1.53x")
+        // The tile glows or shimmers: every frame differs from the one before, the text does not.
+        repeat(20) { i -> d.frame("1.70x", "2.01x", offsetX = if (i % 2 == 0) 0 else 20) }
+        assertEquals(listOf(170L), d.newRounds.map { it.value.hundredths })
+        repeat(20) { i -> d.frame("1.70x", "2.01x", offsetX = if (i % 2 == 0) 0 else 20) }
+        assertEquals("the same animated round is counted once", 1, d.newRounds.size)
     }
 
     @Test
@@ -245,16 +269,17 @@ class NewRoundDetectorTest {
         val d = driver(baseline = baseline, catchUp = true)
         d.still("1.70x", "2.01x")
         assertEquals(0, d.newRounds.size)
-        assertTrue(d.results.any { it is DetectorResult.Initialized && !it.gapSuspected })
+        assertTrue(d.results.any { it is DetectorResult.Initialized })
     }
 
     @Test
-    fun `after the row was found again an unreadable neighbour only initialises and flags the gap`() {
+    fun `after the row was found again a changed newest tile is processed even when the neighbour is unreadable`() {
         val baseline = DetectorBaseline(lastObservedValue = Coefficient(170), lastSequence = 5, lastEventAtMs = 0)
         val d = driver(baseline = baseline, catchUp = true)
         d.still("2.50x")
-        assertEquals(0, d.newRounds.size)
-        assertTrue(d.results.any { it is DetectorResult.Initialized && it.gapSuspected })
+        assertEquals(listOf(250L), d.newRounds.map { it.value.hundredths })
+        // Rounds before it cannot be checked.
+        assertEquals(Continuity.GAP_SUSPECTED, d.newRounds.single().continuity)
     }
 
     @Test

@@ -104,12 +104,8 @@ sealed interface DetectorResult {
 
     data class Stabilizing(val value: Coefficient, val frames: Int, val required: Int) : DetectorResult
 
-    /**
-     * Baseline established without a transition (start/resume/restart). [gapSuspected]: the row was
-     * found again showing another value than before, and the neighbour could not tell which rounds
-     * were missed.
-     */
-    data class Initialized(val value: Coefficient, val confidence: Float?, val gapSuspected: Boolean = false) : DetectorResult
+    /** Baseline established without a transition (start/resume/restart). */
+    data class Initialized(val value: Coefficient, val confidence: Float?) : DetectorResult
 
     /** The same round is still on screen. */
     data class SameRound(val value: Coefficient) : DetectorResult
@@ -128,9 +124,13 @@ sealed interface DetectorResult {
  * Turns a stream of frames of the "first tile right of ?" into exactly one [RoundEvent] per round.
  *
  * Rules, in order:
- *  1. A frame that differs from the previous one is motion; motion resets the candidate value.
- *  2. A value is trusted only after [DetectorConfig.requiredStableFrames] still frames read it
- *     with acceptable confidence. Invalid readings never advance anything.
+ *  1. The text decides, as when reading by eye: a value is trusted once
+ *     [DetectorConfig.requiredStableFrames] readings in a row show it with acceptable confidence,
+ *     also readings taken while the picture still changes. Invalid readings never advance anything.
+ *  2. A frame that differs from the previous one is motion. While a short motion (a tile sliding
+ *     in) goes on, nothing is decided; the first still frame decides. A tile whose picture never
+ *     settles (an animated tile) is decided on once the motion outlasts
+ *     [DetectorConfig.maxTransitionMs].
  *  3. The first trusted value after (re)start only initialises the baseline unless the user chose
  *     [FirstRoundPolicy.PROCESS_FIRST]. The value last observed before a restart is never re-processed.
  *  4. A trusted value different from the committed one is a new round.
@@ -143,7 +143,8 @@ sealed interface DetectorResult {
  *     emitted first ([DetectorResult.NewRound.missed]), then the newest one.
  *  7. With [catchUp] (the row was lost and found again) the first trusted value is compared with
  *     the baseline instead of only initialising: rounds missed meanwhile are taken from the newest
- *     and the neighbour tile.
+ *     and the neighbour tile. A changed newest tile is always a new round, flagged when the
+ *     neighbour cannot tell what was missed before it.
  *
  * Image signatures are only compared at the same screen position (frame-to-frame, or the
  * neighbour against itself). Comparisons across positions use OCR text instead, because a
@@ -185,18 +186,21 @@ class NewRoundDetector(
     fun onFrame(frame: FrameSample): DetectorResult {
         val previous = previousFrame
         previousFrame = frame.primary
-        if (previous != null && previous.similarity(frame.primary) < config.frameStableSimilarity) {
+        val moving = previous != null && previous.similarity(frame.primary) < config.frameStableSimilarity
+        if (moving) {
             if (transitionStartMs == null) transitionStartMs = frame.timestampMs
             transitionLastMs = frame.timestampMs
-            resetCandidate()
-            return DetectorResult.Transitioning
+        } else {
+            closeTransition()
         }
-        closeTransition()
+        // A tile that keeps changing for longer than any slide is animated, not arriving: judge it as still.
+        val settling = moving && frame.timestampMs - transitionStartMs!! <= config.maxTransitionMs
 
-        val reading = frame.reading ?: return DetectorResult.AwaitingReading
+        val reading = frame.reading ?: return if (moving) DetectorResult.Transitioning else DetectorResult.AwaitingReading
         val valid = acceptedOrNull(reading)
         if (valid == null) {
             resetCandidate()
+            if (moving) return DetectorResult.Transitioning
             // A still picture without a readable coefficient means something else covered the tile
             // (another app, a dialog). One such frame is enough: with slow OCR there may be only one.
             interruptedSinceCommit = true
@@ -211,6 +215,7 @@ class NewRoundDetector(
             candidateConfidence = null
         }
         candidateConfidence = lowerConfidence(candidateConfidence, valid.confidence)
+        if (settling) return DetectorResult.Transitioning
         if (candidateFrames < config.requiredStableFrames) {
             return DetectorResult.Stabilizing(valid.value, candidateFrames, config.requiredStableFrames)
         }
@@ -261,14 +266,12 @@ class NewRoundDetector(
     /**
      * The row was found again and its newest tile shows [value], not [before]: rounds were missed.
      * If the neighbour shows [before], only the newest one was missed; if it shows another value,
-     * that one was missed too (and maybe more). If the neighbour is unreadable, only initialise.
+     * that one was missed too (and maybe more). If the neighbour is unreadable, the newest is
+     * processed and the gap flagged.
      */
     private fun catchUpAfterGap(frame: FrameSample, value: Coefficient, confidence: Float?, before: Coefficient): DetectorResult {
         val neighbor = frame.neighborReading?.let(::acceptedOrNull)?.value
-        if (neighbor == null) {
-            commit(frame, value)
-            return DetectorResult.Initialized(value, confidence, gapSuspected = true)
-        }
+            ?: return emit(frame, value, confidence, DetectionReason.VALUE_CHANGED, Continuity.GAP_SUSPECTED)
         if (neighbor == before) return emit(frame, value, confidence, DetectionReason.VALUE_CHANGED, Continuity.CONFIRMED)
         return emitWithMissed(frame, neighbor, Continuity.GAP_SUSPECTED, value, confidence, DetectionReason.VALUE_CHANGED)
     }

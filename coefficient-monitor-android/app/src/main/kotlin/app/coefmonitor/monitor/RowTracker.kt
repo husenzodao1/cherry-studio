@@ -71,6 +71,9 @@ class RowTracker(
     private var lastFullSearchMs = 0L
     private var movingSinceMs: Long? = null
 
+    /** Where the strip showed the row once; it is followed there only if the next look agrees. */
+    private var pendingMove: RowCells? = null
+
     /** The row's cells as a share of the screen (where the auto-clicker must not tap), while it is followed. */
     fun rowBand(): NormalizedRect? {
         val tracked = cells ?: return null
@@ -99,8 +102,8 @@ class RowTracker(
         lastNewest = newest
         val now = SystemClock.elapsedRealtime()
         movingSinceMs = if (moving) movingSinceMs ?: now else null
-        // The tile is animating or the screen is moving: nothing worth reading yet. If it keeps
-        // changing (the row scrolled away and something animated is there now), look anyway.
+        // The tile is sliding in or the screen is moving: nothing worth reading yet. If it keeps
+        // changing (an animated tile, or the row scrolled away), look anyway.
         if (moving && now - movingSinceMs!! < MAX_MOVING_MS) {
             return PipelineStep.Sample(FrameSample(nowMs, newest, grab.neighbor, reading = null), anchored = false, lost = false)
         }
@@ -108,6 +111,8 @@ class RowTracker(
         val words = stripWords(grab)
         val located = RowLocator.locate(words, grab.width, grab.height, near = tracked)
         if (located == null) {
+            // While the tile still changes the row may just be unreadable for a moment.
+            if (moving) return PipelineStep.Sample(FrameSample(nowMs, newest, grab.neighbor, reading = null), anchored = false, lost = false)
             // Not in the strip any more: look at the whole screen now.
             fullSearch(capturer, near = tracked, nowMs = nowMs, force = false)?.let { return it }
             return PipelineStep.Sample(
@@ -116,7 +121,14 @@ class RowTracker(
                 lost = true,
             )
         }
-        if (located.movedFrom(tracked)) return anchor(capturer, located, words, nowMs) ?: PipelineStep.NoFrame
+        if (located.movedFrom(tracked)) {
+            // One look in the middle of an animation can show the row somewhere else for a moment.
+            val confirmed = pendingMove?.let { !located.movedFrom(it) } == true
+            if (confirmed) return anchor(capturer, located, words, nowMs) ?: PipelineStep.NoFrame
+            pendingMove = located
+            return PipelineStep.Sample(FrameSample(nowMs, newest, grab.neighbor, reading = null), anchored = false, lost = false)
+        }
+        pendingMove = null
         return PipelineStep.Sample(
             FrameSample(nowMs, newest, grab.neighbor, tracked.readNewest(words), tracked.readNeighbor(words)),
             anchored = false,
@@ -129,6 +141,7 @@ class RowTracker(
         lastNewest = null
         movingSinceMs = null
         stripCache = null
+        pendingMove = null
     }
 
     /** Copies what this tick needs while the frame is locked: the strip and the two cells. */
@@ -198,6 +211,7 @@ class RowTracker(
         val anchored = near == null || found.movedFrom(near)
         cells = found
         stripCache = null
+        pendingMove = null
         return PipelineStep.Sample(sample, anchored = anchored, lost = false)
     }
 
@@ -205,6 +219,7 @@ class RowTracker(
     private suspend fun anchor(capturer: ScreenCapturer, found: RowCells, words: List<TextBox>, nowMs: Long): PipelineStep? {
         cells = found
         stripCache = null
+        pendingMove = null
         val signatures = capturer.withLatestFrame { frame ->
             signature(frame.crop(found.newest), found.newest) to found.neighbor?.let { signature(frame.crop(it), it) }
         } ?: return null
@@ -242,7 +257,7 @@ class RowTracker(
         /** While the row is lost, the whole screen is read at most this often. */
         const val LOST_SEARCH_INTERVAL_MS = 700L
 
-        /** A tile animation is over well within this; longer means something else is there now. */
-        const val MAX_MOVING_MS = 1_500L
+        /** A tile slides in within this; after it the tile is read even while its picture still changes. */
+        const val MAX_MOVING_MS = 500L
     }
 }

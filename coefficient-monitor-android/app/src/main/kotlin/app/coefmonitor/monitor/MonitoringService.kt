@@ -330,10 +330,6 @@ class MonitoringService : LifecycleService() {
             }
             is DetectorResult.Initialized -> {
                 markReady(result.value)
-                if (result.gapSuspected) {
-                    runtime.update { it.copy(lastContinuity = Continuity.GAP_SUSPECTED) }
-                    log(DiagnosticLevel.WARNING, "ROW", "The row shows ${result.value} now: rounds were missed while it could not be read")
-                }
                 container.monitor.recordObservation(result.value)
                 log(DiagnosticLevel.INFO, "DETECTOR", "Observation initialised at ${result.value} (not processed as a round)")
             }
