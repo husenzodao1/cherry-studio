@@ -1,6 +1,8 @@
 package app.coefmonitor.e2e
 
 import android.os.SystemClock
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -19,11 +21,13 @@ import app.coefmonitor.e2e.TestEnv.app
 import app.coefmonitor.e2e.TestEnv.container
 import app.coefmonitor.e2e.TestEnv.device
 import app.coefmonitor.e2e.TestEnv.failureContext
+import app.coefmonitor.e2e.TestEnv.instrumentation
 import app.coefmonitor.e2e.TestEnv.log
 import app.coefmonitor.e2e.TestEnv.screenshot
 import app.coefmonitor.e2e.TestEnv.waitFor
 import app.coefmonitor.monitor.FloatingPanelService
 import app.coefmonitor.monitor.MonitorStatus
+import app.coefmonitor.withAppLocale
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -121,6 +125,31 @@ class FloatingModeTest {
         device.findObject(panel().text("✕")).click()
         waitFor("floating mode off", 5_000) { runBlocking { container.settings.current().overlayEnabled }.takeIf { !it } }
         assertTrue("panel still shown", device.wait(Until.gone(panel().text("✕")), 5_000))
+    }
+
+    /** The panel in Tajik: every tab, for review on the results branch. */
+    @Test
+    fun panelInTajik() {
+        // No panel from an earlier test may still be shown with the old language.
+        device.wait(Until.gone(panel().text("✕")), 5_000)
+        instrumentation.runOnMainSync { AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("tg")) }
+        try {
+            val tg = app.withAppLocale()
+            runBlocking { container.settings.update { it.copy(overlayEnabled = true) } }
+            FloatingPanelService.sync(app, enabled = true)
+            val status = device.wait(Until.findObject(panel().text(tg.getString(R.string.overlay_tab_status))), 10_000)
+            if (status == null) logHierarchy()
+            assertNotNull("Tajik panel not shown\n${failureContext()}", status)
+            screenshot("floating_tg_01_status")
+            listOf(R.string.overlay_tab_algorithm to "floating_tg_02_algorithm", R.string.overlay_tab_settings to "floating_tg_03_settings")
+                .forEach { (tab, shot) ->
+                    device.wait(Until.findObject(panel().text(tg.getString(tab))), 5_000).click()
+                    SystemClock.sleep(500)
+                    screenshot(shot)
+                }
+        } finally {
+            instrumentation.runOnMainSync { AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList()) }
+        }
     }
 
     private fun panel() = By.pkg(TestEnv.PACKAGE)

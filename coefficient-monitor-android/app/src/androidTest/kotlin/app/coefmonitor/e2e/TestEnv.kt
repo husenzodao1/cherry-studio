@@ -52,6 +52,10 @@ object TestEnv {
         shell("appops set $PACKAGE PROJECT_MEDIA allow")
         shell("appops set $PACKAGE SYSTEM_ALERT_WINDOW allow")
         if (Build.VERSION.SDK_INT >= 33) shell("pm grant $PACKAGE android.permission.POST_NOTIFICATIONS")
+        // The CI emulator's launcher sometimes stops responding; its system dialog would cover the
+        // screen under test (OCR reads the dialog, UiAutomator sees only the dialog).
+        shell("settings put global hide_error_dialogs 1")
+        device.findObject(By.pkg("android").res("android:id/aerr_wait"))?.click()
     }
 
     /** Turns the auto-clicker's accessibility service on, as the user does in system settings. */

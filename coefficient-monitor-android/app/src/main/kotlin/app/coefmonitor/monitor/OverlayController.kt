@@ -223,7 +223,10 @@ class OverlayController(
         panel.addView(header)
         attachDrag(title)
 
-        body = column().apply { minimumWidth = dp(MIN_BODY_WIDTH_DP) }
+        // A fixed width, so every text is measured once at its final width and long ones wrap fully.
+        body = column().apply {
+            layoutParams = LinearLayout.LayoutParams(dp(BODY_WIDTH_DP), LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
         val tabs = row().apply { setPadding(0, dp(6), 0, dp(6)) }
         listOf(
             Tab.STATUS to R.string.overlay_tab_status,
@@ -253,14 +256,17 @@ class OverlayController(
         warning = text(12f, Color.rgb(0xFF, 0xB4, 0x54))
         log = text(11f, Color.rgb(0xA9, 0xA7, 0xC9))
         listOf(name, coefficient, status, clickLine, warning, log).forEach(page::addView)
-        val buttons = row().apply { setPadding(0, dp(8), 0, 0) }
+        val monitorButtons = row().apply { setPadding(0, dp(8), 0, 0) }
         startButton = button(context.getString(R.string.overlay_start)) { actions.startMonitoring() }
         pauseButton = button(context.getString(R.string.action_pause)) { actions.pauseResume() }
         stopButton = button(context.getString(R.string.action_stop)) { actions.stopMonitoring() }
+        listOf(startButton, pauseButton, stopButton).forEach(monitorButtons::addView)
+        page.addView(monitorButtons)
+        val clickButtons = row().apply { setPadding(0, dp(6), 0, 0) }
         clicksButton = button(context.getString(R.string.overlay_clicks_button)) { actions.runOrStopClicks() }
-        val openButton = button(context.getString(R.string.overlay_open_app)) { actions.openApp() }
-        listOf(startButton, pauseButton, stopButton, clicksButton, openButton).forEach(buttons::addView)
-        page.addView(buttons)
+        clickButtons.addView(clicksButton)
+        clickButtons.addView(button(context.getString(R.string.overlay_open_app)) { actions.openApp() })
+        page.addView(clickButtons)
         return page
     }
 
@@ -432,8 +438,8 @@ class OverlayController(
         text = label
         setTextColor(Color.WHITE)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-        setPadding(dp(12), dp(8), dp(12), dp(8))
-        minHeight = dp(40)
+        setPadding(dp(12), dp(6), dp(12), dp(6))
+        minHeight = dp(36)
         gravity = Gravity.CENTER
         background = GradientDrawable().apply {
             cornerRadius = dp(10).toFloat()
@@ -492,8 +498,10 @@ class OverlayController(
         val MUTED = Color.rgb(0xC7, 0xC5, 0xF0)
         val BUTTON = Color.rgb(0x2E, 0x2B, 0x55)
         const val MAX_TEXT_WIDTH_DP = 260
-        const val MIN_BODY_WIDTH_DP = 248
-        const val MAX_PAGE_HEIGHT_DP = 300
+        const val BODY_WIDTH_DP = 264
+
+        /** Tall pages scroll inside the panel instead of covering the game's result row. */
+        const val MAX_PAGE_HEIGHT_DP = 200
         const val TIME_STEP_MS = 50L
         const val COOLDOWN_STEP_MS = 250L
         const val REPEAT_START_MS = 400L
