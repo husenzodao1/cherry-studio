@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -27,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -139,7 +141,15 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
                             selected = route == destination.route,
                             onClick = { navigateTop(destination.route) },
                             icon = { Icon(destination.icon, contentDescription = null) },
-                            label = { Text(stringResource(destination.label)) },
+                            // One line for every label, so long ones ("Алгоритмы", "Настройки") don't push their icon up.
+                            label = {
+                                Text(
+                                    stringResource(destination.label),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
                         )
                     }
                 }
