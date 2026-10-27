@@ -8,13 +8,6 @@ import org.junit.Test
 
 class ClickPlanTest {
 
-    private val calibration = ObservationCalibration(
-        tile = NormalizedRect(0.20f, 0.10f, 0.35f, 0.14f),
-        placeholder = NormalizedPoint(0.11f, 0.12f),
-        referenceWidth = 1080,
-        referenceHeight = 2400,
-    )
-
     @Test
     fun `steps run in order with their delays and steps without a point are pauses`() {
         val steps = listOf(
@@ -37,8 +30,8 @@ class ClickPlanTest {
 
     @Test
     fun `taps on the row being read are refused but the step still waits`() {
-        val band = ObservationRegionManager.readingBand(calibration)
-        // Observed tile and its neighbour (one pitch to the right) are covered, with a margin.
+        // The newest tile and its neighbour, as followed by the monitor.
+        val band = NormalizedRect(0.20f, 0.10f, 0.50f, 0.14f)
         assertFalse(ClickPlan.isAllowed(NormalizedPoint(0.27f, 0.12f), band))
         assertFalse(ClickPlan.isAllowed(NormalizedPoint(0.45f, 0.12f), band))
         assertTrue(ClickPlan.isAllowed(NormalizedPoint(0.27f, 0.50f), band))

@@ -20,7 +20,7 @@ class CaptureConsentActivity : ComponentActivity() {
     private val consent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val data = result.data
         if (result.resultCode == Activity.RESULT_OK && data != null) {
-            MonitoringService.start(this, result.resultCode, data, MonitoringService.Mode.MONITOR)
+            MonitoringService.start(this, result.resultCode, data)
         } else {
             appContainer.runtime.update { it.copy(status = MonitorStatus.ERROR, error = MonitorError.CAPTURE_DENIED) }
         }

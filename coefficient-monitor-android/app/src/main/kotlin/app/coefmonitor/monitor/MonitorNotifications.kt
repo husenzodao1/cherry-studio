@@ -146,7 +146,6 @@ class MonitorNotifications(private val context: Context) {
         const val ID_MONITOR = 1001
         const val ID_END_OF_SEQUENCE = 1002
         const val ID_CAPTURE_STOPPED = 1003
-        const val ID_SNAPSHOT = 1004
         const val ID_ROUND = 1005
         const val ID_NO_ALGORITHMS = 1006
         const val ID_FLOATING = 1007

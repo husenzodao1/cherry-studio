@@ -11,9 +11,6 @@ import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectionReason
 import app.coefmonitor.core.DetectorConfig
-import app.coefmonitor.core.NormalizedPoint
-import app.coefmonitor.core.NormalizedRect
-import app.coefmonitor.core.ObservationCalibration
 import app.coefmonitor.core.ProcessResult
 import app.coefmonitor.core.RoundEvent
 import app.coefmonitor.core.TransitionReason
@@ -175,12 +172,11 @@ class PersistenceTest {
     @Test
     fun `settings persist and malformed stored values fall back to defaults`() = runBlocking {
         val file = File(context.filesDir, "settings-${UUID.randomUUID()}.preferences_pb")
-        val calibration = ObservationCalibration(NormalizedRect(0.2f, 0.3f, 0.4f, 0.5f), NormalizedPoint(0.1f, 0.4f), 1080, 2400)
 
         val scope1 = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val store1 = PreferenceDataStoreFactory.create(scope = scope1) { file }
         val repo1 = SettingsRepository(store1)
-        repo1.update { it.copy(threshold = Coefficient(250), calibration = calibration, detector = DetectorConfig(requiredStableFrames = 5)) }
+        repo1.update { it.copy(threshold = Coefficient(250), detector = DetectorConfig(requiredStableFrames = 5)) }
         scope1.coroutineContext.job.cancelAndJoin()
 
         val scope2 = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -188,14 +184,11 @@ class PersistenceTest {
         val repo2 = SettingsRepository(store2)
         val restored = repo2.current()
         assertEquals(Coefficient(250), restored.threshold)
-        assertEquals(calibration, restored.calibration)
         assertEquals(5, restored.detector.requiredStableFrames)
 
         store2.edit { it[stringPreferencesKey("detector_json")] = "{not json" }
-        store2.edit { it[stringPreferencesKey("calibration_json")] = "{\"broken\":true}" }
         val fallback = repo2.current()
         assertEquals(DetectorConfig(), fallback.detector)
-        assertEquals(null, fallback.calibration)
         assertEquals(Coefficient(250), fallback.threshold)
         scope2.coroutineContext.job.cancelAndJoin()
         file.delete()

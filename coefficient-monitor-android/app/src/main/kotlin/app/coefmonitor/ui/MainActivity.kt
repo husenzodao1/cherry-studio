@@ -46,7 +46,6 @@ import app.coefmonitor.data.ThemeMode
 import app.coefmonitor.monitor.FloatingPanelService
 import app.coefmonitor.ui.algorithms.AlgorithmEditorScreen
 import app.coefmonitor.ui.algorithms.AlgorithmsScreen
-import app.coefmonitor.ui.calibration.CalibrationScreen
 import app.coefmonitor.ui.dashboard.DashboardScreen
 import app.coefmonitor.ui.log.EventLogScreen
 import app.coefmonitor.ui.presets.PresetsScreen
@@ -59,7 +58,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    /** Screen requested by a notification ("calibration", "algorithms"), consumed by navigation. */
+    /** Screen requested by a notification ("algorithms"), consumed by navigation. */
     private val openTarget = MutableStateFlow<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,7 +95,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_OPEN = "open"
-        const val OPEN_CALIBRATION = "calibration"
         const val OPEN_ALGORITHMS = "algorithms"
     }
 }
@@ -108,7 +106,6 @@ object Routes {
     const val LOG = "log"
     const val PRESETS = "presets"
     const val SETTINGS = "settings"
-    const val CALIBRATION = "calibration"
 
     fun algorithmEditor(id: Long) = "algorithm/$id"
 }
@@ -130,7 +127,6 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
     val target by openTarget.collectAsStateWithLifecycle()
     LaunchedEffect(target) {
         when (target) {
-            MainActivity.OPEN_CALIBRATION -> nav.navigate(Routes.CALIBRATION) { launchSingleTop = true }
             MainActivity.OPEN_ALGORITHMS -> nav.navigate(Routes.ALGORITHMS) { launchSingleTop = true }
         }
         if (target != null) openTarget.value = null
@@ -179,7 +175,6 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
         ) {
             composable(Routes.DASHBOARD) {
                 DashboardScreen(
-                    onOpenCalibration = { nav.navigate(Routes.CALIBRATION) },
                     onOpenAlgorithms = { navigateTop(Routes.ALGORITHMS) },
                     onOpenLog = { navigateTop(Routes.LOG) },
                 )
@@ -198,8 +193,7 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
             }
             composable(Routes.LOG) { EventLogScreen() }
             composable(Routes.PRESETS) { PresetsScreen() }
-            composable(Routes.SETTINGS) { SettingsScreen(onOpenCalibration = { nav.navigate(Routes.CALIBRATION) }) }
-            composable(Routes.CALIBRATION) { CalibrationScreen(onBack = { nav.popBackStack() }) }
+            composable(Routes.SETTINGS) { SettingsScreen() }
         }
     }
 }

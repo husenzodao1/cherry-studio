@@ -13,7 +13,6 @@ data class PresetPayload(
     val detector: DetectorConfig,
     val captureIntervalMs: Long,
     val globalDelayMs: Long,
-    val calibration: ObservationCalibration? = null,
     /** Null when the preset was saved without algorithm definitions. */
     val algorithms: List<AlgorithmDefinition>? = null,
 )
@@ -105,9 +104,6 @@ object ExportFormats {
             return ImportResult.Failure("threshold out of range")
         }
         if (!DelayPolicy.isValid(payload.globalDelayMs)) return ImportResult.Failure("global delay out of range")
-        payload.calibration?.let { calibration ->
-            ObservationRegionManager.validate(calibration)?.let { return ImportResult.Failure("calibration: $it") }
-        }
         payload.algorithms?.forEachIndexed { index, definition ->
             AlgorithmLimits.problemOf(definition)?.let { return ImportResult.Failure("algorithm ${index + 1}: $it") }
         }

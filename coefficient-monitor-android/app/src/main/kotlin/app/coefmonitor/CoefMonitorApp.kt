@@ -13,8 +13,8 @@ import app.coefmonitor.data.SettingsRepository
 import app.coefmonitor.data.db.AppDatabase
 import app.coefmonitor.data.settingsDataStore
 import app.coefmonitor.monitor.AutoClicker
-import app.coefmonitor.monitor.CalibrationImageStore
 import app.coefmonitor.monitor.MonitorRuntime
+import app.coefmonitor.monitor.ScreenImageStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,12 +33,12 @@ class AppContainer(context: Context) {
     val algorithms: AlgorithmRepository by lazy { AlgorithmRepository(database) }
     val monitor: MonitorRepository by lazy { MonitorRepository(database, events) }
     val presets: PresetRepository by lazy { PresetRepository(database, settings, algorithms) }
-    val calibrationImages: CalibrationImageStore by lazy { CalibrationImageStore(appContext) }
+    val screenImages: ScreenImageStore by lazy { ScreenImageStore(appContext) }
     val runtime = MonitorRuntime()
 
     /** Lives as long as the process; used by work that outlives a single service, like the auto-clicker. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    val autoClicker: AutoClicker by lazy { AutoClicker(appContext, this, appScope) }
+    val autoClicker: AutoClicker by lazy { AutoClicker(this, appScope) }
 }
 
 val Context.appContainer: AppContainer get() = (applicationContext as CoefMonitorApp).container

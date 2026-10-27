@@ -44,9 +44,9 @@ class UiSmokeTest {
     fun setUp() {
         TestEnv.grantPermissions()
         TestEnv.resetState()
-        // A plain screenshot so the step point picker has something to show.
+        // A plain screen, as if monitoring had found the row on it, so the step point picker has something to show.
         val screen = Bitmap.createBitmap(1080, 2400, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.rgb(21, 16, 39)) }
-        runBlocking { TestEnv.container.calibrationImages.save(screen) }
+        runBlocking { TestEnv.container.screenImages.save(screen) }
     }
 
     @After
@@ -94,10 +94,10 @@ class UiSmokeTest {
         compose.onNodeWithText("+ Pause (no click)").performClick()
         compose.onAllNodes(hasSetTextAction())[2].performTextInput("Wait for the bet button")
 
-        // Step 2: a click point picked on the screenshot.
+        // Step 2: a click point picked on the saved screen.
         compose.onNodeWithText("+ Click: pick a point on the screen").performClick()
         waitText("Step 2: pick the click point")
-        compose.onNodeWithContentDescription("Screenshot used for calibration").performTouchInput {
+        compose.onNodeWithContentDescription("Screen where the coefficient row was found").performTouchInput {
             click(Offset(width * 0.5f, height * 0.15f))
         }
         shot("ui_03a_point_picker")
@@ -135,12 +135,6 @@ class UiSmokeTest {
         // The auto-clicker is on in the app, but its accessibility service is not: the way to turn it on is offered.
         scrollTo("Turn on in Accessibility settings")
         shot("ui_07b_settings_auto_clicker")
-
-        scrollTo("Calibrate")
-        compose.onNode(hasText("Calibrate") and hasClickAction()).performClick()
-        waitText("What to mark")
-        shot("ui_08_calibration")
-        compose.onNodeWithContentDescription("Back").performClick()
 
         // Tajik.
         scrollTo("Тоҷикӣ")

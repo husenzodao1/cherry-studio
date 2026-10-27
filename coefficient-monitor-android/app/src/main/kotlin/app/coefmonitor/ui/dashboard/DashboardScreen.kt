@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -32,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -86,7 +84,6 @@ import app.coefmonitor.ui.theme.LocalSemanticColors
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    onOpenCalibration: () -> Unit,
     onOpenAlgorithms: () -> Unit,
     onOpenLog: () -> Unit,
     viewModel: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory),
@@ -104,14 +101,7 @@ fun DashboardScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.dashboard_title)) },
-                actions = {
-                    IconButton(onClick = onOpenCalibration) {
-                        Icon(Icons.Filled.CropFree, contentDescription = stringResource(R.string.action_calibrate))
-                    }
-                },
-            )
+            TopAppBar(title = { Text(stringResource(R.string.dashboard_title)) })
         },
     ) { padding ->
         LazyColumn(
@@ -123,11 +113,10 @@ fun DashboardScreen(
                 StatusCard(
                     state = state,
                     clickerConnected = clickerConnected,
-                    onStart = { startCapture(MonitoringService.Mode.MONITOR, 0L) },
+                    onStart = startCapture,
                     onPause = { MonitoringService.command(context, MonitoringService.ACTION_PAUSE) },
                     onResume = { MonitoringService.command(context, MonitoringService.ACTION_RESUME) },
                     onStop = { MonitoringService.command(context, MonitoringService.ACTION_STOP) },
-                    onOpenCalibration = onOpenCalibration,
                     onOpenAlgorithms = onOpenAlgorithms,
                     onEnableClicker = { context.startActivity(accessibilitySettingsIntent()) },
                 )
@@ -146,7 +135,7 @@ fun DashboardScreen(
                     state = state,
                     overlayGranted = overlayGranted,
                     notificationsGranted = notificationsGranted,
-                    onOpenCalibration = onOpenCalibration,
+                    onFindRow = { MonitoringService.command(context, MonitoringService.ACTION_FIND_ROW) },
                     onGrantOverlay = { context.startActivity(overlaySettingsIntent(context)) },
                     onGrantNotifications = { context.startActivity(appNotificationSettingsIntent(context).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) },
                 )
@@ -189,7 +178,6 @@ private fun StatusCard(
     onPause: () -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit,
-    onOpenCalibration: () -> Unit,
     onOpenAlgorithms: () -> Unit,
     onEnableClicker: () -> Unit,
 ) {
@@ -208,16 +196,6 @@ private fun StatusCard(
             )
         }
         runtime.error?.let { Banner(stringResource(Labels.error(it)), semantic.error, Icons.Filled.ErrorOutline) }
-        runtime.calibrationProblem?.let {
-            Banner(stringResource(Labels.calibrationProblem(it)), semantic.error, Icons.Filled.ErrorOutline) {
-                TextButton(onClick = onOpenCalibration) { Text(stringResource(R.string.action_calibrate)) }
-            }
-        }
-        if (state.settings.calibration == null) {
-            Banner(stringResource(R.string.banner_not_calibrated), semantic.warning, Icons.Filled.WarningAmber) {
-                TextButton(onClick = onOpenCalibration) { Text(stringResource(R.string.action_calibrate)) }
-            }
-        }
         if (state.total == 0) {
             Banner(stringResource(R.string.banner_no_algorithms), semantic.warning, Icons.Filled.WarningAmber) {
                 TextButton(onClick = onOpenAlgorithms) { Text(stringResource(R.string.action_add)) }
@@ -258,7 +236,7 @@ private fun StatusCard(
                 }
                 else -> Button(
                     onClick = onStart,
-                    enabled = state.settings.calibration != null && state.total > 0,
+                    enabled = state.total > 0,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 ) {
                     Icon(Icons.Filled.PlayArrow, contentDescription = null)
@@ -413,7 +391,7 @@ private fun DetectionCard(
     state: DashboardState,
     overlayGranted: Boolean,
     notificationsGranted: Boolean,
-    onOpenCalibration: () -> Unit,
+    onFindRow: () -> Unit,
     onGrantOverlay: () -> Unit,
     onGrantNotifications: () -> Unit,
 ) {
@@ -421,20 +399,23 @@ private fun DetectionCard(
     val locale = LocalConfiguration.current.locales[0]
     SectionCard(
         title = stringResource(R.string.detection_and_permissions),
-        actions = { TextButton(onClick = onOpenCalibration) { Text(stringResource(R.string.action_calibrate)) } },
+        actions = {
+            TextButton(onClick = onFindRow, enabled = state.runtime.captureActive) { Text(stringResource(R.string.overlay_find_row)) }
+        },
     ) {
-        val calibration = state.settings.calibration
+        // Found on the live screen by monitoring itself; null until then (and while it is searched again).
+        val row = state.runtime.rowBand
         InfoRow(
             stringResource(R.string.observation_region),
-            if (calibration == null) {
-                stringResource(R.string.not_calibrated)
+            if (row == null) {
+                stringResource(R.string.row_not_found)
             } else {
                 stringResource(
                     R.string.region_summary,
-                    String.format(locale, "%.0f", calibration.tile.left * 100),
-                    String.format(locale, "%.0f", calibration.tile.right * 100),
-                    String.format(locale, "%.0f", calibration.tile.top * 100),
-                    String.format(locale, "%.0f", calibration.tile.bottom * 100),
+                    String.format(locale, "%.0f", row.left * 100),
+                    String.format(locale, "%.0f", row.right * 100),
+                    String.format(locale, "%.0f", row.top * 100),
+                    String.format(locale, "%.0f", row.bottom * 100),
                 )
             },
         )

@@ -3,7 +3,6 @@ package app.coefmonitor.ui
 import android.content.Context
 import androidx.annotation.StringRes
 import app.coefmonitor.R
-import app.coefmonitor.core.CalibrationProblem
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectionReason
 import app.coefmonitor.core.RejectionReason
@@ -36,20 +35,8 @@ object Labels {
         OcrStatus.OK -> R.string.ocr_ok
         OcrStatus.REJECTED -> R.string.ocr_rejected
         OcrStatus.PLACEHOLDER -> R.string.ocr_placeholder
-        OcrStatus.NO_REGION -> R.string.ocr_no_region
         OcrStatus.FAILED -> R.string.ocr_failed
         OcrStatus.SEARCHING -> R.string.ocr_searching
-    }
-
-    @StringRes
-    fun calibrationProblem(problem: CalibrationProblem): Int = when (problem) {
-        CalibrationProblem.NOT_CALIBRATED -> R.string.calib_problem_not_calibrated
-        CalibrationProblem.OUT_OF_BOUNDS -> R.string.calib_problem_out_of_bounds
-        CalibrationProblem.TOO_SMALL -> R.string.calib_problem_too_small
-        CalibrationProblem.PLACEHOLDER_NOT_LEFT_OF_TILE -> R.string.calib_problem_marker_left
-        CalibrationProblem.PLACEHOLDER_NOT_ON_TILE_ROW -> R.string.calib_problem_marker_row
-        CalibrationProblem.GEOMETRY_CHANGED -> R.string.calib_problem_geometry
-        CalibrationProblem.INVALID_IMAGE -> R.string.calib_problem_image
     }
 
     @StringRes
@@ -68,7 +55,6 @@ object Labels {
         MonitorError.CAPTURE_DENIED -> R.string.error_capture_denied
         MonitorError.CAPTURE_REVOKED -> R.string.error_capture_revoked
         MonitorError.CAPTURE_FAILED -> R.string.error_capture_failed
-        MonitorError.CALIBRATION_INVALID -> R.string.error_calibration
         MonitorError.NO_ALGORITHMS -> R.string.error_no_algorithms
         MonitorError.OCR_FAILED -> R.string.error_ocr
     }
@@ -108,9 +94,6 @@ object Labels {
     fun status(context: Context, status: MonitorStatus): String = context.getString(status(status))
 
     fun ocrStatus(context: Context, status: OcrStatus): String = context.getString(ocrStatus(status))
-
-    fun calibrationProblem(context: Context, problem: CalibrationProblem): String =
-        context.getString(calibrationProblem(problem))
 
     /** "Algorithm 1 → Algorithm 2" or "Algorithm 1 remains active". */
     fun transitionSummary(context: Context, previous: Int, new: Int, type: TransitionType): String =

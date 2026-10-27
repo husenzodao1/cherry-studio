@@ -40,18 +40,25 @@ class ExportFormatsTest {
     }
 
     @Test
-    fun `preset round-trip keeps calibration and settings`() {
+    fun `preset round-trip keeps settings and algorithms`() {
         val payload = PresetPayload(
             thresholdHundredths = 210,
             detector = DetectorConfig(requiredStableFrames = 4),
             captureIntervalMs = 300,
             globalDelayMs = 100,
-            calibration = ObservationCalibration(NormalizedRect(0.2f, 0.3f, 0.4f, 0.6f), NormalizedPoint(0.1f, 0.45f), 968, 191),
             algorithms = algorithms.take(3),
         )
         val parsed = ExportFormats.presetFromJson(ExportFormats.presetToJson("Evening", payload)) as ImportResult.Success
         assertEquals("Evening", parsed.value.first)
         assertEquals(payload, parsed.value.second)
+    }
+
+    @Test
+    fun `a preset saved with a calibration by an older version still imports`() {
+        val json = ExportFormats.presetToJson("Old", PresetPayload(210, DetectorConfig(), 300, 100))
+            .replace("\"globalDelayMs\"", "\"calibration\": {\"tile\": {\"left\": 0.2, \"top\": 0.3, \"right\": 0.4, \"bottom\": 0.6}},\n\"globalDelayMs\"")
+        val parsed = ExportFormats.presetFromJson(json) as ImportResult.Success
+        assertEquals(210L, parsed.value.second.thresholdHundredths)
     }
 
     @Test

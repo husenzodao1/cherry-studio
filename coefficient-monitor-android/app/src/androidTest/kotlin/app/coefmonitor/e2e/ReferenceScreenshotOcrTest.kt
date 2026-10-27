@@ -8,12 +8,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DetectorConfig
 import app.coefmonitor.core.ImageSignature
-import app.coefmonitor.core.NormalizedPoint
-import app.coefmonitor.core.NormalizedRect
-import app.coefmonitor.core.ObservationCalibration
-import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.core.OcrReading
-import app.coefmonitor.core.RegionResolution
+import app.coefmonitor.core.RowCells
+import app.coefmonitor.core.RowLocator
+import app.coefmonitor.core.TextBox
 import app.coefmonitor.e2e.TestEnv.log
 import app.coefmonitor.monitor.CoefficientOcrEngine
 import kotlinx.coroutines.runBlocking
@@ -25,15 +23,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Real on-device ML Kit OCR against the user's screenshot of the result row
- * ("?" | 2.01x | 1.53x | 1.20x | 2.03x). Tile bounds were measured from the image.
+ * Real on-device ML Kit OCR against the user's screenshots of the game: the result row alone
+ * ("?" | 2.01x | 1.53x | 1.20x | 2.03x; tile bounds measured from the image), and the row with the
+ * floating panel over the game, as the monitor sees it.
  */
 @RunWith(AndroidJUnit4::class)
 class ReferenceScreenshotOcrTest {
 
-    private val screenshot: Bitmap by lazy {
-        InstrumentationRegistry.getInstrumentation().context.assets.open("reference_tiles.jpg").use(BitmapFactory::decodeStream)
-    }
+    private fun asset(name: String): Bitmap =
+        InstrumentationRegistry.getInstrumentation().context.assets.open(name).use(BitmapFactory::decodeStream)
+
+    private val screenshot: Bitmap by lazy { asset("reference_tiles.jpg") }
 
     private val tiles = listOf(
         Rect(42, 64, 205, 138), // "?"
@@ -59,43 +59,46 @@ class ReferenceScreenshotOcrTest {
         }
     }
 
-    @Test
-    fun calibratedRegionReadsTheNewestValue() = runBlocking {
-        val w = screenshot.width.toFloat()
-        val h = screenshot.height.toFloat()
-        val calibration = ObservationCalibration(
-            tile = NormalizedRect(222 / w, 64 / h, 386 / w, 138 / h),
-            placeholder = NormalizedPoint(123 / w, 100 / h),
-            referenceWidth = screenshot.width,
-            referenceHeight = screenshot.height,
-        )
-        val ready = ObservationRegionManager.resolve(calibration, screenshot.width, screenshot.height) as RegionResolution.Ready
-        val neighbor = assertNotNullAndGet(ready.neighbor)
-        log("observed=${ready.primary} neighbour=$neighbor")
-        assertTrue("neighbour must be the 1.53x tile", neighbor.left in 395..410)
-        CoefficientOcrEngine().use { ocr ->
-            val primary = ocr.read(Bitmap.createBitmap(screenshot, ready.primary.left, ready.primary.top, ready.primary.width, ready.primary.height))
-            val next = ocr.read(Bitmap.createBitmap(screenshot, neighbor.left, neighbor.top, neighbor.width, neighbor.height))
-            assertEquals(Coefficient(201), (primary as OcrReading.Valid).value)
-            assertEquals(Coefficient(153), (next as OcrReading.Valid).value)
-        }
+    /** Finds the row on [image] the way monitoring does: every word on the screen, then [RowLocator]. */
+    private suspend fun locate(image: Bitmap): Pair<RowCells, List<TextBox>> {
+        val words = CoefficientOcrEngine().use { it.readWords(image) }
+        log("words: ${words.joinToString { "${it.text}@${it.left},${it.top}" }}")
+        val cells = RowLocator.locate(words, image.width, image.height)
+        assertNotNull("row not found", cells)
+        log("row: $cells")
+        return cells!! to words
     }
 
     @Test
-    fun autoDetectFindsTheTileRightOfPlaceholder() = runBlocking {
-        val layout = CoefficientOcrEngine().use { it.detectLayout(screenshot) }
-        assertNotNull("auto-detect found nothing", layout)
-        layout!!
-        log("auto-detect on reference: $layout")
-        val w = screenshot.width
-        val h = screenshot.height
-        val centerX = layout.tile.centerX * w
-        val centerY = layout.tile.centerY * h
-        assertTrue("tile centre x=$centerX not on the 2.01x tile", centerX in 222f..386f)
-        assertTrue("tile centre y=$centerY not on the row", centerY in 64f..138f)
-        val markX = layout.placeholder.x * w
-        assertTrue("\"?\" marker x=$markX not on the \"?\" tile", markX in 42f..205f)
-        assertTrue(ObservationRegionManager.validate(ObservationCalibration(layout.tile, layout.placeholder, w, h)) == null)
+    fun findsTheRowAndReadsTheNewestValueAndItsNeighbour() = runBlocking {
+        val (cells, words) = locate(screenshot)
+        assertTrue("newest cell ${cells.newest} not on the 2.01x tile", (cells.newest.left + cells.newest.right) / 2 in 222..386)
+        assertEquals(Coefficient(201), (cells.readNewest(words) as OcrReading.Valid).value)
+        assertEquals(Coefficient(153), (cells.readNeighbor(words) as OcrReading.Valid).value)
+    }
+
+    @Test
+    fun findsTheRowUnderTheFloatingPanel() = runBlocking {
+        val (cells, words) = locate(asset("real_row_with_panel.jpg"))
+        assertEquals(Coefficient(203), (cells.readNewest(words) as OcrReading.Valid).value)
+        assertEquals(Coefficient(100), (cells.readNeighbor(words) as OcrReading.Valid).value)
+        // Read again from the tracking strip only, as monitoring does once the row is known.
+        val image = asset("real_row_with_panel.jpg")
+        val strip = cells.strip(image.width, image.height)
+        val stripWords = CoefficientOcrEngine().use {
+            it.readWords(Bitmap.createBitmap(image, strip.left, strip.top, strip.width, strip.height), offsetY = strip.top)
+        }
+        val followed = RowLocator.locate(stripWords, image.width, image.height, near = cells)
+        assertTrue("row lost or moved in the strip: $followed", followed != null && !followed.movedFrom(cells))
+        assertEquals(Coefficient(203), (cells.readNewest(stripWords) as OcrReading.Valid).value)
+    }
+
+    @Test
+    fun findsTheRowNextToALastValueInThePanel() = runBlocking {
+        // The panel shows "17.35x" in big letters: a single value is never taken for the row.
+        val (cells, words) = locate(asset("real_row_with_old_panel.jpg"))
+        assertEquals(Coefficient(158), (cells.readNewest(words) as OcrReading.Valid).value)
+        assertEquals(Coefficient(350), (cells.readNeighbor(words) as OcrReading.Valid).value)
     }
 
     @Test
@@ -115,10 +118,5 @@ class ReferenceScreenshotOcrTest {
         assertEquals(1f, signatures[1].similarity(signatures[1]), 0.0001f)
         assertTrue("2.01x and 1.53x must look different", signatures[1].similarity(signatures[2]) < same)
         assertTrue("1.53x and 1.20x must look different", signatures[2].similarity(signatures[3]) < same)
-    }
-
-    private fun <T> assertNotNullAndGet(value: T?): T {
-        assertNotNull(value)
-        return value!!
     }
 }

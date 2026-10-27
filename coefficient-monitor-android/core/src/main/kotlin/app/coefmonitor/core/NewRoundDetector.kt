@@ -54,7 +54,7 @@ data class DetectorBaseline(
 data class FrameSample(
     val timestampMs: Long,
     val primary: ImageSignature,
-    /** Signature of the next-older tile, when the calibration allows one. */
+    /** Signature of the next-older tile, when the row has one on the screen. */
     val neighbor: ImageSignature?,
     /** OCR result for [primary]; null when OCR was skipped for this frame. */
     val reading: OcrReading?,

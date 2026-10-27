@@ -2,7 +2,9 @@ package app.coefmonitor.e2e
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.SystemClock
+import android.view.View
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -15,10 +17,8 @@ import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.ImageSignature
 import app.coefmonitor.core.NormalizedPoint
 import app.coefmonitor.core.NormalizedRect
-import app.coefmonitor.core.ObservationCalibration
-import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.core.OcrReading
-import app.coefmonitor.core.RegionResolution
+import app.coefmonitor.core.RowLocator
 import app.coefmonitor.core.TransitionType
 import app.coefmonitor.debug.SimulatorActivity
 import app.coefmonitor.debug.SimulatorBoard
@@ -49,8 +49,8 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.abs
 
 /**
- * Whole app on a device: real MediaProjection capture of the simulator screen → crop of the tile
- * right of "?" → real ML Kit OCR → round detection → Room transaction → dashboard/overlay.
+ * Whole app on a device: real MediaProjection capture of the simulator screen → real ML Kit OCR
+ * finds the row by itself and follows it → round detection → Room transaction → dashboard/overlay.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -90,13 +90,13 @@ class EndToEndMonitoringTest {
         onSimulator { it.board.push(value) }
     }
 
-    /** Requests capture consent from the simulator and starts the service in [mode]. */
-    private fun startCapture(mode: MonitoringService.Mode, delayMs: Long = 0L) {
+    /** Requests capture consent from the simulator and starts monitoring. */
+    private fun startCapture() {
         val delivered = AtomicReference<Int?>(null)
         onSimulator { activity ->
             activity.requestCapture { code, data ->
                 delivered.set(code)
-                if (code == Activity.RESULT_OK && data != null) MonitoringService.start(activity, code, data, mode, delayMs)
+                if (code == Activity.RESULT_OK && data != null) MonitoringService.start(activity, code, data)
             }
         }
         waitFor("screen-capture consent", 20_000) {
@@ -136,37 +136,27 @@ class EndToEndMonitoringTest {
     private fun waitCooldown() = SystemClock.sleep(3_400)
 
     @Test
-    fun autoDetectOnCapturedSimulatorScreen() {
-        val bitmap = snapshot(delayMs = 1_500)
+    fun findsTheRowOnTheSimulatorScreen() {
+        val screen = screen()
         screenshot("e2e_00_simulator")
         val expectedTile = onSimulator { it.tileBounds(0) }
-        val expectedMark = onSimulator { it.placeholderBounds() }
-        val layout = runBlocking { CoefficientOcrEngine().use { it.detectLayout(bitmap) } }
-        log("auto-detect on captured simulator: $layout; expected tile=$expectedTile mark=$expectedMark; image=${bitmap.width}x${bitmap.height}")
-        assertTrue("auto-detect found nothing", layout != null)
-        layout!!
-        // "?" may be recognised or estimated one tile left of the first coefficient; both must land on the "?" tile.
-        log("placeholder recognised directly: ${!layout.placeholderGuessed}")
-        assertTrue("tile centre outside the first result tile", contains(expectedTile, layout.tile.centerX, layout.tile.centerY))
-        assertTrue("marker outside the \"?\" tile", contains(expectedMark, layout.placeholder.x, layout.placeholder.y))
-
-        val calibration = ObservationCalibration(layout.tile, layout.placeholder, bitmap.width, bitmap.height)
-        val ready = ObservationRegionManager.resolve(calibration, bitmap.width, bitmap.height) as RegionResolution.Ready
-        val reading = runBlocking {
-            CoefficientOcrEngine().use { ocr ->
-                ocr.read(android.graphics.Bitmap.createBitmap(bitmap, ready.primary.left, ready.primary.top, ready.primary.width, ready.primary.height))
-            }
-        }
-        log("OCR of auto-detected region: $reading")
-        assertEquals(Coefficient(333), (reading as OcrReading.Valid).value)
+        val words = runBlocking { CoefficientOcrEngine().use { it.readWords(screen) } }
+        log("words on the simulator: ${words.joinToString { "${it.text}@${it.left},${it.top}" }}; image=${screen.width}x${screen.height}")
+        val cells = RowLocator.locate(words, screen.width, screen.height)
+        assertTrue("row not found", cells != null)
+        cells!!
+        log("row found: $cells; expected newest tile $expectedTile")
+        val centerX = (cells.newest.left + cells.newest.width / 2f) / screen.width
+        val centerY = (cells.newest.top + cells.newest.height / 2f) / screen.height
+        assertTrue("newest cell outside the first result tile", contains(expectedTile, centerX, centerY))
+        assertEquals(Coefficient(333), (cells.readNewest(words) as OcrReading.Valid).value)
+        assertEquals(Coefficient(111), (cells.readNeighbor(words) as OcrReading.Valid).value)
     }
 
     @Test
     fun fullMonitoringSession() {
-        val calibration = onSimulator { it.calibration() }
-        log("calibration $calibration")
         runBlocking {
-            container.settings.update { it.copy(calibration = calibration, overlayEnabled = true, autoClickEnabled = true) }
+            container.settings.update { it.copy(overlayEnabled = true, autoClickEnabled = true) }
             // Algorithm 2 has two click steps; the auto-clicker must tap them one after another.
             val second = container.database.algorithmDao().getAll()[1]
             container.algorithms.update(
@@ -183,8 +173,8 @@ class EndToEndMonitoringTest {
 
         TestEnv.enableAutoClicker()
 
-        // Start: the visible 3.33x only initialises the detector.
-        startCapture(MonitoringService.Mode.MONITOR)
+        // Start: the row is found without any setup; the visible 3.33x only initialises the detector.
+        startCapture()
         awaitStatus(MonitorStatus.MONITORING, timeoutMs = FIRST_READ_TIMEOUT_MS)
         SystemClock.sleep(2_000)
         assertEquals("visible round must not be processed at start", 0, eventCount())
@@ -250,7 +240,7 @@ class EndToEndMonitoringTest {
         // Stop and start a new session: the round on screen is not replayed.
         MonitoringService.command(app, MonitoringService.ACTION_STOP)
         awaitStatus(MonitorStatus.STOPPED)
-        startCapture(MonitoringService.Mode.MONITOR)
+        startCapture()
         awaitStatus(MonitorStatus.MONITORING, timeoutMs = FIRST_READ_TIMEOUT_MS)
         SystemClock.sleep(4_000)
         assertEquals("restart must not replay the visible round\n${failureContext()}", events, eventCount())
@@ -285,23 +275,24 @@ class EndToEndMonitoringTest {
 
     @Test
     fun findsTheRowAgainAfterTheGameMoved() {
-        val calibration = onSimulator { it.calibration() }
-        runBlocking { container.settings.update { it.copy(calibration = calibration) } }
-        startCapture(MonitoringService.Mode.MONITOR)
+        startCapture()
         awaitStatus(MonitorStatus.MONITORING, timeoutMs = FIRST_READ_TIMEOUT_MS)
+        val before = waitFor("row found", 10_000) { TestEnv.runtime().rowBand }
 
-        // The game is scrolled and does not come back to exactly the same place: the row is now
-        // 60 dp lower, and two rounds end while the old place shows nothing.
-        onSimulator { it.board.translationY = 60 * it.resources.displayMetrics.density }
-        SystemClock.sleep(500)
+        // The game is scrolled away while two rounds end, and does not come back to exactly the
+        // same place: the row is now 60 dp lower.
+        onSimulator { it.board.visibility = View.INVISIBLE }
+        SystemClock.sleep(1_500)
         push("1.70x")
         SystemClock.sleep(800)
         push("1.20x")
-        val moved = waitFor("row found at its new place", 30_000) {
-            runBlocking { container.settings.current().calibration }?.takeIf { it != calibration }
+        SystemClock.sleep(1_000)
+        onSimulator {
+            it.board.translationY = 60 * it.resources.displayMetrics.density
+            it.board.visibility = View.VISIBLE
         }
-        log("region moved from ${calibration.tile} to ${moved.tile}")
-        assertTrue("region did not move down", moved.tile.top > calibration.tile.top)
+        val moved = waitFor("row found at its new place", 30_000) { TestEnv.runtime().rowBand?.takeIf { it.top > before.top + 0.01f } }
+        log("row moved from $before to $moved")
 
         // Both rounds are counted in order: the newest from its tile, the one before from the neighbour.
         awaitEventCount(2)
@@ -319,29 +310,30 @@ class EndToEndMonitoringTest {
 
     @Test
     fun staticTileSignatureIsStableAcrossFrames() {
-        // Two captures of an unchanged tile must look identical to the detector (no false motion).
-        val calibration = onSimulator { it.calibration() }
-        val first = snapshot()
-        val second = snapshot()
-        val ready = ObservationRegionManager.resolve(calibration, first.width, first.height) as RegionResolution.Ready
-        fun signature(bitmap: android.graphics.Bitmap): ImageSignature {
-            val r = ready.primary
-            val pixels = IntArray(r.width * r.height)
-            bitmap.getPixels(pixels, 0, r.width, r.left, r.top, r.width, r.height)
-            return ImageSignature.fromArgb(pixels, r.width, r.height)
+        // Two pictures of an unchanged tile must look identical to the detector (no false motion).
+        val tile = onSimulator { it.tileBounds(0) }
+        val first = screen()
+        SystemClock.sleep(300)
+        val second = screen()
+        fun signature(bitmap: Bitmap): ImageSignature {
+            val left = (tile.left * bitmap.width).toInt()
+            val top = (tile.top * bitmap.height).toInt()
+            val width = (tile.width * bitmap.width).toInt()
+            val height = (tile.height * bitmap.height).toInt()
+            val pixels = IntArray(width * height)
+            bitmap.getPixels(pixels, 0, width, left, top, width, height)
+            return ImageSignature.fromArgb(pixels, width, height)
         }
         val similarity = signature(first).similarity(signature(second))
         log("static tile similarity between captures = $similarity")
         assertTrue("static tile similarity $similarity", similarity >= 0.985f)
     }
 
-    /** One capture session in snapshot mode; returns the stored full-screen frame. */
-    private fun snapshot(delayMs: Long = 800): android.graphics.Bitmap {
-        val before = container.calibrationImages.version.value
-        startCapture(MonitoringService.Mode.SNAPSHOT_ONLY, delayMs)
-        waitFor("calibration snapshot", 20_000) { container.calibrationImages.version.value.takeIf { it != before } }
-        awaitStatus(MonitorStatus.STOPPED)
-        return runBlocking { container.calibrationImages.load() }!!
+    /** The whole display, as monitoring captures it. */
+    private fun screen(): Bitmap {
+        val shot = instrumentation.uiAutomation.takeScreenshot() ?: error("screenshot failed")
+        // Screenshots can be hardware bitmaps, whose pixels cannot be read directly.
+        return shot.copy(Bitmap.Config.ARGB_8888, false)
     }
 
     private fun contains(rect: NormalizedRect, x: Float, y: Float) = x in rect.left..rect.right && y in rect.top..rect.bottom

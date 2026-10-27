@@ -163,7 +163,7 @@ class FrameAccess internal constructor(private val image: Image, val generation:
         return out
     }
 
-    /** Full-frame copy, used only for calibration screenshots. */
+    /** Full-frame copy, used when the whole screen is searched for the row. */
     fun toBitmap(): Bitmap {
         val plane = image.planes[0]
         val paddedWidth = plane.rowStride / plane.pixelStride

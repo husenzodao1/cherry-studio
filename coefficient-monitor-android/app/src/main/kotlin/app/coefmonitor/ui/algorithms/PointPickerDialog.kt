@@ -61,7 +61,7 @@ private val MARKER = Color(0xFFE5484D)
 private val MARKER_GRAB = 36.dp
 
 /**
- * Full-screen picker: tap on the calibration screenshot where this step should click, or drag the
+ * Full-screen picker: tap on the saved screen where this step should click, or drag the
  * marker. Other drags scroll, the slider zooms. The coefficient row being read (red) cannot be chosen.
  */
 @Composable
@@ -166,7 +166,7 @@ private fun PickerCanvas(
             Box(Modifier.size(contentWidth, contentHeight)) {
                 Image(
                     bitmap = canvas.image,
-                    contentDescription = stringResource(R.string.calibration_image_description),
+                    contentDescription = stringResource(R.string.screen_image_description),
                     contentScale = ContentScale.FillBounds,
                     modifier = Modifier.matchParentSize(),
                 )

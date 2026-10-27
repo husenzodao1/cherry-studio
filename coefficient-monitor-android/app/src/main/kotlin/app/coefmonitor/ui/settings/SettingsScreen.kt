@@ -102,17 +102,14 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
         viewModelScope.launch { container.monitor.forgetObservedRound() }
     }
 
-    /** Restores defaults but keeps the calibration, which is device specific and tedious to redo. */
-    fun restoreDefaults() = update { AppSettings(calibration = it.calibration) }
-
-    fun clearCalibration() = update { it.copy(calibration = null) }
+    fun restoreDefaults() = update { AppSettings() }
 
     companion object {
         val Factory = viewModelFactory { initializer { SettingsViewModel(container()) } }
     }
 }
 
-private enum class ConfirmAction { RESET_SEQUENCE, FORGET_ROUND, RESTORE_DEFAULTS, CLEAR_CALIBRATION }
+private enum class ConfirmAction { RESET_SEQUENCE, FORGET_ROUND, RESTORE_DEFAULTS }
 
 private data class LanguageOption(val tag: String, val label: Int)
 
@@ -125,7 +122,7 @@ private val languages = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onOpenCalibration: () -> Unit, viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory)) {
+fun SettingsScreen(viewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory)) {
     val loaded by viewModel.settings.collectAsStateWithLifecycle()
     var confirm by remember { mutableStateOf<ConfirmAction?>(null) }
 
@@ -137,7 +134,6 @@ fun SettingsScreen(onOpenCalibration: () -> Unit, viewModel: SettingsViewModel =
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item { DetectionSection(settings, viewModel) }
-            item { CalibrationSection(settings, onOpenCalibration, onClear = { confirm = ConfirmAction.CLEAR_CALIBRATION }) }
             item { DelaySection(settings, viewModel) }
             item { AppearanceSection(settings, viewModel) }
             item { PermissionsSection(settings, viewModel) }
@@ -151,7 +147,6 @@ fun SettingsScreen(onOpenCalibration: () -> Unit, viewModel: SettingsViewModel =
             ConfirmAction.RESET_SEQUENCE -> R.string.confirm_reset_title to R.string.confirm_reset_text
             ConfirmAction.FORGET_ROUND -> R.string.confirm_forget_round_title to R.string.confirm_forget_round_text
             ConfirmAction.RESTORE_DEFAULTS -> R.string.confirm_restore_defaults_title to R.string.confirm_restore_defaults_text
-            ConfirmAction.CLEAR_CALIBRATION -> R.string.confirm_clear_calibration_title to R.string.confirm_clear_calibration_text
         }
         ConfirmDialog(
             title = stringResource(title),
@@ -162,7 +157,6 @@ fun SettingsScreen(onOpenCalibration: () -> Unit, viewModel: SettingsViewModel =
                     ConfirmAction.RESET_SEQUENCE -> viewModel.resetToFirst()
                     ConfirmAction.FORGET_ROUND -> viewModel.forgetObservedRound()
                     ConfirmAction.RESTORE_DEFAULTS -> viewModel.restoreDefaults()
-                    ConfirmAction.CLEAR_CALIBRATION -> viewModel.clearCalibration()
                 }
             },
             onDismiss = { confirm = null },
@@ -296,29 +290,6 @@ private fun ThresholdField(current: Coefficient, onApply: (Coefficient) -> Unit)
             style = MaterialTheme.typography.bodySmall,
             color = if (valid) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
         )
-    }
-}
-
-@Composable
-private fun CalibrationSection(settings: AppSettings, onOpenCalibration: () -> Unit, onClear: () -> Unit) {
-    SectionCard(title = stringResource(R.string.settings_calibration)) {
-        Text(
-            stringResource(if (settings.calibration == null) R.string.not_calibrated else R.string.calibration_saved),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Text(
-            stringResource(R.string.calibration_explainer),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalButton(onClick = onOpenCalibration) {
-                Text(stringResource(if (settings.calibration == null) R.string.action_calibrate else R.string.action_edit_calibration))
-            }
-            if (settings.calibration != null) {
-                OutlinedButton(onClick = onClear) { Text(stringResource(R.string.action_clear)) }
-            }
-        }
     }
 }
 

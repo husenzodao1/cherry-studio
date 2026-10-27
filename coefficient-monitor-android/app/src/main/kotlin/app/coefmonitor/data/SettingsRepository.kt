@@ -13,8 +13,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
-import app.coefmonitor.core.ObservationCalibration
-import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.data.db.StorageJson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -29,7 +27,6 @@ data class AppSettings(
     val detector: DetectorConfig = DetectorConfig(),
     val captureIntervalMs: Long = DEFAULT_CAPTURE_INTERVAL_MS,
     val globalDelayMs: Long = DelayPolicy.DEFAULT_GLOBAL_MS,
-    val calibration: ObservationCalibration? = null,
     val theme: ThemeMode = ThemeMode.SYSTEM,
     val logRejectedReadings: Boolean = true,
     val overlayEnabled: Boolean = false,
@@ -55,7 +52,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val DETECTOR = stringPreferencesKey("detector_json")
         val CAPTURE_INTERVAL = longPreferencesKey("capture_interval_ms")
         val GLOBAL_DELAY = longPreferencesKey("global_delay_ms")
-        val CALIBRATION = stringPreferencesKey("calibration_json")
         val THEME = stringPreferencesKey("theme")
         val LOG_REJECTED = booleanPreferencesKey("log_rejected")
         val OVERLAY = booleanPreferencesKey("overlay_enabled")
@@ -85,10 +81,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
                 ?.coerceIn(AppSettings.MIN_CAPTURE_INTERVAL_MS, AppSettings.MAX_CAPTURE_INTERVAL_MS)
                 ?: defaults.captureIntervalMs,
             globalDelayMs = this[Keys.GLOBAL_DELAY]?.takeIf(DelayPolicy::isValid) ?: defaults.globalDelayMs,
-            calibration = this[Keys.CALIBRATION]?.let { json ->
-                runCatching { StorageJson.decodeFromString(ObservationCalibration.serializer(), json) }.getOrNull()
-                    ?.takeIf { ObservationRegionManager.validate(it) == null }
-            },
             theme = ThemeMode.entries.firstOrNull { it.name == this[Keys.THEME] } ?: defaults.theme,
             logRejectedReadings = this[Keys.LOG_REJECTED] ?: defaults.logRejectedReadings,
             overlayEnabled = this[Keys.OVERLAY] ?: defaults.overlayEnabled,
@@ -103,12 +95,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         this[Keys.DETECTOR] = StorageJson.encodeToString(DetectorConfig.serializer(), settings.detector.sanitized())
         this[Keys.CAPTURE_INTERVAL] = settings.captureIntervalMs
         this[Keys.GLOBAL_DELAY] = settings.globalDelayMs
-        val calibration = settings.calibration
-        if (calibration == null) {
-            remove(Keys.CALIBRATION)
-        } else {
-            this[Keys.CALIBRATION] = StorageJson.encodeToString(ObservationCalibration.serializer(), calibration)
-        }
         this[Keys.THEME] = settings.theme.name
         this[Keys.LOG_REJECTED] = settings.logRejectedReadings
         this[Keys.OVERLAY] = settings.overlayEnabled

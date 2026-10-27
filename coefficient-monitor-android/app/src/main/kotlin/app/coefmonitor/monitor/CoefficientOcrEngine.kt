@@ -1,25 +1,14 @@
 package app.coefmonitor.monitor
 
 import android.graphics.Bitmap
-import android.graphics.Rect
 import app.coefmonitor.core.CoefficientParser
-import app.coefmonitor.core.NormalizedPoint
-import app.coefmonitor.core.NormalizedRect
 import app.coefmonitor.core.OcrReading
+import app.coefmonitor.core.TextBox
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.tasks.await
 import java.io.Closeable
-import kotlin.math.abs
-
-/** Suggested calibration from [CoefficientOcrEngine.detectLayout]. */
-data class DetectedLayout(
-    val placeholder: NormalizedPoint,
-    val tile: NormalizedRect,
-    /** True when "?" was not recognised and its position was estimated. */
-    val placeholderGuessed: Boolean,
-)
 
 /**
  * On-device OCR (ML Kit bundled Latin model: no network, no download at runtime).
@@ -40,48 +29,18 @@ class CoefficientOcrEngine : Closeable {
     }
 
     /**
-     * Calibration helper: finds a "?" with a coefficient immediately to its right on a full
-     * screenshot. If no "?" is recognised, falls back to the leftmost coefficient of the longest
-     * row of coefficients and guesses "?" one tile to its left. The user always reviews the result.
+     * Every word on [image] with its box, shifted down by [offsetY] (when [image] is a strip of
+     * the frame) so boxes are in frame pixels. Confidence is the word's line confidence.
      */
-    suspend fun detectLayout(screen: Bitmap): DetectedLayout? {
-        val text = recognizer.process(InputImage.fromBitmap(screen, 0)).await()
-        val elements = text.textBlocks.flatMap { it.lines }.flatMap { it.elements }
-            .mapNotNull { element -> element.boundingBox?.let { element.text.trim() to it } }
-        val coefficients = elements.filter { (value, _) -> CoefficientParser.parse(value) is OcrReading.Valid }.map { it.second }
-        // "?" is sometimes read together with the pointer under it (e.g. "?^"), so allow one extra symbol.
-        val marks = elements.filter { (value, _) -> value.startsWith("?") && value.length <= 2 }.map { it.second }
-        for (mark in marks.sortedBy { it.top }) {
-            val next = coefficients
-                .filter { it.left > mark.right && it.centerY() in mark.top..mark.bottom }
-                .minByOrNull { it.left } ?: continue
-            return layout(mark.exactCenterX(), mark.exactCenterY(), next, screen.width, screen.height, guessed = false)
+    suspend fun readWords(image: Bitmap, offsetY: Int = 0): List<TextBox> {
+        val text = recognizer.process(InputImage.fromBitmap(image, 0)).await()
+        return text.textBlocks.flatMap { it.lines }.flatMap { line ->
+            line.elements.mapNotNull { element ->
+                element.boundingBox?.let { box ->
+                    TextBox(element.text.trim(), box.left, box.top + offsetY, box.right, box.bottom + offsetY, line.confidence)
+                }
+            }
         }
-        val row = coefficients
-            .map { anchor -> coefficients.filter { abs(it.centerY() - anchor.centerY()) <= anchor.height() / 2 }.sortedBy { it.left } }
-            .filter { it.size >= 2 }
-            .maxByOrNull { it.size } ?: return null
-        val pitch = row[1].exactCenterX() - row[0].exactCenterX()
-        return layout(row[0].exactCenterX() - pitch, row[0].exactCenterY(), row[0], screen.width, screen.height, guessed = true)
-    }
-
-    private fun layout(markX: Float, markY: Float, tile: Rect, width: Int, height: Int, guessed: Boolean): DetectedLayout {
-        val pitch = tile.exactCenterX() - markX
-        // Cover ~90% of one tile pitch so wider values (e.g. 123.45x) still fit inside the region.
-        val halfWidth = maxOf(pitch * 0.45f, tile.width() * 0.75f)
-        val halfHeight = tile.height() * 1.1f
-        val cx = tile.exactCenterX()
-        val cy = tile.exactCenterY()
-        return DetectedLayout(
-            placeholder = NormalizedPoint((markX / width).coerceIn(0f, 1f), (markY / height).coerceIn(0f, 1f)),
-            tile = NormalizedRect(
-                ((cx - halfWidth) / width).coerceIn(0f, 1f),
-                ((cy - halfHeight) / height).coerceIn(0f, 1f),
-                ((cx + halfWidth) / width).coerceIn(0f, 1f),
-                ((cy + halfHeight) / height).coerceIn(0f, 1f),
-            ),
-            placeholderGuessed = guessed,
-        )
     }
 
     override fun close() = recognizer.close()

@@ -1,15 +1,7 @@
 package app.coefmonitor.monitor
 
-import android.content.Context
-import android.hardware.display.DisplayManager
-import android.util.DisplayMetrics
-import android.view.Display
 import app.coefmonitor.AppContainer
-import app.coefmonitor.core.CalibrationProblem
 import app.coefmonitor.core.ClickPlan
-import app.coefmonitor.core.ObservationCalibration
-import app.coefmonitor.core.ObservationRegionManager
-import app.coefmonitor.core.RegionResolution
 import app.coefmonitor.data.DiagnosticLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +14,6 @@ import kotlinx.coroutines.withContext
  * replaces the one in progress.
  */
 class AutoClicker(
-    private val context: Context,
     private val container: AppContainer,
     private val scope: CoroutineScope,
 ) {
@@ -38,21 +29,13 @@ class AutoClicker(
 
     /**
      * Runs the clicks of the algorithm at [activeIndex] (position in the enabled sequence), step by
-     * step with the step times in between. Taps on the row being read are skipped, and nothing is
-     * tapped if the screen orientation no longer matches the calibration screenshot the points
-     * were picked on.
+     * step with the step times in between. Taps on the row being read right now are skipped.
      */
     suspend fun run(activeIndex: Int) {
         val settings = container.settings.current()
-        val calibration = settings.calibration
         val definition = container.algorithms.allDefinitions().filter { it.enabled }.getOrNull(activeIndex) ?: return
-        val band = calibration?.let { ObservationRegionManager.readingBand(it) }
-        val clicks = ClickPlan.plan(definition.steps, settings.globalDelayMs, band)
+        val clicks = ClickPlan.plan(definition.steps, settings.globalDelayMs, container.runtime.state.value.rowBand)
         if (clicks.isEmpty()) return
-        if (calibration != null && !sameOrientationAs(calibration)) {
-            log(DiagnosticLevel.WARNING, "Screen orientation differs from the calibration screenshot; Algorithm ${activeIndex + 1} was not clicked")
-            return
-        }
         if (!AutoClickService.connected.value) {
             if (!offReported) {
                 log(DiagnosticLevel.WARNING, "The auto-clicker is off in Accessibility settings; Algorithm ${activeIndex + 1} was not clicked")
@@ -72,15 +55,6 @@ class AutoClicker(
             log(DiagnosticLevel.INFO, "Algorithm $algorithmNumber: $tapped click(s) performed")
         } else {
             log(DiagnosticLevel.WARNING, "Algorithm $algorithmNumber: $tapped click(s) performed; step(s) ${missed.joinToString()} could not be clicked")
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private fun sameOrientationAs(calibration: ObservationCalibration): Boolean {
-        val metrics = DisplayMetrics()
-        context.getSystemService(DisplayManager::class.java).getDisplay(Display.DEFAULT_DISPLAY).getRealMetrics(metrics)
-        return ObservationRegionManager.resolve(calibration, metrics.widthPixels, metrics.heightPixels).let {
-            it !is RegionResolution.Invalid || it.problem != CalibrationProblem.GEOMETRY_CHANGED
         }
     }
 

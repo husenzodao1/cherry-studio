@@ -19,7 +19,6 @@ import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
 import app.coefmonitor.core.NormalizedPoint
-import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.StoredAlgorithm
 import app.coefmonitor.data.db.EventEntity
@@ -160,7 +159,6 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
         val lastValue = p.state.lastAcceptedHundredths?.let { Coefficient(it).toString() } ?: "—"
         val clickerOff = !p.clickerConnected && active?.steps?.any { it.point != null } == true
         val warning = when {
-            p.runtime.calibrationProblem != null -> Labels.calibrationProblem(str, p.runtime.calibrationProblem)
             clickerOff -> str.getString(R.string.warning_auto_click_off)
             total > 0 && index == total - 1 -> str.getString(R.string.warning_last_algorithm)
             p.runtime.lastContinuity == Continuity.GAP_SUSPECTED -> str.getString(R.string.warning_gap)
@@ -315,8 +313,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
     /** Hides the panel and lets the user tap (and drag) the click point right on the screen. */
     private fun pickPoint(initial: NormalizedPoint?, onPicked: (NormalizedPoint) -> Unit) {
         if (picker != null) return
-        val band = latest?.settings?.calibration?.let { ObservationRegionManager.readingBand(it) }
-        val overlay = PointPickerOverlay(withAppLocale(), initial, band) { point ->
+        val overlay = PointPickerOverlay(withAppLocale(), initial, container.runtime.state.value.rowBand) { point ->
             picker = null
             panel?.setHidden(false)
             if (point != null) onPicked(point)

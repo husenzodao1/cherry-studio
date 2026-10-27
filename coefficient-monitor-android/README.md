@@ -14,7 +14,7 @@ independent, and the sequence position does not predict the next result.
 
 | Module | What it contains | Needs Android SDK |
 | --- | --- | --- |
-| `core/` | Pure Kotlin: threshold state machine, OCR text parser, new-round detector, calibration geometry, import/export formats. All rules live here. | No |
+| `core/` | Pure Kotlin: threshold state machine, OCR text parser, new-round detector, row locator, import/export formats. All rules live here. | No |
 | `app/` | Android app: MediaProjection capture service, ML Kit OCR, Room + DataStore, Compose UI, floating panel. | Yes |
 
 `core` is a standalone Gradle build included by the root build (`includeBuild("core")`). You can
@@ -29,11 +29,11 @@ test it with plain Maven Central access: `cd core && gradle test`.
 - `NewRoundDetector` (core): turns frames into exactly one `RoundEvent` per round.
 - `RoundProcessor` (core): applies an event to the stored state. It refuses already-processed
   sequence numbers and builds the event record.
-- `ObservationRegionManager` (core): normalised calibration ↔ pixels, plus validation.
-- `MonitoringService` / `ScreenCapturer` / `FramePipeline` / `CoefficientOcrEngine` (app): the capture pipeline.
+- `RowLocator` (core): finds the result row among the words OCR read on the screen.
+- `MonitoringService` / `ScreenCapturer` / `RowTracker` / `CoefficientOcrEngine` (app): the capture pipeline.
 - `ClickPlan` (core) / `AutoClicker` / `AutoClickController` / `AutoClickService` (app): the
   auto-clicker. The plan lists the steps with their times; `AutoClicker` (one per app, used by
-  monitoring and the floating panel) checks the orientation and the service; the controller runs
+  monitoring and the floating panel) checks the service and skips taps on the row being read; the controller runs
   the steps one after another; the accessibility service performs the taps.
 - `FloatingPanelService` / `OverlayController` (app): floating mode, see [Floating mode](#floating-mode).
 - `MonitorRepository` (app): writes the new position and the event row in **one Room transaction**.
@@ -44,33 +44,33 @@ test it with plain Maven Central access: `cd core && gradle test`.
 
 ```
 [ ? ] [ 2.01x ] [ 1.53x ] [ 1.20x ] [ 2.03x ] …
-       ^^^^^^^  observed tile (new results appear here)
-                ^^^^^^^  neighbour, used only to confirm the row shifted
+       ^^^^^^^  newest tile (new results appear here)
+                ^^^^^^^  neighbour: confirms the row shifted, and shows a round that was missed
 ```
 
-Calibration (Monitor → Calibrate) uses a screenshot of your device:
+There is nothing to set up: monitoring finds the row on the live screen by itself. ML Kit reads
+every word on the screen; the row is `?` followed by coefficients on one line, and the newest
+tile is the first slot right of `?` (even when its value is not read in that frame). If `?` is not
+recognised, a run of at least three evenly spaced coefficients counts. Single values elsewhere
+(the game's big multiplier, a bet field, the floating panel's *Last: 17.35x*) never form a row,
+and a value whose `x` was not read still shows where the row is.
 
-1. **Capture screen (5 s)** asks for capture consent, waits 5 s so you can switch to the game, and
-   takes one frame. Alternatively, **pick a screenshot** you took yourself.
-2. **Auto-detect** runs OCR over the whole screenshot. It finds `?` and the coefficient
-   immediately to its right and proposes the rectangle. You can also do it by hand: mark `?`,
-   then draw, move or resize the rectangle (zoom, pan, ±2 px nudges).
-3. **Test OCR** reads the selected tile and its neighbour. **Save** stores the region in normalised
-   coordinates together with the screenshot size.
-
-At runtime the region is scaled to the capture size. If the aspect ratio changed (rotation,
-split-screen), monitoring stops with "recalibrate" instead of guessing a rectangle.
+Once found, the row is followed: OCR reads only a full-width strip around it each tick, and the
+screen where it was found is kept for picking click points in the app. The dashboard shows where
+the row is (*Observation region*), and **Find row** (dashboard or panel) looks for it on the whole
+screen again at once.
 
 ## How a new round is detected (and processed only once)
 
 Each tick (default 300 ms):
 
-1. Crop the observed tile and its neighbour from the newest frame. Compute small
+1. Crop the newest tile and its neighbour from the newest frame. Compute small
    brightness-normalised image signatures.
 2. If the tile differs from the previous frame it is **moving** (animation, app switch). Nothing is
    read and the candidate value is discarded.
-3. On still frames, ML Kit OCR reads the tile. OCR is skipped while the picture is pixel-identical,
-   so a static screen costs almost nothing. The reading must be valid, meet the minimum
+3. On still frames, ML Kit OCR reads the strip around the row; the values are the words inside the
+   two tiles. OCR is skipped while the strip is pixel-identical, so a static screen costs almost
+   nothing. The reading must be valid, meet the minimum
    confidence, and be identical on **N consecutive still frames** (default 3).
 4. The trusted value is compared with the last committed round:
    - **different value** → new round;
@@ -96,16 +96,17 @@ restart is never processed again.
 
 ## Finding the row again
 
-The observed region is fixed on the screen. If the game is scrolled or moved and comes back a few
-pixels off, the region cuts the coefficient and every reading is rejected. When the region has
-given no readable coefficient for 2 s (rejected, "?", or no valid region, e.g. not calibrated or
-the screen rotated), monitoring reads the whole screen every 3 s, finds "?" and the coefficient
-right of it (as calibration's *Auto-detect* does), moves the region there and saves it as the new
-calibration. The detector then catches up: if the newest tile still shows the value seen before,
-nothing was missed; if it shows another one and the neighbour shows the value seen before, the
-newest is the one missed round; if the neighbour is new too, both are processed (neighbour first)
-and flagged, since more may be missing. If the neighbour cannot be read, the visible round is only
-the starting point and the gap is flagged. **Find row** on the panel does the same at once.
+When the game is scrolled, the row moves with it. As long as it stays inside the strip, the next
+tick finds it at its new place; otherwise the whole screen is read in the same tick (and every
+0.7 s while it is not found), so the row is found again as soon as it is back, wherever it is.
+While the row is at the same height it stays put: a newest tile that was not read in one frame,
+or a row partly covered by the floating panel, does not move it.
+
+When the row was found at another place, the detector catches up: if the newest tile still shows
+the value seen before, nothing was missed; if it shows another one and the neighbour shows the
+value seen before, the newest is the one missed round; if the neighbour is new too, both are
+processed (neighbour first) and flagged, since more may be missing. If the neighbour cannot be
+read, the visible round is only the starting point and the gap is flagged.
 
 ## Algorithms, presets, log
 
@@ -117,8 +118,8 @@ the starting point and the gap is flagged. **Find row** on the panel does the sa
   clamps the position; it never silently resets to 1.
 - On the last algorithm, a low coefficient keeps the position and posts "Add another algorithm to
   continue". It never wraps.
-- Presets store threshold, detection settings, capture interval, delays, calibration and
-  (optionally) the algorithm list. Loading a preset never touches round de-duplication.
+- Presets store threshold, detection settings, capture interval, delays and (optionally) the
+  algorithm list. Loading a preset never touches round de-duplication.
 - The event log is searchable and exports to JSON or CSV (CSV is protected against spreadsheet
   formula injection). A separate diagnostics log records rejected OCR readings, errors and
   manual actions.
@@ -128,8 +129,8 @@ the starting point and the gap is flagged. **Find row** on the panel does the sa
 Each algorithm step is a **click on a point of the screen** plus the **time until the next
 click**:
 
-1. In the algorithm editor, tap **+ Click: pick a point on the screen**. The calibration
-   screenshot opens; tap where the click should land or drag the marker, then **Use this point**. Use zoom for
+1. In the algorithm editor, tap **+ Click: pick a point on the screen**. The screen saved when
+   monitoring last found the row opens (start monitoring once with the game open); tap where the click should land or drag the marker, then **Use this point**. Use zoom for
    precision, and set the time in ms (empty = the global delay). Add as many clicks as you need
    and **Save**. The row being read (shown in red) cannot be chosen, because a popup opened by a
    tap there would hide the coefficient. Clicks can also be added and picked right on the live screen from
@@ -146,9 +147,8 @@ click**:
    algorithm's clicks right away, over any app and also while monitoring is stopped. A new run,
    a new round, **Stop clicks**, **Pause** and **Stop** cancel a run in progress.
 
-Points are normalised to the calibration screenshot and scaled to the current screen. If the
-screen orientation no longer matches the screenshot, nothing is tapped and the diagnostics log
-says so. Every run is logged there too ("Algorithm 2: 3 click(s) performed"), as are taps that
+Points are normalised to the screen and scaled to the current screen. Taps on the row being read
+right now are skipped (the step still waits its time). Every run is logged there too ("Algorithm 2: 3 click(s) performed"), as are taps that
 Android cancelled (for example because you touched the screen at the same moment). A tap lands on
 whatever is on screen at that moment, so keep the game in front while monitoring runs. The
 auto-clicker can be turned off in Settings without touching the accessibility service.

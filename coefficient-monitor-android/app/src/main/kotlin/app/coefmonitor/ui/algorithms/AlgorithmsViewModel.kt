@@ -15,7 +15,6 @@ import app.coefmonitor.core.ExportFormats
 import app.coefmonitor.core.ImportResult
 import app.coefmonitor.core.NormalizedPoint
 import app.coefmonitor.core.NormalizedRect
-import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.data.StoredAlgorithm
 import app.coefmonitor.ui.NEW_ALGORITHM_ID
 import app.coefmonitor.ui.container
@@ -71,7 +70,7 @@ class AlgorithmsViewModel(private val container: AppContainer) : ViewModel() {
 
 data class StepDraft(val key: Long, val text: String, val delayText: String, val point: NormalizedPoint? = null)
 
-/** The screenshot used to pick step points (the same one used for calibration). */
+/** The screen monitoring found the row on, used to pick step points. */
 data class PointCanvas(
     val image: ImageBitmap,
     val width: Int,
@@ -121,10 +120,9 @@ class AlgorithmEditorViewModel(private val container: AppContainer, private val 
     }
 
     private suspend fun loadCanvas() {
-        val bitmap = container.calibrationImages.load()
-        val calibration = container.settings.current().calibration
+        val bitmap = container.screenImages.load()
         val canvas = bitmap?.let {
-            PointCanvas(it.asImageBitmap(), it.width, it.height, calibration?.let(ObservationRegionManager::readingBand))
+            PointCanvas(it.asImageBitmap(), it.width, it.height, container.runtime.state.value.rowBand)
         }
         mutableState.update { it.copy(canvas = canvas, canvasLoaded = true) }
     }

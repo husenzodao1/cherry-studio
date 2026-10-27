@@ -32,7 +32,6 @@ class PresetRepository(
             detector = current.detector,
             captureIntervalMs = current.captureIntervalMs,
             globalDelayMs = current.globalDelayMs,
-            calibration = current.calibration,
             algorithms = if (includeAlgorithms) algorithms.allDefinitions() else null,
         )
         return store(name.trim(), payload)
@@ -52,7 +51,6 @@ class PresetRepository(
                     AppSettings.MAX_CAPTURE_INTERVAL_MS,
                 ),
                 globalDelayMs = payload.globalDelayMs,
-                calibration = payload.calibration ?: it.calibration,
                 activePresetId = id,
             )
         }

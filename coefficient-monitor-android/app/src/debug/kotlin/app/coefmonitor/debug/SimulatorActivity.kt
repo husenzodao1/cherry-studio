@@ -32,7 +32,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.NormalizedPoint
 import app.coefmonitor.core.NormalizedRect
-import app.coefmonitor.core.ObservationCalibration
 import java.lang.ref.WeakReference
 import java.util.Locale
 import java.util.concurrent.CopyOnWriteArrayList
@@ -124,24 +123,7 @@ class SimulatorActivity : ComponentActivity() {
         consent.launch(getSystemService(MediaProjectionManager::class.java).createScreenCaptureIntent())
     }
 
-    /** Exact calibration of the first tile right of "?", in full-display coordinates. */
-    fun calibration(): ObservationCalibration {
-        val display = displaySize()
-        val location = IntArray(2)
-        board.getLocationOnScreen(location)
-        val tile = board.tileRect(0).apply { offset(location[0].toFloat(), location[1].toFloat()) }
-        val placeholder = board.placeholderRect().apply { offset(location[0].toFloat(), location[1].toFloat()) }
-        val w = display.first.toFloat()
-        val h = display.second.toFloat()
-        return ObservationCalibration(
-            tile = NormalizedRect(tile.left / w, tile.top / h, tile.right / w, tile.bottom / h),
-            placeholder = NormalizedPoint(placeholder.centerX() / w, placeholder.centerY() / h),
-            referenceWidth = display.first,
-            referenceHeight = display.second,
-        )
-    }
-
-    /** "?" tile bounds normalised to the display, for checking auto-detection. */
+    /** "?" tile bounds normalised to the display, for checking where the row was found. */
     fun placeholderBounds(): NormalizedRect = normalized(board.placeholderRect())
 
     fun tileBounds(index: Int): NormalizedRect = normalized(board.tileRect(index))

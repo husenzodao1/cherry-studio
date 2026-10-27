@@ -11,10 +11,6 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -71,24 +67,17 @@ fun hasNotificationPermission(context: Context): Boolean =
 
 /**
  * Returns a function that asks for screen-capture consent (and, once, notification permission)
- * and then starts [MonitoringService] in the given mode. Every capture session needs new consent.
+ * and then starts [MonitoringService]. Every capture session needs new consent.
  */
 @Composable
-fun rememberCaptureStarter(): (MonitoringService.Mode, Long) -> Unit {
+fun rememberCaptureStarter(): () -> Unit {
     val context = LocalContext.current
-    // "MODE:delay", saved so the pending request survives activity recreation during the dialog.
-    var pending by rememberSaveable { mutableStateOf<String?>(null) }
 
     val consent = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val request = pending
-        pending = null
-        val parts = request?.split(":") ?: return@rememberLauncherForActivityResult
-        val mode = MonitoringService.Mode.entries.firstOrNull { it.name == parts.getOrNull(0) } ?: MonitoringService.Mode.MONITOR
-        val delay = parts.getOrNull(1)?.toLongOrNull() ?: MonitoringService.DEFAULT_SNAPSHOT_DELAY_MS
         val data = result.data
         if (result.resultCode == Activity.RESULT_OK && data != null) {
-            MonitoringService.start(context, result.resultCode, data, mode, delay)
-        } else if (mode == MonitoringService.Mode.MONITOR) {
+            MonitoringService.start(context, result.resultCode, data)
+        } else {
             context.appContainer.runtime.update { it.copy(status = MonitorStatus.ERROR, error = MonitorError.CAPTURE_DENIED) }
         }
     }
@@ -102,8 +91,7 @@ fun rememberCaptureStarter(): (MonitoringService.Mode, Long) -> Unit {
         launchConsent()
     }
 
-    return { mode, delay ->
-        pending = "${mode.name}:$delay"
+    return {
         if (!hasNotificationPermission(context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
