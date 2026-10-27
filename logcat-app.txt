@@ -1,0 +1,724 @@
+10-27 18:00:02.835  2676  2676 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-27 18:00:02.851  2676  2676 I AndroidRuntime: Using default boot image
+10-27 18:00:02.851  2676  2676 I AndroidRuntime: Leaving lock profiling enabled
+10-27 18:00:03.039  2676  2676 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+10-27 18:00:03.205  2676  2676 D AndroidRuntime: Shutting down VM
+10-27 18:00:57.831  1934  1978 I PackageManager: Un-granting permission android.permission.SYSTEM_ALERT_WINDOW from package app.coefmonitor (protectionLevel=1250 flags=0x20483e46)
+10-27 18:00:58.079  2078  3823 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-27 18:00:58.082  2078  3359 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-27 18:00:58.246  1934  1978 I PackageManager: Un-granting permission android.permission.SYSTEM_ALERT_WINDOW from package app.coefmonitor (protectionLevel=1250 flags=0x20483e46)
+10-27 18:00:58.329  1934  1978 V BackupManagerService: restoreAtInstall pkg=app.coefmonitor.test token=2 restoreSet=0
+10-27 18:00:58.532  2078  4931 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-27 18:00:58.533  2078  3359 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-27 18:00:59.483  5027  5027 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-27 18:00:59.495  5027  5027 I AndroidRuntime: Using default boot image
+10-27 18:00:59.495  5027  5027 I AndroidRuntime: Leaving lock profiling enabled
+10-27 18:00:59.592  2287  4963 I ChromeSync: [Sync,SyncIntentOperation] Handling the intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 cmp=com.google.android.gms/.chimera.GmsIntentOperationService (has extras) }.
+10-27 18:00:59.622  5027  5027 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+10-27 18:00:59.637  1934  2142 I ActivityManager: Force stopping app.coefmonitor appid=10146 user=0: start instr
+10-27 18:00:59.650  1934  1967 I ActivityManager: Start proc 5088:app.coefmonitor/u0a146 for added application app.coefmonitor
+10-27 18:00:59.764  5088  5088 W ActivityThread: Package uses different ABI(s) than its instrumentation: package[app.coefmonitor]: x86_64, null instrumentation[app.coefmonitor.test]: null, null
+10-27 18:01:00.503  2287  4963 I ChromeSync: [Persistence,AffiliationManager] One of affiliation or grouping data for android://BRSh3ALfpzpYS2WlBesCM3c0jqsCWeAkbBmiU1-GgILLdf-OEdv81ETGxEy48m1_I1ygI_PGL-rxVwjJDziHaQ==@app.coefmonitor/ was not found. Marking affiliation data as stale...
+10-27 18:01:01.255  2287  4963 I ChromeSync: [Sync,SyncIntentOperation] Handling the intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 cmp=com.google.android.gms/.chimera.GmsIntentOperationService (has extras) }.
+10-27 18:01:01.260  2287  4477 I FontLog : Package app.coefmonitor.test has no metadata [CONTEXT service_id=132 ]
+10-27 18:01:01.855  2287  4963 I ChromeSync: [Persistence,AffiliationManager] One of affiliation or grouping data for android://BRSh3ALfpzpYS2WlBesCM3c0jqsCWeAkbBmiU1-GgILLdf-OEdv81ETGxEy48m1_I1ygI_PGL-rxVwjJDziHaQ==@app.coefmonitor.test/ was not found. Marking affiliation data as stale...
+10-27 18:01:05.286  5088  5088 I AndroidJUnitRunner: newApplication app.coefmonitor.CoefMonitorApp
+10-27 18:01:05.570  5088  5391 I TestRequestBuilder: Scanning classpath to find tests in paths [/data/app/app.coefmonitor.test-Ctor57aT50SrdPgMeK9Gqg==/base.apk]
+10-27 18:01:06.028  5088  5391 I TestRunner: run started: 12 tests
+10-27 18:01:06.033  5088  5391 I TestRunner: started: findsTheRowOnTheSimulatorScreen(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:01:06.974  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:01:07.041  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:01:09.440  1934  3119 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity} from uid 10146
+10-27 18:01:09.651  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@2a7036d in: PRE_ON_CREATE
+10-27 18:01:09.825  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@2a7036d in: CREATED
+10-27 18:01:09.825  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@2a7036d
+10-27 18:01:09.828  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@2a7036d in: STARTED
+10-27 18:01:09.828  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@2a7036d
+10-27 18:01:09.880  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@2a7036d in: RESUMED
+10-27 18:01:09.880  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@2a7036d
+10-27 18:01:09.610  5088  5088 W RenderThread: type=1400 audit(0.0:49): avc: denied { write } for name="property_service" dev="tmpfs" ino=6862 scontext=u:r:untrusted_app:s0:c146,c256,c512,c768 tcontext=u:object_r:property_socket:s0 tclass=sock_file permissive=0 app=app.coefmonitor
+10-27 18:01:11.160  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity: +1s641ms
+10-27 18:01:11.316  5088  5683 D ProfileInstaller: Installing profile for app.coefmonitor
+10-27 18:01:13.114  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:01:13.286  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_e2e_00_simulator.png
+10-27 18:01:22.884  1934  2756 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver
+10-27 18:01:22.885  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.android.musicfx/.Compatibility$Receiver
+10-27 18:01:22.886  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+10-27 18:01:22.886  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+10-27 18:01:22.886  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+10-27 18:01:22.887  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+10-27 18:01:22.887  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.google.android.ims/.receivers.RcsAutoStartReceiver
+10-27 18:01:22.916  1934  3805 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver
+10-27 18:01:22.917  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.android.musicfx/.Compatibility$Receiver
+10-27 18:01:22.917  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+10-27 18:01:22.917  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+10-27 18:01:22.917  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+10-27 18:01:22.918  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+10-27 18:01:22.918  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.google.android.ims/.receivers.RcsAutoStartReceiver
+10-27 18:01:30.631  4515  6329 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_00_simulator.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:01:30.646  5088  5391 I CoefMonitorTest: screenshot e2e_00_simulator
+10-27 18:01:30.769  4515  6329 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_00_simulator.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:01:31.280  5088  6338 W GooglePlayServicesUtil: Google Play services out of date for app.coefmonitor.  Requires 203400000 but found 202414023
+10-27 18:01:37.174  5088  5391 I CoefMonitorTest: words on the simulator: 6:01@23,19, ?@118,1194, 3.33x@266,1194, 2.77x@398,735, 1.11x@448,1194, 2.45x@625,1192, 1.07x@808,1194; image=1080x2400
+10-27 18:01:37.174  5088  6338 W GooglePlayServicesUtil: Google Play services out of date for app.coefmonitor.  Requires 203400000 but found 202414023
+10-27 18:01:37.219  5088  5391 I CoefMonitorTest: row found: RowCells(newest=PixelRect(left=222, top=1181, width=165, height=48), neighbor=PixelRect(left=402, top=1181, width=166, height=48), pitch=180); expected newest tile NormalizedRect(left=0.20670398, top=0.486875, right=0.35770395, bottom=0.51734585)
+10-27 18:01:37.342  5088  5391 I CoefMonitorTest: final state
+10-27 18:01:37.342  5088  5391 I CoefMonitorTest: runtime=RuntimeState(status=STOPPED, captureActive=false, ocrStatus=IDLE, lastRawText=null, lastReadValue=null, lastConfidence=null, lastRejection=null, rowBand=null, error=null, lastContinuity=null, clicks=null)
+10-27 18:01:37.342  5088  5391 I CoefMonitorTest: active=1
+10-27 18:01:37.342  5088  5391 I CoefMonitorTest: events:
+10-27 18:01:37.342  5088  5391 I CoefMonitorTest: 
+10-27 18:01:37.342  5088  5391 I CoefMonitorTest: diagnostics (newest first):
+10-27 18:01:37.345  1934  3126 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} from uid 10146
+10-27 18:01:37.374  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@2a7036d in: PAUSED
+10-27 18:01:37.375  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@2a7036d
+10-27 18:01:37.471  1934  1967 I ActivityManager: Start proc 6512:app.coefmonitor.test/u0a147 for activity {app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity}
+10-27 18:01:37.883  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@2a7036d in: STOPPED
+10-27 18:01:37.883  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@2a7036d
+10-27 18:01:37.895  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@2a7036d in: DESTROYED
+10-27 18:01:37.740  6512  6512 W RenderThread: type=1400 audit(0.0:51): avc: denied { write } for name="property_service" dev="tmpfs" ino=6862 scontext=u:r:untrusted_app:s0:c147,c256,c512,c768 tcontext=u:object_r:property_socket:s0 tclass=sock_file permissive=0 app=app.coefmonitor.test
+10-27 18:01:38.052  5088  5391 I TestRunner: finished: findsTheRowOnTheSimulatorScreen(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:01:38.054  5088  5391 I TestRunner: started: fullMonitoringSession(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:01:38.094  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:01:38.216  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:01:38.487  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity: +1s141ms
+10-27 18:01:39.629  1747  1747 E Layer   : [Surface(name=AppWindowToken{faa751c token=Token{d748e8f ActivityRecord{1a829ee u0 app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity t7}}})/@0xa5882fc - animation-leash#0] No local sync point found
+10-27 18:01:39.697  1747  1747 E Layer   : [Surface(name=AppWindowToken{faa751c token=Token{d748e8f ActivityRecord{1a829ee u0 app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity t7}}})/@0xa5882fc - animation-leash#0] No local sync point found
+10-27 18:01:41.591  1934  2837 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity} from uid 10146
+10-27 18:01:41.799  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@338d0ab in: PRE_ON_CREATE
+10-27 18:01:41.849  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@338d0ab in: CREATED
+10-27 18:01:41.849  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@338d0ab
+10-27 18:01:41.856  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@338d0ab in: STARTED
+10-27 18:01:41.856  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@338d0ab
+10-27 18:01:41.860  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@338d0ab in: RESUMED
+10-27 18:01:41.860  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@338d0ab
+10-27 18:01:42.277  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity: +685ms
+10-27 18:01:43.431  5088  5391 D UiDevice: Executing shell command: settings put secure enabled_accessibility_services app.coefmonitor/app.coefmonitor.monitor.AutoClickService
+10-27 18:01:43.525  1934  1953 I ActivityTaskManager: START u0 {cmp=com.android.systemui/.media.MediaProjectionPermissionActivity} from uid 10146
+10-27 18:01:43.531  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@338d0ab in: PAUSED
+10-27 18:01:43.531  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@338d0ab
+10-27 18:01:43.666  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@338d0ab in: RESUMED
+10-27 18:01:43.666  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@338d0ab
+10-27 18:01:43.769  1934  2884 I DisplayManagerService: Display device added: DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 2, defaultModeId 2, supportedModes [{id=2, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION}
+10-27 18:01:43.779  1934  1961 I DisplayManagerService: Display DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 2, defaultModeId 2, supportedModes [{id=2, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION} does not support input device matching.
+10-27 18:01:43.892  1934  1958 I DisplayManagerService: Display DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 2, defaultModeId 2, supportedModes [{id=2, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION} does not support input device matching.
+10-27 18:01:57.243  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 1 line
+10-27 18:02:05.796  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:02:05.813  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_e2e_01_monitoring_started.png
+10-27 18:02:10.211  4515  6973 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_01_monitoring_started.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:02:10.223  4515  6973 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_01_monitoring_started.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:02:10.247  5088  5391 I CoefMonitorTest: screenshot e2e_01_monitoring_started
+10-27 18:02:10.247  5088  5391 I CoefMonitorTest: push 1.70x
+10-27 18:02:15.861  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:02:15.981  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_e2e_01b_auto_click_running.png
+10-27 18:02:16.754  4515  6996 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_01b_auto_click_running.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:02:16.763  4515  6996 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_01b_auto_click_running.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:02:16.797  5088  5391 I CoefMonitorTest: screenshot e2e_01b_auto_click_running
+10-27 18:02:17.257  5088  5391 I CoefMonitorTest: auto-clicks seen: [SimulatorTap(point=NormalizedPoint(x=0.3, y=0.8), atMs=152404), SimulatorTap(point=NormalizedPoint(x=0.7, y=0.86), atMs=153874)]
+10-27 18:02:21.870  5088  5391 I CoefMonitorTest: push 1.60x
+10-27 18:02:29.872  5088  5391 I CoefMonitorTest: push 1.20x
+10-27 18:02:41.438  5088  5391 I CoefMonitorTest: push 2.10x
+10-27 18:02:46.092  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:02:46.110  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_e2e_02_after_reset_2_10x.png
+10-27 18:02:46.476  4515  7029 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_02_after_reset_2_10x.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:02:46.484  4515  7029 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_02_after_reset_2_10x.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:02:46.509  5088  5391 I CoefMonitorTest: screenshot e2e_02_after_reset_2_10x
+10-27 18:02:49.909  5088  5391 I CoefMonitorTest: push 2.30x
+10-27 18:02:57.071  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:03:00.527  5088  5391 I CoefMonitorTest: push 1.50x
+10-27 18:03:08.033  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:03:11.493  5088  5391 I CoefMonitorTest: push 1.70x
+10-27 18:03:19.369  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 1 line
+10-27 18:03:22.910  5088  5391 I CoefMonitorTest: push 1.90x
+10-27 18:03:31.472  5088  5391 I CoefMonitorTest: push 2.50x
+10-27 18:03:42.041  5088  5391 I CoefMonitorTest: push 1.50x
+10-27 18:03:49.536  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:03:53.162  5088  5391 I CoefMonitorTest: push 1.50x
+10-27 18:04:01.046  5088  5391 I CoefMonitorTest: push 1.50x
+10-27 18:04:11.707  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[hasObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q4 / 25\E.*$']].
+10-27 18:04:11.707  5088  5391 D UiDevice: Searching for node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q4 / 25\E.*$'].
+10-27 18:04:21.802  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:04:21.809  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_e2e_03_overlay_algorithm_4.png
+10-27 18:04:22.083  4515  7108 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_03_overlay_algorithm_4.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:04:22.112  5088  5391 I CoefMonitorTest: screenshot e2e_03_overlay_algorithm_4
+10-27 18:04:22.118  4515  7108 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_03_overlay_algorithm_4.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:04:40.233  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@338d0ab in: PAUSED
+10-27 18:04:40.234  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@338d0ab
+10-27 18:04:41.260  1747  1747 E Layer   : [Surface(name=AppWindowToken{b896d7d token=Token{68697d4 ActivityRecord{d252927 u0 app.coefmonitor/.debug.SimulatorActivity t8}}})/@0xa427ba0 - animation-leash#0] No local sync point found
+10-27 18:04:41.625  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@338d0ab in: STOPPED
+10-27 18:04:41.625  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@338d0ab
+10-27 18:04:44.270  1934  2123 I ActivityTaskManager: START u0 {flg=0x10020000 cmp=app.coefmonitor/.debug.SimulatorActivity} from uid 10146
+10-27 18:04:45.222  1934  1961 W WindowManager: TaskSnapshotSurface.create: Failed to find main window for token=AppWindowToken{a383272 token=Token{b54337d ActivityRecord{b48b5d4 u0 app.coefmonitor/.debug.SimulatorActivity t8}}}
+10-27 18:04:45.294  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@894c1fc in: PRE_ON_CREATE
+10-27 18:04:45.294  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:04:45.322  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@894c1fc in: CREATED
+10-27 18:04:45.322  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:04:45.334  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@894c1fc in: STARTED
+10-27 18:04:45.334  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:04:45.339  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@894c1fc in: RESUMED
+10-27 18:04:45.339  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:04:45.779  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity: +523ms
+10-27 18:04:50.346  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 4 lines
+10-27 18:04:50.440  5088  5391 I CoefMonitorTest: push 1.30x
+10-27 18:04:55.240  5088  6663 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 1 line
+10-27 18:05:02.570  5088  6664 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 3 lines
+10-27 18:05:04.266  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:05:07.241  5088  5391 I CoefMonitorTest: push 2.80x
+10-27 18:05:15.000  1934  4042 I DisplayManagerService: Display device removed: DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 2, defaultModeId 2, supportedModes [{id=2, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION}
+10-27 18:05:15.155  1934  2944 I ActivityTaskManager: START u0 {cmp=com.android.systemui/.media.MediaProjectionPermissionActivity} from uid 10146
+10-27 18:05:15.164  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@894c1fc in: PAUSED
+10-27 18:05:15.164  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:05:15.250  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@894c1fc in: RESUMED
+10-27 18:05:15.250  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:05:15.310  1934  2944 I DisplayManagerService: Display device added: DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 3, defaultModeId 3, supportedModes [{id=3, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION}
+10-27 18:05:15.341  1934  1958 I DisplayManagerService: Display DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 3, defaultModeId 3, supportedModes [{id=3, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION} does not support input device matching.
+10-27 18:05:15.415  1934  1961 I DisplayManagerService: Display DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 3, defaultModeId 3, supportedModes [{id=3, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION} does not support input device matching.
+10-27 18:05:16.730  5088  7198 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 1 line
+10-27 18:05:18.501  5088  7198 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 1 line
+10-27 18:05:23.568  5088  7199 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:05:25.619  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:05:39.338  5088  5391 I CoefMonitorTest: push 1.40x
+10-27 18:05:46.719  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:05:46.798  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:05:46.833  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_e2e_04_after_restart.png
+10-27 18:05:47.343  4515  7278 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_04_after_restart.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:05:47.358  4515  7278 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_04_after_restart.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:05:47.367  5088  5391 I CoefMonitorTest: screenshot e2e_04_after_restart
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000001 1.70x — ADVANCE — Algorithm 1 → Algorithm 2 [VALUE_CHANGED, CONFIRMED, ocr=0.8390625]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000002 1.60x — ADVANCE — Algorithm 2 → Algorithm 3 [VALUE_CHANGED, CONFIRMED, ocr=0.8140625]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000003 1.20x — ADVANCE — Algorithm 3 → Algorithm 4 [VALUE_CHANGED, CONFIRMED, ocr=0.853125]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000004 2.10x — RESET_TO_FIRST — Algorithm 4 → Algorithm 1 [VALUE_CHANGED, CONFIRMED, ocr=0.871875]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000005 2.30x — NO_POSITION_CHANGE — Algorithm 1 remains active [VALUE_CHANGED, CONFIRMED, ocr=0.85546875]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000006 1.50x — ADVANCE — Algorithm 1 → Algorithm 2 [VALUE_CHANGED, CONFIRMED, ocr=0.803125]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000007 1.70x — ADVANCE — Algorithm 2 → Algorithm 3 [VALUE_CHANGED, CONFIRMED, ocr=0.82421875]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000008 1.90x — ADVANCE — Algorithm 3 → Algorithm 4 [VALUE_CHANGED, CONFIRMED, ocr=0.8484375]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000009 2.50x — RESET_TO_FIRST — Algorithm 4 → Algorithm 1 [VALUE_CHANGED, CONFIRMED, ocr=0.865625]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000010 1.50x — ADVANCE — Algorithm 1 → Algorithm 2 [VALUE_CHANGED, CONFIRMED, ocr=0.803125]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000011 1.50x — ADVANCE — Algorithm 2 → Algorithm 3 [SAME_VALUE_ROW_SHIFT, CONFIRMED, ocr=0.803125]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000012 1.50x — ADVANCE — Algorithm 3 → Algorithm 4 [SAME_VALUE_MOTION, CONFIRMED, ocr=0.803125]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000013 2.80x — RESET_TO_FIRST — Algorithm 4 → Algorithm 1 [VALUE_CHANGED, CONFIRMED, ocr=0.82109374]
+10-27 18:05:47.376  5088  5391 I CoefMonitorTest: record R-000014 1.40x — ADVANCE — Algorithm 1 → Algorithm 2 [VALUE_CHANGED, CONFIRMED, ocr=0.8335937]
+10-27 18:05:47.409  1934  3119 I DisplayManagerService: Display device removed: DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 3, defaultModeId 3, supportedModes [{id=3, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION}
+10-27 18:05:47.501  1934  1934 I NotificationService: Cannot find enqueued record for key: 0|app.coefmonitor|1001|null|10146
+10-27 18:05:47.544  1934  2142 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity} from uid 10146
+10-27 18:05:47.549  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@338d0ab in: DESTROYED
+10-27 18:05:47.550  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity.getIntent()=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@338d0ab
+10-27 18:05:47.604  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@894c1fc in: PAUSED
+10-27 18:05:47.604  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:05:47.604  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:05:47.762  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@1784eab in: PRE_ON_CREATE
+10-27 18:05:47.762  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:47.993  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@1784eab in: CREATED
+10-27 18:05:47.993  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:47.994  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:47.996  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@1784eab in: STARTED
+10-27 18:05:47.996  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:47.996  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:47.996  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@1784eab in: RESUMED
+10-27 18:05:47.996  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:47.996  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:49.981  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.ui.MainActivity: +34s753ms
+10-27 18:05:50.904  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@894c1fc in: STOPPED
+10-27 18:05:50.906  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:05:50.908  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:05:50.909  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@894c1fc in: DESTROYED
+10-27 18:05:50.909  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:05:50.909  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity.getIntent()=Intent { flg=0x10420000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity=app.coefmonitor.debug.SimulatorActivity@894c1fc
+10-27 18:05:52.898  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:05:52.906  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_e2e_05_dashboard_after_session.png
+10-27 18:05:53.132  4515  7333 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_05_dashboard_after_session.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:05:53.143  4515  7333 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_05_dashboard_after_session.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:05:53.156  5088  5391 I CoefMonitorTest: screenshot e2e_05_dashboard_after_session
+10-27 18:05:53.248  5088  5391 W UiObject2: Clicking on non-clickable object: android.view.accessibility.AccessibilityNodeInfo@3127f; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(513, 2191 - 567, 2226); packageName: app.coefmonitor; className: android.widget.TextView; text: Log; error: null; maxTextLength: -1; contentDescription: null; tooltipText: null; viewIdResName: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: true; visible: true; actions: [AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SET_SELECTION - null, AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null]
+10-27 18:05:54.802  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:05:54.808  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_e2e_06_event_log.png
+10-27 18:05:55.051  4515  7348 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_06_event_log.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:05:55.058  4515  7348 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_06_event_log.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:05:55.075  5088  5391 I CoefMonitorTest: screenshot e2e_06_event_log
+10-27 18:05:55.080  1934  3119 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} from uid 10146
+10-27 18:05:55.157  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@1784eab in: PAUSED
+10-27 18:05:55.157  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:55.157  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:55.447  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity: +323ms
+10-27 18:05:55.589  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@1784eab in: STOPPED
+10-27 18:05:55.589  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:55.589  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:55.829  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@1784eab in: DESTROYED
+10-27 18:05:55.869  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the intent does not match. startActivityIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity }, activity.getIntent()=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity }, activity=app.coefmonitor.ui.MainActivity@1784eab
+10-27 18:05:56.552  1747  1747 E Layer   : [Surface(name=AppWindowToken{c79e44c token=Token{c7c7f ActivityRecord{174599e u0 app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity t9}}})/@0x5707374 - animation-leash#0] No local sync point found
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest: final state
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest: runtime=RuntimeState(status=STOPPED, captureActive=false, ocrStatus=IDLE, lastRawText=1.40x, lastReadValue=1.40x, lastConfidence=0.8335937, lastRejection=null, rowBand=null, error=null, lastContinuity=CONFIRMED, clicks=null)
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest: active=2
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest: events:
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000001 1.70x — ADVANCE — Algorithm 1 → Algorithm 2 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000002 1.60x — ADVANCE — Algorithm 2 → Algorithm 3 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000003 1.20x — ADVANCE — Algorithm 3 → Algorithm 4 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000004 2.10x — RESET_TO_FIRST — Algorithm 4 → Algorithm 1 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000005 2.30x — NO_POSITION_CHANGE — Algorithm 1 remains active [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000006 1.50x — ADVANCE — Algorithm 1 → Algorithm 2 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000007 1.70x — ADVANCE — Algorithm 2 → Algorithm 3 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000008 1.90x — ADVANCE — Algorithm 3 → Algorithm 4 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000009 2.50x — RESET_TO_FIRST — Algorithm 4 → Algorithm 1 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000010 1.50x — ADVANCE — Algorithm 1 → Algorithm 2 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000011 1.50x — ADVANCE — Algorithm 2 → Algorithm 3 [SAME_VALUE_ROW_SHIFT, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000012 1.50x — ADVANCE — Algorithm 3 → Algorithm 4 [SAME_VALUE_MOTION, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000013 2.80x — RESET_TO_FIRST — Algorithm 4 → Algorithm 1 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   R-000014 1.40x — ADVANCE — Algorithm 1 → Algorithm 2 [VALUE_CHANGED, CONFIRMED]
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest: diagnostics (newest first):
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO DETECTOR: Observation initialised at 2.80x (not processed as a round)
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO ROW: Row of coefficients found on the screen (newest tile at 221,1181)
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   WARNING OCR: OCR took 6163 ms; rounds are detected later than usual on this device
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO MONITOR: Monitoring started
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO DETECTOR: Observation initialised at 1.30x (not processed as a round)
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO ROW: Row of coefficients found on the screen (newest tile at 222,1181)
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   WARNING OCR: OCR took 5951 ms; rounds are detected later than usual on this device
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO MONITOR: Resumed
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO MONITOR: Paused
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   WARNING OCR: OCR took 3411 ms; rounds are detected later than usual on this device
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO AUTO_CLICK: Algorithm 2: 2 click(s) performed
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO AUTO_CLICK: Algorithm 2: 2 click(s) performed
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   WARNING OCR: OCR took 3118 ms; rounds are detected later than usual on this device
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO AUTO_CLICK: Algorithm 2: 2 click(s) performed
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO DETECTOR: Observation initialised at 3.33x (not processed as a round)
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO ROW: Row of coefficients found on the screen (newest tile at 222,1181)
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   WARNING OCR: OCR took 7133 ms; rounds are detected later than usual on this device
+10-27 18:05:56.784  5088  5391 I CoefMonitorTest:   INFO MONITOR: Monitoring started
+10-27 18:05:56.830  5088  5391 I TestRunner: finished: fullMonitoringSession(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:05:56.851  5088  5391 I TestRunner: started: staticTileSignatureIsStableAcrossFrames(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:05:56.860  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:05:57.038  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:05:58.422  1934  5227 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity} from uid 10146
+10-27 18:05:58.484  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: PRE_ON_CREATE
+10-27 18:05:58.490  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: CREATED
+10-27 18:05:58.490  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:05:58.494  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: STARTED
+10-27 18:05:58.494  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:05:58.499  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: RESUMED
+10-27 18:05:58.499  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:05:58.793  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity: +324ms
+10-27 18:06:00.342  5088  5391 I CoefMonitorTest: static tile similarity between captures = 1.0
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: final state
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: runtime=RuntimeState(status=STOPPED, captureActive=false, ocrStatus=IDLE, lastRawText=null, lastReadValue=null, lastConfidence=null, lastRejection=null, rowBand=null, error=null, lastContinuity=null, clicks=null)
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: active=1
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: events:
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: 
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: diagnostics (newest first):
+10-27 18:06:00.446  1934  5227 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} from uid 10146
+10-27 18:06:00.457  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: PAUSED
+10-27 18:06:00.457  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:06:00.689  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity: +233ms
+10-27 18:06:00.763  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: STOPPED
+10-27 18:06:00.763  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:06:00.767  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: DESTROYED
+10-27 18:06:00.768  5088  5391 I TestRunner: finished: staticTileSignatureIsStableAcrossFrames(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:06:00.772  5088  5391 I TestRunner: started: findsTheRowAgainAfterTheGameMoved(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:06:00.774  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:06:00.875  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:06:01.709  1747  1747 E Layer   : [Surface(name=AppWindowToken{4f98381 token=Token{4d8f368 ActivityRecord{3a8268b u0 app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity t11}}})/@0x5a03209 - animation-leash#0] No local sync point found
+10-27 18:06:02.755  1934  5227 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity} from uid 10146
+10-27 18:06:02.942  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@bd903f5 in: PRE_ON_CREATE
+10-27 18:06:02.948  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@bd903f5 in: CREATED
+10-27 18:06:02.948  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@bd903f5
+10-27 18:06:02.949  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@bd903f5 in: STARTED
+10-27 18:06:02.949  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@bd903f5
+10-27 18:06:02.950  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@bd903f5 in: RESUMED
+10-27 18:06:02.950  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@bd903f5
+10-27 18:06:03.240  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity: +452ms
+10-27 18:06:04.242  1934  1953 I ActivityTaskManager: START u0 {cmp=com.android.systemui/.media.MediaProjectionPermissionActivity} from uid 10146
+10-27 18:06:04.245  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@bd903f5 in: PAUSED
+10-27 18:06:04.245  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@bd903f5
+10-27 18:06:04.314  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@bd903f5 in: RESUMED
+10-27 18:06:04.314  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@bd903f5
+10-27 18:06:04.367  1934  5227 I DisplayManagerService: Display device added: DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 4, defaultModeId 4, supportedModes [{id=4, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION}
+10-27 18:06:04.390  1934  1958 I DisplayManagerService: Display DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 4, defaultModeId 4, supportedModes [{id=4, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION} does not support input device matching.
+10-27 18:06:04.459  1934  1961 I DisplayManagerService: Display DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 4, defaultModeId 4, supportedModes [{id=4, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION} does not support input device matching.
+10-27 18:06:05.768  5088  7444 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 1 line
+10-27 18:06:11.134  5088  7444 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 3 lines
+10-27 18:06:25.897  5088  5391 I CoefMonitorTest: push 1.70x
+10-27 18:06:26.699  5088  5391 I CoefMonitorTest: push 1.20x
+10-27 18:06:30.310  5088  7444 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 3 lines
+10-27 18:06:35.682  5088  5391 I CoefMonitorTest: row moved from NormalizedRect(left=0.20555556, top=0.49208334, right=0.52592593, bottom=0.51208335) to NormalizedRect(left=0.20648149, top=0.5575, right=0.52592593, bottom=0.5775)
+10-27 18:06:36.913  5088  7444 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:06:39.661  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:06:39.675  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_e2e_07_row_found_again.png
+10-27 18:06:40.020  4515  7559 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_07_row_found_again.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:06:40.029  4515  7559 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_e2e_07_row_found_again.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:06:40.041  5088  5391 I CoefMonitorTest: screenshot e2e_07_row_found_again
+10-27 18:06:43.442  5088  5391 I CoefMonitorTest: push 2.50x
+10-27 18:06:50.932  1934  5227 I DisplayManagerService: Display device removed: DisplayDeviceInfo{"coefficient-monitor": uniqueId="virtual:app.coefmonitor,10146,coefficient-monitor,0", 1080 x 2400, modeId 4, defaultModeId 4, supportedModes [{id=4, width=1080, height=2400, fps=60.0}], colorMode 0, supportedColorModes [0], HdrCapabilities null, density 420, 420.0 x 420.0 dpi, appVsyncOff 0, presDeadline 16666666, touch NONE, rotation 0, type VIRTUAL, state ON, owner app.coefmonitor (uid 10146), FLAG_PRIVATE, FLAG_PRESENTATION}
+10-27 18:06:50.992  1934  1934 I NotificationService: Cannot find enqueued record for key: 0|app.coefmonitor|1001|null|10146
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest: final state
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest: runtime=RuntimeState(status=STOPPED, captureActive=false, ocrStatus=IDLE, lastRawText=2.50x, lastReadValue=2.50x, lastConfidence=0.86875, lastRejection=null, rowBand=null, error=null, lastContinuity=CONFIRMED, clicks=null)
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest: active=1
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest: events:
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest:   R-000001 1.70x — ADVANCE — Algorithm 1 → Algorithm 2 [MISSED_ROUND_NEIGHBOR, GAP_SUSPECTED]
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest:   R-000002 1.20x — ADVANCE — Algorithm 2 → Algorithm 3 [VALUE_CHANGED, CONFIRMED]
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest:   R-000003 2.50x — RESET_TO_FIRST — Algorithm 3 → Algorithm 1 [VALUE_CHANGED, CONFIRMED]
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest: diagnostics (newest first):
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest:   WARNING CONTINUITY: Possible missed round(s) before R-000001; check the game history
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest:   INFO ROW: Row of coefficients found on the screen (newest tile at 223,1338)
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest:   INFO DETECTOR: Observation initialised at 3.33x (not processed as a round)
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest:   INFO ROW: Row of coefficients found on the screen (newest tile at 222,1181)
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest:   WARNING OCR: OCR took 4473 ms; rounds are detected later than usual on this device
+10-27 18:06:51.192  5088  5391 I CoefMonitorTest:   INFO MONITOR: Monitoring started
+10-27 18:06:51.003  1934  1934 I NotificationService: Cannot find enqueued record for key: 0|app.coefmonitor|1001|null|10146
+10-27 18:06:51.194  1934  2944 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} from uid 10146
+10-27 18:06:51.227  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@bd903f5 in: PAUSED
+10-27 18:06:51.227  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@bd903f5
+10-27 18:06:51.445  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity: +47s166ms
+10-27 18:06:51.453  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@bd903f5 in: STOPPED
+10-27 18:06:51.453  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@bd903f5
+10-27 18:06:51.454  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@bd903f5 in: DESTROYED
+10-27 18:06:51.459  5088  5391 I TestRunner: finished: findsTheRowAgainAfterTheGameMoved(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:06:51.469  5088  5391 I TestRunner: started: panelInTajik(app.coefmonitor.e2e.FloatingModeTest)
+10-27 18:06:51.473  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:06:51.573  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:06:52.190  1747  1747 E Layer   : [Surface(name=AppWindowToken{119154b token=Token{f1be61a ActivityRecord{37d4cc5 u0 app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity t13}}})/@0xef6d1ce - animation-leash#0] No local sync point found
+10-27 18:06:53.491  1934  3804 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity} from uid 10146
+10-27 18:06:53.693  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@336d9e6 in: PRE_ON_CREATE
+10-27 18:06:53.702  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@336d9e6 in: CREATED
+10-27 18:06:53.702  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@336d9e6
+10-27 18:06:53.715  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@336d9e6 in: STARTED
+10-27 18:06:53.715  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@336d9e6
+10-27 18:06:53.716  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@336d9e6 in: RESUMED
+10-27 18:06:53.716  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@336d9e6
+10-27 18:06:53.931  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity: +424ms
+10-27 18:06:55.027  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[gone=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E']].
+10-27 18:06:55.027  5088  5391 D UiDevice: Searching for node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E'].
+10-27 18:07:05.131  5088  5391 D UiDevice: Waiting 10000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QҲолат\E']].
+10-27 18:07:05.131  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QҲолат\E'].
+10-27 18:07:15.175  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:07:15.181  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_tg_01_status.png
+10-27 18:07:15.436  4515  7674 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_tg_01_status.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:07:15.446  4515  7674 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_tg_01_status.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:07:15.457  5088  5391 I CoefMonitorTest: screenshot floating_tg_01_status
+10-27 18:07:15.458  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QАлгоритм\E']].
+10-27 18:07:15.458  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QАлгоритм\E'].
+10-27 18:07:36.166  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:07:36.174  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_tg_02_algorithm.png
+10-27 18:07:36.443  4515  7690 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_tg_02_algorithm.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:07:36.453  5088  5391 I CoefMonitorTest: screenshot floating_tg_02_algorithm
+10-27 18:07:36.454  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QТанзимот\E']].
+10-27 18:07:36.454  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QТанзимот\E'].
+10-27 18:07:36.460  4515  7690 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_tg_02_algorithm.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:07:37.578  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 4 lines
+10-27 18:07:57.113  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:07:57.125  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_tg_03_settings.png
+10-27 18:07:57.387  4515  7710 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_tg_03_settings.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:07:57.393  5088  5391 I CoefMonitorTest: screenshot floating_tg_03_settings
+10-27 18:07:57.404  4515  7710 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_tg_03_settings.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:07:57.466  1934  4005 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} from uid 10146
+10-27 18:07:57.483  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@336d9e6 in: PAUSED
+10-27 18:07:57.483  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@336d9e6
+10-27 18:07:58.654  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@336d9e6 in: STOPPED
+10-27 18:07:58.659  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@336d9e6
+10-27 18:07:58.661  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@336d9e6 in: DESTROYED
+10-27 18:07:58.670  5088  5391 I TestRunner: finished: panelInTajik(app.coefmonitor.e2e.FloatingModeTest)
+10-27 18:07:58.690  5088  5391 I TestRunner: started: panelWorksOverAnotherAppWithoutMonitoring(app.coefmonitor.e2e.FloatingModeTest)
+10-27 18:07:58.698  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:07:58.775  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:08:00.652  1934  2142 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.debug.SimulatorActivity} from uid 10146
+10-27 18:08:00.670  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: PRE_ON_CREATE
+10-27 18:08:00.676  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: CREATED
+10-27 18:08:00.676  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:08:00.677  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: STARTED
+10-27 18:08:00.677  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:08:00.677  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: RESUMED
+10-27 18:08:00.677  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:08:00.957  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity: +288ms
+10-27 18:08:02.058  5088  5391 D UiDevice: Executing shell command: settings put secure enabled_accessibility_services app.coefmonitor/app.coefmonitor.monitor.AutoClickService
+10-27 18:08:02.114  5088  5391 D UiDevice: Waiting 10000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QStatus\E']].
+10-27 18:08:02.115  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QStatus\E'].
+10-27 18:08:12.233  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:08:12.242  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_00_shown.png
+10-27 18:08:12.479  4515  7793 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_00_shown.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:08:12.495  4515  7793 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_00_shown.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:08:12.506  5088  5391 I CoefMonitorTest: screenshot floating_00_shown
+10-27 18:08:12.524  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q1 / 2\E.*$']].
+10-27 18:08:12.524  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q1 / 2\E.*$'].
+10-27 18:08:22.555  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:08:22.562  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_01_status.png
+10-27 18:08:22.810  4515  7808 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_01_status.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:08:22.819  4515  7808 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_01_status.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:08:22.854  5088  5391 I CoefMonitorTest: screenshot floating_01_status
+10-27 18:08:22.856  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QRun clicks\E']].
+10-27 18:08:22.856  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QRun clicks\E'].
+10-27 18:08:44.069  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 1 line
+10-27 18:08:44.132  5088  5391 I CoefMonitorTest: clicks from the panel: [SimulatorTap(point=NormalizedPoint(x=0.3, y=0.8), atMs=539692), SimulatorTap(point=NormalizedPoint(x=0.7, y=0.86), atMs=540692)]
+10-27 18:08:44.583  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QSettings\E']].
+10-27 18:08:44.583  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QSettings\E'].
+10-27 18:09:04.819  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q+\E']].
+10-27 18:09:04.824  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q+\E'].
+10-27 18:09:06.683  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 4 lines
+10-27 18:09:25.092  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:09:25.109  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_02_settings.png
+10-27 18:09:25.395  4515  7835 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_02_settings.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:09:25.408  4515  7835 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_02_settings.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:09:25.414  5088  5391 I CoefMonitorTest: screenshot floating_02_settings
+10-27 18:09:25.415  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QAlgorithm\E']].
+10-27 18:09:25.416  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QAlgorithm\E'].
+10-27 18:09:45.596  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q▶\E']].
+10-27 18:09:45.596  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q▶\E'].
+10-27 18:09:47.420  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 5 lines
+10-27 18:10:05.779  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QMake active\E']].
+10-27 18:10:05.780  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QMake active\E'].
+10-27 18:10:26.008  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$']].
+10-27 18:10:26.008  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$'].
+10-27 18:10:36.035  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:10:36.043  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_03_algorithm.png
+10-27 18:10:36.296  4515  7869 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_03_algorithm.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:10:36.305  5088  5391 I CoefMonitorTest: screenshot floating_03_algorithm
+10-27 18:10:36.306  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q+ Click\E']].
+10-27 18:10:36.306  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q+ Click\E'].
+10-27 18:10:36.316  4515  7869 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_03_algorithm.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:10:56.483  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QTap where the click should land. Drag the marker to adjust.\E']].
+10-27 18:10:56.484  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QTap where the click should land. Drag the marker to adjust.\E'].
+10-27 18:10:56.487  1934  2141 W AppOps  : Noting op not finished: uid 10146 pkg app.coefmonitor code 24 time=1793124482163 duration=-1
+10-27 18:11:06.695  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:11:06.731  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_04_point_picker.png
+10-27 18:11:07.024  4515  7889 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_04_point_picker.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:11:07.035  4515  7889 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_04_point_picker.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:11:07.057  5088  5391 I CoefMonitorTest: screenshot floating_04_point_picker
+10-27 18:11:07.057  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QUse this point\E']].
+10-27 18:11:07.057  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QUse this point\E'].
+10-27 18:11:27.264  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 1 line
+10-27 18:11:27.362  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$']].
+10-27 18:11:27.362  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$'].
+10-27 18:11:29.010  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 5 lines
+10-27 18:11:37.437  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:11:37.446  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_05_algorithm_with_click.png
+10-27 18:11:37.690  4515  7927 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_05_algorithm_with_click.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:11:37.702  4515  7927 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_05_algorithm_with_click.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:11:37.715  5088  5391 I CoefMonitorTest: screenshot floating_05_algorithm_with_click
+10-27 18:11:37.716  5088  5391 D UiDevice: Retrieving node with selector: BySelector [DESC='\QMinimise to a circle\E', PKG='\Qapp.coefmonitor\E'].
+10-27 18:11:57.881  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [DESC='\QOpen the panel\E', PKG='\Qapp.coefmonitor\E']].
+10-27 18:11:57.881  5088  5391 D UiDevice: Retrieving node with selector: BySelector [DESC='\QOpen the panel\E', PKG='\Qapp.coefmonitor\E'].
+10-27 18:12:18.034  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:12:18.040  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_06_minimised.png
+10-27 18:12:18.276  4515  7955 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_06_minimised.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:12:18.290  4515  7955 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_06_minimised.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:12:18.306  5088  5391 I CoefMonitorTest: screenshot floating_06_minimised
+10-27 18:12:28.327  5088  5391 W UiObject2: Clicking on non-clickable object: android.view.accessibility.AccessibilityNodeInfo@62501; boundsInParent: Rect(0, 0 - 136, 136); boundsInScreen: Rect(31, 168 - 167, 304); packageName: app.coefmonitor; className: android.widget.TextView; text: 2; error: null; maxTextLength: -1; contentDescription: Open the panel; tooltipText: null; viewIdResName: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: true; visible: true; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null, AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_SET_SELECTION - null]
+10-27 18:12:28.362  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$']].
+10-27 18:12:28.362  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$'].
+10-27 18:12:30.273  5088  5641 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 3 lines
+10-27 18:12:41.408  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E'].
+10-27 18:12:51.501  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E'].
+10-27 18:13:11.838  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[gone=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E']].
+10-27 18:13:11.838  5088  5391 D UiDevice: Searching for node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E'].
+10-27 18:13:21.995  1934  4005 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} from uid 10146
+10-27 18:13:22.015  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: PAUSED
+10-27 18:13:22.015  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:13:23.063  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: STOPPED
+10-27 18:13:23.063  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:13:23.065  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: DESTROYED
+10-27 18:13:23.073  5088  5391 I TestRunner: finished: panelWorksOverAnotherAppWithoutMonitoring(app.coefmonitor.e2e.FloatingModeTest)
+10-27 18:13:23.076  5088  5391 I TestRunner: started: findsTheRowUnderTheFloatingPanel(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:29.091  5088  5391 I CoefMonitorTest: words: ?@116,90, 2.03x@262,89, AnropuTM@110,255, 1/@302,254, 20@374,253, Craryc@140,356, AnropuTM@310,356, AnropuTM@111,442, 1@273,442, 1.00x@444,88, KAMKn@141,737, OTKpbITb@302,735, 1.51x@623,88, HactpoŭKu@530,355, lay3a@139,634, CTom@300,635, HańTM@441,632, pAg@545,636, 1.16X@803,88, NocnegHMÄ:@113,491, –KMIAHVE@419,491, VHMLMansaLMA-@113,552, MTeHne@356,552, oTKNOHeHO@457,552, PAVHAA@636,552, X@786,256
+10-27 18:13:29.092  5088  5391 I CoefMonitorTest: row: RowCells(newest=PixelRect(left=221, top=74, width=165, height=52), neighbor=PixelRect(left=401, top=74, width=165, height=52), pitch=180)
+10-27 18:13:31.367  5088  8040 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 3 lines
+10-27 18:13:33.355  5088  5391 I TestRunner: finished: findsTheRowUnderTheFloatingPanel(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:33.357  5088  5391 I TestRunner: started: readsObservedTileAndNeighbour(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:35.325  5088  8065 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:13:44.680  5088  5391 I CoefMonitorTest: reference tile 0 -> Placeholder(rawText=?)
+10-27 18:13:44.680  5088  5391 I CoefMonitorTest: reference tile 1 -> Valid(value=2.01x, confidence=0.88125, rawText=2.01x)
+10-27 18:13:44.680  5088  5391 I CoefMonitorTest: reference tile 2 -> Valid(value=1.53x, confidence=0.81640625, rawText=1.53x)
+10-27 18:13:44.680  5088  5391 I CoefMonitorTest: reference tile 3 -> Valid(value=1.20x, confidence=0.83984375, rawText=1.20x)
+10-27 18:13:44.680  5088  5391 I CoefMonitorTest: reference tile 4 -> Valid(value=2.03x, confidence=0.82890624, rawText=2.03x)
+10-27 18:13:44.680  5088  5391 I CoefMonitorTest: confidence of 2.01x = 0.88125 (default minimum 0.5)
+10-27 18:13:44.680  5088  5391 I TestRunner: finished: readsObservedTileAndNeighbour(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:44.682  5088  5391 I TestRunner: started: findsTheRowNextToALastValueInThePanel(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:46.180  5088  8090 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:13:47.926  5088  5391 I CoefMonitorTest: words: 1.58x@264,47, 3.50x@442,45, AnropuTMM@112,372, 1@358,372, /10@374,372, AnropuTM@112,425, 1@287,425, QKMAAHME@423,447, OxnpuH:@113,484, 17.35x@341,481, 1.04x@624,47, OMOgaco3M@112,549, XOHMW@311,552, pa@431,554, UyA@498,555, 17.35X@798,42, LAErO@316,508, PAYHAA@634,507
+10-27 18:13:47.927  5088  5391 I CoefMonitorTest: row: RowCells(newest=PixelRect(left=222, top=32, width=166, height=52), neighbor=PixelRect(left=403, top=32, width=166, height=52), pitch=181)
+10-27 18:13:47.928  5088  5391 I TestRunner: finished: findsTheRowNextToALastValueInThePanel(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:47.930  5088  5391 I TestRunner: started: findsTheRowAndReadsTheNewestValueAndItsNeighbour(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:49.540  5088  8114 I chatty  : uid=10146(u0_a146) app.coefmonitor identical 2 lines
+10-27 18:13:50.798  5088  5391 I CoefMonitorTest: words: ?@117,90, 2.01x@263,90, 1.53x@444,90, 1.20x@624,90, 2.03X@803,89
+10-27 18:13:50.798  5088  5391 I CoefMonitorTest: row: RowCells(newest=PixelRect(left=221, top=77, width=166, height=48), neighbor=PixelRect(left=401, top=77, width=166, height=48), pitch=180)
+10-27 18:13:50.799  5088  5391 I TestRunner: finished: findsTheRowAndReadsTheNewestValueAndItsNeighbour(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:50.802  5088  5391 I TestRunner: started: signaturesSeparateDifferentTiles(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:50.805  5088  5391 I CoefMonitorTest: similarity tile1 vs tile2 = 0.8456979
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile1 vs tile3 = 0.75878364
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile1 vs tile4 = 0.81113404
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile2 vs tile3 = 0.8831256
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile2 vs tile4 = 0.8615833
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile3 vs tile4 = 0.83854467
+10-27 18:13:50.806  5088  5391 I TestRunner: finished: signaturesSeparateDifferentTiles(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:50.808  5088  5391 I TestRunner: started: walkThroughAllScreens(app.coefmonitor.e2e.UiSmokeTest)
+10-27 18:13:50.856  5088  5391 E AndroidXTracer: java.lang.NoSuchMethodError: No static method forceEnableAppTracing()V in class Landroidx/tracing/Trace; or its super classes (declaration of 'androidx.tracing.Trace' appears in /data/app/app.coefmonitor-nuzvQJ_sRbcBgl94bmCggQ==/base.apk!classes11.dex)
+10-27 18:13:50.908  1934  4005 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=app.coefmonitor/.ui.MainActivity} from uid 10146
+10-27 18:13:50.933  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@3c0203e in: PRE_ON_CREATE
+10-27 18:13:50.950  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@3c0203e in: CREATED
+10-27 18:13:50.950  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.ui.MainActivity@3c0203e
+10-27 18:13:50.955  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@3c0203e in: STARTED
+10-27 18:13:50.955  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.ui.MainActivity@3c0203e
+10-27 18:13:50.955  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@3c0203e in: RESUMED
+10-27 18:13:50.955  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.ui.MainActivity@3c0203e
+10-27 18:13:51.397  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.ui.MainActivity: +488ms
+10-27 18:13:51.447  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:13:51.530  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:13:52.701  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:13:52.709  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_01_dashboard_empty.png
+10-27 18:13:52.942  4515  8170 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_01_dashboard_empty.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:13:52.958  4515  8170 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_01_dashboard_empty.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:13:52.966  5088  5391 I CoefMonitorTest: screenshot ui_01_dashboard_empty
+10-27 18:13:54.469  2548  2548 I AndroidIME: DummyIme.onActivate() : EditorInfo = Package = app.coefmonitor : Type = Number : Learning = Disable : Suggestion = Hide : AutoCorrection = Disable : Microphone = Hide : NoPersonalizedLearning = Disable
+10-27 18:13:54.475  2548  2548 I Conv2QueryExtension: Conv2Query not enabled due to current app [app.coefmonitor] not in whitelist
+10-27 18:13:54.681  1934  2224 E InputDispatcher: Window handle Window{49b8de2 u0 app.coefmonitor/app.coefmonitor.ui.MainActivity} has no registered input channel
+10-27 18:13:55.539  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:13:55.548  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_02_algorithms_120.png
+10-27 18:13:56.140  4515  8186 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_02_algorithms_120.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:13:56.163  4515  8186 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_02_algorithms_120.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:13:56.195  5088  5391 I CoefMonitorTest: screenshot ui_02_algorithms_120
+10-27 18:13:56.732  2548  2548 I AndroidIME: LatinIme.onActivate() : EditorInfo = Package = app.coefmonitor : Type = Text : Learning = Enable : Suggestion = Show : AutoCorrection = Enable : Microphone = Show : NoPersonalizedLearning = Disable
+10-27 18:13:56.907  2548  2548 I Conv2QueryExtension: Conv2Query not enabled due to current app [app.coefmonitor] not in whitelist
+10-27 18:13:58.422  2548  2548 I AndroidIME: LatinIme.onActivate() : EditorInfo = Package = app.coefmonitor : Type = Text : Learning = Enable : Suggestion = Show : AutoCorrection = Enable : Microphone = Show : NoPersonalizedLearning = Disable
+10-27 18:13:58.498  2548  2548 I Conv2QueryExtension: Conv2Query not enabled due to current app [app.coefmonitor] not in whitelist
+10-27 18:13:59.007  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:13:59.041  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_03a_point_picker.png
+10-27 18:13:59.489  4515  8212 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_03a_point_picker.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:13:59.504  4515  8212 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_03a_point_picker.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:13:59.518  5088  5391 I CoefMonitorTest: screenshot ui_03a_point_picker
+10-27 18:13:59.601  1934  4005 E InputDispatcher: Window handle Window{ad647d6 u0 app.coefmonitor/app.coefmonitor.ui.MainActivity} has no registered input channel
+10-27 18:13:59.640  1934  2494 E InputDispatcher: Window handle Window{ad647d6 u0 app.coefmonitor/app.coefmonitor.ui.MainActivity} has no registered input channel
+10-27 18:14:00.288  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:00.298  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_03_algorithm_editor.png
+10-27 18:14:00.564  4515  8241 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_03_algorithm_editor.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:00.575  4515  8241 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_03_algorithm_editor.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:00.588  5088  5391 I CoefMonitorTest: screenshot ui_03_algorithm_editor
+10-27 18:14:02.026  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:02.033  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_04_dashboard.png
+10-27 18:14:02.252  4515  8254 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_04_dashboard.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:02.257  4515  8254 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_04_dashboard.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:02.275  5088  5391 I CoefMonitorTest: screenshot ui_04_dashboard
+10-27 18:14:03.015  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:03.022  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_05_log.png
+10-27 18:14:03.243  4515  8267 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_05_log.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:03.251  4515  8267 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_05_log.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:03.264  5088  5391 I CoefMonitorTest: screenshot ui_05_log
+10-27 18:14:04.327  2548  2548 I AndroidIME: LatinIme.onActivate() : EditorInfo = Package = app.coefmonitor : Type = Text : Learning = Enable : Suggestion = Show : AutoCorrection = Enable : Microphone = Show : NoPersonalizedLearning = Disable
+10-27 18:14:04.381  2548  2548 I Conv2QueryExtension: Conv2Query not enabled due to current app [app.coefmonitor] not in whitelist
+10-27 18:14:05.210  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:05.226  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_06_presets.png
+10-27 18:14:05.531  4515  8291 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_06_presets.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:05.544  5088  5391 I CoefMonitorTest: screenshot ui_06_presets
+10-27 18:14:05.547  4515  8291 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_06_presets.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:06.002  2548  2548 I AndroidIME: DummyIme.onActivate() : EditorInfo = Package = app.coefmonitor : Type = Number : Learning = Disable : Suggestion = Hide : AutoCorrection = Disable : Microphone = Hide : NoPersonalizedLearning = Disable
+10-27 18:14:06.029  2548  2548 I Conv2QueryExtension: Conv2Query not enabled due to current app [app.coefmonitor] not in whitelist
+10-27 18:14:06.428  2548  2548 I AndroidIME: DummyIme.onActivate() : EditorInfo = Package = app.coefmonitor : Type = Number : Learning = Disable : Suggestion = Hide : AutoCorrection = Disable : Microphone = Hide : NoPersonalizedLearning = Disable
+10-27 18:14:06.434  2548  2548 I Conv2QueryExtension: Conv2Query not enabled due to current app [app.coefmonitor] not in whitelist
+10-27 18:14:06.931  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:06.941  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_07_settings.png
+10-27 18:14:07.265  4515  8316 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_07_settings.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:07.273  4515  8316 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_07_settings.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:07.286  5088  5391 I CoefMonitorTest: screenshot ui_07_settings
+10-27 18:14:08.690  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:08.699  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_07a_info_bubble.png
+10-27 18:14:09.027  4515  8337 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_07a_info_bubble.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:09.034  4515  8337 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_07a_info_bubble.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:09.056  5088  5391 I CoefMonitorTest: screenshot ui_07a_info_bubble
+10-27 18:14:09.978  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:09.985  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_07b_settings_auto_clicker.png
+10-27 18:14:10.208  4515  8350 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_07b_settings_auto_clicker.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:10.217  5088  5391 I CoefMonitorTest: screenshot ui_07b_settings_auto_clicker
+10-27 18:14:10.225  4515  8350 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_07b_settings_auto_clicker.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:10.386  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@3c0203e in: PAUSED
+10-27 18:14:10.386  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.ui.MainActivity@3c0203e
+10-27 18:14:10.426  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@3c0203e in: STOPPED
+10-27 18:14:10.426  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.ui.MainActivity@3c0203e
+10-27 18:14:10.457  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@3c0203e in: DESTROYED
+10-27 18:14:10.479  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@c55fc40 in: PRE_ON_CREATE
+10-27 18:14:10.501  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@c55fc40 in: CREATED
+10-27 18:14:10.501  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.ui.MainActivity@c55fc40
+10-27 18:14:10.503  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@c55fc40 in: STARTED
+10-27 18:14:10.503  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.ui.MainActivity@c55fc40
+10-27 18:14:10.503  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@c55fc40 in: RESUMED
+10-27 18:14:10.503  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.ui.MainActivity@c55fc40
+10-27 18:14:11.351  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:11.358  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_09_settings_tajik.png
+10-27 18:14:11.581  4515  8366 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_09_settings_tajik.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:11.589  4515  8366 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_09_settings_tajik.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:11.605  5088  5391 I CoefMonitorTest: screenshot ui_09_settings_tajik
+10-27 18:14:12.429  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:12.436  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_10_dashboard_tajik.png
+10-27 18:14:12.658  4515  8380 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_10_dashboard_tajik.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:12.667  5088  5391 I CoefMonitorTest: screenshot ui_10_dashboard_tajik
+10-27 18:14:12.670  4515  8380 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_10_dashboard_tajik.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:13.460  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:13.467  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_11_algorithms_tajik.png
+10-27 18:14:13.690  4515  8393 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_11_algorithms_tajik.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:13.703  4515  8393 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_11_algorithms_tajik.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:13.715  5088  5391 I CoefMonitorTest: screenshot ui_11_algorithms_tajik
+10-27 18:14:14.002  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@c55fc40 in: PAUSED
+10-27 18:14:14.002  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.ui.MainActivity@c55fc40
+10-27 18:14:14.047  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@c55fc40 in: STOPPED
+10-27 18:14:14.047  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.ui.MainActivity@c55fc40
+10-27 18:14:14.088  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@c55fc40 in: DESTROYED
+10-27 18:14:14.109  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@86ba2a9 in: PRE_ON_CREATE
+10-27 18:14:14.125  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@86ba2a9 in: CREATED
+10-27 18:14:14.130  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.ui.MainActivity@86ba2a9
+10-27 18:14:14.141  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@86ba2a9 in: STARTED
+10-27 18:14:14.141  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.ui.MainActivity@86ba2a9
+10-27 18:14:14.142  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@86ba2a9 in: RESUMED
+10-27 18:14:14.142  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.ui.MainActivity@86ba2a9
+10-27 18:14:15.257  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:14:15.264  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_ui_12_dashboard_russian.png
+10-27 18:14:15.486  4515  8409 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_12_dashboard_russian.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:15.494  4515  8409 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_ui_12_dashboard_russian.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:14:15.515  5088  5391 I CoefMonitorTest: screenshot ui_12_dashboard_russian
+10-27 18:14:15.526  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@86ba2a9 in: PAUSED
+10-27 18:14:15.526  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.ui.MainActivity@86ba2a9
+10-27 18:14:15.534  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@86ba2a9 in: STOPPED
+10-27 18:14:15.534  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.ui.MainActivity@86ba2a9
+10-27 18:14:15.544  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@86ba2a9 in: DESTROYED
+10-27 18:14:15.564  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@94c2276 in: PRE_ON_CREATE
+10-27 18:14:15.583  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@94c2276 in: CREATED
+10-27 18:14:15.583  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.ui.MainActivity@94c2276
+10-27 18:14:15.585  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@94c2276 in: STARTED
+10-27 18:14:15.585  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.ui.MainActivity@94c2276
+10-27 18:14:15.585  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@94c2276 in: RESUMED
+10-27 18:14:15.585  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.ui.MainActivity@94c2276
+10-27 18:14:15.847  1934  4824 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity} from uid 10146
+10-27 18:14:15.863  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@94c2276 in: PAUSED
+10-27 18:14:15.863  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.ui.MainActivity@94c2276
+10-27 18:14:16.217  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@94c2276 in: STOPPED
+10-27 18:14:16.217  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.ui.MainActivity@94c2276
+10-27 18:14:16.219  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity: +257ms
+10-27 18:14:16.503  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.ui.MainActivity@94c2276 in: DESTROYED
+10-27 18:14:16.566  5088  5391 I TestRunner: finished: walkThroughAllScreens(app.coefmonitor.e2e.UiSmokeTest)
+10-27 18:14:16.580  5088  5391 I TestRunner: run finished: 12 tests, 0 failed, 0 ignored
+10-27 18:14:16.655  1934  2335 I ActivityManager: Force stopping app.coefmonitor appid=10146 user=0: finished inst
+10-27 18:14:16.656  1934  2335 I ActivityManager: Killing 5088:app.coefmonitor/u0a146 (adj 0): stop app.coefmonitor
+10-27 18:14:16.671  5027  5027 D AndroidRuntime: Shutting down VM
+10-27 18:14:17.175  1747  1747 E Layer   : [Surface(name=AppWindowToken{87ed369 token=Token{77371f0 ActivityRecord{d0aea33 u0 app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity t19}}})/@0x9abb5ba - animation-leash#0] No local sync point found
+10-27 18:14:17.957  1934  1966 I ActivityManager: Force stopping app.coefmonitor appid=10146 user=-1: deletePackageX
+10-27 18:14:17.969  1934  1978 I PackageManager: Removing old permission tree: app.coefmonitor.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION from package app.coefmonitor
+10-27 18:14:18.339  1934  2757 W LaunchParamsPersister: Failed to delete /data/system_ce/0/launch_params/app.coefmonitor_.ui.MainActivity.xml
+10-27 18:14:18.515  1934  1978 I ActivityManager: Force stopping app.coefmonitor appid=10146 user=0: pkg removed
+10-27 18:14:18.568  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.android.musicfx/.Compatibility$Receiver
+10-27 18:14:18.568  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+10-27 18:14:18.579  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+10-27 18:14:18.579  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:app.coefmonitor flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+10-27 18:14:18.580  1934  1957 E PackageManager: failed to find package app.coefmonitor
+10-27 18:14:18.580  1934  1957 E OverlayManager: Failed to change enabled overlays for app.coefmonitor user 0
+10-27 18:14:18.589  2078  2078 I GeofencerStateMachine: removeGeofences: removeRequest=RemoveGeofencingRequest[REMOVE_ALL packageName=app.coefmonitor]
+10-27 18:14:18.607  1934  1966 I ActivityManager: Force stopping app.coefmonitor.test appid=10147 user=-1: deletePackageX
+10-27 18:14:18.608  1934  1966 I ActivityManager: Killing 6512:app.coefmonitor.test/u0a147 (adj 900): stop app.coefmonitor.test
+10-27 18:14:18.810  1934  2039 D WifiConfigManager: Remove all networks for app ApplicationInfo{df840e8 app.coefmonitor}
+10-27 18:14:18.811  2287  7012 I Icing   : doRemovePackageData app.coefmonitor
+10-27 18:14:18.832  1934  1934 I ConditionProviders: Disallowing condition provider app.coefmonitor
+10-27 18:14:18.894  1934  2039 E PasspointManager: No app ops listener found for app.coefmonitor
+10-27 18:14:19.060  4515  8555 I MediaProvider: Begin Intent { act=android.intent.action.PACKAGE_FULLY_REMOVED dat=package:app.coefmonitor flg=0x5000010 cmp=com.android.providers.media/.MediaService (has extras) }
+10-27 18:14:19.060  4515  8555 I MediaProvider: End Intent { act=android.intent.action.PACKAGE_FULLY_REMOVED dat=package:app.coefmonitor flg=0x5000010 cmp=com.android.providers.media/.MediaService (has extras) }
+10-27 18:14:19.161  1934  1978 I ActivityManager: Force stopping app.coefmonitor.test appid=10147 user=0: pkg removed
+10-27 18:14:19.214  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.android.musicfx/.Compatibility$Receiver
+10-27 18:14:19.214  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+10-27 18:14:19.215  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+10-27 18:14:19.215  1934  1966 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:app.coefmonitor.test flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+10-27 18:14:19.261  2078  2078 I GeofencerStateMachine: removeGeofences: removeRequest=RemoveGeofencingRequest[REMOVE_ALL packageName=app.coefmonitor.test]
+10-27 18:14:19.316  1934  2039 D WifiConfigManager: Remove all networks for app ApplicationInfo{4829f11 app.coefmonitor.test}
+10-27 18:14:19.362  1934  1934 I ConditionProviders: Disallowing condition provider app.coefmonitor.test
+10-27 18:14:19.428  4515  8585 I MediaProvider: Begin Intent { act=android.intent.action.PACKAGE_FULLY_REMOVED dat=package:app.coefmonitor.test flg=0x5000010 cmp=com.android.providers.media/.MediaService (has extras) }
+10-27 18:14:19.428  4515  8585 I MediaProvider: End Intent { act=android.intent.action.PACKAGE_FULLY_REMOVED dat=package:app.coefmonitor.test flg=0x5000010 cmp=com.android.providers.media/.MediaService (has extras) }
+10-27 18:14:19.488  2287  6140 I Icing   : doRemovePackageData app.coefmonitor.test
+10-27 18:14:19.495  1934  2039 E PasspointManager: No app ops listener found for app.coefmonitor.test

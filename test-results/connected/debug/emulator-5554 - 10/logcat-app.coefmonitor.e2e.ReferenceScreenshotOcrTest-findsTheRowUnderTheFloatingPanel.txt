@@ -1,0 +1,154 @@
+10-27 18:13:23.076  5088  5391 I TestRunner: started: findsTheRowUnderTheFloatingPanel(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:23.125  5088  8002 D DecoupledTextDelegate: Start loading thick OCR module.
+10-27 18:13:23.126  5088  8002 I DynamiteModule: Considering local module com.google.mlkit.dynamite.text.latin:10000 and remote module com.google.mlkit.dynamite.text.latin:0
+10-27 18:13:23.126  5088  8002 I DynamiteModule: Selected local version of com.google.mlkit.dynamite.text.latin
+10-27 18:13:23.127  5088  8002 I native  : I0000 00:00:1793124803.127300    8002 asset_manager_util.cc:61] Created global reference to asset manager.
+10-27 18:13:23.128  5088  8002 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getInt(Ljava/lang/Object;J)I (greylist, linking, allowed)
+10-27 18:13:23.128  5088  8002 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getObject(Ljava/lang/Object;J)Ljava/lang/Object; (greylist, linking, allowed)
+10-27 18:13:23.128  5088  8002 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getLong(Ljava/lang/Object;J)J (greylist,core-platform-api, linking, allowed)
+10-27 18:13:23.160  5088  6334 D TransportRuntime.SQLiteEventStore: Storing event with priority=DEFAULT, name=FIREBASE_ML_SDK for destination cct
+10-27 18:13:23.166  5088  8004 I native  : I0000 00:00:1793124803.166613    8004 text_detector_thread_pool_context.cc:38] Compute manager max in flight region detector overwrite: 1
+10-27 18:13:23.166  5088  8004 I native  : I0000 00:00:1793124803.166898    8004 common_util.h:41] Resizing Thread Pool: ocr_det_0 to 3
+10-27 18:13:23.185  5088  8003 I native  : I0000 00:00:1793124803.185638    8003 text_classifier.cc:32] Creating classifier TfliteTextClassifier
+10-27 18:13:23.186  5088  8003 I native  : I0000 00:00:1793124803.186138    8003 common_util.h:41] Resizing Thread Pool: ocr_segm to 3
+10-27 18:13:23.186  5088  8004 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:23.205  5088  8004 I native  : I0000 00:00:1793124803.205807    8004 tflite_detector_client_with_shape_cache.cc:105] Caching size: 10
+10-27 18:13:23.206  5088  8003 I native  : I0000 00:00:1793124803.206848    8003 tflite_lstm_client_base.cc:371] Resizing interpreter pool to 4
+10-27 18:13:23.209  5088  6334 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, DEFAULT, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:13:23.213  5088  8003 I native  : I0000 00:00:1793124803.213223    8003 multi_pass_line_recognition_mutator.cc:342] Preloading recognizers.
+10-27 18:13:23.214  5088  6496 I native  : I0000 00:00:1793124803.214142    6496 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/conv_model.fb
+10-27 18:13:23.214  5088  6496 I native  : I0000 00:00:1793124803.214690    6496 tflite_model_pooled_runner.cc:636] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/lstm_model.fb
+10-27 18:13:23.217  5088  6496 I native  : I0000 00:00:1793124803.217219    6496 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 4
+10-27 18:13:23.219  5088  6496 I native  : I0000 00:00:1793124803.219733    6496 mobile_langid_v2.cc:58] MobileLangID V2 initialized.
+10-27 18:13:23.219  5088  6496 I native  : I0000 00:00:1793124803.219809    6496 multi_pass_line_recognition_mutator.cc:364] Finished preloading a recognizer for "Latn"
+10-27 18:13:23.220  5088  8003 I native  : I0000 00:00:1793124803.219950    8003 multi_pass_line_recognition_mutator.cc:398] Finished preloading recognizers.
+10-27 18:13:23.220  5088  8003 I native  : I0000 00:00:1793124803.220155    8003 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_splitting_custom_ops/model.tflite
+10-27 18:13:23.220  5088  8003 I native  : I0000 00:00:1793124803.220545    8003 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:13:23.221  5088  8003 I native  : I0000 00:00:1793124803.221136    8003 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_clustering_custom_ops/model.tflite
+10-27 18:13:23.221  5088  8003 I native  : I0000 00:00:1793124803.221598    8003 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:13:23.224  5088  8002 D PipelineManager: Start process bitmap
+10-27 18:13:23.230  5088  6334 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:13:23.251  5088  6334 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:13:23.262  5088  8003 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:23.268  5088  6334 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:13:23.350  5088  6334 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: exception when setting module id
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: java.lang.IllegalStateException: Unable to get current module info in ModuleManager created with non-module Context
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at com.google.android.chimera.config.ModuleManager.getCurrentModule(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at aewd.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):4)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at aewg.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):9)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at aeso.a(Unknown Source:0)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at rpm.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at rlv.c(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at rlt.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at rok.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):6)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at rok.c(:com.google.android.gms@202414023@20.24.14 (040800-319035315):6)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at rok.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):10)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at rok.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):17)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at rok.g(:com.google.android.gms@202414023@20.24.14 (040800-319035315):3)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at sdr.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at scr.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):10)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at sci.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at scl.handleMessage(:com.google.android.gms@202414023@20.24.14 (040800-319035315):28)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at aekz.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at aekz.dispatchMessage(:com.google.android.gms@202414023@20.24.14 (040800-319035315):14)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:13:23.455  2078  2499 E ModuleIdSetter: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:13:23.513  2078  7847 W ctxmgr  : [AclManager] No 3 for (accnt=account#-517948760#, com.google.android.gms(10119):UserVelocityProducer, vrsn=202414023, 0, 3pPkg = null ,  3pMdlId = null ,  pid = 2078). Was: 3 for 1, account#-517948760# [CONTEXT service_id=47 ]
+10-27 18:13:23.521  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:13:23.705  2078  7756 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:13:23.721  1934  1947 I system_server: NativeAlloc concurrent copying GC freed 88121(3514KB) AllocSpace objects, 15(492KB) LOS objects, 35% free, 10MB/16MB, paused 741us total 647.602ms
+10-27 18:13:23.794  2078  7846 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:13:23.797  2078  8018 I PlacesLogger: [PlaceInferenceEngine]: [anon] Changed inference mode: 0 [CONTEXT service_id=253 ]
+10-27 18:13:23.801  2078  2078 I GeofencerStateMachine: removeGeofences: removeRequest=RemoveGeofencingRequest[REMOVE_BY_PENDING_INTENT pendingIntent=PendingIntent[creatorPackage=com.google.android.gms], packageName=com.google.android.gms]
+10-27 18:13:23.804  2078  2078 I GeofencerStateMachine: removeGeofences: removeRequest=RemoveGeofencingRequest[REMOVE_BY_PENDING_INTENT pendingIntent=PendingIntent[creatorPackage=com.google.android.gms], packageName=com.google.android.gms]
+10-27 18:13:23.849  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:13:23.860  2078  7846 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:13:24.038  2078  7756 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:13:24.131  2078  8019 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:13:24.137  2078  7846 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:13:24.260  2078  7846 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:13:24.260  2078  7846 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:13:24.260  2078  7846 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:13:24.361  2078  7846 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:13:24.361  2078  7846 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:13:24.361  2078  7846 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:13:24.444  5088  8003 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:24.494  2078  8018 W LogUtils: [Places]: ?: Failed to download inference model weights SLS
+10-27 18:13:24.494  2078  8018 W LogUtils: ckdr: NOT_FOUND: Requested entity was not found.
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at ckdq.c(:com.google.android.gms@202414023@20.24.14 (040800-319035315):3)
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at sjo.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):57)
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at bjxj.call(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at bjvu.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at soy.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):12)
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at soy.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):7)
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at sux.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:13:24.494  2078  8018 W LogUtils: 	at java.lang.Thread.run(Thread.java:919)
+10-27 18:13:24.494  2078  8018 W LogUtils:
+10-27 18:13:24.494  2078  8018 W LogUtils: [CONTEXT service_id=253 ]
+10-27 18:13:24.496  2078  8018 W PlacesLogger: [PlaceInferenceEngine]: Failed to download model weights. Status code: 7 [CONTEXT service_id=253 ]
+10-27 18:13:24.498  2078  8028 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:13:24.511  2078  7846 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:13:24.551  2078  7847 I ctxmgr  : [ProducerStatusImpl] updateStateForNewContextData: inactive, contextName=7 [CONTEXT service_id=47 ]
+10-27 18:13:24.616  2078  8020 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:13:24.630  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:13:24.640  2078  8018 I LogUtils: [Places]: ?: PlacesBleScanner start() with priority 2 [CONTEXT service_id=253 ]
+10-27 18:13:24.640  2078  8018 I PlacesLogger: [PlaceInferenceEngine]: [anon] Changed inference mode: 1 [CONTEXT service_id=253 ]
+10-27 18:13:24.648  2078  2078 E BeaconBle: Missing BluetoothAdapter [CONTEXT service_id=111 ]
+10-27 18:13:24.648  2078  2078 I BeaconBle: BLE 'KK+' software access layer enabled [CONTEXT service_id=111 ]
+10-27 18:13:24.651  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:13:24.662  2078  2078 I BeaconBle: Client requested scan, settings=BleSettings [scanMode=ZERO_POWER, callbackType=ALL_MATCHES, reportDelayMillis=0, 1 filters, 0 clients, callingClientName=Places] [CONTEXT service_id=111 ]
+10-27 18:13:24.663  2078  2078 I BeaconBle: Scan : No clients left, canceling alarm. [CONTEXT service_id=111 ]
+10-27 18:13:24.663  2078  2078 E BeaconBle: Scan couldn't start for Places [CONTEXT service_id=111 ]
+10-27 18:13:24.664  2078  2078 W Places  : BLE failure while scanning - code 5
+10-27 18:13:24.742  2078  2099 I .gms.persisten: Background young concurrent copying GC freed 76315(4073KB) AllocSpace objects, 2(104KB) LOS objects, 27% free, 10MB/14MB, paused 7.346ms total 73.508ms
+10-27 18:13:25.124  5088  8003 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:25.521  1934  4005 D WificondControl: Scan result ready event
+10-27 18:13:25.717  5088  8003 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:26.629  2418  2430 I m.android.phon: Background young concurrent copying GC freed 20542(1696KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 1826KB/3620KB, paused 9.224ms total 23.200ms
+10-27 18:13:26.870  5088  8003 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:29.081  5088  8002 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:13:29.091  5088  5391 I CoefMonitorTest: words: ?@116,90, 2.03x@262,89, AnropuTM@110,255, 1/@302,254, 20@374,253, Craryc@140,356, AnropuTM@310,356, AnropuTM@111,442, 1@273,442, 1.00x@444,88, KAMKn@141,737, OTKpbITb@302,735, 1.51x@623,88, HactpoŭKu@530,355, lay3a@139,634, CTom@300,635, HańTM@441,632, pAg@545,636, 1.16X@803,88, NocnegHMÄ:@113,491, –KMIAHVE@419,491, VHMLMansaLMA-@113,552, MTeHne@356,552, oTKNOHeHO@457,552, PAVHAA@636,552, X@786,256
+10-27 18:13:29.092  5088  5391 I CoefMonitorTest: row: RowCells(newest=PixelRect(left=221, top=74, width=165, height=52), neighbor=PixelRect(left=401, top=74, width=165, height=52), pitch=180)
+10-27 18:13:29.102  5088  6334 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:13:29.106  5088  6334 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:13:29.112  5088  6334 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:13:29.118  5088  6334 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:13:29.122  5088  8038 D DecoupledTextDelegate: Start loading thick OCR module.
+10-27 18:13:29.122  5088  8038 I DynamiteModule: Considering local module com.google.mlkit.dynamite.text.latin:10000 and remote module com.google.mlkit.dynamite.text.latin:0
+10-27 18:13:29.122  5088  8038 I DynamiteModule: Selected local version of com.google.mlkit.dynamite.text.latin
+10-27 18:13:29.123  5088  8038 I native  : I0000 00:00:1793124809.123368    8038 asset_manager_util.cc:61] Created global reference to asset manager.
+10-27 18:13:29.124  5088  8038 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getInt(Ljava/lang/Object;J)I (greylist, linking, allowed)
+10-27 18:13:29.124  5088  8038 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getObject(Ljava/lang/Object;J)Ljava/lang/Object; (greylist, linking, allowed)
+10-27 18:13:29.124  5088  8038 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getLong(Ljava/lang/Object;J)J (greylist,core-platform-api, linking, allowed)
+10-27 18:13:29.125  5088  6334 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:13:29.130  5088  6334 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:13:29.132  5088  8039 I native  : I0000 00:00:1793124809.132542    8039 text_detector_thread_pool_context.cc:38] Compute manager max in flight region detector overwrite: 1
+10-27 18:13:29.132  5088  8040 I native  : I0000 00:00:1793124809.132926    8040 text_classifier.cc:32] Creating classifier TfliteTextClassifier
+10-27 18:13:29.133  5088  8039 I native  : I0000 00:00:1793124809.133424    8039 common_util.h:41] Resizing Thread Pool: ocr_det_0 to 3
+10-27 18:13:29.135  5088  6334 D TransportRuntime.SQLiteEventStore: Storing event with priority=DEFAULT, name=FIREBASE_ML_SDK for destination cct
+10-27 18:13:29.137  5088  8040 I native  : I0000 00:00:1793124809.137203    8040 common_util.h:41] Resizing Thread Pool: ocr_segm to 3
+10-27 18:13:29.140  5088  8040 I native  : I0000 00:00:1793124809.140335    8040 tflite_lstm_client_base.cc:371] Resizing interpreter pool to 4
+10-27 18:13:29.151  5088  8040 I native  : I0000 00:00:1793124809.151691    8040 multi_pass_line_recognition_mutator.cc:342] Preloading recognizers.
+10-27 18:13:29.153  5088  6496 I native  : I0000 00:00:1793124809.151980    6496 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/conv_model.fb
+10-27 18:13:29.154  5088  6496 I native  : I0000 00:00:1793124809.154838    6496 tflite_model_pooled_runner.cc:636] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/lstm_model.fb
+10-27 18:13:29.156  5088  8039 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:29.157  5088  8039 I native  : I0000 00:00:1793124809.156980    8039 tflite_detector_client_with_shape_cache.cc:105] Caching size: 10
+10-27 18:13:29.158  5088  6496 I native  : I0000 00:00:1793124809.158609    6496 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 4
+10-27 18:13:29.160  5088  6334 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, DEFAULT, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:13:29.161  5088  8039 I native  : I0000 00:00:1793124809.161070    8039 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_splitting_custom_ops/model.tflite
+10-27 18:13:29.162  5088  8039 I native  : I0000 00:00:1793124809.162649    8039 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:13:29.162  5088  8039 I native  : I0000 00:00:1793124809.162891    8039 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_clustering_custom_ops/model.tflite
+10-27 18:13:29.164  5088  8039 I native  : I0000 00:00:1793124809.164273    8039 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:13:29.165  5088  6496 I native  : I0000 00:00:1793124809.165648    6496 mobile_langid_v2.cc:58] MobileLangID V2 initialized.
+10-27 18:13:29.165  5088  6496 I native  : I0000 00:00:1793124809.165735    6496 multi_pass_line_recognition_mutator.cc:364] Finished preloading a recognizer for "Latn"
+10-27 18:13:29.165  5088  8040 I native  : I0000 00:00:1793124809.165898    8040 multi_pass_line_recognition_mutator.cc:398] Finished preloading recognizers.
+10-27 18:13:29.167  5088  8038 D PipelineManager: Start process bitmap
+10-27 18:13:29.206  5088  8040 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:31.367  5088  8040 I chatty  : uid=10146(app.coefmonitor) Thread-56 identical 3 lines
+10-27 18:13:31.990  5088  8040 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:33.352  5088  8038 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:13:33.355  5088  5391 I TestRunner: finished: findsTheRowUnderTheFloatingPanel(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)

@@ -1,0 +1,8 @@
+10-27 18:13:50.802  5088  5391 I TestRunner: started: signaturesSeparateDifferentTiles(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:50.805  5088  5391 I CoefMonitorTest: similarity tile1 vs tile2 = 0.8456979
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile1 vs tile3 = 0.75878364
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile1 vs tile4 = 0.81113404
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile2 vs tile3 = 0.8831256
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile2 vs tile4 = 0.8615833
+10-27 18:13:50.806  5088  5391 I CoefMonitorTest: similarity tile3 vs tile4 = 0.83854467
+10-27 18:13:50.806  5088  5391 I TestRunner: finished: signaturesSeparateDifferentTiles(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)

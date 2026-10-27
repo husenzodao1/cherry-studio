@@ -1,0 +1,35 @@
+10-27 18:13:47.930  5088  5391 I TestRunner: started: findsTheRowAndReadsTheNewestValueAndItsNeighbour(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:13:47.942  5088  6334 D TransportRuntime.SQLiteEventStore: Storing event with priority=DEFAULT, name=FIREBASE_ML_SDK for destination cct
+10-27 18:13:47.949  5088  6334 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, DEFAULT, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:13:47.951  5088  8089 D DecoupledTextDelegate: Start loading thick OCR module.
+10-27 18:13:47.951  5088  8089 I DynamiteModule: Considering local module com.google.mlkit.dynamite.text.latin:10000 and remote module com.google.mlkit.dynamite.text.latin:0
+10-27 18:13:47.951  5088  8089 I DynamiteModule: Selected local version of com.google.mlkit.dynamite.text.latin
+10-27 18:13:47.953  5088  8089 I native  : I0000 00:00:1793124827.953513    8089 asset_manager_util.cc:61] Created global reference to asset manager.
+10-27 18:13:47.954  5088  8089 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getInt(Ljava/lang/Object;J)I (greylist, linking, allowed)
+10-27 18:13:47.954  5088  8089 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getLong(Ljava/lang/Object;J)J (greylist,core-platform-api, linking, allowed)
+10-27 18:13:47.959  5088  8113 I native  : I0000 00:00:1793124827.959238    8113 text_detector_thread_pool_context.cc:38] Compute manager max in flight region detector overwrite: 1
+10-27 18:13:47.959  5088  8114 I native  : I0000 00:00:1793124827.959346    8114 text_classifier.cc:32] Creating classifier TfliteTextClassifier
+10-27 18:13:47.959  5088  8113 I native  : I0000 00:00:1793124827.959899    8113 common_util.h:41] Resizing Thread Pool: ocr_det_0 to 3
+10-27 18:13:47.960  5088  8114 I native  : I0000 00:00:1793124827.960605    8114 common_util.h:41] Resizing Thread Pool: ocr_segm to 3
+10-27 18:13:47.962  5088  8114 I native  : I0000 00:00:1793124827.962456    8114 tflite_lstm_client_base.cc:371] Resizing interpreter pool to 4
+10-27 18:13:47.963  5088  8114 I native  : I0000 00:00:1793124827.963381    8114 multi_pass_line_recognition_mutator.cc:342] Preloading recognizers.
+10-27 18:13:47.963  5088  6495 I native  : I0000 00:00:1793124827.963459    6495 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/conv_model.fb
+10-27 18:13:47.963  5088  6495 I native  : I0000 00:00:1793124827.963873    6495 tflite_model_pooled_runner.cc:636] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/lstm_model.fb
+10-27 18:13:47.966  5088  6495 I native  : I0000 00:00:1793124827.966058    6495 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 4
+10-27 18:13:47.967  5088  6495 I native  : I0000 00:00:1793124827.967652    6495 mobile_langid_v2.cc:58] MobileLangID V2 initialized.
+10-27 18:13:47.967  5088  6495 I native  : I0000 00:00:1793124827.967689    6495 multi_pass_line_recognition_mutator.cc:364] Finished preloading a recognizer for "Latn"
+10-27 18:13:47.967  5088  8114 I native  : I0000 00:00:1793124827.967805    8114 multi_pass_line_recognition_mutator.cc:398] Finished preloading recognizers.
+10-27 18:13:47.967  5088  8114 I native  : I0000 00:00:1793124827.967969    8114 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_splitting_custom_ops/model.tflite
+10-27 18:13:47.968  5088  8114 I native  : I0000 00:00:1793124827.968246    8114 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:13:47.968  5088  8114 I native  : I0000 00:00:1793124827.968448    8114 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_clustering_custom_ops/model.tflite
+10-27 18:13:47.968  5088  8114 I native  : I0000 00:00:1793124827.968817    8114 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:13:47.969  5088  8113 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:47.969  5088  8113 I native  : I0000 00:00:1793124827.969898    8113 tflite_detector_client_with_shape_cache.cc:105] Caching size: 10
+10-27 18:13:47.971  5088  8089 D PipelineManager: Start process bitmap
+10-27 18:13:47.984  5088  8114 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:49.540  5088  8114 I chatty  : uid=10146(app.coefmonitor) Thread-63 identical 2 lines
+10-27 18:13:50.068  5088  8114 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:13:50.796  5088  8089 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:13:50.798  5088  5391 I CoefMonitorTest: words: ?@117,90, 2.01x@263,90, 1.53x@444,90, 1.20x@624,90, 2.03X@803,89
+10-27 18:13:50.798  5088  5391 I CoefMonitorTest: row: RowCells(newest=PixelRect(left=221, top=77, width=166, height=48), neighbor=PixelRect(left=401, top=77, width=166, height=48), pitch=180)
+10-27 18:13:50.799  5088  5391 I TestRunner: finished: findsTheRowAndReadsTheNewestValueAndItsNeighbour(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)

@@ -1,0 +1,212 @@
+10-27 18:05:56.851  5088  5391 I TestRunner: started: staticTileSignatureIsStableAcrossFrames(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:05:56.860  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:05:56.887  4090  4131 I MicroDetectionWorker: onReady
+10-27 18:05:56.891  4090  6865 I MicroRecognitionRunner: Starting detection.
+10-27 18:05:56.891  4090  6865 I MultipleReaderAudioSrc: Using micInputStream
+10-27 18:05:56.893  4090  6590 I MicrophoneInputStream: mic_starting  SR : 16000 CC : 16 SO : 1999
+10-27 18:05:57.004  1735  7373 I AudioFlinger: AudioFlinger's thread 0x76b2d0ee6fc0 tid=7373 ready to run
+10-27 18:05:57.008  1934  3805 I AudioService.RecordingActivityMonitor: rec update riid:55 uid:10122 session:41 src:HOTWORD pack:com.google.android.googlequicksearchbox
+10-27 18:05:57.028  4090  6590 I MicrophoneInputStream: mic_started  SR : 16000 CC : 16 SO : 1999
+10-27 18:05:57.038  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:05:57.061  4090  6865 W SpeechLevelGenerator: Really low audio levels detected. The audio input may have issues.
+10-27 18:05:57.062  4090  4131 I MicroDetectionWorker: onReady
+10-27 18:05:57.081  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:05:57.119  4090  4102 I earchbox:searc: Background young concurrent copying GC freed 11995(698KB) AllocSpace objects, 0(0B) LOS objects, 2% free, 9666KB/9946KB, paused 23.136ms total 227.763ms
+10-27 18:05:57.139  5088  5391 D UiDevice: Executing shell command: settings put global hide_error_dialogs 1
+10-27 18:05:57.191  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:05:57.275  2078  7126 W ctxmgr  : [AclManager] No 3 for (accnt=account#-517948760#, com.google.android.gms(10119):UserVelocityProducer, vrsn=202414023, 0, 3pPkg = null ,  3pMdlId = null ,  pid = 2078). Was: 3 for 1, account#-517948760# [CONTEXT service_id=47 ]
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: exception when setting module id
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: java.lang.IllegalStateException: Unable to get current module info in ModuleManager created with non-module Context
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at com.google.android.chimera.config.ModuleManager.getCurrentModule(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at aewd.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):4)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at aewg.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):9)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at aeso.a(Unknown Source:0)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at rpm.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at rlv.c(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at rlt.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at rok.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):6)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at rok.c(:com.google.android.gms@202414023@20.24.14 (040800-319035315):6)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at rok.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):10)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at rok.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):17)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at rok.g(:com.google.android.gms@202414023@20.24.14 (040800-319035315):3)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at sdr.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at scr.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):10)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at sci.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at scl.handleMessage(:com.google.android.gms@202414023@20.24.14 (040800-319035315):28)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at aekz.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at aekz.dispatchMessage(:com.google.android.gms@202414023@20.24.14 (040800-319035315):14)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:05:57.300  2078  2499 E ModuleIdSetter: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:05:57.350  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:05:57.436  2078  4210 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:05:57.501  2078  2078 I GeofencerStateMachine: removeGeofences: removeRequest=RemoveGeofencingRequest[REMOVE_BY_PENDING_INTENT pendingIntent=PendingIntent[creatorPackage=com.google.android.gms], packageName=com.google.android.gms]
+10-27 18:05:57.512  2078  2078 I GeofencerStateMachine: removeGeofences: removeRequest=RemoveGeofencingRequest[REMOVE_BY_PENDING_INTENT pendingIntent=PendingIntent[creatorPackage=com.google.android.gms], packageName=com.google.android.gms]
+10-27 18:05:57.554  2078  7389 I PlacesLogger: [PlaceInferenceEngine]: [anon] Changed inference mode: 0 [CONTEXT service_id=253 ]
+10-27 18:05:57.555  2078  4223 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:05:57.557  2078  7287 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:05:57.610  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:05:57.726  2078  4223 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:05:57.747  5088  5391 D UiDevice: Node not found with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:05:57.759  2078  4223 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:05:57.774  2078  7287 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:05:57.775  2078  7390 E cklt    : *~*~*~ Channel {0} was not shutdown properly!!! ~*~*~*
+10-27 18:05:57.775  2078  7390 E cklt    :     Make sure to call shutdown()/shutdownNow() and wait until awaitTermination() returns true.
+10-27 18:05:57.775  2078  7390 E cklt    : java.lang.RuntimeException: ManagedChannel allocation site
+10-27 18:05:57.775  2078  7390 E cklt    : 	at ckls.<init>(:com.google.android.gms@202414023@20.24.14 (040800-319035315):3)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at cklt.<init>(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at ckfk.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):21)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at sjo.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):29)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at sjo.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):52)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at bjxj.call(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at bjvu.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at soy.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):12)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at soy.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):7)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at sux.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:05:57.775  2078  7390 E cklt    : 	at java.lang.Thread.run(Thread.java:919)
+10-27 18:05:57.806  5088  5541 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getObject(Ljava/lang/Object;J)Ljava/lang/Object; (greylist, linking, allowed)
+10-27 18:05:57.806  5088  5541 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->putObject(Ljava/lang/Object;JLjava/lang/Object;)V (greylist, linking, allowed)
+10-27 18:05:57.806  5088  5541 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->putInt(Ljava/lang/Object;JI)V (greylist, linking, allowed)
+10-27 18:05:57.806  5088  5541 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getInt(Ljava/lang/Object;J)I (greylist, linking, allowed)
+10-27 18:05:57.849  2078  7287 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:05:57.849  2078  7287 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:05:57.849  2078  7287 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:05:57.867  5088  5541 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->putObject(Ljava/lang/Object;JLjava/lang/Object;)V (greylist, linking, allowed)
+10-27 18:05:57.890  2287  7393 I Vision  : Requesting optional module download of ocr.
+10-27 18:05:57.906  5088  5391 W Settings: Setting always_finish_activities has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.
+10-27 18:05:57.908  2287  7393 I Vision  : Checking for download completion for 384537 -- ocr
+10-27 18:05:57.910  2078  7126 I ctxmgr  : [ProducerStatusImpl] updateStateForNewContextData: inactive, contextName=7 [CONTEXT service_id=47 ]
+10-27 18:05:57.954  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:05:57.956  2078  7287 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:05:57.956  2078  7287 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:05:57.956  2078  7287 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:05:57.976  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:05:58.029  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1892352
+10-27 18:05:58.073  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:05:58.108  2078  7389 W LogUtils: [Places]: ?: Failed to download inference model weights SLS
+10-27 18:05:58.108  2078  7389 W LogUtils: ckdr: NOT_FOUND: Requested entity was not found.
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at ckdq.c(:com.google.android.gms@202414023@20.24.14 (040800-319035315):3)
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at sjo.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):57)
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at bjxj.call(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at bjvu.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at soy.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):12)
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at soy.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):7)
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at sux.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:05:58.108  2078  7389 W LogUtils: 	at java.lang.Thread.run(Thread.java:919)
+10-27 18:05:58.108  2078  7389 W LogUtils:
+10-27 18:05:58.108  2078  7389 W LogUtils: [CONTEXT service_id=253 ]
+10-27 18:05:58.109  2078  7389 W PlacesLogger: [PlaceInferenceEngine]: Failed to download model weights. Status code: 7 [CONTEXT service_id=253 ]
+10-27 18:05:58.109  2078  7390 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:05:58.122  2287  7220 W ChimeraConfigurator: Error syncing flags: qoq: COMMIT_TIMEOUT
+10-27 18:05:58.122  2287  7220 I ChmraDebugLogger: [79] COMMIT_TIMEOUT
+10-27 18:05:58.143  2078  4223 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:05:58.158  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1892352
+10-27 18:05:58.189  2287  7220 I ChmraDebugLogger: [52] null
+10-27 18:05:58.190  2078  7390 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:05:58.226  2287  7220 W ChimeraConfigService: Retry attempt was throttled.
+10-27 18:05:58.230  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:05:58.242  2078  7389 I LogUtils: [Places]: ?: PlacesBleScanner start() with priority 2 [CONTEXT service_id=253 ]
+10-27 18:05:58.257  2078  7389 I PlacesLogger: [PlaceInferenceEngine]: [anon] Changed inference mode: 1 [CONTEXT service_id=253 ]
+10-27 18:05:58.277  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:05:58.280  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1892352
+10-27 18:05:58.283  2078  2078 E BeaconBle: Missing BluetoothAdapter [CONTEXT service_id=111 ]
+10-27 18:05:58.283  2078  2078 I BeaconBle: BLE 'KK+' software access layer enabled [CONTEXT service_id=111 ]
+10-27 18:05:58.320  2084  2348 D EGL_emulation: eglMakeCurrent: 0x799ed18791c0: ver 3 0 (tinfo 0x799ed18ee7a0)
+10-27 18:05:58.327  2078  2099 I .gms.persisten: Background concurrent copying GC freed 122983(5964KB) AllocSpace objects, 1(16KB) LOS objects, 41% free, 8625KB/14MB, paused 636us total 164.886ms
+10-27 18:05:58.381  2078  2078 I BeaconBle: Client requested scan, settings=BleSettings [scanMode=ZERO_POWER, callbackType=ALL_MATCHES, reportDelayMillis=0, 1 filters, 0 clients, callingClientName=Places] [CONTEXT service_id=111 ]
+10-27 18:05:58.382  2078  2078 I BeaconBle: Scan : No clients left, canceling alarm. [CONTEXT service_id=111 ]
+10-27 18:05:58.384  2078  2078 E BeaconBle: Scan couldn't start for Places [CONTEXT service_id=111 ]
+10-27 18:05:58.384  2078  2078 W Places  : BLE failure while scanning - code 5
+10-27 18:05:58.446  1934  1961 E system_server: Invalid ID 0x00000000.
+10-27 18:05:58.458  1934  2141 W InputReader: Device has associated, but no associated display id.
+10-27 18:05:58.463  1934  2141 I chatty  : uid=1000(system) Binder:1934_4 identical 38 lines
+10-27 18:05:58.463  1934  2141 W InputReader: Device has associated, but no associated display id.
+10-27 18:05:58.464  5088  5088 W ActivityThread: handleWindowVisibility: no activity for token android.os.BinderProxy@901b58
+10-27 18:05:58.483  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:05:58.484  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: PRE_ON_CREATE
+10-27 18:05:58.484  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the reported transition was not ON_CREATE while the last known transition was PRE_ON_CREATE
+10-27 18:05:58.490  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: CREATED
+10-27 18:05:58.490  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:05:58.494  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: STARTED
+10-27 18:05:58.494  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:05:58.499  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: RESUMED
+10-27 18:05:58.499  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:05:58.547  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:05:58.548  1934  1961 I chatty  : uid=1000(system) android.anim identical 8 lines
+10-27 18:05:58.548  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:05:58.577  1702  1758 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:05:58.581  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1662976
+10-27 18:05:58.581  4090  4131 I MicroDetector: Keeping mic open: false
+10-27 18:05:58.588  4090  6866 I DeviceStateChecker: DeviceStateChecker cancelled
+10-27 18:05:58.586  4090  4149 I AudioController: internalShutdown
+10-27 18:05:58.591  1934  6614 D HostConnection: HostConnection::get() New Host Connection established 0x799e6cb8cf00, tid 6614
+10-27 18:05:58.592  1934  6614 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:05:58.593  4090  4232 I MicroRecognitionRunner: Stopping hotword detection.
+10-27 18:05:58.594  1934  6614 D EGL_emulation: eglCreateContext: 0x799e6cb8d0e0: maj 3 min 0 rcv 3
+10-27 18:05:58.595  1934  6614 D EGL_emulation: eglMakeCurrent: 0x799e6cb8d0e0: ver 3 0 (tinfo 0x799e82c92d60)
+10-27 18:05:58.600  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:05:58.604  1702  1758 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:05:58.611  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:05:58.646  1934  3020 D HostConnection: HostConnection::get() New Host Connection established 0x799e80833140, tid 3020
+10-27 18:05:58.709  1934  3020 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:05:58.728  4090  4149 I MicrophoneInputStream: mic_close  SR : 16000 CC : 16 SO : 1999
+10-27 18:05:58.729  4090  4149 E AudioSource: Stop listening is called on already closed AudioSource
+10-27 18:05:58.729  4090  4232 W earchbox:searc: Long monitor contention with owner UserFacing2 (4149) at void android.media.AudioRecord.native_stop()(AudioRecord.java:-2) waiters=0 in void com.google.android.apps.gsa.speech.audio.aw.b(int) for 131ms
+10-27 18:05:58.731  4090  6865 I MicroRecognitionRunner: Detection finished
+10-27 18:05:58.793  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity: +324ms
+10-27 18:05:58.941  4090  4154 D EGL_emulation: eglMakeCurrent: 0xdc663200: ver 3 0 (tinfo 0xc3bf7010)
+10-27 18:05:58.953  2593  3122 D EGL_emulation: eglMakeCurrent: 0x799ed1883fa0: ver 3 0 (tinfo 0x799ed1818620)
+10-27 18:05:59.006  1934  1947 I system_server: NativeAlloc concurrent copying GC freed 21051(1443KB) AllocSpace objects, 19(572KB) LOS objects, 35% free, 10MB/16MB, paused 774us total 279.056ms
+10-27 18:05:59.023  4090  4149 I PBSessionCacheImpl: Deleted sessionId[224089673708] from persistence.
+10-27 18:05:59.038  4090  4131 W SearchServiceCore: Abort, client detached.
+10-27 18:05:59.924  1702  1758 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:06:00.011  2084  2084 D KeyguardClockSwitch: Updating clock: 606
+10-27 18:06:00.299  1702  1758 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:06:00.342  5088  5391 I CoefMonitorTest: static tile similarity between captures = 1.0
+10-27 18:06:00.342  5088  5391 D UiDevice: Executing shell command: settings delete secure enabled_accessibility_services
+10-27 18:06:00.366  5088  5391 D UiDevice: Setting accessibility service flags: 65618
+10-27 18:06:00.424  5088  5391 D UiDevice: Executing shell command: settings put secure accessibility_enabled 0
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: final state
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: runtime=RuntimeState(status=STOPPED, captureActive=false, ocrStatus=IDLE, lastRawText=null, lastReadValue=null, lastConfidence=null, lastRejection=null, rowBand=null, error=null, lastContinuity=null, clicks=null)
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: active=1
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: events:
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest:
+10-27 18:06:00.444  5088  5391 I CoefMonitorTest: diagnostics (newest first):
+10-27 18:06:00.452  1934  1961 E system_server: Invalid ID 0x00000000.
+10-27 18:06:00.457  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: PAUSED
+10-27 18:06:00.457  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:06:00.463  1934  1953 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.465  1934  1953 I chatty  : uid=1000(system) Binder:1934_1 identical 38 lines
+10-27 18:06:00.465  1934  1953 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.465  6512  6512 W ActivityThread: handleWindowVisibility: no activity for token android.os.BinderProxy@8f3f485
+10-27 18:06:00.468  1934  1953 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.469  1934  1953 I chatty  : uid=1000(system) Binder:1934_1 identical 8 lines
+10-27 18:06:00.469  1934  1953 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.517  1702  1758 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:06:00.565  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.566  1934  1961 I chatty  : uid=1000(system) android.anim identical 18 lines
+10-27 18:06:00.566  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.568  1702  1758 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 6639616
+10-27 18:06:00.580  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:06:00.600  1702  1758 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:06:00.621  1702  1758 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:06:00.629  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:06:00.632  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:06:00.632  6512  6532 D EGL_emulation: eglMakeCurrent: 0x799ed18546e0: ver 3 0 (tinfo 0x799ed18187a0)
+10-27 18:06:00.677  1934  3020 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.677  1934  3020 I chatty  : uid=1000(system) Binder:1934_12 identical 8 lines
+10-27 18:06:00.677  1934  3020 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.689  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity: +233ms
+10-27 18:06:00.702  1934  2837 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.705  1934  2837 I chatty  : uid=1000(system) Binder:1934_C identical 8 lines
+10-27 18:06:00.705  1934  2837 W InputReader: Device has associated, but no associated display id.
+10-27 18:06:00.719  2593  2607 I s.nexuslaunche: NativeAlloc concurrent copying GC freed 2439(260KB) AllocSpace objects, 2(104KB) LOS objects, 49% free, 3152KB/6305KB, paused 724us total 106.303ms
+10-27 18:06:00.763  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: STOPPED
+10-27 18:06:00.763  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@43638e9
+10-27 18:06:00.767  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@43638e9 in: DESTROYED
+10-27 18:06:00.768  5088  5088 V ActivityScenario: Update currentActivityStage to DESTROYED, currentActivity=null
+10-27 18:06:00.768  5088  5391 I TestRunner: finished: staticTileSignatureIsStableAcrossFrames(app.coefmonitor.e2e.EndToEndMonitoringTest)

@@ -1,0 +1,804 @@
+10-27 18:07:58.690  5088  5391 I TestRunner: started: panelWorksOverAnotherAppWithoutMonitoring(app.coefmonitor.e2e.FloatingModeTest)
+10-27 18:07:58.698  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:07:58.775  5088  5391 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:07:58.776  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:07:58.820  5088  5391 D UiDevice: Executing shell command: settings put global hide_error_dialogs 1
+10-27 18:07:58.866  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:07:58.982  2078  7726 W ctxmgr  : [AclManager] No 3 for (accnt=account#-517948760#, com.google.android.gms(10119):UserVelocityProducer, vrsn=202414023, 0, 3pPkg = null ,  3pMdlId = null ,  pid = 2078). Was: 3 for 1, account#-517948760# [CONTEXT service_id=47 ]
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: exception when setting module id
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: java.lang.IllegalStateException: Unable to get current module info in ModuleManager created with non-module Context
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at com.google.android.chimera.config.ModuleManager.getCurrentModule(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at aewd.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):4)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at aewg.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):9)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at aeso.a(Unknown Source:0)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at rpm.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at rlv.c(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at rlt.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at rok.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):6)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at rok.c(:com.google.android.gms@202414023@20.24.14 (040800-319035315):6)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at rok.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):10)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at rok.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):17)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at rok.g(:com.google.android.gms@202414023@20.24.14 (040800-319035315):3)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at sdr.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at scr.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):10)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at sci.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at scl.handleMessage(:com.google.android.gms@202414023@20.24.14 (040800-319035315):28)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at aekz.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at aekz.dispatchMessage(:com.google.android.gms@202414023@20.24.14 (040800-319035315):14)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:07:58.985  2078  2499 E ModuleIdSetter: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:07:59.015  1934  1947 I system_server: NativeAlloc concurrent copying GC freed 65809(3081KB) AllocSpace objects, 35(1292KB) LOS objects, 35% free, 10MB/16MB, paused 632us total 119.524ms
+10-27 18:07:59.055  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:07:59.070  2078  7733 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:07:59.208  2078  7726 I ctxmgr  : [ProducerStatusImpl] updateStateForNewContextData: inactive, contextName=7 [CONTEXT service_id=47 ]
+10-27 18:07:59.238  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 368250 , only wrote 368177
+10-27 18:07:59.239  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 368191 , only wrote 368177
+10-27 18:07:59.254  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 368863 , only wrote 368838
+10-27 18:07:59.244  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:07:59.278  2078  2078 I GeofencerStateMachine: removeGeofences: removeRequest=RemoveGeofencingRequest[REMOVE_BY_PENDING_INTENT pendingIntent=PendingIntent[creatorPackage=com.google.android.gms], packageName=com.google.android.gms]
+10-27 18:07:59.285  2078  2078 I GeofencerStateMachine: removeGeofences: removeRequest=RemoveGeofencingRequest[REMOVE_BY_PENDING_INTENT pendingIntent=PendingIntent[creatorPackage=com.google.android.gms], packageName=com.google.android.gms]
+10-27 18:07:59.340  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:07:59.356  2078  7755 I PlacesLogger: [PlaceInferenceEngine]: [anon] Changed inference mode: 0 [CONTEXT service_id=253 ]
+10-27 18:07:59.357  2078  7613 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:07:59.376  2078  7756 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:07:59.462  2078  7726 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:07:59.481  2078  7757 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:07:59.493  2078  7756 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:07:59.494  2078  7726 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:07:59.543  2078  7755 I LogUtils: [Places]: ?: PlacesBleScanner start() with priority 2 [CONTEXT service_id=253 ]
+10-27 18:07:59.578  2078  7757 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:07:59.578  2078  7757 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:07:59.578  2078  7757 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:07:59.581  2078  7755 I PlacesLogger: [PlaceInferenceEngine]: [anon] Changed inference mode: 1 [CONTEXT service_id=253 ]
+10-27 18:07:59.587  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:07:59.597  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 383965 , only wrote 383380
+10-27 18:07:59.623  2078  2078 E BeaconBle: Missing BluetoothAdapter [CONTEXT service_id=111 ]
+10-27 18:07:59.623  2078  2078 I BeaconBle: BLE 'KK+' software access layer enabled [CONTEXT service_id=111 ]
+10-27 18:07:59.643  2078  7757 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:07:59.643  2078  7757 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:07:59.643  2078  7757 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:07:59.705  2078  2078 I BeaconBle: Client requested scan, settings=BleSettings [scanMode=ZERO_POWER, callbackType=ALL_MATCHES, reportDelayMillis=0, 1 filters, 0 clients, callingClientName=Places] [CONTEXT service_id=111 ]
+10-27 18:07:59.706  2078  2078 I BeaconBle: Scan : No clients left, canceling alarm. [CONTEXT service_id=111 ]
+10-27 18:07:59.723  2078  2078 E BeaconBle: Scan couldn't start for Places [CONTEXT service_id=111 ]
+10-27 18:07:59.724  2078  2078 W Places  : BLE failure while scanning - code 5
+10-27 18:07:59.764  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 397763 , only wrote 390651
+10-27 18:07:59.841  1934  2142 D WificondControl: Scan result ready event
+10-27 18:08:00.006  2084  2084 D KeyguardClockSwitch: Updating clock: 608
+10-27 18:08:00.294  2078  7755 W LogUtils: [Places]: ?: Failed to download inference model weights SLS
+10-27 18:08:00.294  2078  7755 W LogUtils: ckdr: NOT_FOUND: Requested entity was not found.
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at ckdq.c(:com.google.android.gms@202414023@20.24.14 (040800-319035315):3)
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at sjo.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):57)
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at bjxj.call(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at bjvu.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):1)
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at soy.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):12)
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at soy.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):7)
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at sux.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:08:00.294  2078  7755 W LogUtils: 	at java.lang.Thread.run(Thread.java:919)
+10-27 18:08:00.294  2078  7755 W LogUtils:
+10-27 18:08:00.294  2078  7755 W LogUtils: [CONTEXT service_id=253 ]
+10-27 18:08:00.294  2078  7755 W PlacesLogger: [PlaceInferenceEngine]: Failed to download model weights. Status code: 7 [CONTEXT service_id=253 ]
+10-27 18:08:00.294  2078  7733 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:08:00.296  2078  7733 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:08:00.634  5088  5391 D UiDevice: Node not found with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:08:00.639  5088  6982 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getObject(Ljava/lang/Object;J)Ljava/lang/Object; (greylist, linking, allowed)
+10-27 18:08:00.639  5088  6982 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->getInt(Ljava/lang/Object;J)I (greylist, linking, allowed)
+10-27 18:08:00.649  5088  5391 W Settings: Setting always_finish_activities has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.
+10-27 18:08:00.658  1934  1961 E system_server: Invalid ID 0x00000000.
+10-27 18:08:00.660  1934  2224 W InputReader: Device has associated, but no associated display id.
+10-27 18:08:00.661  1934  2224 I chatty  : uid=1000(system) Binder:1934_6 identical 27 lines
+10-27 18:08:00.661  1934  2224 W InputReader: Device has associated, but no associated display id.
+10-27 18:08:00.661  5088  5088 W ActivityThread: handleWindowVisibility: no activity for token android.os.BinderProxy@e30708
+10-27 18:08:00.661  1934  2224 W InputReader: Device has associated, but no associated display id.
+10-27 18:08:00.662  1934  2224 I chatty  : uid=1000(system) Binder:1934_6 identical 9 lines
+10-27 18:08:00.662  1934  2224 W InputReader: Device has associated, but no associated display id.
+10-27 18:08:00.670  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: PRE_ON_CREATE
+10-27 18:08:00.671  5088  5088 V ActivityScenario: Activity lifecycle changed event received but ignored because the reported transition was not ON_CREATE while the last known transition was PRE_ON_CREATE
+10-27 18:08:00.676  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: CREATED
+10-27 18:08:00.676  5088  5088 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:08:00.677  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: STARTED
+10-27 18:08:00.677  5088  5088 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:08:00.677  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: RESUMED
+10-27 18:08:00.677  5088  5088 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:08:00.677  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:08:00.706  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:08:00.707  1934  1961 I chatty  : uid=1000(system) android.anim identical 8 lines
+10-27 18:08:00.707  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:08:00.745  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:08:00.787  4090  4131 I MicroDetector: Keeping mic open: false
+10-27 18:08:00.788  4090  6862 I DeviceStateChecker: DeviceStateChecker cancelled
+10-27 18:08:00.788  4090  4232 I AudioController: internalShutdown
+10-27 18:08:00.795  4090  6590 I MicroRecognitionRunner: Stopping hotword detection.
+10-27 18:08:00.807  4090  4232 I MicrophoneInputStream: mic_close  SR : 16000 CC : 16 SO : 1999
+10-27 18:08:00.807  4090  4232 E AudioSource: Stop listening is called on already closed AudioSource
+10-27 18:08:00.807  4090  6876 I MicroRecognitionRunner: Detection finished
+10-27 18:08:00.814  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:08:00.823  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:08:00.831  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:08:00.957  1934  1965 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity: +288ms
+10-27 18:08:01.066  2593  3122 D EGL_emulation: eglMakeCurrent: 0x799ed1883fa0: ver 3 0 (tinfo 0x799ed1818620)
+10-27 18:08:01.092  4090  4154 D EGL_emulation: eglMakeCurrent: 0xdc663200: ver 3 0 (tinfo 0xc3bf7010)
+10-27 18:08:01.143  4090  7725 I PBSessionCacheImpl: Deleted sessionId[224089674986] from persistence.
+10-27 18:08:01.218  4090  4131 W SearchServiceCore: Abort, client detached.
+10-27 18:08:02.058  5088  5391 D UiDevice: Executing shell command: settings put secure enabled_accessibility_services app.coefmonitor/app.coefmonitor.monitor.AutoClickService
+10-27 18:08:02.082  5088  5391 D UiDevice: Executing shell command: settings put secure accessibility_enabled 1
+10-27 18:08:02.106  5088  6982 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->putObject(Ljava/lang/Object;JLjava/lang/Object;)V (greylist, linking, allowed)
+10-27 18:08:02.114  5088  5391 D UiDevice: Waiting 10000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QStatus\E']].
+10-27 18:08:02.115  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QStatus\E'].
+10-27 18:08:02.192  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1892352
+10-27 18:08:02.197  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1892352
+10-27 18:08:02.207  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:08:02.207  1702  1758 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1892352
+10-27 18:08:02.229  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:08:06.238  2078  7613 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:08:06.240  2078  7760 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:08:06.251  2078  7755 I LogUtils: [Places]: ?: PlacesBleScanner stop() [CONTEXT service_id=253 ]
+10-27 18:08:06.251  2078  2078 I BeaconBle: Scan : No clients left, canceling alarm. [CONTEXT service_id=111 ]
+10-27 18:08:06.252  2078  2078 I BeaconBle: Scan canceled successfully. [CONTEXT service_id=111 ]
+10-27 18:08:06.257  2078  7755 I PlacesLogger: [PlaceInferenceEngine]: [anon] Changed inference mode: 0 [CONTEXT service_id=253 ]
+10-27 18:08:06.263  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:08:06.297  2078  7745 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:08:06.300  2078  7613 I LogUtils: [Places]: ?: Couldn't find platform key file. [CONTEXT service_id=253 ]
+10-27 18:08:06.354  2078  2078 I GeofencerStateMachine: removeGeofences: removeRequest=RemoveGeofencingRequest[REMOVE_BY_PENDING_INTENT pendingIntent=PendingIntent[creatorPackage=com.google.android.gms], packageName=com.google.android.gms]
+10-27 18:08:11.135  4090  4131 I WorkerManager: dispose()
+10-27 18:08:11.136  4090  4131 W ThreadPoolDumper: Queue length for executor EventBus is now 11. Perhaps some tasks are too long, or the pool is too small.
+10-27 18:08:11.263  2078  2078 I BeaconBle: Scan : No clients left, canceling alarm. [CONTEXT service_id=111 ]
+10-27 18:08:12.191  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:08:12.233  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:08:12.242  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_00_shown.png
+10-27 18:08:12.275  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:08:12.288  1587  1587 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@3.0::IMapper/default in either framework or device manifest.
+10-27 18:08:12.288  7784  7784 W Gralloc3: mapper 3.x is not supported
+10-27 18:08:12.293  7784  7784 D HostConnection: createUnique: call
+10-27 18:08:12.293  7784  7784 D HostConnection: HostConnection::get() New Host Connection established 0x724026b0b5a0, tid 7784
+10-27 18:08:12.295  7784  7784 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:08:12.295  7784  7784 D eglCodecCommon: allocate: Ask for block of size 0x1000
+10-27 18:08:12.296  7784  7784 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3ffff6000 size 0x2000
+10-27 18:08:12.308  7784  7784 D eglCodecCommon: allocate: Ask for block of size 0x9e4000
+10-27 18:08:12.308  7784  7784 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3fe23f000 size 0x9e5000
+10-27 18:08:12.479  4515  7793 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_00_shown.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:08:12.494  4515  7793 W ExifInterface: Invalid image: ExifInterface got an unsupported image format file(ExifInterface supports JPEG and some RAW image formats only) or a corrupted JPEG file to ExifInterface.
+10-27 18:08:12.494  4515  7793 W ExifInterface: java.io.IOException: Invalid byte order: ffff8950
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at android.media.ExifInterface.readByteOrder(ExifInterface.java:3121)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at android.media.ExifInterface.isOrfFormat(ExifInterface.java:2437)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at android.media.ExifInterface.getMimeType(ExifInterface.java:2315)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at android.media.ExifInterface.loadAttributes(ExifInterface.java:1753)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at android.media.ExifInterface.<init>(ExifInterface.java:1447)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItemImage(ModernMediaScanner.java:729)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItem(ModernMediaScanner.java:502)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.access$500(ModernMediaScanner.java:118)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:406)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:207)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2670)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2742)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.walkFileTree(ModernMediaScanner.java:267)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.run(ModernMediaScanner.java:245)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanFile(ModernMediaScanner.java:174)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.MediaService.onScanFile(MediaService.java:164)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at com.android.providers.media.MediaService.onHandleIntent(MediaService.java:90)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at android.app.IntentService$ServiceHandler.handleMessage(IntentService.java:78)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:08:12.494  4515  7793 W ExifInterface: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:08:12.495  4515  7793 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_00_shown.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:08:12.506  5088  5391 I CoefMonitorTest: screenshot floating_00_shown
+10-27 18:08:12.524  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q1 / 2\E.*$']].
+10-27 18:08:12.524  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q1 / 2\E.*$'].
+10-27 18:08:22.532  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:08:22.555  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:08:22.562  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_01_status.png
+10-27 18:08:22.597  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:08:22.608  1587  1587 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@3.0::IMapper/default in either framework or device manifest.
+10-27 18:08:22.608  7799  7799 W Gralloc3: mapper 3.x is not supported
+10-27 18:08:22.620  7799  7799 D HostConnection: createUnique: call
+10-27 18:08:22.624  7799  7799 D HostConnection: HostConnection::get() New Host Connection established 0x7344df9465a0, tid 7799
+10-27 18:08:22.626  7799  7799 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:08:22.626  7799  7799 D eglCodecCommon: allocate: Ask for block of size 0x1000
+10-27 18:08:22.627  7799  7799 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3ffff6000 size 0x2000
+10-27 18:08:22.647  7799  7799 D eglCodecCommon: allocate: Ask for block of size 0x9e4000
+10-27 18:08:22.647  7799  7799 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3fe23f000 size 0x9e5000
+10-27 18:08:22.810  4515  7808 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_01_status.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:08:22.817  4515  7808 W ExifInterface: Invalid image: ExifInterface got an unsupported image format file(ExifInterface supports JPEG and some RAW image formats only) or a corrupted JPEG file to ExifInterface.
+10-27 18:08:22.817  4515  7808 W ExifInterface: java.io.IOException: Invalid byte order: ffff8950
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at android.media.ExifInterface.readByteOrder(ExifInterface.java:3121)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at android.media.ExifInterface.isOrfFormat(ExifInterface.java:2437)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at android.media.ExifInterface.getMimeType(ExifInterface.java:2315)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at android.media.ExifInterface.loadAttributes(ExifInterface.java:1753)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at android.media.ExifInterface.<init>(ExifInterface.java:1447)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItemImage(ModernMediaScanner.java:729)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItem(ModernMediaScanner.java:502)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.access$500(ModernMediaScanner.java:118)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:406)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:207)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2670)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2742)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.walkFileTree(ModernMediaScanner.java:267)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.run(ModernMediaScanner.java:245)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanFile(ModernMediaScanner.java:174)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.MediaService.onScanFile(MediaService.java:164)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at com.android.providers.media.MediaService.onHandleIntent(MediaService.java:90)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at android.app.IntentService$ServiceHandler.handleMessage(IntentService.java:78)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:08:22.817  4515  7808 W ExifInterface: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:08:22.819  4515  7808 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_01_status.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:08:22.854  5088  5391 I CoefMonitorTest: screenshot floating_01_status
+10-27 18:08:22.856  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QRun clicks\E']].
+10-27 18:08:22.856  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QRun clicks\E'].
+10-27 18:08:28.778  2287  7812 I GmscoreIpa: how are you::
+10-27 18:08:32.924  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:08:43.026  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:08:43.029  5088  5391 D UiObject2: Clicking on (169, 721).
+10-27 18:08:43.035  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:08:43.049  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:08:43.058  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 390665 , only wrote 390651
+10-27 18:08:43.079  5088  5391 W GestureController: Gestures took longer than expected (50ms >> 16ms), device might be in a busy state.
+10-27 18:08:43.087  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2039808
+10-27 18:08:43.097  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:08:43.112  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2039808
+10-27 18:08:43.121  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2039808
+10-27 18:08:43.123  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:08:44.069  5088  5641 I chatty  : uid=10146(app.coefmonitor) RenderThread identical 1 line
+10-27 18:08:44.085  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:08:44.132  5088  5391 I CoefMonitorTest: clicks from the panel: [SimulatorTap(point=NormalizedPoint(x=0.3, y=0.8), atMs=539692), SimulatorTap(point=NormalizedPoint(x=0.7, y=0.86), atMs=540692)]
+10-27 18:08:44.572  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1892352
+10-27 18:08:44.574  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:08:44.580  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1892352
+10-27 18:08:44.583  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QSettings\E']].
+10-27 18:08:44.583  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QSettings\E'].
+10-27 18:08:44.591  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 1892352
+10-27 18:08:44.599  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:08:46.191  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 665113 , only wrote 528800
+10-27 18:08:51.708  1809  1809 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+10-27 18:08:51.881  1814  1814 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+10-27 18:08:54.670  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:09:00.007  2084  2084 D KeyguardClockSwitch: Updating clock: 609
+10-27 18:09:04.753  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:09:04.767  5088  5391 D UiObject2: Clicking on (634, 320).
+10-27 18:09:04.785  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:09:04.798  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:09:04.808  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 528807 , only wrote 528800
+10-27 18:09:04.818  5088  5391 W GestureController: Gestures took longer than expected (50ms >> 16ms), device might be in a busy state.
+10-27 18:09:04.819  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q+\E']].
+10-27 18:09:04.824  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q+\E'].
+10-27 18:09:04.831  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2351104
+10-27 18:09:04.834  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:09:04.843  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2351104
+10-27 18:09:04.850  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2351104
+10-27 18:09:04.870  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:09:04.988  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:09:04.988  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:09:05.006  2084  2084 D KeyguardClockSwitch: Updating clock: 609
+10-27 18:09:06.418  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:09:06.683  5088  5641 I chatty  : uid=10146(app.coefmonitor) RenderThread identical 4 lines
+10-27 18:09:06.768  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:09:07.940  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 803392 , only wrote 666949
+10-27 18:09:08.947  1934  2884 D WificondControl: Scan result ready event
+10-27 18:09:14.932  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:09:23.479  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:09:23.479  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:09:25.028  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:09:25.031  5088  5391 D UiObject2: Clicking on (708, 433).
+10-27 18:09:25.035  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:09:25.039  5088  5541 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->putObject(Ljava/lang/Object;JLjava/lang/Object;)V (greylist, linking, allowed)
+10-27 18:09:25.044  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:09:25.056  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:09:25.090  5088  5391 W GestureController: Gestures took longer than expected (58ms >> 16ms), device might be in a busy state.
+10-27 18:09:25.092  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:09:25.093  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:09:25.109  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_02_settings.png
+10-27 18:09:25.177  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:09:25.184  1587  1587 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@3.0::IMapper/default in either framework or device manifest.
+10-27 18:09:25.185  7826  7826 W Gralloc3: mapper 3.x is not supported
+10-27 18:09:25.194  7826  7826 D HostConnection: createUnique: call
+10-27 18:09:25.194  7826  7826 D HostConnection: HostConnection::get() New Host Connection established 0x7d8e4221d5a0, tid 7826
+10-27 18:09:25.196  7826  7826 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:09:25.196  7826  7826 D eglCodecCommon: allocate: Ask for block of size 0x1000
+10-27 18:09:25.197  7826  7826 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3ffff6000 size 0x2000
+10-27 18:09:25.222  7826  7826 D eglCodecCommon: allocate: Ask for block of size 0x9e4000
+10-27 18:09:25.222  7826  7826 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3fe23f000 size 0x9e5000
+10-27 18:09:25.389  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:09:25.389  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:09:25.395  4515  7835 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_02_settings.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:09:25.403  4515  7835 W ExifInterface: Invalid image: ExifInterface got an unsupported image format file(ExifInterface supports JPEG and some RAW image formats only) or a corrupted JPEG file to ExifInterface.
+10-27 18:09:25.403  4515  7835 W ExifInterface: java.io.IOException: Invalid byte order: ffff8950
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at android.media.ExifInterface.readByteOrder(ExifInterface.java:3121)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at android.media.ExifInterface.isOrfFormat(ExifInterface.java:2437)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at android.media.ExifInterface.getMimeType(ExifInterface.java:2315)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at android.media.ExifInterface.loadAttributes(ExifInterface.java:1753)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at android.media.ExifInterface.<init>(ExifInterface.java:1447)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItemImage(ModernMediaScanner.java:729)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItem(ModernMediaScanner.java:502)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.access$500(ModernMediaScanner.java:118)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:406)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:207)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2670)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2742)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.walkFileTree(ModernMediaScanner.java:267)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.run(ModernMediaScanner.java:245)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanFile(ModernMediaScanner.java:174)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.MediaService.onScanFile(MediaService.java:164)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at com.android.providers.media.MediaService.onHandleIntent(MediaService.java:90)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at android.app.IntentService$ServiceHandler.handleMessage(IntentService.java:78)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:09:25.403  4515  7835 W ExifInterface: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:09:25.408  4515  7835 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_02_settings.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:09:25.414  5088  5391 I CoefMonitorTest: screenshot floating_02_settings
+10-27 18:09:25.415  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QAlgorithm\E']].
+10-27 18:09:25.416  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QAlgorithm\E'].
+10-27 18:09:35.479  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:09:45.548  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:09:45.552  5088  5391 D UiObject2: Clicking on (408, 320).
+10-27 18:09:45.568  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:09:45.582  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:09:45.589  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 666958 , only wrote 666949
+10-27 18:09:45.596  5088  5391 W GestureController: Gestures took longer than expected (44ms >> 16ms), device might be in a busy state.
+10-27 18:09:45.596  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q▶\E']].
+10-27 18:09:45.596  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q▶\E'].
+10-27 18:09:45.602  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2498560
+10-27 18:09:45.609  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:09:45.624  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2498560
+10-27 18:09:45.657  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2498560
+10-27 18:09:45.667  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:09:47.420  5088  5641 I chatty  : uid=10146(app.coefmonitor) RenderThread identical 5 lines
+10-27 18:09:47.527  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:09:48.738  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 942720 , only wrote 805759
+10-27 18:09:51.735  1809  1809 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+10-27 18:09:51.940  1814  1814 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+10-27 18:09:55.572  2287  7841 I GmscoreIpa: how are you::
+10-27 18:09:55.667  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:09:58.673  1934  4824 E memtrack: Couldn't load memtrack module
+10-27 18:09:58.673  1934  4824 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:10:00.006  2084  2084 D KeyguardClockSwitch: Updating clock: 610
+10-27 18:10:02.149  1684  1684 I netd    : firewallEnableChildChain(2, "false") <0.02ms>
+10-27 18:10:05.713  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:10:05.717  5088  5391 D UiObject2: Clicking on (708, 426).
+10-27 18:10:05.735  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:10:05.755  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:10:05.779  5088  5391 W GestureController: Gestures took longer than expected (63ms >> 16ms), device might be in a busy state.
+10-27 18:10:05.779  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QMake active\E']].
+10-27 18:10:05.780  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QMake active\E'].
+10-27 18:10:05.792  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 805797 , only wrote 805759
+10-27 18:10:05.815  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2101248
+10-27 18:10:05.839  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:10:05.858  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2101248
+10-27 18:10:05.868  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2101248
+10-27 18:10:05.893  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:10:08.955  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 1082833 , only wrote 945230
+10-27 18:10:15.861  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:10:17.558  1684  7849 E ResolverController: No valid NAT64 prefix (100, <unspecified>/0)
+10-27 18:10:17.592  1684  7852 E ResolverController: No valid NAT64 prefix (100, <unspecified>/0)
+10-27 18:10:17.598  2078  7847 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:10:17.599  2078  7847 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:10:17.599  2078  7847 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.611  2078  7847 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:10:17.611  2078  7847 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:10:17.611  2078  7847 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.650  2078  3212 W GLSUser : [AppCertManager] Failed to get security token.
+10-27 18:10:17.650  2078  3212 W GLSUser : java.io.IOException: Invalid scope
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at adiw.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):23)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at adiw.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):18)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at adiw.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):11)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at hwy.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):17)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at hww.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):45)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at hwr.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at hwu.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):10)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at gbi.call(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at soy.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):12)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at soy.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):7)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at sux.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.650  2078  3212 W GLSUser : 	at java.lang.Thread.run(Thread.java:919)
+10-27 18:10:17.685  2078  3212 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:10:17.685  2078  3212 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:10:17.685  2078  3212 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.690  2078  3212 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+10-27 18:10:17.690  2078  3212 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):2)
+10-27 18:10:17.690  2078  3212 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.731  2078  3212 W GLSUser : [AppCertManager] IOException while requesting key:
+10-27 18:10:17.731  2078  3212 W GLSUser : java.io.IOException: Invalid device key response.
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at hwy.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):49)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at hww.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):45)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at hwr.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at hwu.a(:com.google.android.gms@202414023@20.24.14 (040800-319035315):10)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at gbi.call(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at soy.b(:com.google.android.gms@202414023@20.24.14 (040800-319035315):12)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at soy.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):7)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at sux.run(:com.google.android.gms@202414023@20.24.14 (040800-319035315):0)
+10-27 18:10:17.731  2078  3212 W GLSUser : 	at java.lang.Thread.run(Thread.java:919)
+10-27 18:10:22.245  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:10:22.245  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:10:25.941  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:10:25.949  5088  5391 D UiObject2: Clicking on (182, 575).
+10-27 18:10:25.952  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:10:25.964  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:10:25.981  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 945565 , only wrote 945230
+10-27 18:10:25.996  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:10:26.008  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$']].
+10-27 18:10:26.008  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$'].
+10-27 18:10:26.052  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:10:29.114  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 1220066 , only wrote 1083379
+10-27 18:10:32.622  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:10:32.622  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:10:33.368  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:10:33.368  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:10:33.373  2078  6130 E WakeLock: GCM_HB_ALARM release without a matched acquire!
+10-27 18:10:33.374  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:10:33.374  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:10:33.376  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:10:33.376  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:10:33.379  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:10:33.379  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:10:36.019  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:10:36.035  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:10:36.043  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_03_algorithm.png
+10-27 18:10:36.079  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:10:36.094  1587  1587 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@3.0::IMapper/default in either framework or device manifest.
+10-27 18:10:36.098  7860  7860 W Gralloc3: mapper 3.x is not supported
+10-27 18:10:36.107  7860  7860 D HostConnection: createUnique: call
+10-27 18:10:36.109  7860  7860 D HostConnection: HostConnection::get() New Host Connection established 0x775efc9ce5a0, tid 7860
+10-27 18:10:36.112  7860  7860 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:10:36.113  7860  7860 D eglCodecCommon: allocate: Ask for block of size 0x1000
+10-27 18:10:36.113  7860  7860 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3ffff6000 size 0x2000
+10-27 18:10:36.128  7860  7860 D eglCodecCommon: allocate: Ask for block of size 0x9e4000
+10-27 18:10:36.128  7860  7860 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3fe23f000 size 0x9e5000
+10-27 18:10:36.296  4515  7869 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_03_algorithm.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:10:36.305  5088  5391 I CoefMonitorTest: screenshot floating_03_algorithm
+10-27 18:10:36.306  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q+ Click\E']].
+10-27 18:10:36.306  4515  7869 W ExifInterface: Invalid image: ExifInterface got an unsupported image format file(ExifInterface supports JPEG and some RAW image formats only) or a corrupted JPEG file to ExifInterface.
+10-27 18:10:36.306  4515  7869 W ExifInterface: java.io.IOException: Invalid byte order: ffff8950
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at android.media.ExifInterface.readByteOrder(ExifInterface.java:3121)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at android.media.ExifInterface.isOrfFormat(ExifInterface.java:2437)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at android.media.ExifInterface.getMimeType(ExifInterface.java:2315)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at android.media.ExifInterface.loadAttributes(ExifInterface.java:1753)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at android.media.ExifInterface.<init>(ExifInterface.java:1447)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItemImage(ModernMediaScanner.java:729)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItem(ModernMediaScanner.java:502)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.access$500(ModernMediaScanner.java:118)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:406)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:207)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2670)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2742)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.walkFileTree(ModernMediaScanner.java:267)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.run(ModernMediaScanner.java:245)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanFile(ModernMediaScanner.java:174)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.MediaService.onScanFile(MediaService.java:164)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at com.android.providers.media.MediaService.onHandleIntent(MediaService.java:90)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at android.app.IntentService$ServiceHandler.handleMessage(IntentService.java:78)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:10:36.306  4515  7869 W ExifInterface: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:10:36.306  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q+ Click\E'].
+10-27 18:10:36.316  4515  7869 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_03_algorithm.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:10:46.321  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:10:46.321  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:10:46.405  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:10:51.778  1809  1809 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+10-27 18:10:51.950  1814  1814 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+10-27 18:10:56.430  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:10:56.434  5088  5391 D UiObject2: Clicking on (144, 790).
+10-27 18:10:56.451  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:10:56.465  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:10:56.477  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 1083389 , only wrote 1083379
+10-27 18:10:56.483  5088  5391 W GestureController: Gestures took longer than expected (50ms >> 16ms), device might be in a busy state.
+10-27 18:10:56.483  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QTap where the click should land. Drag the marker to adjust.\E']].
+10-27 18:10:56.484  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QTap where the click should land. Drag the marker to adjust.\E'].
+10-27 18:10:56.532  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9826304
+10-27 18:10:56.563  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9826304
+10-27 18:10:56.571  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:10:56.585  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 9826304
+10-27 18:10:56.620  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:10:59.640  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 1360532 , only wrote 1222850
+10-27 18:11:00.006  2084  2084 D KeyguardClockSwitch: Updating clock: 611
+10-27 18:11:06.490  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:11:06.491  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:11:06.492  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:11:06.492  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:11:06.494  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:11:06.494  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:11:06.495  2287  7876 I GmscoreIpa: how are you::
+10-27 18:11:06.496  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:11:06.496  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:11:06.504  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:11:06.513  5088  5391 D UiDevice: Clicking on (540, 1440).
+10-27 18:11:06.542  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:11:06.595  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:11:06.695  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:11:06.731  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_04_point_picker.png
+10-27 18:11:06.794  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:11:06.814  1587  1587 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@3.0::IMapper/default in either framework or device manifest.
+10-27 18:11:06.815  7880  7880 W Gralloc3: mapper 3.x is not supported
+10-27 18:11:06.825  7880  7880 D HostConnection: createUnique: call
+10-27 18:11:06.826  7880  7880 D HostConnection: HostConnection::get() New Host Connection established 0x7061cc5ac5a0, tid 7880
+10-27 18:11:06.829  7880  7880 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:11:06.830  7880  7880 D eglCodecCommon: allocate: Ask for block of size 0x1000
+10-27 18:11:06.830  7880  7880 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3ffff6000 size 0x2000
+10-27 18:11:06.857  7880  7880 D eglCodecCommon: allocate: Ask for block of size 0x9e4000
+10-27 18:11:06.859  7880  7880 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3fe23f000 size 0x9e5000
+10-27 18:11:07.021  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:11:07.021  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:11:07.024  4515  7889 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_04_point_picker.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:11:07.028  4515  7889 W ExifInterface: Invalid image: ExifInterface got an unsupported image format file(ExifInterface supports JPEG and some RAW image formats only) or a corrupted JPEG file to ExifInterface.
+10-27 18:11:07.028  4515  7889 W ExifInterface: java.io.IOException: Invalid byte order: ffff8950
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at android.media.ExifInterface.readByteOrder(ExifInterface.java:3121)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at android.media.ExifInterface.isOrfFormat(ExifInterface.java:2437)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at android.media.ExifInterface.getMimeType(ExifInterface.java:2315)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at android.media.ExifInterface.loadAttributes(ExifInterface.java:1753)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at android.media.ExifInterface.<init>(ExifInterface.java:1447)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItemImage(ModernMediaScanner.java:729)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItem(ModernMediaScanner.java:502)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.access$500(ModernMediaScanner.java:118)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:406)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:207)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2670)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2742)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.walkFileTree(ModernMediaScanner.java:267)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.run(ModernMediaScanner.java:245)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanFile(ModernMediaScanner.java:174)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.MediaService.onScanFile(MediaService.java:164)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at com.android.providers.media.MediaService.onHandleIntent(MediaService.java:90)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at android.app.IntentService$ServiceHandler.handleMessage(IntentService.java:78)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:11:07.028  4515  7889 W ExifInterface: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:11:07.035  4515  7889 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_04_point_picker.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:11:07.057  5088  5391 I CoefMonitorTest: screenshot floating_04_point_picker
+10-27 18:11:07.057  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QUse this point\E']].
+10-27 18:11:07.057  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QUse this point\E'].
+10-27 18:11:17.089  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:11:27.120  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:11:27.124  5088  5391 D UiObject2: Clicking on (710, 270).
+10-27 18:11:27.135  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:11:27.147  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:11:27.161  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 1222862 , only wrote 1222850
+10-27 18:11:27.178  5088  5391 W GestureController: Gestures took longer than expected (55ms >> 16ms), device might be in a busy state.
+10-27 18:11:27.189  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2101248
+10-27 18:11:27.192  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2101248
+10-27 18:11:27.193  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:11:27.194  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2101248
+10-27 18:11:27.228  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:11:27.264  5088  5641 I chatty  : uid=10146(app.coefmonitor) RenderThread identical 1 line
+10-27 18:11:27.290  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:11:27.293  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2244608
+10-27 18:11:27.298  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:11:27.311  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2244608
+10-27 18:11:27.352  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2244608
+10-27 18:11:27.362  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$']].
+10-27 18:11:27.362  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$'].
+10-27 18:11:27.372  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:11:29.010  5088  5641 I chatty  : uid=10146(app.coefmonitor) RenderThread identical 5 lines
+10-27 18:11:29.087  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:11:30.294  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 1497483 , only wrote 1360999
+10-27 18:11:33.381  2078  2078 W GCM     : Heartbeat timeout, GCM connection reset -2
+10-27 18:11:33.387  2078  7895 E WakeLock: GCM_HB_ALARM release without a matched acquire!
+10-27 18:11:33.387  2078  7895 W WakeLock: GCM_HB_ALARM counter does not exist
+10-27 18:11:33.392  2314  3061 D NetworkMonitor/100: Forcing reevaluation for UID 10119. Dns signal count: 0
+10-27 18:11:33.403  2078  7898 I NetworkManagementSocketTagger: tagSocketFd(-1, 805307399, -1) failed with errno-9
+10-27 18:11:33.420  2314  7899 D NetworkMonitor/100: PROBE_DNS www.google.com 25ms OK 142.251.151.119,142.251.157.119,142.251.155.119,142.251.154.119,142.251.150.119,142.251.152.119,142.251.153.119,142.251.156.119,2001:4860:4828:7700::,2001:4860:482a:7700::,2001:4860:4829:7700::,2001:4860:4826:7700::,2001:4860:482c:7700::,2001:4860:482b:7700::,2001:4860:482d:7700::,2001:4860:4827:7700::
+10-27 18:11:33.427  2314  7900 D NetworkMonitor/100: PROBE_DNS connectivitycheck.gstatic.com 33ms OK 142.251.150.120,2001:4860:4826:7800::
+10-27 18:11:33.448  2314  7900 D NetworkMonitor/100: PROBE_HTTP http://connectivitycheck.gstatic.com/generate_204 time=18ms ret=204 request={Connection=[close], User-Agent=[Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36]} headers={null=[HTTP/1.1 204 No Content], Connection=[close], Content-Length=[0], Cross-Origin-Resource-Policy=[cross-origin], Date=[Tue, 27 Oct 2026 18:11:34 GMT], X-Android-Received-Millis=[1793124693447], X-Android-Response-Source=[NETWORK 204], X-Android-Selected-Protocol=[http/1.1], X-Android-Sent-Millis=[1793124693436]}
+10-27 18:11:33.461  2314  7899 D NetworkMonitor/100: PROBE_HTTPS https://www.google.com/generate_204 time=35ms ret=204 request={Connection=[close], User-Agent=[Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36]} headers={null=[HTTP/1.1 204 No Content], Alt-Svc=[h3=":443"; ma=2592000,h3-29=":443"; ma=2592000], Connection=[close], Content-Length=[0], Cross-Origin-Resource-Policy=[cross-origin], Date=[Tue, 27 Oct 2026 18:11:34 GMT], X-Android-Received-Millis=[1793124693461], X-Android-Response-Source=[NETWORK 204], X-Android-Selected-Protocol=[http/1.1], X-Android-Sent-Millis=[1793124693456]}
+10-27 18:11:33.463  2314  7897 D NetworkMonitor/100: isCaptivePortal: isSuccessful()=true isPortal()=false RedirectUrl=null isPartialConnectivity()=false Time=69ms
+10-27 18:11:37.231  2287  7914 I GmscoreIpa: how are you::
+10-27 18:11:37.399  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:11:37.437  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:11:37.446  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_05_algorithm_with_click.png
+10-27 18:11:37.478  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:11:37.491  1587  1587 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@3.0::IMapper/default in either framework or device manifest.
+10-27 18:11:37.491  7918  7918 W Gralloc3: mapper 3.x is not supported
+10-27 18:11:37.496  7918  7918 D HostConnection: createUnique: call
+10-27 18:11:37.496  7918  7918 D HostConnection: HostConnection::get() New Host Connection established 0x7a9672c795a0, tid 7918
+10-27 18:11:37.497  7918  7918 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:11:37.498  7918  7918 D eglCodecCommon: allocate: Ask for block of size 0x1000
+10-27 18:11:37.499  7918  7918 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3ffff6000 size 0x2000
+10-27 18:11:37.513  7918  7918 D eglCodecCommon: allocate: Ask for block of size 0x9e4000
+10-27 18:11:37.514  7918  7918 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3fe23f000 size 0x9e5000
+10-27 18:11:37.690  4515  7927 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_05_algorithm_with_click.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:11:37.694  4515  7927 W ExifInterface: Invalid image: ExifInterface got an unsupported image format file(ExifInterface supports JPEG and some RAW image formats only) or a corrupted JPEG file to ExifInterface.
+10-27 18:11:37.694  4515  7927 W ExifInterface: java.io.IOException: Invalid byte order: ffff8950
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at android.media.ExifInterface.readByteOrder(ExifInterface.java:3121)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at android.media.ExifInterface.isOrfFormat(ExifInterface.java:2437)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at android.media.ExifInterface.getMimeType(ExifInterface.java:2315)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at android.media.ExifInterface.loadAttributes(ExifInterface.java:1753)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at android.media.ExifInterface.<init>(ExifInterface.java:1447)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItemImage(ModernMediaScanner.java:729)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItem(ModernMediaScanner.java:502)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.access$500(ModernMediaScanner.java:118)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:406)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:207)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2670)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2742)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.walkFileTree(ModernMediaScanner.java:267)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.run(ModernMediaScanner.java:245)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanFile(ModernMediaScanner.java:174)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.MediaService.onScanFile(MediaService.java:164)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at com.android.providers.media.MediaService.onHandleIntent(MediaService.java:90)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at android.app.IntentService$ServiceHandler.handleMessage(IntentService.java:78)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:11:37.694  4515  7927 W ExifInterface: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:11:37.702  4515  7927 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_05_algorithm_with_click.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:11:37.715  5088  5391 I CoefMonitorTest: screenshot floating_05_algorithm_with_click
+10-27 18:11:37.716  5088  5391 D UiDevice: Retrieving node with selector: BySelector [DESC='\QMinimise to a circle\E', PKG='\Qapp.coefmonitor\E'].
+10-27 18:11:47.708  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:11:47.708  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:11:47.766  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:11:51.818  1809  1809 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+10-27 18:11:51.973  1814  1814 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+10-27 18:11:57.841  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:11:57.844  5088  5391 D UiObject2: Clicking on (645, 227).
+10-27 18:11:57.851  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:11:57.862  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:11:57.871  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 1361068 , only wrote 1360999
+10-27 18:11:57.880  5088  5391 W GestureController: Gestures took longer than expected (37ms >> 16ms), device might be in a busy state.
+10-27 18:11:57.881  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [DESC='\QOpen the panel\E', PKG='\Qapp.coefmonitor\E']].
+10-27 18:11:57.881  5088  5391 D UiDevice: Retrieving node with selector: BySelector [DESC='\QOpen the panel\E', PKG='\Qapp.coefmonitor\E'].
+10-27 18:11:57.891  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 77824
+10-27 18:11:57.894  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:11:57.898  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 77824
+10-27 18:11:57.935  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:12:00.002  2084  2084 D KeyguardClockSwitch: Updating clock: 612
+10-27 18:12:01.004  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 1635470 , only wrote 1499148
+10-27 18:12:07.873  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:12:07.873  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:12:07.877  2287  7941 I GmscoreIpa: how are you::
+10-27 18:12:07.933  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:12:18.033  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:12:18.034  5088  5391 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:12:18.040  5088  5391 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api29_floating_06_minimised.png
+10-27 18:12:18.072  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:12:18.082  1587  1587 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@3.0::IMapper/default in either framework or device manifest.
+10-27 18:12:18.083  7946  7946 W Gralloc3: mapper 3.x is not supported
+10-27 18:12:18.093  7946  7946 D HostConnection: createUnique: call
+10-27 18:12:18.094  7946  7946 D HostConnection: HostConnection::get() New Host Connection established 0x7a1f9e13b5a0, tid 7946
+10-27 18:12:18.096  7946  7946 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:12:18.096  7946  7946 D eglCodecCommon: allocate: Ask for block of size 0x1000
+10-27 18:12:18.097  7946  7946 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3ffff6000 size 0x2000
+10-27 18:12:18.109  7946  7946 D eglCodecCommon: allocate: Ask for block of size 0x9e4000
+10-27 18:12:18.109  7946  7946 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3fe23f000 size 0x9e5000
+10-27 18:12:18.276  4515  7955 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_06_minimised.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:12:18.281  4515  7955 W ExifInterface: Invalid image: ExifInterface got an unsupported image format file(ExifInterface supports JPEG and some RAW image formats only) or a corrupted JPEG file to ExifInterface.
+10-27 18:12:18.281  4515  7955 W ExifInterface: java.io.IOException: Invalid byte order: ffff8950
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at android.media.ExifInterface.readByteOrder(ExifInterface.java:3121)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at android.media.ExifInterface.isOrfFormat(ExifInterface.java:2437)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at android.media.ExifInterface.getMimeType(ExifInterface.java:2315)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at android.media.ExifInterface.loadAttributes(ExifInterface.java:1753)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at android.media.ExifInterface.<init>(ExifInterface.java:1447)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItemImage(ModernMediaScanner.java:729)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanItem(ModernMediaScanner.java:502)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.access$500(ModernMediaScanner.java:118)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:406)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.visitFile(ModernMediaScanner.java:207)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2670)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at java.nio.file.Files.walkFileTree(Files.java:2742)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.walkFileTree(ModernMediaScanner.java:267)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner$Scan.run(ModernMediaScanner.java:245)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.scan.ModernMediaScanner.scanFile(ModernMediaScanner.java:174)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.MediaService.onScanFile(MediaService.java:164)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at com.android.providers.media.MediaService.onHandleIntent(MediaService.java:90)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at android.app.IntentService$ServiceHandler.handleMessage(IntentService.java:78)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at android.os.Looper.loop(Looper.java:214)
+10-27 18:12:18.281  4515  7955 W ExifInterface: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:12:18.290  4515  7955 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/coefmonitor/api29_floating_06_minimised.png flg=0x1400010 cmp=com.android.providers.media/.MediaService }
+10-27 18:12:18.306  5088  5391 I CoefMonitorTest: screenshot floating_06_minimised
+10-27 18:12:28.324  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:12:28.327  5088  5391 D UiObject2: Clicking on (99, 236).
+10-27 18:12:28.327  5088  5391 W UiObject2: Clicking on non-clickable object: android.view.accessibility.AccessibilityNodeInfo@62501; boundsInParent: Rect(0, 0 - 136, 136); boundsInScreen: Rect(31, 168 - 167, 304); packageName: app.coefmonitor; className: android.widget.TextView; text: 2; error: null; maxTextLength: -1; contentDescription: Open the panel; tooltipText: null; viewIdResName: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: true; visible: true; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null, AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_SET_SELECTION - null]
+10-27 18:12:28.335  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:12:28.345  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:12:28.361  5088  5391 W GestureController: Gestures took longer than expected (35ms >> 16ms), device might be in a busy state.
+10-27 18:12:28.362  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$']].
+10-27 18:12:28.362  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='^.*\Q2 / 2\E.*$'].
+10-27 18:12:28.375  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2244608
+10-27 18:12:28.378  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:12:28.385  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2244608
+10-27 18:12:28.468  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:12:29.952  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:12:29.960  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 2244608
+10-27 18:12:30.104  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:12:30.273  5088  5641 I chatty  : uid=10146(app.coefmonitor) RenderThread identical 3 lines
+10-27 18:12:30.335  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:12:38.393  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:12:41.408  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E'].
+10-27 18:12:48.442  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:12:48.442  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:12:48.446  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:12:48.446  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:12:48.447  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:12:48.447  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:12:48.449  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:12:48.449  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:12:48.468  2287  7958 I GmscoreIpa: how are you::
+10-27 18:12:51.485  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:12:51.501  5088  5391 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E'].
+10-27 18:12:51.870  1809  1809 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+10-27 18:12:52.031  1814  1814 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+10-27 18:13:00.006  2084  2084 D KeyguardClockSwitch: Updating clock: 613
+10-27 18:13:01.598  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:13:03.662  1934  1954 D WificondControl: Scan result ready event
+10-27 18:13:06.202  1934  1965 E memtrack: Couldn't load memtrack module
+10-27 18:13:06.202  1934  1965 W android.os.Debug: failed to get memory consumption info: -1
+10-27 18:13:11.629  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:13:11.636  5088  5391 D UiObject2: Clicking on (718, 227).
+10-27 18:13:11.651  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:13:11.662  1934  2028 V InputDispatcher: Asynchronous input event injection succeeded.
+10-27 18:13:11.670  1692  2718 W audio_hw_generic: Not supplying enough data to HAL, expected position 1499226 , only wrote 1499148
+10-27 18:13:11.677  5088  5391 W GestureController: Gestures took longer than expected (42ms >> 16ms), device might be in a busy state.
+10-27 18:13:11.681  5088  6655 W app.coefmonito: Accessing hidden method Lsun/misc/Unsafe;->putObject(Ljava/lang/Object;JLjava/lang/Object;)V (greylist, linking, allowed)
+10-27 18:13:11.838  5088  5391 D UiDevice: Waiting 5000ms for SearchCondition[gone=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E']].
+10-27 18:13:11.838  5088  5391 D UiDevice: Searching for node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E'].
+10-27 18:13:14.818  1692  7122 W audio_hw_generic: Not supplying enough data to HAL, expected position 1775066 , only wrote 1637958
+10-27 18:13:21.936  5088  5391 W QueryController: Could not detect idle state.
+10-27 18:13:21.950  5088  5391 D UiDevice: Executing shell command: settings delete secure enabled_accessibility_services
+10-27 18:13:21.963  5088  5391 D UiDevice: Executing shell command: settings put secure accessibility_enabled 0
+10-27 18:13:22.014  1934  1961 E system_server: Invalid ID 0x00000000.
+10-27 18:13:22.015  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: PAUSED
+10-27 18:13:22.015  5088  5088 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:13:22.015  1934  3804 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.017  1934  3804 I chatty  : uid=1000(system) Binder:1934_18 identical 38 lines
+10-27 18:13:22.017  1934  3804 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.018  6512  6512 W ActivityThread: handleWindowVisibility: no activity for token android.os.BinderProxy@bd295de
+10-27 18:13:22.020  1934  3804 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.020  1934  3804 I chatty  : uid=1000(system) Binder:1934_18 identical 8 lines
+10-27 18:13:22.020  1934  3804 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.058  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:13:22.091  1702  1702 I chatty  : uid=1000(system) allocator@2.0-s identical 2 lines
+10-27 18:13:22.106  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:13:22.112  6512  6532 D EGL_emulation: eglMakeCurrent: 0x799ed18546e0: ver 3 0 (tinfo 0x799ed18187a0)
+10-27 18:13:22.157  1934  3804 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.172  1934  3804 I chatty  : uid=1000(system) Binder:1934_18 identical 18 lines
+10-27 18:13:22.172  1934  3804 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.181  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:13:22.201  1702  1702 I chatty  : uid=1000(system) allocator@2.0-s identical 2 lines
+10-27 18:13:22.202  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:13:22.208  4090  4154 D EGL_emulation: eglMakeCurrent: 0xdc663200: ver 3 0 (tinfo 0xc3bf7010)
+10-27 18:13:22.245  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:13:22.253  1702  1702 I chatty  : uid=1000(system) allocator@2.0-s identical 1 line
+10-27 18:13:22.258  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 10371072
+10-27 18:13:22.259  2593  3122 D EGL_emulation: eglMakeCurrent: 0x799ed1883fa0: ver 3 0 (tinfo 0x799ed1818620)
+10-27 18:13:22.298  4090  4090 W ThreadPoolDumper: Queue length for executor EventBus is now 11. Perhaps some tasks are too long, or the pool is too small.
+10-27 18:13:22.304  4090  4131 W SessionLifecycleManager: Handover failed. Creating new session controller.
+10-27 18:13:22.307  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.307  1934  1961 I chatty  : uid=1000(system) android.anim identical 8 lines
+10-27 18:13:22.307  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.311  1702  1702 D gralloc_ranchu: gralloc_alloc: Creating ashmem region of size 6639616
+10-27 18:13:22.326  6512  6532 D EGL_emulation: eglMakeCurrent: 0x799ed18546e0: ver 3 0 (tinfo 0x799ed18187a0)
+10-27 18:13:22.365  4090  4131 W ThreadPoolDumper: Queue length for executor Lightweight is now 11. Perhaps some tasks are too long, or the pool is too small.
+10-27 18:13:22.430  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.430  1934  1961 I chatty  : uid=1000(system) android.anim identical 8 lines
+10-27 18:13:22.430  1934  1961 W InputReader: Device has associated, but no associated display id.
+10-27 18:13:22.445  2593  2609 W System  : A resource failed to call release.
+10-27 18:13:22.445  2593  2609 W System  : A resource failed to call release.
+10-27 18:13:22.645  4090  7995 W LocationOracle: No location history returned by ContextManager
+10-27 18:13:22.795  4090  4131 I MicroDetectionWorker: #startMicroDetector [speakerMode: 0]
+10-27 18:13:22.796  4090  4131 I AudioController: Created new AudioSource
+10-27 18:13:22.808  4090  4131 I MicroDetectionWorker: onReady
+10-27 18:13:22.828  4090  7983 I MicroRecognitionRunner: Starting detection.
+10-27 18:13:22.828  4090  7983 I MultipleReaderAudioSrc: Using micInputStream
+10-27 18:13:22.833  4090  7993 I MicrophoneInputStream: mic_starting  SR : 16000 CC : 16 SO : 1999
+10-27 18:13:22.839  1735  8000 I AudioFlinger: AudioFlinger's thread 0x76b2ce4bc080 tid=8000 ready to run
+10-27 18:13:22.971  1934  6535 D HostConnection: HostConnection::get() New Host Connection established 0x799e678caaa0, tid 6535
+10-27 18:13:22.985  1934  6535 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+10-27 18:13:22.990  1934  6535 D EGL_emulation: eglCreateContext: 0x799e678cbae0: maj 3 min 0 rcv 3
+10-27 18:13:22.990  1934  4005 I AudioService.RecordingActivityMonitor: rec update riid:87 uid:10122 session:73 src:HOTWORD pack:com.google.android.googlequicksearchbox
+10-27 18:13:22.991  4090  4102 I earchbox:searc: Background young concurrent copying GC freed 18899(1080KB) AllocSpace objects, 0(0B) LOS objects, 10% free, 8886KB/9881KB, paused 589us total 147.518ms
+10-27 18:13:22.997  4090  7993 I MicrophoneInputStream: mic_started  SR : 16000 CC : 16 SO : 1999
+10-27 18:13:23.002  1934  6535 D EGL_emulation: eglMakeCurrent: 0x799e678cbae0: ver 3 0 (tinfo 0x799e809ab520)
+10-27 18:13:23.014  2078  3495 W GCoreFlp: No location to return for getLastLocation()
+10-27 18:13:23.029  4090  4131 I MicroDetectionWorker: onReady
+10-27 18:13:23.036  4090  7983 W SpeechLevelGenerator: Really low audio levels detected. The audio input may have issues.
+10-27 18:13:23.040  5088  5641 D EGL_emulation: eglMakeCurrent: 0x799ed18080a0: ver 3 0 (tinfo 0x799ed1980540)
+10-27 18:13:23.063  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: STOPPED
+10-27 18:13:23.063  5088  5088 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@e1b80d9
+10-27 18:13:23.065  5088  5088 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@e1b80d9 in: DESTROYED
+10-27 18:13:23.065  5088  5088 V ActivityScenario: Update currentActivityStage to DESTROYED, currentActivity=null
+10-27 18:13:23.073  5088  5391 I TestRunner: finished: panelWorksOverAnotherAppWithoutMonitoring(app.coefmonitor.e2e.FloatingModeTest)

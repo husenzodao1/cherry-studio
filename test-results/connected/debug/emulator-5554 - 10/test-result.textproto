@@ -1,0 +1,640 @@
+# 2026-10-27T18:14:20.072383547Z:
+test_suite_meta_data {
+  scheduled_test_case_count: 12
+}
+test_status: PASSED
+test_result {
+  test_case {
+    test_class: "EndToEndMonitoringTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "findsTheRowOnTheSimulatorScreen"
+    start_time {
+      seconds: 1793124066
+      nanos: 903000000
+    }
+    end_time {
+      seconds: 1793124098
+      nanos: 916000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.EndToEndMonitoringTest-findsTheRowOnTheSimulatorScreen.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "EndToEndMonitoringTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "fullMonitoringSession"
+    start_time {
+      seconds: 1793124098
+      nanos: 962000000
+    }
+    end_time {
+      seconds: 1793124357
+      nanos: 696000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.EndToEndMonitoringTest-fullMonitoringSession.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "EndToEndMonitoringTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "staticTileSignatureIsStableAcrossFrames"
+    start_time {
+      seconds: 1793124357
+      nanos: 732000000
+    }
+    end_time {
+      seconds: 1793124361
+      nanos: 631000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.EndToEndMonitoringTest-staticTileSignatureIsStableAcrossFrames.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "EndToEndMonitoringTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "findsTheRowAgainAfterTheGameMoved"
+    start_time {
+      seconds: 1793124361
+      nanos: 634000000
+    }
+    end_time {
+      seconds: 1793124412
+      nanos: 334000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.EndToEndMonitoringTest-findsTheRowAgainAfterTheGameMoved.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "FloatingModeTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "panelInTajik"
+    start_time {
+      seconds: 1793124412
+      nanos: 344000000
+    }
+    end_time {
+      seconds: 1793124479
+      nanos: 564000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.FloatingModeTest-panelInTajik.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "FloatingModeTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "panelWorksOverAnotherAppWithoutMonitoring"
+    start_time {
+      seconds: 1793124479
+      nanos: 567000000
+    }
+    end_time {
+      seconds: 1793124803
+      nanos: 932000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.FloatingModeTest-panelWorksOverAnotherAppWithoutMonitoring.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "ReferenceScreenshotOcrTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "findsTheRowUnderTheFloatingPanel"
+    start_time {
+      seconds: 1793124803
+      nanos: 964000000
+    }
+    end_time {
+      seconds: 1793124814
+      nanos: 215000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.ReferenceScreenshotOcrTest-findsTheRowUnderTheFloatingPanel.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "ReferenceScreenshotOcrTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "readsObservedTileAndNeighbour"
+    start_time {
+      seconds: 1793124814
+      nanos: 221000000
+    }
+    end_time {
+      seconds: 1793124825
+      nanos: 545000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.ReferenceScreenshotOcrTest-readsObservedTileAndNeighbour.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "ReferenceScreenshotOcrTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "findsTheRowNextToALastValueInThePanel"
+    start_time {
+      seconds: 1793124825
+      nanos: 549000000
+    }
+    end_time {
+      seconds: 1793124828
+      nanos: 785000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.ReferenceScreenshotOcrTest-findsTheRowNextToALastValueInThePanel.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "ReferenceScreenshotOcrTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "findsTheRowAndReadsTheNewestValueAndItsNeighbour"
+    start_time {
+      seconds: 1793124828
+      nanos: 787000000
+    }
+    end_time {
+      seconds: 1793124831
+      nanos: 673000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.ReferenceScreenshotOcrTest-findsTheRowAndReadsTheNewestValueAndItsNeighbour.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "ReferenceScreenshotOcrTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "signaturesSeparateDifferentTiles"
+    start_time {
+      seconds: 1793124831
+      nanos: 677000000
+    }
+    end_time {
+      seconds: 1793124831
+      nanos: 678000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.ReferenceScreenshotOcrTest-signaturesSeparateDifferentTiles.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+test_result {
+  test_case {
+    test_class: "UiSmokeTest"
+    test_package: "app.coefmonitor.e2e"
+    test_method: "walkThroughAllScreens"
+    start_time {
+      seconds: 1793124831
+      nanos: 679000000
+    }
+    end_time {
+      seconds: 1793124857
+      nanos: 439000000
+    }
+  }
+  test_status: PASSED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/logcat-app.coefmonitor.e2e.UiSmokeTest-walkThroughAllScreens.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/cpuinfo"
+    }
+  }
+}
+output_artifact {
+  label {
+    label: "test-results.log"
+    namespace: "com.google.testing.platform.runtime.android.driver.AndroidInstrumentationDriver"
+  }
+  source_path {
+    path: "/home/runner/work/cherry-studio/cherry-studio/coefficient-monitor-android/app/build/outputs/androidTest-results/connected/debug/emulator-5554 - 10/testlog/test-results.log"
+  }
+  type: TEST_DATA
+  mime_type: "text/plain"
+}
