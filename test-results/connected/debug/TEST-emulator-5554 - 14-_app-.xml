@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="app.coefmonitor.e2e.EndToEndMonitoringTest" tests="12" failures="0" errors="0" skipped="0" time="819.734" timestamp="2026-10-27T18:36:19" hostname="localhost">
+  <properties>
+    <property name="device" value="emulator-5554 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="findsTheRowOnTheSimulatorScreen" classname="app.coefmonitor.e2e.EndToEndMonitoringTest" time="19.162" />
+  <testcase name="fullMonitoringSession" classname="app.coefmonitor.e2e.EndToEndMonitoringTest" time="280.055" />
+  <testcase name="staticTileSignatureIsStableAcrossFrames" classname="app.coefmonitor.e2e.EndToEndMonitoringTest" time="6.06" />
+  <testcase name="findsTheRowAgainAfterTheGameMoved" classname="app.coefmonitor.e2e.EndToEndMonitoringTest" time="48.769" />
+  <testcase name="panelInTajik" classname="app.coefmonitor.e2e.FloatingModeTest" time="68.495" />
+  <testcase name="panelWorksOverAnotherAppWithoutMonitoring" classname="app.coefmonitor.e2e.FloatingModeTest" time="325.896" />
+  <testcase name="findsTheRowUnderTheFloatingPanel" classname="app.coefmonitor.e2e.ReferenceScreenshotOcrTest" time="8.437" />
+  <testcase name="readsObservedTileAndNeighbour" classname="app.coefmonitor.e2e.ReferenceScreenshotOcrTest" time="9.215" />
+  <testcase name="findsTheRowNextToALastValueInThePanel" classname="app.coefmonitor.e2e.ReferenceScreenshotOcrTest" time="2.996" />
+  <testcase name="findsTheRowAndReadsTheNewestValueAndItsNeighbour" classname="app.coefmonitor.e2e.ReferenceScreenshotOcrTest" time="2.092" />
+  <testcase name="signaturesSeparateDifferentTiles" classname="app.coefmonitor.e2e.ReferenceScreenshotOcrTest" time="0.0" />
+  <testcase name="walkThroughAllScreens" classname="app.coefmonitor.e2e.UiSmokeTest" time="45.915" />
+</testsuite>

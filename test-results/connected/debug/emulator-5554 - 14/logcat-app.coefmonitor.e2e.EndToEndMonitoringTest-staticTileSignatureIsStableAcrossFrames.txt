@@ -1,0 +1,545 @@
+10-27 18:27:38.586  5305  5382 I TestRunner: started: staticTileSignatureIsStableAcrossFrames(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:27:38.644   529   551 W system_server: Long monitor contention with owner android.anim (552) at void com.android.server.wm.WindowSurfacePlacer$Traverser.run()(WindowSurfacePlacer.java:58) waiters=0 in void com.android.server.wm.WindowManagerService$H.handleMessage(android.os.Message) for 362ms
+10-27 18:27:38.648  5305  5382 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:27:38.720   874   950 D EGL_emulation: app_time_stats: avg=1271.99ms min=6.59ms max=7116.18ms count=6
+10-27 18:27:38.782  5305  5382 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:27:38.841  5004  5004 I PhenotypeBackgroundRecv: Skipping com.google.android.googlequicksearchbox which doesn't use ProcessStable flags.
+10-27 18:27:38.843  1799  1799 I BgTaskExecutorImpl: Starting EXCLUSIVE background task FETCH_CONFIGS_FROM_PHENOTYPE.
+10-27 18:27:38.859  5305  5382 D UiDevice: Executing shell command: pm grant app.coefmonitor android.permission.POST_NOTIFICATIONS
+10-27 18:27:38.861  5305  5382 W UiAutomation: UiAutomation.grantRuntimePermission() is more robust and should be used instead of 'pm grant'
+10-27 18:27:38.871  6024  6673 W BpBinder: Large outgoing transaction of 329800 bytes, interface descriptor , code 4
+10-27 18:27:38.874   529   964 I ImeTracker: com.google.android.apps.nexuslauncher:5c5f4622: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-27 18:27:38.874   529   964 I ImeTracker: com.google.android.apps.nexuslauncher:5c5f4622: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-27 18:27:38.880  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3227
+10-27 18:27:38.880  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 0, unlocked = true
+10-27 18:27:38.881  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.google.android.apps.nexuslauncher fieldId=0 fieldName=null extras=null}, false)
+10-27 18:27:38.881  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.shouldHideHeaderOnInitialState():4008 ShouldHideHeaderOnInitialState = false
+10-27 18:27:38.881  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_birthdaydoodle_jar__name to integer.
+10-27 18:27:38.881  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_call_jar__name to integer.
+10-27 18:27:38.881  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_canvas_jar__name to integer.
+10-27 18:27:38.881  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_chkpkg_jar__name to integer.
+10-27 18:27:38.881  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+10-27 18:27:38.881  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_dining_jar__name to integer.
+10-27 18:27:38.881  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_doodle_notifications_jar__name to integer.
+10-27 18:27:38.881  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_imageviewer_jar__name to integer.
+10-27 18:27:38.881  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_ipa_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_jslocation_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_localintent_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_messaging_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_nativesrp_activity_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_nativesrp_presenter_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_nowcontent_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_recents_activity_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_save_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_searchresults_activity_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_test_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag AndroidGsaVelourJars__velour_weather_jar__name to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag bindle_flags__bloblobber_blob to integer.
+10-27 18:27:38.882  1799  7015 W A       : Can't format flag bindle_flags__velour_jar to integer.
+10-27 18:27:38.887  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 2, unlocked = true
+10-27 18:27:38.991  5305  5382 D UiDevice: Executing shell command: settings put global hide_error_dialogs 1
+10-27 18:27:39.057  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.057  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.057  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.065  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.065  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.135  6024  6460 W BpBinder: Large outgoing transaction of 329800 bytes, interface descriptor , code 4
+10-27 18:27:39.150  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_birthdaydoodle_jar__name to integer.
+10-27 18:27:39.150  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_call_jar__name to integer.
+10-27 18:27:39.150  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_canvas_jar__name to integer.
+10-27 18:27:39.150  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_chkpkg_jar__name to integer.
+10-27 18:27:39.150  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+10-27 18:27:39.150  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_dining_jar__name to integer.
+10-27 18:27:39.150  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_doodle_notifications_jar__name to integer.
+10-27 18:27:39.150  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_imageviewer_jar__name to integer.
+10-27 18:27:39.150  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_ipa_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_jslocation_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_localintent_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_messaging_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_nativesrp_activity_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_nativesrp_presenter_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_nowcontent_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_recents_activity_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_save_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_searchresults_activity_jar__name to integer.
+10-27 18:27:39.151  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_test_jar__name to integer.
+10-27 18:27:39.152  1799  2198 W A       : Can't format flag AndroidGsaVelourJars__velour_weather_jar__name to integer.
+10-27 18:27:39.152  1799  2198 W A       : Can't format flag bindle_flags__bloblobber_blob to integer.
+10-27 18:27:39.152  1799  2198 W A       : Can't format flag bindle_flags__velour_jar to integer.
+10-27 18:27:39.158  5305  5382 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:27:39.220  1799  2289 I FedAssExpListener: Fed-ass not supported for signed out users.
+10-27 18:27:39.220  1799  2289 I FedAssExpListener: Successfully processed experiments changed.
+10-27 18:27:39.221  1799  2289 I A       : NGA disabled since it's running Panthera and at least one a11y feature is on.
+10-27 18:27:39.221  1799  2219 I OpaEligibilityChecker: send OpaEligibilityChange broadcast to CommonBroadcastReceiver
+10-27 18:27:39.236  1799  2361 I BistoSettingsListener: listener created
+10-27 18:27:39.259  1799  2288 I BlobLobber: Canceling downloads: []
+10-27 18:27:39.279  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.279  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.317  5502  5551 D EGL_emulation: app_time_stats: avg=139.51ms min=5.52ms max=265.12ms count=7
+10-27 18:27:39.325   874   933 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@7774b8d
+10-27 18:27:39.341  1799  1799 I BgTaskExecutorImpl: Starting EXCLUSIVE background task BLOBLOBBER_SYNC.
+10-27 18:27:39.351  1799  2288 I OpaEligibilityChecker: send OpaEligibilityChange broadcast to CommonBroadcastReceiver
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil:  query= size=15
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=most and least trusted professions,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=most and least trusted professions searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 8347bf1b-9c35-4610-b582-29611a824546
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=ftc lawsuit dollar general pricing,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=ftc lawsuit dollar general pricing searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 43ddefac-03c5-4aa3-899a-0030d3b4c15e
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=apple new ipad mini,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=apple new ipad mini searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 192fb88c-91ba-4c33-bf7d-31117608813c
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/png;base64,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,suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=true,is_personal=false,suggest_raw_text=nfl football,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=nfl football searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 87173ee1-ec94-427c-8552-0df55519c3c7
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=harry styles coming up roses music video,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=harry styles coming up roses music video searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: b2bc20b5-a98f-4a3e-800d-5de4a220806d
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=liberty ship ss joseph v connolly,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=liberty ship ss joseph v connolly searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 0229576f-fe75-4134-a9b7-87d2ec54520b
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=pet medication,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=pet medication searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 84cf29e0-a978-40d7-bfbe-e6f97ed34852
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/png;base64,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,suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=true,is_personal=false,suggest_raw_text=alabama football,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=Alabama Crimson Tide football searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 5f856b94-8491-4827-95f7-f0953e7c2b92
+10-27 18:27:39.355  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=winter storm forecast,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=winter storm forecast searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: c8eac229-9f4e-4e99-b640-f18d26af5597
+10-27 18:27:39.356  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/jpeg;base64,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
+10-27 18:27:39.356  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=anbernic handheld 3ds emulator dispute,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=anbernic handheld 3ds emulator dispute searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: c50423ed-e5f1-48b9-b3d4-c948b7a3b899
+10-27 18:27:39.356  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=gerrothorax maritimus,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=gerrothorax maritimus searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: c4c02506-7292-4ecb-a0fc-6b7072032cc6
+10-27 18:27:39.356  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=consecutive world record bull elk,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=consecutive world record bull elk searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 571b8e7c-dc0a-446e-968d-619e91aca8d7
+10-27 18:27:39.356  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=starbucks mystery bearista glass cup,group_id=web352164,response_id=6c869610-f120-4a0d-86a3-56516b131929,support_query_builder=false,} searchAction=starbucks mystery bearista glass cup searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 094d00d6-25df-4429-b710-0c6b66cf206d
+10-27 18:27:39.364  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/png;base64,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
+10-27 18:27:39.371  1799  2288 I FedAssExpListener: Fed-ass not supported for signed out users.
+10-27 18:27:39.373  1799  2219 I FedAssExpListener: Successfully processed experiments changed.
+10-27 18:27:39.373  1799  2219 I A       : NGA disabled since it's running Panthera and at least one a11y feature is on.
+10-27 18:27:39.408   529   544 W InputManager-JNI: Input channel object '3c23b1a Splash Screen app.coefmonitor.test (client)' was disposed without first being removed with the input manager!
+10-27 18:27:39.428  5776  5776 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@2fbb47c
+10-27 18:27:39.469  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.469  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.469  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.469  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.469  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.544   529  1938 W InputManager-JNI: Input channel object '9539aa5 app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity (client)' was disposed without first being removed with the input manager!
+10-27 18:27:39.594  6045  6152 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.googlequicksearchbox componentName=agsa_icing_connection serviceId=32
+10-27 18:27:39.600  6045  6332 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.googlequicksearchbox componentName=agsa_icing_connection serviceId=33
+10-27 18:27:39.652  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:39.710   874   950 D EGL_emulation: app_time_stats: avg=488.42ms min=17.77ms max=7231.65ms count=16
+10-27 18:27:39.847  6045  6513 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0
+10-27 18:27:39.863  6045  6513 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0
+10-27 18:27:40.221  5305  5382 D UiDevice: Node not found with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:27:40.541  5305  5382 W Settings: Setting always_finish_activities has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.
+10-27 18:27:40.699  5305  5305 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@e6c0c45
+10-27 18:27:40.715   529  1962 W InputManager-JNI: Input channel object '2302b47 app.coefmonitor (client)' was disposed without first being removed with the input manager!
+10-27 18:27:40.732   529  1962 D TelephonyManager: requestModemActivityInfo: Sending result to app: ModemActivityInfo{ mTimestamp=412707 mSleepTimeMs=0 mIdleTimeMs=412704 mActivityStatsTechSpecificInfo=[{mRat=UNKNOWN,mFrequencyRange=UNKNOWN,mTxTimeMs[]=[0, 0, 0, 0, 0],mRxTimeMs=0}]}
+10-27 18:27:40.793  5502  5551 D EGL_emulation: app_time_stats: avg=481.70ms min=53.49ms max=1140.49ms count=3
+10-27 18:27:40.811   874   950 D EGL_emulation: app_time_stats: avg=61.05ms min=9.72ms max=142.17ms count=15
+10-27 18:27:40.848   343   376 I netd    : tetherGetStats() -> {[]} <6.52ms>
+10-27 18:27:40.872   874   934 D SplashScreenView: Build android.window.SplashScreenView{60ea208 V.E...... ......ID 0,0-0,0}
+10-27 18:27:40.872   874   934 D SplashScreenView: Icon: view: null drawable: null size: 0
+10-27 18:27:40.872   874   934 D SplashScreenView: Branding: view: android.view.View{3c99da1 G.ED..... ......I. 0,0-0,0 #10204ef android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+10-27 18:27:41.036   408   408 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:27:41.064  1684  1684 I GsaVoiceInteractionSrv: Handling ACTION_STOP_HOTWORD
+10-27 18:27:41.065  1684  2233 E HwDetectorWithState: a: 3
+10-27 18:27:41.087  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@3dc69de in: PRE_ON_CREATE
+10-27 18:27:41.087  5305  5305 V ActivityScenario: Activity lifecycle changed event received but ignored because the reported transition was not ON_CREATE while the last known transition was PRE_ON_CREATE
+10-27 18:27:41.164  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@3dc69de in: CREATED
+10-27 18:27:41.166  5305  5305 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@3dc69de
+10-27 18:27:41.168  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@3dc69de in: STARTED
+10-27 18:27:41.168  5305  5305 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@3dc69de
+10-27 18:27:41.170  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@3dc69de in: RESUMED
+10-27 18:27:41.170  5305  5305 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@3dc69de
+10-27 18:27:41.215   874   950 D EGL_emulation: app_time_stats: avg=798.59ms min=20.17ms max=2291.57ms count=3
+10-27 18:27:41.610   529   548 W ziparchive: Unable to open '/data/app/~~ZofI-Q0-sDsZmCGeLWLayg==/app.coefmonitor-jVjQ0vUrCBz2CGffmLPFVQ==/base.dm': No such file or directory
+10-27 18:27:41.620   529   548 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity for user 0: +687ms
+10-27 18:27:41.695   529  1962 I ImeTracker: app.coefmonitor:b6f7a507: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-27 18:27:41.696   529  1962 I ImeTracker: app.coefmonitor:b6f7a507: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-27 18:27:41.697  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3227
+10-27 18:27:41.701  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 0, unlocked = true
+10-27 18:27:41.702  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=app.coefmonitor fieldId=0 fieldName=null extras=null}, false)
+10-27 18:27:41.702  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.shouldHideHeaderOnInitialState():4008 ShouldHideHeaderOnInitialState = false
+10-27 18:27:41.710  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 2, unlocked = true
+10-27 18:27:41.807  1565  1573 I putmethod.latin: JIT allocated 106KB for compiled code of boolean drz.a(ikb, java.lang.Object[])
+10-27 18:27:41.807  1565  1573 I putmethod.latin: Compiler allocated 5216KB to compile boolean drz.a(ikb, java.lang.Object[])
+10-27 18:27:41.956  1069  1376 D BtGatt.ScanManager: uid 10128 isForeground true scanMode -1
+10-27 18:27:41.956  1069  1376 D BtGatt.ScanManager: uid 10128 isForeground true scanMode -1
+10-27 18:27:41.969  5502  5563 D OneSearchSuggestProvider: Shut down the binder channel
+10-27 18:27:41.969  5502  7030 I IPCThreadState: oneway function results for code 2 on binder at 0x70891ae9f550 will be dropped but finished with status UNKNOWN_TRANSACTION
+10-27 18:27:41.974  5502  5545 I ImeTracker: com.google.android.apps.nexuslauncher:a4bc948c: onRequestHide at ORIGIN_CLIENT_HIDE_SOFT_INPUT reason HIDE_SOFT_INPUT
+10-27 18:27:41.974  5502  5545 I ImeTracker: com.google.android.apps.nexuslauncher:a4bc948c: onFailed at PHASE_CLIENT_VIEW_SERVED
+10-27 18:27:41.979  5305  5382 W SurfaceComposerClient: Sync transaction timed out waiting for commit callback.
+10-27 18:27:42.142  1655  1827 D PickerSyncController: syncAllMedia
+10-27 18:27:42.142  1655  1827 D PickerSyncController: syncAllMediaFromProvider() LOCAL, auth=com.android.providers.media.photopicker, retry=true
+10-27 18:27:42.142  1655  1827 D PickerSyncController: getSyncRequestParams() LOCAL, auth=com.android.providers.media.photopicker
+10-27 18:27:42.154  1655  1827 D PickerSyncController:    Latest ID/Gen=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary/52
+10-27 18:27:42.154  1655  1827 D PickerSyncController:    Cached ID/Gen=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary/41
+10-27 18:27:42.154  1655  1827 D PickerSyncController:    RESULT=SyncRequestParams{type=MEDIA_INCREMENTAL, gen=41, latest=Bundle[{last_media_sync_generation=52, media_collection_id=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary}]}
+10-27 18:27:42.154  1655  1827 I PickerSyncController: Executing SyncAdd. isLocal: true. authority: com.android.providers.media.photopicker
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: Failed to insert picker db media. ContentValues: standard_mime_type_extension=0 size_bytes=0 orientation=0 height=2400 date_taken_ms=1793125656000 duration_ms=0 sync_generation=52 mime_type=image/png width=1080 is_favorite=0 local_id=1000000026 is_visible=1
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: android.database.sqlite.SQLiteConstraintException: CHECK constraint failed: size_bytes > 0 (code 275 SQLITE_CONSTRAINT_CHECK)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteConnection.nativeExecuteForLastInsertedRowId(Native Method)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteConnection.executeForLastInsertedRowId(SQLiteConnection.java:961)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteSession.executeForLastInsertedRowId(SQLiteSession.java:790)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteStatement.executeInsert(SQLiteStatement.java:89)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.database.DatabaseUtils.executeInsert(DatabaseUtils.java:199)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteQueryBuilder.insert(SQLiteQueryBuilder.java:629)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.data.PickerDbFacade$AddMediaOperation.insertMedia(PickerDbFacade.java:476)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.data.PickerDbFacade$AddMediaOperation.upsertMedia(PickerDbFacade.java:490)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.data.PickerDbFacade$AddMediaOperation.executeInternal(PickerDbFacade.java:450)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.data.PickerDbFacade$DbWriteOperation.execute(PickerDbFacade.java:335)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.executePagedSync(PickerSyncController.java:987)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.executeSyncAdd(PickerSyncController.java:719)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.syncAllMediaFromProvider(PickerSyncController.java:643)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.syncAllMediaFromLocalProvider(PickerSyncController.java:213)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.syncAllMedia(PickerSyncController.java:197)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController$$ExternalSyntheticLambda0.run(R8$$SyntheticClass:0)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.os.Handler.handleCallback(Handler.java:958)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.os.Looper.loopOnce(Looper.java:205)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.os.Looper.loop(Looper.java:294)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: Retrying failed insert as update. ContentValues: standard_mime_type_extension=0 size_bytes=0 orientation=0 height=2400 date_taken_ms=1793125656000 duration_ms=0 sync_generation=52 mime_type=image/png width=1080 is_favorite=0 local_id=1000000026 is_visible=1
+10-27 18:27:42.198  1655  1827 V PickerDbFacade: Failed to update picker db media. ContentValues: standard_mime_type_extension=0 size_bytes=0 orientation=0 height=2400 date_taken_ms=1793125656000 duration_ms=0 sync_generation=52 mime_type=image/png width=1080 is_favorite=0 local_id=1000000026 is_visible=1
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: Failed to insert picker db media. ContentValues: standard_mime_type_extension=0 size_bytes=0 orientation=0 height=2400 date_taken_ms=1793125656000 duration_ms=0 sync_generation=52 mime_type=image/png width=1080 is_favorite=0 local_id=1000000026 is_visible=1
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: android.database.sqlite.SQLiteConstraintException: CHECK constraint failed: size_bytes > 0 (code 275 SQLITE_CONSTRAINT_CHECK)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteConnection.nativeExecuteForLastInsertedRowId(Native Method)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteConnection.executeForLastInsertedRowId(SQLiteConnection.java:961)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteSession.executeForLastInsertedRowId(SQLiteSession.java:790)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteStatement.executeInsert(SQLiteStatement.java:89)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.database.DatabaseUtils.executeInsert(DatabaseUtils.java:199)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.database.sqlite.SQLiteQueryBuilder.insert(SQLiteQueryBuilder.java:629)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.data.PickerDbFacade$AddMediaOperation.insertMedia(PickerDbFacade.java:476)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.data.PickerDbFacade$AddMediaOperation.upsertMedia(PickerDbFacade.java:490)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.data.PickerDbFacade$AddMediaOperation.executeInternal(PickerDbFacade.java:467)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.data.PickerDbFacade$DbWriteOperation.execute(PickerDbFacade.java:335)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.executePagedSync(PickerSyncController.java:987)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.executeSyncAdd(PickerSyncController.java:719)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.syncAllMediaFromProvider(PickerSyncController.java:643)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.syncAllMediaFromLocalProvider(PickerSyncController.java:213)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController.syncAllMedia(PickerSyncController.java:197)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at com.android.providers.media.photopicker.PickerSyncController$$ExternalSyntheticLambda0.run(R8$$SyntheticClass:0)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.os.Handler.handleCallback(Handler.java:958)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.os.Looper.loopOnce(Looper.java:205)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.os.Looper.loop(Looper.java:294)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: Retrying failed insert as update. ContentValues: standard_mime_type_extension=0 size_bytes=0 orientation=0 height=2400 date_taken_ms=1793125656000 duration_ms=0 sync_generation=52 mime_type=image/png width=1080 is_favorite=0 local_id=1000000026 is_visible=1
+10-27 18:27:42.199  1655  1827 V PickerDbFacade: Failed to update picker db media. ContentValues: standard_mime_type_extension=0 size_bytes=0 orientation=0 height=2400 date_taken_ms=1793125656000 duration_ms=0 sync_generation=52 mime_type=image/png width=1080 is_favorite=0 local_id=1000000026 is_visible=1
+10-27 18:27:42.199  1655  1827 I PickerSyncController: Paged sync successful. QueryArgs: Bundle[{android.provider.extra.SYNC_GENERATION=41}]. Result count: 1. Cursor count: 2
+10-27 18:27:42.199  1655  1827 I PickerSyncController: Executing SyncRemove. isLocal: true. authority: com.android.providers.media.photopicker
+10-27 18:27:42.200  1655  1827 I PickerSyncController: Paged sync successful. QueryArgs: Bundle[{android.provider.extra.SYNC_GENERATION=41}]. Result count: 0. Cursor count: 0
+10-27 18:27:42.200  1655  1827 D PickerSyncController: syncAllMediaFromProvider() CLOUD, auth=null, retry=true
+10-27 18:27:42.200  1655  1827 D PickerSyncController: getSyncRequestParams() CLOUD, auth=null
+10-27 18:27:42.200  1655  1827 D PickerSyncController:    RESULT=SyncRequestParams{type=MEDIA_RESET, gen=0, latest=null}
+10-27 18:27:42.200  1655  1827 I PickerSyncController: Executing SyncReset. isLocal: false. authority: null
+10-27 18:27:42.200  1655  1827 I PickerSyncController: SyncReset. isLocal:false. authority: null. result count: 0
+10-27 18:27:42.200  1655  1827 D PickerSyncController: Ignoring cache media info for null authority with bundle: null
+10-27 18:27:42.200  1655  1827 I PickerSyncController: Executing SyncAlbumReset. isLocal: true. authority: com.android.providers.media.photopicker. albumId: null
+10-27 18:27:42.200  1655  1827 I PickerSyncController: Successfully executed SyncResetAlbum. authority: com.android.providers.media.photopicker. albumId: null. Result count: 0
+10-27 18:27:42.200  1655  1827 I PickerSyncController: Executing SyncAlbumReset. isLocal: false. authority: null. albumId: null
+10-27 18:27:42.200  1655  1827 I PickerSyncController: Successfully executed SyncResetAlbum. authority: null. albumId: null. Result count: 0
+10-27 18:27:42.314   874   950 D EGL_emulation: app_time_stats: avg=549.53ms min=211.37ms max=887.68ms count=2
+10-27 18:27:42.317   874   933 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@873484c
+10-27 18:27:42.320   529  1962 W InputManager-JNI: Input channel object '54a5a4c Splash Screen app.coefmonitor (client)' was disposed without first being removed with the input manager!
+10-27 18:27:42.632  5305  5443 D EGL_emulation: app_time_stats: avg=90.46ms min=59.81ms max=143.39ms count=10
+10-27 18:27:42.993  1653  3540 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+10-27 18:27:42.994  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:42.998  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:42.998  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:42.998  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:42.998  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:42.998  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:42.998  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:42.998  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:42.998  5305  6980 W MessageQueue: Handler (android.os.Handler) {d7d9443} sending message to a Handler on a dead thread
+10-27 18:27:42.998  5305  6980 W MessageQueue: java.lang.IllegalStateException: Handler (android.os.Handler) {d7d9443} sending message to a Handler on a dead thread
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.os.MessageQueue.enqueueMessage(MessageQueue.java:560)
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.os.Handler.enqueueMessage(Handler.java:786)
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.os.Handler.sendMessageAtTime(Handler.java:735)
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.os.Handler.sendMessageDelayed(Handler.java:705)
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.os.Handler.post(Handler.java:435)
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.os.HandlerExecutor.execute(HandlerExecutor.java:41)
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.accessibilityservice.AccessibilityService$IAccessibilityServiceClientWrapper.init(AccessibilityService.java:2886)
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.accessibilityservice.IAccessibilityServiceClient$Stub.onTransact(IAccessibilityServiceClient.java:235)
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.os.Binder.execTransactInternal(Binder.java:1344)
+10-27 18:27:42.998  5305  6980 W MessageQueue: 	at android.os.Binder.execTransact(Binder.java:1275)
+10-27 18:27:42.999  5305  6980 W Binder  : Caught a RuntimeException from the binder stub implementation.
+10-27 18:27:42.999  5305  6980 W Binder  : java.util.concurrent.RejectedExecutionException: Handler (android.os.Handler) {d7d9443} is shutting down
+10-27 18:27:42.999  5305  6980 W Binder  : 	at android.os.HandlerExecutor.execute(HandlerExecutor.java:42)
+10-27 18:27:42.999  5305  6980 W Binder  : 	at android.accessibilityservice.AccessibilityService$IAccessibilityServiceClientWrapper.init(AccessibilityService.java:2886)
+10-27 18:27:42.999  5305  6980 W Binder  : 	at android.accessibilityservice.IAccessibilityServiceClient$Stub.onTransact(IAccessibilityServiceClient.java:235)
+10-27 18:27:42.999  5305  6980 W Binder  : 	at android.os.Binder.execTransactInternal(Binder.java:1344)
+10-27 18:27:42.999  5305  6980 W Binder  : 	at android.os.Binder.execTransact(Binder.java:1275)
+10-27 18:27:43.003  1799  2219 I A       : NGA enabled in interactor.
+10-27 18:27:43.003  1799  2219 I A       : Nga state changed to NgaStateDetails{state=ENABLED, isSpecialExperience=false}
+10-27 18:27:43.008  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+10-27 18:27:43.009  5305  7073 V UiAutomation: Init UiAutomation@107d512[id=5, displayId=0, flags=1]
+10-27 18:27:43.010  1684  1733 I A       : Initializing all components
+10-27 18:27:43.014  1653  1695 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+10-27 18:27:43.014  1684  2246 I A       : onIsEnabledChanged, isEnabled: false
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 I A       : onOpaVisibilityChanged: false
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 I A       : Setting session to type: NO_SESSION
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.015  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.016  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.016  1684  2246 I A       : setNavBarVisible: GestureNavBarVisible{navbarVisible=true}
+10-27 18:27:43.016  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.016  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.016  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.016  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.016  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.016  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.016  1684  2246 I A       : onDisabled. Registered: false
+10-27 18:27:43.017  1684  2259 I A       : State changed: IDLE => IDLE by NGA_STATE_CHANGED and N/A with Optional.empty
+10-27 18:27:43.019  1684  2259 I A       : Recognizer choice: (recognizer_type: 1, recognizer_mode: 1, choice_reason: 4)
+10-27 18:27:43.022  1684  1733 I A       : APA or Classic session decision: SessionDecision(sessionVariance=CLASSIC, platformVariance=CLASSIC, justification=CURRENT_PLATFORM_VARIANCE).
+10-27 18:27:43.022  1684  1733 I A       : [Memory] eligibility: StashEligibility{6}
+10-27 18:27:43.022  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-27 18:27:43.023  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.023  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.023  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.023  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.023  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.023  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.023  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.023  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.024  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+10-27 18:27:43.024  1684  2246 I NgaEntryPointEventSendr: setupConnection
+10-27 18:27:43.025  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-27 18:27:43.031  1684  2246 I NgaEntryPointEventSendr: State changed: Disconnected => Connecting
+10-27 18:27:43.037  1684  2246 I A       : Initialize
+10-27 18:27:43.038  1684  2246 I A       : on opa visibility changed false
+10-27 18:27:43.038  1684  2246 I A       : stopListening(NGA_PAUSED_UNKNOWN_REASON, NGA_CREATE), idleOverride=NOT_LISTENING
+10-27 18:27:43.041  1684  2259 I A       : onActiveStateChangeEvent: IDLE => IDLE
+10-27 18:27:43.042  1684  2259 I A       : #onActiveStateChangeEvent, newState: IDLE, previousState: IDLE.
+10-27 18:27:43.047   874   874 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+10-27 18:27:43.051   874   874 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+10-27 18:27:43.062  1799  2288 I A       : NGA disabled since it's running Panthera and at least one a11y feature is on.
+10-27 18:27:43.062  1799  2288 I A       : Nga state changed to NgaStateDetails{state=DISABLED, isSpecialExperience=false}
+10-27 18:27:43.064  1799  1799 I A       : Creating pss binder().
+10-27 18:27:43.072  1684  3058 I A       : APA or Classic session decision: SessionDecision(sessionVariance=CLASSIC, platformVariance=CLASSIC, justification=CURRENT_PLATFORM_VARIANCE).
+10-27 18:27:43.073  1684  3058 I A       : [Memory] eligibility: StashEligibility{4}
+10-27 18:27:43.079  5291  5301 W System  : A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+10-27 18:27:43.079  5291  5301 W System  : java.lang.Throwable: Explicit termination method 'HardwareBuffer.close' not called
+10-27 18:27:43.079  5291  5301 W System  : 	at dalvik.system.CloseGuard.openWithCallSite(CloseGuard.java:288)
+10-27 18:27:43.079  5291  5301 W System  : 	at dalvik.system.CloseGuard.open(CloseGuard.java:257)
+10-27 18:27:43.079  5291  5301 W System  : 	at android.hardware.HardwareBuffer.<init>(HardwareBuffer.java:266)
+10-27 18:27:43.079  5291  5301 W System  : A resource was acquired at attached stack trace but never released. See java.io.Closeable for information on avoiding resource leaks.
+10-27 18:27:43.079  5291  5301 W System  : java.lang.Throwable: Explicit termination method 'HardwareBuffer.close' not called
+10-27 18:27:43.079  5291  5301 W System  : 	at dalvik.system.CloseGuard.openWithCallSite(CloseGuard.java:288)
+10-27 18:27:43.079  5291  5301 W System  : 	at dalvik.system.CloseGuard.open(CloseGuard.java:257)
+10-27 18:27:43.079  5291  5301 W System  : 	at android.hardware.HardwareBuffer.<init>(HardwareBuffer.java:266)
+10-27 18:27:43.080  1684  2246 I NgaEntryPointEventSendr: onServiceConnected
+10-27 18:27:43.080  1799  5648 I A       : Calling beginBinderSession().
+10-27 18:27:43.082  1799  5648 I A       : beginBinderSession(): calling binder
+10-27 18:27:43.086  1684  2246 I NgaEntryPointEventSendr: State changed: Connecting => Ready
+10-27 18:27:43.097  1684  2259 I A       : Successfully initialized all components
+10-27 18:27:43.102  1684  2259 I A       : Unsubscribed to apa or classic variant change.
+10-27 18:27:43.120  1684  2246 I A       : on opa visibility changed false
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: Invalid input from icing corpus JSON flag.
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: android.util.MalformedJsonException: Use JsonReader.setLenient(true) to accept malformed JSON at line 123 column 2
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at android.util.JsonReader.syntaxError(JsonReader.java:1162)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at android.util.JsonReader.checkLenient(JsonReader.java:840)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at android.util.JsonReader.nextInArray(JsonReader.java:615)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at android.util.JsonReader.peek(JsonReader.java:345)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at android.util.JsonReader.hasNext(JsonReader.java:321)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.searchbox.c.b.b.k.c(PG:7)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.searchbox.c.b.b.k.<init>(PG:5)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.staticplugins.searchboxroot.features.n.a.c.<init>(PG:16)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.staticplugins.searchboxroot.b.a(PG:14)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.staticplugins.searchboxroot.x.<init>(PG:7)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.binaries.velvet.app.akd.b(PG:15)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at dagger.a.e.b(PG:1)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.staticplugins.searchboxroot.a.a.a(PG:3)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.binaries.velvet.app.ok.f(Unknown Source:2541)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.binaries.velvet.app.ok.b(PG:1)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.search.core.service.g.a.c.a(PG:2)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.libraries.gsa.k.a.f.a(PG:2)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.shared.logger.f.a.a.l.h(PG:2)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.apps.gsa.shared.logger.f.a.a.h.a(Unknown Source:4)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.common.util.concurrent.dx.a(PG:1)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.common.util.concurrent.cv.run(PG:4)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.common.util.concurrent.dz.run(PG:1)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.libraries.i.ae.run(PG:1)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.libraries.i.k.run(PG:2)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at com.google.android.libraries.i.p.run(PG:4)
+10-27 18:27:43.129  1799  2363 W CorpusConfigHelper: 	at java.lang.Thread.run(Thread.java:1012)
+10-27 18:27:43.149  1799  2512 W A       : UiCallbackStub-onGenericEvent[ServiceEvent = 60] task was not run. Callback from Service received after client was disposed.
+10-27 18:27:43.149  1799  2512 W A       : UiCallbackStub-onGenericEvent[ServiceEvent = 60] task was not run. Callback from Service received after client was disposed.
+10-27 18:27:43.152  1799  2512 W A       : UiCallbackStub-onGenericEvent[ServiceEvent = 42] task was not run. Callback from Service received after client was disposed.
+10-27 18:27:43.152  1799  2512 W A       : Queue length for executor EventBus is now 11. Perhaps some tasks are too long, or the pool is too small.
+10-27 18:27:43.155  1799  2363 I PBSessionCacheImpl: Deleted sessionId[7913878798763386] from persistence.
+10-27 18:27:43.166  1684  2259 I NgaEntryPointEventSendr: State changed: Ready => Disconnected (onOpaDisconnected)
+10-27 18:27:43.166  6045  6152 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.googlequicksearchbox componentName=null serviceId=36
+10-27 18:27:43.177  1799  2512 W A       : UiCallbackStub-onGenericEvent[ServiceEvent = 67] task was not run. Callback from Service received after client was disposed.
+10-27 18:27:43.177  1799  2512 W A       : UiCallbackStub-onGenericEvent[ServiceEvent = 60] task was not run. Callback from Service received after client was disposed.
+10-27 18:27:43.180  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:43.180  1799  2512 I MicroDetectionState: Should stop hotword detection immediately - true
+10-27 18:27:43.181  1799  2512 I A       : Using proto config with mendel
+10-27 18:27:43.181  1799  2512 I A       : Using proto config with mendel
+10-27 18:27:43.189  6045  6513 I Icing   : Usage reports ok 1, Failed Usage reports 0, indexed 0, rejected 0
+10-27 18:27:43.567  5305  5382 I CoefMonitorTest: static tile similarity between captures = 1.0
+10-27 18:27:43.568  5305  5382 D UiDevice: Executing shell command: settings delete secure enabled_accessibility_services
+10-27 18:27:43.569  1653  3540 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+10-27 18:27:43.570  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.570  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.570  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.570  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.570  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.570  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.570  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.571  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.571  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+10-27 18:27:43.571  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-27 18:27:43.572   874   874 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+10-27 18:27:43.578  1799  2219 I A       : NGA enabled in interactor.
+10-27 18:27:43.578  1799  2219 I A       : Nga state changed to NgaStateDetails{state=ENABLED, isSpecialExperience=false}
+10-27 18:27:43.579  5305  7077 V UiAutomation: Init UiAutomation@107d512[id=6, displayId=0, flags=1]
+10-27 18:27:43.579  5305  5382 D UiDevice: Setting accessibility service flags: 65618
+10-27 18:27:43.583  1684  5536 I A       : Initializing all components
+10-27 18:27:43.583  1684  5536 I A       : APA or Classic session decision: SessionDecision(sessionVariance=CLASSIC, platformVariance=CLASSIC, justification=CURRENT_PLATFORM_VARIANCE).
+10-27 18:27:43.583  1684  5536 I A       : [Memory] eligibility: StashEligibility{6}
+10-27 18:27:43.584  1684  2246 I A       : onIsEnabledChanged, isEnabled: false
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 I A       : onOpaVisibilityChanged: false
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 I A       : Setting session to type: NO_SESSION
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.584  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.585  1684  2246 I A       : setNavBarVisible: GestureNavBarVisible{navbarVisible=true}
+10-27 18:27:43.585  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.585  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.585  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.585  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.585  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.585  1684  2246 W A       : Disposing empty manager. Did you forgot to subscribe observables?
+10-27 18:27:43.585  1684  2246 I A       : onDisabled. Registered: false
+10-27 18:27:43.588  1684  2259 I A       : State changed: IDLE => IDLE by NGA_STATE_CHANGED and N/A with Optional.empty
+10-27 18:27:43.590  1653  1695 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+10-27 18:27:43.593  1799  2219 I A       : NGA disabled since it's running Panthera and at least one a11y feature is on.
+10-27 18:27:43.593  1799  2219 I A       : Nga state changed to NgaStateDetails{state=DISABLED, isSpecialExperience=false}
+10-27 18:27:43.594  1684  1730 I A       : APA or Classic session decision: SessionDecision(sessionVariance=CLASSIC, platformVariance=CLASSIC, justification=CURRENT_PLATFORM_VARIANCE).
+10-27 18:27:43.594  1684  1730 I A       : [Memory] eligibility: StashEligibility{4}
+10-27 18:27:43.596  1653  1695 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+10-27 18:27:43.600  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.603  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.603  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.603  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.618  1684  2246 I A       : Initialize
+10-27 18:27:43.618  1684  2246 I A       : on opa visibility changed false
+10-27 18:27:43.619   529  2532 D SafetySourceDataValidator: No cert check requested for package com.google.android.permissioncontroller
+10-27 18:27:43.619  1684  2246 I A       : on opa visibility changed false
+10-27 18:27:43.620  5305  5382 D UiDevice: Executing shell command: settings put secure accessibility_enabled 0
+10-27 18:27:43.623  1684  2246 I A       : stopListening(NGA_PAUSED_UNKNOWN_REASON, NGA_CREATE), idleOverride=NOT_LISTENING
+10-27 18:27:43.630  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.630  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.630  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.630  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.631  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.631  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.631  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.631  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.631  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.631  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.631  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.631  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.634  1684  2246 I NgaEntryPointEventSendr: setupConnection
+10-27 18:27:43.637  1799  1799 I A       : Creating pss binder().
+10-27 18:27:43.639  1684  2246 I NgaEntryPointEventSendr: State changed: Disconnected => Connecting
+10-27 18:27:43.640  1684  2246 I NgaEntryPointEventSendr: onServiceConnected
+10-27 18:27:43.640  1799  5648 I A       : Calling beginBinderSession().
+10-27 18:27:43.640  1799  5648 I A       : beginBinderSession(): calling binder
+10-27 18:27:43.641  1684  2246 I NgaEntryPointEventSendr: State changed: Connecting => Ready
+10-27 18:27:43.643  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+10-27 18:27:43.644  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-27 18:27:43.644  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+10-27 18:27:43.644  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-27 18:27:43.646  1684  2246 I A       : Successfully initialized all components
+10-27 18:27:43.647  1684  2246 I A       : Unsubscribed to apa or classic variant change.
+10-27 18:27:43.656   874   874 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+10-27 18:27:43.656   874   874 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+10-27 18:27:43.662  1799  2512 I PBSessionCacheImpl: Deleted sessionId[7913878798763389] from persistence.
+10-27 18:27:43.663  1799  2512 W A       : UiCallbackStub-onGenericEvent[ServiceEvent = 60] task was not run. Callback from Service received after client was disposed.
+10-27 18:27:43.665  1799  2512 W SearchServiceCore: Abort, client detached.
+10-27 18:27:43.670  1684  2259 I A       : Recognizer choice: (recognizer_type: 1, recognizer_mode: 1, choice_reason: 4)
+10-27 18:27:43.671  1684  2259 I A       : onActiveStateChangeEvent: IDLE => IDLE
+10-27 18:27:43.671  1684  2259 I A       : #onActiveStateChangeEvent, newState: IDLE, previousState: IDLE.
+10-27 18:27:43.675  1684  2246 I NgaEntryPointEventSendr: State changed: Ready => Disconnected (onOpaDisconnected)
+10-27 18:27:43.690  1653  1695 I AiAiEcho: Settings changed for uri: content://settings/secure/accessibility_enabled
+10-27 18:27:43.690  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.691  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.691  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.692  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.694  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:43.694  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:43.694  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:43.694  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:43.694  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+10-27 18:27:43.695  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-27 18:27:43.695   874   874 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+10-27 18:27:43.722  5305  5382 I CoefMonitorTest: final state
+10-27 18:27:43.722  5305  5382 I CoefMonitorTest: runtime=RuntimeState(status=STOPPED, captureActive=false, ocrStatus=IDLE, lastRawText=null, lastReadValue=null, lastConfidence=null, lastRejection=null, rowBand=null, error=null, lastContinuity=null, clicks=null)
+10-27 18:27:43.722  5305  5382 I CoefMonitorTest: active=1
+10-27 18:27:43.722  5305  5382 I CoefMonitorTest: events:
+10-27 18:27:43.722  5305  5382 I CoefMonitorTest:
+10-27 18:27:43.722  5305  5382 I CoefMonitorTest: diagnostics (newest first):
+10-27 18:27:43.730   874   934 D SplashScreenView: Build android.window.SplashScreenView{b18b880 V.E...... ......ID 0,0-0,0}
+10-27 18:27:43.730   874   934 D SplashScreenView: Icon: view: null drawable: null size: 0
+10-27 18:27:43.730   874   934 D SplashScreenView: Branding: view: android.view.View{4bdbeb9 G.ED..... ......I. 0,0-0,0 #10204ef android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+10-27 18:27:43.747  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@3dc69de in: PAUSED
+10-27 18:27:43.747  5305  5305 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@3dc69de
+10-27 18:27:43.759   408   408 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:27:43.760  5305  5443 D EGL_emulation: app_time_stats: avg=125.29ms min=103.78ms max=143.15ms count=9
+10-27 18:27:43.920   874   950 D EGL_emulation: app_time_stats: avg=1605.10ms min=1605.10ms max=1605.10ms count=1
+10-27 18:27:43.986  5776  5792 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-27 18:27:44.406   874   950 D EGL_emulation: app_time_stats: avg=588.02ms min=56.57ms max=3117.76ms count=6
+10-27 18:27:44.489   529   548 W ziparchive: Unable to open '/data/app/~~XB79Qb2GtF3PL9RAUKKiog==/app.coefmonitor.test-kwl5Lnq94LP-XiIFKdRW8Q==/base.dm': No such file or directory
+10-27 18:27:44.497  5776  5776 I Choreographer: Skipped 30 frames!  The application may be doing too much work on its main thread.
+10-27 18:27:44.520   408   408 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:27:44.534   529  1700 W AppSearchIcing: icing-search-engine.cc:283: Error: 5, Message: Document (com.google.android.googlequicksearchbox$OneSearchZeroStateGoogleSuggestions/default, zp) not found.
+10-27 18:27:44.539  5502  5563 D OneSearchSuggestProvider: Created the binder channel successfully for end point service =com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService , mChannel=z1{delegate=s1{logId=13, target=directaddress:///AndroidComponentAddress%5BIntent%20%7B%20act=grpc.io.action.BIND%20cmp=com.google.android.googlequicksearchbox/com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService%20%7D%5D}} , mOneSearchConnection=X1.T@9b4f212
+10-27 18:27:44.552   529   548 I ActivityTaskManager: Displayed app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity for user 0: +755ms
+10-27 18:27:44.595  1069  1376 D BtGatt.ScanManager: uid 10128 isForeground true scanMode -1
+10-27 18:27:44.595  1069  1376 D BtGatt.ScanManager: uid 10128 isForeground true scanMode -1
+10-27 18:27:44.598  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:27:44.598  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:27:44.598  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:27:44.598  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:27:44.600  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-27 18:27:44.678  1684  1684 I GsaVoiceInteractionSrv: Handling ACTION_START_HOTWORD
+10-27 18:27:44.678  1684  2185 I GsaVoiceInteractionSrv: disregardVoiceMatch: false
+10-27 18:27:44.679  1684  2185 I GsaVoiceInteractionSrv: Cannot start hotword, hotword has been explicitly disabled.
+10-27 18:27:44.687  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@3dc69de in: STOPPED
+10-27 18:27:44.688  5305  5305 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@3dc69de
+10-27 18:27:44.690  1799  1799 I A       : Created gRPC endpoint to "search" for service class com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService
+10-27 18:27:44.690  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@3dc69de in: DESTROYED
+10-27 18:27:44.690  5305  5305 V ActivityScenario: Update currentActivityStage to DESTROYED, currentActivity=null
+10-27 18:27:44.691  5305  5382 I TestRunner: finished: staticTileSignatureIsStableAcrossFrames(app.coefmonitor.e2e.EndToEndMonitoringTest)

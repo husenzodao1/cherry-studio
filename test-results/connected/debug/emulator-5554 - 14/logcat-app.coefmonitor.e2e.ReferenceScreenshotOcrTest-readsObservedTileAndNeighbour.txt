@@ -1,0 +1,47 @@
+10-27 18:35:16.454  5305  5382 I TestRunner: started: readsObservedTileAndNeighbour(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)
+10-27 18:35:16.458  5305  7628 D DecoupledTextDelegate: Start loading thick OCR module.
+10-27 18:35:16.459  5305  7628 I DynamiteModule: Considering local module com.google.mlkit.dynamite.text.latin:10000 and remote module com.google.mlkit.dynamite.text.latin:0
+10-27 18:35:16.459  5305  7628 I DynamiteModule: Selected local version of com.google.mlkit.dynamite.text.latin
+10-27 18:35:16.460  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=DEFAULT, name=FIREBASE_ML_SDK for destination cct
+10-27 18:35:16.460  5305  7628 I native  : I0000 00:00:1793126116.460687    7628 asset_manager_util.cc:61] Created global reference to asset manager.
+10-27 18:35:16.465  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, DEFAULT, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:35:16.467  5305  7685 I native  : I0000 00:00:1793126116.467777    7685 text_detector_thread_pool_context.cc:38] Compute manager max in flight region detector overwrite: 1
+10-27 18:35:16.468  5305  7684 I native  : I0000 00:00:1793126116.467817    7684 text_classifier.cc:32] Creating classifier TfliteTextClassifier
+10-27 18:35:16.468  5305  7684 I native  : I0000 00:00:1793126116.468302    7684 common_util.h:41] Resizing Thread Pool: ocr_segm to 3
+10-27 18:35:16.468  5305  7685 I native  : I0000 00:00:1793126116.468516    7685 common_util.h:41] Resizing Thread Pool: ocr_det_0 to 3
+10-27 18:35:16.470  5305  7684 I native  : I0000 00:00:1793126116.470189    7684 tflite_lstm_client_base.cc:371] Resizing interpreter pool to 4
+10-27 18:35:16.471  5305  7684 I native  : I0000 00:00:1793126116.471052    7684 multi_pass_line_recognition_mutator.cc:342] Preloading recognizers.
+10-27 18:35:16.471  5305  5750 I native  : I0000 00:00:1793126116.471159    5750 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/conv_model.fb
+10-27 18:35:16.471  5305  5750 I native  : I0000 00:00:1793126116.471587    5750 tflite_model_pooled_runner.cc:636] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/lstm_model.fb
+10-27 18:35:16.473  5305  5750 I native  : I0000 00:00:1793126116.473752    5750 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 4
+10-27 18:35:16.475  5305  5750 I native  : I0000 00:00:1793126116.475052    5750 mobile_langid_v2.cc:58] MobileLangID V2 initialized.
+10-27 18:35:16.475  5305  5750 I native  : I0000 00:00:1793126116.475142    5750 multi_pass_line_recognition_mutator.cc:364] Finished preloading a recognizer for "Latn"
+10-27 18:35:16.475  5305  7684 I native  : I0000 00:00:1793126116.475239    7684 multi_pass_line_recognition_mutator.cc:398] Finished preloading recognizers.
+10-27 18:35:16.475  5305  7684 I native  : I0000 00:00:1793126116.475458    7684 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_splitting_custom_ops/model.tflite
+10-27 18:35:16.475  5305  7684 I native  : I0000 00:00:1793126116.475755    7684 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:35:16.476  5305  7684 I native  : I0000 00:00:1793126116.476072    7684 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_clustering_custom_ops/model.tflite
+10-27 18:35:16.476  5305  7684 I native  : I0000 00:00:1793126116.476389    7684 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:35:16.481  5305  7685 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:35:16.490  5305  7685 I native  : I0000 00:00:1793126116.490326    7685 tflite_detector_client_with_shape_cache.cc:105] Caching size: 10
+10-27 18:35:16.491  5305  7628 D PipelineManager: Start process bitmap
+10-27 18:35:16.513  5305  7684 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:35:17.006  5305  7684 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:35:17.365  5305  7684 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:35:17.876  5305  7684 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:35:18.405  5305  7628 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:35:18.407  5305  7628 D PipelineManager: Start process bitmap
+10-27 18:35:20.270  5305  7628 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:35:20.273  5305  7656 D PipelineManager: Start process bitmap
+10-27 18:35:22.044  5305  7656 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:35:22.046  5305  7656 D PipelineManager: Start process bitmap
+10-27 18:35:23.828  5305  7656 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:35:23.831  5305  7656 D PipelineManager: Start process bitmap
+10-27 18:35:25.607   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:35:25.664  5305  7656 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:35:25.666  5305  5382 I CoefMonitorTest: reference tile 0 -> Placeholder(rawText=?)
+10-27 18:35:25.666  5305  5382 I CoefMonitorTest: reference tile 1 -> Valid(value=2.01x, confidence=0.88125, rawText=2.01x)
+10-27 18:35:25.666  5305  5382 I CoefMonitorTest: reference tile 2 -> Valid(value=1.53x, confidence=0.81640625, rawText=1.53x)
+10-27 18:35:25.666  5305  5382 I CoefMonitorTest: reference tile 3 -> Valid(value=1.20x, confidence=0.83984375, rawText=1.20x)
+10-27 18:35:25.666  5305  5382 I CoefMonitorTest: reference tile 4 -> Valid(value=2.03x, confidence=0.82890624, rawText=2.03x)
+10-27 18:35:25.666  5305  5382 I CoefMonitorTest: confidence of 2.01x = 0.88125 (default minimum 0.5)
+10-27 18:35:25.667  5305  5382 I TestRunner: finished: readsObservedTileAndNeighbour(app.coefmonitor.e2e.ReferenceScreenshotOcrTest)

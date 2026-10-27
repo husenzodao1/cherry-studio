@@ -1,0 +1,419 @@
+10-27 18:28:33.473  5305  5382 I TestRunner: started: panelInTajik(app.coefmonitor.e2e.FloatingModeTest)
+10-27 18:28:33.476  5305  5382 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:28:33.478  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:28:33.486  5305  5305 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@88fa813
+10-27 18:28:33.526  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-27 18:28:33.563  1684  1684 I GsaVoiceInteractionSrv: Handling ACTION_START_HOTWORD
+10-27 18:28:33.577  1684  2181 I GsaVoiceInteractionSrv: disregardVoiceMatch: false
+10-27 18:28:33.577  1684  2181 I GsaVoiceInteractionSrv: Cannot start hotword, hotword has been explicitly disabled.
+10-27 18:28:33.584  1799  1799 I A       : Created gRPC endpoint to "search" for service class com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService
+10-27 18:28:33.593   529  2277 W InputManager-JNI: Input channel object 'e9624cb app.coefmonitor/app.coefmonitor.debug.SimulatorActivity (client)' was disposed without first being removed with the input manager!
+10-27 18:28:33.666  5305  5382 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:28:33.733  5305  5382 D UiDevice: Executing shell command: pm grant app.coefmonitor android.permission.POST_NOTIFICATIONS
+10-27 18:28:33.738  5305  5382 W UiAutomation: UiAutomation.grantRuntimePermission() is more robust and should be used instead of 'pm grant'
+10-27 18:28:33.822  5305  5382 D UiDevice: Executing shell command: settings put global hide_error_dialogs 1
+10-27 18:28:33.827  5502  5502 D SearchTargetUtil:  query= size=15
+10-27 18:28:33.828  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=most and least trusted professions,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=most and least trusted professions searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 488806a7-ec3a-49ba-86c4-93b0a466beaf
+10-27 18:28:33.828  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=ftc lawsuit dollar general pricing,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=ftc lawsuit dollar general pricing searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 7cd70f62-88c5-4d3a-9866-5f58ca36f98a
+10-27 18:28:33.828  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=apple new ipad mini,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=apple new ipad mini searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: eb2115ce-b4c9-45b4-9f64-bb9ff3112f39
+10-27 18:28:33.828  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/png;base64,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,suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=true,is_personal=false,suggest_raw_text=nfl football,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=nfl football searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: aa0f27d8-128c-4e19-8733-7e4208de632c
+10-27 18:28:33.828  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=harry styles coming up roses music video,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=harry styles coming up roses music video searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: ab62200f-643e-46c0-8d3f-ca0bc26df579
+10-27 18:28:33.828  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=liberty ship ss joseph v connolly,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=liberty ship ss joseph v connolly searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: b17748a1-050e-4a21-9257-ccfd777a7214
+10-27 18:28:33.828  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=pet medication,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=pet medication searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: d73d85d9-3f48-48e9-a2b9-3f46693ae4c5
+10-27 18:28:33.832  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/png;base64,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,suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=true,is_personal=false,suggest_raw_text=alabama football,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=Alabama Crimson Tide football searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 807881f8-dc49-419c-96f3-75522303f43c
+10-27 18:28:33.832  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=winter storm forecast,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=winter storm forecast searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: aa3d9de3-ae20-4a3d-9a5d-60459055dedc
+10-27 18:28:33.832  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/jpeg;base64,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
+10-27 18:28:33.832  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=anbernic handheld 3ds emulator dispute,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=anbernic handheld 3ds emulator dispute searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 5e2f03c8-aeb2-4aee-a8bd-9f581abbd257
+10-27 18:28:33.833  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=gerrothorax maritimus,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=gerrothorax maritimus searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: d5b251c0-8ec6-4a67-b2d3-e82339a802d2
+10-27 18:28:33.833  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=consecutive world record bull elk,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=consecutive world record bull elk searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: e5c5b81e-4634-4554-a450-47bb2c996311
+10-27 18:28:33.833  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=starbucks mystery bearista glass cup,group_id=web352164,response_id=19318e90-6969-4078-99fa-2d28a485a3e1,support_query_builder=false,} searchAction=starbucks mystery bearista glass cup searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: dac24897-ca43-4835-83a6-4313f2f98bbc
+10-27 18:28:33.833  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/png;base64,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
+10-27 18:28:33.839   874   950 D EGL_emulation: app_time_stats: avg=102.32ms min=15.74ms max=730.96ms count=15
+10-27 18:28:33.858  5305  5382 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:28:33.933   874   950 D EGL_emulation: app_time_stats: avg=4707.51ms min=10.84ms max=46452.98ms count=10
+10-27 18:28:34.207   529  1769 I ImeTracker: com.google.android.apps.nexuslauncher:5dcdf66f: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-27 18:28:34.208   529  1769 I ImeTracker: com.google.android.apps.nexuslauncher:5dcdf66f: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-27 18:28:34.211  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3227
+10-27 18:28:34.223  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 0, unlocked = true
+10-27 18:28:34.223  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.google.android.apps.nexuslauncher fieldId=0 fieldName=null extras=null}, false)
+10-27 18:28:34.223  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.shouldHideHeaderOnInitialState():4008 ShouldHideHeaderOnInitialState = false
+10-27 18:28:34.275  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 2, unlocked = true
+10-27 18:28:34.582  5776  5776 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@107d512
+10-27 18:28:34.590   874   933 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@e3a3fc4
+10-27 18:28:34.592   529  1769 W InputManager-JNI: Input channel object '8695e9a app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity (client)' was disposed without first being removed with the input manager!
+10-27 18:28:34.601   529   958 W InputManager-JNI: Input channel object 'c0becb7 Splash Screen app.coefmonitor.test (client)' was disposed without first being removed with the input manager!
+10-27 18:28:34.933   874   950 D EGL_emulation: app_time_stats: avg=124.25ms min=44.69ms max=355.94ms count=8
+10-27 18:28:35.589   874   950 D EGL_emulation: app_time_stats: avg=435.86ms min=97.67ms max=1025.32ms count=4
+10-27 18:28:35.656   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:28:35.846  5305  5382 D UiDevice: Node not found with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:28:35.977  5305  5382 W Settings: Setting always_finish_activities has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.
+10-27 18:28:35.983   874   950 D EGL_emulation: app_time_stats: avg=52.47ms min=42.81ms max=60.89ms count=19
+10-27 18:28:36.025   874   934 D SplashScreenView: Build android.window.SplashScreenView{6f3bc95 V.E...... ......ID 0,0-0,0}
+10-27 18:28:36.025   874   934 D SplashScreenView: Icon: view: null drawable: null size: 0
+10-27 18:28:36.025   874   934 D SplashScreenView: Branding: view: android.view.View{97ae1aa G.ED..... ......I. 0,0-0,0 #10204ef android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+10-27 18:28:36.077  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@a38353a in: PRE_ON_CREATE
+10-27 18:28:36.078  5305  5305 V ActivityScenario: Activity lifecycle changed event received but ignored because the reported transition was not ON_CREATE while the last known transition was PRE_ON_CREATE
+10-27 18:28:36.082   408   408 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:28:36.100  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@a38353a in: CREATED
+10-27 18:28:36.104  5305  5305 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@a38353a
+10-27 18:28:36.106  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@a38353a in: STARTED
+10-27 18:28:36.110  5305  5305 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@a38353a
+10-27 18:28:36.112  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@a38353a in: RESUMED
+10-27 18:28:36.124  5305  5305 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@a38353a
+10-27 18:28:36.142  1684  1684 I GsaVoiceInteractionSrv: Handling ACTION_STOP_HOTWORD
+10-27 18:28:36.142  1684  2233 E HwDetectorWithState: a: 3
+10-27 18:28:36.161  5502  5551 D EGL_emulation: app_time_stats: avg=363.87ms min=65.71ms max=1463.78ms count=7
+10-27 18:28:36.625   529   548 W ziparchive: Unable to open '/data/app/~~ZofI-Q0-sDsZmCGeLWLayg==/app.coefmonitor-jVjQ0vUrCBz2CGffmLPFVQ==/base.dm': No such file or directory
+10-27 18:28:36.630   529   548 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity for user 0: +593ms
+10-27 18:28:36.738   529  2641 I ImeTracker: app.coefmonitor:7d7043d9: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-27 18:28:36.739   529  2641 I ImeTracker: app.coefmonitor:7d7043d9: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-27 18:28:36.777  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3227
+10-27 18:28:36.779  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 0, unlocked = true
+10-27 18:28:36.779  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=app.coefmonitor fieldId=0 fieldName=null extras=null}, false)
+10-27 18:28:36.779  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.shouldHideHeaderOnInitialState():4008 ShouldHideHeaderOnInitialState = false
+10-27 18:28:36.779  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 2, unlocked = true
+10-27 18:28:36.986  5502  5563 D OneSearchSuggestProvider: Shut down the binder channel
+10-27 18:28:36.989  5502  5514 I IPCThreadState: oneway function results for code 2 on binder at 0x70891ae72be0 will be dropped but finished with status UNKNOWN_TRANSACTION
+10-27 18:28:37.017  5502  5545 I ImeTracker: com.google.android.apps.nexuslauncher:7384c942: onRequestHide at ORIGIN_CLIENT_HIDE_SOFT_INPUT reason HIDE_SOFT_INPUT
+10-27 18:28:37.017  5502  5545 I ImeTracker: com.google.android.apps.nexuslauncher:7384c942: onFailed at PHASE_CLIENT_VIEW_SERVED
+10-27 18:28:37.239   874   933 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@96d60e4
+10-27 18:28:37.241   529  2471 W InputManager-JNI: Input channel object '1014f62 Splash Screen app.coefmonitor (client)' was disposed without first being removed with the input manager!
+10-27 18:28:37.709  5305  5443 D EGL_emulation: app_time_stats: avg=98.93ms min=48.59ms max=262.66ms count=10
+10-27 18:28:38.002  5305  5382 D UiDevice: Waiting 5000ms for SearchCondition[gone=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E']].
+10-27 18:28:38.002  5305  5382 D UiDevice: Searching for node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\Q✕\E'].
+10-27 18:28:38.793  5305  5443 D EGL_emulation: app_time_stats: avg=120.36ms min=113.13ms max=136.89ms count=9
+10-27 18:28:39.894  5305  5443 D EGL_emulation: app_time_stats: avg=122.32ms min=116.24ms max=134.41ms count=9
+10-27 18:28:40.976  5305  5443 D EGL_emulation: app_time_stats: avg=120.24ms min=115.59ms max=133.26ms count=9
+10-27 18:28:42.060  5305  5443 D EGL_emulation: app_time_stats: avg=120.35ms min=115.54ms max=133.65ms count=9
+10-27 18:28:42.418   529   792 E WifiStaIfaceAidlImpl: installApfPacketFilter failed with service-specific exception: android.os.ServiceSpecificException:  (code 4)
+10-27 18:28:43.160  5305  5443 D EGL_emulation: app_time_stats: avg=122.23ms min=113.72ms max=136.29ms count=9
+10-27 18:28:44.243  5305  5443 D EGL_emulation: app_time_stats: avg=120.36ms min=114.15ms max=133.28ms count=9
+10-27 18:28:44.941   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:28:45.327  5305  5443 D EGL_emulation: app_time_stats: avg=120.42ms min=113.60ms max=136.27ms count=9
+10-27 18:28:45.612   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:28:45.627   874   950 D EGL_emulation: app_time_stats: avg=10037.40ms min=10037.40ms max=10037.40ms count=1
+10-27 18:28:46.426  5305  5443 D EGL_emulation: app_time_stats: avg=122.14ms min=115.42ms max=133.79ms count=9
+10-27 18:28:47.510  5305  5443 D EGL_emulation: app_time_stats: avg=120.42ms min=113.16ms max=133.44ms count=9
+10-27 18:28:47.945   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:28:48.027  5305  5382 W QueryController: Could not detect idle state.
+10-27 18:28:48.072  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@a38353a in: PAUSED
+10-27 18:28:48.078  5305  5305 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@a38353a
+10-27 18:28:48.080  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@a38353a in: STOPPED
+10-27 18:28:48.080  5305  5305 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@a38353a
+10-27 18:28:48.081  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@a38353a in: DESTROYED
+10-27 18:28:48.082  5305  5305 V ActivityScenario: Update currentActivityStage to DESTROYED, currentActivity=null
+10-27 18:28:48.082  5305  5305 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@37e8551
+10-27 18:28:48.085   529  2641 W InputManager-JNI: Input channel object '807d25f app.coefmonitor/app.coefmonitor.debug.SimulatorActivity (client)' was disposed without first being removed with the input manager!
+10-27 18:28:48.103  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@250edc0 in: PRE_ON_CREATE
+10-27 18:28:48.104  5305  5305 V ActivityScenario: Activity lifecycle changed event received but ignored because the reported transition was not ON_CREATE while the last known transition was DESTROYED
+10-27 18:28:48.111  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@250edc0 in: CREATED
+10-27 18:28:48.111  5305  5305 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@250edc0
+10-27 18:28:48.113  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@250edc0 in: STARTED
+10-27 18:28:48.113  5305  5305 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@250edc0
+10-27 18:28:48.115  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@250edc0 in: RESUMED
+10-27 18:28:48.115  5305  5305 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@250edc0
+10-27 18:28:48.168   529  2574 I ImeTracker: app.coefmonitor:a2767e29: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-27 18:28:48.169   529  2574 I ImeTracker: app.coefmonitor:a2767e29: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-27 18:28:48.172  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3227
+10-27 18:28:48.183  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 0, unlocked = true
+10-27 18:28:48.183  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=app.coefmonitor fieldId=0 fieldName=null extras=null}, false)
+10-27 18:28:48.183  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.shouldHideHeaderOnInitialState():4008 ShouldHideHeaderOnInitialState = false
+10-27 18:28:48.188  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 2, unlocked = true
+10-27 18:28:48.223  5305  5382 D UiDevice: Waiting 10000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QҲолат\E']].
+10-27 18:28:48.223  5305  5382 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QҲолат\E'].
+10-27 18:28:48.466  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:48.466  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:48.484   874   950 D EGL_emulation: app_time_stats: avg=2857.25ms min=2857.25ms max=2857.25ms count=1
+10-27 18:28:48.500   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:48.505   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:48.582  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:48.582  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:48.728   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:48.740   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:49.177  5305  5443 D EGL_emulation: app_time_stats: avg=114.17ms min=33.71ms max=194.45ms count=9
+10-27 18:28:50.260  5305  5443 D EGL_emulation: app_time_stats: avg=120.38ms min=116.01ms max=133.77ms count=9
+10-27 18:28:51.360  5305  5443 D EGL_emulation: app_time_stats: avg=122.14ms min=116.14ms max=133.71ms count=9
+10-27 18:28:52.445  5305  5443 D EGL_emulation: app_time_stats: avg=120.56ms min=116.33ms max=133.63ms count=9
+10-27 18:28:53.526  5305  5443 D EGL_emulation: app_time_stats: avg=120.14ms min=112.07ms max=133.34ms count=9
+10-27 18:28:54.627  5305  5443 D EGL_emulation: app_time_stats: avg=122.28ms min=116.30ms max=133.59ms count=9
+10-27 18:28:55.614   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:28:55.710  5305  5443 D EGL_emulation: app_time_stats: avg=120.35ms min=116.16ms max=133.41ms count=9
+10-27 18:28:56.810  5305  5443 D EGL_emulation: app_time_stats: avg=122.22ms min=116.08ms max=133.94ms count=9
+10-27 18:28:57.893  5305  5443 D EGL_emulation: app_time_stats: avg=120.28ms min=116.01ms max=133.86ms count=9
+10-27 18:28:58.224  5305  5382 W QueryController: Could not detect idle state.
+10-27 18:28:58.241  5305  5382 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:28:58.249  5305  5382 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api34_floating_tg_01_status.png
+10-27 18:28:58.333  7326  7326 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-27 18:28:58.334  1655  3087 W MediaProvider: isAppCloneUserPair for user 0: false
+10-27 18:28:58.336  7326  7326 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-27 18:28:58.348   151   151 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+10-27 18:28:58.348  7326  7329 I Gralloc4: mapper 4.x is not supported
+10-27 18:28:58.436  6024  7186 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService started execution. cause:9 exec_start_elapsed_seconds: 490 [CONTEXT service_id=218 ]
+10-27 18:28:58.440  6045  7330 I GmscoreIpa: Starting mediastore instant index [CONTEXT service_id=255 ]
+10-27 18:28:58.441  6024  7268 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService finished executing. cause:9 result: 1 elapsed_millis: 65 uptime_millis: 65 exec_start_elapsed_seconds: 490 [CONTEXT service_id=218 ]
+10-27 18:28:58.574   529  1962 I ActivityManager: Broadcasting: Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }
+10-27 18:28:58.577   529   548 I ActivityManager: Broadcast completed: result=0
+10-27 18:28:58.578  1655  2339 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+10-27 18:28:58.586  1655  2339 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+10-27 18:28:58.590  5305  5382 I CoefMonitorTest: screenshot floating_tg_01_status
+10-27 18:28:58.591  5305  5382 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QАлгоритм\E']].
+10-27 18:28:58.591  5305  5382 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QАлгоритм\E'].
+10-27 18:28:58.599  6024  7332 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService started execution. cause:9 exec_start_elapsed_seconds: 490 [CONTEXT service_id=218 ]
+10-27 18:28:58.601  6024  7186 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService finished executing. cause:9 result: 1 elapsed_millis: 6 uptime_millis: 6 exec_start_elapsed_seconds: 490 [CONTEXT service_id=218 ]
+10-27 18:28:58.993  5305  5443 D EGL_emulation: app_time_stats: avg=122.21ms min=113.20ms max=133.75ms count=9
+10-27 18:28:59.966   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:29:00.030  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:29:00.030  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:29:00.030  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:29:00.030  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:29:00.031  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:29:00.031  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:29:00.031  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:29:00.032   874   950 D EGL_emulation: app_time_stats: avg=959.81ms min=11.09ms max=11141.79ms count=12
+10-27 18:29:00.032  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:29:00.032  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+10-27 18:29:00.033  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+10-27 18:29:00.041   874   874 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+10-27 18:29:00.041   874   874 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+10-27 18:29:00.076  5305  5443 D EGL_emulation: app_time_stats: avg=120.33ms min=113.85ms max=133.02ms count=9
+10-27 18:29:01.160  5305  5443 D EGL_emulation: app_time_stats: avg=120.36ms min=116.23ms max=133.84ms count=9
+10-27 18:29:02.260  5305  5443 D EGL_emulation: app_time_stats: avg=122.21ms min=113.84ms max=133.36ms count=9
+10-27 18:29:02.970   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:29:03.343  5305  5443 D EGL_emulation: app_time_stats: avg=120.37ms min=116.43ms max=133.59ms count=9
+10-27 18:29:03.589  1655  1827 D PickerSyncController: syncAllMedia
+10-27 18:29:03.589  1655  1827 D PickerSyncController: syncAllMediaFromProvider() LOCAL, auth=com.android.providers.media.photopicker, retry=true
+10-27 18:29:03.589  1655  1827 D PickerSyncController: getSyncRequestParams() LOCAL, auth=com.android.providers.media.photopicker
+10-27 18:29:03.590  1655  1827 D PickerSyncController:    Latest ID/Gen=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary/66
+10-27 18:29:03.590  1655  1827 D PickerSyncController:    Cached ID/Gen=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary/59
+10-27 18:29:03.590  1655  1827 D PickerSyncController:    RESULT=SyncRequestParams{type=MEDIA_INCREMENTAL, gen=59, latest=Bundle[{last_media_sync_generation=66, media_collection_id=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary}]}
+10-27 18:29:03.590  1655  1827 I PickerSyncController: Executing SyncAdd. isLocal: true. authority: com.android.providers.media.photopicker
+10-27 18:29:03.591  1655  1827 I PickerSyncController: Paged sync successful. QueryArgs: Bundle[{android.provider.extra.SYNC_GENERATION=59}]. Result count: 1. Cursor count: 1
+10-27 18:29:03.591  1655  1827 I PickerSyncController: Executing SyncRemove. isLocal: true. authority: com.android.providers.media.photopicker
+10-27 18:29:03.592  1655  1827 I PickerSyncController: Paged sync successful. QueryArgs: Bundle[{android.provider.extra.SYNC_GENERATION=59}]. Result count: 0. Cursor count: 0
+10-27 18:29:03.594  1655  1827 D PickerSyncController: syncAllMediaFromProvider() CLOUD, auth=null, retry=true
+10-27 18:29:03.594  1655  1827 D PickerSyncController: getSyncRequestParams() CLOUD, auth=null
+10-27 18:29:03.594  1655  1827 D PickerSyncController:    RESULT=SyncRequestParams{type=MEDIA_RESET, gen=0, latest=null}
+10-27 18:29:03.594  1655  1827 I PickerSyncController: Executing SyncReset. isLocal: false. authority: null
+10-27 18:29:03.594  1655  1827 I PickerSyncController: SyncReset. isLocal:false. authority: null. result count: 0
+10-27 18:29:03.594  1655  1827 D PickerSyncController: Ignoring cache media info for null authority with bundle: null
+10-27 18:29:03.594  1655  1827 I PickerSyncController: Executing SyncAlbumReset. isLocal: true. authority: com.android.providers.media.photopicker. albumId: null
+10-27 18:29:03.594  1655  1827 I PickerSyncController: Successfully executed SyncResetAlbum. authority: com.android.providers.media.photopicker. albumId: null. Result count: 0
+10-27 18:29:03.594  1655  1827 I PickerSyncController: Executing SyncAlbumReset. isLocal: false. authority: null. albumId: null
+10-27 18:29:03.594  1655  1827 I PickerSyncController: Successfully executed SyncResetAlbum. authority: null. albumId: null. Result count: 0
+10-27 18:29:04.426  5305  5443 D EGL_emulation: app_time_stats: avg=120.31ms min=116.21ms max=133.66ms count=9
+10-27 18:29:05.527  5305  5443 D EGL_emulation: app_time_stats: avg=122.26ms min=116.22ms max=133.71ms count=9
+10-27 18:29:05.610   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:29:05.974   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:29:06.610  5305  5443 D EGL_emulation: app_time_stats: avg=120.34ms min=116.16ms max=133.47ms count=9
+10-27 18:29:07.710  5305  5443 D EGL_emulation: app_time_stats: avg=122.23ms min=116.43ms max=133.74ms count=9
+10-27 18:29:08.642  5305  5382 W QueryController: Could not detect idle state.
+10-27 18:29:08.793  5305  5443 D EGL_emulation: app_time_stats: avg=120.32ms min=116.38ms max=133.44ms count=9
+10-27 18:29:08.979   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:29:09.893  5305  5443 D EGL_emulation: app_time_stats: avg=122.20ms min=113.84ms max=133.15ms count=9
+10-27 18:29:10.977  5305  5443 D EGL_emulation: app_time_stats: avg=120.38ms min=116.57ms max=133.35ms count=9
+10-27 18:29:12.060  5305  5443 D EGL_emulation: app_time_stats: avg=120.31ms min=115.97ms max=133.68ms count=9
+10-27 18:29:13.160  5305  5443 D EGL_emulation: app_time_stats: avg=122.29ms min=113.76ms max=133.59ms count=9
+10-27 18:29:14.243  5305  5443 D EGL_emulation: app_time_stats: avg=120.28ms min=113.59ms max=133.57ms count=9
+10-27 18:29:15.327  5305  5443 D EGL_emulation: app_time_stats: avg=120.43ms min=115.94ms max=133.73ms count=9
+10-27 18:29:15.614   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:29:15.625   874   950 D EGL_emulation: app_time_stats: avg=15593.30ms min=15593.30ms max=15593.30ms count=1
+10-27 18:29:16.426  5305  5443 D EGL_emulation: app_time_stats: avg=122.13ms min=115.75ms max=133.87ms count=9
+10-27 18:29:17.510  5305  5443 D EGL_emulation: app_time_stats: avg=120.38ms min=116.12ms max=134.23ms count=9
+10-27 18:29:18.610  5305  5443 D EGL_emulation: app_time_stats: avg=122.26ms min=116.12ms max=133.53ms count=9
+10-27 18:29:18.735  5305  5382 W QueryController: Could not detect idle state.
+10-27 18:29:18.739  5305  5382 D UiObject2: Clicking on (408, 385).
+10-27 18:29:18.761  5502  5502 D TaplEvents: TIS / TouchInteractionService.onInputEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=408.0, y[0]=385.0, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=510715, downTime=510715, deviceId=-1, source=0x1002, displayId=0, eventId=-490819951 }
+10-27 18:29:18.763  5305  5305 D AutofillManager: Fill dialog is enabled:false, hints=[password, passwordAuto, creditCardNumber, creditCardSecurityCode, creditCardExpirationDate]
+10-27 18:29:18.770  5502  5502 D TaplEvents: TIS / TouchInteractionService.onInputEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=408.0, y[0]=385.0, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=510744, downTime=510715, deviceId=-1, source=0x1002, displayId=0, eventId=-1041922013 }
+10-27 18:29:18.774   405   821 D audioserver: FGS Logger Transaction failed
+10-27 18:29:18.775   405   821 D audioserver: -129
+10-27 18:29:18.786  5305  5382 W GestureController: Gestures took longer than expected (46ms >> 16ms), device might be in a busy state.
+10-27 18:29:18.940   405   505 D audioserver: FGS Logger Transaction failed
+10-27 18:29:18.940   405   505 D audioserver: -129
+10-27 18:29:19.286  5305  5382 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:29:19.295  5305  5382 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api34_floating_tg_02_algorithm.png
+10-27 18:29:19.374  7342  7342 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-27 18:29:19.376  1655  5938 W MediaProvider: isAppCloneUserPair for user 0: false
+10-27 18:29:19.380  7342  7342 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-27 18:29:19.389   151   151 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+10-27 18:29:19.390  7342  7345 I Gralloc4: mapper 4.x is not supported
+10-27 18:29:19.476  6024  7268 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService started execution. cause:9 exec_start_elapsed_seconds: 511 [CONTEXT service_id=218 ]
+10-27 18:29:19.503  6024  7346 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService finished executing. cause:9 result: 1 elapsed_millis: 97 uptime_millis: 97 exec_start_elapsed_seconds: 511 [CONTEXT service_id=218 ]
+10-27 18:29:19.624   529   958 I ActivityManager: Broadcasting: Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }
+10-27 18:29:19.627   529   548 I ActivityManager: Broadcast completed: result=0
+10-27 18:29:19.629  1655  2339 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+10-27 18:29:19.638  1655  2339 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+10-27 18:29:19.641  5305  5382 I CoefMonitorTest: screenshot floating_tg_02_algorithm
+10-27 18:29:19.641  5305  5382 D UiDevice: Waiting 5000ms for SearchCondition[findObject=BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QТанзимот\E']].
+10-27 18:29:19.641  5305  5382 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qapp.coefmonitor\E', TEXT='\QТанзимот\E'].
+10-27 18:29:19.653  6024  7268 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService started execution. cause:9 exec_start_elapsed_seconds: 511 [CONTEXT service_id=218 ]
+10-27 18:29:19.655  6024  7186 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService finished executing. cause:9 result: 1 elapsed_millis: 7 uptime_millis: 7 exec_start_elapsed_seconds: 511 [CONTEXT service_id=218 ]
+10-27 18:29:19.693  5305  5443 D EGL_emulation: app_time_stats: avg=120.32ms min=84.56ms max=170.40ms count=9
+10-27 18:29:20.384  5305  5443 D EGL_emulation: app_time_stats: avg=769.84ms min=15.84ms max=1523.83ms count=2
+10-27 18:29:20.804  5305  5443 D EGL_emulation: app_time_stats: avg=138.81ms min=114.02ms max=176.70ms count=8
+10-27 18:29:21.819   349  5433 D android.hardware.audio@7.1-impl.ranchu: threadLoop: entering standby, frames: 295936
+10-27 18:29:21.826  5305  5443 D EGL_emulation: app_time_stats: avg=113.58ms min=63.72ms max=133.19ms count=9
+10-27 18:29:22.910  5305  5443 D EGL_emulation: app_time_stats: avg=120.32ms min=115.91ms max=133.63ms count=9
+10-27 18:29:23.201   529  2574 D WifiNl80211Manager: Scan result ready event
+10-27 18:29:23.201   529  2574 D WifiNative: Scan result ready event
+10-27 18:29:23.993  5305  5443 D EGL_emulation: app_time_stats: avg=120.41ms min=116.43ms max=133.38ms count=9
+10-27 18:29:24.665  1655  1827 D PickerSyncController: syncAllMedia
+10-27 18:29:24.665  1655  1827 D PickerSyncController: syncAllMediaFromProvider() LOCAL, auth=com.android.providers.media.photopicker, retry=true
+10-27 18:29:24.666  1655  1827 D PickerSyncController: getSyncRequestParams() LOCAL, auth=com.android.providers.media.photopicker
+10-27 18:29:24.666  1655  1827 D PickerSyncController:    Latest ID/Gen=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary/73
+10-27 18:29:24.666  1655  1827 D PickerSyncController:    Cached ID/Gen=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary/66
+10-27 18:29:24.666  1655  1827 D PickerSyncController:    RESULT=SyncRequestParams{type=MEDIA_INCREMENTAL, gen=66, latest=Bundle[{last_media_sync_generation=73, media_collection_id=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary}]}
+10-27 18:29:24.666  1655  1827 I PickerSyncController: Executing SyncAdd. isLocal: true. authority: com.android.providers.media.photopicker
+10-27 18:29:24.667  1655  1827 I PickerSyncController: Paged sync successful. QueryArgs: Bundle[{android.provider.extra.SYNC_GENERATION=66}]. Result count: 1. Cursor count: 1
+10-27 18:29:24.667  1655  1827 I PickerSyncController: Executing SyncRemove. isLocal: true. authority: com.android.providers.media.photopicker
+10-27 18:29:24.668  1655  1827 I PickerSyncController: Paged sync successful. QueryArgs: Bundle[{android.provider.extra.SYNC_GENERATION=66}]. Result count: 0. Cursor count: 0
+10-27 18:29:24.668  1655  1827 D PickerSyncController: syncAllMediaFromProvider() CLOUD, auth=null, retry=true
+10-27 18:29:24.668  1655  1827 D PickerSyncController: getSyncRequestParams() CLOUD, auth=null
+10-27 18:29:24.668  1655  1827 D PickerSyncController:    RESULT=SyncRequestParams{type=MEDIA_RESET, gen=0, latest=null}
+10-27 18:29:24.668  1655  1827 I PickerSyncController: Executing SyncReset. isLocal: false. authority: null
+10-27 18:29:24.668  1655  1827 I PickerSyncController: SyncReset. isLocal:false. authority: null. result count: 0
+10-27 18:29:24.668  1655  1827 D PickerSyncController: Ignoring cache media info for null authority with bundle: null
+10-27 18:29:24.668  1655  1827 I PickerSyncController: Executing SyncAlbumReset. isLocal: true. authority: com.android.providers.media.photopicker. albumId: null
+10-27 18:29:24.668  1655  1827 I PickerSyncController: Successfully executed SyncResetAlbum. authority: com.android.providers.media.photopicker. albumId: null. Result count: 0
+10-27 18:29:24.668  1655  1827 I PickerSyncController: Executing SyncAlbumReset. isLocal: false. authority: null. albumId: null
+10-27 18:29:24.668  1655  1827 I PickerSyncController: Successfully executed SyncResetAlbum. authority: null. albumId: null. Result count: 0
+10-27 18:29:25.093  5305  5443 D EGL_emulation: app_time_stats: avg=122.20ms min=116.36ms max=133.89ms count=9
+10-27 18:29:25.617   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:29:26.177  5305  5443 D EGL_emulation: app_time_stats: avg=120.43ms min=116.13ms max=133.96ms count=9
+10-27 18:29:27.276  5305  5443 D EGL_emulation: app_time_stats: avg=122.11ms min=115.91ms max=133.30ms count=9
+10-27 18:29:28.360  5305  5443 D EGL_emulation: app_time_stats: avg=120.35ms min=116.40ms max=133.47ms count=9
+10-27 18:29:28.449  6045  7352 I GmscoreIpa: Starting mediastore instant index [CONTEXT service_id=255 ]
+10-27 18:29:29.443  5305  5443 D EGL_emulation: app_time_stats: avg=120.39ms min=116.03ms max=134.31ms count=9
+10-27 18:29:29.685  5305  5382 W QueryController: Could not detect idle state.
+10-27 18:29:30.544  5305  5443 D EGL_emulation: app_time_stats: avg=122.23ms min=110.55ms max=133.17ms count=9
+10-27 18:29:31.626  5305  5443 D EGL_emulation: app_time_stats: avg=120.28ms min=115.92ms max=133.36ms count=9
+10-27 18:29:32.726  5305  5443 D EGL_emulation: app_time_stats: avg=122.21ms min=116.17ms max=133.55ms count=9
+10-27 18:29:33.815  5305  5443 D EGL_emulation: app_time_stats: avg=120.90ms min=116.22ms max=134.03ms count=9
+10-27 18:29:34.893  5305  5443 D EGL_emulation: app_time_stats: avg=119.84ms min=111.92ms max=133.42ms count=9
+10-27 18:29:35.611   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:29:35.993  5305  5443 D EGL_emulation: app_time_stats: avg=122.22ms min=116.03ms max=134.11ms count=9
+10-27 18:29:37.076  5305  5443 D EGL_emulation: app_time_stats: avg=120.32ms min=116.03ms max=133.73ms count=9
+10-27 18:29:38.177  5305  5443 D EGL_emulation: app_time_stats: avg=122.23ms min=116.30ms max=133.65ms count=9
+10-27 18:29:39.260  5305  5443 D EGL_emulation: app_time_stats: avg=120.33ms min=113.52ms max=133.56ms count=9
+10-27 18:29:39.788  5305  5382 W QueryController: Could not detect idle state.
+10-27 18:29:39.791  5305  5382 D UiObject2: Clicking on (634, 385).
+10-27 18:29:39.808  5502  5502 D TaplEvents: TIS / TouchInteractionService.onInputEvent: MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=634.0, y[0]=385.0, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=531767, downTime=531767, deviceId=-1, source=0x1002, displayId=0, eventId=-460380256 }
+10-27 18:29:39.821  5502  5502 D TaplEvents: TIS / TouchInteractionService.onInputEvent: MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=634.0, y[0]=385.0, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=531792, downTime=531767, deviceId=-1, source=0x1002, displayId=0, eventId=-291630487 }
+10-27 18:29:39.824   405   405 D audioserver: FGS Logger Transaction failed
+10-27 18:29:39.824   405   405 D audioserver: -129
+10-27 18:29:39.827   405   505 D AudioFlinger: mixer(0x793e01259930) throttle end: throttle time(35)
+10-27 18:29:39.833  5305  5382 W GestureController: Gestures took longer than expected (41ms >> 16ms), device might be in a busy state.
+10-27 18:29:39.986   405   505 D audioserver: FGS Logger Transaction failed
+10-27 18:29:39.986   405   505 D audioserver: -129
+10-27 18:29:40.333  5305  5382 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:29:40.342  5305  5382 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api34_floating_tg_03_settings.png
+10-27 18:29:40.360  5305  5443 D EGL_emulation: app_time_stats: avg=122.26ms min=103.35ms max=163.84ms count=9
+10-27 18:29:40.431  7359  7359 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-27 18:29:40.433  1655  2070 W MediaProvider: isAppCloneUserPair for user 0: false
+10-27 18:29:40.435  7359  7359 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-27 18:29:40.453   151   151 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+10-27 18:29:40.454  7359  7362 I Gralloc4: mapper 4.x is not supported
+10-27 18:29:40.482  6024  7268 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService started execution. cause:9 exec_start_elapsed_seconds: 532 [CONTEXT service_id=218 ]
+10-27 18:29:40.488  6024  7186 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService finished executing. cause:9 result: 1 elapsed_millis: 25 uptime_millis: 25 exec_start_elapsed_seconds: 532 [CONTEXT service_id=218 ]
+10-27 18:29:40.692   529   958 I ActivityManager: Broadcasting: Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }
+10-27 18:29:40.695   529   548 I ActivityManager: Broadcast completed: result=0
+10-27 18:29:40.696  1655  2339 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+10-27 18:29:40.700  1655  2339 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+10-27 18:29:40.706  5305  5382 I CoefMonitorTest: screenshot floating_tg_03_settings
+10-27 18:29:40.709  5305  5382 D UiDevice: Executing shell command: settings delete secure enabled_accessibility_services
+10-27 18:29:40.716  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@250edc0 in: PAUSED
+10-27 18:29:40.716  5305  5305 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@250edc0
+10-27 18:29:40.718  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@250edc0 in: STOPPED
+10-27 18:29:40.718  5305  5305 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@250edc0
+10-27 18:29:40.720  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@250edc0 in: DESTROYED
+10-27 18:29:40.721  5305  5305 V ActivityScenario: Update currentActivityStage to DESTROYED, currentActivity=null
+10-27 18:29:40.721  5305  5305 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@cd88eee
+10-27 18:29:40.730  6024  7186 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService started execution. cause:9 exec_start_elapsed_seconds: 532 [CONTEXT service_id=218 ]
+10-27 18:29:40.738   529  2574 W InputManager-JNI: Input channel object 'b267128 app.coefmonitor/app.coefmonitor.debug.SimulatorActivity (client)' was disposed without first being removed with the input manager!
+10-27 18:29:40.739  6024  7363 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService finished executing. cause:9 result: 1 elapsed_millis: 17 uptime_millis: 17 exec_start_elapsed_seconds: 532 [CONTEXT service_id=218 ]
+10-27 18:29:40.752  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@7037559 in: PRE_ON_CREATE
+10-27 18:29:40.753  5305  5382 D UiDevice: Executing shell command: settings put secure accessibility_enabled 0
+10-27 18:29:40.754  5305  5305 V ActivityScenario: Activity lifecycle changed event received but ignored because the reported transition was not ON_CREATE while the last known transition was DESTROYED
+10-27 18:29:40.769  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@7037559 in: CREATED
+10-27 18:29:40.770  5305  5305 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@7037559
+10-27 18:29:40.772  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@7037559 in: STARTED
+10-27 18:29:40.773  5305  5305 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@7037559
+10-27 18:29:40.776  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@7037559 in: RESUMED
+10-27 18:29:40.777  5305  5305 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@7037559
+10-27 18:29:40.849  5305  5305 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@eebe202
+10-27 18:29:40.863   529   958 W InputManager-JNI: Input channel object '2607e04 app.coefmonitor (client)' was disposed without first being removed with the input manager!
+10-27 18:29:40.877   874   950 D EGL_emulation: app_time_stats: avg=25251.54ms min=25251.54ms max=25251.54ms count=1
+10-27 18:29:40.885   529   958 I ImeTracker: app.coefmonitor:ba0d0f07: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-27 18:29:40.886   529   958 I ImeTracker: app.coefmonitor:ba0d0f07: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-27 18:29:40.887  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3227
+10-27 18:29:40.898  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 0, unlocked = true
+10-27 18:29:40.904  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=app.coefmonitor fieldId=0 fieldName=null extras=null}, false)
+10-27 18:29:40.905  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.shouldHideHeaderOnInitialState():4008 ShouldHideHeaderOnInitialState = false
+10-27 18:29:40.910  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 2, unlocked = true
+10-27 18:29:40.968  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@7037559 in: PAUSED
+10-27 18:29:40.969  5305  5305 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@7037559
+10-27 18:29:40.978   874   934 D SplashScreenView: Build android.window.SplashScreenView{eb8496e V.E...... ......ID 0,0-0,0}
+10-27 18:29:40.978   874   934 D SplashScreenView: Icon: view: null drawable: null size: 0
+10-27 18:29:40.978   874   934 D SplashScreenView: Branding: view: android.view.View{3eaf80f G.ED..... ......I. 0,0-0,0 #10204ef android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+10-27 18:29:40.992   408   408 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:29:41.123   529  2641 D ConnectivityService: requestNetwork for uid/pid:10130/2986 activeRequest: null callbackRequest: 160 [NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10130 RequestorUid: 10130 RequestorPkg: com.google.android.dialer UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-27 18:29:41.141   529   799 D ConnectivityService: NetReassign [161 : null → 100] [c 1] [a 0] [i 6]
+10-27 18:29:41.148   529   792 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10130 RequestorUid: 10130 RequestorPkg: com.google.android.dialer UnderlyingNetworks: Null] ]
+10-27 18:29:41.148   529   792 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10130 RequestorUid: 10130 RequestorPkg: com.google.android.dialer UnderlyingNetworks: Null] ]
+10-27 18:29:41.148   529   792 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10130 RequestorUid: 10130 RequestorPkg: com.google.android.dialer UnderlyingNetworks: Null] ]
+10-27 18:29:41.148   529   792 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=161, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10130 RequestorUid: 10130 RequestorPkg: com.google.android.dialer UnderlyingNetworks: Null] ]
+10-27 18:29:41.163  2986  2986 I DialerConstellationSyncWorker: com.android.dialer.businessvoice.control.worker.ConstellationSyncWorker.startWork:66 starting work
+10-27 18:29:41.164  2986  3290 I DialerCountryCodeProvider: com.android.dialer.businessvoice.verifiedcall.impl.i18n.CountryCodeProvider.getSimCountryCodeInternal:85 returning Redacted-2-chars
+10-27 18:29:41.165  2986  3290 I DialerCachedVerifiedNumberProvider: com.android.dialer.businessvoice.verifiedcall.impl.constellation.CachedVerifiedNumberProvider.refreshConstellationInfo:190 Retrieving constellation info and refreshing the cache.
+10-27 18:29:41.193  6045  6045 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.constellation.service.START pkg=com.google.android.gms }
+10-27 18:29:41.193  6045  6045 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.constellation.service.START pkg=com.google.android.gms }
+10-27 18:29:41.278  5776  5792 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-27 18:29:41.335  6045  6045 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+10-27 18:29:41.335  6045  6045 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+10-27 18:29:41.339  6045  6045 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+10-27 18:29:41.339  6045  6149 E constellation: [api_verify_phone_operation] Failed to generate Client Signature
+10-27 18:29:41.339  6045  6149 E constellation: acwp: Stored private key deleted
+10-27 18:29:41.339  6045  6149 E constellation: 	at acos.e(:com.google.android.gms@231818047@23.18.18 (190800-535401451):4)
+10-27 18:29:41.339  6045  6149 E constellation: 	at acos.d(:com.google.android.gms@231818047@23.18.18 (190800-535401451):1)
+10-27 18:29:41.339  6045  6149 E constellation: 	at acoa.c(:com.google.android.gms@231818047@23.18.18 (190800-535401451):22)
+10-27 18:29:41.339  6045  6149 E constellation: 	at acoa.f(:com.google.android.gms@231818047@23.18.18 (190800-535401451):12)
+10-27 18:29:41.339  6045  6149 E constellation: 	at avsy.eo(:com.google.android.gms@231818047@23.18.18 (190800-535401451):1)
+10-27 18:29:41.339  6045  6149 E constellation: 	at avtf.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):14)
+10-27 18:29:41.339  6045  6149 E constellation: 	at dfhf.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+10-27 18:29:41.339  6045  6149 E constellation: 	at aced.c(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+10-27 18:29:41.339  6045  6149 E constellation: 	at aced.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):7)
+10-27 18:29:41.339  6045  6149 E constellation: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-27 18:29:41.339  6045  6149 E constellation: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-27 18:29:41.339  6045  6149 E constellation: 	at acjn.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:29:41.339  6045  6149 E constellation: 	at java.lang.Thread.run(Thread.java:1012)
+10-27 18:29:41.340  2986  3252 W DialerVerifiedNumberProvider: com.android.dialer.businessvoice.verifiedcall.impl.constellation.VerifiedNumberProvider.lambda$getConstellationResponse$1:155 Failed to get constellation token.
+10-27 18:29:41.340  2986  3252 W DialerVerifiedNumberProvider: nkq: 5004:
+10-27 18:29:41.340  2986  3252 W DialerVerifiedNumberProvider: 	at nov.au(PG:1)
+10-27 18:29:41.340  2986  3252 W DialerVerifiedNumberProvider: 	at nnf.g(PG:2)
+10-27 18:29:41.340  2986  3252 W DialerVerifiedNumberProvider: 	at npo.a(Unknown Source:2)
+10-27 18:29:41.340  2986  3252 W DialerVerifiedNumberProvider: 	at npy.dm(PG:9)
+10-27 18:29:41.340  2986  3252 W DialerVerifiedNumberProvider: 	at ncz.onTransact(PG:4)
+10-27 18:29:41.340  2986  3252 W DialerVerifiedNumberProvider: 	at android.os.Binder.execTransactInternal(Binder.java:1344)
+10-27 18:29:41.340  2986  3252 W DialerVerifiedNumberProvider: 	at android.os.Binder.execTransact(Binder.java:1275)
+10-27 18:29:41.362  2986  3252 W DialerConstellationSyncWorker: com.android.dialer.businessvoice.control.worker.ConstellationSyncWorker.lambda$syncConstellation$2:110 Constellation api request failed, status code: 5004
+10-27 18:29:41.367  2986  3243 I WM-WorkerWrapper: Worker result RETRY for Work [ id=6d727997-48ff-4a76-85ae-52bb965886c1, tags={ com.google.apps.tiktok.contrib.work.TikTokListenableWorker, TikTokWorker#com.android.dialer.businessvoice.control.worker.ConstellationSyncWorker } ]
+10-27 18:29:41.618   529   548 W ziparchive: Unable to open '/data/app/~~XB79Qb2GtF3PL9RAUKKiog==/app.coefmonitor.test-kwl5Lnq94LP-XiIFKdRW8Q==/base.dm': No such file or directory
+10-27 18:29:41.727   529   548 I ActivityTaskManager: Displayed app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity for user 0: +678ms
+10-27 18:29:41.812  1684  1684 I GsaVoiceInteractionSrv: Handling ACTION_START_HOTWORD
+10-27 18:29:41.812  1684  2185 I GsaVoiceInteractionSrv: disregardVoiceMatch: false
+10-27 18:29:41.812  1684  2185 I GsaVoiceInteractionSrv: Cannot start hotword, hotword has been explicitly disabled.
+10-27 18:29:41.841  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:29:41.841  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:29:41.841  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:29:41.841  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:29:41.846   529  1700 W AppSearchIcing: icing-search-engine.cc:283: Error: 5, Message: Document (com.google.android.googlequicksearchbox$OneSearchZeroStateGoogleSuggestions/default, zp) not found.
+10-27 18:29:41.849  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface home with targets# 0 (types=[])
+10-27 18:29:41.852  5502  5563 D OneSearchSuggestProvider: Created the binder channel successfully for end point service =com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService , mChannel=z1{delegate=s1{logId=21, target=directaddress:///AndroidComponentAddress%5BIntent%20%7B%20act=grpc.io.action.BIND%20cmp=com.google.android.googlequicksearchbox/com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService%20%7D%5D}} , mOneSearchConnection=X1.T@f0e133a
+10-27 18:29:41.856  1799  1799 I A       : Created gRPC endpoint to "search" for service class com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService
+10-27 18:29:41.946  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@7037559 in: STOPPED
+10-27 18:29:41.946  5305  5305 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@7037559
+10-27 18:29:41.950   874   950 D EGL_emulation: app_time_stats: avg=131.10ms min=16.68ms max=492.39ms count=8
+10-27 18:29:41.953   874   950 D EGL_emulation: app_time_stats: avg=10966.62ms min=13.01ms max=65503.93ms count=6
+10-27 18:29:41.959  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@7037559 in: DESTROYED
+10-27 18:29:41.959  5305  5305 V ActivityScenario: Update currentActivityStage to DESTROYED, currentActivity=null
+10-27 18:29:41.960  5305  5382 I TestRunner: finished: panelInTajik(app.coefmonitor.e2e.FloatingModeTest)

@@ -1,0 +1,572 @@
+10-27 18:27:44.703  5305  5382 I TestRunner: started: findsTheRowAgainAfterTheGameMoved(app.coefmonitor.e2e.EndToEndMonitoringTest)
+10-27 18:27:44.711  5305  5382 D UiDevice: Executing shell command: appops set app.coefmonitor PROJECT_MEDIA allow
+10-27 18:27:44.712  5305  5305 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@a981245
+10-27 18:27:44.815  5305  5382 D UiDevice: Executing shell command: appops set app.coefmonitor SYSTEM_ALERT_WINDOW allow
+10-27 18:27:44.840   529  2507 W system_server: Long monitor contention with owner android.anim (552) at void com.android.server.wm.WindowAnimator.lambda$new$1(long)(WindowAnimator.java:103) waiters=1 in void com.android.server.wm.ActivityClientController.activityIdle(android.os.IBinder, android.content.res.Configuration, boolean) for 137ms
+10-27 18:27:44.901   529   544 W InputManager-JNI: Input channel object '970c476 app.coefmonitor/app.coefmonitor.debug.SimulatorActivity (client)' was disposed without first being removed with the input manager!
+10-27 18:27:44.930   529  2574 I ImeTracker: com.google.android.apps.nexuslauncher:e7faf687: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-27 18:27:44.930   529  2574 I ImeTracker: com.google.android.apps.nexuslauncher:e7faf687: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-27 18:27:44.932  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3227
+10-27 18:27:44.935  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 0, unlocked = true
+10-27 18:27:44.941  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.google.android.apps.nexuslauncher fieldId=0 fieldName=null extras=null}, false)
+10-27 18:27:44.942  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.shouldHideHeaderOnInitialState():4008 ShouldHideHeaderOnInitialState = false
+10-27 18:27:44.951  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 2, unlocked = true
+10-27 18:27:44.989  5305  5382 D UiDevice: Executing shell command: pm grant app.coefmonitor android.permission.POST_NOTIFICATIONS
+10-27 18:27:44.990  5305  5382 W UiAutomation: UiAutomation.grantRuntimePermission() is more robust and should be used instead of 'pm grant'
+10-27 18:27:45.049   874   950 D EGL_emulation: app_time_stats: avg=153.91ms min=9.62ms max=926.62ms count=7
+10-27 18:27:45.056  5305  5382 D UiDevice: Executing shell command: settings put global hide_error_dialogs 1
+10-27 18:27:45.067   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:27:45.174   529   540 I system_server: NativeAlloc concurrent copying GC freed 413917(16MB) AllocSpace objects, 29(592KB) LOS objects, 46% free, 27MB/51MB, paused 160us,66us total 609.547ms
+10-27 18:27:45.174   529   541 W JavaBinder: BinderProxy is being destroyed but the application did not call unlinkToDeath to unlink all of its death recipients beforehand.  Releasing leaked death recipient: com.android.server.wm.ActivityRecord$$ExternalSyntheticLambda0
+10-27 18:27:45.175   529   541 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:27:45.236  5502  5510 I s.nexuslauncher: NativeAlloc concurrent copying GC freed 51421(3212KB) AllocSpace objects, 16(512KB) LOS objects, 49% free, 6284KB/12MB, paused 25us,21us total 368.703ms
+10-27 18:27:45.237  5305  5382 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:27:45.349  5502  5502 D SearchTargetUtil:  query= size=15
+10-27 18:27:45.350  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=most and least trusted professions,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=most and least trusted professions searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 99041538-a3bf-4488-9e23-973f4a987cc8
+10-27 18:27:45.350  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=ftc lawsuit dollar general pricing,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=ftc lawsuit dollar general pricing searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 051bcc3f-6926-40a2-b188-d003f5b3df80
+10-27 18:27:45.350  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=apple new ipad mini,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=apple new ipad mini searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 6154bce6-d072-4f28-9c16-9589791b6d34
+10-27 18:27:45.351  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/png;base64,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,suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=true,is_personal=false,suggest_raw_text=nfl football,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=nfl football searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 9817b1b2-312f-43b7-925b-067449c14022
+10-27 18:27:45.351  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=harry styles coming up roses music video,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=harry styles coming up roses music video searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 9753356f-a462-422d-b43d-def67093761b
+10-27 18:27:45.351  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=liberty ship ss joseph v connolly,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=liberty ship ss joseph v connolly searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 8de1dd3e-4041-4795-996f-edd3a77ccc2d
+10-27 18:27:45.351  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=pet medication,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=pet medication searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 3e521e1b-7311-40e1-b414-11cbf493b022
+10-27 18:27:45.351  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/png;base64,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,suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=true,is_personal=false,suggest_raw_text=alabama football,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=Alabama Crimson Tide football searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: f8508c22-97cc-409e-af29-de72c5c59608
+10-27 18:27:45.352  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=winter storm forecast,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=winter storm forecast searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 7931fac1-3ac2-46ba-b5f9-773dafa58524
+10-27 18:27:45.352  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/jpeg;base64,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
+10-27 18:27:45.352  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=anbernic handheld 3ds emulator dispute,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=anbernic handheld 3ds emulator dispute searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 574de4c4-e62b-4856-a259-fd776a14f302
+10-27 18:27:45.352  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=gerrothorax maritimus,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=gerrothorax maritimus searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 2396e995-ca34-4097-92f4-2d1e5978735b
+10-27 18:27:45.352  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=consecutive world record bull elk,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=consecutive world record bull elk searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 42da86a4-1a79-4762-885e-345e5f72dc1b
+10-27 18:27:45.352  5502  5502 D SearchTargetUtil: layoutType=short_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{suggestion_type=33,suggest_truncate_start=false,is_answer=false,is_entity=false,is_personal=false,suggest_raw_text=starbucks mystery bearista glass cup,group_id=web352164,response_id=72de6a79-16fe-4f0a-87d3-8e3ce82e3aca,support_query_builder=false,} searchAction=starbucks mystery bearista glass cup searchActionExtras=Bundle{learn_more_url=https://support.google.com/websearch/answer/106230?hl=106230,suggestion_action_text=Report this,should_start_for_result=true,allow_pinning=true,skip_logging_in_target_handler=false,suggestion_action_rpc=2,}ParentID: null targetID: 3e38bb41-4627-47fc-b6ca-9f13fd3de08d
+10-27 18:27:45.352  5502  5502 D SearchTargetUtil: layoutType=extra_tall_icon_row resultType=131072 packageName=com.google.android.googlequicksearchbox extras=Bundle{bitmap_url=data:image/png;base64,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
+10-27 18:27:45.631  5776  5776 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@efa83f1
+10-27 18:27:45.632   529  2574 W InputManager-JNI: Input channel object 'bee8691 app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity (client)' was disposed without first being removed with the input manager!
+10-27 18:27:45.638   529   544 W InputManager-JNI: Input channel object '887e346 Splash Screen app.coefmonitor.test (client)' was disposed without first being removed with the input manager!
+10-27 18:27:45.656  5502  5512 W System  : A resource failed to call release.
+10-27 18:27:45.656  5502  5512 W System  : A resource failed to call release.
+10-27 18:27:45.656  5502  5512 W System  : A resource failed to call release.
+10-27 18:27:45.666   874   874 I Choreographer: Skipped 35 frames!  The application may be doing too much work on its main thread.
+10-27 18:27:45.686  6045  6045 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+10-27 18:27:45.716   874   950 D EGL_emulation: app_time_stats: avg=109.89ms min=3.06ms max=358.62ms count=11
+10-27 18:27:45.727   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:27:45.784   874   933 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@c7a7d7b
+10-27 18:27:45.810  6024  6077 V NativeCrypto: Read error: ssl=0x70890ae4be58: I/O error during system call, Connection reset by peer
+10-27 18:27:45.813  6024  6991 V NativeCrypto: SSL shutdown failed: ssl=0x70890ae4be58: I/O error during system call, Broken pipe
+10-27 18:27:45.813  6024  6991 E WakeLock: GCM_HB_ALARM release without a matched acquire!
+10-27 18:27:45.813  6024  6991 W WakeLock: GCM_HB_ALARM counter does not exist
+10-27 18:27:45.814   529   799 D ConnectivityService: reportNetworkConnectivity(100, false) by 10128
+10-27 18:27:45.814  1045  2118 D NetworkMonitor/100: Forcing reevaluation for UID 10128. Dns signal count: 0
+10-27 18:27:45.815  6024  6991 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_CONN_ALARM type: 2 triggerAtMillis: 425520]
+10-27 18:27:45.816  6024  6991 E WakeLock: GCM_CONN_ALARM release without a matched acquire!
+10-27 18:27:45.816  6024  6991 W WakeLock: GCM_CONN_ALARM counter does not exist
+10-27 18:27:45.822  1045  7125 D TrafficStats: tagSocket(6) with statsTag=0xffffff81, statsUid=-1
+10-27 18:27:45.823  1045  7125 D TrafficStats: tagSocket(6) with statsTag=0xffffff81, statsUid=-1
+10-27 18:27:45.825  1045  7126 D TrafficStats: tagSocket(68) with statsTag=0xffffff81, statsUid=-1
+10-27 18:27:45.826  1045  7126 D TrafficStats: tagSocket(68) with statsTag=0xffffff81, statsUid=-1
+10-27 18:27:45.826   343  7129 I resolv  : ResNSendHandler::run: 0 / {100 983140 100 983140 1073 1}
+10-27 18:27:45.826   343  7128 I resolv  : ResNSendHandler::run: 0 / {100 983140 100 983140 1073 1}
+10-27 18:27:45.827   343  7127 I resolv  : ResNSendHandler::run: 0 / {100 983140 100 983140 1073 1}
+10-27 18:27:45.833   343  7127 I resolv  : res_nsend: used send_dg 256 terrno: 0
+10-27 18:27:45.834   343  7128 I resolv  : res_nsend: used send_dg 160 terrno: 0
+10-27 18:27:45.835   343  7130 I resolv  : ResNSendHandler::run: 0 / {100 983140 100 983140 1073 1}
+10-27 18:27:45.835   343  7130 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7a1a3aced310
+10-27 18:27:45.835  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.835  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.836  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.836  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.839  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.839  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.840  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.840  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.840  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.842  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.842  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.843  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.843  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.843  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.844  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.847  1045  1045 D TrafficStats: tagSocket(6) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.848  1045  7125 D NetworkMonitor/100: PROBE_DNS www.google.com 25ms OK 142.251.150.119,142.251.156.119,142.251.155.119,142.251.151.119,142.251.152.119,142.251.154.119,142.251.157.119,142.251.153.119,2001:4860:482c:7700::,2001:4860:4826:7700::,2001:4860:482a:7700::,2001:4860:4828:7700::,2001:4860:4827:7700::,2001:4860:482b:7700::,2001:4860:482d:7700::,2001:4860:4829:7700::
+10-27 18:27:45.852   343  7131 I resolv  : GetAddrInfoHandler::run: {100 983140 100 983140 1073 1}
+10-27 18:27:45.853   343  7133 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-27 18:27:45.853   343  7133 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7a1a2ace3ad0
+10-27 18:27:45.853   343  7133 I resolv  : doQuery: rcode=0, ancount=8, return value=160
+10-27 18:27:45.853   343  7132 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-27 18:27:45.853   343  7132 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7a1b5ace12d0
+10-27 18:27:45.853   343  7132 I resolv  : doQuery: rcode=0, ancount=8, return value=256
+10-27 18:27:45.854  1045  7125 D TrafficStats: tagSocket(6) with statsTag=0xffffff81, statsUid=-1
+10-27 18:27:45.863   343  7129 I resolv  : res_nsend: used send_dg 75 terrno: 0
+10-27 18:27:45.864  1045  1045 D TrafficStats: tagSocket(68) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.864  1045  1045 D TrafficStats: tagSocket(68) with statsTag=0xffffffff, statsUid=-1
+10-27 18:27:45.865  1045  7126 D NetworkMonitor/100: PROBE_DNS connectivitycheck.gstatic.com 39ms OK 142.251.150.120,2001:4860:4826:7800::
+10-27 18:27:45.868   343  7135 I resolv  : GetAddrInfoHandler::run: {100 983140 100 983140 1073 1}
+10-27 18:27:45.869   343  7137 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-27 18:27:45.869   343  7137 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7a1a3aced310
+10-27 18:27:45.871   343  7137 I resolv  : doQuery: rcode=0, ancount=1, return value=63
+10-27 18:27:45.871   343  7136 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-27 18:27:45.871   343  7136 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7a1a3aceb2b0
+10-27 18:27:45.871   343  7136 I resolv  : doQuery: rcode=0, ancount=1, return value=75
+10-27 18:27:45.872  1045  7126 D TrafficStats: tagSocket(68) with statsTag=0xffffff81, statsUid=-1
+10-27 18:27:45.907  1045  7126 D NetworkMonitor/100: PROBE_HTTP http://connectivitycheck.gstatic.com/generate_204 time=41ms ret=204 request={Connection=[close], User-Agent=[Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36]} headers={null=[HTTP/1.1 204 No Content], Connection=[close], Content-Length=[0], Cross-Origin-Resource-Policy=[cross-origin], Date=[Tue, 27 Oct 2026 18:27:46 GMT], X-Android-Received-Millis=[1793125665906], X-Android-Response-Source=[NETWORK 204], X-Android-Selected-Protocol=[http/1.1], X-Android-Sent-Millis=[1793125665890]}
+10-27 18:27:45.921  1045  7125 D NetworkMonitor/100: PROBE_HTTPS https://www.google.com/generate_204 time=73ms ret=204 request={Connection=[close], User-Agent=[Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36]} headers={null=[HTTP/1.1 204 No Content], Alt-Svc=[h3=":443"; ma=2592000,h3-29=":443"; ma=2592000], Connection=[close], Content-Length=[0], Cross-Origin-Resource-Policy=[cross-origin], Date=[Tue, 27 Oct 2026 18:27:46 GMT], X-Android-Received-Millis=[1793125665921], X-Android-Response-Source=[NETWORK 204], X-Android-Selected-Protocol=[http/1.1], X-Android-Sent-Millis=[1793125665903]}
+10-27 18:27:45.922  1045  7124 D NetworkMonitor/100: isCaptivePortal: isSuccessful()=true isPortal()=false RedirectUrl=null isPartialConnectivity()=false Time=105ms
+10-27 18:27:45.925   529   799 D ConnectivityService: [100 WIFI] validation passed
+10-27 18:27:46.743   874   950 D EGL_emulation: app_time_stats: avg=54.34ms min=42.29ms max=127.73ms count=17
+10-27 18:27:46.921  5305  5382 D UiDevice: Node not found with selector: BySelector [PKG='\Qandroid\E', RES='\Qandroid:id/aerr_wait\E'].
+10-27 18:27:46.947  5305  5382 W Settings: Setting always_finish_activities has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.
+10-27 18:27:46.961   874   934 D SplashScreenView: Build android.window.SplashScreenView{2894b4b V.E...... ......ID 0,0-0,0}
+10-27 18:27:46.961   874   934 D SplashScreenView: Icon: view: null drawable: null size: 0
+10-27 18:27:46.961   874   934 D SplashScreenView: Branding: view: android.view.View{681928 G.ED..... ......I. 0,0-0,0 #10204ef android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+10-27 18:27:47.005  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@5169920 in: PRE_ON_CREATE
+10-27 18:27:47.006  5305  5305 V ActivityScenario: Activity lifecycle changed event received but ignored because the reported transition was not ON_CREATE while the last known transition was PRE_ON_CREATE
+10-27 18:27:47.023  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@5169920 in: CREATED
+10-27 18:27:47.024  5305  5305 V ActivityScenario: Update currentActivityStage to CREATED, currentActivity=app.coefmonitor.debug.SimulatorActivity@5169920
+10-27 18:27:47.026  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@5169920 in: STARTED
+10-27 18:27:47.027  5305  5305 V ActivityScenario: Update currentActivityStage to STARTED, currentActivity=app.coefmonitor.debug.SimulatorActivity@5169920
+10-27 18:27:47.028  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@5169920 in: RESUMED
+10-27 18:27:47.028  5305  5305 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@5169920
+10-27 18:27:47.083  1684  1684 I GsaVoiceInteractionSrv: Handling ACTION_STOP_HOTWORD
+10-27 18:27:47.084  1684  2232 E HwDetectorWithState: a: 3
+10-27 18:27:47.085   408   408 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:27:47.156  5502  5551 D EGL_emulation: app_time_stats: avg=399.99ms min=49.38ms max=1440.39ms count=6
+10-27 18:27:47.635   529   548 W ziparchive: Unable to open '/data/app/~~ZofI-Q0-sDsZmCGeLWLayg==/app.coefmonitor-jVjQ0vUrCBz2CGffmLPFVQ==/base.dm': No such file or directory
+10-27 18:27:47.639   529   548 I ActivityTaskManager: Displayed app.coefmonitor/.debug.SimulatorActivity for user 0: +346ms
+10-27 18:27:47.752   529   944 I ImeTracker: app.coefmonitor:dfedeb0d: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-27 18:27:47.753   529   944 I ImeTracker: app.coefmonitor:dfedeb0d: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-27 18:27:47.757  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3227
+10-27 18:27:47.758  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 0, unlocked = true
+10-27 18:27:47.758  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=app.coefmonitor fieldId=0 fieldName=null extras=null}, false)
+10-27 18:27:47.758  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.shouldHideHeaderOnInitialState():4008 ShouldHideHeaderOnInitialState = false
+10-27 18:27:47.759  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 2, unlocked = true
+10-27 18:27:47.865   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:27:48.006  1069  1376 D BtGatt.ScanManager: uid 10128 isForeground true scanMode -1
+10-27 18:27:48.011  1069  1376 D BtGatt.ScanManager: uid 10128 isForeground true scanMode -1
+10-27 18:27:48.105   874   933 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=falsecallback=android.view.ViewRootImpl$$ExternalSyntheticLambda17@e4c2c72
+10-27 18:27:48.112  5305  5382 W SurfaceComposerClient: Sync transaction timed out waiting for commit callback.
+10-27 18:27:48.117  5502  5563 D OneSearchSuggestProvider: Shut down the binder channel
+10-27 18:27:48.124   529  2507 W InputManager-JNI: Input channel object 'beab1f9 Splash Screen app.coefmonitor (client)' was disposed without first being removed with the input manager!
+10-27 18:27:48.134  5502  5545 I ImeTracker: com.google.android.apps.nexuslauncher:9a5ae55d: onRequestHide at ORIGIN_CLIENT_HIDE_SOFT_INPUT reason HIDE_SOFT_INPUT
+10-27 18:27:48.134  5502  5545 I ImeTracker: com.google.android.apps.nexuslauncher:9a5ae55d: onFailed at PHASE_CLIENT_VIEW_SERVED
+10-27 18:27:48.137  5502  7122 I IPCThreadState: oneway function results for code 2 on binder at 0x70891ae92c80 will be dropped but finished with status UNKNOWN_TRANSACTION
+10-27 18:27:48.443  5305  5443 D EGL_emulation: app_time_stats: avg=119.68ms min=52.11ms max=204.77ms count=9
+10-27 18:27:49.231  5305  5382 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qcom.android.systemui\E', TEXT='(?i)a single app'].
+10-27 18:27:49.232  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@5169920 in: PAUSED
+10-27 18:27:49.232  5305  5305 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@5169920
+10-27 18:27:49.241   408   408 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:27:49.251  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@5169920 in: RESUMED
+10-27 18:27:49.253  5305  5305 V ActivityScenario: Update currentActivityStage to RESUMED, currentActivity=app.coefmonitor.debug.SimulatorActivity@5169920
+10-27 18:27:49.306  5305  5762 D DecoupledTextDelegate: Start loading thick OCR module.
+10-27 18:27:49.309  5305  5762 I DynamiteModule: Considering local module com.google.mlkit.dynamite.text.latin:10000 and remote module com.google.mlkit.dynamite.text.latin:0
+10-27 18:27:49.309  5305  5762 I DynamiteModule: Selected local version of com.google.mlkit.dynamite.text.latin
+10-27 18:27:49.318  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=DEFAULT, name=FIREBASE_ML_SDK for destination cct
+10-27 18:27:49.326   874   950 D EGL_emulation: app_time_stats: avg=1425.62ms min=193.02ms max=3492.00ms count=3
+10-27 18:27:49.329  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, DEFAULT, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:27:49.332   529   958 I ImeTracker: app.coefmonitor:52aa09b3: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR
+10-27 18:27:49.332   529   958 I ImeTracker: app.coefmonitor:52aa09b3: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-27 18:27:49.333  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3227
+10-27 18:27:49.334  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 0, unlocked = true
+10-27 18:27:49.334  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=app.coefmonitor fieldId=0 fieldName=null extras=null}, false)
+10-27 18:27:49.334  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.shouldHideHeaderOnInitialState():4008 ShouldHideHeaderOnInitialState = false
+10-27 18:27:49.334  1565  1565 I GoogleInputMethodService: GoogleInputMethodService.updateDeviceLockedStatus():2087 repeatCheckTimes = 2, unlocked = true
+10-27 18:27:49.338  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:27:49.344  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:27:49.435  5305  5313 W app.coefmonitor: Cleared Reference was only reachable from finalizer (only reported once)
+10-27 18:27:49.437  5305  5313 I app.coefmonitor: NativeAlloc concurrent copying GC freed 55080(2546KB) AllocSpace objects, 4(192KB) LOS objects, 49% free, 9377KB/18MB, paused 22us,20us total 163.358ms
+10-27 18:27:49.485  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:27:49.485  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:27:49.502  5305  5443 D EGL_emulation: app_time_stats: avg=116.10ms min=28.49ms max=170.87ms count=9
+10-27 18:27:49.550  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:27:49.550  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:27:49.567  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:27:49.567  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:27:49.752   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:49.760   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:49.778  5305  5944 I native  : I0000 00:00:1793125669.778697    5944 asset_manager_util.cc:61] Created global reference to asset manager.
+10-27 18:27:49.804  5305  7147 I native  : I0000 00:00:1793125669.804415    7147 text_detector_thread_pool_context.cc:38] Compute manager max in flight region detector overwrite: 1
+10-27 18:27:49.804  5305  7147 I native  : I0000 00:00:1793125669.804637    7147 common_util.h:41] Resizing Thread Pool: ocr_det_0 to 3
+10-27 18:27:49.805  5305  7148 I native  : I0000 00:00:1793125669.805641    7148 text_classifier.cc:32] Creating classifier TfliteTextClassifier
+10-27 18:27:49.805  5305  7148 I native  : I0000 00:00:1793125669.805845    7148 common_util.h:41] Resizing Thread Pool: ocr_segm to 3
+10-27 18:27:49.807  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:27:49.831  5305  7148 I native  : I0000 00:00:1793125669.830997    7148 tflite_lstm_client_base.cc:371] Resizing interpreter pool to 4
+10-27 18:27:49.838  5305  7148 I native  : I0000 00:00:1793125669.838415    7148 multi_pass_line_recognition_mutator.cc:342] Preloading recognizers.
+10-27 18:27:49.838  5305  5602 I native  : I0000 00:00:1793125669.838531    5602 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/conv_model.fb
+10-27 18:27:49.840  5305  5602 I native  : I0000 00:00:1793125669.840270    5602 tflite_model_pooled_runner.cc:636] Loading mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/lstm_model.fb
+10-27 18:27:49.850  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:27:49.869  5305  5602 I native  : I0000 00:00:1793125669.869319    5602 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 4
+10-27 18:27:49.894  5305  5602 I native  : I0000 00:00:1793125669.894031    5602 mobile_langid_v2.cc:58] MobileLangID V2 initialized.
+10-27 18:27:49.894  5305  5602 I native  : I0000 00:00:1793125669.894826    5602 multi_pass_line_recognition_mutator.cc:364] Finished preloading a recognizer for "Latn"
+10-27 18:27:49.896  5305  7148 I native  : I0000 00:00:1793125669.896045    7148 multi_pass_line_recognition_mutator.cc:398] Finished preloading recognizers.
+10-27 18:27:49.899  5305  7148 I native  : I0000 00:00:1793125669.899799    7148 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_splitting_custom_ops/model.tflite
+10-27 18:27:49.917  5305  7148 I native  : I0000 00:00:1793125669.917953    7148 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:27:49.920  5305  7148 I native  : I0000 00:00:1793125669.920955    7148 tflite_model_pooled_runner.cc:625] Loading mlkit-google-ocr-models/gocr/layout/line_clustering_custom_ops/model.tflite
+10-27 18:27:49.935  5305  7148 I native  : I0000 00:00:1793125669.935719    7148 tflite_model_pooled_runner.cc:836] Resizing interpreter pool to 1
+10-27 18:27:49.961  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:49.962  5305  7147 I native  : I0000 00:00:1793125669.962695    7147 tflite_detector_client_with_shape_cache.cc:105] Caching size: 10
+10-27 18:27:49.986  5305  5944 D PipelineManager: Start process bitmap
+10-27 18:27:50.002  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:27:50.002  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:27:50.093  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:50.214   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:50.253   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:50.327   874   950 D EGL_emulation: app_time_stats: avg=40.24ms min=7.20ms max=118.35ms count=18
+10-27 18:27:50.394   874   882 I ndroid.systemui: Background young concurrent copying GC freed 199491(11MB) AllocSpace objects, 6(120KB) LOS objects, 31% free, 24MB/36MB, paused 38us,37us total 140.999ms
+10-27 18:27:50.594  5305  5443 D EGL_emulation: app_time_stats: avg=117.07ms min=40.06ms max=185.86ms count=9
+10-27 18:27:50.960  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:51.641  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:51.677  5305  5443 D EGL_emulation: app_time_stats: avg=120.27ms min=114.76ms max=134.20ms count=9
+10-27 18:27:52.490  6045  6045 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.languageprofile.service.START pkg=com.google.android.gms }
+10-27 18:27:52.493  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:52.777  5305  5443 D EGL_emulation: app_time_stats: avg=122.25ms min=107.76ms max=134.13ms count=9
+10-27 18:27:52.791  6024  6866 I GMS_MM_Logger: Memory Metric Logging not allowed. Stopping.
+10-27 18:27:53.073  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:53.569   343  7179 I resolv  : GetAddrInfoHandler::run: {100 786532 100 983140 10128 0}
+10-27 18:27:53.573   343  7181 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-27 18:27:53.573   343  7180 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-27 18:27:53.581   343  7180 I resolv  : res_nsend: used send_dg 91 terrno: 0
+10-27 18:27:53.581   343  7180 I resolv  : doQuery: rcode=0, ancount=2, return value=91
+10-27 18:27:53.609   343  7181 I resolv  : res_nsend: used send_dg 79 terrno: 0
+10-27 18:27:53.609   343  7181 I resolv  : doQuery: rcode=0, ancount=2, return value=79
+10-27 18:27:53.613  6024  6991 D TrafficStats: tagSocket(-1) with statsTag=0x30000407, statsUid=-1
+10-27 18:27:53.613  6024  6991 I TrafficStats: tagSocketFd(-1, 805307399, -1) failed with errno-9
+10-27 18:27:53.613  6024  6991 D TrafficStats: tagSocket(153) with statsTag=0x30000407, statsUid=-1
+10-27 18:27:53.681  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:53.862  5305  5443 D EGL_emulation: app_time_stats: avg=120.48ms min=116.00ms max=133.72ms count=9
+10-27 18:27:54.185  6024  6583 D TrafficStats: tagSocket(223) with statsTag=0x30000407, statsUid=-1
+10-27 18:27:54.206  6024  6583 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_HB_ALARM type: 2 triggerAtMillis: 986181]
+10-27 18:27:54.299  6024  7186 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_HB_ALARM type: 2 triggerAtMillis: 986275]
+10-27 18:27:54.301  6024  7186 E WakeLock: GCM_CONN_ALARM release without a matched acquire!
+10-27 18:27:54.306  6024  7186 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_HB_ALARM type: 2 triggerAtMillis: 986281]
+10-27 18:27:54.828  5305  5944 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:27:54.961  5305  5443 D EGL_emulation: app_time_stats: avg=122.02ms min=114.67ms max=132.80ms count=9
+10-27 18:27:55.040  5305  5581 D PipelineManager: Start process bitmap
+10-27 18:27:55.061  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:55.190  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:27:55.190  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:27:55.235   874   950 D EGL_emulation: app_time_stats: avg=4905.96ms min=4905.96ms max=4905.96ms count=1
+10-27 18:27:55.250   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:55.251   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:55.612   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:27:55.674  3954  3954 I GH.IconVerifyService: triggerSource = BOOT_COMPLETE, componentState = 2
+10-27 18:27:55.707  6024  6583 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.tapandpay.gcmtask.TapAndPayGcmTaskService started execution. cause:4 exec_start_elapsed_seconds: 427 [CONTEXT service_id=218 ]
+10-27 18:27:55.708  6024  6583 V NFC     : this device does not have NFC support
+10-27 18:27:55.708  6024  6583 W TapAndPay: NfcAdapter is null while obtaining CardEmulation instance. [CONTEXT service_id=79 ]
+10-27 18:27:55.708  6024  6583 W TapAndPay: java.lang.NullPointerException: NfcAdapter is null
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at android.nfc.cardemulation.CardEmulation.getInstance(CardEmulation.java:152)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at cdoy.<init>(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at com.google.android.gms.tapandpay.hce.task.TapAndPayAidRegistrationTaskOperation.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):5)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at com.google.android.gms.tapandpay.gcmtask.TapAndPayGcmTaskChimeraService.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):4)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at avzs.call(:com.google.android.gms@231818047@23.18.18 (190800-535401451):4)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at aced.c(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at aced.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):7)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at acjn.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:27:55.708  6024  6583 W TapAndPay: 	at java.lang.Thread.run(Thread.java:1012)
+10-27 18:27:55.709  6045  7195 I ChimeraConfigurator: Starting update, reason: 4 urgentFeatures: vision.ocr:-1
+10-27 18:27:55.748  6024  6583 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.tapandpay.gcmtask.TapAndPayGcmTaskService finished executing. cause:4 result: 3 elapsed_millis: 65 uptime_millis: 65 exec_start_elapsed_seconds: 427 [CONTEXT service_id=218 ]
+10-27 18:27:55.759  6045  7195 I ChimeraConfigurator: Detected pending changes for urgent request: [vision.ocr]. Pending module sets: container:2318189190800+mlkit.ocr.common,tflite_dynamite:2627305025100800+tflite_dynamite,vision_ocr:2316024025100000+vision.ocr
+10-27 18:27:55.767  6045  7195 I GmsDebugLogger: [73] 1801
+10-27 18:27:55.769  6045  7195 W ZappDownloader: No successful module downloads for requested features [vision.ocr].
+10-27 18:27:55.769  6045  7195 I GmsDebugLogger: [30] [VisionOcrDynamite.integ:231602402100000],[TfliteDynamiteDynamite.integ:262730502100800],[MlkitOcrCommon.optional:231818100800]
+10-27 18:27:55.773  6045  7195 W ChimeraConfigService: Retry attempt was throttled. [CONTEXT service_id=264 ]
+10-27 18:27:55.773  6045  7195 I GmsDebugLogger: [83] 1 [vision.ocr]
+10-27 18:27:55.773  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:55.781  6045  7175 W Vision  : Request for optional module download of ocr failed. Request again.
+10-27 18:27:55.781  6045  7175 W Vision  : Would have logged:
+10-27 18:27:55.781  6045  7175 W Vision  : # dsae@37884fe7
+10-27 18:27:55.781  6045  7175 I Vision  : Schedule retrying download ocr at 427757 with backoff 160 seconds
+10-27 18:27:55.813  6024  6866 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.auth.account.be.legacy.AuthCronService started execution. cause:5 exec_start_elapsed_seconds: 427 [CONTEXT service_id=218 ]
+10-27 18:27:55.894  6024  6031 I .gms.persistent: Background young concurrent copying GC freed 235771(9349KB) AllocSpace objects, 4(160KB) LOS objects, 32% free, 18MB/27MB, paused 28us,17us total 118.084ms
+10-27 18:27:56.009   343  7203 I resolv  : GetAddrInfoHandler::run: {100 786532 100 983140 10128 0}
+10-27 18:27:56.009  3257  3627 D TrafficStats: tagSocket(101) with statsTag=0x1809, statsUid=-1
+10-27 18:27:56.016  3257  3627 W libc    : Access denied finding property "persist.adb.tls_server.enable"
+10-27 18:27:56.016  3257  3627 W libc    : Access denied finding property "service.adb.tls.port"
+10-27 18:27:56.013  3257  3257 W binder:3257_4: type=1400 audit(0.0:139): avc:  denied  { read } for  name="u:object_r:system_adbd_prop:s0" dev="tmpfs" ino=292 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:system_adbd_prop:s0 tclass=file permissive=0 app=com.google.android.gms
+10-27 18:27:56.013  3257  3257 W binder:3257_4: type=1400 audit(0.0:140): avc:  denied  { read } for  name="u:object_r:adbd_prop:s0" dev="tmpfs" ino=60 scontext=u:r:gmscore_app:s0:c512,c768 tcontext=u:object_r:adbd_prop:s0 tclass=file permissive=0 app=com.google.android.gms
+10-27 18:27:56.048  5305  5443 D EGL_emulation: app_time_stats: avg=120.76ms min=109.21ms max=135.74ms count=9
+10-27 18:27:56.056  6024  6460 W GmsUrlRequestImpl: Content-Type header is overwritten.
+10-27 18:27:56.067   343  7204 I resolv  : GetAddrInfoHandler::run: {100 786532 100 983140 10128 0}
+10-27 18:27:56.073   343  7205 I resolv  : res_nmkquery: (QUERY, IN, AAAA)
+10-27 18:27:56.077   343  7206 I resolv  : res_nmkquery: (QUERY, IN, A)
+10-27 18:27:56.077   343  7206 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0x7a1b8aced090
+10-27 18:27:56.077   343  7206 I resolv  : doQuery: rcode=0, ancount=8, return value=168
+10-27 18:27:56.106   343  7205 I resolv  : res_nsend: used send_dg 264 terrno: 0
+10-27 18:27:56.106   343  7205 I resolv  : doQuery: rcode=0, ancount=8, return value=264
+10-27 18:27:56.113  6024  6358 D TrafficStats: tagSocket(156) with statsTag=0x401, statsUid=10128
+10-27 18:27:56.215  6024  6460 W GLSUser : [AppCertManager] Exception while requesting key:
+10-27 18:27:56.215  6024  6460 W GLSUser : java.util.concurrent.ExecutionException: avvw: Parse Proto Exception.
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dlnv.s(:com.google.android.gms@231818047@23.18.18 (190800-535401451):3)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dlnv.get(:com.google.android.gms@231818047@23.18.18 (190800-535401451):7)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at oub.b(:com.google.android.gms@231818047@23.18.18 (190800-535401451):78)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at otz.b(:com.google.android.gms@231818047@23.18.18 (190800-535401451):4)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at otu.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at otx.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at lzq.call(:com.google.android.gms@231818047@23.18.18 (190800-535401451):14)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at aced.c(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at aced.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):7)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at acjn.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at java.lang.Thread.run(Thread.java:1012)
+10-27 18:27:56.215  6024  6460 W GLSUser : Caused by: avvw: Parse Proto Exception.
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at avwn.f(:com.google.android.gms@231818047@23.18.18 (190800-535401451):5)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at avxk.onSucceeded(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at jf.onSucceeded(:com.google.android.gms.dynamite_cronetdynamite@231818047@23.18.18 (190800-0):0)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at ie.run(:com.google.android.gms.dynamite_cronetdynamite@231818047@23.18.18 (190800-0):4)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	... 6 more
+10-27 18:27:56.215  6024  6460 W GLSUser : Caused by: dzfz: Protocol message contained an invalid tag (zero).
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dzdb.k(:com.google.android.gms@231818047@23.18.18 (190800-535401451):13)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dzha.c(:com.google.android.gms@231818047@23.18.18 (190800-535401451):47)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dzha.h(:com.google.android.gms@231818047@23.18.18 (190800-535401451):45)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dzfd.A(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dzex.f(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dzcx.d(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dzcx.c(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at dzcx.n(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at avwn.h(:com.google.android.gms@231818047@23.18.18 (190800-535401451):7)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	at avwn.f(:com.google.android.gms@231818047@23.18.18 (190800-535401451):1)
+10-27 18:27:56.215  6024  6460 W GLSUser : 	... 9 more
+10-27 18:27:56.236  6024  6866 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.auth.account.be.legacy.AuthCronService finished executing. cause:5 result: 3 elapsed_millis: 463 uptime_millis: 463 exec_start_elapsed_seconds: 427 [CONTEXT service_id=218 ]
+10-27 18:27:56.256  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:56.637  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:57.144  5305  5443 D EGL_emulation: app_time_stats: avg=121.74ms min=112.88ms max=136.04ms count=9
+10-27 18:27:57.445  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:27:58.030  6045  7175 I GmscoreIpa: Starting mediastore instant index [CONTEXT service_id=255 ]
+10-27 18:27:58.227  5305  5443 D EGL_emulation: app_time_stats: avg=120.30ms min=108.92ms max=135.04ms count=9
+10-27 18:27:58.567  5305  5581 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:27:58.575  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:27:58.581  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:27:58.584  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:27:58.587  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:27:58.590  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:27:58.600  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:27:58.777  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:27:58.777  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:27:58.796   874   950 D EGL_emulation: app_time_stats: avg=1776.57ms min=70.32ms max=3482.82ms count=2
+10-27 18:27:58.808   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:58.808   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:58.868  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:27:58.868  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:27:58.870  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:27:58.870  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:27:58.889  1799  2512 I WorkerManager: dispose()
+10-27 18:27:58.890  1799  2512 W A       : Queue length for executor EventBus is now 11. Perhaps some tasks are too long, or the pool is too small.
+10-27 18:27:58.912   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:58.912   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:27:59.227  5305  5443 D EGL_emulation: app_time_stats: avg=125.00ms min=97.13ms max=168.97ms count=8
+10-27 18:27:59.278  5305  5382 W QueryController: Could not detect idle state.
+10-27 18:27:59.292  5305  5382 D UiDevice: Node not found with selector: BySelector [PKG='\Qcom.android.systemui\E', TEXT='(?i)a single app'].
+10-27 18:27:59.293  5305  5382 D UiDevice: Retrieving node with selector: BySelector [PKG='\Qcom.android.systemui\E', TEXT='(?i)start now|start|share screen', CLICKABLE='true'].
+10-27 18:27:59.888   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:28:00.013  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:28:00.013  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:28:00.013  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:28:00.013  1653  1968 I AiAiEcho: Ranked targets strategy: SORT, count: 0, ranking metadata:
+10-27 18:28:00.013  1653  1968 I AiAiEcho: #postPredictionTargets: Sending updates to UISurface lockscreen with targets# 0 (types=[])
+10-27 18:28:00.017   874   950 D EGL_emulation: app_time_stats: avg=303.90ms min=47.39ms max=1047.15ms count=4
+10-27 18:28:00.024   874   874 W PageIndicator: Total number of pages invalid: 0. Assuming 1 page.
+10-27 18:28:00.327  5305  5443 D EGL_emulation: app_time_stats: avg=122.16ms min=115.79ms max=133.82ms count=9
+10-27 18:28:01.410  5305  5443 D EGL_emulation: app_time_stats: avg=120.36ms min=116.28ms max=133.34ms count=9
+10-27 18:28:02.493  5305  5443 D EGL_emulation: app_time_stats: avg=120.34ms min=115.91ms max=133.39ms count=9
+10-27 18:28:02.886   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:28:03.593  5305  5443 D EGL_emulation: app_time_stats: avg=122.18ms min=116.13ms max=133.41ms count=9
+10-27 18:28:04.677  5305  5443 D EGL_emulation: app_time_stats: avg=120.46ms min=116.08ms max=133.44ms count=9
+10-27 18:28:05.610   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:28:05.777  5305  5443 D EGL_emulation: app_time_stats: avg=122.17ms min=116.12ms max=133.75ms count=9
+10-27 18:28:05.889   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:28:06.860  5305  5443 D EGL_emulation: app_time_stats: avg=120.29ms min=111.97ms max=138.67ms count=9
+10-27 18:28:07.960  5305  5443 D EGL_emulation: app_time_stats: avg=122.24ms min=116.34ms max=133.18ms count=9
+10-27 18:28:09.046  5305  5443 D EGL_emulation: app_time_stats: avg=120.64ms min=116.08ms max=133.95ms count=9
+10-27 18:28:09.318  5305  5382 W QueryController: Could not detect idle state.
+10-27 18:28:09.344  5305  5382 D UiDevice: Node not found with selector: BySelector [PKG='\Qcom.android.systemui\E', TEXT='(?i)start now|start|share screen', CLICKABLE='true'].
+10-27 18:28:09.685  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:09.685  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:09.696   874   950 D EGL_emulation: app_time_stats: avg=9678.15ms min=9678.15ms max=9678.15ms count=1
+10-27 18:28:09.708   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:09.708   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:09.810  5305  5762 D PipelineManager: Start process bitmap
+10-27 18:28:10.022  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:10.023  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:10.056  5305  5313 I app.coefmonitor: Background concurrent copying GC freed 4907(364KB) AllocSpace objects, 18(6480KB) LOS objects, 49% free, 9095KB/17MB, paused 24us,9us total 220.507ms
+10-27 18:28:10.073   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:10.074   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:10.141  5305  5443 D EGL_emulation: app_time_stats: avg=109.47ms min=48.53ms max=149.24ms count=10
+10-27 18:28:10.845  5305  5382 I CoefMonitorTest: push 1.70x
+10-27 18:28:11.227  5305  5443 D EGL_emulation: app_time_stats: avg=120.72ms min=112.92ms max=135.71ms count=9
+10-27 18:28:11.646  5305  5382 I CoefMonitorTest: push 1.20x
+10-27 18:28:12.312  5305  5443 D EGL_emulation: app_time_stats: avg=120.51ms min=111.88ms max=136.63ms count=9
+10-27 18:28:12.817  5305  5762 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:28:12.877  5305  5944 D PipelineManager: Start process bitmap
+10-27 18:28:12.909  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:13.412  5305  5443 D EGL_emulation: app_time_stats: avg=109.72ms min=49.15ms max=133.84ms count=10
+10-27 18:28:13.489  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:13.649  1799  1799 E A       : disposing SearchServiceClient after timeout []
+10-27 18:28:13.969  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:14.494  5305  5443 D EGL_emulation: app_time_stats: avg=120.26ms min=112.96ms max=133.78ms count=9
+10-27 18:28:14.522  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:15.266  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:15.595  5305  5443 D EGL_emulation: app_time_stats: avg=122.31ms min=115.25ms max=134.87ms count=9
+10-27 18:28:15.634   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:28:15.813  5305  7147 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:16.677  5305  5443 D EGL_emulation: app_time_stats: avg=120.16ms min=109.68ms max=132.05ms count=9
+10-27 18:28:17.007  5305  5944 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:28:17.041  5305  5382 I CoefMonitorTest: row moved from NormalizedRect(left=0.20555556, top=0.51875, right=0.52592593, bottom=0.53875) to NormalizedRect(left=0.20555556, top=0.5833333, right=0.525, bottom=0.6041667)
+10-27 18:28:17.101  5305  5581 D PipelineManager: Start process bitmap
+10-27 18:28:17.113  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:17.223  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:17.223  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:17.225  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:17.225  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:17.249   874   950 D EGL_emulation: app_time_stats: avg=1888.17ms min=52.80ms max=7126.08ms count=4
+10-27 18:28:17.258   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:17.260   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:17.763  5305  5443 D EGL_emulation: app_time_stats: avg=120.60ms min=115.99ms max=126.48ms count=9
+10-27 18:28:17.816  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:18.523  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:18.863  5305  5443 D EGL_emulation: app_time_stats: avg=122.24ms min=111.91ms max=135.93ms count=9
+10-27 18:28:19.255  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:19.946  5305  5443 D EGL_emulation: app_time_stats: avg=120.29ms min=114.73ms max=133.35ms count=9
+10-27 18:28:19.974  5305  7148 I tflite  : Replacing 44 out of 46 node(s) with delegate (TfLiteXNNPackDelegate) node, yielding 3 partitions for the whole graph.
+10-27 18:28:20.907   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:28:20.920  5305  5581 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:28:21.043  5305  5443 D EGL_emulation: app_time_stats: avg=121.91ms min=113.17ms max=133.40ms count=9
+10-27 18:28:21.110  5305  5382 D UiDevice: Executing shell command: mkdir -p /sdcard/Download/coefmonitor
+10-27 18:28:21.119  5305  5382 D UiDevice: Executing shell command: screencap -p /sdcard/Download/coefmonitor/api34_e2e_07_row_found_again.png
+10-27 18:28:21.133  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:21.134  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:21.146   874   950 D EGL_emulation: app_time_stats: avg=1946.55ms min=96.38ms max=3796.72ms count=2
+10-27 18:28:21.159   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:21.160   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:21.219  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:21.220  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:21.221  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:21.221  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:21.222  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:21.222  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:21.223  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:21.223  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:21.227  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:21.227  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:21.289   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:21.298   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:21.320  7258  7258 W BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+10-27 18:28:21.334  1655  5938 W MediaProvider: isAppCloneUserPair for user 0: false
+10-27 18:28:21.349  7258  7258 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+10-27 18:28:21.394   151   151 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+10-27 18:28:21.394  7258  7261 I Gralloc4: mapper 4.x is not supported
+10-27 18:28:21.514  6024  7186 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService started execution. cause:9 exec_start_elapsed_seconds: 453 [CONTEXT service_id=218 ]
+10-27 18:28:21.522  6024  6866 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService finished executing. cause:9 result: 1 elapsed_millis: 65 uptime_millis: 65 exec_start_elapsed_seconds: 453 [CONTEXT service_id=218 ]
+10-27 18:28:21.666   529   958 I ActivityManager: Broadcasting: Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x400000 }
+10-27 18:28:21.670   529   548 I ActivityManager: Broadcast completed: result=0
+10-27 18:28:21.671  1655  2339 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+10-27 18:28:21.675  1655  2339 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+10-27 18:28:21.691  5305  5382 I CoefMonitorTest: screenshot e2e_07_row_found_again
+10-27 18:28:21.719  6024  7263 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService started execution. cause:9 exec_start_elapsed_seconds: 453 [CONTEXT service_id=218 ]
+10-27 18:28:21.722  6024  7186 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService finished executing. cause:9 result: 1 elapsed_millis: 7 uptime_millis: 7 exec_start_elapsed_seconds: 453 [CONTEXT service_id=218 ]
+10-27 18:28:22.143  5305  5443 D EGL_emulation: app_time_stats: avg=122.24ms min=96.42ms max=156.21ms count=9
+10-27 18:28:23.226  5305  5443 D EGL_emulation: app_time_stats: avg=120.29ms min=116.14ms max=133.79ms count=9
+10-27 18:28:24.326  5305  5443 D EGL_emulation: app_time_stats: avg=122.24ms min=115.57ms max=133.41ms count=9
+10-27 18:28:25.092  5305  5382 I CoefMonitorTest: push 2.50x
+10-27 18:28:25.314  5305  5762 D PipelineManager: Start process bitmap
+10-27 18:28:25.328  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:28:25.359  5305  5443 D EGL_emulation: app_time_stats: avg=80.95ms min=19.46ms max=132.67ms count=12
+10-27 18:28:25.486  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:28:25.576  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:25.577  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:25.627   874   874 D StatusBarIconController: ignoring old pipeline callbacks, because the new mobile icons are enabled
+10-27 18:28:25.628   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:25.637   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:25.673   874   950 D EGL_emulation: app_time_stats: avg=1131.55ms min=63.21ms max=4293.29ms count=4
+10-27 18:28:26.462  5305  5443 D EGL_emulation: app_time_stats: avg=62.53ms min=28.14ms max=127.83ms count=15
+10-27 18:28:26.713  1655  1827 D PickerSyncController: syncAllMedia
+10-27 18:28:26.713  1655  1827 D PickerSyncController: syncAllMediaFromProvider() LOCAL, auth=com.android.providers.media.photopicker, retry=true
+10-27 18:28:26.713  1655  1827 D PickerSyncController: getSyncRequestParams() LOCAL, auth=com.android.providers.media.photopicker
+10-27 18:28:26.714  1655  1827 D PickerSyncController:    Latest ID/Gen=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary/59
+10-27 18:28:26.714  1655  1827 D PickerSyncController:    Cached ID/Gen=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary/52
+10-27 18:28:26.714  1655  1827 D PickerSyncController:    RESULT=SyncRequestParams{type=MEDIA_INCREMENTAL, gen=52, latest=Bundle[{last_media_sync_generation=59, media_collection_id=1407:8d51ff18-b252-4172-92c1-8bab1c471848:external_primary}]}
+10-27 18:28:26.714  1655  1827 I PickerSyncController: Executing SyncAdd. isLocal: true. authority: com.android.providers.media.photopicker
+10-27 18:28:26.731  1655  1827 I PickerSyncController: Paged sync successful. QueryArgs: Bundle[{android.provider.extra.SYNC_GENERATION=52}]. Result count: 1. Cursor count: 1
+10-27 18:28:26.731  1655  1827 I PickerSyncController: Executing SyncRemove. isLocal: true. authority: com.android.providers.media.photopicker
+10-27 18:28:26.732  1655  1827 I PickerSyncController: Paged sync successful. QueryArgs: Bundle[{android.provider.extra.SYNC_GENERATION=52}]. Result count: 0. Cursor count: 0
+10-27 18:28:26.732  1655  1827 D PickerSyncController: syncAllMediaFromProvider() CLOUD, auth=null, retry=true
+10-27 18:28:26.732  1655  1827 D PickerSyncController: getSyncRequestParams() CLOUD, auth=null
+10-27 18:28:26.732  1655  1827 D PickerSyncController:    RESULT=SyncRequestParams{type=MEDIA_RESET, gen=0, latest=null}
+10-27 18:28:26.732  1655  1827 I PickerSyncController: Executing SyncReset. isLocal: false. authority: null
+10-27 18:28:26.732  1655  1827 I PickerSyncController: SyncReset. isLocal:false. authority: null. result count: 0
+10-27 18:28:26.732  1655  1827 D PickerSyncController: Ignoring cache media info for null authority with bundle: null
+10-27 18:28:26.732  1655  1827 I PickerSyncController: Executing SyncAlbumReset. isLocal: true. authority: com.android.providers.media.photopicker. albumId: null
+10-27 18:28:26.732  1655  1827 I PickerSyncController: Successfully executed SyncResetAlbum. authority: com.android.providers.media.photopicker. albumId: null. Result count: 0
+10-27 18:28:26.732  1655  1827 I PickerSyncController: Executing SyncAlbumReset. isLocal: false. authority: null. albumId: null
+10-27 18:28:26.732  1655  1827 I PickerSyncController: Successfully executed SyncResetAlbum. authority: null. albumId: null. Result count: 0
+10-27 18:28:27.543  5305  5443 D EGL_emulation: app_time_stats: avg=120.13ms min=110.24ms max=139.90ms count=9
+10-27 18:28:28.612  5305  5762 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:28:28.619  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:28:28.624  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:28:28.627  5305  5565 D TransportRuntime.SQLiteEventStore: Storing event with priority=VERY_LOW, name=FIREBASE_ML_SDK for destination cct
+10-27 18:28:28.631  5305  5565 D TransportRuntime.JobInfoScheduler: Upload for context TransportContext(cct, VERY_LOW, MSRodHRwczovL2ZpcmViYXNlbG9nZ2luZy5nb29nbGVhcGlzLmNvbS92MGNjL2xvZy9iYXRjaD9mb3JtYXQ9anNvbl9wcm90bzNc) is already scheduled. Returning...
+10-27 18:28:28.643  5305  5443 D EGL_emulation: app_time_stats: avg=122.17ms min=113.46ms max=135.29ms count=9
+10-27 18:28:28.825  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:28.825  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:28.846   874   950 D EGL_emulation: app_time_stats: avg=1586.40ms min=86.69ms max=3086.11ms count=2
+10-27 18:28:28.858   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:28.858   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:28.913  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:28.913  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:28.945   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:28.945   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:29.049  5305  5944 D PipelineManager: Start process bitmap
+10-27 18:28:29.134  5305  5313 I app.coefmonitor: Background young concurrent copying GC freed 17274(836KB) AllocSpace objects, 21(5856KB) LOS objects, 36% free, 11MB/17MB, paused 37us,17us total 111.430ms
+10-27 18:28:29.249  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:29.250  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:29.296   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:29.296   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:29.727  5305  5443 D EGL_emulation: app_time_stats: avg=120.48ms min=109.53ms max=133.34ms count=9
+10-27 18:28:29.925   874   874 D StatusBarIconController: ignoring old pipeline callback because the new wifi icon is enabled
+10-27 18:28:30.815  5305  5443 D EGL_emulation: app_time_stats: avg=120.80ms min=114.10ms max=133.92ms count=9
+10-27 18:28:31.912  5305  5443 D EGL_emulation: app_time_stats: avg=121.82ms min=114.62ms max=135.18ms count=9
+10-27 18:28:32.014  5305  5944 D PipelineManager: OCR process succeeded via visionkit pipeline.
+10-27 18:28:32.227  1653  2030 W AiAiEcho: LyftNotificationParser Ridesharing ETA not enabled
+10-27 18:28:32.227  1653  2030 W AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+10-27 18:28:32.246   874   950 D EGL_emulation: app_time_stats: avg=566.67ms min=38.21ms max=2894.83ms count=6
+10-27 18:28:32.261   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:32.261   874   949 D LocalImageResolver: Couldn't use ImageDecoder for drawable, falling back to non-resized load.
+10-27 18:28:32.443   529  1417 I InputManager: Not applying additional properties for display 4 because the pointer is currently targeting display 0.
+10-27 18:28:32.444  5305  5474 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:28:32.579  5305  5382 D UiDevice: Executing shell command: settings delete secure enabled_accessibility_services
+10-27 18:28:32.612  5305  5382 D UiDevice: Executing shell command: settings put secure accessibility_enabled 0
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest: final state
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest: runtime=RuntimeState(status=STOPPED, captureActive=false, ocrStatus=IDLE, lastRawText=2.50x, lastReadValue=2.50x, lastConfidence=0.8734375, lastRejection=null, rowBand=null, error=null, lastContinuity=CONFIRMED, clicks=null)
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest: active=1
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest: events:
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest:   R-000001 1.70x — ADVANCE — Algorithm 1 → Algorithm 2 [MISSED_ROUND_NEIGHBOR, GAP_SUSPECTED]
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest:   R-000002 1.20x — ADVANCE — Algorithm 2 → Algorithm 3 [VALUE_CHANGED, CONFIRMED]
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest:   R-000003 2.50x — RESET_TO_FIRST — Algorithm 3 → Algorithm 1 [VALUE_CHANGED, CONFIRMED]
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest: diagnostics (newest first):
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest:   WARNING CONTINUITY: Possible missed round(s) before R-000001; check the game history
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest:   INFO ROW: Row of coefficients found on the screen (newest tile at 222,1400)
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest:   INFO DETECTOR: Observation initialised at 3.33x (not processed as a round)
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest:   INFO ROW: Row of coefficients found on the screen (newest tile at 222,1245)
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest:   WARNING OCR: OCR took 5068 ms; rounds are detected later than usual on this device
+10-27 18:28:32.657  5305  5382 I CoefMonitorTest:   INFO MONITOR: Monitoring started
+10-27 18:28:32.678  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@5169920 in: PAUSED
+10-27 18:28:32.679  5305  5305 V ActivityScenario: Update currentActivityStage to PAUSED, currentActivity=app.coefmonitor.debug.SimulatorActivity@5169920
+10-27 18:28:32.718   874   934 D SplashScreenView: Build android.window.SplashScreenView{4399a18 V.E...... ......ID 0,0-0,0}
+10-27 18:28:32.718   874   934 D SplashScreenView: Icon: view: null drawable: null size: 0
+10-27 18:28:32.718   874   934 D SplashScreenView: Branding: view: android.view.View{a1c71 G.ED..... ......I. 0,0-0,0 #10204ef android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+10-27 18:28:32.728   408   408 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:28:32.926  5305  5443 D EGL_emulation: app_time_stats: avg=126.10ms min=99.15ms max=156.39ms count=8
+10-27 18:28:32.967  5776  5792 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-27 18:28:33.429  5776  5776 I Choreographer: Skipped 33 frames!  The application may be doing too much work on its main thread.
+10-27 18:28:33.431   529   548 W ziparchive: Unable to open '/data/app/~~XB79Qb2GtF3PL9RAUKKiog==/app.coefmonitor.test-kwl5Lnq94LP-XiIFKdRW8Q==/base.dm': No such file or directory
+10-27 18:28:33.433   529   548 I ActivityTaskManager: Displayed app.coefmonitor.test/androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity for user 0: +766ms
+10-27 18:28:33.445   408   408 I BpBinder: onLastStrongRef automatically unlinking death recipients:
+10-27 18:28:33.455  1653  1968 I AiAiEcho: Predicting[0]:
+10-27 18:28:33.455  1653  1968 I AiAiEcho: EchoTargets:
+10-27 18:28:33.455  1653  1968 I AiAiEcho: Filtered by AiAi flag check:
+10-27 18:28:33.455   529  1700 W AppSearchIcing: icing-search-engine.cc:283: Error: 5, Message: Document (com.google.android.googlequicksearchbox$OneSearchZeroStateGoogleSuggestions/default, zp) not found.
+10-27 18:28:33.456  5502  5563 D OneSearchSuggestProvider: Created the binder channel successfully for end point service =com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService , mChannel=z1{delegate=s1{logId=17, target=directaddress:///AndroidComponentAddress%5BIntent%20%7B%20act=grpc.io.action.BIND%20cmp=com.google.android.googlequicksearchbox/com.google.android.apps.search.googleapp.search.suggest.plugins.onesearch.server.OneSearchSuggestService%20%7D%5D}} , mOneSearchConnection=X1.T@9ea5c7a
+10-27 18:28:33.466  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@5169920 in: STOPPED
+10-27 18:28:33.466  5305  5305 V ActivityScenario: Update currentActivityStage to STOPPED, currentActivity=app.coefmonitor.debug.SimulatorActivity@5169920
+10-27 18:28:33.468  5305  5305 D LifecycleMonitor: Lifecycle status change: app.coefmonitor.debug.SimulatorActivity@5169920 in: DESTROYED
+10-27 18:28:33.469  5305  5305 V ActivityScenario: Update currentActivityStage to DESTROYED, currentActivity=null
+10-27 18:28:33.469  5305  5382 I TestRunner: finished: findsTheRowAgainAfterTheGameMoved(app.coefmonitor.e2e.EndToEndMonitoringTest)
