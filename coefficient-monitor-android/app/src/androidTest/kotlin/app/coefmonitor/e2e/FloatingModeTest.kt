@@ -1,5 +1,9 @@
 package app.coefmonitor.e2e
 
+import android.app.LocaleManager
+import android.content.res.Configuration
+import android.os.Build
+import android.os.LocaleList
 import android.os.SystemClock
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
@@ -27,7 +31,6 @@ import app.coefmonitor.e2e.TestEnv.screenshot
 import app.coefmonitor.e2e.TestEnv.waitFor
 import app.coefmonitor.monitor.FloatingPanelService
 import app.coefmonitor.monitor.MonitorStatus
-import app.coefmonitor.withAppLocale
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -132,9 +135,9 @@ class FloatingModeTest {
     fun panelInTajik() {
         // No panel from an earlier test may still be shown with the old language.
         device.wait(Until.gone(panel().text("✕")), 5_000)
-        instrumentation.runOnMainSync { AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("tg")) }
+        setAppLanguage("tg")
         try {
-            val tg = app.withAppLocale()
+            val tg = app.createConfigurationContext(Configuration(app.resources.configuration).apply { setLocales(LocaleList.forLanguageTags("tg")) })
             runBlocking { container.settings.update { it.copy(overlayEnabled = true) } }
             FloatingPanelService.sync(app, enabled = true)
             val status = device.wait(Until.findObject(panel().text(tg.getString(R.string.overlay_tab_status))), 10_000)
@@ -148,7 +151,21 @@ class FloatingModeTest {
                     screenshot(shot)
                 }
         } finally {
-            instrumentation.runOnMainSync { AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList()) }
+            setAppLanguage(null)
+        }
+    }
+
+    /** The app's own language, as Settings → Language sets it; null is the system language. */
+    private fun setAppLanguage(tag: String?) {
+        val locales = if (tag == null) LocaleList.getEmptyLocaleList() else LocaleList.forLanguageTags(tag)
+        if (Build.VERSION.SDK_INT >= 33) {
+            // AppCompat forwards this to Android only while one of its activities is open; this test has none.
+            app.getSystemService(LocaleManager::class.java).applicationLocales = locales
+            if (tag != null) {
+                waitFor("app language $tag", 10_000) { app.resources.configuration.locales[0].language.takeIf { it == tag } }
+            }
+        } else {
+            instrumentation.runOnMainSync { AppCompatDelegate.setApplicationLocales(LocaleListCompat.wrap(locales)) }
         }
     }
 
