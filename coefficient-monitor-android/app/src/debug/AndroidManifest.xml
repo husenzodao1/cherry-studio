@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Debug builds only: an on-device stand-in for the game screen used by instrumented tests. -->
+    <application>
+        <activity
+            android:name="app.coefmonitor.debug.SimulatorActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CoefMonitor" />
+    </application>
+</manifest>
