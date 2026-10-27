@@ -31,9 +31,11 @@ test it with plain Maven Central access: `cd core && gradle test`.
   sequence numbers and builds the event record.
 - `ObservationRegionManager` (core): normalised calibration ↔ pixels, plus validation.
 - `MonitoringService` / `ScreenCapturer` / `FramePipeline` / `CoefficientOcrEngine` (app): the capture pipeline.
-- `ClickPlan` (core) / `AutoClickController` / `AutoClickService` (app): the auto-clicker. The plan
-  lists the steps with their times; the controller runs them one after another; the accessibility
-  service performs the taps.
+- `ClickPlan` (core) / `AutoClicker` / `AutoClickController` / `AutoClickService` (app): the
+  auto-clicker. The plan lists the steps with their times; `AutoClicker` (one per app, used by
+  monitoring and the floating panel) checks the orientation and the service; the controller runs
+  the steps one after another; the accessibility service performs the taps.
+- `FloatingPanelService` / `OverlayController` (app): floating mode, see [Floating mode](#floating-mode).
 - `MonitorRepository` (app): writes the new position and the event row in **one Room transaction**.
   The `events.sequence` column has a unique index, so the database itself also rejects a round
   that was already processed.
@@ -123,7 +125,8 @@ click**:
 4. After every round the active algorithm's clicks run **one after another**: tap step 1, wait its
    time (counted from the start of the tap), tap step 2, and so on. The floating panel shows
    "Auto-click: step 2 of 3 · next in 250 ms", and its **Run clicks** button runs the active
-   algorithm's clicks right away. A new round, **Pause** and **Stop** cancel a run in progress.
+   algorithm's clicks right away, over any app and also while monitoring is stopped. A new run,
+   a new round, **Stop clicks**, **Pause** and **Stop** cancel a run in progress.
 
 Points are normalised to the calibration screenshot and scaled to the current screen. If the
 screen orientation no longer matches the screenshot, nothing is tapped and the diagnostics log
@@ -131,6 +134,28 @@ says so. Every run is logged there too ("Algorithm 2: 3 click(s) performed"), as
 Android cancelled (for example because you touched the screen at the same moment). A tap lands on
 whatever is on screen at that moment, so keep the game in front while monitoring runs. The
 auto-clicker can be turned off in Settings without touching the accessibility service.
+
+## Floating mode
+
+Settings → **Floating mode** puts a movable panel over every app. It stays there until you close it
+with **✕** (or the notification's *Close*), whether monitoring runs or not; it runs in its own
+foreground service, so Android does not remove it when you switch apps or swipe the app away.
+Drag it by the title; tap the title to collapse it. It has three tabs:
+
+- **Status**: active algorithm, last coefficient, monitoring and OCR status, auto-click progress,
+  warnings, the last log lines, and the buttons **Start** (shows Android's screen-capture dialog
+  and starts monitoring without opening the app) or **Pause**/**Resume** and **Stop**, **Run
+  clicks**/**Stop clicks**, and **Open** (the app).
+- **Algorithm**: ◀ ▶ to choose the active algorithm, **Back to Algorithm 1**, and every step of the
+  active algorithm with its time until the next click (− / +, 50 ms per press). Points are still
+  picked in the app's algorithm editor, on the calibration screenshot.
+- **Settings**: threshold (± 0.01x), global delay and capture interval (± 50 ms), stable frames,
+  minimum time between rounds (± 250 ms), the auto-clicker and round-notification switches, and
+  a shortcut to the Accessibility settings while the auto-clicker service is off.
+
+Hold − or + to repeat. Every change is saved at once, exactly as if it was made in the app.
+Changing detection settings while monitoring runs re-initialises the detector (the visible round
+is not processed).
 
 ## Permissions
 
@@ -140,6 +165,7 @@ auto-clicker can be turned off in Settings without touching the accessibility se
 | `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PROJECTION` | Continuous capture requires a visible foreground service. |
 | `POST_NOTIFICATIONS` | Monitoring status, "add another algorithm", capture stopped. |
 | `SYSTEM_ALERT_WINDOW` (optional) | Floating panel; only if granted in system settings. |
+| `FOREGROUND_SERVICE_SPECIAL_USE` | Keeps the floating panel's service running while floating mode is on (with its own notification). |
 | Accessibility service "auto-clicker" (optional) | Performing the clicks; only if turned on in Accessibility settings. It reads no screen content and receives no accessibility events. |
 
 The app makes no network requests itself. OCR uses ML Kit's bundled model (no download at runtime)

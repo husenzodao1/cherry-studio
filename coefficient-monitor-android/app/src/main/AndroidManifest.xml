@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Optional floating panel; only used after the user grants it in system settings. -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Floating mode keeps its panel in a foreground service so Android does not remove it. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:name=".CoefMonitorApp"
@@ -32,10 +34,27 @@
             </intent-filter>
         </activity>
 
+        <!-- Floating panel's Start button: shows the screen-capture consent dialog, then closes. -->
+        <activity
+            android:name=".ui.CaptureConsentActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <service
             android:name=".monitor.MonitoringService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
+
+        <service
+            android:name=".monitor.FloatingPanelService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Floating control panel shown over other apps until the user closes it" />
+        </service>
 
         <!-- Auto-clicker taps. Android only lets an app tap on other apps through an accessibility
              service, which the user turns on in system settings; only the system can bind to it. -->

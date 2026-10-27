@@ -29,7 +29,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -40,6 +43,7 @@ import androidx.navigation.navArgument
 import app.coefmonitor.R
 import app.coefmonitor.appContainer
 import app.coefmonitor.data.ThemeMode
+import app.coefmonitor.monitor.FloatingPanelService
 import app.coefmonitor.ui.algorithms.AlgorithmEditorScreen
 import app.coefmonitor.ui.algorithms.AlgorithmsScreen
 import app.coefmonitor.ui.calibration.CalibrationScreen
@@ -49,6 +53,9 @@ import app.coefmonitor.ui.presets.PresetsScreen
 import app.coefmonitor.ui.settings.SettingsScreen
 import app.coefmonitor.ui.theme.CoefMonitorTheme
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -59,6 +66,15 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) openTarget.value = intent?.getStringExtra(EXTRA_OPEN)
+        // Floating mode follows its setting. Checked on every return to the app, so the panel
+        // appears right after the "display over other apps" permission is granted.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                appContainer.settings.settings.map { it.overlayEnabled }.distinctUntilChanged().collect { enabled ->
+                    FloatingPanelService.sync(this@MainActivity, enabled)
+                }
+            }
+        }
         setContent {
             val settings by appContainer.settings.settings.collectAsStateWithLifecycle(initialValue = null)
             val dark = when (settings?.theme ?: ThemeMode.SYSTEM) {

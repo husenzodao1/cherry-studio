@@ -14,26 +14,19 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import app.coefmonitor.R
 import app.coefmonitor.appContainer
-import app.coefmonitor.core.CalibrationProblem
-import app.coefmonitor.core.ClickPlan
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
-import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorResult
 import app.coefmonitor.core.FirstRoundPolicy
 import app.coefmonitor.core.NewRoundDetector
-import app.coefmonitor.core.ObservationCalibration
-import app.coefmonitor.core.ObservationRegionManager
 import app.coefmonitor.core.OcrReading
 import app.coefmonitor.core.ProcessResult
-import app.coefmonitor.core.RegionResolution
 import app.coefmonitor.core.RejectionReason
 import app.coefmonitor.core.RoundEvent
 import app.coefmonitor.core.TransitionReason
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.DiagnosticLevel
 import app.coefmonitor.data.StoredAlgorithm
-import app.coefmonitor.data.db.EventEntity
 import app.coefmonitor.data.db.MonitorStateEntity
 import app.coefmonitor.data.db.enumOrDefault
 import app.coefmonitor.ui.MainActivity
@@ -67,13 +60,10 @@ class MonitoringService : LifecycleService() {
     private var ocr: CoefficientOcrEngine? = null
     private var loopJob: Job? = null
     private var snapshotJob: Job? = null
-    private var overlay: OverlayController? = null
-    private lateinit var clicker: AutoClickController
     private var mode = Mode.MONITOR
     private var inForeground = false
     private var detectorReady = false
     private var lastLoggedRejection: Pair<RejectionReason?, String>? = null
-    private var clickerOffReported = false
 
     @Volatile
     private var settings = AppSettings()
@@ -82,17 +72,7 @@ class MonitoringService : LifecycleService() {
         super.onCreate()
         notifications = MonitorNotifications(this)
         notifications.ensureChannels()
-        clicker = AutoClickController(
-            scope = lifecycleScope,
-            onProgress = { progress -> runtime.update { it.copy(clicks = progress) } },
-            onFinished = ::reportClicks,
-        )
-        lifecycleScope.launch {
-            container.settings.settings.collect {
-                settings = it
-                applyOverlaySetting(it)
-            }
-        }
+        lifecycleScope.launch { container.settings.settings.collect { settings = it } }
         lifecycleScope.launch { observePresentation() }
     }
 
@@ -111,13 +91,11 @@ class MonitoringService : LifecycleService() {
     }
 
     override fun onDestroy() {
-        if (::clicker.isInitialized) clicker.cancel()
         loopJob?.cancel()
         snapshotJob?.cancel()
         releaseCapture()
         ocr?.close()
         ocr = null
-        hideOverlay()
         runtime.update {
             if (it.status == MonitorStatus.ERROR) it.copy(captureActive = false) else it.copy(status = MonitorStatus.STOPPED, captureActive = false, ocrStatus = OcrStatus.IDLE)
         }
@@ -178,7 +156,7 @@ class MonitoringService : LifecycleService() {
         if (capturer == null) return stopIfIdle()
         loopJob?.cancel()
         loopJob = null
-        clicker.cancel()
+        container.autoClicker.cancel()
         runtime.update { it.copy(status = MonitorStatus.PAUSED, ocrStatus = OcrStatus.IDLE) }
         log(DiagnosticLevel.INFO, "MONITOR", "Paused")
     }
@@ -195,7 +173,7 @@ class MonitoringService : LifecycleService() {
 
     /** Stops everything. [error] non-null leaves the dashboard in the Error state with a reason. */
     private fun shutdown(error: MonitorError?) {
-        clicker.cancel()
+        container.autoClicker.cancel()
         loopJob?.cancel()
         loopJob = null
         snapshotJob?.cancel()
@@ -203,7 +181,6 @@ class MonitoringService : LifecycleService() {
         releaseCapture()
         ocr?.close()
         ocr = null
-        hideOverlay()
         runtime.update {
             it.copy(
                 status = if (error != null) MonitorStatus.ERROR else MonitorStatus.STOPPED,
@@ -260,7 +237,8 @@ class MonitoringService : LifecycleService() {
         loopJob?.cancel()
         loopJob = lifecycleScope.launch {
             settings = container.settings.current()
-            if (settings.overlayEnabled) showOverlay()
+            // Floating mode stays on by itself; this only brings the panel back if Android removed it.
+            if (settings.overlayEnabled) FloatingPanelService.sync(this@MonitoringService, enabled = true)
             val engine = ocr ?: return@launch
             val pipeline = FramePipeline(
                 ocr = engine,
@@ -359,56 +337,6 @@ class MonitoringService : LifecycleService() {
         }
     }
 
-    /**
-     * Runs the clicks of the algorithm at [activeIndex] (position in the enabled sequence), step by
-     * step with the step times in between. Taps on the row being read are skipped, and nothing is
-     * tapped if the screen orientation no longer matches the calibration screenshot the points
-     * were picked on.
-     */
-    private suspend fun runClicks(activeIndex: Int) {
-        val s = settings
-        val calibration = s.calibration
-        val definition = container.algorithms.allDefinitions().filter { it.enabled }.getOrNull(activeIndex) ?: return
-        val band = calibration?.let { ObservationRegionManager.readingBand(it) }
-        val clicks = ClickPlan.plan(definition.steps, s.globalDelayMs, band)
-        if (clicks.isEmpty()) return
-        if (calibration != null && !sameOrientationAs(calibration)) {
-            log(DiagnosticLevel.WARNING, "AUTO_CLICK", "Screen orientation differs from the calibration screenshot; Algorithm ${activeIndex + 1} was not clicked")
-            return
-        }
-        if (!AutoClickService.connected.value) {
-            if (!clickerOffReported) {
-                log(DiagnosticLevel.WARNING, "AUTO_CLICK", "The auto-clicker is off in Accessibility settings; Algorithm ${activeIndex + 1} was not clicked")
-            }
-            clickerOffReported = true
-            return
-        }
-        clickerOffReported = false
-        withContext(Dispatchers.Main) { clicker.play(activeIndex + 1, clicks) }
-    }
-
-    private fun reportClicks(algorithmNumber: Int, tapped: Int, missed: List<Int>) {
-        if (missed.isEmpty()) {
-            log(DiagnosticLevel.INFO, "AUTO_CLICK", "Algorithm $algorithmNumber: $tapped click(s) performed")
-        } else {
-            log(
-                DiagnosticLevel.WARNING,
-                "AUTO_CLICK",
-                "Algorithm $algorithmNumber: $tapped click(s) performed; step(s) ${missed.joinToString()} could not be clicked",
-            )
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private fun sameOrientationAs(calibration: ObservationCalibration): Boolean {
-        val metrics = android.util.DisplayMetrics()
-        getSystemService(android.hardware.display.DisplayManager::class.java)
-            .getDisplay(android.view.Display.DEFAULT_DISPLAY).getRealMetrics(metrics)
-        return ObservationRegionManager.resolve(calibration, metrics.widthPixels, metrics.heightPixels).let {
-            it !is RegionResolution.Invalid || it.problem != CalibrationProblem.GEOMETRY_CHANGED
-        }
-    }
-
     private var lastSlowOcrReportMs = 0L
 
     /** OCR is normally tens of milliseconds; report (at most once a minute) when the device is much slower. */
@@ -487,7 +415,7 @@ class MonitoringService : LifecycleService() {
                     )
                     else -> Unit
                 }
-                if (s.autoClickEnabled) runClicks(result.transition.newIndex)
+                if (s.autoClickEnabled) container.autoClicker.run(result.transition.newIndex)
                 if (s.roundNotifications) {
                     notifications.round(
                         str.getString(R.string.notif_round_title, event.value.toString()),
@@ -525,56 +453,22 @@ class MonitoringService : LifecycleService() {
         }
     }
 
-    // ---- Floating panel and notification ----------------------------------------------------
-
-    private fun applyOverlaySetting(s: AppSettings) {
-        if (capturer == null || mode != Mode.MONITOR) return
-        if (s.overlayEnabled) showOverlay() else hideOverlay()
-    }
-
-    private fun showOverlay() {
-        if (overlay?.isShowing == true) return
-        val controller = OverlayController(
-            context = withAppLocale(),
-            onPauseResume = { if (runtime.state.value.status == MonitorStatus.PAUSED) resume() else pause() },
-            onStop = { shutdown(error = null) },
-            onRunClicks = {
-                lifecycleScope.launch { runClicks(container.monitor.sequenceState().activeIndex) }
-            },
-            onOpenApp = {
-                startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP))
-            },
-        )
-        if (controller.show()) overlay = controller
-    }
-
-    private fun hideOverlay() {
-        overlay?.hide()
-        overlay = null
-    }
+    // ---- Notification ---------------------------------------------------------------------
 
     private data class Presentation(
         val runtime: RuntimeState,
-        val clickerConnected: Boolean,
         val state: MonitorStateEntity,
         val algorithms: List<StoredAlgorithm>,
-        val recent: List<EventEntity>,
-        val settings: AppSettings,
     )
 
     private suspend fun observePresentation() {
-        combine(
-            combine(runtime.state, AutoClickService.connected, ::Pair),
-            container.monitor.state,
-            container.algorithms.algorithms,
-            container.events.recent(OVERLAY_LOG_LINES),
-            container.settings.settings,
-        ) { (rt, clickerConnected), state, algorithms, recent, s ->
-            Presentation(rt, clickerConnected, state, algorithms.filter { it.definition.enabled }, recent, s)
+        combine(runtime.state, container.monitor.state, container.algorithms.algorithms) { rt, state, algorithms ->
+            Presentation(rt, state, algorithms.filter { it.definition.enabled })
         }.collect { render(it) }
     }
 
     private fun render(p: Presentation) {
+        if (!inForeground || capturer == null) return
         val str = withAppLocale()
         val total = p.algorithms.size
         val index = if (total == 0) 0 else p.state.activeIndex.coerceIn(0, total - 1)
@@ -585,39 +479,12 @@ class MonitoringService : LifecycleService() {
             str.getString(R.string.algorithm_position, index + 1, total)
         }
         val lastValue = p.state.lastAcceptedHundredths?.let { Coefficient(it).toString() } ?: "—"
-        val statusText = Labels.status(str, p.runtime.status)
-        val coefficientLine = str.getString(R.string.overlay_last_coefficient, lastValue)
-        if (inForeground && capturer != null) {
-            notifications.updateMonitoring(
-                notifications.monitoring(
-                    title = "$title · ${active?.name ?: "—"}",
-                    text = "$statusText · $coefficientLine",
-                    paused = p.runtime.status == MonitorStatus.PAUSED,
-                    controls = mode == Mode.MONITOR,
-                ),
-            )
-        }
-        val firstStepDelay = active?.steps?.firstOrNull()?.let { DelayPolicy.effective(it, p.settings.globalDelayMs) }
-            ?: p.settings.globalDelayMs
-        val clickerOff = p.settings.autoClickEnabled && !p.clickerConnected && active?.steps?.any { it.point != null } == true
-        val warning = when {
-            p.runtime.calibrationProblem != null -> Labels.calibrationProblem(str, p.runtime.calibrationProblem)
-            clickerOff -> str.getString(R.string.warning_auto_click_off)
-            total > 0 && index == total - 1 -> str.getString(R.string.warning_last_algorithm)
-            p.runtime.lastContinuity == Continuity.GAP_SUSPECTED -> str.getString(R.string.warning_gap)
-            else -> null
-        }
-        overlay?.update(
-            OverlayState(
-                title = title,
-                algorithmName = active?.name ?: "—",
-                coefficientLine = coefficientLine,
-                statusLine = "$statusText · ${Labels.ocrStatus(str, p.runtime.ocrStatus)}",
-                delayLine = str.getString(R.string.overlay_delay, firstStepDelay),
-                warning = warning,
-                log = p.recent.map { Labels.eventLine(str, it) },
+        notifications.updateMonitoring(
+            notifications.monitoring(
+                title = "$title · ${active?.name ?: "—"}",
+                text = "${Labels.status(str, p.runtime.status)} · ${str.getString(R.string.overlay_last_coefficient, lastValue)}",
                 paused = p.runtime.status == MonitorStatus.PAUSED,
-                clickLine = p.runtime.clicks?.let { str.getString(R.string.overlay_clicks, it.position, it.total, it.delayMs) },
+                controls = mode == Mode.MONITOR,
             ),
         )
     }
@@ -642,7 +509,6 @@ class MonitoringService : LifecycleService() {
         private const val MIN_IDLE_MS = 30L
         private const val SLOW_OCR_MS = 2_000L
         private const val SLOW_OCR_REPORT_INTERVAL_MS = 60_000L
-        private const val OVERLAY_LOG_LINES = 3
 
         /** Starts a capture session with the result of the system screen-capture consent dialog. */
         fun start(context: Context, resultCode: Int, data: Intent, mode: Mode, delayMs: Long = DEFAULT_SNAPSHOT_DELAY_MS) {

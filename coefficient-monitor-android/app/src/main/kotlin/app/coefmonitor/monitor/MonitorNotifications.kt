@@ -59,6 +59,28 @@ class MonitorNotifications(private val context: Context) {
 
     fun updateMonitoring(notification: Notification) = post(ID_MONITOR, notification)
 
+    /** Ongoing notification while floating mode is on; Android requires one for the panel's service. */
+    fun floating(): Notification {
+        val s = strings
+        val close = PendingIntent.getService(
+            context,
+            3,
+            FloatingPanelService.closeIntent(context),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        return NotificationCompat.Builder(context, CHANNEL_MONITOR)
+            .setSmallIcon(R.drawable.ic_stat_monitor)
+            .setContentTitle(s.getString(R.string.floating_notification_title))
+            .setContentText(s.getString(R.string.floating_notification_text))
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .setContentIntent(openApp(null))
+            .addAction(0, s.getString(R.string.action_close), close)
+            .build()
+    }
+
     fun alert(id: Int, title: String, text: String, target: String? = null) {
         post(
             id,
@@ -127,5 +149,6 @@ class MonitorNotifications(private val context: Context) {
         const val ID_SNAPSHOT = 1004
         const val ID_ROUND = 1005
         const val ID_NO_ALGORITHMS = 1006
+        const val ID_FLOATING = 1007
     }
 }
