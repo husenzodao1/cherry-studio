@@ -156,6 +156,7 @@
     <string name="delay_use_global">Умумӣ</string>
     <string name="detection_and_permissions">Шинохт ва иҷозатҳо</string>
     <string name="detection_first">даври аввали намоён</string>
+    <string name="detection_missed_neighbor">даври аз даст рафта, аз катаки пешина хонда шуд</string>
     <string name="detection_motion">ҳамон қимат, аниматсияи катаки нав</string>
     <string name="detection_row_shift">ҳамон қимат, қатор ҷунбид</string>
     <string name="detection_value_changed">қимати нав дар катак</string>

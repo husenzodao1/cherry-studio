@@ -37,7 +37,6 @@ import app.coefmonitor.e2e.TestEnv.waitFor
 import app.coefmonitor.monitor.CoefficientOcrEngine
 import app.coefmonitor.monitor.MonitorStatus
 import app.coefmonitor.monitor.MonitoringService
-import app.coefmonitor.monitor.OcrStatus
 import app.coefmonitor.ui.MainActivity
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -291,23 +290,31 @@ class EndToEndMonitoringTest {
         startCapture(MonitoringService.Mode.MONITOR)
         awaitStatus(MonitorStatus.MONITORING, timeoutMs = FIRST_READ_TIMEOUT_MS)
 
-        // The game is scrolled and does not come back to exactly the same place: the row is now 60 dp lower.
+        // The game is scrolled and does not come back to exactly the same place: the row is now
+        // 60 dp lower, and two rounds end while the old place shows nothing.
         onSimulator { it.board.translationY = 60 * it.resources.displayMetrics.density }
+        SystemClock.sleep(500)
+        push("1.70x")
+        SystemClock.sleep(800)
+        push("1.20x")
         val moved = waitFor("row found at its new place", 30_000) {
             runBlocking { container.settings.current().calibration }?.takeIf { it != calibration }
         }
         log("region moved from ${calibration.tile} to ${moved.tile}")
         assertTrue("region did not move down", moved.tile.top > calibration.tile.top)
-        waitFor("reading again at the new place", 30_000) {
-            TestEnv.runtime().takeIf { it.ocrStatus == OcrStatus.OK && it.lastReadValue == Coefficient(333) }
-        }
-        assertEquals("finding the row again is not a round", 0, eventCount())
+
+        // Both rounds are counted in order: the newest from its tile, the one before from the neighbour.
+        awaitEventCount(2)
+        val values = runBlocking { container.events.allRecords() }.sortedBy { it.sequence }.map { it.coefficientHundredths }
+        assertEquals("rounds after the row was found again\n${failureContext()}", listOf(170L, 120L), values)
+        assertEquals("after 1.70x and 1.20x\n${failureContext()}", 3, activeAlgorithm())
         screenshot("e2e_07_row_found_again")
 
         // Monitoring goes on by itself: the next round is read at the new place.
-        push("1.70x")
-        awaitEventCount(1)
-        assertEquals("after 1.70x\n${failureContext()}", 2, activeAlgorithm())
+        waitCooldown()
+        push("2.50x")
+        awaitEventCount(3)
+        assertEquals("after 2.50x\n${failureContext()}", 1, activeAlgorithm())
     }
 
     @Test

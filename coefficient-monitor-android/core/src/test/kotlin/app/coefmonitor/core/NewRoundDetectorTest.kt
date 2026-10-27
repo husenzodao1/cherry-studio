@@ -10,7 +10,8 @@ class NewRoundDetectorTest {
         policy: FirstRoundPolicy = FirstRoundPolicy.INITIALIZE_ONLY,
         baseline: DetectorBaseline = DetectorBaseline(),
         config: DetectorConfig = DetectorConfig(firstRoundPolicy = policy, minRoundIntervalMs = 1_000),
-    ) = FrameDriver(NewRoundDetector(config, baseline))
+        catchUp: Boolean = false,
+    ) = FrameDriver(NewRoundDetector(config, baseline, catchUp))
 
     @Test
     fun `first visible round only initialises by default`() {
@@ -180,12 +181,88 @@ class NewRoundDetectorTest {
     }
 
     @Test
-    fun `a gap is flagged when the neighbour is not the previous tile`() {
+    fun `a round missed between frames is read from the neighbour tile`() {
         val d = driver()
         d.still("2.01x", "1.53x")
         // Two rounds happened between frames: the neighbour shows 3.40x, not 2.01x.
         d.shiftTo("1.70x", oldText = "2.01x", newNeighbor = "3.40x")
+        assertEquals(listOf(340L, 170L), d.newRounds.map { it.value.hundredths })
+        assertEquals(listOf(1L, 2L), d.newRounds.map { it.sequence })
+        val (missed, newest) = d.newRounds
+        assertEquals(DetectionReason.MISSED_ROUND_NEIGHBOR, missed.reason)
+        // Nothing was in the way, but rounds before 3.40x cannot be checked.
+        assertEquals(Continuity.UNKNOWN, missed.continuity)
+        assertEquals(DetectionReason.VALUE_CHANGED, newest.reason)
+        assertEquals(Continuity.CONFIRMED, newest.continuity)
+    }
+
+    @Test
+    fun `a missed round after the tile was covered keeps the gap warning`() {
+        val d = driver()
+        d.still("2.01x", "1.53x")
+        repeat(10) { d.frame("2.01x", "1.53x", reading = OcrReading.Rejected("", RejectionReason.EMPTY)) }
+        d.shiftTo("1.70x", oldText = "2.01x", newNeighbor = "3.40x")
+        assertEquals(listOf(340L, 170L), d.newRounds.map { it.value.hundredths })
+        assertEquals(Continuity.GAP_SUSPECTED, d.newRounds.first().continuity)
+    }
+
+    @Test
+    fun `an unchanged neighbour is not taken as a missed round`() {
+        val d = driver()
+        d.still("2.01x", "1.53x")
+        d.waitMs(5_000)
+        // The newest reading changes but the neighbour tile does not move: no shift, nothing missed.
+        d.still("2.05x", "1.53x")
+        assertEquals(listOf(205L), d.newRounds.map { it.value.hundredths })
         assertEquals(Continuity.GAP_SUSPECTED, d.newRounds.single().continuity)
+    }
+
+    @Test
+    fun `after the row was found again the newest round is processed when the neighbour shows the last one`() {
+        val baseline = DetectorBaseline(lastObservedValue = Coefficient(170), lastSequence = 5, lastEventAtMs = 0)
+        val d = driver(baseline = baseline, catchUp = true)
+        d.still("2.50x", "1.70x")
+        assertEquals(listOf(250L), d.newRounds.map { it.value.hundredths })
+        assertEquals(6L, d.newRounds.single().sequence)
+        assertEquals(Continuity.CONFIRMED, d.newRounds.single().continuity)
+    }
+
+    @Test
+    fun `after the row was found again both visible rounds are processed when the neighbour is new too`() {
+        val baseline = DetectorBaseline(lastObservedValue = Coefficient(170), lastSequence = 5, lastEventAtMs = 0)
+        val d = driver(baseline = baseline, catchUp = true)
+        d.still("2.50x", "1.20x")
+        assertEquals(listOf(120L, 250L), d.newRounds.map { it.value.hundredths })
+        assertEquals(listOf(6L, 7L), d.newRounds.map { it.sequence })
+        // Older rounds may be missing too.
+        assertEquals(Continuity.GAP_SUSPECTED, d.newRounds.first().continuity)
+        assertEquals(Continuity.CONFIRMED, d.newRounds.last().continuity)
+    }
+
+    @Test
+    fun `after the row was found again an unchanged row only initialises`() {
+        val baseline = DetectorBaseline(lastObservedValue = Coefficient(170), lastSequence = 5, lastEventAtMs = 0)
+        val d = driver(baseline = baseline, catchUp = true)
+        d.still("1.70x", "2.01x")
+        assertEquals(0, d.newRounds.size)
+        assertTrue(d.results.any { it is DetectorResult.Initialized && !it.gapSuspected })
+    }
+
+    @Test
+    fun `after the row was found again an unreadable neighbour only initialises and flags the gap`() {
+        val baseline = DetectorBaseline(lastObservedValue = Coefficient(170), lastSequence = 5, lastEventAtMs = 0)
+        val d = driver(baseline = baseline, catchUp = true)
+        d.still("2.50x")
+        assertEquals(0, d.newRounds.size)
+        assertTrue(d.results.any { it is DetectorResult.Initialized && it.gapSuspected })
+    }
+
+    @Test
+    fun `without catch-up a changed row at start only initialises`() {
+        val baseline = DetectorBaseline(lastObservedValue = Coefficient(170), lastSequence = 5, lastEventAtMs = 0)
+        val d = driver(baseline = baseline)
+        d.still("2.50x", "1.20x")
+        assertEquals(0, d.newRounds.size)
     }
 
     @Test

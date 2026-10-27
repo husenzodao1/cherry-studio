@@ -156,6 +156,7 @@
     <string name="delay_use_global">Global</string>
     <string name="detection_and_permissions">Detection &amp; permissions</string>
     <string name="detection_first">first visible round</string>
+    <string name="detection_missed_neighbor">missed round, read from the previous tile</string>
     <string name="detection_motion">same value, new tile animation</string>
     <string name="detection_row_shift">same value, row shifted</string>
     <string name="detection_value_changed">new value on the tile</string>

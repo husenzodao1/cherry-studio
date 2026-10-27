@@ -81,10 +81,14 @@ Each tick (default 300 ms):
 5. A change within the cooldown (default 3 s) after a round counts as a correction, not a new round.
 6. The event gets a monotonic sequence number. `MonitorRepository.applyRound` processes it once.
 
-**Continuity check:** after a genuine one-tile shift, the neighbour must show the value that was
-newest before. If it does not, for example after you were away from the game, the event is
-flagged *possible missed rounds* in the log and on the dashboard. You can then set the active
-algorithm by hand.
+**Continuity check and missed rounds:** besides the newest tile, the neighbour tile (the round
+before it) is read too. After a genuine one-tile shift the neighbour must show the value that was
+newest before. If it shows another valid value and the neighbour tile visibly changed, that value
+is a round that was missed: it is processed first (log: *missed round, read from the previous
+tile*; no clicks, its round is over), then the newest one. Rounds missed before that one cannot be
+seen with two tiles; if the screen was away or covered meanwhile, the missed round is flagged
+*possible missed rounds* in the log and on the dashboard, and you can set the active algorithm by
+hand.
 
 **Start / resume / restart:** the round already visible is used only as the starting point
 (default). The other option is *Process it as a round* in Settings. The value last seen before a
@@ -97,9 +101,11 @@ pixels off, the region cuts the coefficient and every reading is rejected. When 
 given no readable coefficient for 2 s (rejected, "?", or no valid region, e.g. not calibrated or
 the screen rotated), monitoring reads the whole screen every 3 s, finds "?" and the coefficient
 right of it (as calibration's *Auto-detect* does), moves the region there and saves it as the new
-calibration. The detector then re-initialises: the visible round is only the starting point. If it
-differs from the last value seen before, rounds were missed meanwhile; the log and the panel say
-so, and you can set the active algorithm by hand. **Find row** on the panel does the same at once.
+calibration. The detector then catches up: if the newest tile still shows the value seen before,
+nothing was missed; if it shows another one and the neighbour shows the value seen before, the
+newest is the one missed round; if the neighbour is new too, both are processed (neighbour first)
+and flagged, since more may be missing. If the neighbour cannot be read, the visible round is only
+the starting point and the gap is flagged. **Find row** on the panel does the same at once.
 
 ## Algorithms, presets, log
 

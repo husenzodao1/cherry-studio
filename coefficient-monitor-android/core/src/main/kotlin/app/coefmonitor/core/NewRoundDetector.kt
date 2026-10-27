@@ -63,7 +63,15 @@ data class FrameSample(
 )
 
 @Serializable
-enum class DetectionReason { FIRST_OBSERVATION, VALUE_CHANGED, SAME_VALUE_ROW_SHIFT, SAME_VALUE_MOTION }
+enum class DetectionReason {
+    FIRST_OBSERVATION,
+    VALUE_CHANGED,
+    SAME_VALUE_ROW_SHIFT,
+    SAME_VALUE_MOTION,
+
+    /** A round that was missed (e.g. while the row could not be read), read from the neighbour tile. */
+    MISSED_ROUND_NEIGHBOR,
+}
 
 /** Whether the detector could confirm that no round was missed before this one. */
 @Serializable
@@ -96,8 +104,12 @@ sealed interface DetectorResult {
 
     data class Stabilizing(val value: Coefficient, val frames: Int, val required: Int) : DetectorResult
 
-    /** Baseline established without a transition (start/resume/restart). */
-    data class Initialized(val value: Coefficient, val confidence: Float?) : DetectorResult
+    /**
+     * Baseline established without a transition (start/resume/restart). [gapSuspected]: the row was
+     * found again showing another value than before, and the neighbour could not tell which rounds
+     * were missed.
+     */
+    data class Initialized(val value: Coefficient, val confidence: Float?, val gapSuspected: Boolean = false) : DetectorResult
 
     /** The same round is still on screen. */
     data class SameRound(val value: Coefficient) : DetectorResult
@@ -105,7 +117,11 @@ sealed interface DetectorResult {
     /** A change too soon after the previous round; treated as a correction, not a new round. */
     data class SuppressedByCooldown(val value: Coefficient) : DetectorResult
 
-    data class NewRound(val event: RoundEvent) : DetectorResult
+    /**
+     * A new round. [missed] is a round that happened before it but was not seen as newest (read
+     * from the neighbour tile); it must be processed first.
+     */
+    data class NewRound(val event: RoundEvent, val missed: RoundEvent? = null) : DetectorResult
 }
 
 /**
@@ -122,6 +138,12 @@ sealed interface DetectorResult {
  *     (when it showed a different value, so a shift must change it) or, otherwise, a short
  *     motion burst happened without the screen being replaced by something else in between.
  *     Re-reading an unchanged screen never counts.
+ *  6. After a shift the neighbour must show the round committed before. If it shows another valid
+ *     value and the neighbour tile visibly changed, that value is a round that was missed: it is
+ *     emitted first ([DetectorResult.NewRound.missed]), then the newest one.
+ *  7. With [catchUp] (the row was lost and found again) the first trusted value is compared with
+ *     the baseline instead of only initialising: rounds missed meanwhile are taken from the newest
+ *     and the neighbour tile.
  *
  * Image signatures are only compared at the same screen position (frame-to-frame, or the
  * neighbour against itself). Comparisons across positions use OCR text instead, because a
@@ -132,6 +154,7 @@ sealed interface DetectorResult {
 class NewRoundDetector(
     config: DetectorConfig,
     baseline: DetectorBaseline = DetectorBaseline(),
+    private val catchUp: Boolean = false,
 ) {
     private val config = config.sanitized()
     private val restoredValue = baseline.lastObservedValue
@@ -198,6 +221,7 @@ class NewRoundDetector(
         val current = committed
         if (current == null) {
             val alreadySeenBeforeRestart = restoredValue == value
+            if (catchUp && restoredValue != null && !alreadySeenBeforeRestart) return catchUpAfterGap(frame, value, confidence, restoredValue)
             if (alreadySeenBeforeRestart || config.firstRoundPolicy == FirstRoundPolicy.INITIALIZE_ONLY) {
                 commit(frame, value)
                 return DetectorResult.Initialized(value, confidence)
@@ -225,7 +249,62 @@ class NewRoundDetector(
             commit(frame, value)
             return DetectorResult.SuppressedByCooldown(value)
         }
+        val missed = missedRound(current, frame)
+        if (missed != null) {
+            // More rounds may be missing before it if the screen was away or covered meanwhile.
+            val missedContinuity = if (longTransitionSeen || interruptedSinceCommit) Continuity.GAP_SUSPECTED else Continuity.UNKNOWN
+            return emitWithMissed(frame, missed, missedContinuity, value, confidence, reason)
+        }
         return emit(frame, value, confidence, reason, continuityOf(current, frame))
+    }
+
+    /**
+     * The row was found again and its newest tile shows [value], not [before]: rounds were missed.
+     * If the neighbour shows [before], only the newest one was missed; if it shows another value,
+     * that one was missed too (and maybe more). If the neighbour is unreadable, only initialise.
+     */
+    private fun catchUpAfterGap(frame: FrameSample, value: Coefficient, confidence: Float?, before: Coefficient): DetectorResult {
+        val neighbor = frame.neighborReading?.let(::acceptedOrNull)?.value
+        if (neighbor == null) {
+            commit(frame, value)
+            return DetectorResult.Initialized(value, confidence, gapSuspected = true)
+        }
+        if (neighbor == before) return emit(frame, value, confidence, DetectionReason.VALUE_CHANGED, Continuity.CONFIRMED)
+        return emitWithMissed(frame, neighbor, Continuity.GAP_SUSPECTED, value, confidence, DetectionReason.VALUE_CHANGED)
+    }
+
+    /**
+     * The round between the committed one and the newest, read from the neighbour tile. Only after
+     * the neighbour tile visibly changed: an unchanged neighbour means the row did not shift and the
+     * newest reading only replaced an earlier one.
+     */
+    private fun missedRound(current: CommittedRound, frame: FrameSample): Coefficient? {
+        val neighbor = frame.neighborReading?.let(::acceptedOrNull)?.value ?: return null
+        if (neighbor == current.value) return null
+        val before = current.neighbor ?: return null
+        val now = frame.neighbor ?: return null
+        return neighbor.takeIf { now.similarity(before) < config.sameTileSimilarity }
+    }
+
+    private fun emitWithMissed(
+        frame: FrameSample,
+        missed: Coefficient,
+        missedContinuity: Continuity,
+        value: Coefficient,
+        confidence: Float?,
+        reason: DetectionReason,
+    ): DetectorResult.NewRound {
+        lastSequence += 1
+        val missedEvent = RoundEvent(
+            lastSequence,
+            missed,
+            (frame.neighborReading as? OcrReading.Valid)?.confidence,
+            frame.timestampMs,
+            DetectionReason.MISSED_ROUND_NEIGHBOR,
+            missedContinuity,
+        )
+        // The newest round follows the missed one directly.
+        return emit(frame, value, confidence, reason, Continuity.CONFIRMED).copy(missed = missedEvent)
     }
 
     private fun emit(

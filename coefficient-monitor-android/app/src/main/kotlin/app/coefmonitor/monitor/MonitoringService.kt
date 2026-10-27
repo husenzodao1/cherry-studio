@@ -73,9 +73,9 @@ class MonitoringService : LifecycleService() {
     @Volatile
     private var lastRowSearchMs = 0L
 
-    /** The region was moved while monitoring; the next first reading tells whether rounds were missed meanwhile. */
+    /** The region was moved while monitoring; the next detector catches up on rounds missed meanwhile. */
     @Volatile
-    private var checkGapAfterRowSearch = false
+    private var rowMoved = false
 
     @Volatile
     private var settings = AppSettings()
@@ -266,8 +266,11 @@ class MonitoringService : LifecycleService() {
                     val latest = settings
                     if (latest.detector != active.detector || latest.calibration != active.calibration) {
                         // Reconfigured mid-session (settings, preset, recalibration): re-initialise
-                        // from the stored baseline without processing the round on screen.
-                        detector = newDetector(latest, forceInitializeOnly = true)
+                        // from the stored baseline without processing the round on screen, except
+                        // after the row was found again: then rounds missed meanwhile are caught up.
+                        val catchUp = rowMoved
+                        rowMoved = false
+                        detector = newDetector(latest, forceInitializeOnly = true, catchUp = catchUp)
                         pipeline.reset()
                         log(DiagnosticLevel.INFO, "MONITOR", "Detector re-initialised after a configuration change")
                     }
@@ -280,10 +283,10 @@ class MonitoringService : LifecycleService() {
         }
     }
 
-    private suspend fun newDetector(s: AppSettings, forceInitializeOnly: Boolean): NewRoundDetector {
+    private suspend fun newDetector(s: AppSettings, forceInitializeOnly: Boolean, catchUp: Boolean = false): NewRoundDetector {
         detectorReady = false
         val config = if (forceInitializeOnly) s.detector.copy(firstRoundPolicy = FirstRoundPolicy.INITIALIZE_ONLY) else s.detector
-        return NewRoundDetector(config, container.monitor.baseline())
+        return NewRoundDetector(config, container.monitor.baseline(), catchUp)
     }
 
     private suspend fun tick(detector: NewRoundDetector, pipeline: FramePipeline, s: AppSettings) {
@@ -344,12 +347,9 @@ class MonitoringService : LifecycleService() {
             }
             is DetectorResult.Initialized -> {
                 markReady(result.value)
-                if (checkGapAfterRowSearch) {
-                    checkGapAfterRowSearch = false
-                    if (container.monitor.baseline().lastObservedValue != result.value) {
-                        runtime.update { it.copy(lastContinuity = Continuity.GAP_SUSPECTED) }
-                        log(DiagnosticLevel.WARNING, "ROW_SEARCH", "The row shows ${result.value} now: rounds were missed while it could not be read")
-                    }
+                if (result.gapSuspected) {
+                    runtime.update { it.copy(lastContinuity = Continuity.GAP_SUSPECTED) }
+                    log(DiagnosticLevel.WARNING, "ROW_SEARCH", "The row shows ${result.value} now: rounds were missed while it could not be read")
                 }
                 container.monitor.recordObservation(result.value)
                 log(DiagnosticLevel.INFO, "DETECTOR", "Observation initialised at ${result.value} (not processed as a round)")
@@ -362,6 +362,8 @@ class MonitoringService : LifecycleService() {
             }
             is DetectorResult.NewRound -> {
                 markReady(result.event.value)
+                // A missed round is over already: it moves the sequence, but its clicks would be too late.
+                result.missed?.let { applyRound(it, s, runClicks = false) }
                 applyRound(result.event, s)
             }
         }
@@ -417,7 +419,8 @@ class MonitoringService : LifecycleService() {
             return
         }
         if (found == settings.calibration) return
-        checkGapAfterRowSearch = detectorReady
+        // Only catch up against a value read in this session, never against a stale one from before.
+        rowMoved = detectorReady
         container.settings.update { it.copy(calibration = found) }
         log(DiagnosticLevel.INFO, "ROW_SEARCH", "Row of coefficients found; the observed region was moved there")
     }
@@ -452,7 +455,7 @@ class MonitoringService : LifecycleService() {
         }
     }
 
-    private suspend fun applyRound(event: RoundEvent, s: AppSettings) {
+    private suspend fun applyRound(event: RoundEvent, s: AppSettings, runClicks: Boolean = true) {
         val result = try {
             container.monitor.applyRound(event, s.threshold)
         } catch (e: CancellationException) {
@@ -490,7 +493,7 @@ class MonitoringService : LifecycleService() {
                     )
                     else -> Unit
                 }
-                if (s.autoClickEnabled) container.autoClicker.run(result.transition.newIndex)
+                if (s.autoClickEnabled && runClicks) container.autoClicker.run(result.transition.newIndex)
                 if (s.roundNotifications) {
                     notifications.round(
                         str.getString(R.string.notif_round_title, event.value.toString()),
