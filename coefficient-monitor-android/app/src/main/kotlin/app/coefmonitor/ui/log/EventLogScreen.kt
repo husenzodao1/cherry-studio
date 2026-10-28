@@ -56,6 +56,7 @@ import app.coefmonitor.AppContainer
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.text.font.FontWeight
 import app.coefmonitor.R
+import app.coefmonitor.core.DetectionReason
 import app.coefmonitor.ui.components.ListCard
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
@@ -288,6 +289,9 @@ private fun EventCard(event: EventEntity) {
                 )
                 if (enumOrNull<Continuity>(event.continuity) == Continuity.GAP_SUSPECTED) {
                     Text(stringResource(R.string.continuity_gap), style = MaterialTheme.typography.labelSmall, color = semantic.warning)
+                }
+                if (enumOrNull<DetectionReason>(event.detectionReason) == DetectionReason.SEEN_LATE) {
+                    Text(stringResource(R.string.detection_seen_late), style = MaterialTheme.typography.labelSmall, color = semantic.warning)
                 }
             }
         }

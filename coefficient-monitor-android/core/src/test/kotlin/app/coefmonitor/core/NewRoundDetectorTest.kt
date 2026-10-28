@@ -231,6 +231,39 @@ class NewRoundDetectorTest {
     }
 
     @Test
+    fun `a round that ended while the row was out of view counts but is seen late`() {
+        val d = driver()
+        d.still("2.01x", "1.53x")
+        d.hidden(3_000)
+        d.shiftTo("1.70x", oldText = "?", newNeighbor = "2.01x")
+        assertEquals(listOf(170L), d.newRounds.map { it.value.hundredths })
+        assertEquals(DetectionReason.SEEN_LATE, d.newRounds.single().reason)
+        // The next round seen live is a normal one again.
+        d.shiftTo("1.20x", oldText = "1.70x", newNeighbor = "1.70x")
+        assertEquals(DetectionReason.VALUE_CHANGED, d.newRounds.last().reason)
+    }
+
+    @Test
+    fun `losing the row for a moment is not out of view`() {
+        val d = driver()
+        d.still("2.01x", "1.53x")
+        d.hidden(600)
+        d.shiftTo("1.70x", oldText = "2.01x", newNeighbor = "2.01x")
+        assertEquals(DetectionReason.VALUE_CHANGED, d.newRounds.single().reason)
+    }
+
+    @Test
+    fun `a round that ended during a long app switch is seen late`() {
+        val d = driver()
+        d.still("2.01x", "1.53x")
+        // Another app is on screen for a while: every frame differs from the one before.
+        repeat(12) { i -> d.frame("other app", offsetX = (i % 2) * 30, reading = null) }
+        d.still("1.70x", "2.01x")
+        assertEquals(listOf(170L), d.newRounds.map { it.value.hundredths })
+        assertEquals(DetectionReason.SEEN_LATE, d.newRounds.single().reason)
+    }
+
+    @Test
     fun `an unchanged neighbour is not taken as a missed round`() {
         val d = driver()
         d.still("2.01x", "1.53x")
@@ -249,6 +282,8 @@ class NewRoundDetectorTest {
         assertEquals(listOf(250L), d.newRounds.map { it.value.hundredths })
         assertEquals(6L, d.newRounds.single().sequence)
         assertEquals(Continuity.CONFIRMED, d.newRounds.single().continuity)
+        // It ended while the row was lost: counted, but not in time for its clicks.
+        assertEquals(DetectionReason.SEEN_LATE, d.newRounds.single().reason)
     }
 
     @Test
@@ -258,6 +293,7 @@ class NewRoundDetectorTest {
         d.still("2.50x", "1.20x")
         assertEquals(listOf(120L, 250L), d.newRounds.map { it.value.hundredths })
         assertEquals(listOf(6L, 7L), d.newRounds.map { it.sequence })
+        assertEquals(listOf(DetectionReason.MISSED_ROUND_NEIGHBOR, DetectionReason.SEEN_LATE), d.newRounds.map { it.reason })
         // Older rounds may be missing too.
         assertEquals(Continuity.GAP_SUSPECTED, d.newRounds.first().continuity)
         assertEquals(Continuity.CONFIRMED, d.newRounds.last().continuity)

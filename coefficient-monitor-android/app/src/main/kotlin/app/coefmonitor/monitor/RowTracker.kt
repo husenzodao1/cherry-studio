@@ -31,9 +31,12 @@ sealed interface PipelineStep {
  *
  * Until the row is known, the whole screen is read. Once it is, OCR reads only a strip around it
  * (cheap; it also follows the row when the game scrolls a little). When the row is not in the
- * strip, the whole screen is read in the same tick, so a row that moved is found again at once.
+ * strip, the whole screen is read in the same tick, also while it still scrolls, so a row that
+ * moved is found again at once. While the row is nowhere, the whole screen is read again as soon
+ * as it changes (scrolled back, the game in front again), like an eye looking for it. Such frames
+ * are marked as not showing the row, so the detector knows what happened out of view.
  * The cells of the newest tile and its neighbour stay put while the row does; their pictures feed
- * the detector's motion check, and OCR is skipped while the newest tile is moving.
+ * the detector's motion check, and OCR is skipped while the newest tile starts moving.
  */
 class RowTracker(
     private val ocr: CoefficientOcrEngine,
@@ -51,6 +54,8 @@ class RowTracker(
         val generation: Long,
         val width: Int,
         val height: Int,
+        /** Coarse picture of the whole screen, to tell whether it changed since the last search. */
+        val screen: ImageSignature,
         val strip: PixelRect?,
         val stripPixels: IntArray?,
         val newest: ImageSignature?,
@@ -68,8 +73,14 @@ class RowTracker(
     private var frameHeight = 0
     private var lastNewest: ImageSignature? = null
     private var stripCache: StripCache? = null
-    private var lastFullSearchMs = 0L
     private var movingSinceMs: Long? = null
+
+    /** The screen as it was at the last whole-screen search that found nothing, and when that was. */
+    private var searchedScreen: ImageSignature? = null
+    private var searchedAtMs = 0L
+
+    /** Since when the row has been nowhere on the screen; null while it is seen. */
+    private var lostSinceMs: Long? = null
 
     /** Where the strip showed the row once; it is followed there only if the next look agrees. */
     private var pendingMove: RowCells? = null
@@ -99,7 +110,8 @@ class RowTracker(
             reset()
         }
         val grab = capturer.withLatestFrame(::grab) ?: return PipelineStep.NoFrame
-        val tracked = cells ?: return fullSearch(capturer, near = null, nowMs = nowMs, force = true) ?: PipelineStep.Searching
+        val tracked = cells ?: return fullSearch(capturer, grab, near = null, nowMs = nowMs)
+            ?: PipelineStep.Searching.also { if (lostSinceMs == null) lostSinceMs = SystemClock.elapsedRealtime() }
 
         val newest = grab.newest!!
         val moving = lastNewest?.let { it.similarity(newest) < stableSimilarity } == true
@@ -115,16 +127,16 @@ class RowTracker(
         val words = stripWords(grab)
         val located = RowLocator.locate(words, grab.width, grab.height, near = tracked)
         if (located == null) {
-            // While the tile still changes the row may just be unreadable for a moment.
-            if (moving) return PipelineStep.Sample(FrameSample(nowMs, newest, grab.neighbor, reading = null), anchored = false, lost = false)
-            // Not in the strip any more: look at the whole screen now.
-            fullSearch(capturer, near = tracked, nowMs = nowMs, force = false)?.let { return it }
+            // Not in the strip any more: look at the whole screen, also while it still scrolls.
+            fullSearch(capturer, grab, near = tracked, nowMs = nowMs)?.let { return it }
+            if (lostSinceMs == null) lostSinceMs = now
             return PipelineStep.Sample(
-                FrameSample(nowMs, newest, grab.neighbor, OcrReading.Rejected("", RejectionReason.EMPTY)),
+                FrameSample(nowMs, newest, grab.neighbor, OcrReading.Rejected("", RejectionReason.EMPTY), rowVisible = false),
                 anchored = false,
                 lost = true,
             )
         }
+        lostSinceMs = null
         if (located.movedFrom(tracked)) {
             // One look in the middle of an animation can show the row somewhere else for a moment.
             val confirmed = pendingMove?.let { !located.movedFrom(it) } == true
@@ -146,6 +158,8 @@ class RowTracker(
         movingSinceMs = null
         stripCache = null
         pendingMove = null
+        searchedScreen = null
+        lostSinceMs = null
     }
 
     /** Copies what this tick needs while the frame is locked: the strip and the two cells. */
@@ -156,12 +170,14 @@ class RowTracker(
             frameHeight = frame.height
             reset()
         }
-        val tracked = cells ?: return Grab(frame.generation, frame.width, frame.height, null, null, null, null)
+        val screen = frame.thumbnail()
+        val tracked = cells ?: return Grab(frame.generation, frame.width, frame.height, screen, null, null, null, null)
         val strip = tracked.strip(frame.width, frame.height)
         return Grab(
             generation = frame.generation,
             width = frame.width,
             height = frame.height,
+            screen = screen,
             strip = strip,
             stripPixels = frame.crop(strip),
             newest = signature(frame.crop(tracked.newest), tracked.newest),
@@ -196,20 +212,23 @@ class RowTracker(
 
     /**
      * Reads the whole screen and, if the row is there, follows it from now on. Returns null if it
-     * was not found (or a search ran too recently while the row is lost, unless [force]).
+     * was not found, or if this very screen was already searched (see [worthSearching]).
      */
-    private suspend fun fullSearch(capturer: ScreenCapturer, near: RowCells?, nowMs: Long, force: Boolean): PipelineStep? {
+    private suspend fun fullSearch(capturer: ScreenCapturer, grab: Grab, near: RowCells?, nowMs: Long): PipelineStep? {
         val now = SystemClock.elapsedRealtime()
-        if (!force && now - lastFullSearchMs < LOST_SEARCH_INTERVAL_MS) return null
-        lastFullSearchMs = now
+        if (!worthSearching(grab.screen, now)) return null
         val takenMs = takenAt(nowMs)
         val bitmap = capturer.withLatestFrame { it.toBitmap() } ?: return null
         val words = timedOcr { ocr.readWords(bitmap) }
         val found = RowLocator.locate(words, bitmap.width, bitmap.height, near)
         if (found == null) {
             bitmap.recycle()
+            searchedScreen = grab.screen
+            searchedAtMs = now
             return null
         }
+        searchedScreen = null
+        lostSinceMs = null
         onRowFound(bitmap, found)
         val sample = sampleAt(found, words, bitmap, takenMs)
         bitmap.recycle()
@@ -241,6 +260,19 @@ class RowTracker(
     }
 
     /**
+     * Like an eye: look again as soon as the screen changed (it scrolled back, the game is in front
+     * again), otherwise now and then. After a long time without the row, at most once a second.
+     */
+    private fun worthSearching(screen: ImageSignature, now: Long): Boolean {
+        val searched = searchedScreen ?: return true
+        val sinceSearch = now - searchedAtMs
+        if (sinceSearch >= UNCHANGED_SEARCH_INTERVAL_MS) return true
+        if (searched.similarity(screen) >= SAME_SCREEN_SIMILARITY) return false
+        val longLost = lostSinceMs?.let { now - it > LONG_LOST_MS } == true
+        return !longLost || sinceSearch >= LONG_LOST_SEARCH_INTERVAL_MS
+    }
+
+    /**
      * The time of a picture taken now, on the clock of [next]'s nowMs. A picture taken after a
      * slow OCR call is seconds newer than the tick: the detector must know how long it looked away.
      */
@@ -266,8 +298,15 @@ class RowTracker(
         /** Practically pixel-identical: OCR would return the same words. */
         const val REUSE_SIMILARITY = 0.999f
 
-        /** While the row is lost, the whole screen is read at most this often. */
-        const val LOST_SEARCH_INTERVAL_MS = 700L
+        /** A screen this similar to the one last searched is the same screen: nothing new to find. */
+        const val SAME_SCREEN_SIMILARITY = 0.995f
+
+        /** An unchanged screen is searched again this often (something small may have changed). */
+        const val UNCHANGED_SEARCH_INTERVAL_MS = 2_000L
+
+        /** After this long without the row, a changing screen is searched at most once a second. */
+        const val LONG_LOST_MS = 30_000L
+        const val LONG_LOST_SEARCH_INTERVAL_MS = 1_000L
 
         /** A tile slides in within this; after it the tile is read even while its picture still changes. */
         const val MAX_MOVING_MS = 500L

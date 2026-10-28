@@ -55,6 +55,7 @@ class FrameDriver(val detector: NewRoundDetector, startMs: Long = 1_000_000L) {
         neighbor: String? = null,
         offsetX: Int = 0,
         reading: OcrReading? = CoefficientParser.parse(text, 0.95f),
+        rowVisible: Boolean = true,
     ): DetectorResult {
         now += FRAME_MS
         val result = detector.onFrame(
@@ -64,6 +65,7 @@ class FrameDriver(val detector: NewRoundDetector, startMs: Long = 1_000_000L) {
                 neighbor = neighbor?.let { TestTiles.signature(it) },
                 reading = reading,
                 neighborReading = neighbor?.let { CoefficientParser.parse(it, 0.95f) },
+                rowVisible = rowVisible,
             ),
         )
         results += result
@@ -79,6 +81,11 @@ class FrameDriver(val detector: NewRoundDetector, startMs: Long = 1_000_000L) {
         frame(oldText, offsetX = 40, reading = null)
         frame(newText, offsetX = -40, reading = null)
         still(newText, newNeighbor)
+    }
+
+    /** The row is nowhere on the screen for [ms] (scrolled away): [what] is shown where it was. */
+    fun hidden(ms: Long, what: String = "?") {
+        repeat((ms / FRAME_MS).toInt()) { frame(what, reading = OcrReading.Rejected("", RejectionReason.EMPTY), rowVisible = false) }
     }
 
     fun waitMs(ms: Long) {

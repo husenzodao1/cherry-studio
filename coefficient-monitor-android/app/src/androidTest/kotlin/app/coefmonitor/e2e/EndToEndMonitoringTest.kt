@@ -14,6 +14,7 @@ import app.coefmonitor.core.AlgorithmDefinition
 import app.coefmonitor.core.AlgorithmStep
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
+import app.coefmonitor.core.DetectionReason
 import app.coefmonitor.core.ImageSignature
 import app.coefmonitor.core.NormalizedPoint
 import app.coefmonitor.core.NormalizedRect
@@ -296,9 +297,11 @@ class EndToEndMonitoringTest {
 
         // Both rounds are counted in order: the newest from its tile, the one before from the neighbour.
         awaitEventCount(2)
-        val values = runBlocking { container.events.allRecords() }.sortedBy { it.sequence }.map { it.coefficientHundredths }
-        assertEquals("rounds after the row was found again\n${failureContext()}", listOf(170L, 120L), values)
+        val records = runBlocking { container.events.allRecords() }.sortedBy { it.sequence }
+        assertEquals("rounds after the row was found again\n${failureContext()}", listOf(170L, 120L), records.map { it.coefficientHundredths })
         assertEquals("after 1.70x and 1.20x\n${failureContext()}", 3, activeAlgorithm())
+        // Both ended out of view: they count, but their clicks are not run.
+        assertEquals(listOf(DetectionReason.MISSED_ROUND_NEIGHBOR, DetectionReason.SEEN_LATE), records.map { it.detectionReason })
         screenshot("e2e_07_row_found_again")
 
         // Monitoring goes on by itself: the next round is read at the new place.
@@ -306,6 +309,8 @@ class EndToEndMonitoringTest {
         push("2.50x")
         awaitEventCount(3)
         assertEquals("after 2.50x\n${failureContext()}", 1, activeAlgorithm())
+        val live = runBlocking { container.events.allRecords() }.maxBy { it.sequence }
+        assertEquals("the next round is seen live again", DetectionReason.VALUE_CHANGED, live.detectionReason)
     }
 
     @Test

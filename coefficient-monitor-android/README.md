@@ -100,8 +100,12 @@ restart is never processed again.
 ## Finding the row again
 
 When the game is scrolled, the row moves with it. As long as it stays inside the strip, the next
-tick finds it at its new place; otherwise the whole screen is read in the same tick (and every
-0.7 s while it is not found), so the row is found again as soon as it is back, wherever it is.
+tick finds it at its new place; otherwise the whole screen is read in the same tick, also while it
+still scrolls. While the row is nowhere, the whole screen is read again as soon as it changes
+(scrolled back, the game in front again), like an eye looking for it: a coarse picture of the
+screen taken every tick tells whether anything changed. An unchanged screen is read again every
+2 s; after 30 s without the row, at most once a second. So the row is found again the moment it
+is back, wherever it is.
 While the row is at the same height it stays put: a newest tile that was not read in one frame,
 or a row partly covered by the floating panel, does not move it. A move is followed only when two
 looks in a row agree, so a glimpse in the middle of an animation never moves the row.
@@ -111,6 +115,13 @@ the value seen before, nothing was missed; if it shows another one and the neigh
 value seen before, the newest is the one missed round; if the neighbour is new too, both are
 processed (neighbour first) and flagged, since more may be missing. If the neighbour cannot be
 read, the newest is processed and the gap is flagged.
+
+**Rounds that ended out of view count, but run no clicks.** A round that ended while the row was
+not on the screen for 1.5 s or more (scrolled away), while another app was in front, or before
+the row was found again, moves the sequence as usual, so the count is never lost. Its clicks are
+not run, because that moment has passed: the log marks it *Seen late — no clicks*, the panel and
+the dashboard say that clicks resume with the next round, and the next round seen live runs its
+clicks as usual.
 
 ## Algorithms, presets, log
 

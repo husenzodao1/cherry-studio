@@ -17,6 +17,7 @@ import app.coefmonitor.R
 import app.coefmonitor.appContainer
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
+import app.coefmonitor.core.DetectionReason
 import app.coefmonitor.core.DetectorResult
 import app.coefmonitor.core.FirstRoundPolicy
 import app.coefmonitor.core.NewRoundDetector
@@ -343,7 +344,12 @@ class MonitoringService : LifecycleService() {
                 markReady(result.event.value)
                 // A missed round is over already: it moves the sequence, but its clicks would be too late.
                 result.missed?.let { applyRound(it, s, runClicks = false) }
-                applyRound(result.event, s)
+                // So is one that ended out of view: the clicks wait for the next round seen live.
+                val late = result.event.reason == DetectionReason.SEEN_LATE
+                if (late) {
+                    log(DiagnosticLevel.WARNING, "ROW", "${result.event.value} ended while the row was out of view: counted, clicks wait for the next round")
+                }
+                applyRound(result.event, s, runClicks = !late)
             }
         }
     }
@@ -410,7 +416,7 @@ class MonitoringService : LifecycleService() {
             is ProcessResult.Duplicate ->
                 container.events.log(DiagnosticLevel.WARNING, "DUPLICATE", "Round ${event.roundId} was already processed; ignored")
             is ProcessResult.Applied -> {
-                runtime.update { it.copy(lastContinuity = event.continuity) }
+                runtime.update { it.copy(lastContinuity = event.continuity, lastSeenLate = event.reason == DetectionReason.SEEN_LATE) }
                 if (event.continuity == Continuity.GAP_SUSPECTED) {
                     container.events.log(
                         DiagnosticLevel.WARNING,

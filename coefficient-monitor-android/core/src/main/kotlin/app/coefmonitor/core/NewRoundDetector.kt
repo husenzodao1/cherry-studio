@@ -60,6 +60,8 @@ data class FrameSample(
     val reading: OcrReading?,
     /** OCR result for [neighbor]; used to tell whether the row really shifted by one tile. */
     val neighborReading: OcrReading? = null,
+    /** False when the row was not found anywhere on the screen (scrolled away, another app on top). */
+    val rowVisible: Boolean = true,
 )
 
 @Serializable
@@ -71,6 +73,12 @@ enum class DetectionReason {
 
     /** A round that was missed (e.g. while the row could not be read), read from the neighbour tile. */
     MISSED_ROUND_NEIGHBOR,
+
+    /**
+     * A round that ended while the row was out of view (scrolled away, another app): it counts in
+     * the sequence, but it is too late for its clicks; they wait for the next round seen live.
+     */
+    SEEN_LATE,
 }
 
 /** Whether the detector could confirm that no round was missed before this one. */
@@ -145,6 +153,9 @@ sealed interface DetectorResult {
  *     the baseline instead of only initialising: rounds missed meanwhile are taken from the newest
  *     and the neighbour tile. A changed newest tile is always a new round, flagged when the
  *     neighbour cannot tell what was missed before it.
+ *  8. A round that ended out of view is [DetectionReason.SEEN_LATE]: after catching up, after the
+ *     row was not visible for [MIN_HIDDEN_MS] in total, or after the screen showed something else
+ *     for longer than a slide. It counts in the sequence, but its clicks are not run.
  *
  * Image signatures are only compared at the same screen position (frame-to-frame, or the
  * neighbour against itself). Comparisons across positions use OCR text instead, because a
@@ -173,6 +184,8 @@ class NewRoundDetector(
     private var shortTransitionSeen = false
     private var longTransitionSeen = false
     private var interruptedSinceCommit = false
+    private var lastFrameMs: Long? = null
+    private var hiddenMsSinceCommit = 0L
 
     private data class CommittedRound(
         val value: Coefficient,
@@ -184,6 +197,9 @@ class NewRoundDetector(
     val lastProcessedSequence: Long get() = lastSequence
 
     fun onFrame(frame: FrameSample): DetectorResult {
+        val previousMs = lastFrameMs
+        lastFrameMs = frame.timestampMs
+        if (!frame.rowVisible && previousMs != null) hiddenMsSinceCommit += frame.timestampMs - previousMs
         val previous = previousFrame
         previousFrame = frame.primary
         val moving = previous != null && previous.similarity(frame.primary) < config.frameStableSimilarity
@@ -254,26 +270,28 @@ class NewRoundDetector(
             commit(frame, value)
             return DetectorResult.SuppressedByCooldown(value)
         }
+        // Ended while the row was out of view: it counts, but its clicks are too late.
+        val seen = if (hiddenMsSinceCommit >= MIN_HIDDEN_MS || longTransitionSeen) DetectionReason.SEEN_LATE else reason
         val missed = missedRound(current, frame)
         if (missed != null) {
             // More rounds may be missing before it if the screen was away or covered meanwhile.
             val missedContinuity = if (longTransitionSeen || interruptedSinceCommit) Continuity.GAP_SUSPECTED else Continuity.UNKNOWN
-            return emitWithMissed(frame, missed, missedContinuity, value, confidence, reason)
+            return emitWithMissed(frame, missed, missedContinuity, value, confidence, seen)
         }
-        return emit(frame, value, confidence, reason, continuityOf(current, frame))
+        return emit(frame, value, confidence, seen, continuityOf(current, frame))
     }
 
     /**
      * The row was found again and its newest tile shows [value], not [before]: rounds were missed.
      * If the neighbour shows [before], only the newest one was missed; if it shows another value,
      * that one was missed too (and maybe more). If the neighbour is unreadable, the newest is
-     * processed and the gap flagged.
+     * processed and the gap flagged. Either way the newest ended out of view: [DetectionReason.SEEN_LATE].
      */
     private fun catchUpAfterGap(frame: FrameSample, value: Coefficient, confidence: Float?, before: Coefficient): DetectorResult {
         val neighbor = frame.neighborReading?.let(::acceptedOrNull)?.value
-            ?: return emit(frame, value, confidence, DetectionReason.VALUE_CHANGED, Continuity.GAP_SUSPECTED)
-        if (neighbor == before) return emit(frame, value, confidence, DetectionReason.VALUE_CHANGED, Continuity.CONFIRMED)
-        return emitWithMissed(frame, neighbor, Continuity.GAP_SUSPECTED, value, confidence, DetectionReason.VALUE_CHANGED)
+            ?: return emit(frame, value, confidence, DetectionReason.SEEN_LATE, Continuity.GAP_SUSPECTED)
+        if (neighbor == before) return emit(frame, value, confidence, DetectionReason.SEEN_LATE, Continuity.CONFIRMED)
+        return emitWithMissed(frame, neighbor, Continuity.GAP_SUSPECTED, value, confidence, DetectionReason.SEEN_LATE)
     }
 
     /**
@@ -345,6 +363,7 @@ class NewRoundDetector(
         shortTransitionSeen = false
         longTransitionSeen = false
         interruptedSinceCommit = false
+        hiddenMsSinceCommit = 0L
     }
 
     private fun closeTransition() {
@@ -373,5 +392,10 @@ class NewRoundDetector(
         a == null -> b
         b == null -> a
         else -> minOf(a, b)
+    }
+
+    companion object {
+        /** Not seeing the row for this long in total means a round ending meanwhile was not seen live. */
+        const val MIN_HIDDEN_MS = 1_500L
     }
 }

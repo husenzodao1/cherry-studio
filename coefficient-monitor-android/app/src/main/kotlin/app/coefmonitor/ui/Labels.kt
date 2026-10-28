@@ -82,6 +82,7 @@ object Labels {
         DetectionReason.SAME_VALUE_ROW_SHIFT -> R.string.detection_row_shift
         DetectionReason.SAME_VALUE_MOTION -> R.string.detection_motion
         DetectionReason.MISSED_ROUND_NEIGHBOR -> R.string.detection_missed_neighbor
+        DetectionReason.SEEN_LATE -> R.string.detection_seen_late
     }
 
     @StringRes

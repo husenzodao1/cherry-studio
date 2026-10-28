@@ -58,6 +58,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material.icons.outlined.VisibilityOff
 import app.coefmonitor.R
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
@@ -402,6 +403,9 @@ private fun LastRoundCard(state: DashboardState) {
         )
         if (enumOrNull<Continuity>(monitor.lastContinuity) == Continuity.GAP_SUSPECTED) {
             Banner(stringResource(R.string.warning_gap), semantic.warning, Icons.Outlined.WarningAmber)
+        }
+        if (state.runtime.lastSeenLate) {
+            Banner(stringResource(R.string.warning_seen_late), semantic.warning, Icons.Outlined.VisibilityOff)
         }
     }
 }

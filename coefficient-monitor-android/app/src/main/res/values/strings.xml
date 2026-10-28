@@ -128,6 +128,7 @@
     <string name="detection_missed_neighbor">missed round, read from the previous tile</string>
     <string name="detection_motion">same value, new tile animation</string>
     <string name="detection_row_shift">same value, row shifted</string>
+    <string name="detection_seen_late">Seen late — no clicks</string>
     <string name="detection_value_changed">new value on the tile</string>
     <string name="diagnostics_empty_text">Rejected OCR readings, errors and manual actions are listed here.</string>
     <string name="diagnostics_empty_title">No diagnostics</string>
@@ -330,5 +331,6 @@
     <string name="warning_auto_click_off">Auto-clicker is off — turn it on in Accessibility</string>
     <string name="warning_gap">Possible missed rounds — check the game history</string>
     <string name="warning_last_algorithm">Last algorithm — add one more to continue</string>
+    <string name="warning_seen_late">Last round ended out of view — clicks resume next round</string>
     <string name="zoom">Zoom</string>
 </resources>

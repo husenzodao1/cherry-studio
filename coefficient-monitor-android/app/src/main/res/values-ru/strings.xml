@@ -128,6 +128,7 @@
     <string name="detection_missed_neighbor">пропущенный раунд, прочитан с предыдущей плитки</string>
     <string name="detection_motion">то же значение, анимация новой плитки</string>
     <string name="detection_row_shift">то же значение, ряд сдвинулся</string>
+    <string name="detection_seen_late">Замечен поздно — без кликов</string>
     <string name="detection_value_changed">новое значение на плитке</string>
     <string name="diagnostics_empty_text">Здесь отображаются отклонённые чтения OCR, ошибки и ручные действия.</string>
     <string name="diagnostics_empty_title">Диагностики нет</string>
@@ -327,5 +328,6 @@
     <string name="warning_auto_click_off">Автокликер выключен — включите в спец. возможностях</string>
     <string name="warning_gap">Возможны пропущенные раунды — проверьте историю игры</string>
     <string name="warning_last_algorithm">Последний алгоритм — добавьте ещё один</string>
+    <string name="warning_seen_late">Последний раунд закончился вне экрана — клики со следующего раунда</string>
     <string name="zoom">Масштаб</string>
 </resources>

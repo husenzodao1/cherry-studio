@@ -38,6 +38,8 @@ data class RuntimeState(
     val rowBand: NormalizedRect? = null,
     val error: MonitorError? = null,
     val lastContinuity: Continuity? = null,
+    /** The last round ended while the row was out of view: counted, but its clicks were not run. */
+    val lastSeenLate: Boolean = false,
     val clicks: ClickProgress? = null,
 )
 

@@ -160,6 +160,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
         val clickerOff = !p.clickerConnected && active?.steps?.any { it.point != null } == true
         val warning = when {
             clickerOff -> str.getString(R.string.warning_auto_click_off)
+            p.runtime.lastSeenLate -> str.getString(R.string.warning_seen_late)
             total > 0 && index == total - 1 -> str.getString(R.string.warning_last_algorithm)
             p.runtime.lastContinuity == Continuity.GAP_SUSPECTED -> str.getString(R.string.warning_gap)
             else -> null

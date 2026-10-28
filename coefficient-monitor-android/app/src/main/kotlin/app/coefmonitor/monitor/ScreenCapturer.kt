@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.DisplayMetrics
 import android.view.Display
+import app.coefmonitor.core.ImageSignature
 import app.coefmonitor.core.PixelRect
 
 /**
@@ -163,6 +164,27 @@ class FrameAccess internal constructor(private val image: Image, val generation:
         return out
     }
 
+    /**
+     * A coarse picture of the whole frame from a sparse grid of pixels: cheap enough for every
+     * tick, enough to tell whether the screen changed.
+     */
+    fun thumbnail(): ImageSignature {
+        val plane = image.planes[0]
+        val buffer = plane.buffer
+        val luminance = FloatArray(THUMB_COLUMNS * THUMB_ROWS)
+        for (y in 0 until THUMB_ROWS) {
+            val rowStart = ((2 * y + 1) * image.height / (2 * THUMB_ROWS)) * plane.rowStride
+            for (x in 0 until THUMB_COLUMNS) {
+                val i = rowStart + ((2 * x + 1) * image.width / (2 * THUMB_COLUMNS)) * plane.pixelStride
+                val r = buffer.get(i).toInt() and 0xFF
+                val g = buffer.get(i + 1).toInt() and 0xFF
+                val b = buffer.get(i + 2).toInt() and 0xFF
+                luminance[y * THUMB_COLUMNS + x] = 0.299f * r + 0.587f * g + 0.114f * b
+            }
+        }
+        return ImageSignature.fromLuminance(luminance, THUMB_COLUMNS, THUMB_ROWS)
+    }
+
     /** Full-frame copy, used when the whole screen is searched for the row. */
     fun toBitmap(): Bitmap {
         val plane = image.planes[0]
@@ -174,5 +196,10 @@ class FrameAccess internal constructor(private val image: Image, val generation:
         val exact = Bitmap.createBitmap(padded, 0, 0, image.width, image.height)
         padded.recycle()
         return exact
+    }
+
+    private companion object {
+        const val THUMB_COLUMNS = 48
+        const val THUMB_ROWS = 96
     }
 }

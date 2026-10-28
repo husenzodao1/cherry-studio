@@ -128,6 +128,7 @@
     <string name="detection_missed_neighbor">даври аз даст рафта, аз катаки пешина хонда шуд</string>
     <string name="detection_motion">ҳамон қимат, аниматсияи катаки нав</string>
     <string name="detection_row_shift">ҳамон қимат, қатор ҷунбид</string>
+    <string name="detection_seen_late">Дер дида шуд — бе клик</string>
     <string name="detection_value_changed">қимати нав дар катак</string>
     <string name="diagnostics_empty_text">Дар ин ҷо хонишҳои радшудаи OCR, хатоҳо ва амалҳои дастӣ нишон дода мешаванд.</string>
     <string name="diagnostics_empty_title">Ташхис нест</string>
@@ -327,5 +328,6 @@
     <string name="warning_auto_click_off">Автокликер хомӯш аст — дар Accessibility фаъол кунед</string>
     <string name="warning_gap">Шояд даврҳо гум шуданд — таърихи бозиро санҷед</string>
     <string name="warning_last_algorithm">Алгоритми охирин — боз якто илова кунед</string>
+    <string name="warning_seen_late">Даври охирин берун аз экран тамом шуд — кликҳо аз даври навбатӣ</string>
     <string name="zoom">Миқёс</string>
 </resources>
