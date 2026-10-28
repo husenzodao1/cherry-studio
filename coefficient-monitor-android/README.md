@@ -221,6 +221,11 @@ monitor.
 The repository workflow `.github/workflows/coefficient-monitor-android.yml` runs all three on
 GitHub Actions and uploads the debug APK as an artifact.
 
+Every build is signed with the debug key in `app/debug.keystore` (committed on purpose), so a newer
+APK installs over an older one. APKs built before that were each signed with a different key, and
+Android refuses to update them: uninstall such a version once (export algorithms and presets
+first). The version shown in Settings → About is `2.<workflow run number>`.
+
 ## Known limitations (need real-device verification)
 
 - The detection thresholds (stillness, same-picture, animation length) are sensible defaults

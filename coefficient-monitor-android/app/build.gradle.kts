@@ -13,13 +13,27 @@ android {
     namespace = "app.coefmonitor"
     compileSdk = 34
 
+    // CI builds count up, so each new APK installs as an update and Settings → About shows which build it is.
+    val buildNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0
+
     defaultConfig {
         applicationId = "app.coefmonitor"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 100 + buildNumber
+        versionName = "2.$buildNumber"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        // One fixed debug key for every build. Each CI machine would otherwise make its own, and
+        // Android refuses to install an APK over one signed with a different key.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
