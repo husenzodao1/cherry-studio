@@ -15,7 +15,8 @@ android {
         applicationId = "tj.hamnavo"
         minSdk = 29
         targetSdk = 34
-        versionCode = env("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+        // Minutes since 2026-01-01: every new build installs over the previous one.
+        versionCode = ((System.currentTimeMillis() - 1_767_225_600_000L) / 60_000).toInt()
         versionName = "1.0." + (env("GITHUB_RUN_NUMBER") ?: "0")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
