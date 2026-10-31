@@ -33,20 +33,27 @@ fun Service.buildNotification(text: String, stopIntent: Intent): Notification {
         .build()
 }
 
-/** Partial wake lock + low-latency Wi-Fi lock so streaming continues with the screen off. */
+/**
+ * Partial wake lock + Wi-Fi locks so streaming continues with the screen off. The low-latency lock
+ * only works while the app is visible; the high-performance lock keeps Wi-Fi power saving off in
+ * the background on the Android versions that still honour it.
+ */
 class KeepAwake(context: Context, tag: String) {
     private val wake = context.getSystemService(PowerManager::class.java)
         .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "hamnavo:$tag").apply { setReferenceCounted(false) }
-    private val wifi = context.applicationContext.getSystemService(WifiManager::class.java)
-        .createWifiLock(WifiManager.WIFI_MODE_FULL_LOW_LATENCY, "hamnavo:$tag").apply { setReferenceCounted(false) }
+    private val wifiManager = context.applicationContext.getSystemService(WifiManager::class.java)
+    private val wifiLocks = listOf(
+        WifiManager.WIFI_MODE_FULL_LOW_LATENCY,
+        @Suppress("DEPRECATION") WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+    ).map { mode -> wifiManager.createWifiLock(mode, "hamnavo:$tag:$mode").apply { setReferenceCounted(false) } }
 
     fun acquire() {
         wake.acquire()
-        wifi.acquire()
+        wifiLocks.forEach { it.acquire() }
     }
 
     fun release() {
         if (wake.isHeld) wake.release()
-        if (wifi.isHeld) wifi.release()
+        wifiLocks.forEach { if (it.isHeld) it.release() }
     }
 }

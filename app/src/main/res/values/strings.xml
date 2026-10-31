@@ -34,7 +34,7 @@
     <string name="recv_no_wifi">Wi-Fi нест. Ба нуқтаи дастрасии телефони А пайваст шавед.</string>
     <string name="recv_searching">Ҷустуҷӯи телефони А…</string>
     <string name="recv_connecting">Пайвастшавӣ ба %1$s…</string>
-    <string name="recv_connected">Пайваст ба %1$s · буфер %2$d мс</string>
+    <string name="recv_connected">Пайваст ба %1$s · таъхир %2$d мс · қатъшавӣ: %3$d</string>
 
     <string name="log_wifi">Wi-Fi: IP %1$s, шлюз %2$s</string>
     <string name="log_own_ip">%1$s — IP-и ҳамин телефон аст, гузаронида шуд</string>

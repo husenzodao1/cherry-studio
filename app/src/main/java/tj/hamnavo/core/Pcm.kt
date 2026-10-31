@@ -36,6 +36,45 @@ object Pcm {
         return p
     }
 
+    /** Linear fade-in (gain 0 -> 1) over the first [frames] sample frames, in place. */
+    fun fadeIn(pcm: ByteArray, channels: Int, frames: Int) {
+        val n = min(frames, pcm.size / 2 / channels)
+        for (i in 0 until n) for (c in 0 until channels) {
+            val k = i * channels + c
+            setSample(pcm, k, (getSample(pcm, k) * i / n).toShort())
+        }
+    }
+
+    /** Linear fade-out (gain 1 -> 0) over the whole buffer, in place. */
+    fun fadeOut(pcm: ByteArray, channels: Int) {
+        val n = pcm.size / 2 / channels
+        for (i in 0 until n) for (c in 0 until channels) {
+            val k = i * channels + c
+            setSample(pcm, k, (getSample(pcm, k) * (n - 1 - i) / n).toShort())
+        }
+    }
+
+    /** Time-reversed copy; it starts exactly where [pcm] ends, so it continues without a click. */
+    fun reversed(pcm: ByteArray, channels: Int): ByteArray {
+        val n = pcm.size / 2 / channels
+        val out = ByteArray(pcm.size)
+        for (i in 0 until n) for (c in 0 until channels) {
+            setSample(out, i * channels + c, getSample(pcm, (n - 1 - i) * channels + c))
+        }
+        return out
+    }
+
+    /** Copy of [to] whose first [frames] sample frames blend smoothly from [from] into [to]. */
+    fun crossfade(from: ByteArray, to: ByteArray, channels: Int, frames: Int): ByteArray {
+        val out = to.copyOf()
+        val n = min(frames, min(from.size, to.size) / 2 / channels)
+        for (i in 0 until n) for (c in 0 until channels) {
+            val k = i * channels + c
+            setSample(out, k, clamp((getSample(from, k) * (n - i) + getSample(to, k) * i) / n))
+        }
+        return out
+    }
+
     /** Sine tone with short fades, interleaved for [channels]. */
     fun tone(sampleRate: Int, channels: Int, freqHz: Double, durationMs: Int, amplitude: Double = 0.3): ShortArray {
         val frames = sampleRate * durationMs / 1000

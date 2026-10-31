@@ -21,6 +21,11 @@ object AppState {
     @Volatile var receiverLevel = 0f
     @Volatile var receiverConnectedTo: String? = null
     @Volatile var receiverPlayedFrames = 0L
+    @Volatile var receiverBufferMs = 0
+    @Volatile var receiverTargetMs = 0
+    @Volatile var receiverTrackMs = 0
+    /** Audible problems: gaps (buffer empty) + dropped frames + speaker underruns. */
+    @Volatile var receiverGlitches = 0L
 
     /** Called for every captured frame: level before and after the test beep is mixed in. */
     @Volatile var senderFrameListener: ((captured: Float, sent: Float) -> Unit)? = null

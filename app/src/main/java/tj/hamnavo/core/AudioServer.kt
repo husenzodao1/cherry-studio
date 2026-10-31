@@ -1,5 +1,6 @@
 package tj.hamnavo.core
 
+import java.io.BufferedOutputStream
 import java.io.Closeable
 import java.io.IOException
 import java.net.InetAddress
@@ -12,11 +13,13 @@ import kotlin.concurrent.thread
 /**
  * TCP server that sends the stream header and then raw PCM frames to every client.
  * Each client has its own drop-oldest queue and writer thread, so [broadcast] never blocks.
+ * The queue holds [queueFrames] (1 s by default) so a Wi-Fi burst/stall never costs audio here;
+ * the receiver's jitter buffer decides how much delay to keep.
  */
 class AudioServer(
     port: Int,
     private val header: StreamHeader,
-    private val queueFrames: Int = 16,
+    private val queueFrames: Int = 100,
     bindAddress: InetAddress? = null,
 ) : Closeable {
     private val serverSocket = ServerSocket().apply {
@@ -63,12 +66,16 @@ class AudioServer(
             thread(name = "hmnv-client", isDaemon = true) {
                 try {
                     socket.tcpNoDelay = true
-                    val out = socket.getOutputStream()
+                    socket.sendBufferSize = 256 * 1024
+                    val out = BufferedOutputStream(socket.getOutputStream(), 64 * 1024)
                     out.write(Protocol.encodeHeader(header))
                     out.flush()
                     while (open && !closed) {
                         val f = queue.poll(500) ?: continue
                         out.write(f)
+                        // Send everything that queued up meanwhile in one go.
+                        while (true) out.write(queue.poll(0) ?: break)
+                        out.flush()
                     }
                 } catch (_: IOException) {
                 } finally {

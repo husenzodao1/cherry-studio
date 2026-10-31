@@ -69,6 +69,7 @@ class TwoPhonesTest {
         val playedFrames = AppState.receiverPlayedFrames - f0
         assertTrue("AudioTrack played only $playedFrames frames in 2 s", playedFrames > 48_000 * 3 / 2)
 
+        val glitchesBefore = AppState.receiverGlitches
         // Wait for: the music (~3 s), then 3 beeps, then at least 2 s of silence.
         val deadline = SystemClock.uptimeMillis() + 120_000
         var verdict = analyse(played, connectedAt)
@@ -79,6 +80,8 @@ class TwoPhonesTest {
         E2e.log("phone B heard: $verdict")
         E2e.screenshot("phoneB_played")
         assertTrue("phone B: $verdict\n${E2e.state()}", verdict.startsWith("OK"))
+        val glitches = AppState.receiverGlitches - glitchesBefore
+        assertTrue("sound was choppy: $glitches gaps/drops while playing", glitches <= 1)
     }
 
     /** Checks what phone B played; returns "OK ..." or what is still missing / wrong. */

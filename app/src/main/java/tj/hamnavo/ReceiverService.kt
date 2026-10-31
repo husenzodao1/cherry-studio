@@ -47,7 +47,7 @@ class ReceiverService : Service() {
 
     private lateinit var keepAwake: KeepAwake
     private lateinit var cm: ConnectivityManager
-    private val jitter = JitterBuffer.forMillis(startMs = 40, maxMs = 120)
+    private val jitter = JitterBuffer()
 
     @Volatile private var running = false
     @Volatile private var manualHost: String? = null
@@ -186,7 +186,10 @@ class ReceiverService : Service() {
                 },
                 onFrame = { f ->
                     jitter.push(f)
-                    AppState.receiverStatus = getString(R.string.recv_connected, host, jitter.size * Protocol.FRAME_MS)
+                    AppState.receiverStatus = getString(
+                        R.string.recv_connected, host, AppState.receiverBufferMs + AppState.receiverTrackMs,
+                        AppState.receiverGlitches,
+                    )
                 },
             )
         } catch (e: Exception) {
@@ -225,6 +228,7 @@ class ReceiverService : Service() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO)
         var track: AudioTrack? = null
         var trackHeader: StreamHeader? = null
+        var trackUnderruns = 0
         try {
             while (running) {
                 val h = header
@@ -238,6 +242,8 @@ class ReceiverService : Service() {
                     track?.release()
                     track = AudioOut.createTrack(h)
                     trackHeader = h
+                    trackUnderruns = 0
+                    AppState.receiverTrackMs = AudioOut.START_MS
                 }
                 if (track.playState != AudioTrack.PLAYSTATE_PLAYING) track.play()
                 // Play silence while (re)buffering; the track clock paces this loop.
@@ -246,6 +252,15 @@ class ReceiverService : Service() {
                 AppState.receiverLevel = level
                 track.write(frame, 0, frame.size, AudioTrack.WRITE_BLOCKING)
                 AppState.receiverPlayedFrames = track.playbackHeadPosition.toLong() and 0xFFFFFFFFL
+                val u = track.underrunCount
+                if (u > trackUnderruns) {
+                    // The speaker ran dry (the phone was busy): keep a little more audio in it.
+                    trackUnderruns = u
+                    AppState.receiverTrackMs = AudioOut.grow(track, h)
+                }
+                AppState.receiverBufferMs = jitter.bufferedMs
+                AppState.receiverTargetMs = jitter.targetMs
+                AppState.receiverGlitches = jitter.underruns + jitter.dropped + trackUnderruns
                 AppState.receiverFrameListener?.invoke(level)
             }
         } finally {
