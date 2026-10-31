@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="btn_hotspot" type="id" />
+    <item name="btn_send" type="id" />
+    <item name="btn_beep" type="id" />
+    <item name="btn_receive" type="id" />
+    <item name="btn_stop" type="id" />
+    <item name="btn_battery" type="id" />
+    <item name="ip_input" type="id" />
+    <item name="status_sender" type="id" />
+    <item name="status_receiver" type="id" />
+    <item name="log_view" type="id" />
+</resources>

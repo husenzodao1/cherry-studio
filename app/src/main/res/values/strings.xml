@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ҳамнаво</string>
+    <string name="intro">Як телефон садоро мефиристад (А), дигаре мегирад (Б). Дар як телефон танҳо як нақш кор мекунад.</string>
+
+    <string name="section_sender">Телефони А — фиристанда</string>
+    <string name="hint_sender">1) Нуқтаи дастрасии Wi-Fi (hotspot)-ро фаъол кунед.\n2) «Фиристодан»-ро пахш кунед ва иҷозат диҳед.\n3) Мусиқиро дар ҳар барнома оғоз кунед.</string>
+    <string name="btn_hotspot">Танзимоти нуқтаи дастрасӣ</string>
+    <string name="btn_send">Фиристодан</string>
+    <string name="btn_beep">Садои санҷишӣ</string>
+    <string name="btn_beep_stop">Қатъи садои санҷишӣ</string>
+
+    <string name="section_receiver">Телефони Б — гиранда</string>
+    <string name="hint_receiver">Ба Wi-Fi-и телефони А пайваст шавед ва «Гирифтан»-ро пахш кунед. IP-ро танҳо агар худкор наёбад нависед — IP-и телефони А, на ҳамин телефон.</string>
+    <string name="hint_ip">IP-и телефони А (ихтиёрӣ)</string>
+    <string name="btn_receive">Гирифтан</string>
+
+    <string name="btn_stop">Қатъ</string>
+    <string name="btn_battery">Иҷозати кор дар замина (батарея)</string>
+    <string name="battery_ok">Маҳдудияти батарея аллакай хомӯш аст</string>
+    <string name="need_mic">Бе иҷозати сабти садо фиристодан ғайриимкон аст</string>
+    <string name="projection_denied">Иҷозати сабти садо дода нашуд</string>
+
+    <string name="notif_channel">Пахши садо</string>
+    <string name="notif_sending">Садо фиристода мешавад</string>
+    <string name="notif_receiving">Садо қабул мешавад</string>
+
+    <string name="sender_off">Фиристанда хомӯш аст</string>
+    <string name="sender_on">Фиристода мешавад · IP: %1$s\nТелефонҳои пайваст: %2$d\nСатҳи садо: %3$s</string>
+    <string name="sender_no_sound">Садо нест: мусиқиро оғоз кунед. Баъзе барномаҳо сабтро манъ мекунанд.</string>
+    <string name="receiver_off">Гиранда хомӯш аст</string>
+    <string name="receiver_on">%1$s\nСатҳи садо: %2$s</string>
+
+    <string name="recv_no_wifi">Wi-Fi нест. Ба нуқтаи дастрасии телефони А пайваст шавед.</string>
+    <string name="recv_searching">Ҷустуҷӯи телефони А…</string>
+    <string name="recv_connecting">Пайвастшавӣ ба %1$s…</string>
+    <string name="recv_connected">Пайваст ба %1$s · буфер %2$d мс</string>
+
+    <string name="log_wifi">Wi-Fi: IP %1$s, шлюз %2$s</string>
+    <string name="log_own_ip">%1$s — IP-и ҳамин телефон аст, гузаронида шуд</string>
+    <string name="log_failed">%1$s: пайваст нашуд (%2$s)</string>
+    <string name="log_connected">Пайваст шуд: %1$s</string>
+    <string name="log_disconnected">Пайваст канда шуд: %1$s</string>
+    <string name="log_discovery_none">Ҷустуҷӯи UDP: ҷавоб нест</string>
+    <string name="log_scan">Ҷустуҷӯ дар шабака (%1$d адрес)…</string>
+    <string name="log_server">Сервер омода: порти %1$d</string>
+    <string name="log_client_in">Телефон пайваст шуд: %1$s</string>
+    <string name="log_client_out">Телефон ҷудо шуд</string>
+    <string name="log_sender_error">Хатои фиристанда: %1$s</string>
+</resources>
