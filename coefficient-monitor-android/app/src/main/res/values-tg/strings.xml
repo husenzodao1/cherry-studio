@@ -31,6 +31,7 @@
     <string name="action_export_csv">Экспорти ҳодисаҳо (CSV)</string>
     <string name="action_export_diagnostics">Экспорти ташхис (CSV)</string>
     <string name="action_export_json">Экспорти ҳодисаҳо (JSON)</string>
+    <string name="action_filter">Филтр</string>
     <string name="action_forget_round">Фаромӯш кардани даври охирини дидашуда</string>
     <string name="action_import">Импорт</string>
     <string name="action_load">Бор кардан</string>
@@ -145,11 +146,15 @@
     <string name="field_name">Ном</string>
     <string name="field_step_delay">Вақт то клики навбатӣ (мс)</string>
     <string name="field_step_text">Номгузорӣ (ихтиёрӣ)</string>
-    <string name="first_round_initialize">Танҳо ҳамчун нуқтаи оғоз (тавсия мешавад)</string>
-    <string name="first_round_initialize_hint">Аввалин даври коркардшуда даври нави навбатӣ аст. Пас аз бозоғозӣ бехатар.</string>
-    <string name="first_round_process">Ҳамчун давр коркард кардан</string>
-    <string name="first_round_process_hint">Қоидаи ҳадро ба қимати намоён татбиқ мекунад — агар он ҳамон қимати пеш аз бозоғозӣ набошад.</string>
-    <string name="first_round_title">Даври намоён ҳангоми оғоз</string>
+    <string name="filter_above_10">Аз 10x боло</string>
+    <string name="filter_all">Ҳамаи даврҳо</string>
+    <string name="filter_flagged">Аз даст рафта ё дер</string>
+    <string name="filter_high">Баланд (&gt; ҳад)</string>
+    <string name="filter_low">Паст (≤ ҳад)</string>
+    <string name="filter_nothing_text">Ҷустуҷӯ ё филтрро тағйир диҳед.</string>
+    <string name="filter_nothing_title">Чизе ёфт нашуд</string>
+    <string name="filter_resets">Бозгашт ба алгоритми 1</string>
+    <string name="filter_sort_highest">Аввал алгоритмҳои калонтарин</string>
     <string name="floating_notification_text">Панел болои ҳамаи барномаҳо мемонад. Барои кушодани барнома пахш кунед.</string>
     <string name="floating_notification_title">Режими шинокунанда фаъол аст</string>
     <string name="floating_panel">Режими шинокунанда</string>
@@ -161,7 +166,6 @@
     <string name="import_title">Импорти алгоритмҳо</string>
     <string name="include_algorithms">Алгоритмҳоро дохил кардан</string>
     <string name="info_active_algorithm">Алгоритме, ки кликҳояш пас аз даври навбатӣ иҷро мешаванд. Коэффитсиенти паст — гузариш ба навбатӣ, баланд — бозгашт ба Алгоритми 1.</string>
-    <string name="info_first_round">Бо натиҷае, ки ҳангоми оғози мониторинг аллакай дар экран аст, чӣ кор кардан лозим.</string>
     <string name="info_last_ocr">Матне, ки охирин бор дар катаки нав хонда шуд. Агар давр шинохта нашавад, кӯмак мекунад.</string>
     <string name="info_last_round">Коэффитсиенти охирини хондашуда ва таъсири он ба пайдарпайӣ.</string>
     <string name="info_notifications">Барои огоҳиномаи мониторинг бо таваққуф ва қатъ, инчунин барои огоҳиҳо лозим аст.</string>
@@ -270,6 +274,7 @@
     <string name="reason_high">Коэффитсиент аз ҳад баланд аст</string>
     <string name="reason_low">Коэффитсиент аз ҳад баланд нест</string>
     <string name="reason_no_algorithms">Ягон алгоритми дохилшуда нест</string>
+    <string name="reason_session_start">Оғоз: сессия аз алгоритми 1 сар мешавад</string>
     <string name="recent_events">Даврҳои охирин</string>
     <string name="region_summary">Катаки рости «?» · x %1$s–%2$s%%, y %3$s–%4$s%%</string>
     <string name="reject_empty">матн нест</string>
@@ -290,7 +295,7 @@
     <string name="screen_capture_explainer">Android ҳар дафъа ҳангоми оғоз розигӣ мепурсад ва ҳангоми кор нишондиҳандаи сабтро нишон медиҳад.</string>
     <string name="screen_capture_value">Танҳо ҳангоми мониторинг</string>
     <string name="screen_image_description">Экране, ки дар он қатори коэффитсиентҳо ёфт шуд</string>
-    <string name="search_hint">Ҷустуҷӯ: 1.70x, R-000012, RESET, алгоритм…</string>
+    <string name="search_hint">Ҷустуҷӯ</string>
     <string name="settings_about">Дар бораи барнома</string>
     <string name="settings_appearance">Намуд ва забон</string>
     <string name="settings_delays">Таъхирҳо</string>
@@ -326,6 +331,7 @@
     <string name="transition_reset">Бозгашт ба Алгоритми 1</string>
     <string name="version">Версия</string>
     <string name="warning_auto_click_off">Автокликер хомӯш аст — дар Accessibility фаъол кунед</string>
+    <string name="warning_awaiting_start">Интизори даври навбатӣ — баъд алгоритми 1</string>
     <string name="warning_gap">Шояд даврҳо гум шуданд — таърихи бозиро санҷед</string>
     <string name="warning_last_algorithm">Алгоритми охирин — боз якто илова кунед</string>
     <string name="warning_seen_late">Даври охирин берун аз экран тамом шуд — кликҳо аз даври навбатӣ</string>

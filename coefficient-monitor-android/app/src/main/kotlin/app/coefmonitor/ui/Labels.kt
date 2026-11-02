@@ -73,6 +73,7 @@ object Labels {
         TransitionReason.ALREADY_AT_FIRST -> R.string.reason_already_first
         TransitionReason.END_OF_SEQUENCE -> R.string.reason_end
         TransitionReason.NO_ALGORITHMS -> R.string.reason_no_algorithms
+        TransitionReason.SESSION_START -> R.string.reason_session_start
     }
 
     @StringRes

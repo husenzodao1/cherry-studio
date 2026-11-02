@@ -52,16 +52,35 @@ interface EventDao {
     @Query("SELECT * FROM events ORDER BY sequence DESC LIMIT :limit")
     fun observeRecent(limit: Int): Flow<List<EventEntity>>
 
+    /**
+     * The event log list. An empty [pattern] matches every row; [filter] is an
+     * [app.coefmonitor.data.EventFilter] name. [highestFirst] lists the highest algorithm reached
+     * first (newest first among equal ones), otherwise newest first.
+     */
     @Query(
         """
         SELECT * FROM events
-        WHERE coefficientText LIKE :pattern OR roundId LIKE :pattern OR transitionType LIKE :pattern
-            OR transitionReason LIKE :pattern OR newAlgorithmName LIKE :pattern
-            OR CAST(newAlgorithm AS TEXT) = :exact OR CAST(previousAlgorithm AS TEXT) = :exact
-        ORDER BY sequence DESC LIMIT :limit
+        WHERE (:pattern = '' OR coefficientText LIKE :pattern OR roundId LIKE :pattern OR transitionType LIKE :pattern
+                OR transitionReason LIKE :pattern OR newAlgorithmName LIKE :pattern
+                OR CAST(newAlgorithm AS TEXT) = :exact OR CAST(previousAlgorithm AS TEXT) = :exact)
+            AND (:filter = 'ALL'
+                OR (:filter = 'LOW' AND coefficientHundredths <= thresholdHundredths)
+                OR (:filter = 'HIGH' AND coefficientHundredths > thresholdHundredths)
+                OR (:filter = 'ABOVE_10X' AND coefficientHundredths > :highlightAbove)
+                OR (:filter = 'RESETS' AND transitionType = 'RESET_TO_FIRST')
+                OR (:filter = 'FLAGGED' AND (detectionReason IN ('SEEN_LATE', 'MISSED_ROUND_NEIGHBOR') OR continuity = 'GAP_SUSPECTED')))
+        ORDER BY CASE WHEN :highestFirst THEN newAlgorithm ELSE 0 END DESC, sequence DESC
+        LIMIT :limit
         """,
     )
-    fun observeSearch(pattern: String, exact: String, limit: Int): Flow<List<EventEntity>>
+    fun observeFiltered(
+        pattern: String,
+        exact: String,
+        filter: String,
+        highlightAbove: Long,
+        highestFirst: Boolean,
+        limit: Int,
+    ): Flow<List<EventEntity>>
 
     @Query("SELECT COUNT(*) FROM events")
     fun observeCount(): Flow<Int>

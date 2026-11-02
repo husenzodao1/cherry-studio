@@ -31,6 +31,7 @@
     <string name="action_export_csv">Экспорт событий (CSV)</string>
     <string name="action_export_diagnostics">Экспорт диагностики (CSV)</string>
     <string name="action_export_json">Экспорт событий (JSON)</string>
+    <string name="action_filter">Фильтр</string>
     <string name="action_forget_round">Забыть последний наблюдаемый раунд</string>
     <string name="action_import">Импорт</string>
     <string name="action_load">Загрузить</string>
@@ -145,11 +146,15 @@
     <string name="field_name">Название</string>
     <string name="field_step_delay">Время до следующего клика (мс)</string>
     <string name="field_step_text">Подпись (необязательно)</string>
-    <string name="first_round_initialize">Только как точку отсчёта (рекомендуется)</string>
-    <string name="first_round_initialize_hint">Первым обрабатывается следующий новый раунд. Безопасно после перезапуска.</string>
-    <string name="first_round_process">Обработать как раунд</string>
-    <string name="first_round_process_hint">Применяет правило порога к видимому значению — если это не то же значение, что было до перезапуска.</string>
-    <string name="first_round_title">Раунд, видимый при запуске</string>
+    <string name="filter_above_10">Выше 10x</string>
+    <string name="filter_all">Все раунды</string>
+    <string name="filter_flagged">Пропущенные или поздние</string>
+    <string name="filter_high">Высокие (&gt; порога)</string>
+    <string name="filter_low">Низкие (≤ порога)</string>
+    <string name="filter_nothing_text">Измените поиск или фильтр.</string>
+    <string name="filter_nothing_title">Ничего не найдено</string>
+    <string name="filter_resets">Возврат к алгоритму 1</string>
+    <string name="filter_sort_highest">Сначала самые высокие алгоритмы</string>
     <string name="floating_notification_text">Панель остаётся поверх всех приложений. Нажмите, чтобы открыть приложение.</string>
     <string name="floating_notification_title">Плавающий режим включён</string>
     <string name="floating_panel">Плавающий режим</string>
@@ -161,7 +166,6 @@
     <string name="import_title">Импорт алгоритмов</string>
     <string name="include_algorithms">Включить алгоритмы</string>
     <string name="info_active_algorithm">Алгоритм, клики которого выполнятся после следующего раунда. Низкий коэффициент — переход к следующему, высокий — возврат к алгоритму 1.</string>
-    <string name="info_first_round">Что делать с результатом, который уже на экране при запуске мониторинга.</string>
     <string name="info_last_ocr">Текст, последний раз прочитанный в новой плитке. Помогает, если раунд не распознаётся.</string>
     <string name="info_last_round">Последний прочитанный коэффициент и что он изменил в последовательности.</string>
     <string name="info_notifications">Нужны для уведомления мониторинга с паузой и остановкой и для предупреждений.</string>
@@ -270,6 +274,7 @@
     <string name="reason_high">Коэффициент выше порога</string>
     <string name="reason_low">Коэффициент не выше порога</string>
     <string name="reason_no_algorithms">Нет включённых алгоритмов</string>
+    <string name="reason_session_start">Старт: сессия начинается с алгоритма 1</string>
     <string name="recent_events">Последние раунды</string>
     <string name="region_summary">Плитка справа от «?» · x %1$s–%2$s%%, y %3$s–%4$s%%</string>
     <string name="reject_empty">нет текста</string>
@@ -290,7 +295,7 @@
     <string name="screen_capture_explainer">Android запрашивает согласие при каждом запуске и показывает индикатор захвата во время работы.</string>
     <string name="screen_capture_value">Только во время мониторинга</string>
     <string name="screen_image_description">Экран, на котором найден ряд коэффициентов</string>
-    <string name="search_hint">Поиск: 1.70x, R-000012, RESET, алгоритм…</string>
+    <string name="search_hint">Поиск</string>
     <string name="settings_about">О приложении</string>
     <string name="settings_appearance">Оформление и язык</string>
     <string name="settings_delays">Задержки</string>
@@ -326,6 +331,7 @@
     <string name="transition_reset">Сброс на алгоритм 1</string>
     <string name="version">Версия</string>
     <string name="warning_auto_click_off">Автокликер выключен — включите в спец. возможностях</string>
+    <string name="warning_awaiting_start">Ждём следующий раунд — затем алгоритм 1</string>
     <string name="warning_gap">Возможны пропущенные раунды — проверьте историю игры</string>
     <string name="warning_last_algorithm">Последний алгоритм — добавьте ещё один</string>
     <string name="warning_seen_late">Последний раунд закончился вне экрана — клики со следующего раунда</string>

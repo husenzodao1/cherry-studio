@@ -21,6 +21,9 @@ enum class TransitionReason {
 
     /** No enabled algorithms are configured. */
     NO_ALGORITHMS,
+
+    /** First round that ended after Start: the session begins at Algorithm 1; the round itself is not evaluated. */
+    SESSION_START,
 }
 
 /** Positions are zero-based; the UI shows them as "Algorithm N" with N = index + 1. */

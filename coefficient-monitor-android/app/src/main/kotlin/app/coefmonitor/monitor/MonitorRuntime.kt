@@ -40,6 +40,8 @@ data class RuntimeState(
     val lastContinuity: Continuity? = null,
     /** The last round ended while the row was out of view: counted, but its clicks were not run. */
     val lastSeenLate: Boolean = false,
+    /** Started, but no round has ended since: the session begins with the next one. */
+    val awaitingStart: Boolean = false,
     val clicks: ClickProgress? = null,
 )
 

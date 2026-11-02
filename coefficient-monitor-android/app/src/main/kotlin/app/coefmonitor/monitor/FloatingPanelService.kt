@@ -5,6 +5,9 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.provider.Settings
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
@@ -156,9 +159,11 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
         } else {
             str.getString(R.string.algorithm_position, index + 1, total)
         }
-        val lastValue = p.state.lastAcceptedHundredths?.let { Coefficient(it).toString() } ?: "—"
+        val last = p.state.lastAcceptedHundredths?.let(::Coefficient)
+        val lastValue = last?.toString() ?: "—"
         val clickerOff = !p.clickerConnected && active?.steps?.any { it.point != null } == true
         val warning = when {
+            p.runtime.awaitingStart -> str.getString(R.string.warning_awaiting_start)
             clickerOff -> str.getString(R.string.warning_auto_click_off)
             p.runtime.lastSeenLate -> str.getString(R.string.warning_seen_late)
             total > 0 && index == total - 1 -> str.getString(R.string.warning_last_algorithm)
@@ -177,9 +182,10 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
                 bubbleText = if (total == 0) "—" else "${index + 1}",
                 algorithmName = active?.name ?: "—",
                 coefficientLine = str.getString(R.string.overlay_last_coefficient, lastValue),
+                coefficientHighlighted = last?.isHighlighted == true,
                 statusLine = "${Labels.status(str, p.runtime.status)} · ${Labels.ocrStatus(str, p.runtime.ocrStatus)}",
                 warning = warning,
-                log = p.recent.map { Labels.eventLine(str, it) },
+                log = p.recent.map { event -> highlighted(Labels.eventLine(str, event), event) },
                 captureActive = p.runtime.captureActive,
                 paused = p.runtime.status == MonitorStatus.PAUSED,
                 clickLine = p.runtime.clicks?.let { str.getString(R.string.overlay_clicks, it.position, it.total, it.delayMs) },
@@ -216,6 +222,14 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
     override fun stopMonitoring() = monitorCommand(MonitoringService.ACTION_STOP)
 
     override fun findRow() = monitorCommand(MonitoringService.ACTION_FIND_ROW)
+
+    /** Colours the leading coefficient of a log line yellow when it is above 10.00x. */
+    private fun highlighted(line: String, event: EventEntity): CharSequence {
+        if (!Coefficient(event.coefficientHundredths).isHighlighted || !line.startsWith(event.coefficientText)) return line
+        return SpannableString(line).apply {
+            setSpan(ForegroundColorSpan(OverlayStyle.BIG), 0, event.coefficientText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }
 
     private fun monitorCommand(action: String) {
         runCatching { MonitoringService.command(this, action) }

@@ -38,6 +38,46 @@ class RoundProcessorTest {
     }
 
     @Test
+    fun `first round after Start begins at Algorithm 1 without the threshold rule`() {
+        // Left on Algorithm 5 by an earlier session; the first new round is low (1.20x).
+        val stale = SequenceState(activeIndex = 4, lastSequence = 9)
+        val start = RoundProcessor.process(stale, event(10, 120), 25, threshold, startOfSession = true) as ProcessResult.Applied
+        assertEquals(0, start.state.activeIndex)
+        assertEquals(TransitionType.RESET_TO_FIRST, start.transition.type)
+        assertEquals(TransitionReason.SESSION_START, start.transition.reason)
+        assertEquals(5, start.record.previousAlgorithm)
+        assertEquals(1, start.record.newAlgorithm)
+        assertEquals(10L, start.state.lastSequence)
+
+        // From the next round on the threshold rule applies again, starting at Algorithm 1.
+        val next = RoundProcessor.process(start.state, event(11, 150), 25, threshold) as ProcessResult.Applied
+        assertEquals(1, next.state.activeIndex)
+        assertEquals(TransitionReason.LOW_COEFFICIENT, next.transition.reason)
+    }
+
+    @Test
+    fun `session start on Algorithm 1 keeps the position, a high round does not matter`() {
+        val start = RoundProcessor.process(SequenceState(), event(1, 2_500), 25, threshold, startOfSession = true) as ProcessResult.Applied
+        assertEquals(0, start.state.activeIndex)
+        assertEquals(TransitionType.NO_POSITION_CHANGE, start.transition.type)
+        assertEquals(TransitionReason.SESSION_START, start.transition.reason)
+    }
+
+    @Test
+    fun `session start without algorithms reports it`() {
+        val start = RoundProcessor.process(SequenceState(), event(1, 150), 0, threshold, startOfSession = true) as ProcessResult.Applied
+        assertEquals(TransitionReason.NO_ALGORITHMS, start.transition.reason)
+    }
+
+    @Test
+    fun `only coefficients above 10x are highlighted`() {
+        assertEquals(false, Coefficient(9_99).isHighlighted)
+        assertEquals(false, Coefficient(10_00).isHighlighted)
+        assertEquals(true, Coefficient(10_01).isHighlighted)
+        assertEquals(true, Coefficient(125_40).isHighlighted)
+    }
+
+    @Test
     fun `duplicate or older sequence numbers are ignored`() {
         val first = RoundProcessor.process(SequenceState(), event(1, 150), 25, threshold) as ProcessResult.Applied
         val again = RoundProcessor.process(first.state, event(1, 150), 25, threshold)

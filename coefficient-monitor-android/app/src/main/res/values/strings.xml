@@ -31,6 +31,7 @@
     <string name="action_export_csv">Export events (CSV)</string>
     <string name="action_export_diagnostics">Export diagnostics (CSV)</string>
     <string name="action_export_json">Export events (JSON)</string>
+    <string name="action_filter">Filter</string>
     <string name="action_forget_round">Forget last observed round</string>
     <string name="action_import">Import</string>
     <string name="action_load">Load</string>
@@ -145,11 +146,15 @@
     <string name="field_name">Name</string>
     <string name="field_step_delay">Time until next click (ms)</string>
     <string name="field_step_text">Label (optional)</string>
-    <string name="first_round_initialize">Only use it as the starting point (recommended)</string>
-    <string name="first_round_initialize_hint">The first round processed is the next new one. Safe after restarts.</string>
-    <string name="first_round_process">Process it as a round</string>
-    <string name="first_round_process_hint">Applies the threshold rule to the visible value — unless it is the same value seen before a restart.</string>
-    <string name="first_round_title">Round already visible at start</string>
+    <string name="filter_above_10">Above 10x</string>
+    <string name="filter_all">All rounds</string>
+    <string name="filter_flagged">Missed or late</string>
+    <string name="filter_high">High (&gt; threshold)</string>
+    <string name="filter_low">Low (≤ threshold)</string>
+    <string name="filter_nothing_text">Change the search or the filter.</string>
+    <string name="filter_nothing_title">Nothing matches</string>
+    <string name="filter_resets">Back to Algorithm 1</string>
+    <string name="filter_sort_highest">Highest algorithms first</string>
     <string name="floating_notification_text">The panel stays over all apps. Tap to open the app.</string>
     <string name="floating_notification_title">Floating mode is on</string>
     <string name="floating_panel">Floating mode</string>
@@ -161,7 +166,6 @@
     <string name="import_title">Import algorithms</string>
     <string name="include_algorithms">Include algorithm definitions</string>
     <string name="info_active_algorithm">The algorithm whose clicks run after the next round. A low coefficient moves on to the next one, a high one goes back to Algorithm 1.</string>
-    <string name="info_first_round">What to do with the result that is already on screen when monitoring starts.</string>
     <string name="info_last_ocr">The text last read in the newest tile. Useful when a round is not recognised.</string>
     <string name="info_last_round">The last coefficient read from the game and what it did to the sequence.</string>
     <string name="info_notifications">Needed for the monitoring notification with pause and stop, and for alerts.</string>
@@ -273,6 +277,7 @@
     <string name="reason_high">Coefficient above the threshold</string>
     <string name="reason_low">Coefficient at or below the threshold</string>
     <string name="reason_no_algorithms">No enabled algorithms</string>
+    <string name="reason_session_start">Start: the session begins at Algorithm 1</string>
     <string name="recent_events">Recent rounds</string>
     <string name="region_summary">Tile right of “?” · x %1$s–%2$s%%, y %3$s–%4$s%%</string>
     <string name="reject_empty">no text</string>
@@ -293,7 +298,7 @@
     <string name="screen_capture_explainer">Android asks for consent every time monitoring starts and shows a capture indicator while it runs.</string>
     <string name="screen_capture_value">Only while monitoring</string>
     <string name="screen_image_description">Screen where the coefficient row was found</string>
-    <string name="search_hint">Search: 1.70x, R-000012, RESET, algorithm…</string>
+    <string name="search_hint">Search</string>
     <string name="settings_about">About</string>
     <string name="settings_appearance">Appearance &amp; language</string>
     <string name="settings_delays">Delays</string>
@@ -329,6 +334,7 @@
     <string name="transition_reset">Reset to Algorithm 1</string>
     <string name="version">Version</string>
     <string name="warning_auto_click_off">Auto-clicker is off — turn it on in Accessibility</string>
+    <string name="warning_awaiting_start">Waiting for the next round — then Algorithm 1</string>
     <string name="warning_gap">Possible missed rounds — check the game history</string>
     <string name="warning_last_algorithm">Last algorithm — add one more to continue</string>
     <string name="warning_seen_late">Last round ended out of view — clicks resume next round</string>

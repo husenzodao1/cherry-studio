@@ -62,14 +62,23 @@ sealed interface ProcessResult {
  */
 object RoundProcessor {
 
+    /**
+     * [startOfSession]: the first round that ended after Start. No stake was placed on it, so the
+     * threshold rule is not applied: the session simply begins at Algorithm 1.
+     */
     fun process(
         state: SequenceState,
         event: RoundEvent,
         algorithmCount: Int,
         threshold: Coefficient,
+        startOfSession: Boolean = false,
     ): ProcessResult {
         if (event.sequence <= state.lastSequence) return ProcessResult.Duplicate(event.sequence, state.lastSequence)
-        val transition = AlgorithmSequenceEngine.next(state.activeIndex, algorithmCount, event.value, threshold)
+        val transition = if (startOfSession) {
+            sessionStart(state.activeIndex, algorithmCount)
+        } else {
+            AlgorithmSequenceEngine.next(state.activeIndex, algorithmCount, event.value, threshold)
+        }
         val newState = state.copy(
             activeIndex = transition.newIndex,
             lastSequence = event.sequence,
@@ -94,6 +103,15 @@ object RoundProcessor {
             processingStatus = ProcessingStatus.APPLIED,
         )
         return ProcessResult.Applied(newState, transition, record)
+    }
+
+    private fun sessionStart(currentIndex: Int, algorithmCount: Int): Transition {
+        if (algorithmCount <= 0) {
+            return Transition(0, 0, TransitionType.NO_POSITION_CHANGE, TransitionReason.NO_ALGORITHMS)
+        }
+        val current = clampIndex(currentIndex, algorithmCount)
+        val type = if (current == 0) TransitionType.NO_POSITION_CHANGE else TransitionType.RESET_TO_FIRST
+        return Transition(current, 0, type, TransitionReason.SESSION_START)
     }
 
     /** Keeps the position valid after algorithms are deleted or disabled (never jumps to 1 silently). */

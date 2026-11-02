@@ -1,5 +1,18 @@
 package app.coefmonitor.ui.log
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.testTag
+import app.coefmonitor.data.EventFilter
+import kotlinx.coroutines.flow.combine
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +37,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -86,10 +98,13 @@ import kotlinx.coroutines.launch
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class EventLogViewModel(private val container: AppContainer) : ViewModel() {
     val query = MutableStateFlow("")
+    val filter = MutableStateFlow(EventFilter.ALL)
 
-    val events: StateFlow<List<EventEntity>> = query
-        .debounce(SEARCH_DEBOUNCE_MS)
-        .flatMapLatest { container.events.search(it, LIST_LIMIT) }
+    /** Highest algorithm reached first instead of newest first. */
+    val highestFirst = MutableStateFlow(false)
+
+    val events: StateFlow<List<EventEntity>> = combine(query.debounce(SEARCH_DEBOUNCE_MS), filter, highestFirst, ::Triple)
+        .flatMapLatest { (text, kind, highest) -> container.events.search(text, kind, highest, LIST_LIMIT) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val count: StateFlow<Int> = container.events.count.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
@@ -129,6 +144,8 @@ fun EventLogScreen(viewModel: EventLogViewModel = viewModel(factory = EventLogVi
     val count by viewModel.count.collectAsStateWithLifecycle()
     val diagnostics by viewModel.diagnostics.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
+    val filter by viewModel.filter.collectAsStateWithLifecycle()
+    val highestFirst by viewModel.highestFirst.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -200,22 +217,17 @@ fun EventLogScreen(viewModel: EventLogViewModel = viewModel(factory = EventLogVi
                 Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.tab_diagnostics)) })
             }
             if (tab == 0) {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { viewModel.query.value = it },
-                    leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
-                    trailingIcon = {
-                        if (query.isNotEmpty()) {
-                            IconButton(onClick = { viewModel.query.value = "" }) {
-                                Icon(Icons.Outlined.Clear, contentDescription = stringResource(R.string.action_clear))
-                            }
-                        }
-                    },
-                    placeholder = { Text(stringResource(R.string.search_hint)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                SearchRow(
+                    query = query,
+                    onQuery = { viewModel.query.value = it },
+                    filter = filter,
+                    onFilter = { viewModel.filter.value = it },
+                    highestFirst = highestFirst,
+                    onHighestFirst = { viewModel.highestFirst.value = it },
                 )
-                if (events.isEmpty()) {
+                if (events.isEmpty() && (query.isNotBlank() || filter != EventFilter.ALL)) {
+                    EmptyState(Icons.Outlined.FilterList, stringResource(R.string.filter_nothing_title), stringResource(R.string.filter_nothing_text))
+                } else if (events.isEmpty()) {
                     EmptyState(Icons.Outlined.History, stringResource(R.string.log_empty_title), stringResource(R.string.log_empty_text))
                 } else {
                     LazyColumn(
@@ -260,15 +272,118 @@ fun EventLogScreen(viewModel: EventLogViewModel = viewModel(factory = EventLogVi
     }
 }
 
+/** A small pill-shaped search field with a filter icon next to it. */
+@Composable
+private fun SearchRow(
+    query: String,
+    onQuery: (String) -> Unit,
+    filter: EventFilter,
+    onFilter: (EventFilter) -> Unit,
+    highestFirst: Boolean,
+    onHighestFirst: (Boolean) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    var menu by remember { mutableStateOf(false) }
+    val filtering = filter != EventFilter.ALL || highestFirst
+    Row(
+        Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            Modifier
+                .weight(1f)
+                .height(36.dp)
+                .background(colors.surfaceContainerHigh, RoundedCornerShape(50))
+                .padding(start = 12.dp, end = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(Icons.Outlined.Search, contentDescription = null, tint = colors.onSurfaceVariant, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(8.dp))
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                if (query.isEmpty()) {
+                    Text(stringResource(R.string.search_hint), style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                }
+                BasicTextField(
+                    value = query,
+                    onValueChange = onQuery,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurface),
+                    cursorBrush = SolidColor(colors.primary),
+                    modifier = Modifier.fillMaxWidth().testTag(SEARCH_FIELD_TAG),
+                )
+            }
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQuery("") }, modifier = Modifier.size(28.dp)) {
+                    Icon(Icons.Outlined.Clear, contentDescription = stringResource(R.string.action_clear), modifier = Modifier.size(16.dp))
+                }
+            }
+        }
+        Box {
+            IconButton(onClick = { menu = true }) {
+                Icon(
+                    Icons.Outlined.FilterList,
+                    contentDescription = stringResource(R.string.action_filter),
+                    tint = if (filtering) colors.primary else colors.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+            if (filtering) {
+                Box(Modifier.align(Alignment.TopEnd).padding(10.dp).size(6.dp).background(colors.primary, CircleShape))
+            }
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.filter_sort_highest)) },
+                    leadingIcon = { MenuCheck(highestFirst) },
+                    onClick = {
+                        menu = false
+                        onHighestFirst(!highestFirst)
+                    },
+                )
+                HorizontalDivider()
+                EventFilter.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(filterLabel(option))) },
+                        leadingIcon = { MenuCheck(filter == option) },
+                        onClick = {
+                            menu = false
+                            onFilter(option)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MenuCheck(checked: Boolean) {
+    if (checked) {
+        Icon(Icons.Outlined.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+    } else {
+        Spacer(Modifier.size(18.dp))
+    }
+}
+
+private fun filterLabel(filter: EventFilter): Int = when (filter) {
+    EventFilter.ALL -> R.string.filter_all
+    EventFilter.LOW -> R.string.filter_low
+    EventFilter.HIGH -> R.string.filter_high
+    EventFilter.ABOVE_10X -> R.string.filter_above_10
+    EventFilter.RESETS -> R.string.filter_resets
+    EventFilter.FLAGGED -> R.string.filter_flagged
+}
+
+/** Test tag of the event log's search field. */
+const val SEARCH_FIELD_TAG = "event_search"
+
 @Composable
 private fun EventCard(event: EventEntity) {
     val context = LocalContext.current
     val semantic = LocalSemanticColors.current
     val locale = LocalConfiguration.current.locales[0]
-    val value = Coefficient(event.coefficientHundredths)
     ListCard {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            CoefficientTile(event.coefficientText, if (value <= Coefficient(event.thresholdHundredths)) semantic.low else semantic.high)
+            CoefficientTile(Coefficient(event.coefficientHundredths), Coefficient(event.thresholdHundredths))
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(Labels.eventLine(context, event).substringAfter(" — "), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)

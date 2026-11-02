@@ -93,9 +93,16 @@ seen with two tiles; if the screen was away or covered meanwhile, the missed rou
 *possible missed rounds* in the log and on the dashboard, and you can set the active algorithm by
 hand.
 
-**Start / resume / restart:** the round already visible is used only as the starting point
-(default). The other option is *Process it as a round* in Settings. The value last seen before a
-restart is never processed again.
+**Start:** the round already visible is never counted; it is only the starting point. Monitoring
+then waits for the next round to end (dashboard and panel: *Waiting for the next round — then
+Algorithm 1*). That first round is not evaluated either, since nothing was staked on it: it
+begins the session at **Algorithm 1** (log: *Start: the session begins at Algorithm 1*), and
+Algorithm 1's clicks run. From the round after it the threshold rule applies. A round that ended
+out of view cannot begin the session; the next one seen live does. Rounds that ended before the
+session began, also one read from the neighbour tile, are not counted.
+
+**Resume / restart:** after Pause the visible round only re-initialises the detector and the
+position is kept. The value last seen before a restart is never processed again.
 
 ## Finding the row again
 
@@ -135,6 +142,12 @@ clicks as usual.
   continue". It never wraps.
 - Presets store threshold, detection settings, capture interval, delays and (optionally) the
   algorithm list. Loading a preset never touches round de-duplication.
+- The event log has a small search field and a filter icon next to it: **Highest algorithms
+  first** (the deepest positions reached, newest first among equal ones), and show only **low**
+  (≤ threshold), **high**, **above 10x**, **back to Algorithm 1**, or **missed or late** rounds.
+  The icon is tinted while a filter or the sorting is on.
+- Coefficients **above 10.00x** are yellow everywhere: dashboard, recent rounds, event log and the
+  floating panel (last coefficient and log lines). 10.00x itself keeps its normal colour.
 - The event log is searchable and exports to JSON or CSV (CSV is protected against spreadsheet
   formula injection). A separate diagnostics log records rejected OCR readings, errors and
   manual actions.

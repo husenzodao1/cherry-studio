@@ -56,6 +56,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import app.coefmonitor.R
+import app.coefmonitor.core.Coefficient
+import app.coefmonitor.ui.theme.LocalSemanticColors
 
 /** A group of related content: flat surface, hairline border, small muted title. */
 @Composable
@@ -235,18 +237,27 @@ fun StatusPill(text: String, color: Color, modifier: Modifier = Modifier) {
     }
 }
 
-/** Rounded coefficient badge styled like the game's history tiles. */
+/**
+ * Rounded coefficient badge styled like the game's history tiles: yellow above 10.00x, otherwise
+ * coloured by whether it is at or below [threshold].
+ */
 @Composable
-fun CoefficientTile(text: String, color: Color, modifier: Modifier = Modifier, large: Boolean = false) {
+fun CoefficientTile(value: Coefficient, threshold: Coefficient, modifier: Modifier = Modifier, large: Boolean = false) {
+    val semantic = LocalSemanticColors.current
+    val (background, content) = when {
+        value.isHighlighted -> semantic.big to semantic.onBig
+        value <= threshold -> semantic.low to Color.White
+        else -> semantic.high to Color.White
+    }
     Box(
         modifier
-            .background(color, RoundedCornerShape(if (large) 14.dp else 9.dp))
+            .background(background, RoundedCornerShape(if (large) 14.dp else 9.dp))
             .padding(horizontal = if (large) 18.dp else 9.dp, vertical = if (large) 10.dp else 5.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text,
-            color = Color.White,
+            value.toString(),
+            color = content,
             style = if (large) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
         )

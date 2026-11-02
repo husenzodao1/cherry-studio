@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExpandLess
@@ -29,7 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -49,7 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
@@ -67,7 +64,6 @@ import app.coefmonitor.R
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
-import app.coefmonitor.core.FirstRoundPolicy
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.ThemeMode
 import app.coefmonitor.monitor.AutoClickService
@@ -175,20 +171,6 @@ private fun DetectionSection(settings: AppSettings, viewModel: SettingsViewModel
     var advanced by remember { mutableStateOf(false) }
     SectionCard(title = stringResource(R.string.settings_detection)) {
         ThresholdField(settings.threshold) { value -> viewModel.update { it.copy(threshold = value) } }
-        HorizontalDivider()
-        LabelWithInfo(stringResource(R.string.first_round_title), stringResource(R.string.info_first_round), style = MaterialTheme.typography.titleSmall)
-        RadioRow(
-            selected = detector.firstRoundPolicy == FirstRoundPolicy.INITIALIZE_ONLY,
-            title = stringResource(R.string.first_round_initialize),
-            hint = stringResource(R.string.first_round_initialize_hint),
-            onSelect = { viewModel.updateDetector { it.copy(firstRoundPolicy = FirstRoundPolicy.INITIALIZE_ONLY) } },
-        )
-        RadioRow(
-            selected = detector.firstRoundPolicy == FirstRoundPolicy.PROCESS_FIRST,
-            title = stringResource(R.string.first_round_process),
-            hint = stringResource(R.string.first_round_process_hint),
-            onSelect = { viewModel.updateDetector { it.copy(firstRoundPolicy = FirstRoundPolicy.PROCESS_FIRST) } },
-        )
         HorizontalDivider()
         SliderSetting(
             title = stringResource(R.string.stable_frames),
@@ -496,16 +478,4 @@ private fun SliderSetting(
 @Composable
 private fun SwitchRow(title: String, hint: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     SettingRow(title, hint) { Switch(checked = checked, onCheckedChange = onChange) }
-}
-
-@Composable
-private fun RadioRow(selected: Boolean, title: String, hint: String, onSelect: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().selectable(selected = selected, onClick = onSelect, role = Role.RadioButton),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(selected = selected, onClick = null)
-        Spacer(Modifier.width(8.dp))
-        LabelWithInfo(title, hint)
-    }
 }

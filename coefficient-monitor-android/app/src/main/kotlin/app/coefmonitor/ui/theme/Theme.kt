@@ -102,6 +102,9 @@ data class SemanticColors(
     val low: Color,
     /** Coefficient above the threshold (resets). */
     val high: Color,
+    /** Coefficient above 10.00x, wherever it is shown; [onBig] is the text on it. */
+    val big: Color,
+    val onBig: Color,
     val warning: Color,
 )
 
@@ -112,6 +115,8 @@ private val DarkSemantic = SemanticColors(
     error = Color(0xFFFF6B6B),
     low = Color(0xFF5B7CFA),
     high = Color(0xFF8E6CF0),
+    big = Color(0xFFFFD43B),
+    onBig = Color(0xFF1A1400),
     warning = Color(0xFFF5B94A),
 )
 
@@ -122,6 +127,8 @@ private val LightSemantic = SemanticColors(
     error = Color(0xFFE5484D),
     low = Color(0xFF4766F0),
     high = Color(0xFF7C5AE6),
+    big = Color(0xFFFFC61A),
+    onBig = Color(0xFF1A1400),
     warning = Color(0xFFC98500),
 )
 

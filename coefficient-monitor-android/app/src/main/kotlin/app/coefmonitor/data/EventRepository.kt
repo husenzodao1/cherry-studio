@@ -1,5 +1,6 @@
 package app.coefmonitor.data
 
+import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.EventRecord
 import app.coefmonitor.core.ExportFormats
 import app.coefmonitor.data.db.AppDatabase
@@ -10,6 +11,26 @@ import kotlinx.coroutines.flow.Flow
 
 enum class DiagnosticLevel { INFO, WARNING, ERROR }
 
+/** Which rounds the event log shows. */
+enum class EventFilter {
+    ALL,
+
+    /** At or below the threshold the round was evaluated with. */
+    LOW,
+
+    /** Above that threshold. */
+    HIGH,
+
+    /** Above 10.00x (the yellow ones). */
+    ABOVE_10X,
+
+    /** Rounds that sent the sequence back to Algorithm 1. */
+    RESETS,
+
+    /** Missed rounds, rounds seen late and possible gaps. */
+    FLAGGED,
+}
+
 /** Event log (one row per processed round) and the troubleshooting log. */
 class EventRepository(private val db: AppDatabase) {
     private val eventDao = db.eventDao()
@@ -19,11 +40,22 @@ class EventRepository(private val db: AppDatabase) {
 
     fun recent(limit: Int): Flow<List<EventEntity>> = eventDao.observeRecent(limit)
 
-    fun search(query: String, limit: Int): Flow<List<EventEntity>> {
+    fun search(
+        query: String,
+        filter: EventFilter = EventFilter.ALL,
+        highestFirst: Boolean = false,
+        limit: Int,
+    ): Flow<List<EventEntity>> {
         val trimmed = query.trim()
-        if (trimmed.isEmpty()) return eventDao.observeRecent(limit)
         val escaped = trimmed.replace("%", "").replace("_", "")
-        return eventDao.observeSearch(pattern = "%$escaped%", exact = trimmed, limit = limit)
+        return eventDao.observeFiltered(
+            pattern = if (trimmed.isEmpty()) "" else "%$escaped%",
+            exact = trimmed,
+            filter = filter.name,
+            highlightAbove = Coefficient.HIGHLIGHT_ABOVE.hundredths,
+            highestFirst = highestFirst,
+            limit = limit,
+        )
     }
 
     suspend fun allRecords(): List<EventRecord> = eventDao.getAll().map { it.toRecord() }

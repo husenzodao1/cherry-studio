@@ -30,10 +30,11 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
 
     suspend fun baseline(): DetectorBaseline = sequenceState().toBaseline()
 
-    suspend fun applyRound(event: RoundEvent, threshold: Coefficient): ProcessResult = db.withTransaction {
+    /** [startOfSession]: the first round after Start, which only begins the session at Algorithm 1. */
+    suspend fun applyRound(event: RoundEvent, threshold: Coefficient, startOfSession: Boolean = false): ProcessResult = db.withTransaction {
         val stored = stateDao.get() ?: MonitorStateEntity()
         val enabled = algorithmDao.getAll().filter { it.enabled }
-        val result = RoundProcessor.process(stored.toSequenceState(), event, enabled.size, threshold)
+        val result = RoundProcessor.process(stored.toSequenceState(), event, enabled.size, threshold, startOfSession)
         if (result is ProcessResult.Applied) {
             val newState = result.state
             stateDao.upsert(

@@ -32,9 +32,12 @@ data class OverlayState(
     val bubbleText: String,
     val algorithmName: String,
     val coefficientLine: String,
+    /** The last coefficient is above 10.00x: shown in yellow. */
+    val coefficientHighlighted: Boolean,
     val statusLine: String,
     val warning: String?,
-    val log: List<String>,
+    /** Recent event lines; coefficients above 10.00x are already coloured yellow. */
+    val log: List<CharSequence>,
     /** True while a capture session exists (monitoring or paused); false shows Start instead of Pause/Stop. */
     val captureActive: Boolean,
     val paused: Boolean,
@@ -189,10 +192,11 @@ class OverlayController(
 
         name.text = state.algorithmName
         coefficient.text = state.coefficientLine
+        coefficient.setTextColor(if (state.coefficientHighlighted) OverlayStyle.BIG else OverlayStyle.TEXT)
         status.text = state.statusLine
         warning.showText(state.warning)
         clickLine.showText(state.clickLine)
-        log.showText(state.log.takeIf { it.isNotEmpty() }?.joinToString("\n"))
+        log.showText(state.log.takeIf { it.isNotEmpty() }?.let { TextUtils.join("\n", it) })
         startButton.visibleIf(!state.captureActive)
         pauseButton.visibleIf(state.captureActive)
         stopButton.visibleIf(state.captureActive)
@@ -515,8 +519,8 @@ class OverlayController(
         setPadding(0, dp(12), 0, dp(4))
     }
 
-    private fun TextView.showText(value: String?) {
-        text = value.orEmpty()
+    private fun TextView.showText(value: CharSequence?) {
+        text = value ?: ""
         visibility = if (value == null) View.GONE else View.VISIBLE
     }
 

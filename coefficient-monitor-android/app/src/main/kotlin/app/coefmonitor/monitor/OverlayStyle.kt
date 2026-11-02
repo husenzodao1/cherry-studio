@@ -67,6 +67,9 @@ internal class OverlayStyle(private val context: Context) {
         const val ACCENT_DEEP = 0xFF6E5FEA.toInt()
         const val ON_ACCENT = 0xFF0C0D10.toInt()
         const val WARNING = 0xFFF5B94A.toInt()
+
+        /** Coefficients above 10.00x. */
+        const val BIG = 0xFFFFD43B.toInt()
         const val DANGER = 0xFFFF6B6B.toInt()
         const val STOPPED = 0xFF3A3E47.toInt()
     }

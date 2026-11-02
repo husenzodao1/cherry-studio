@@ -17,6 +17,9 @@ value class Coefficient(val hundredths: Long) : Comparable<Coefficient> {
 
     override fun toString(): String = "${toPlainString()}x"
 
+    /** Above 10.00x: shown in yellow everywhere in the app. */
+    val isHighlighted: Boolean get() = this > HIGHLIGHT_ABOVE
+
     companion object {
         val DEFAULT_THRESHOLD = Coefficient(200)
 
@@ -25,6 +28,9 @@ value class Coefficient(val hundredths: Long) : Comparable<Coefficient> {
 
         /** Upper sanity bound for OCR output; anything above is treated as a misread. */
         val MAX_PLAUSIBLE = Coefficient(100_000_00)
+
+        /** Coefficients strictly above this value are highlighted (10.00x itself is not). */
+        val HIGHLIGHT_ABOVE = Coefficient(10_00)
 
         val MIN_THRESHOLD = Coefficient(100)
         val MAX_THRESHOLD = Coefficient(1_000_00)

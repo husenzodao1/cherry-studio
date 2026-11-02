@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.RestartAlt
@@ -204,6 +205,9 @@ private fun StatusCard(
             )
         }
         runtime.error?.let { Banner(stringResource(Labels.error(it)), semantic.error, Icons.Outlined.ErrorOutline) }
+        if (runtime.awaitingStart) {
+            Banner(stringResource(R.string.warning_awaiting_start), MaterialTheme.colorScheme.primary, Icons.Outlined.HourglassEmpty)
+        }
         if (state.total == 0) {
             Banner(stringResource(R.string.banner_no_algorithms), semantic.warning, Icons.Outlined.WarningAmber) {
                 TextButton(onClick = onOpenAlgorithms) { Text(stringResource(R.string.action_add)) }
@@ -375,7 +379,7 @@ private fun LastRoundCard(state: DashboardState) {
             Text(stringResource(R.string.no_rounds_yet), style = MaterialTheme.typography.bodyMedium)
         } else {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                CoefficientTile(last.toString(), if (last <= threshold) semantic.low else semantic.high, large = true)
+                CoefficientTile(last, threshold, large = true)
                 Spacer(Modifier.width(16.dp))
                 Column(Modifier.weight(1f)) {
                     val type = enumOrNull<TransitionType>(monitor.lastTransitionType)
@@ -495,7 +499,6 @@ private fun PermissionRow(label: String, info: String, granted: Boolean, relevan
 @Composable
 private fun RecentEventsCard(state: DashboardState, onOpenLog: () -> Unit) {
     val context = LocalContext.current
-    val semantic = LocalSemanticColors.current
     SectionCard(
         title = stringResource(R.string.recent_events),
         info = stringResource(R.string.info_recent_events),
@@ -506,8 +509,7 @@ private fun RecentEventsCard(state: DashboardState, onOpenLog: () -> Unit) {
         }
         state.recent.forEach { event ->
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val value = Coefficient(event.coefficientHundredths)
-                CoefficientTile(event.coefficientText, if (value <= Coefficient(event.thresholdHundredths)) semantic.low else semantic.high)
+                CoefficientTile(Coefficient(event.coefficientHundredths), Coefficient(event.thresholdHundredths))
                 Spacer(Modifier.width(12.dp))
                 Text(
                     Labels.eventLine(context, event).substringAfter(" — "),

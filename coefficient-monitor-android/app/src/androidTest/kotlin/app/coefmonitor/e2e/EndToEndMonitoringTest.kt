@@ -20,6 +20,7 @@ import app.coefmonitor.core.NormalizedPoint
 import app.coefmonitor.core.NormalizedRect
 import app.coefmonitor.core.OcrReading
 import app.coefmonitor.core.RowLocator
+import app.coefmonitor.core.TransitionReason
 import app.coefmonitor.core.TransitionType
 import app.coefmonitor.debug.SimulatorActivity
 import app.coefmonitor.debug.SimulatorBoard
@@ -107,7 +108,7 @@ class EndToEndMonitoringTest {
         assertEquals("consent result", Activity.RESULT_OK, delivered.get())
     }
 
-    /** After the first round (→ Algorithm 2) its two points must be tapped on the simulator in order, 1.5 s apart. */
+    /** After the first evaluated round (→ Algorithm 2) its two points must be tapped on the simulator in order, 1.5 s apart. */
     private fun assertAlgorithm2Clicked() {
         var screenshotTaken = false
         val taps = waitFor("two auto-clicks on the simulator", 15_000) {
@@ -126,7 +127,7 @@ class EndToEndMonitoringTest {
         assertTrue("time between the clicks was $interval ms, expected about 1500 ms", interval in 1_300L..2_500L)
         waitFor("auto-click run to finish", 10_000) { (TestEnv.runtime().clicks == null).takeIf { it } }
         assertEquals("only the two clicks of Algorithm 2", 2, SimulatorBoard.taps.size)
-        assertEquals("the clicks must not create rounds", 1, eventCount())
+        assertEquals("the clicks must not create rounds", 2, eventCount())
     }
 
     private fun assertNear(what: String, expected: NormalizedPoint, actual: NormalizedPoint) {
@@ -179,15 +180,23 @@ class EndToEndMonitoringTest {
         awaitStatus(MonitorStatus.MONITORING, timeoutMs = FIRST_READ_TIMEOUT_MS)
         SystemClock.sleep(2_000)
         assertEquals("visible round must not be processed at start", 0, eventCount())
+        assertTrue("dashboard and panel say the next round starts the session", TestEnv.runtime().awaitingStart)
         screenshot("e2e_01_monitoring_started")
+
+        // The first round that ends after Start only begins the session at Algorithm 1, even when low.
+        SimulatorBoard.taps.clear()
+        push("1.40x")
+        awaitEventCount(1)
+        assertEquals("the first round after Start begins at Algorithm 1\n${failureContext()}", 1, activeAlgorithm())
+        assertTrue("no longer waiting for the start", !TestEnv.runtime().awaitingStart)
+        waitCooldown()
 
         // Specification example.
         val values = listOf("1.70x", "1.60x", "1.20x", "2.10x", "2.30x", "1.50x", "1.70x", "1.90x", "2.50x")
         val expected = listOf(2, 3, 4, 1, 1, 2, 3, 4, 1)
-        SimulatorBoard.taps.clear()
         values.forEachIndexed { i, value ->
             push(value)
-            awaitEventCount(i + 1)
+            awaitEventCount(i + 2)
             assertEquals("after $value\n${failureContext()}", expected[i], activeAlgorithm())
             if (i == 0) assertAlgorithm2Clicked()
             if (i == 3) screenshot("e2e_02_after_reset_2_10x")
@@ -197,11 +206,11 @@ class EndToEndMonitoringTest {
         // Equal values in separate rounds: 1.50x three times (the third time the neighbour is also 1.50x).
         listOf(2, 3, 4).forEachIndexed { i, expectedActive ->
             push("1.50x")
-            awaitEventCount(values.size + i + 1)
+            awaitEventCount(values.size + i + 2)
             assertEquals("equal value round ${i + 1}\n${failureContext()}", expectedActive, activeAlgorithm())
             waitCooldown()
         }
-        var events = values.size + 3
+        var events = values.size + 4
 
         // Floating panel shows the live position.
         assertTrue(
@@ -238,7 +247,7 @@ class EndToEndMonitoringTest {
         assertEquals("2.80x resets to Algorithm 1", 1, activeAlgorithm())
         waitCooldown()
 
-        // Stop and start a new session: the round on screen is not replayed.
+        // Stop and start a new session: the round on screen is not replayed, the next one starts it.
         MonitoringService.command(app, MonitoringService.ACTION_STOP)
         awaitStatus(MonitorStatus.STOPPED)
         startCapture()
@@ -246,6 +255,10 @@ class EndToEndMonitoringTest {
         SystemClock.sleep(4_000)
         assertEquals("restart must not replay the visible round\n${failureContext()}", events, eventCount())
         push("1.40x")
+        awaitEventCount(++events)
+        assertEquals("a new session begins at Algorithm 1", 1, activeAlgorithm())
+        waitCooldown()
+        push("1.30x")
         awaitEventCount(++events)
         assertEquals(2, activeAlgorithm())
         screenshot("e2e_04_after_restart")
@@ -256,11 +269,13 @@ class EndToEndMonitoringTest {
         assertEquals(events, records.size)
         assertEquals((1L..events.toLong()).toList(), records.map { it.sequence })
         records.zipWithNext().forEach { (a, b) -> assertEquals("chain ${a.roundId}->${b.roundId}", a.newAlgorithm, b.previousAlgorithm) }
-        assertEquals(TransitionType.RESET_TO_FIRST, records[3].transitionType)
-        assertEquals(TransitionType.NO_POSITION_CHANGE, records[4].transitionType)
+        assertEquals(TransitionReason.SESSION_START, records[0].transitionReason)
+        assertEquals(TransitionType.RESET_TO_FIRST, records[4].transitionType)
+        assertEquals(TransitionType.NO_POSITION_CHANGE, records[5].transitionType)
+        assertEquals(TransitionReason.SESSION_START, records[events - 2].transitionReason)
         assertTrue("unexpected gap warnings", records.none { it.continuity == Continuity.GAP_SUSPECTED })
         assertEquals(
-            listOf(170L, 160L, 120L, 210L, 230L, 150L, 170L, 190L, 250L, 150L, 150L, 150L, 280L, 140L),
+            listOf(140L, 170L, 160L, 120L, 210L, 230L, 150L, 170L, 190L, 250L, 150L, 150L, 150L, 280L, 140L, 130L),
             records.map { it.coefficientHundredths },
         )
 
@@ -279,6 +294,10 @@ class EndToEndMonitoringTest {
         startCapture()
         awaitStatus(MonitorStatus.MONITORING, timeoutMs = FIRST_READ_TIMEOUT_MS)
         val before = waitFor("row found", 10_000) { TestEnv.runtime().rowBand }
+        // The session begins with the first round seen live.
+        push("1.40x")
+        awaitEventCount(1)
+        waitCooldown()
 
         // The game is scrolled away while two rounds end, and does not come back to exactly the
         // same place: the row is now 60 dp lower.
@@ -296,8 +315,8 @@ class EndToEndMonitoringTest {
         log("row moved from $before to $moved")
 
         // Both rounds are counted in order: the newest from its tile, the one before from the neighbour.
-        awaitEventCount(2)
-        val records = runBlocking { container.events.allRecords() }.sortedBy { it.sequence }
+        awaitEventCount(3)
+        val records = runBlocking { container.events.allRecords() }.sortedBy { it.sequence }.drop(1)
         assertEquals("rounds after the row was found again\n${failureContext()}", listOf(170L, 120L), records.map { it.coefficientHundredths })
         assertEquals("after 1.70x and 1.20x\n${failureContext()}", 3, activeAlgorithm())
         // Both ended out of view: they count, but their clicks are not run.
@@ -307,7 +326,7 @@ class EndToEndMonitoringTest {
         // Monitoring goes on by itself: the next round is read at the new place.
         waitCooldown()
         push("2.50x")
-        awaitEventCount(3)
+        awaitEventCount(4)
         assertEquals("after 2.50x\n${failureContext()}", 1, activeAlgorithm())
         val live = runBlocking { container.events.allRecords() }.maxBy { it.sequence }
         assertEquals("the next round is seen live again", DetectionReason.VALUE_CHANGED, live.detectionReason)

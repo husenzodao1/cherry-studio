@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -99,6 +100,57 @@ class PersistenceTest {
         assertTrue(monitor.applyRound(event(1, 150), threshold) is ProcessResult.Duplicate)
         assertEquals(1, monitor.sequenceState().activeIndex)
         assertEquals(1, events.allRecords().size)
+    }
+
+    @Test
+    fun `the first round after Start begins at Algorithm 1 and is logged as the start`() = runBlocking {
+        val events = EventRepository(db)
+        val monitor = MonitorRepository(db, events)
+        AlgorithmRepository(db).addNumbered(10, "Algorithm")
+        monitor.selectAlgorithm(4)
+
+        // A low round would advance; as the start of a session it only goes to Algorithm 1.
+        val start = monitor.applyRound(event(1, 120), threshold, startOfSession = true) as ProcessResult.Applied
+        assertEquals(TransitionReason.SESSION_START, start.transition.reason)
+        assertEquals(0, monitor.sequenceState().activeIndex)
+        // The next round is evaluated normally from Algorithm 1.
+        monitor.applyRound(event(2, 120), threshold)
+        assertEquals(1, monitor.sequenceState().activeIndex)
+
+        val records = events.allRecords()
+        assertEquals(listOf(TransitionReason.SESSION_START, TransitionReason.LOW_COEFFICIENT), records.map { it.transitionReason })
+        assertEquals(5, records[0].previousAlgorithm)
+        assertEquals(1, records[0].newAlgorithm)
+    }
+
+    @Test
+    fun `event log filters and highest algorithm first`() = runBlocking {
+        val events = EventRepository(db)
+        val monitor = MonitorRepository(db, events)
+        AlgorithmRepository(db).addNumbered(10, "Algorithm")
+        // 1.20 → A2, 1.50 → A3, 12.40 → A1, 1.10 → A2, 10.00 → A1, 1.90 → A2 (missed round)
+        monitor.applyRound(event(1, 120), threshold)
+        monitor.applyRound(event(2, 150), threshold)
+        monitor.applyRound(event(3, 1_240), threshold)
+        monitor.applyRound(event(4, 110), threshold)
+        monitor.applyRound(event(5, 1_000), threshold)
+        monitor.applyRound(event(6, 190).copy(reason = DetectionReason.MISSED_ROUND_NEIGHBOR), threshold)
+
+        suspend fun values(filter: EventFilter, highestFirst: Boolean = false, query: String = "") =
+            events.search(query, filter, highestFirst, limit = 100).first().map { it.coefficientHundredths }
+
+        assertEquals(listOf(190L, 1_000L, 110L, 1_240L, 150L, 120L), values(EventFilter.ALL))
+        assertEquals(listOf(190L, 110L, 150L, 120L), values(EventFilter.LOW))
+        assertEquals(listOf(1_000L, 1_240L), values(EventFilter.HIGH))
+        // 10.00x itself is not above 10x.
+        assertEquals(listOf(1_240L), values(EventFilter.ABOVE_10X))
+        assertEquals(listOf(1_000L, 1_240L), values(EventFilter.RESETS))
+        assertEquals(listOf(190L), values(EventFilter.FLAGGED))
+        // Highest algorithm reached first (Algorithm 3), then Algorithm 2 rounds newest first.
+        assertEquals(listOf(150L, 190L, 110L, 120L, 1_000L, 1_240L), values(EventFilter.ALL, highestFirst = true))
+        // Search and filter combine.
+        assertEquals(listOf(110L), values(EventFilter.LOW, query = "1.1"))
+        assertEquals(emptyList<Long>(), values(EventFilter.HIGH, query = "1.1"))
     }
 
     @Test

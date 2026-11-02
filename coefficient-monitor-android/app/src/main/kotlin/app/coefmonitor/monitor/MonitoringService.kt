@@ -64,6 +64,9 @@ class MonitoringService : LifecycleService() {
     private var inForeground = false
     private var detectorReady = false
     private var screenSaved = false
+
+    /** After Start nothing is counted until a round ends live; that round begins the session at Algorithm 1. */
+    private var awaitingStart = false
     private var lastLoggedRejection: Pair<RejectionReason?, String>? = null
 
     @Volatile
@@ -100,7 +103,7 @@ class MonitoringService : LifecycleService() {
             if (it.status == MonitorStatus.ERROR) {
                 it.copy(captureActive = false, rowBand = null)
             } else {
-                it.copy(status = MonitorStatus.STOPPED, captureActive = false, ocrStatus = OcrStatus.IDLE, rowBand = null)
+                it.copy(status = MonitorStatus.STOPPED, captureActive = false, ocrStatus = OcrStatus.IDLE, rowBand = null, awaitingStart = false)
             }
         }
         super.onDestroy()
@@ -141,9 +144,12 @@ class MonitoringService : LifecycleService() {
         ocr?.close()
         ocr = CoefficientOcrEngine()
         screenSaved = false
-        runtime.update { it.copy(status = MonitorStatus.INITIALIZING, ocrStatus = OcrStatus.SEARCHING, error = null, rowBand = null) }
-        log(DiagnosticLevel.INFO, "MONITOR", "Monitoring started")
-        launchLoop(forceInitializeOnly = false)
+        awaitingStart = true
+        runtime.update {
+            it.copy(status = MonitorStatus.INITIALIZING, ocrStatus = OcrStatus.SEARCHING, error = null, rowBand = null, awaitingStart = true)
+        }
+        log(DiagnosticLevel.INFO, "MONITOR", "Monitoring started; waiting for the next round to begin at Algorithm 1")
+        launchLoop()
     }
 
     private fun pause() {
@@ -161,7 +167,7 @@ class MonitoringService : LifecycleService() {
         if (ocr == null) ocr = CoefficientOcrEngine()
         runtime.update { it.copy(status = MonitorStatus.INITIALIZING, ocrStatus = OcrStatus.SEARCHING) }
         log(DiagnosticLevel.INFO, "MONITOR", "Resumed")
-        launchLoop(forceInitializeOnly = false)
+        launchLoop()
     }
 
     /** Stops everything. [error] non-null leaves the dashboard in the Error state with a reason. */
@@ -170,6 +176,7 @@ class MonitoringService : LifecycleService() {
         loopJob?.cancel()
         loopJob = null
         tracker = null
+        awaitingStart = false
         releaseCapture()
         ocr?.close()
         ocr = null
@@ -180,6 +187,7 @@ class MonitoringService : LifecycleService() {
                 ocrStatus = OcrStatus.IDLE,
                 rowBand = null,
                 error = error,
+                awaitingStart = false,
             )
         }
         if (inForeground) {
@@ -226,7 +234,7 @@ class MonitoringService : LifecycleService() {
 
     // ---- Monitoring loop -------------------------------------------------------------------
 
-    private fun launchLoop(forceInitializeOnly: Boolean) {
+    private fun launchLoop() {
         loopJob?.cancel()
         loopJob = lifecycleScope.launch {
             settings = container.settings.current()
@@ -241,7 +249,7 @@ class MonitoringService : LifecycleService() {
             )
             tracker = eye
             var active = settings
-            var detector = newDetector(active, forceInitializeOnly)
+            var detector = newDetector(active)
             var anchoredBefore = false
             withContext(Dispatchers.Default) {
                 while (isActive) {
@@ -250,7 +258,7 @@ class MonitoringService : LifecycleService() {
                     if (latest.detector != active.detector) {
                         // Reconfigured mid-session (settings, preset): re-initialise from the
                         // stored baseline without processing the round on screen.
-                        detector = newDetector(latest, forceInitializeOnly = true)
+                        detector = newDetector(latest)
                         log(DiagnosticLevel.INFO, "MONITOR", "Detector re-initialised after a configuration change")
                     }
                     active = latest
@@ -260,7 +268,7 @@ class MonitoringService : LifecycleService() {
                         if (anchoredBefore) {
                             // The row is somewhere else now: pictures from before are not comparable.
                             // If rounds were being read, catch up on those that ended meanwhile.
-                            detector = newDetector(active, forceInitializeOnly = true, catchUp = detectorReady)
+                            detector = newDetector(active, catchUp = detectorReady)
                         }
                         anchoredBefore = true
                     }
@@ -272,9 +280,10 @@ class MonitoringService : LifecycleService() {
         }
     }
 
-    private suspend fun newDetector(s: AppSettings, forceInitializeOnly: Boolean, catchUp: Boolean = false): NewRoundDetector {
+    /** The round already on the screen is never counted: it is only the starting point. */
+    private suspend fun newDetector(s: AppSettings, catchUp: Boolean = false): NewRoundDetector {
         detectorReady = false
-        val config = if (forceInitializeOnly) s.detector.copy(firstRoundPolicy = FirstRoundPolicy.INITIALIZE_ONLY) else s.detector
+        val config = s.detector.copy(firstRoundPolicy = FirstRoundPolicy.INITIALIZE_ONLY)
         return NewRoundDetector(config, container.monitor.baseline(), catchUp)
     }
 
@@ -342,6 +351,7 @@ class MonitoringService : LifecycleService() {
             }
             is DetectorResult.NewRound -> {
                 markReady(result.event.value)
+                if (awaitingStart) return startSession(result.event, s)
                 // A missed round is over already: it moves the sequence, but its clicks would be too late.
                 result.missed?.let { applyRound(it, s, runClicks = false) }
                 // So is one that ended out of view: the clicks wait for the next round seen live.
@@ -352,6 +362,23 @@ class MonitoringService : LifecycleService() {
                 applyRound(result.event, s, runClicks = !late)
             }
         }
+    }
+
+    /**
+     * The first round that ended after Start: the session begins at Algorithm 1 and its clicks run
+     * for the next round. Rounds before it (also one read from the neighbour tile) are not counted.
+     * A round that ended out of view is too late to begin with, so the next live one is waited for.
+     */
+    private suspend fun startSession(event: RoundEvent, s: AppSettings) {
+        if (event.reason == DetectionReason.SEEN_LATE) {
+            container.monitor.recordObservation(event.value)
+            log(DiagnosticLevel.INFO, "MONITOR", "${event.value} ended out of view; still waiting for a round seen live to begin")
+            return
+        }
+        awaitingStart = false
+        runtime.update { it.copy(awaitingStart = false) }
+        log(DiagnosticLevel.INFO, "MONITOR", "${event.value} ended: session begins at Algorithm 1 (this round is not evaluated)")
+        applyRound(event, s, startOfSession = true)
     }
 
     /** The eye found the row by reading the whole screen. The first screen of a session is kept for the in-app point picker. */
@@ -403,9 +430,9 @@ class MonitoringService : LifecycleService() {
         }
     }
 
-    private suspend fun applyRound(event: RoundEvent, s: AppSettings, runClicks: Boolean = true) {
+    private suspend fun applyRound(event: RoundEvent, s: AppSettings, runClicks: Boolean = true, startOfSession: Boolean = false) {
         val result = try {
-            container.monitor.applyRound(event, s.threshold)
+            container.monitor.applyRound(event, s.threshold, startOfSession)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
