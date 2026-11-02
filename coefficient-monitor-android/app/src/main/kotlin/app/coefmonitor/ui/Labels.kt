@@ -64,6 +64,7 @@ object Labels {
         MonitorError.OCR_FAILED -> R.string.error_ocr
         MonitorError.BALANCE_MISMATCH -> R.string.error_balance_mismatch
         MonitorError.BALANCE_UNREADABLE -> R.string.error_balance_unreadable
+        MonitorError.NETWORK_SLOW -> R.string.error_network_slow
     }
 
     @StringRes

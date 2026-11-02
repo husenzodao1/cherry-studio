@@ -25,6 +25,9 @@ import app.coefmonitor.core.GuardedEvent
 import app.coefmonitor.core.GuardedStart
 import app.coefmonitor.core.GuardedStep
 import app.coefmonitor.core.Money
+import app.coefmonitor.core.NetworkPolicy
+import app.coefmonitor.core.NetworkVerdict
+import app.coefmonitor.core.NetworkWatch
 import app.coefmonitor.core.NewRoundDetector
 import app.coefmonitor.core.OcrReading
 import app.coefmonitor.core.ProcessResult
@@ -82,6 +85,9 @@ class MonitoringService : LifecycleService() {
 
     /** A start balance read once that differs from the expected one; a second equal look confirms it. */
     private var unconfirmedStartBalance: Long? = null
+
+    /** Measures the internet speed while a capture session exists (balance management). */
+    private var networkJob: Job? = null
     private var lastLoggedRejection: Pair<RejectionReason?, String>? = null
 
     @Volatile
@@ -100,7 +106,10 @@ class MonitoringService : LifecycleService() {
         when (intent?.action) {
             ACTION_START -> handleStart(intent)
             ACTION_PAUSE -> pause()
-            ACTION_RESUME -> resume()
+            ACTION_RESUME -> {
+                runtime.update { it.copy(networkPaused = false) }
+                resume()
+            }
             ACTION_STOP -> shutdown(error = null)
             ACTION_FIND_ROW -> if (capturer != null) tracker?.forget() else stopIfIdle()
             ACTION_ACCEPT_BALANCE -> acceptBalance()
@@ -154,6 +163,7 @@ class MonitoringService : LifecycleService() {
         capturer = capture
         runtime.update { it.copy(captureActive = true, error = null) }
         startMonitoring()
+        watchNetwork()
     }
 
     private fun startMonitoring() {
@@ -187,13 +197,14 @@ class MonitoringService : LifecycleService() {
         log(DiagnosticLevel.INFO, "MONITOR", "Paused")
     }
 
-    private fun resume() {
+    /** [catchUp]: rounds that ended while paused are counted from the row (newest and neighbour tile), as seen late. */
+    private fun resume(catchUp: Boolean = false) {
         if (capturer == null) return stopIfIdle()
         if (loopJob?.isActive == true) return
         if (ocr == null) ocr = CoefficientOcrEngine()
         runtime.update { it.copy(status = MonitorStatus.INITIALIZING, ocrStatus = OcrStatus.SEARCHING) }
-        log(DiagnosticLevel.INFO, "MONITOR", "Resumed")
-        launchLoop()
+        log(DiagnosticLevel.INFO, "MONITOR", if (catchUp) "Resumed; rounds that ended meanwhile are caught up" else "Resumed")
+        launchLoop(catchUp)
     }
 
     /** The user goes on with the balance seen at the start: calculations continue from it. */
@@ -214,6 +225,8 @@ class MonitoringService : LifecycleService() {
         awaitingStart = false
         startBalance = null
         unconfirmedStartBalance = null
+        networkJob?.cancel()
+        networkJob = null
         releaseCapture()
         ocr?.close()
         ocr = null
@@ -226,6 +239,8 @@ class MonitoringService : LifecycleService() {
                 error = error,
                 awaitingStart = false,
                 balancePrompt = null,
+                networkKbps = null,
+                networkPaused = false,
             )
         }
         if (inForeground) {
@@ -272,7 +287,7 @@ class MonitoringService : LifecycleService() {
 
     // ---- Monitoring loop -------------------------------------------------------------------
 
-    private fun launchLoop() {
+    private fun launchLoop(catchUp: Boolean = false) {
         loopJob?.cancel()
         loopJob = lifecycleScope.launch {
             settings = container.settings.current()
@@ -288,7 +303,7 @@ class MonitoringService : LifecycleService() {
             tracker = eye
             balanceEye = BalanceEye(engine)
             var active = settings
-            var detector = newDetector(active)
+            var detector = newDetector(active, catchUp = catchUp)
             var anchoredBefore = false
             withContext(Dispatchers.Default) {
                 while (isActive) {
@@ -426,7 +441,7 @@ class MonitoringService : LifecycleService() {
         applyRound(event, s, startOfSession = true)
     }
 
-    private fun balanceChecked(s: AppSettings): Boolean = s.guarded?.balance != null
+    private fun balanceChecked(s: AppSettings): Boolean = s.effectiveGuarded?.balance != null
 
     /**
      * Before the session begins, the balance on the screen must be the expected one (the configured
@@ -434,7 +449,7 @@ class MonitoringService : LifecycleService() {
      * before the user is asked whether to go on with it, and monitoring pauses until then.
      */
     private suspend fun checkStartBalance(s: AppSettings) {
-        val config = s.guarded ?: return
+        val config = s.effectiveGuarded ?: return
         if (config.balance == null || startBalance != null || runtime.state.value.balancePrompt != null) return
         val eye = balanceEye ?: return
         val capture = capturer ?: return
@@ -555,7 +570,7 @@ class MonitoringService : LifecycleService() {
         verifyBalance: Boolean = true,
     ) {
         val result = try {
-            container.monitor.applyRound(event, s.threshold, startOfSession, s.guarded, live = runClicks, startBalance = startBalance)
+            container.monitor.applyRound(event, s.threshold, startOfSession, s.effectiveGuarded, live = runClicks, startBalance = startBalance)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -607,7 +622,7 @@ class MonitoringService : LifecycleService() {
 
     /** Logs what the round did to the guarded start; when the whole amount is made, everything stops. */
     private suspend fun onGuardStep(step: GuardedStep, s: AppSettings) {
-        val config = s.guarded ?: return
+        val config = s.effectiveGuarded ?: return
         val state = step.state
         val target = Money.format(GuardedStart.partTarget(config))
         val progress = "part ${state.part}/${config.parts}: ${Money.format(state.partProfit)} / $target, total ${Money.format(state.totalProfit)}"
@@ -631,6 +646,74 @@ class MonitoringService : LifecycleService() {
             )
             shutdown(error = null)
         }
+    }
+
+    // ---- Balance management: internet speed ---------------------------------------------
+
+    /**
+     * While a capture session exists, measures the internet speed every [PROBE_INTERVAL_MS] when the
+     * balance management watches it. Too slow for too long: automatic mode stops everything for
+     * good; manual mode pauses (clicks stop at once) and resumes when the speed is back, counting the
+     * rounds that ended meanwhile from the row.
+     */
+    private fun watchNetwork() {
+        networkJob?.cancel()
+        networkJob = lifecycleScope.launch {
+            val probe = NetworkProbe()
+            var policy: NetworkPolicy? = null
+            var watch: NetworkWatch? = null
+            while (isActive && capturer != null) {
+                val current = settings.balanceControl?.networkPolicy()
+                if (current != policy) {
+                    policy = current
+                    watch = current?.let(::NetworkWatch)
+                    // Turned off or changed while paused for the network: go on.
+                    if (runtime.state.value.networkPaused) {
+                        runtime.update { it.copy(networkPaused = false) }
+                        resume(catchUp = true)
+                    }
+                }
+                val active = watch
+                if (active == null || policy == null) {
+                    runtime.update { it.copy(networkKbps = null) }
+                    delay(PROBE_INTERVAL_MS)
+                    continue
+                }
+                val startedMs = SystemClock.elapsedRealtime()
+                val kbps = probe.measureKbps(PROBE_TIMEOUT_MS)
+                runtime.update { it.copy(networkKbps = kbps ?: 0) }
+                when (active.onSample(kbps, SystemClock.elapsedRealtime())) {
+                    NetworkVerdict.STOP -> {
+                        networkAlert(R.string.alert_network_stop_title, R.string.alert_network_stop_text, policy)
+                        container.events.log(DiagnosticLevel.ERROR, "NETWORK", "Below ${policy.minKbps} kbit/s for ${policy.slowMs / 1000} s (last ${kbps ?: 0} kbit/s): stopped")
+                        shutdown(MonitorError.NETWORK_SLOW)
+                        return@launch
+                    }
+                    NetworkVerdict.PAUSE -> {
+                        networkAlert(R.string.alert_network_pause_title, R.string.alert_network_pause_text, policy)
+                        log(DiagnosticLevel.WARNING, "NETWORK", "Below ${policy.minKbps} kbit/s for ${policy.slowMs / 1000} s (last ${kbps ?: 0} kbit/s): paused")
+                        runtime.update { it.copy(networkPaused = true) }
+                        pause()
+                    }
+                    NetworkVerdict.RESUME -> if (runtime.state.value.networkPaused) {
+                        log(DiagnosticLevel.INFO, "NETWORK", "Back to $kbps kbit/s: resumed, rounds that ended meanwhile are caught up")
+                        runtime.update { it.copy(networkPaused = false) }
+                        resume(catchUp = true)
+                    }
+                    NetworkVerdict.OK, NetworkVerdict.SLOW -> Unit
+                }
+                delay((PROBE_INTERVAL_MS - (SystemClock.elapsedRealtime() - startedMs)).coerceAtLeast(MIN_IDLE_MS))
+            }
+        }
+    }
+
+    private fun networkAlert(title: Int, text: Int, policy: NetworkPolicy) {
+        val str = withAppLocale()
+        notifications.alert(
+            MonitorNotifications.ID_NETWORK,
+            str.getString(title),
+            str.getString(text, policy.minKbps, policy.slowMs / 1000),
+        )
     }
 
     // ---- Notification ---------------------------------------------------------------------
@@ -693,6 +776,10 @@ class MonitoringService : LifecycleService() {
         /** How long the balance may take to show the expected amount after a round (it may still change). */
         private const val BALANCE_SETTLE_MS = 2_000L
         private const val BALANCE_LOOK_MS = 150L
+
+        /** Balance management: one speed measurement every 2 s (about 13 KB each, roughly 24 MB an hour). */
+        private const val PROBE_INTERVAL_MS = 2_000L
+        private const val PROBE_TIMEOUT_MS = 4_000
         private const val SLOW_OCR_MS = 2_000L
         private const val SLOW_OCR_REPORT_INTERVAL_MS = 60_000L
 

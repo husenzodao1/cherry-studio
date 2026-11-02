@@ -5,6 +5,8 @@
     <!-- Continuous screen capture needs a visible foreground service. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <!-- Balance management only: measures the internet speed with a small download. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- Monitoring status and "add another algorithm" alerts (Android 13+ asks the user). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Optional floating panel; only used after the user grants it in system settings. -->

@@ -67,6 +67,10 @@
     <string name="alert_end_title">Боз як алгоритм илова кунед</string>
     <string name="alert_guard_finished_text">Оғози монеадор %1$s ба даст овард. Мониторинг ва кликҳо қатъ шуданд.</string>
     <string name="alert_guard_finished_title">Мақсад иҷро шуд</string>
+    <string name="alert_network_pause_text">Дар %2$d сония пасттар аз %1$d кбит/с. Мониторинг ва кликҳо бозмонданд ва ҳангоми баргаштани суръат худ давом медиҳанд.</string>
+    <string name="alert_network_pause_title">Танаффус: интернети суст</string>
+    <string name="alert_network_stop_text">Дар %2$d сония пасттар аз %1$d кбит/с. Мониторинг ва кликҳо қатъ шуданд; ҳангоми пайвасти хуб аз нав оғоз кунед.</string>
+    <string name="alert_network_stop_title">Қатъ шуд: интернети суст</string>
     <string name="alert_no_algorithms_text">Давр муайян шуд, вале алгоритми дохилшуда барои гузаштан нест.</string>
     <string name="alert_no_algorithms_title">Ягон алгоритм дохил нест</string>
     <string name="algorithm_number">Алгоритми %1$d</string>
@@ -85,6 +89,12 @@
     <string name="auto_click_service_label">Назорати коэффитсиентҳо: автокликер</string>
     <string name="auto_click_service_off">Ғайрифаъол — кликҳо иҷро намешаванд</string>
     <string name="auto_click_service_on">Фаъол</string>
+    <string name="balance_control_network">Интернети суст</string>
+    <string name="balance_control_switch">Фаъол кардан</string>
+    <string name="balance_control_switch_hint">Мепурсад, ки ҳангоми интернети суст чӣ кор кунад ва (ихтиёрӣ) баланси экранро.</string>
+    <string name="balance_control_title">Идораи баланс</string>
+    <string name="balance_field_hint">Бо оғози монеадор кор мекунад: ҳангоми Start ва баъди ҳар давр санҷида мешавад. Холӣ: санҷида намешавад.</string>
+    <string name="balance_needs_guarded">Баланс танҳо вақте санҷида мешавад, ки оғози монеадор фаъол бошад.</string>
     <string name="balance_prompt">Баланс бо дидашуда мувофиқ нест: баланси экран %1$s (интизор %2$s). Бо ҳамин баланс идома диҳем?</string>
     <string name="banner_no_algorithms">Барои оғоз ақаллан як алгоритм илова кунед.</string>
     <string name="bulk_add_count">Чандто (1–%1$d)</string>
@@ -147,6 +157,7 @@
     <string name="error_capture_denied">Иҷозати сабти экран дода нашуд.</string>
     <string name="error_capture_failed">Сабти экран оғоз нашуд. Боз кӯшиш кунед.</string>
     <string name="error_capture_revoked">Сабти экран қатъ шуд — аз нав оғоз кунед</string>
+    <string name="error_network_slow">Интернет барои бозӣ хеле суст буд: қатъ шуд.</string>
     <string name="error_no_algorithms">Ягон алгоритми дохилшуда нест.</string>
     <string name="error_ocr">OCR дар кадри охирин нокомӣ кард.</string>
     <string name="field_description">Тавсиф</string>
@@ -196,6 +207,7 @@
     <string name="import_title">Импорти алгоритмҳо</string>
     <string name="include_algorithms">Алгоритмҳоро дохил кардан</string>
     <string name="info_active_algorithm">Алгоритме, ки кликҳояш пас аз даври навбатӣ иҷро мешаванд. Коэффитсиенти паст — гузариш ба навбатӣ, баланд — бозгашт ба Алгоритми 1.</string>
+    <string name="info_balance_control">Балансро муҳофизат мекунад: вақте интернет барои бозӣ хеле суст аст, мониторинг ва кликҳоро қатъ ё бозмедорад, ва (бо оғози монеадор) баланси экранро ҳангоми Start ва баъди ҳар давр месанҷад.</string>
     <string name="info_guarded">Алгоритмҳо танҳо баъди шумораи муайяни коэффитсиентҳои пасти пайдарпай (≤ ҳад) ставка мегузоранд. Рақам ба қисмҳо ҷудо мешавад: вақте қисм пур шуд, ҳама ба алгоритми 1 бармегардад ва боз пастҳои пайдарпайро интизор мешавад; баъди қисми охирин ҳама қатъ мешавад. Ставкаҳо аз ҳад ҳисоб мешаванд, то бурд бохтҳоро аз бурди охирин баргардонад ва ставкаи оғоз × (ҳад − 1) илова кунад. Пастҳои пайдарпай эҳтимоли даври навбатиро тағйир намедиҳанд.</string>
     <string name="info_last_ocr">Матне, ки охирин бор дар катаки нав хонда шуд. Агар давр шинохта нашавад, кӯмак мекунад.</string>
     <string name="info_last_round">Коэффитсиенти охирини хондашуда ва таъсири он ба пайдарпайӣ.</string>
@@ -235,7 +247,18 @@
     <string name="nav_presets">Пресетҳо</string>
     <string name="nav_settings">Танзимот</string>
     <string name="network">Шабака</string>
+    <string name="network_auto">Худкор</string>
+    <string name="network_auto_hint">Баъди %2$d сония пасттар аз %1$d кбит/с ҳама чизро пурра қатъ мекунад. Барои Lucky Jet рақами расмӣ нест; аз ин пасттар бозиҳои crash-и зинда меистанд (суръати 2G/EDGE).</string>
+    <string name="network_auto_summary">Худкор: қатъ аз %1$d кбит/с паст дар %2$d сония</string>
+    <string name="network_data_note">Ҳар 2 сония бо зеркашии 13 КБ чен карда мешавад (тақрибан 24 МБ дар як соат). Суръат таъхири дархостро дар бар мегирад, бинобар ин аз натиҷаи спидтест пасттар аст.</string>
+    <string name="network_field_kbps">Суръати ҳадди ақал (кбит/с; 8 кбит/с = 1 КБ/с)</string>
+    <string name="network_field_seconds">Чанд сония паст будан то қатъ</string>
+    <string name="network_manual">Дастӣ</string>
+    <string name="network_manual_hint">Агар суръат дар сонияҳои шумо аз суръати шумо паст бошад, бозмедорад ва вақте суръат баргашт (3 сония), худ давом медиҳад ва даврҳои дар ин вақт тамомшударо ба ҳисоб мегирад.</string>
+    <string name="network_manual_summary">Дастӣ: танаффус аз %1$d кбит/с паст дар %2$d сония</string>
     <string name="network_not_used">Истифода намешавад — OCR дар дастгоҳ кор мекунад</string>
+    <string name="network_off">Санҷида нашавад</string>
+    <string name="network_speed">Интернет: %1$d кбит/с</string>
     <string name="new_algorithm">Алгоритми нав</string>
     <string name="next_algorithm">Навбатӣ</string>
     <string name="no_algorithms_short">Алгоритм нест</string>
@@ -370,6 +393,7 @@
     <string name="warning_awaiting_start">Интизори даври навбатӣ — баъд алгоритми 1</string>
     <string name="warning_gap">Шояд даврҳо гум шуданд — таърихи бозиро санҷед</string>
     <string name="warning_last_algorithm">Алгоритми охирин — боз якто илова кунед</string>
+    <string name="warning_network_paused">Интернет хеле суст: танаффус, ҳангоми тез шудан худ давом медиҳад</string>
     <string name="warning_seen_late">Даври охирин берун аз экран тамом шуд — кликҳо аз даври навбатӣ</string>
     <string name="zoom">Миқёс</string>
 </resources>

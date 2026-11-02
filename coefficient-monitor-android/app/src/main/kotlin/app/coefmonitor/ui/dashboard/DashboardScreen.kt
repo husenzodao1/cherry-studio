@@ -138,7 +138,7 @@ fun DashboardScreen(
                     onManage = onOpenAlgorithms,
                 )
             }
-            state.settings.guarded?.let { config -> item { GuardedCard(config, state) } }
+            state.settings.effectiveGuarded?.let { config -> item { GuardedCard(config, state) } }
             item { LastRoundCard(state) }
             item {
                 DetectionCard(
@@ -224,8 +224,18 @@ private fun StatusCard(
                 }
             }
         }
+        if (runtime.networkPaused) {
+            Banner(stringResource(R.string.warning_network_paused), semantic.warning, Icons.Outlined.WarningAmber)
+        }
         if (runtime.awaitingStart) {
             Banner(stringResource(R.string.warning_awaiting_start), MaterialTheme.colorScheme.primary, Icons.Outlined.HourglassEmpty)
+        }
+        runtime.networkKbps?.let { kbps ->
+            Text(
+                stringResource(R.string.network_speed, kbps),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         if (state.total == 0) {
             Banner(stringResource(R.string.banner_no_algorithms), semantic.warning, Icons.Outlined.WarningAmber) {

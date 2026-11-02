@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import app.coefmonitor.core.BalanceControl
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
@@ -37,7 +38,12 @@ data class AppSettings(
     val activePresetId: Long? = null,
     /** Guarded start ("Оғози монеадор"); null while it is off. */
     val guarded: GuardedConfig? = null,
+    /** Balance management ("Идораи баланс"): internet speed and balance checks; null while it is off. */
+    val balanceControl: BalanceControl? = null,
 ) {
+    /** The guarded start as it runs: with the balance check of [balanceControl], if any. */
+    val effectiveGuarded: GuardedConfig? get() = guarded?.copy(balance = balanceControl?.balance)
+
     companion object {
         const val DEFAULT_CAPTURE_INTERVAL_MS = 300L
         const val MIN_CAPTURE_INTERVAL_MS = 100L
@@ -62,6 +68,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val AUTO_CLICK = booleanPreferencesKey("auto_click")
         val ACTIVE_PRESET = longPreferencesKey("active_preset_id")
         val GUARDED = stringPreferencesKey("guarded_json")
+        val BALANCE_CONTROL = stringPreferencesKey("balance_control_json")
     }
 
     val settings: Flow<AppSettings> = dataStore.data
@@ -93,6 +100,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
             activePresetId = this[Keys.ACTIVE_PRESET],
             guarded = this[Keys.GUARDED]?.let { json ->
                 runCatching { StorageJson.decodeFromString(GuardedConfig.serializer(), json) }.getOrNull()?.takeIf { it.problem() == null }
+                    // The balance belongs to the balance management now.
+                    ?.copy(balance = null)
+            },
+            balanceControl = this[Keys.BALANCE_CONTROL]?.let { json ->
+                runCatching { StorageJson.decodeFromString(BalanceControl.serializer(), json) }.getOrNull()?.takeIf { it.problem() == null }
             },
         )
     }
@@ -111,5 +123,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         if (presetId == null) remove(Keys.ACTIVE_PRESET) else this[Keys.ACTIVE_PRESET] = presetId
         val guarded = settings.guarded
         if (guarded == null) remove(Keys.GUARDED) else this[Keys.GUARDED] = StorageJson.encodeToString(GuardedConfig.serializer(), guarded)
+        val control = settings.balanceControl
+        if (control == null) {
+            remove(Keys.BALANCE_CONTROL)
+        } else {
+            this[Keys.BALANCE_CONTROL] = StorageJson.encodeToString(BalanceControl.serializer(), control)
+        }
     }
 }

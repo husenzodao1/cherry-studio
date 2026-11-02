@@ -132,7 +132,7 @@ clicks as usual.
 
 ## Guarded start
 
-Settings → **Guarded start** (*Оғози монеадор*). Turning it on asks for four numbers and an optional balance:
+Settings → **Guarded start** (*Оғози монеадор*). Turning it on asks for four numbers:
 
 | Field | Example | Meaning |
 | --- | --- | --- |
@@ -140,7 +140,6 @@ Settings → **Guarded start** (*Оғози монеадор*). Turning it on as
 | Amount | 200 | Total profit to make. |
 | Parts | 4 | The amount is made in parts of amount / parts (here 50), each one started by its own run of lows. |
 | Start stake | 2 | Stake of Algorithm 1. |
-| Balance on the screen (optional) | 10000 | Checked at Start and after every round, see [Balance check](#balance-check). Empty: not checked. |
 
 While waiting, Algorithm 1 stays active and no clicks run. When the run of lows is complete,
 Algorithm 1's clicks run and the threshold rule moves the sequence as usual. When a part is made,
@@ -169,9 +168,40 @@ that round then only stakes again. The dashboard card and the floating panel sho
 ("Waiting for lows 2/3 · part 1/4", "Part 1/4 · 26.00 / 50.00 · stake 4.00"), and the
 diagnostics log records every step (category GUARD).
 
+## Balance management
+
+Settings → **Balance management** (*Идораи баланс*) turns two protections on and off together.
+Turning it on asks how to treat a slow internet connection and, optionally, for the balance on the
+screen.
+
+### Slow internet
+
+| Mode | What happens |
+| --- | --- |
+| Not watched | Nothing is measured. |
+| Automatic | Below **128 kbit/s for 5 s**: monitoring and clicks stop for good, with a notification. Start again by hand. |
+| Manual | Below your speed (kbit/s) for your seconds: monitoring pauses and clicks stop at once. When the speed is back for 3 s, monitoring resumes by itself. |
+
+The speed is measured every 2 s by downloading a 13 KB static file from Google's CDN (about
+24 MB an hour) and dividing its size by the whole request time, delay included: that is what a
+live game feels, and it is lower than a speed test's figure on the same connection. A failed
+request counts as no speed at all. 8 kbit/s = 1 KB/s.
+
+There is no official minimum speed for Lucky Jet. Unofficial guides give 3G as the minimum, and
+2G/EDGE speeds (about 50–150 kbit/s with long delays) are where live crash games stall; the
+automatic mode stops below that. Measure your own connection on the dashboard ("Internet: …
+kbit/s") and use the manual mode for another limit.
+
+After a manual pause the rounds that ended meanwhile are caught up from the row, as after the
+row was lost: the newest tile and its neighbour are counted as seen late (no clicks for them);
+when more rounds ended than the two tiles show, the gap is flagged. With the guarded start a
+stake placed before the pause is settled by its round's result, the round after the pause goes
+unstaked and then the algorithm stakes again, so the martingale goes on where it was. If rounds
+were missed beyond the two tiles, the balance check (below) notices and stops.
+
 ### Balance check
 
-Fill in **Balance on the screen** (e.g. 10000) in the guarded start's settings and the eye also
+Fill in **Balance on the screen** (e.g. 10000) and, while the guarded start is on, the eye also
 reads the game balance (the amount on the nearest line above the result row, e.g. "10 000.00 $"
 next to the wallet; amounts below the row, such as bets, are never taken):
 
@@ -298,11 +328,13 @@ segmented control for its tabs.
 | `POST_NOTIFICATIONS` | Monitoring status, "add another algorithm", capture stopped. |
 | `SYSTEM_ALERT_WINDOW` (optional) | Floating panel; only if granted in system settings. |
 | `FOREGROUND_SERVICE_SPECIAL_USE` | Keeps the floating panel's service running while floating mode is on (with its own notification). |
+| `INTERNET` | Balance management only: measuring the internet speed. |
 | Accessibility service "auto-clicker" (optional) | Performing the clicks; only if turned on in Accessibility settings. It reads no screen content and receives no accessibility events. |
 
-The app makes no network requests itself. OCR uses ML Kit's bundled model (no download at runtime)
-and runs on the device. Network problems therefore cannot affect detection, so there is no network
-monitor.
+The only network requests are the balance management's speed measurements, while it watches the
+internet. OCR uses ML Kit's bundled model (no download at runtime) and runs on the device, so
+network problems cannot affect detection; they affect the game, which is what the balance
+management watches.
 
 ## Build
 

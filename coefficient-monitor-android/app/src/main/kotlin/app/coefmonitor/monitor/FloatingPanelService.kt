@@ -167,6 +167,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
         val prompt = p.runtime.balancePrompt
         val warning = when {
             prompt != null -> str.getString(R.string.balance_prompt, Money.format(prompt.screen), Money.format(prompt.expected))
+            p.runtime.networkPaused -> str.getString(R.string.warning_network_paused)
             p.runtime.awaitingStart -> str.getString(R.string.warning_awaiting_start)
             clickerOff -> str.getString(R.string.warning_auto_click_off)
             p.runtime.lastSeenLate -> str.getString(R.string.warning_seen_late)
@@ -187,7 +188,8 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
                 algorithmName = active?.name ?: "—",
                 coefficientLine = str.getString(R.string.overlay_last_coefficient, lastValue),
                 coefficientHighlighted = last?.isHighlighted == true,
-                statusLine = "${Labels.status(str, p.runtime.status)} · ${Labels.ocrStatus(str, p.runtime.ocrStatus)}",
+                statusLine = "${Labels.status(str, p.runtime.status)} · ${Labels.ocrStatus(str, p.runtime.ocrStatus)}" +
+                    p.runtime.networkKbps?.let { " · " + str.getString(R.string.network_speed, it) }.orEmpty(),
                 guardLine = p.settings.guarded?.let { Labels.guardLine(str, it, p.state.toSequenceState().guarded) },
                 balancePrompt = prompt != null,
                 warning = warning,

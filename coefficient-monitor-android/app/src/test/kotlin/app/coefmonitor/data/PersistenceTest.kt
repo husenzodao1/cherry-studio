@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import app.coefmonitor.core.AlgorithmDefinition
+import app.coefmonitor.core.BalanceControl
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectionReason
@@ -15,6 +16,7 @@ import app.coefmonitor.core.DetectorConfig
 import app.coefmonitor.core.GuardedConfig
 import app.coefmonitor.core.GuardedPhase
 import app.coefmonitor.core.Money
+import app.coefmonitor.core.NetworkMode
 import app.coefmonitor.core.ProcessResult
 import app.coefmonitor.core.RoundEvent
 import app.coefmonitor.core.TransitionReason
@@ -330,6 +332,16 @@ class PersistenceTest {
         assertEquals(guarded, restored.guarded)
         repo2.update { it.copy(guarded = null) }
         assertEquals(null, repo2.current().guarded)
+
+        // Balance management: stored on its own, its balance joins the guarded start when that runs.
+        val control = BalanceControl(network = NetworkMode.MANUAL, minKbps = 300, slowSeconds = 6, balance = Money.parse("10000"))
+        repo2.update { it.copy(guarded = guarded, balanceControl = control) }
+        val withControl = repo2.current()
+        assertEquals(control, withControl.balanceControl)
+        assertEquals(null, withControl.guarded!!.balance)
+        assertEquals(Money.parse("10000"), withControl.effectiveGuarded!!.balance)
+        repo2.update { it.copy(balanceControl = null) }
+        assertEquals(null, repo2.current().effectiveGuarded!!.balance)
 
         store2.edit { it[stringPreferencesKey("detector_json")] = "{not json" }
         val fallback = repo2.current()

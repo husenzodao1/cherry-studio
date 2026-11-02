@@ -13,7 +13,7 @@ enum class MonitorStatus { STOPPED, INITIALIZING, MONITORING, PAUSED, ERROR }
 
 enum class OcrStatus { IDLE, WAITING_FOR_SCREEN, TRANSITIONING, READING, OK, REJECTED, PLACEHOLDER, FAILED, SEARCHING }
 
-enum class MonitorError { CAPTURE_DENIED, CAPTURE_REVOKED, CAPTURE_FAILED, NO_ALGORITHMS, OCR_FAILED, BALANCE_MISMATCH, BALANCE_UNREADABLE }
+enum class MonitorError { CAPTURE_DENIED, CAPTURE_REVOKED, CAPTURE_FAILED, NO_ALGORITHMS, OCR_FAILED, BALANCE_MISMATCH, BALANCE_UNREADABLE, NETWORK_SLOW }
 
 /** At the start the balance on the screen was not the expected one; the user decides whether to go on with it. */
 data class BalancePrompt(val screen: Long, val expected: Long)
@@ -49,6 +49,10 @@ data class RuntimeState(
     val screenBalance: Long? = null,
     /** Waiting for the user to accept the balance seen at the start; monitoring is paused meanwhile. */
     val balancePrompt: BalancePrompt? = null,
+    /** Last internet speed measured by the balance management, kbit/s (0: the measurement failed). */
+    val networkKbps: Int? = null,
+    /** Paused by the balance management because the internet is too slow; resumes by itself. */
+    val networkPaused: Boolean = false,
     val clicks: ClickProgress? = null,
 )
 

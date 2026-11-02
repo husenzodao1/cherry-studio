@@ -67,6 +67,10 @@
     <string name="alert_end_title">Добавьте ещё один алгоритм</string>
     <string name="alert_guard_finished_text">Старт с ожиданием набрал %1$s. Мониторинг и клики остановлены.</string>
     <string name="alert_guard_finished_title">Цель достигнута</string>
+    <string name="alert_network_pause_text">Ниже %1$d кбит/с в течение %2$d с. Мониторинг и клики на паузе и продолжатся сами, когда скорость вернётся.</string>
+    <string name="alert_network_pause_title">Пауза: медленный интернет</string>
+    <string name="alert_network_stop_text">Ниже %1$d кбит/с в течение %2$d с. Мониторинг и клики остановлены; запустите снова при хорошей связи.</string>
+    <string name="alert_network_stop_title">Остановлено: медленный интернет</string>
     <string name="alert_no_algorithms_text">Раунд обнаружен, но нет включённого алгоритма для перехода.</string>
     <string name="alert_no_algorithms_title">Нет включённых алгоритмов</string>
     <string name="algorithm_number">Алгоритм %1$d</string>
@@ -85,6 +89,12 @@
     <string name="auto_click_service_label">Монитор коэффициентов: автокликер</string>
     <string name="auto_click_service_off">Выключена — клики не выполняются</string>
     <string name="auto_click_service_on">Включена</string>
+    <string name="balance_control_network">Медленный интернет</string>
+    <string name="balance_control_switch">Включить</string>
+    <string name="balance_control_switch_hint">Спросит, что делать при медленном интернете, и (по желанию) баланс на экране.</string>
+    <string name="balance_control_title">Управление балансом</string>
+    <string name="balance_field_hint">Работает со стартом с ожиданием: проверяется при старте и после каждого раунда. Пусто: не проверять.</string>
+    <string name="balance_needs_guarded">Баланс проверяется только при включённом старте с ожиданием.</string>
     <string name="balance_prompt">Баланс не совпадает с увиденным: баланс на экране %1$s (ожидалось %2$s). Продолжить с этим балансом?</string>
     <string name="banner_no_algorithms">Добавьте хотя бы один алгоритм, чтобы начать.</string>
     <string name="bulk_add_count">Сколько (1–%1$d)</string>
@@ -147,6 +157,7 @@
     <string name="error_capture_denied">Разрешение на захват экрана не выдано.</string>
     <string name="error_capture_failed">Не удалось запустить захват экрана. Попробуйте снова.</string>
     <string name="error_capture_revoked">Захват экрана остановлен — запустите снова</string>
+    <string name="error_network_slow">Интернет был слишком медленным для игры: остановлено.</string>
     <string name="error_no_algorithms">Нет включённых алгоритмов.</string>
     <string name="error_ocr">Сбой OCR на последнем кадре.</string>
     <string name="field_description">Описание</string>
@@ -196,6 +207,7 @@
     <string name="import_title">Импорт алгоритмов</string>
     <string name="include_algorithms">Включить алгоритмы</string>
     <string name="info_active_algorithm">Алгоритм, клики которого выполнятся после следующего раунда. Низкий коэффициент — переход к следующему, высокий — возврат к алгоритму 1.</string>
+    <string name="info_balance_control">Защищает баланс: останавливает или приостанавливает мониторинг и клики, когда интернет слишком медленный для игры, и (со стартом с ожиданием) проверяет баланс на экране при старте и после каждого раунда.</string>
     <string name="info_guarded">Алгоритмы ставят только после заданного числа низких коэффициентов (≤ порога) подряд. Сумма делится на части: когда часть набрана, всё возвращается к алгоритму 1 и снова ждёт серию низких; после последней части всё останавливается. Ставки считаются от порога так, что выигрыш возвращает проигранное с последнего выигрыша и добавляет стартовую ставку × (порог − 1). Серия низких не меняет шанс следующего раунда.</string>
     <string name="info_last_ocr">Текст, последний раз прочитанный в новой плитке. Помогает, если раунд не распознаётся.</string>
     <string name="info_last_round">Последний прочитанный коэффициент и что он изменил в последовательности.</string>
@@ -235,7 +247,18 @@
     <string name="nav_presets">Пресеты</string>
     <string name="nav_settings">Настройки</string>
     <string name="network">Сеть</string>
+    <string name="network_auto">Автоматически</string>
+    <string name="network_auto_hint">Полностью останавливает всё после %2$d с ниже %1$d кбит/с. Официальной цифры для Lucky Jet нет; ниже этого живые crash-игры зависают (скорость 2G/EDGE).</string>
+    <string name="network_auto_summary">Автоматически: стоп ниже %1$d кбит/с за %2$d с</string>
+    <string name="network_data_note">Измеряется каждые 2 с загрузкой 13 КБ (около 24 МБ в час). Скорость включает задержку запроса, поэтому она ниже, чем показывает спидтест.</string>
+    <string name="network_field_kbps">Минимальная скорость (кбит/с; 8 кбит/с = 1 КБ/с)</string>
+    <string name="network_field_seconds">Секунд ниже неё до остановки</string>
+    <string name="network_manual">Вручную</string>
+    <string name="network_manual_hint">Приостанавливает ниже вашей скорости за ваши секунды и сам продолжает, когда скорость вернулась (3 с), учитывая раунды, закончившиеся за это время.</string>
+    <string name="network_manual_summary">Вручную: пауза ниже %1$d кбит/с за %2$d с</string>
     <string name="network_not_used">Не используется — OCR работает на устройстве</string>
+    <string name="network_off">Не отслеживать</string>
+    <string name="network_speed">Интернет: %1$d кбит/с</string>
     <string name="new_algorithm">Новый алгоритм</string>
     <string name="next_algorithm">Следующий</string>
     <string name="no_algorithms_short">Нет алгоритмов</string>
@@ -370,6 +393,7 @@
     <string name="warning_awaiting_start">Ждём следующий раунд — затем алгоритм 1</string>
     <string name="warning_gap">Возможны пропущенные раунды — проверьте историю игры</string>
     <string name="warning_last_algorithm">Последний алгоритм — добавьте ещё один</string>
+    <string name="warning_network_paused">Интернет слишком медленный: пауза, продолжится сам, когда станет быстрее</string>
     <string name="warning_seen_late">Последний раунд закончился вне экрана — клики со следующего раунда</string>
     <string name="zoom">Масштаб</string>
 </resources>

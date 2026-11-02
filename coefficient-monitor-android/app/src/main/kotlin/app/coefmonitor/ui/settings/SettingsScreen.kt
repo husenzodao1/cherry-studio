@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
@@ -50,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
@@ -64,12 +67,14 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import app.coefmonitor.AppContainer
 import app.coefmonitor.BuildConfig
 import app.coefmonitor.R
+import app.coefmonitor.core.BalanceControl
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
 import app.coefmonitor.core.GuardedConfig
 import app.coefmonitor.core.GuardedStart
 import app.coefmonitor.core.Money
+import app.coefmonitor.core.NetworkMode
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.ThemeMode
 import app.coefmonitor.monitor.AutoClickService
@@ -110,6 +115,8 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
 
     fun restoreDefaults() = update { AppSettings() }
 
+    fun setBalanceControl(control: BalanceControl?) = update { it.copy(balanceControl = control) }
+
     /** Turns the guarded start on with [config] (or off with null); either way a new run begins from part 1. */
     fun setGuarded(config: GuardedConfig?) {
         viewModelScope.launch {
@@ -149,6 +156,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel(factory = SettingsVi
         ) {
             item { DetectionSection(settings, viewModel) }
             item { GuardedSection(settings, viewModel) }
+            item { BalanceControlSection(settings, viewModel) }
             item { DelaySection(settings, viewModel) }
             item { AppearanceSection(settings, viewModel) }
             item { PermissionsSection(settings, viewModel) }
@@ -313,7 +321,6 @@ private fun GuardedSection(settings: AppSettings, viewModel: SettingsViewModel) 
                 "${Money.format(config.amount)} / ${config.parts} = ${Money.format(GuardedStart.partTarget(config))}",
             )
             InfoRow(stringResource(R.string.guarded_start_stake), Money.format(config.startStake))
-            InfoRow(stringResource(R.string.guarded_balance), config.balance?.let(Money::format) ?: stringResource(R.string.guarded_balance_off))
             TextButton(onClick = { editing = true }) { Text(stringResource(R.string.action_edit)) }
         }
     }
@@ -337,17 +344,13 @@ private fun GuardedDialog(initial: GuardedConfig, threshold: Coefficient, onSave
     var amount by remember { mutableStateOf(Money.format(initial.amount)) }
     var parts by remember { mutableStateOf(initial.parts.toString()) }
     var stake by remember { mutableStateOf(Money.format(initial.startStake)) }
-    var balance by remember { mutableStateOf(initial.balance?.let(Money::format).orEmpty()) }
     val lowsValue = lows.toIntOrNull()?.takeIf { it in 1..GuardedConfig.MAX_LOWS_IN_ROW }
     val amountValue = Money.parse(amount)
     val partsValue = parts.toIntOrNull()?.takeIf { it in 1..GuardedConfig.MAX_PARTS }
     val stakeValue = Money.parse(stake)
-    // Empty: the balance is not checked.
-    val balanceValue = Money.parse(balance)
-    val balanceValid = balance.isBlank() || balanceValue != null
     val usableThreshold = threshold > Coefficient.MIN_THRESHOLD
-    val config = if (lowsValue != null && amountValue != null && partsValue != null && stakeValue != null && balanceValid) {
-        GuardedConfig(lowsValue, amountValue, partsValue, stakeValue, balanceValue).takeIf { it.problem() == null }
+    val config = if (lowsValue != null && amountValue != null && partsValue != null && stakeValue != null) {
+        GuardedConfig(lowsValue, amountValue, partsValue, stakeValue).takeIf { it.problem() == null }
     } else {
         null
     }
@@ -360,7 +363,6 @@ private fun GuardedDialog(initial: GuardedConfig, threshold: Coefficient, onSave
                 NumberField(stringResource(R.string.guarded_field_amount), amount, amountValue != null, decimal = true) { amount = it }
                 NumberField(stringResource(R.string.guarded_field_parts), parts, partsValue != null, decimal = false) { parts = it }
                 NumberField(stringResource(R.string.guarded_field_stake), stake, stakeValue != null, decimal = true) { stake = it }
-                NumberField(stringResource(R.string.guarded_field_balance), balance, balanceValid, decimal = true) { balance = it }
                 if (!usableThreshold) {
                     Text(stringResource(R.string.guarded_threshold_too_low), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 } else if (config != null) {
@@ -404,6 +406,112 @@ private fun NumberField(label: String, value: String, valid: Boolean, decimal: B
         keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+@Composable
+private fun BalanceControlSection(settings: AppSettings, viewModel: SettingsViewModel) {
+    var editing by remember { mutableStateOf(false) }
+    val control = settings.balanceControl
+    SectionCard(title = stringResource(R.string.balance_control_title), info = stringResource(R.string.info_balance_control)) {
+        SwitchRow(stringResource(R.string.balance_control_switch), stringResource(R.string.balance_control_switch_hint), checked = control != null) { on ->
+            if (on) editing = true else viewModel.setBalanceControl(null)
+        }
+        if (control != null) {
+            InfoRow(stringResource(R.string.balance_control_network), networkSummary(control))
+            InfoRow(stringResource(R.string.guarded_balance), control.balance?.let(Money::format) ?: stringResource(R.string.guarded_balance_off))
+            if (control.balance != null && settings.guarded == null) {
+                Text(stringResource(R.string.balance_needs_guarded), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+            }
+            TextButton(onClick = { editing = true }) { Text(stringResource(R.string.action_edit)) }
+        }
+    }
+    if (editing) {
+        BalanceControlDialog(
+            initial = control ?: BalanceControl(),
+            onSave = { saved ->
+                viewModel.setBalanceControl(saved)
+                editing = false
+            },
+            onDismiss = { editing = false },
+        )
+    }
+}
+
+@Composable
+private fun networkSummary(control: BalanceControl): String = when (control.network) {
+    NetworkMode.OFF -> stringResource(R.string.network_off)
+    NetworkMode.AUTO -> stringResource(R.string.network_auto_summary, BalanceControl.AUTO_MIN_KBPS, BalanceControl.AUTO_SLOW_SECONDS)
+    NetworkMode.MANUAL -> stringResource(R.string.network_manual_summary, control.minKbps, control.slowSeconds)
+}
+
+/** Internet speed (off, automatic, manual) and the balance on the screen. */
+@Composable
+private fun BalanceControlDialog(initial: BalanceControl, onSave: (BalanceControl) -> Unit, onDismiss: () -> Unit) {
+    var mode by remember { mutableStateOf(initial.network) }
+    var kbps by remember { mutableStateOf(initial.minKbps.toString()) }
+    var seconds by remember { mutableStateOf(initial.slowSeconds.toString()) }
+    var balance by remember { mutableStateOf(initial.balance?.let(Money::format).orEmpty()) }
+    val kbpsValue = kbps.toIntOrNull()?.takeIf { it in BalanceControl.MIN_KBPS..BalanceControl.MAX_KBPS }
+    val secondsValue = seconds.toIntOrNull()?.takeIf { it in BalanceControl.MIN_SLOW_SECONDS..BalanceControl.MAX_SLOW_SECONDS }
+    // Empty: the balance is not checked.
+    val balanceValue = Money.parse(balance)
+    val balanceValid = balance.isBlank() || balanceValue != null
+    val manualValid = mode != NetworkMode.MANUAL || (kbpsValue != null && secondsValue != null)
+    val control = if (balanceValid && manualValid) {
+        BalanceControl(
+            network = mode,
+            minKbps = kbpsValue ?: initial.minKbps,
+            slowSeconds = secondsValue ?: initial.slowSeconds,
+            balance = balanceValue,
+        ).takeIf { it.problem() == null }
+    } else {
+        null
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.balance_control_title)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.balance_control_network), style = MaterialTheme.typography.titleSmall)
+                ModeOption(mode == NetworkMode.OFF, stringResource(R.string.network_off), null) { mode = NetworkMode.OFF }
+                ModeOption(
+                    mode == NetworkMode.AUTO,
+                    stringResource(R.string.network_auto),
+                    stringResource(R.string.network_auto_hint, BalanceControl.AUTO_MIN_KBPS, BalanceControl.AUTO_SLOW_SECONDS),
+                ) { mode = NetworkMode.AUTO }
+                ModeOption(mode == NetworkMode.MANUAL, stringResource(R.string.network_manual), stringResource(R.string.network_manual_hint)) {
+                    mode = NetworkMode.MANUAL
+                }
+                if (mode == NetworkMode.MANUAL) {
+                    NumberField(stringResource(R.string.network_field_kbps), kbps, kbpsValue != null, decimal = false) { kbps = it }
+                    NumberField(stringResource(R.string.network_field_seconds), seconds, secondsValue != null, decimal = false) { seconds = it }
+                }
+                if (mode != NetworkMode.OFF) {
+                    Text(stringResource(R.string.network_data_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                HorizontalDivider()
+                NumberField(stringResource(R.string.guarded_field_balance), balance, balanceValid, decimal = true) { balance = it }
+                Text(stringResource(R.string.balance_field_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        },
+        confirmButton = { TextButton(onClick = { control?.let(onSave) }, enabled = control != null) { Text(stringResource(R.string.action_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+@Composable
+private fun ModeOption(selected: Boolean, title: String, hint: String?, onSelect: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().selectable(selected = selected, onClick = onSelect, role = Role.RadioButton),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Spacer(Modifier.width(8.dp))
+        Column {
+            Text(title, style = MaterialTheme.typography.bodyMedium)
+            if (hint != null) Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
 }
 
 /** Stakes listed in the guarded start's preview. */
