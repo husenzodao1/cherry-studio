@@ -57,6 +57,8 @@ data class MonitorStateEntity(
     val lastTransitionReason: String? = null,
     val lastContinuity: String? = null,
     val updatedAtMs: Long = 0,
+    /** JSON of the guarded start's progress ([app.coefmonitor.core.GuardedState]); null while it is off. Added in version 2. */
+    val guardedJson: String? = null,
 ) {
     companion object {
         const val SINGLETON_ID = 0

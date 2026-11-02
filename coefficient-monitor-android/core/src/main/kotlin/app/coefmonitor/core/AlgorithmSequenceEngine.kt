@@ -24,6 +24,21 @@ enum class TransitionReason {
 
     /** First round that ended after Start: the session begins at Algorithm 1; the round itself is not evaluated. */
     SESSION_START,
+
+    /** Guarded start: waiting for the run of lows; Algorithm 1, nothing staked. */
+    GUARD_WAITING,
+
+    /** Guarded start: the run of lows is complete; Algorithm 1 stakes on the next round. */
+    GUARD_STARTED,
+
+    /** Guarded start: nothing was staked on this round; the same algorithm stakes on the next one. */
+    GUARD_NO_STAKE,
+
+    /** Guarded start: the win completed a part; back to Algorithm 1 and waiting again. */
+    GUARD_PART_DONE,
+
+    /** Guarded start: the win completed the whole amount; everything stops. */
+    GUARD_FINISHED,
 }
 
 /** Positions are zero-based; the UI shows them as "Algorithm N" with N = index + 1. */

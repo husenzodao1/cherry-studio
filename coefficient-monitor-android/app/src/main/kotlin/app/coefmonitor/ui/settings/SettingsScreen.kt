@@ -16,10 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
@@ -64,6 +67,9 @@ import app.coefmonitor.R
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
+import app.coefmonitor.core.GuardedConfig
+import app.coefmonitor.core.GuardedStart
+import app.coefmonitor.core.Money
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.ThemeMode
 import app.coefmonitor.monitor.AutoClickService
@@ -104,6 +110,14 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
 
     fun restoreDefaults() = update { AppSettings() }
 
+    /** Turns the guarded start on with [config] (or off with null); either way a new run begins from part 1. */
+    fun setGuarded(config: GuardedConfig?) {
+        viewModelScope.launch {
+            container.settings.update { it.copy(guarded = config) }
+            container.monitor.resetGuarded()
+        }
+    }
+
     companion object {
         val Factory = viewModelFactory { initializer { SettingsViewModel(container()) } }
     }
@@ -134,6 +148,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel(factory = SettingsVi
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item { DetectionSection(settings, viewModel) }
+            item { GuardedSection(settings, viewModel) }
             item { DelaySection(settings, viewModel) }
             item { AppearanceSection(settings, viewModel) }
             item { PermissionsSection(settings, viewModel) }
@@ -282,6 +297,111 @@ private fun ThresholdField(current: Coefficient, onApply: (Coefficient) -> Unit)
         )
     }
 }
+
+@Composable
+private fun GuardedSection(settings: AppSettings, viewModel: SettingsViewModel) {
+    var editing by remember { mutableStateOf(false) }
+    val config = settings.guarded
+    SectionCard(title = stringResource(R.string.guarded_title), info = stringResource(R.string.info_guarded)) {
+        SwitchRow(stringResource(R.string.guarded_switch), stringResource(R.string.guarded_switch_hint), checked = config != null) { on ->
+            if (on) editing = true else viewModel.setGuarded(null)
+        }
+        if (config != null) {
+            InfoRow(stringResource(R.string.guarded_lows), config.lowsInRow.toString())
+            InfoRow(
+                stringResource(R.string.guarded_amount),
+                "${Money.format(config.amount)} / ${config.parts} = ${Money.format(GuardedStart.partTarget(config))}",
+            )
+            InfoRow(stringResource(R.string.guarded_start_stake), Money.format(config.startStake))
+            TextButton(onClick = { editing = true }) { Text(stringResource(R.string.action_edit)) }
+        }
+    }
+    if (editing) {
+        GuardedDialog(
+            initial = config ?: GuardedConfig(),
+            threshold = settings.threshold,
+            onSave = { saved ->
+                viewModel.setGuarded(saved)
+                editing = false
+            },
+            onDismiss = { editing = false },
+        )
+    }
+}
+
+/** Asks for the four numbers of the guarded start and shows what they mean at the current threshold. */
+@Composable
+private fun GuardedDialog(initial: GuardedConfig, threshold: Coefficient, onSave: (GuardedConfig) -> Unit, onDismiss: () -> Unit) {
+    var lows by remember { mutableStateOf(initial.lowsInRow.toString()) }
+    var amount by remember { mutableStateOf(Money.format(initial.amount)) }
+    var parts by remember { mutableStateOf(initial.parts.toString()) }
+    var stake by remember { mutableStateOf(Money.format(initial.startStake)) }
+    val lowsValue = lows.toIntOrNull()?.takeIf { it in 1..GuardedConfig.MAX_LOWS_IN_ROW }
+    val amountValue = Money.parse(amount)
+    val partsValue = parts.toIntOrNull()?.takeIf { it in 1..GuardedConfig.MAX_PARTS }
+    val stakeValue = Money.parse(stake)
+    val usableThreshold = threshold > Coefficient.MIN_THRESHOLD
+    val config = if (lowsValue != null && amountValue != null && partsValue != null && stakeValue != null) {
+        GuardedConfig(lowsValue, amountValue, partsValue, stakeValue).takeIf { it.problem() == null }
+    } else {
+        null
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.guarded_title)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                NumberField(stringResource(R.string.guarded_field_lows), lows, lowsValue != null, decimal = false) { lows = it }
+                NumberField(stringResource(R.string.guarded_field_amount), amount, amountValue != null, decimal = true) { amount = it }
+                NumberField(stringResource(R.string.guarded_field_parts), parts, partsValue != null, decimal = false) { parts = it }
+                NumberField(stringResource(R.string.guarded_field_stake), stake, stakeValue != null, decimal = true) { stake = it }
+                if (!usableThreshold) {
+                    Text(stringResource(R.string.guarded_threshold_too_low), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                } else if (config != null) {
+                    val profit = GuardedStart.cycleProfit(config, threshold)
+                    Text(
+                        stringResource(
+                            R.string.guarded_preview,
+                            Money.format(GuardedStart.partTarget(config)),
+                            threshold.toString(),
+                            Money.format(profit),
+                            GuardedStart.winsPerPart(config, threshold),
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        stringResource(
+                            R.string.guarded_stakes,
+                            GuardedStart.stakeTable(config, threshold, PREVIEW_STAKES).joinToString(" · ") { Money.format(it) },
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { config?.let(onSave) }, enabled = config != null && usableThreshold) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+@Composable
+private fun NumberField(label: String, value: String, valid: Boolean, decimal: Boolean, onChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { text -> onChange(text.filter { it.isDigit() || (decimal && (it == '.' || it == ',')) }.take(12)) },
+        label = { Text(label) },
+        isError = !valid,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+/** Stakes listed in the guarded start's preview. */
+private const val PREVIEW_STAKES = 8
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

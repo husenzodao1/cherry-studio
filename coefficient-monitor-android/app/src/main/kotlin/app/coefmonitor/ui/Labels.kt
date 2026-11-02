@@ -5,6 +5,11 @@ import androidx.annotation.StringRes
 import app.coefmonitor.R
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectionReason
+import app.coefmonitor.core.GuardedConfig
+import app.coefmonitor.core.GuardedPhase
+import app.coefmonitor.core.GuardedStart
+import app.coefmonitor.core.GuardedState
+import app.coefmonitor.core.Money
 import app.coefmonitor.core.RejectionReason
 import app.coefmonitor.core.TransitionReason
 import app.coefmonitor.core.TransitionType
@@ -74,6 +79,11 @@ object Labels {
         TransitionReason.END_OF_SEQUENCE -> R.string.reason_end
         TransitionReason.NO_ALGORITHMS -> R.string.reason_no_algorithms
         TransitionReason.SESSION_START -> R.string.reason_session_start
+        TransitionReason.GUARD_WAITING -> R.string.reason_guard_waiting
+        TransitionReason.GUARD_STARTED -> R.string.reason_guard_started
+        TransitionReason.GUARD_NO_STAKE -> R.string.reason_guard_no_stake
+        TransitionReason.GUARD_PART_DONE -> R.string.reason_guard_part_done
+        TransitionReason.GUARD_FINISHED -> R.string.reason_guard_finished
     }
 
     @StringRes
@@ -104,6 +114,23 @@ object Labels {
         } else {
             context.getString(R.string.summary_move, previous, new)
         }
+
+    /** One line on the guarded start: "Waiting for lows 2/3 · part 1/4", "Part 1/4 · 26.00 / 50.00 · stake 4.00" or "Done: 200.00". */
+    fun guardLine(context: Context, config: GuardedConfig, state: GuardedState?): String {
+        val s = state ?: GuardedState()
+        return when (s.phase) {
+            GuardedPhase.WAITING -> context.getString(R.string.guard_line_waiting, s.lowStreak, config.lowsInRow, s.part, config.parts)
+            GuardedPhase.ACTIVE -> context.getString(
+                R.string.guard_line_active,
+                s.part,
+                config.parts,
+                Money.format(s.partProfit),
+                Money.format(GuardedStart.partTarget(config)),
+                s.stake?.let(Money::format) ?: "—",
+            )
+            GuardedPhase.DONE -> context.getString(R.string.guard_line_done, Money.format(s.totalProfit))
+        }
+    }
 
     /** "1.70x — ADVANCE — Algorithm 1 → Algorithm 2", the format used in the event log. */
     fun eventLine(context: Context, event: EventEntity): String {

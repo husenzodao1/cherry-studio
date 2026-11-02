@@ -130,6 +130,48 @@ not run, because that moment has passed: the log marks it *Seen late — no clic
 the dashboard say that clicks resume with the next round, and the next round seen live runs its
 clicks as usual.
 
+## Guarded start
+
+Settings → **Guarded start** (*Оғози монеадор*). Turning it on asks for four numbers:
+
+| Field | Example | Meaning |
+| --- | --- | --- |
+| Lows in a row | 3 | The algorithms only stake after this many coefficients at or below the threshold in a row. A higher one starts the count again. |
+| Amount | 200 | Total profit to make. |
+| Parts | 4 | The amount is made in parts of amount / parts (here 50), each one started by its own run of lows. |
+| Start stake | 2 | Stake of Algorithm 1. |
+
+While waiting, Algorithm 1 stays active and no clicks run. When the run of lows is complete,
+Algorithm 1's clicks run and the threshold rule moves the sequence as usual. When a part is made,
+the sequence goes back to Algorithm 1 and waits for a new run of lows; after the last part,
+monitoring and clicks stop and a notification says so. The first round after Start counts towards
+the run. Saving the settings, or turning the feature off, starts again from part 1; Stop/Start
+keeps the part and its profit (a cycle that was broken off keeps its losses in it).
+
+**Stakes follow the threshold T** (the cash-out coefficient), so that a win brings back
+everything lost since the last win plus one cycle's profit, start stake × (T − 1):
+
+    stake = (lost since the last win + start stake × (T − 1)) / (T − 1), rounded up to a cent
+
+| T | Stakes of Algorithms 1, 2, 3, … (start 2) | A win makes | Wins per part of 50 |
+| --- | --- | --- | --- |
+| 1.50x | 2, 6, 18, 54, 162, … | +1.00 | 50 |
+| 2.00x | 2, 4, 8, 16, 32, … | +2.00 | 25 |
+| 3.00x | 2, 3, 4.50, 6.75, 10.13, … | +4.00 | 13 (52.00: 12 wins make only 48) |
+
+A round at or below T loses the stake, above T wins stake × (T − 1). The settings dialog shows
+the part, the win and the stakes for the current threshold; set each algorithm's clicks to place
+exactly its stake, since the app cannot see the stake in the game. A part is made when its profit
+reaches amount / parts; anything above it is not carried into the next part. A round that ended
+out of view still counts, but nothing is staked on the round after it (its clicks did not run);
+that round then only stakes again. The dashboard card and the floating panel show the progress
+("Waiting for lows 2/3 · part 1/4", "Part 1/4 · 26.00 / 50.00 · stake 4.00"), and the
+diagnostics log records every step (category GUARD).
+
+A run of lows does not change the chance of the next round, and a long losing streak costs far
+more than one part: at 2.00x and start 2, ten losses in a row cost 2046. Make sure there are
+enough algorithms for the stakes you are prepared to lose.
+
 ## Algorithms, presets, log
 
 - There is no maximum number of algorithms. **Add several** creates numbered algorithms in bulk.

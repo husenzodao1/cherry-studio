@@ -1,6 +1,7 @@
 package app.coefmonitor.data
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -11,6 +12,9 @@ import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectionReason
 import app.coefmonitor.core.DetectorConfig
+import app.coefmonitor.core.GuardedConfig
+import app.coefmonitor.core.GuardedPhase
+import app.coefmonitor.core.Money
 import app.coefmonitor.core.ProcessResult
 import app.coefmonitor.core.RoundEvent
 import app.coefmonitor.core.TransitionReason
@@ -23,6 +27,10 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -154,6 +162,75 @@ class PersistenceTest {
     }
 
     @Test
+    fun `guarded start progress is stored with every round and survives a restart`() = runBlocking {
+        val events = EventRepository(db)
+        val monitor = MonitorRepository(db, events)
+        AlgorithmRepository(db).addNumbered(10, "Algorithm")
+        val config = GuardedConfig(lowsInRow = 3, amount = Money.parse("200")!!, parts = 4, startStake = Money.parse("2")!!)
+        // Start round (low 1/3), two more lows, then win 2, lose 2, lose 4, win 8.
+        val values = listOf(140L, 150L, 120L, 250L, 130L, 110L, 300L)
+        val clicks = values.mapIndexed { i, value ->
+            val result = monitor.applyRound(event(i + 1L, value), threshold, startOfSession = i == 0, guarded = config) as ProcessResult.Applied
+            result.runClicks
+        }
+        assertEquals(listOf(false, false, true, true, true, true, true), clicks)
+        db.close()
+
+        db = open()
+        val state = MonitorRepository(db, EventRepository(db)).sequenceState()
+        assertEquals(0, state.activeIndex)
+        val guarded = state.guarded!!
+        assertEquals(GuardedPhase.ACTIVE, guarded.phase)
+        assertEquals("4.00", Money.format(guarded.partProfit))
+        assertEquals("2.00", Money.format(guarded.stake!!))
+        assertEquals(
+            listOf(
+                TransitionReason.SESSION_START, TransitionReason.GUARD_WAITING, TransitionReason.GUARD_STARTED,
+                TransitionReason.ALREADY_AT_FIRST, TransitionReason.LOW_COEFFICIENT, TransitionReason.LOW_COEFFICIENT,
+                TransitionReason.HIGH_COEFFICIENT,
+            ),
+            EventRepository(db).allRecords().map { it.transitionReason },
+        )
+
+        // Saving new settings starts a new run.
+        MonitorRepository(db, EventRepository(db)).resetGuarded()
+        assertEquals(null, MonitorRepository(db, EventRepository(db)).sequenceState().guarded)
+    }
+
+    @Test
+    fun `version 1 database is migrated without losing data`() {
+        db.close()
+        context.deleteDatabase(dbName)
+        // Build the database exactly as version 1 created it, from the exported schema.
+        val schema = Json.parseToJsonElement(File("schemas/app.coefmonitor.data.db.AppDatabase/1.json").readText()).jsonObject["database"]!!.jsonObject
+        val legacy = SQLiteDatabase.openOrCreateDatabase(context.getDatabasePath(dbName).apply { parentFile?.mkdirs() }, null)
+        schema["entities"]!!.jsonArray.forEach { entity ->
+            val table = entity.jsonObject["tableName"]!!.jsonPrimitive.content
+            legacy.execSQL(entity.jsonObject["createSql"]!!.jsonPrimitive.content.replace("\${TABLE_NAME}", table))
+            entity.jsonObject["indices"]?.jsonArray?.forEach { index ->
+                legacy.execSQL(index.jsonObject["createSql"]!!.jsonPrimitive.content.replace("\${TABLE_NAME}", table))
+            }
+        }
+        schema["setupQueries"]!!.jsonArray.forEach { legacy.execSQL(it.jsonPrimitive.content) }
+        legacy.execSQL("INSERT INTO monitor_state (id, activeIndex, lastSequence, updatedAtMs) VALUES (0, 6, 41, 0)")
+        legacy.execSQL("INSERT INTO algorithms (position, name, description, enabled, stepsJson) VALUES (0, 'Kept', '', 1, '[]')")
+        legacy.version = 1
+        legacy.close()
+
+        db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .allowMainThreadQueries()
+            .build()
+        runBlocking {
+            val state = MonitorRepository(db, EventRepository(db)).sequenceState()
+            assertEquals(6, state.activeIndex)
+            assertEquals(41L, state.lastSequence)
+            assertEquals(null, state.guarded)
+            assertEquals(listOf("Kept"), AlgorithmRepository(db).allDefinitions().map { it.name })
+        }
+    }
+
+    @Test
     fun `H - algorithms, position and de-duplication state survive a restart`() = runBlocking {
         val algorithms = AlgorithmRepository(db)
         algorithms.addNumbered(120, "Algorithm")
@@ -228,7 +305,8 @@ class PersistenceTest {
         val scope1 = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val store1 = PreferenceDataStoreFactory.create(scope = scope1) { file }
         val repo1 = SettingsRepository(store1)
-        repo1.update { it.copy(threshold = Coefficient(250), detector = DetectorConfig(requiredStableFrames = 5)) }
+        val guarded = GuardedConfig(lowsInRow = 4, amount = Money.parse("300")!!, parts = 3, startStake = Money.parse("1.50")!!)
+        repo1.update { it.copy(threshold = Coefficient(250), detector = DetectorConfig(requiredStableFrames = 5), guarded = guarded) }
         scope1.coroutineContext.job.cancelAndJoin()
 
         val scope2 = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -237,6 +315,9 @@ class PersistenceTest {
         val restored = repo2.current()
         assertEquals(Coefficient(250), restored.threshold)
         assertEquals(5, restored.detector.requiredStableFrames)
+        assertEquals(guarded, restored.guarded)
+        repo2.update { it.copy(guarded = null) }
+        assertEquals(null, repo2.current().guarded)
 
         store2.edit { it[stringPreferencesKey("detector_json")] = "{not json" }
         val fallback = repo2.current()

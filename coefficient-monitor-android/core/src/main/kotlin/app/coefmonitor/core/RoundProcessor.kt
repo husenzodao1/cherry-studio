@@ -11,6 +11,8 @@ data class SequenceState(
     /** Last value seen on the tile, including baselines that were not processed. */
     val lastObservedValue: Coefficient? = null,
     val lastEventAtMs: Long? = null,
+    /** Progress of the guarded start; null while it is off. */
+    val guarded: GuardedState? = null,
 ) {
     fun toBaseline(): DetectorBaseline = DetectorBaseline(lastObservedValue, lastSequence, lastEventAtMs)
 }
@@ -50,7 +52,15 @@ data class EventRecord(
 }
 
 sealed interface ProcessResult {
-    data class Applied(val state: SequenceState, val transition: Transition, val record: EventRecord) : ProcessResult
+    data class Applied(
+        val state: SequenceState,
+        val transition: Transition,
+        val record: EventRecord,
+        /** Whether the active algorithm's clicks should run now (false while the guarded start does not stake). */
+        val runClicks: Boolean = true,
+        /** What the round did to the guarded start; null while it is off. */
+        val guard: GuardedStep? = null,
+    ) : ProcessResult
 
     /** The round was already processed (same or older sequence number); nothing changes. */
     data class Duplicate(val sequence: Long, val lastProcessed: Long) : ProcessResult
@@ -65,6 +75,10 @@ object RoundProcessor {
     /**
      * [startOfSession]: the first round that ended after Start. No stake was placed on it, so the
      * threshold rule is not applied: the session simply begins at Algorithm 1.
+     *
+     * [guarded]: the guarded start's settings, null while it is off. It then decides whether the
+     * algorithms work at all (see [GuardedStart]). [live]: the round was seen when it ended, so
+     * clicks run in time for the next round.
      */
     fun process(
         state: SequenceState,
@@ -72,12 +86,20 @@ object RoundProcessor {
         algorithmCount: Int,
         threshold: Coefficient,
         startOfSession: Boolean = false,
+        guarded: GuardedConfig? = null,
+        live: Boolean = true,
     ): ProcessResult {
         if (event.sequence <= state.lastSequence) return ProcessResult.Duplicate(event.sequence, state.lastSequence)
-        val transition = if (startOfSession) {
-            sessionStart(state.activeIndex, algorithmCount)
-        } else {
-            AlgorithmSequenceEngine.next(state.activeIndex, algorithmCount, event.value, threshold)
+        // The stake rule needs a threshold above 1.00x.
+        val config = guarded?.takeIf { it.problem() == null && threshold > Coefficient.MIN_THRESHOLD }
+        val step = config?.let {
+            val before = if (startOfSession) GuardedStart.begin(state.guarded) else state.guarded ?: GuardedState()
+            GuardedStart.onRound(it, before, event.value, threshold, live)
+        }
+        val transition = when {
+            step != null -> guardedTransition(step.event, state.activeIndex, algorithmCount, event.value, threshold, startOfSession)
+            startOfSession -> sessionStart(state.activeIndex, algorithmCount)
+            else -> AlgorithmSequenceEngine.next(state.activeIndex, algorithmCount, event.value, threshold)
         }
         val newState = state.copy(
             activeIndex = transition.newIndex,
@@ -85,6 +107,7 @@ object RoundProcessor {
             lastAcceptedValue = event.value,
             lastObservedValue = event.value,
             lastEventAtMs = event.detectedAtMs,
+            guarded = step?.state,
         )
         val record = EventRecord(
             timestampMs = event.detectedAtMs,
@@ -102,7 +125,30 @@ object RoundProcessor {
             continuity = event.continuity,
             processingStatus = ProcessingStatus.APPLIED,
         )
-        return ProcessResult.Applied(newState, transition, record)
+        return ProcessResult.Applied(newState, transition, record, runClicks = step?.stakesNext ?: true, guard = step)
+    }
+
+    private fun guardedTransition(
+        event: GuardedEvent,
+        currentIndex: Int,
+        algorithmCount: Int,
+        coefficient: Coefficient,
+        threshold: Coefficient,
+        startOfSession: Boolean,
+    ): Transition {
+        if (algorithmCount <= 0) return Transition(0, 0, TransitionType.NO_POSITION_CHANGE, TransitionReason.NO_ALGORITHMS)
+        val current = clampIndex(currentIndex, algorithmCount)
+        fun toFirst(reason: TransitionReason) =
+            Transition(current, 0, if (current == 0) TransitionType.NO_POSITION_CHANGE else TransitionType.RESET_TO_FIRST, reason)
+        return when (event) {
+            GuardedEvent.LOST, GuardedEvent.WON -> AlgorithmSequenceEngine.next(current, algorithmCount, coefficient, threshold)
+            GuardedEvent.NO_STAKE -> Transition(current, current, TransitionType.NO_POSITION_CHANGE, TransitionReason.GUARD_NO_STAKE)
+            GuardedEvent.LOW_COUNTED, GuardedEvent.RUN_BROKEN ->
+                toFirst(if (startOfSession) TransitionReason.SESSION_START else TransitionReason.GUARD_WAITING)
+            GuardedEvent.STARTED -> toFirst(TransitionReason.GUARD_STARTED)
+            GuardedEvent.PART_DONE -> toFirst(TransitionReason.GUARD_PART_DONE)
+            GuardedEvent.FINISHED -> toFirst(TransitionReason.GUARD_FINISHED)
+        }
     }
 
     private fun sessionStart(currentIndex: Int, algorithmCount: Int): Transition {

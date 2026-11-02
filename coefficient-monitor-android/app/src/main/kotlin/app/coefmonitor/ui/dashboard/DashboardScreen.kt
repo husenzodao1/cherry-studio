@@ -1,5 +1,8 @@
 package app.coefmonitor.ui.dashboard
 
+import app.coefmonitor.core.GuardedConfig
+import app.coefmonitor.core.Money
+import app.coefmonitor.data.db.toSequenceState
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
@@ -134,6 +137,7 @@ fun DashboardScreen(
                     onManage = onOpenAlgorithms,
                 )
             }
+            state.settings.guarded?.let { config -> item { GuardedCard(config, state) } }
             item { LastRoundCard(state) }
             item {
                 DetectionCard(
@@ -365,6 +369,20 @@ private fun NeighborLine(label: String, value: Pair<Int, String>?) {
         label = label,
         value = value?.let { stringResource(R.string.algorithm_number_named, it.first, it.second) } ?: "—",
     )
+}
+
+@Composable
+private fun GuardedCard(config: GuardedConfig, state: DashboardState) {
+    val context = LocalContext.current
+    val progress = state.monitor.toSequenceState().guarded
+    SectionCard(title = stringResource(R.string.guarded_title), info = stringResource(R.string.info_guarded)) {
+        Text(Labels.guardLine(context, config, progress), style = MaterialTheme.typography.titleSmall)
+        Text(
+            stringResource(R.string.guarded_total, Money.format(progress?.totalProfit ?: 0), Money.format(config.amount)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }
 
 @Composable

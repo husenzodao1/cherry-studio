@@ -3,6 +3,7 @@ package app.coefmonitor.data
 import androidx.room.withTransaction
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DetectorBaseline
+import app.coefmonitor.core.GuardedConfig
 import app.coefmonitor.core.ProcessResult
 import app.coefmonitor.core.RoundEvent
 import app.coefmonitor.core.RoundProcessor
@@ -10,6 +11,7 @@ import app.coefmonitor.core.SequenceState
 import app.coefmonitor.data.db.AppDatabase
 import app.coefmonitor.data.db.MonitorStateEntity
 import app.coefmonitor.data.db.toEntity
+import app.coefmonitor.data.db.toJson
 import app.coefmonitor.data.db.toSequenceState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -30,11 +32,21 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
 
     suspend fun baseline(): DetectorBaseline = sequenceState().toBaseline()
 
-    /** [startOfSession]: the first round after Start, which only begins the session at Algorithm 1. */
-    suspend fun applyRound(event: RoundEvent, threshold: Coefficient, startOfSession: Boolean = false): ProcessResult = db.withTransaction {
+    /**
+     * [startOfSession]: the first round after Start, which only begins the session at Algorithm 1.
+     * [guarded]: the guarded start's settings (null while off); its progress is written in the same
+     * transaction. [live]: the round was seen when it ended (its clicks can still run).
+     */
+    suspend fun applyRound(
+        event: RoundEvent,
+        threshold: Coefficient,
+        startOfSession: Boolean = false,
+        guarded: GuardedConfig? = null,
+        live: Boolean = true,
+    ): ProcessResult = db.withTransaction {
         val stored = stateDao.get() ?: MonitorStateEntity()
         val enabled = algorithmDao.getAll().filter { it.enabled }
-        val result = RoundProcessor.process(stored.toSequenceState(), event, enabled.size, threshold, startOfSession)
+        val result = RoundProcessor.process(stored.toSequenceState(), event, enabled.size, threshold, startOfSession, guarded, live)
         if (result is ProcessResult.Applied) {
             val newState = result.state
             stateDao.upsert(
@@ -49,6 +61,7 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
                     lastTransitionReason = result.transition.reason.name,
                     lastContinuity = event.continuity.name,
                     updatedAtMs = System.currentTimeMillis(),
+                    guardedJson = newState.guarded?.toJson(),
                 ),
             )
             eventDao.insert(result.record.toEntity(enabled.getOrNull(result.transition.newIndex)?.name))
@@ -62,6 +75,15 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
         if (stored.lastObservedHundredths != value.hundredths) {
             stateDao.upsert(stored.copy(lastObservedHundredths = value.hundredths, updatedAtMs = System.currentTimeMillis()))
         }
+    }
+
+    /** Forgets the guarded start's progress: the next round begins a new run from part 1. */
+    suspend fun resetGuarded() {
+        db.withTransaction {
+            val stored = stateDao.get() ?: MonitorStateEntity()
+            stateDao.upsert(stored.copy(guardedJson = null, updatedAtMs = System.currentTimeMillis()))
+        }
+        events.log(DiagnosticLevel.INFO, "GUARD", "Guarded start progress reset")
     }
 
     /** Explicit user reset — the only non-threshold way back to Algorithm 1. */

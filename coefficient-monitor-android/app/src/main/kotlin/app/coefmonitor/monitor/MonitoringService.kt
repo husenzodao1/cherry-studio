@@ -20,6 +20,10 @@ import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectionReason
 import app.coefmonitor.core.DetectorResult
 import app.coefmonitor.core.FirstRoundPolicy
+import app.coefmonitor.core.GuardedEvent
+import app.coefmonitor.core.GuardedStart
+import app.coefmonitor.core.GuardedStep
+import app.coefmonitor.core.Money
 import app.coefmonitor.core.NewRoundDetector
 import app.coefmonitor.core.OcrReading
 import app.coefmonitor.core.ProcessResult
@@ -432,7 +436,7 @@ class MonitoringService : LifecycleService() {
 
     private suspend fun applyRound(event: RoundEvent, s: AppSettings, runClicks: Boolean = true, startOfSession: Boolean = false) {
         val result = try {
-            container.monitor.applyRound(event, s.threshold, startOfSession)
+            container.monitor.applyRound(event, s.threshold, startOfSession, s.guarded, live = runClicks)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -468,7 +472,8 @@ class MonitoringService : LifecycleService() {
                     )
                     else -> Unit
                 }
-                if (s.autoClickEnabled && runClicks) container.autoClicker.run(result.transition.newIndex)
+                result.guard?.let { onGuardStep(it, s) }
+                if (s.autoClickEnabled && runClicks && result.runClicks) container.autoClicker.run(result.transition.newIndex)
                 if (s.roundNotifications) {
                     notifications.round(
                         str.getString(R.string.notif_round_title, event.value.toString()),
@@ -476,6 +481,34 @@ class MonitoringService : LifecycleService() {
                     )
                 }
             }
+        }
+    }
+
+    /** Logs what the round did to the guarded start; when the whole amount is made, everything stops. */
+    private suspend fun onGuardStep(step: GuardedStep, s: AppSettings) {
+        val config = s.guarded ?: return
+        val state = step.state
+        val target = Money.format(GuardedStart.partTarget(config))
+        val progress = "part ${state.part}/${config.parts}: ${Money.format(state.partProfit)} / $target, total ${Money.format(state.totalProfit)}"
+        val stake = state.stake?.let { ", next stake ${Money.format(it)}" }.orEmpty()
+        val message = when (step.event) {
+            GuardedEvent.LOW_COUNTED -> "low ${state.lowStreak}/${config.lowsInRow} in a row"
+            GuardedEvent.RUN_BROKEN -> "high round: lows in a row start again (0/${config.lowsInRow})"
+            GuardedEvent.STARTED -> "${config.lowsInRow} lows in a row: algorithms start; $progress$stake"
+            GuardedEvent.NO_STAKE -> "nothing was staked on this round; $progress$stake"
+            GuardedEvent.LOST, GuardedEvent.WON -> "${Money.format(step.change)}; $progress$stake"
+            GuardedEvent.PART_DONE -> "+${Money.format(step.change)}: part ${state.part - 1}/${config.parts} made; waiting for lows again; total ${Money.format(state.totalProfit)}"
+            GuardedEvent.FINISHED -> "+${Money.format(step.change)}: all ${config.parts} parts made, total ${Money.format(state.totalProfit)}; stopped"
+        }
+        container.events.log(DiagnosticLevel.INFO, "GUARD", message)
+        if (step.event == GuardedEvent.FINISHED) {
+            val str = withAppLocale()
+            notifications.alert(
+                MonitorNotifications.ID_GUARD_FINISHED,
+                str.getString(R.string.alert_guard_finished_title),
+                str.getString(R.string.alert_guard_finished_text, Money.format(state.totalProfit)),
+            )
+            shutdown(error = null)
         }
     }
 

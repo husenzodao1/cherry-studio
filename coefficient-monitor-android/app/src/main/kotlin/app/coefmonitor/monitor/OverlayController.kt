@@ -35,6 +35,8 @@ data class OverlayState(
     /** The last coefficient is above 10.00x: shown in yellow. */
     val coefficientHighlighted: Boolean,
     val statusLine: String,
+    /** Guarded start progress; null while it is off. */
+    val guardLine: String?,
     val warning: String?,
     /** Recent event lines; coefficients above 10.00x are already coloured yellow. */
     val log: List<CharSequence>,
@@ -119,6 +121,7 @@ class OverlayController(
     private lateinit var name: TextView
     private lateinit var coefficient: TextView
     private lateinit var status: TextView
+    private lateinit var guard: TextView
     private lateinit var warning: TextView
     private lateinit var clickLine: TextView
     private lateinit var log: TextView
@@ -194,6 +197,7 @@ class OverlayController(
         coefficient.text = state.coefficientLine
         coefficient.setTextColor(if (state.coefficientHighlighted) OverlayStyle.BIG else OverlayStyle.TEXT)
         status.text = state.statusLine
+        guard.showText(state.guardLine)
         warning.showText(state.warning)
         clickLine.showText(state.clickLine)
         log.showText(state.log.takeIf { it.isNotEmpty() }?.let { TextUtils.join("\n", it) })
@@ -316,13 +320,14 @@ class OverlayController(
         name = text(12f, OverlayStyle.MUTED).apply { singleLine() }
         coefficient = text(22f, OverlayStyle.TEXT, bold = true).apply { setPadding(0, dp(4), 0, dp(4)) }
         status = text(11f, OverlayStyle.MUTED)
+        guard = text(11f, OverlayStyle.TEXT, bold = true).apply { setPadding(0, dp(4), 0, 0) }
         clickLine = text(12f, OverlayStyle.ACCENT, bold = true).apply { setPadding(0, dp(4), 0, 0) }
         warning = text(11f, OverlayStyle.WARNING).apply { setPadding(0, dp(4), 0, 0) }
         log = text(10.5f, OverlayStyle.MUTED).apply {
             setPadding(0, dp(6), 0, 0)
             setLineSpacing(dp(2).toFloat(), 1f)
         }
-        listOf(name, coefficient, status, clickLine, warning, log).forEach(page::addView)
+        listOf(name, coefficient, status, guard, clickLine, warning, log).forEach(page::addView)
         val monitorButtons = row().apply { setPadding(0, dp(10), 0, 0) }
         startButton = button(context.getString(R.string.overlay_start), primary = true) { actions.startMonitoring() }
         pauseButton = button(context.getString(R.string.action_pause)) { actions.pauseResume() }

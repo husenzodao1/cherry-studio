@@ -6,6 +6,7 @@ import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectionReason
 import app.coefmonitor.core.EventRecord
+import app.coefmonitor.core.GuardedState
 import app.coefmonitor.core.ProcessingStatus
 import app.coefmonitor.core.SequenceState
 import app.coefmonitor.core.TransitionReason
@@ -49,7 +50,10 @@ fun MonitorStateEntity.toSequenceState(): SequenceState = SequenceState(
     lastAcceptedValue = lastAcceptedHundredths?.let(::Coefficient),
     lastObservedValue = lastObservedHundredths?.let(::Coefficient),
     lastEventAtMs = lastEventAtMs,
+    guarded = guardedJson?.let { json -> runCatching { StorageJson.decodeFromString(GuardedState.serializer(), json) }.getOrNull() },
 )
+
+fun GuardedState.toJson(): String = StorageJson.encodeToString(GuardedState.serializer(), this)
 
 fun EventRecord.toEntity(newAlgorithmName: String?): EventEntity = EventEntity(
     timestampMs = timestampMs,

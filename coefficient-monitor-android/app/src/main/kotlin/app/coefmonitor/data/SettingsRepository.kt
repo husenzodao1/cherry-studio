@@ -13,6 +13,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
+import app.coefmonitor.core.GuardedConfig
 import app.coefmonitor.data.db.StorageJson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -34,6 +35,8 @@ data class AppSettings(
     /** Tap the active algorithm's step points one by one after each round (needs the accessibility service). */
     val autoClickEnabled: Boolean = true,
     val activePresetId: Long? = null,
+    /** Guarded start ("Оғози монеадор"); null while it is off. */
+    val guarded: GuardedConfig? = null,
 ) {
     companion object {
         const val DEFAULT_CAPTURE_INTERVAL_MS = 300L
@@ -58,6 +61,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val ROUND_NOTIFICATIONS = booleanPreferencesKey("round_notifications")
         val AUTO_CLICK = booleanPreferencesKey("auto_click")
         val ACTIVE_PRESET = longPreferencesKey("active_preset_id")
+        val GUARDED = stringPreferencesKey("guarded_json")
     }
 
     val settings: Flow<AppSettings> = dataStore.data
@@ -87,6 +91,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
             roundNotifications = this[Keys.ROUND_NOTIFICATIONS] ?: defaults.roundNotifications,
             autoClickEnabled = this[Keys.AUTO_CLICK] ?: defaults.autoClickEnabled,
             activePresetId = this[Keys.ACTIVE_PRESET],
+            guarded = this[Keys.GUARDED]?.let { json ->
+                runCatching { StorageJson.decodeFromString(GuardedConfig.serializer(), json) }.getOrNull()?.takeIf { it.problem() == null }
+            },
         )
     }
 
@@ -102,5 +109,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         this[Keys.AUTO_CLICK] = settings.autoClickEnabled
         val presetId = settings.activePresetId
         if (presetId == null) remove(Keys.ACTIVE_PRESET) else this[Keys.ACTIVE_PRESET] = presetId
+        val guarded = settings.guarded
+        if (guarded == null) remove(Keys.GUARDED) else this[Keys.GUARDED] = StorageJson.encodeToString(GuardedConfig.serializer(), guarded)
     }
 }

@@ -26,6 +26,7 @@ import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.StoredAlgorithm
 import app.coefmonitor.data.db.EventEntity
 import app.coefmonitor.data.db.MonitorStateEntity
+import app.coefmonitor.data.db.toSequenceState
 import app.coefmonitor.ui.CaptureConsentActivity
 import app.coefmonitor.ui.Labels
 import app.coefmonitor.ui.MainActivity
@@ -184,6 +185,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
                 coefficientLine = str.getString(R.string.overlay_last_coefficient, lastValue),
                 coefficientHighlighted = last?.isHighlighted == true,
                 statusLine = "${Labels.status(str, p.runtime.status)} · ${Labels.ocrStatus(str, p.runtime.ocrStatus)}",
+                guardLine = p.settings.guarded?.let { Labels.guardLine(str, it, p.state.toSequenceState().guarded) },
                 warning = warning,
                 log = p.recent.map { event -> highlighted(Labels.eventLine(str, event), event) },
                 captureActive = p.runtime.captureActive,

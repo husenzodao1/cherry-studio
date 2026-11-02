@@ -70,6 +70,43 @@ class RoundProcessorTest {
     }
 
     @Test
+    fun `guarded start keeps Algorithm 1 without clicks until the run of lows, then the threshold rule moves it`() {
+        val config = GuardedConfig(lowsInRow = 3, amount = 200 * Money.ONE, parts = 4, startStake = 2 * Money.ONE)
+        // Left on Algorithm 4 by an earlier session.
+        var state = SequenceState(activeIndex = 3)
+        val results = listOf(140L, 150L, 120L, 250L, 130L, 110L, 300L).mapIndexed { i, value ->
+            val result = RoundProcessor.process(
+                state, event(i + 1L, value), 25, threshold, startOfSession = i == 0, guarded = config,
+            ) as ProcessResult.Applied
+            state = result.state
+            result
+        }
+        assertEquals(listOf(1, 1, 1, 1, 2, 3, 1), results.map { it.record.newAlgorithm })
+        assertEquals(
+            listOf(
+                TransitionReason.SESSION_START, TransitionReason.GUARD_WAITING, TransitionReason.GUARD_STARTED,
+                TransitionReason.ALREADY_AT_FIRST, TransitionReason.LOW_COEFFICIENT, TransitionReason.LOW_COEFFICIENT,
+                TransitionReason.HIGH_COEFFICIENT,
+            ),
+            results.map { it.transition.reason },
+        )
+        // No clicks while waiting; from the third low on every round stakes on the next one.
+        assertEquals(listOf(false, false, true, true, true, true, true), results.map { it.runClicks })
+        assertEquals(Money.parse("4"), state.guarded!!.partProfit)
+    }
+
+    @Test
+    fun `guarded start is off without settings or at a 1_00x threshold`() {
+        val config = GuardedConfig(lowsInRow = 3)
+        val off = RoundProcessor.process(SequenceState(), event(1, 150), 25, threshold) as ProcessResult.Applied
+        assertEquals(1, off.state.activeIndex)
+        assertEquals(null, off.state.guarded)
+        val atOne = RoundProcessor.process(SequenceState(), event(1, 100), 25, Coefficient(100), guarded = config) as ProcessResult.Applied
+        assertEquals(null, atOne.guard)
+        assertTrue(atOne.runClicks)
+    }
+
+    @Test
     fun `only coefficients above 10x are highlighted`() {
         assertEquals(false, Coefficient(9_99).isHighlighted)
         assertEquals(false, Coefficient(10_00).isHighlighted)
