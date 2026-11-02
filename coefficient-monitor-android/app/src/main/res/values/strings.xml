@@ -21,6 +21,7 @@
     <string name="action_clear_events">Clear event log</string>
     <string name="action_close">Close</string>
     <string name="action_confirm">Confirm</string>
+    <string name="action_continue">Continue</string>
     <string name="action_delete">Delete</string>
     <string name="action_disable">Disable</string>
     <string name="action_duplicate">Duplicate</string>
@@ -57,6 +58,9 @@
     <string name="active_algorithm">Active algorithm</string>
     <string name="active_badge">Active</string>
     <string name="advanced_detection">Advanced detection</string>
+    <string name="alert_balance_prompt_title">Balance does not match</string>
+    <string name="alert_balance_stop_text">The martingale expects %1$s, the screen shows %2$s. Monitoring and clicks stopped.</string>
+    <string name="alert_balance_stop_title">Stopped: balance</string>
     <string name="alert_capture_stopped_text">Monitoring ended because screen capture was stopped. Your active algorithm was kept.</string>
     <string name="alert_capture_stopped_title">Screen capture stopped</string>
     <string name="alert_end_text">Algorithm %1$d is the last configured one. The position was kept (no wrap to Algorithm 1). Add more algorithms to continue the sequence.</string>
@@ -81,6 +85,7 @@
     <string name="auto_click_service_label">Coefficient Monitor: auto-clicker</string>
     <string name="auto_click_service_off">Off — clicks are not performed</string>
     <string name="auto_click_service_on">On</string>
+    <string name="balance_prompt">The balance does not match what was seen: screen balance %1$s (expected %2$s). Continue with this balance?</string>
     <string name="banner_no_algorithms">Add at least one algorithm to start.</string>
     <string name="bulk_add_count">How many (1–%1$d)</string>
     <string name="bulk_add_prefix">Name prefix</string>
@@ -137,6 +142,8 @@
     <string name="diagnostics_empty_title">No diagnostics</string>
     <string name="disabled">Disabled</string>
     <string name="edit_algorithm">Edit algorithm</string>
+    <string name="error_balance_mismatch">The balance did not follow the martingale: stopped (see the notification and the diagnostics log).</string>
+    <string name="error_balance_unreadable">The balance could not be read: stopped. Keep it visible and not covered by the panel.</string>
     <string name="error_capture_denied">Screen capture permission was not granted.</string>
     <string name="error_capture_failed">Screen capture could not start. Try again.</string>
     <string name="error_capture_revoked">Screen capture stopped — start again to continue</string>
@@ -168,7 +175,11 @@
     <string name="guard_line_done">Done: %1$s</string>
     <string name="guard_line_waiting">Waiting for lows %1$d/%2$d · part %3$d/%4$d</string>
     <string name="guarded_amount">Amount / parts</string>
+    <string name="guarded_balance">Balance check</string>
+    <string name="guarded_balance_line">Balance: screen %1$s · must be %2$s</string>
+    <string name="guarded_balance_off">off</string>
     <string name="guarded_field_amount">Amount (total profit)</string>
+    <string name="guarded_field_balance">Balance on the screen (empty: not checked)</string>
     <string name="guarded_field_lows">Lows in a row to wait for (≤ threshold)</string>
     <string name="guarded_field_parts">Split into parts</string>
     <string name="guarded_field_stake">Start stake (Algorithm 1)</string>

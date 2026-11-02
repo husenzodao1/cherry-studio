@@ -78,7 +78,8 @@ object RoundProcessor {
      *
      * [guarded]: the guarded start's settings, null while it is off. It then decides whether the
      * algorithms work at all (see [GuardedStart]). [live]: the round was seen when it ended, so
-     * clicks run in time for the next round.
+     * clicks run in time for the next round. [startBalance]: the balance seen on the screen when
+     * the session starts (with [startOfSession]); the guarded start then tracks what it must become.
      */
     fun process(
         state: SequenceState,
@@ -88,12 +89,13 @@ object RoundProcessor {
         startOfSession: Boolean = false,
         guarded: GuardedConfig? = null,
         live: Boolean = true,
+        startBalance: Long? = null,
     ): ProcessResult {
         if (event.sequence <= state.lastSequence) return ProcessResult.Duplicate(event.sequence, state.lastSequence)
         // The stake rule needs a threshold above 1.00x.
         val config = guarded?.takeIf { it.problem() == null && threshold > Coefficient.MIN_THRESHOLD }
         val step = config?.let {
-            val before = if (startOfSession) GuardedStart.begin(state.guarded) else state.guarded ?: GuardedState()
+            val before = if (startOfSession) GuardedStart.begin(state.guarded, startBalance) else state.guarded ?: GuardedState()
             GuardedStart.onRound(it, before, event.value, threshold, live)
         }
         val transition = when {

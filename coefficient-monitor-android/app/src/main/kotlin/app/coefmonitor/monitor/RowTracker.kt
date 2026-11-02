@@ -44,8 +44,8 @@ class RowTracker(
     private val onOcrStarted: () -> Unit = {},
     /** Called with the duration of each completed OCR call in milliseconds. */
     private val onOcrFinished: (Long) -> Unit = {},
-    /** Called with the whole screen when the row was found there; the bitmap is recycled afterwards. */
-    private val onRowFound: suspend (Bitmap, RowCells) -> Unit = { _, _ -> },
+    /** Called with the whole screen and its words when the row was found there; the bitmap is recycled afterwards. */
+    private val onRowFound: suspend (Bitmap, RowCells, List<TextBox>) -> Unit = { _, _, _ -> },
 ) {
     /** The words last read in the strip, and the pictures they were read from. */
     private class StripCache(val strip: ImageSignature, val newest: ImageSignature, val neighbor: ImageSignature?, val words: List<TextBox>)
@@ -229,7 +229,7 @@ class RowTracker(
         }
         searchedScreen = null
         lostSinceMs = null
-        onRowFound(bitmap, found)
+        onRowFound(bitmap, found, words)
         val sample = sampleAt(found, words, bitmap, takenMs)
         bitmap.recycle()
         val anchored = near == null || found.movedFrom(near)

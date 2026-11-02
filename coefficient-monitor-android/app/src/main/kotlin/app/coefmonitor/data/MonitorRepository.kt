@@ -36,6 +36,7 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
      * [startOfSession]: the first round after Start, which only begins the session at Algorithm 1.
      * [guarded]: the guarded start's settings (null while off); its progress is written in the same
      * transaction. [live]: the round was seen when it ended (its clicks can still run).
+     * [startBalance]: the balance confirmed on the screen when the session starts.
      */
     suspend fun applyRound(
         event: RoundEvent,
@@ -43,10 +44,11 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
         startOfSession: Boolean = false,
         guarded: GuardedConfig? = null,
         live: Boolean = true,
+        startBalance: Long? = null,
     ): ProcessResult = db.withTransaction {
         val stored = stateDao.get() ?: MonitorStateEntity()
         val enabled = algorithmDao.getAll().filter { it.enabled }
-        val result = RoundProcessor.process(stored.toSequenceState(), event, enabled.size, threshold, startOfSession, guarded, live)
+        val result = RoundProcessor.process(stored.toSequenceState(), event, enabled.size, threshold, startOfSession, guarded, live, startBalance)
         if (result is ProcessResult.Applied) {
             val newState = result.state
             stateDao.upsert(

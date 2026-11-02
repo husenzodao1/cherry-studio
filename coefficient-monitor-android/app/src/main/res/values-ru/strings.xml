@@ -21,6 +21,7 @@
     <string name="action_clear_events">Очистить журнал событий</string>
     <string name="action_close">Закрыть</string>
     <string name="action_confirm">Подтвердить</string>
+    <string name="action_continue">Продолжить</string>
     <string name="action_delete">Удалить</string>
     <string name="action_disable">Отключить</string>
     <string name="action_duplicate">Дублировать</string>
@@ -57,6 +58,9 @@
     <string name="active_algorithm">Активный алгоритм</string>
     <string name="active_badge">Активный</string>
     <string name="advanced_detection">Расширенные параметры</string>
+    <string name="alert_balance_prompt_title">Баланс не совпадает</string>
+    <string name="alert_balance_stop_text">По мартингейлу ожидалось %1$s, на экране %2$s. Мониторинг и клики остановлены.</string>
+    <string name="alert_balance_stop_title">Остановлено: баланс</string>
     <string name="alert_capture_stopped_text">Мониторинг завершён, так как захват экрана остановлен. Активный алгоритм сохранён.</string>
     <string name="alert_capture_stopped_title">Захват экрана остановлен</string>
     <string name="alert_end_text">Алгоритм %1$d — последний настроенный. Позиция сохранена (без возврата к алгоритму 1). Добавьте алгоритмы, чтобы продолжить.</string>
@@ -81,6 +85,7 @@
     <string name="auto_click_service_label">Монитор коэффициентов: автокликер</string>
     <string name="auto_click_service_off">Выключена — клики не выполняются</string>
     <string name="auto_click_service_on">Включена</string>
+    <string name="balance_prompt">Баланс не совпадает с увиденным: баланс на экране %1$s (ожидалось %2$s). Продолжить с этим балансом?</string>
     <string name="banner_no_algorithms">Добавьте хотя бы один алгоритм, чтобы начать.</string>
     <string name="bulk_add_count">Сколько (1–%1$d)</string>
     <string name="bulk_add_prefix">Префикс имени</string>
@@ -137,6 +142,8 @@
     <string name="diagnostics_empty_title">Диагностики нет</string>
     <string name="disabled">Отключён</string>
     <string name="edit_algorithm">Изменить алгоритм</string>
+    <string name="error_balance_mismatch">Баланс не совпал с мартингейлом: остановлено (см. уведомление и журнал диагностики).</string>
+    <string name="error_balance_unreadable">Не удалось прочитать баланс: остановлено. Держите его видимым и не закрытым панелью.</string>
     <string name="error_capture_denied">Разрешение на захват экрана не выдано.</string>
     <string name="error_capture_failed">Не удалось запустить захват экрана. Попробуйте снова.</string>
     <string name="error_capture_revoked">Захват экрана остановлен — запустите снова</string>
@@ -168,7 +175,11 @@
     <string name="guard_line_done">Готово: %1$s</string>
     <string name="guard_line_waiting">Ждём низкие %1$d/%2$d · часть %3$d/%4$d</string>
     <string name="guarded_amount">Сумма / части</string>
+    <string name="guarded_balance">Проверка баланса</string>
+    <string name="guarded_balance_line">Баланс: экран %1$s · должен быть %2$s</string>
+    <string name="guarded_balance_off">выкл.</string>
     <string name="guarded_field_amount">Сумма (общая прибыль)</string>
+    <string name="guarded_field_balance">Баланс на экране (пусто: не проверять)</string>
     <string name="guarded_field_lows">Сколько низких подряд ждать (≤ порога)</string>
     <string name="guarded_field_parts">На сколько частей разделить</string>
     <string name="guarded_field_stake">Стартовая ставка (алгоритм 1)</string>

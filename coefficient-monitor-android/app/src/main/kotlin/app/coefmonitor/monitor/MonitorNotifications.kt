@@ -150,5 +150,6 @@ class MonitorNotifications(private val context: Context) {
         const val ID_NO_ALGORITHMS = 1006
         const val ID_FLOATING = 1007
         const val ID_GUARD_FINISHED = 1008
+        const val ID_BALANCE = 1009
     }
 }

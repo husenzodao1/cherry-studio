@@ -1,6 +1,7 @@
 package app.coefmonitor.ui.dashboard
 
 import app.coefmonitor.core.GuardedConfig
+import app.coefmonitor.core.GuardedStart
 import app.coefmonitor.core.Money
 import app.coefmonitor.data.db.toSequenceState
 import android.content.Intent
@@ -193,6 +194,7 @@ private fun StatusCard(
     onEnableClicker: () -> Unit,
 ) {
     val runtime = state.runtime
+    val context = LocalContext.current
     val semantic = LocalSemanticColors.current
     val locale = LocalConfiguration.current.locales[0]
     SectionCard {
@@ -209,6 +211,19 @@ private fun StatusCard(
             )
         }
         runtime.error?.let { Banner(stringResource(Labels.error(it)), semantic.error, Icons.Outlined.ErrorOutline) }
+        runtime.balancePrompt?.let { prompt ->
+            Banner(
+                stringResource(R.string.balance_prompt, Money.format(prompt.screen), Money.format(prompt.expected)),
+                semantic.warning,
+                Icons.Outlined.WarningAmber,
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = onStop) { Text(stringResource(R.string.action_stop)) }
+                TextButton(onClick = { MonitoringService.command(context, MonitoringService.ACTION_ACCEPT_BALANCE) }) {
+                    Text(stringResource(R.string.action_continue))
+                }
+            }
+        }
         if (runtime.awaitingStart) {
             Banner(stringResource(R.string.warning_awaiting_start), MaterialTheme.colorScheme.primary, Icons.Outlined.HourglassEmpty)
         }
@@ -382,6 +397,18 @@ private fun GuardedCard(config: GuardedConfig, state: DashboardState) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        if (config.balance != null) {
+            val expected = progress?.balance ?: GuardedStart.expectedStartBalance(config, progress)
+            Text(
+                stringResource(
+                    R.string.guarded_balance_line,
+                    state.runtime.screenBalance?.let(Money::format) ?: "—",
+                    expected?.let(Money::format) ?: "—",
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

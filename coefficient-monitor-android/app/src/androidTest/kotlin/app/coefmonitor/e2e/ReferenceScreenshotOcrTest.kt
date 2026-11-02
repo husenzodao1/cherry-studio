@@ -5,9 +5,12 @@ import android.graphics.BitmapFactory
 import android.graphics.Rect
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import app.coefmonitor.core.BalanceLocator
+import app.coefmonitor.core.BalanceParser
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DetectorConfig
 import app.coefmonitor.core.ImageSignature
+import app.coefmonitor.core.Money
 import app.coefmonitor.core.OcrReading
 import app.coefmonitor.core.RowCells
 import app.coefmonitor.core.RowLocator
@@ -24,8 +27,8 @@ import org.junit.runner.RunWith
 
 /**
  * Real on-device ML Kit OCR against the user's screenshots of the game: the result row alone
- * ("?" | 2.01x | 1.53x | 1.20x | 2.03x; tile bounds measured from the image), and the row with the
- * floating panel over the game, as the monitor sees it.
+ * ("?" | 2.01x | 1.53x | 1.20x | 2.03x; tile bounds measured from the image), the row with the
+ * floating panel over the game, as the monitor sees it, and the header with the balance.
  */
 @RunWith(AndroidJUnit4::class)
 class ReferenceScreenshotOcrTest {
@@ -99,6 +102,23 @@ class ReferenceScreenshotOcrTest {
         val (cells, words) = locate(asset("real_row_with_old_panel.jpg"))
         assertEquals(Coefficient(158), (cells.readNewest(words) as OcrReading.Valid).value)
         assertEquals(Coefficient(350), (cells.readNeighbor(words) as OcrReading.Valid).value)
+    }
+
+    @Test
+    fun findsAndReadsTheBalanceAboveTheRow() = runBlocking {
+        // The user's screenshot: "10 000.00 $" in the header, the row "? 3.82x 4.87x 1.13x 1.00x" below.
+        val image = asset("real_header_balance.jpg")
+        val (cells, words) = locate(image)
+        assertEquals(Coefficient(382), (cells.readNewest(words) as OcrReading.Valid).value)
+        val spot = BalanceLocator.locate(words, cells, image.width, image.height)
+        assertNotNull("balance not found", spot)
+        log("balance: $spot")
+        assertEquals(Money.parse("10000"), spot!!.value)
+        // Read again from the small region only, as monitoring does after every round.
+        val region = spot.region
+        val text = CoefficientOcrEngine().use { it.readText(Bitmap.createBitmap(image, region.left, region.top, region.width, region.height)) }
+        log("balance region text: \"$text\"")
+        assertEquals(Money.parse("10000"), BalanceParser.parse(text))
     }
 
     @Test

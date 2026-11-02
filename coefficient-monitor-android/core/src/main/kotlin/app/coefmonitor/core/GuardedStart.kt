@@ -42,6 +42,8 @@ data class GuardedConfig(
     val parts: Int = 4,
     /** Stake of Algorithm 1. */
     val startStake: Long = 2 * Money.ONE,
+    /** Balance expected on the screen at the start; null: the balance is not checked. */
+    val balance: Long? = null,
 ) {
     /** Returns a description of the first problem, or null if the configuration is valid. */
     fun problem(): String? = when {
@@ -49,6 +51,7 @@ data class GuardedConfig(
         amount <= 0 -> "amount must be above zero"
         parts !in 1..MAX_PARTS -> "parts outside 1..$MAX_PARTS"
         startStake <= 0 || startStake % 100 != 0L -> "start stake must be whole cents above zero"
+        balance != null && balance <= 0 -> "balance must be above zero"
         else -> null
     }
 
@@ -86,6 +89,11 @@ data class GuardedState(
     val cycleLoss: Long = 0,
     /** Stake on the round being played now; null when nothing was staked on it. */
     val stake: Long? = null,
+    /**
+     * Balance the screen must show when a round has ended (before the next stake is placed): the
+     * start balance plus every win and minus every lost stake. Null while the balance is not checked.
+     */
+    val balance: Long? = null,
 )
 
 /** What one round did to the guarded start. */
@@ -182,12 +190,16 @@ object GuardedStart {
      * one); otherwise the part and its profit so far are kept, and the session waits for a new
      * run of lows: a cycle that was broken off keeps its losses in the part's profit.
      */
-    fun begin(state: GuardedState?): GuardedState =
+    fun begin(state: GuardedState?, startBalance: Long? = null): GuardedState =
         if (state == null || state.phase == GuardedPhase.DONE) {
-            GuardedState()
+            GuardedState(balance = startBalance)
         } else {
-            state.copy(phase = GuardedPhase.WAITING, lowStreak = 0, cycleLoss = 0, stake = null)
+            state.copy(phase = GuardedPhase.WAITING, lowStreak = 0, cycleLoss = 0, stake = null, balance = startBalance)
         }
+
+    /** The balance a new session expects on the screen: where the run left it, or the configured one for a new run. */
+    fun expectedStartBalance(config: GuardedConfig, state: GuardedState?): Long? =
+        if (config.balance == null) null else state?.takeIf { it.phase != GuardedPhase.DONE }?.balance ?: config.balance
 
     /**
      * Applies one finished round. [live]: the round was seen when it ended, so a stake decided now
@@ -207,7 +219,8 @@ object GuardedStart {
             GuardedPhase.ACTIVE -> active(config, state, low, threshold)
         }
         // A stake can only go on the next round if this one was seen in time to run the clicks.
-        return if (!live && step.state.stake != null) step.copy(state = step.state.copy(stake = null)) else step
+        val placed = if (!live && step.state.stake != null) step.copy(state = step.state.copy(stake = null)) else step
+        return placed.copy(state = placed.state.copy(balance = state.balance?.plus(step.change)))
     }
 
     private fun waiting(config: GuardedConfig, state: GuardedState, low: Boolean, threshold: Coefficient): GuardedStep {

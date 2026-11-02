@@ -37,6 +37,8 @@ data class OverlayState(
     val statusLine: String,
     /** Guarded start progress; null while it is off. */
     val guardLine: String?,
+    /** The balance seen at the start is not the expected one: offer to go on with it. */
+    val balancePrompt: Boolean,
     val warning: String?,
     /** Recent event lines; coefficients above 10.00x are already coloured yellow. */
     val log: List<CharSequence>,
@@ -69,6 +71,7 @@ interface OverlayActions {
     fun pauseResume()
     fun stopMonitoring()
     fun findRow()
+    fun acceptBalance()
     fun runOrStopClicks()
     fun openApp()
     fun openAccessibilitySettings()
@@ -129,6 +132,7 @@ class OverlayController(
     private lateinit var pauseButton: TextView
     private lateinit var stopButton: TextView
     private lateinit var findRowButton: TextView
+    private lateinit var acceptBalanceButton: TextView
     private lateinit var clicksButton: TextView
 
     // Algorithm tab
@@ -204,7 +208,8 @@ class OverlayController(
         startButton.visibleIf(!state.captureActive)
         pauseButton.visibleIf(state.captureActive)
         stopButton.visibleIf(state.captureActive)
-        findRowButton.visibleIf(state.captureActive)
+        findRowButton.visibleIf(state.captureActive && !state.balancePrompt)
+        acceptBalanceButton.visibleIf(state.balancePrompt)
         pauseButton.text = context.getString(if (state.paused) R.string.action_resume else R.string.action_pause)
         clicksButton.text = context.getString(if (state.clicksRunning) R.string.overlay_stop_clicks else R.string.overlay_clicks_button)
         (bubble.background as GradientDrawable).setColor(
@@ -333,7 +338,8 @@ class OverlayController(
         pauseButton = button(context.getString(R.string.action_pause)) { actions.pauseResume() }
         stopButton = button(context.getString(R.string.action_stop)) { actions.stopMonitoring() }
         findRowButton = button(context.getString(R.string.overlay_find_row)) { actions.findRow() }
-        listOf(startButton, pauseButton, stopButton, findRowButton).forEach(monitorButtons::addView)
+        acceptBalanceButton = button(context.getString(R.string.action_continue), primary = true) { actions.acceptBalance() }
+        listOf(startButton, pauseButton, stopButton, findRowButton, acceptBalanceButton).forEach(monitorButtons::addView)
         page.addView(monitorButtons)
         val clickButtons = row().apply { setPadding(0, dp(6), 0, 0) }
         clicksButton = button(context.getString(R.string.overlay_clicks_button)) { actions.runOrStopClicks() }

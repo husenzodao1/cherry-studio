@@ -62,6 +62,8 @@ object Labels {
         MonitorError.CAPTURE_FAILED -> R.string.error_capture_failed
         MonitorError.NO_ALGORITHMS -> R.string.error_no_algorithms
         MonitorError.OCR_FAILED -> R.string.error_ocr
+        MonitorError.BALANCE_MISMATCH -> R.string.error_balance_mismatch
+        MonitorError.BALANCE_UNREADABLE -> R.string.error_balance_unreadable
     }
 
     @StringRes

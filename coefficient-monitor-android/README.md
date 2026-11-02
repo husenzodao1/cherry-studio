@@ -132,7 +132,7 @@ clicks as usual.
 
 ## Guarded start
 
-Settings → **Guarded start** (*Оғози монеадор*). Turning it on asks for four numbers:
+Settings → **Guarded start** (*Оғози монеадор*). Turning it on asks for four numbers and an optional balance:
 
 | Field | Example | Meaning |
 | --- | --- | --- |
@@ -140,6 +140,7 @@ Settings → **Guarded start** (*Оғози монеадор*). Turning it on as
 | Amount | 200 | Total profit to make. |
 | Parts | 4 | The amount is made in parts of amount / parts (here 50), each one started by its own run of lows. |
 | Start stake | 2 | Stake of Algorithm 1. |
+| Balance on the screen (optional) | 10000 | Checked at Start and after every round, see [Balance check](#balance-check). Empty: not checked. |
 
 While waiting, Algorithm 1 stays active and no clicks run. When the run of lows is complete,
 Algorithm 1's clicks run and the threshold rule moves the sequence as usual. When a part is made,
@@ -167,6 +168,33 @@ out of view still counts, but nothing is staked on the round after it (its click
 that round then only stakes again. The dashboard card and the floating panel show the progress
 ("Waiting for lows 2/3 · part 1/4", "Part 1/4 · 26.00 / 50.00 · stake 4.00"), and the
 diagnostics log records every step (category GUARD).
+
+### Balance check
+
+Fill in **Balance on the screen** (e.g. 10000) in the guarded start's settings and the eye also
+reads the game balance (the amount on the nearest line above the result row, e.g. "10 000.00 $"
+next to the wallet; amounts below the row, such as bets, are never taken):
+
+- **At Start** the balance must be the expected one: the configured balance for a new run, or
+  where the run left it. If it is not, nothing starts and the dashboard, the floating panel and a
+  notification ask: *The balance does not match what was seen: screen balance {balance} (expected
+  …). Continue with this balance?* **Continue** goes on and calculates from the balance on the
+  screen; **Stop** stops.
+- **After every round, before any click,** the balance must be exactly the martingale's: the
+  start balance plus every win (stake × (T − 1)) and minus every lost stake. At 2.00x it only
+  moves by 2, 4, 8, 16, …; a stake of 20 or 30, a manual bet or a deposit is another amount, and
+  monitoring and clicks stop at once with a notification (expected and seen amounts) and an error
+  on the dashboard. A balance that cannot be read stops too.
+- The last cent digit is not compared: differences below 0.10 are ignored (10000.47 counts as
+  10000.4x).
+- Reading is strict: an amount needs exactly two decimals and must be the only one in the text; a
+  coefficient is never read as an amount. One look that shows the expected amount is enough;
+  another amount must be seen twice in a row (looks 150 ms apart, at most 2 s) before it counts,
+  so a number that is still changing is never trusted. After the first find only a small region
+  around the balance is read (one quick OCR call); if the game scrolled, the whole screen is read
+  to find it again. The diagnostics log records how long each check took.
+
+Keep the balance visible and away from the floating panel while the guarded start runs.
 
 A run of lows does not change the chance of the next round, and a long losing streak costs far
 more than one part: at 2.00x and start 2, ten losses in a row cost 2046. Make sure there are

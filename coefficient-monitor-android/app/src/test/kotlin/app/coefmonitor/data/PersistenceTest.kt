@@ -192,6 +192,18 @@ class PersistenceTest {
             EventRepository(db).allRecords().map { it.transitionReason },
         )
 
+        // With a balance check the expected balance follows every round from the confirmed start balance.
+        MonitorRepository(db, EventRepository(db)).resetGuarded()
+        val checked = config.copy(balance = Money.parse("10000")!!)
+        val repo = MonitorRepository(db, EventRepository(db))
+        val balances = listOf(140L, 150L, 120L, 250L, 130L, 300L).mapIndexed { i, value ->
+            val result = repo.applyRound(
+                event(20L + i, value), threshold, startOfSession = i == 0, guarded = checked, startBalance = Money.parse("10000.47"),
+            ) as ProcessResult.Applied
+            Money.format(result.state.guarded!!.balance!!)
+        }
+        assertEquals(listOf("10000.47", "10000.47", "10000.47", "10002.47", "10000.47", "10004.47"), balances)
+
         // Saving new settings starts a new run.
         MonitorRepository(db, EventRepository(db)).resetGuarded()
         assertEquals(null, MonitorRepository(db, EventRepository(db)).sequenceState().guarded)

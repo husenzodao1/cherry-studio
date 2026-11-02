@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import app.coefmonitor.R
 import app.coefmonitor.appContainer
+import app.coefmonitor.core.BalanceCheck
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectionReason
@@ -30,6 +31,7 @@ import app.coefmonitor.core.ProcessResult
 import app.coefmonitor.core.RejectionReason
 import app.coefmonitor.core.RoundEvent
 import app.coefmonitor.core.RowCells
+import app.coefmonitor.core.TextBox
 import app.coefmonitor.core.TransitionReason
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.DiagnosticLevel
@@ -71,6 +73,15 @@ class MonitoringService : LifecycleService() {
 
     /** After Start nothing is counted until a round ends live; that round begins the session at Algorithm 1. */
     private var awaitingStart = false
+
+    /** Reads the game balance (guarded start with a balance check). */
+    private var balanceEye: BalanceEye? = null
+
+    /** The balance confirmed on the screen for the session about to begin; null until then. */
+    private var startBalance: Long? = null
+
+    /** A start balance read once that differs from the expected one; a second equal look confirms it. */
+    private var unconfirmedStartBalance: Long? = null
     private var lastLoggedRejection: Pair<RejectionReason?, String>? = null
 
     @Volatile
@@ -92,6 +103,7 @@ class MonitoringService : LifecycleService() {
             ACTION_RESUME -> resume()
             ACTION_STOP -> shutdown(error = null)
             ACTION_FIND_ROW -> if (capturer != null) tracker?.forget() else stopIfIdle()
+            ACTION_ACCEPT_BALANCE -> acceptBalance()
             else -> stopIfIdle()
         }
         // Never restart automatically: a new capture session always needs fresh user consent.
@@ -149,8 +161,18 @@ class MonitoringService : LifecycleService() {
         ocr = CoefficientOcrEngine()
         screenSaved = false
         awaitingStart = true
+        startBalance = null
+        unconfirmedStartBalance = null
         runtime.update {
-            it.copy(status = MonitorStatus.INITIALIZING, ocrStatus = OcrStatus.SEARCHING, error = null, rowBand = null, awaitingStart = true)
+            it.copy(
+                status = MonitorStatus.INITIALIZING,
+                ocrStatus = OcrStatus.SEARCHING,
+                error = null,
+                rowBand = null,
+                awaitingStart = true,
+                screenBalance = null,
+                balancePrompt = null,
+            )
         }
         log(DiagnosticLevel.INFO, "MONITOR", "Monitoring started; waiting for the next round to begin at Algorithm 1")
         launchLoop()
@@ -174,6 +196,15 @@ class MonitoringService : LifecycleService() {
         launchLoop()
     }
 
+    /** The user goes on with the balance seen at the start: calculations continue from it. */
+    private fun acceptBalance() {
+        val prompt = runtime.state.value.balancePrompt ?: return
+        startBalance = prompt.screen
+        runtime.update { it.copy(balancePrompt = null) }
+        log(DiagnosticLevel.INFO, "BALANCE", "User accepted the balance on the screen ${Money.format(prompt.screen)} (expected ${Money.format(prompt.expected)})")
+        resume()
+    }
+
     /** Stops everything. [error] non-null leaves the dashboard in the Error state with a reason. */
     private fun shutdown(error: MonitorError?) {
         container.autoClicker.cancel()
@@ -181,6 +212,8 @@ class MonitoringService : LifecycleService() {
         loopJob = null
         tracker = null
         awaitingStart = false
+        startBalance = null
+        unconfirmedStartBalance = null
         releaseCapture()
         ocr?.close()
         ocr = null
@@ -192,6 +225,7 @@ class MonitoringService : LifecycleService() {
                 rowBand = null,
                 error = error,
                 awaitingStart = false,
+                balancePrompt = null,
             )
         }
         if (inForeground) {
@@ -252,6 +286,7 @@ class MonitoringService : LifecycleService() {
                 onRowFound = ::onRowFound,
             )
             tracker = eye
+            balanceEye = BalanceEye(engine)
             var active = settings
             var detector = newDetector(active)
             var anchoredBefore = false
@@ -277,6 +312,7 @@ class MonitoringService : LifecycleService() {
                         anchoredBefore = true
                     }
                     handleStep(step, detector, active)
+                    if (awaitingStart) checkStartBalance(active)
                     val elapsed = SystemClock.elapsedRealtime() - tickStart
                     delay((active.captureIntervalMs - elapsed).coerceAtLeast(MIN_IDLE_MS))
                 }
@@ -357,7 +393,7 @@ class MonitoringService : LifecycleService() {
                 markReady(result.event.value)
                 if (awaitingStart) return startSession(result.event, s)
                 // A missed round is over already: it moves the sequence, but its clicks would be too late.
-                result.missed?.let { applyRound(it, s, runClicks = false) }
+                result.missed?.let { applyRound(it, s, runClicks = false, verifyBalance = false) }
                 // So is one that ended out of view: the clicks wait for the next round seen live.
                 val late = result.event.reason == DetectionReason.SEEN_LATE
                 if (late) {
@@ -379,14 +415,87 @@ class MonitoringService : LifecycleService() {
             log(DiagnosticLevel.INFO, "MONITOR", "${event.value} ended out of view; still waiting for a round seen live to begin")
             return
         }
+        if (balanceChecked(s) && startBalance == null) {
+            container.monitor.recordObservation(event.value)
+            log(DiagnosticLevel.WARNING, "BALANCE", "${event.value} ended, but the balance on the screen is not confirmed yet: not started")
+            return
+        }
         awaitingStart = false
         runtime.update { it.copy(awaitingStart = false) }
         log(DiagnosticLevel.INFO, "MONITOR", "${event.value} ended: session begins at Algorithm 1 (this round is not evaluated)")
         applyRound(event, s, startOfSession = true)
     }
 
+    private fun balanceChecked(s: AppSettings): Boolean = s.guarded?.balance != null
+
+    /**
+     * Before the session begins, the balance on the screen must be the expected one (the configured
+     * balance, or where the run left it). One look per tick; a different amount must be seen twice
+     * before the user is asked whether to go on with it, and monitoring pauses until then.
+     */
+    private suspend fun checkStartBalance(s: AppSettings) {
+        val config = s.guarded ?: return
+        if (config.balance == null || startBalance != null || runtime.state.value.balancePrompt != null) return
+        val eye = balanceEye ?: return
+        val capture = capturer ?: return
+        val row = tracker?.cells ?: return
+        val expected = GuardedStart.expectedStartBalance(config, container.monitor.sequenceState().guarded) ?: return
+        val seen = eye.read(capture, row) ?: return
+        runtime.update { it.copy(screenBalance = seen) }
+        if (BalanceCheck.matches(seen, expected)) {
+            startBalance = seen
+            log(DiagnosticLevel.INFO, "BALANCE", "Balance on the screen ${Money.format(seen)} matches ${Money.format(expected)}")
+            return
+        }
+        val earlier = unconfirmedStartBalance
+        if (earlier == null || !BalanceCheck.matches(earlier, seen)) {
+            unconfirmedStartBalance = seen
+            return
+        }
+        log(DiagnosticLevel.WARNING, "BALANCE", "Balance on the screen ${Money.format(seen)} is not the expected ${Money.format(expected)}: asking the user")
+        runtime.update { it.copy(balancePrompt = BalancePrompt(screen = seen, expected = expected)) }
+        val str = withAppLocale()
+        notifications.alert(
+            MonitorNotifications.ID_BALANCE,
+            str.getString(R.string.alert_balance_prompt_title),
+            str.getString(R.string.balance_prompt, Money.format(seen), Money.format(expected)),
+        )
+        pause()
+    }
+
+    /**
+     * After a round, before any click: the balance on the screen must be what the martingale says.
+     * Otherwise (another stake, a manual bet, a misread that does not go away) everything stops.
+     */
+    private suspend fun balanceFollows(expected: Long): Boolean {
+        val eye = balanceEye
+        val capture = capturer
+        val startedMs = SystemClock.elapsedRealtime()
+        val seen = if (eye != null && capture != null) {
+            eye.readSettled(capture, tracker?.cells, expected, BALANCE_SETTLE_MS, BALANCE_LOOK_MS)
+        } else {
+            null
+        }
+        runtime.update { it.copy(screenBalance = seen ?: it.screenBalance) }
+        if (seen != null && BalanceCheck.matches(seen, expected)) {
+            log(DiagnosticLevel.INFO, "BALANCE", "Balance ${Money.format(seen)} as expected (checked in ${SystemClock.elapsedRealtime() - startedMs} ms)")
+            return true
+        }
+        val shown = seen?.let(Money::format) ?: "—"
+        container.events.log(DiagnosticLevel.ERROR, "BALANCE", "Expected ${Money.format(expected)} by the martingale, the screen shows $shown: stopped")
+        val str = withAppLocale()
+        notifications.alert(
+            MonitorNotifications.ID_BALANCE,
+            str.getString(R.string.alert_balance_stop_title),
+            str.getString(R.string.alert_balance_stop_text, Money.format(expected), shown),
+        )
+        shutdown(if (seen == null) MonitorError.BALANCE_UNREADABLE else MonitorError.BALANCE_MISMATCH)
+        return false
+    }
+
     /** The eye found the row by reading the whole screen. The first screen of a session is kept for the in-app point picker. */
-    private suspend fun onRowFound(screen: Bitmap, cells: RowCells) {
+    private suspend fun onRowFound(screen: Bitmap, cells: RowCells, words: List<TextBox>) {
+        balanceEye?.locate(words, cells, screen.width, screen.height)?.let { value -> runtime.update { it.copy(screenBalance = value) } }
         if (!screenSaved) {
             screenSaved = true
             container.screenImages.save(screen)
@@ -434,9 +543,19 @@ class MonitoringService : LifecycleService() {
         }
     }
 
-    private suspend fun applyRound(event: RoundEvent, s: AppSettings, runClicks: Boolean = true, startOfSession: Boolean = false) {
+    /**
+     * [verifyBalance]: compare the balance on the screen with the martingale before any click; off
+     * for a missed round that is processed just before the newest one (the screen already shows both).
+     */
+    private suspend fun applyRound(
+        event: RoundEvent,
+        s: AppSettings,
+        runClicks: Boolean = true,
+        startOfSession: Boolean = false,
+        verifyBalance: Boolean = true,
+    ) {
         val result = try {
-            container.monitor.applyRound(event, s.threshold, startOfSession, s.guarded, live = runClicks)
+            container.monitor.applyRound(event, s.threshold, startOfSession, s.guarded, live = runClicks, startBalance = startBalance)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -472,6 +591,8 @@ class MonitoringService : LifecycleService() {
                     )
                     else -> Unit
                 }
+                val expectedBalance = result.state.guarded?.balance
+                if (verifyBalance && expectedBalance != null && balanceChecked(s) && !balanceFollows(expectedBalance)) return
                 result.guard?.let { onGuardStep(it, s) }
                 if (s.autoClickEnabled && runClicks && result.runClicks) container.autoClicker.run(result.transition.newIndex)
                 if (s.roundNotifications) {
@@ -561,10 +682,17 @@ class MonitoringService : LifecycleService() {
         /** Reads the whole screen for the row now, instead of where it was last seen. */
         const val ACTION_FIND_ROW = "app.coefmonitor.action.FIND_ROW"
 
+        /** Goes on with the balance seen at the start (see [RuntimeState.balancePrompt]). */
+        const val ACTION_ACCEPT_BALANCE = "app.coefmonitor.action.ACCEPT_BALANCE"
+
         private const val EXTRA_RESULT_CODE = "result_code"
         private const val EXTRA_RESULT_DATA = "result_data"
 
         private const val MIN_IDLE_MS = 30L
+
+        /** How long the balance may take to show the expected amount after a round (it may still change). */
+        private const val BALANCE_SETTLE_MS = 2_000L
+        private const val BALANCE_LOOK_MS = 150L
         private const val SLOW_OCR_MS = 2_000L
         private const val SLOW_OCR_REPORT_INTERVAL_MS = 60_000L
 

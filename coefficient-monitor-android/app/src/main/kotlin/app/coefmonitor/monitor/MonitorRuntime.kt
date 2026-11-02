@@ -13,7 +13,10 @@ enum class MonitorStatus { STOPPED, INITIALIZING, MONITORING, PAUSED, ERROR }
 
 enum class OcrStatus { IDLE, WAITING_FOR_SCREEN, TRANSITIONING, READING, OK, REJECTED, PLACEHOLDER, FAILED, SEARCHING }
 
-enum class MonitorError { CAPTURE_DENIED, CAPTURE_REVOKED, CAPTURE_FAILED, NO_ALGORITHMS, OCR_FAILED }
+enum class MonitorError { CAPTURE_DENIED, CAPTURE_REVOKED, CAPTURE_FAILED, NO_ALGORITHMS, OCR_FAILED, BALANCE_MISMATCH, BALANCE_UNREADABLE }
+
+/** At the start the balance on the screen was not the expected one; the user decides whether to go on with it. */
+data class BalancePrompt(val screen: Long, val expected: Long)
 
 /** Which step of the active algorithm the auto-clicker is running right now. */
 data class ClickProgress(
@@ -42,6 +45,10 @@ data class RuntimeState(
     val lastSeenLate: Boolean = false,
     /** Started, but no round has ended since: the session begins with the next one. */
     val awaitingStart: Boolean = false,
+    /** The balance last read on the screen (guarded start with a balance check). */
+    val screenBalance: Long? = null,
+    /** Waiting for the user to accept the balance seen at the start; monitoring is paused meanwhile. */
+    val balancePrompt: BalancePrompt? = null,
     val clicks: ClickProgress? = null,
 )
 

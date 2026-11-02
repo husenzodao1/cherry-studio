@@ -43,6 +43,16 @@ class CoefficientOcrEngine : Closeable {
         }
     }
 
+    /** All text on [crop], line by line from the top (small crops are enlarged first). */
+    suspend fun readText(crop: Bitmap): String {
+        val input = upscaleIfSmall(crop)
+        val text = recognizer.process(InputImage.fromBitmap(input, 0)).await()
+        if (input !== crop) input.recycle()
+        return text.textBlocks.flatMap { it.lines }
+            .sortedWith(compareBy({ it.boundingBox?.top ?: 0 }, { it.boundingBox?.left ?: 0 }))
+            .joinToString(" ") { it.text }
+    }
+
     override fun close() = recognizer.close()
 
     /** ML Kit needs characters roughly 16+ px tall; tiles on small screens are upscaled. */

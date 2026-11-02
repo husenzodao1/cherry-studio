@@ -21,6 +21,7 @@ import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
+import app.coefmonitor.core.Money
 import app.coefmonitor.core.NormalizedPoint
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.StoredAlgorithm
@@ -163,7 +164,9 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
         val last = p.state.lastAcceptedHundredths?.let(::Coefficient)
         val lastValue = last?.toString() ?: "—"
         val clickerOff = !p.clickerConnected && active?.steps?.any { it.point != null } == true
+        val prompt = p.runtime.balancePrompt
         val warning = when {
+            prompt != null -> str.getString(R.string.balance_prompt, Money.format(prompt.screen), Money.format(prompt.expected))
             p.runtime.awaitingStart -> str.getString(R.string.warning_awaiting_start)
             clickerOff -> str.getString(R.string.warning_auto_click_off)
             p.runtime.lastSeenLate -> str.getString(R.string.warning_seen_late)
@@ -186,6 +189,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
                 coefficientHighlighted = last?.isHighlighted == true,
                 statusLine = "${Labels.status(str, p.runtime.status)} · ${Labels.ocrStatus(str, p.runtime.ocrStatus)}",
                 guardLine = p.settings.guarded?.let { Labels.guardLine(str, it, p.state.toSequenceState().guarded) },
+                balancePrompt = prompt != null,
                 warning = warning,
                 log = p.recent.map { event -> highlighted(Labels.eventLine(str, event), event) },
                 captureActive = p.runtime.captureActive,
@@ -224,6 +228,8 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
     override fun stopMonitoring() = monitorCommand(MonitoringService.ACTION_STOP)
 
     override fun findRow() = monitorCommand(MonitoringService.ACTION_FIND_ROW)
+
+    override fun acceptBalance() = monitorCommand(MonitoringService.ACTION_ACCEPT_BALANCE)
 
     /** Colours the leading coefficient of a log line yellow when it is above 10.00x. */
     private fun highlighted(line: String, event: EventEntity): CharSequence {

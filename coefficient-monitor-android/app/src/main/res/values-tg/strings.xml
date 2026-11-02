@@ -21,6 +21,7 @@
     <string name="action_clear_events">Тоза кардани журнали ҳодисаҳо</string>
     <string name="action_close">Пӯшидан</string>
     <string name="action_confirm">Тасдиқ</string>
+    <string name="action_continue">Идома</string>
     <string name="action_delete">Нест кардан</string>
     <string name="action_disable">Хомӯш кардан</string>
     <string name="action_duplicate">Нусхабардорӣ</string>
@@ -57,6 +58,9 @@
     <string name="active_algorithm">Алгоритми фаъол</string>
     <string name="active_badge">Фаъол</string>
     <string name="advanced_detection">Танзимоти иловагӣ</string>
+    <string name="alert_balance_prompt_title">Баланс мувофиқ нест</string>
+    <string name="alert_balance_stop_text">Аз рӯи мартингейл %1$s интизор буд, дар экран %2$s. Мониторинг ва кликҳо қатъ шуданд.</string>
+    <string name="alert_balance_stop_title">Қатъ шуд: баланс</string>
     <string name="alert_capture_stopped_text">Назорат анҷом ёфт, зеро сабти экран қатъ шуд. Алгоритми фаъоли шумо нигоҳ дошта шуд.</string>
     <string name="alert_capture_stopped_title">Сабти экран қатъ шуд</string>
     <string name="alert_end_text">Алгоритми %1$d охирини танзимшуда аст. Мавқеъ нигоҳ дошта шуд (бе бозгашт ба Алгоритми 1). Барои идомаи пайдарпайӣ алгоритмҳо илова кунед.</string>
@@ -81,6 +85,7 @@
     <string name="auto_click_service_label">Назорати коэффитсиентҳо: автокликер</string>
     <string name="auto_click_service_off">Ғайрифаъол — кликҳо иҷро намешаванд</string>
     <string name="auto_click_service_on">Фаъол</string>
+    <string name="balance_prompt">Баланс бо дидашуда мувофиқ нест: баланси экран %1$s (интизор %2$s). Бо ҳамин баланс идома диҳем?</string>
     <string name="banner_no_algorithms">Барои оғоз ақаллан як алгоритм илова кунед.</string>
     <string name="bulk_add_count">Чандто (1–%1$d)</string>
     <string name="bulk_add_prefix">Пешванди ном</string>
@@ -137,6 +142,8 @@
     <string name="diagnostics_empty_title">Ташхис нест</string>
     <string name="disabled">Хомӯш</string>
     <string name="edit_algorithm">Таҳрири алгоритм</string>
+    <string name="error_balance_mismatch">Баланс бо мартингейл мувофиқ наомад: қатъ шуд (огоҳинома ва журнали ташхисро бинед).</string>
+    <string name="error_balance_unreadable">Балансро хондан нашуд: қатъ шуд. Онро намоён нигоҳ доред ва бо панел напӯшонед.</string>
     <string name="error_capture_denied">Иҷозати сабти экран дода нашуд.</string>
     <string name="error_capture_failed">Сабти экран оғоз нашуд. Боз кӯшиш кунед.</string>
     <string name="error_capture_revoked">Сабти экран қатъ шуд — аз нав оғоз кунед</string>
@@ -168,7 +175,11 @@
     <string name="guard_line_done">Тамом: %1$s</string>
     <string name="guard_line_waiting">Интизори пастҳо %1$d/%2$d · қисм %3$d/%4$d</string>
     <string name="guarded_amount">Рақам / қисмҳо</string>
+    <string name="guarded_balance">Санҷиши баланс</string>
+    <string name="guarded_balance_line">Баланс: экран %1$s · бояд %2$s бошад</string>
+    <string name="guarded_balance_off">хомӯш</string>
     <string name="guarded_field_amount">Рақам (фоидаи умумӣ)</string>
+    <string name="guarded_field_balance">Баланси экран (холӣ: санҷида намешавад)</string>
     <string name="guarded_field_lows">Чанд пасти пайдарпай интизор шавад (≤ ҳад)</string>
     <string name="guarded_field_parts">Ба чанд қисм ҷудо шавад</string>
     <string name="guarded_field_stake">Рақами аввали оғоз (алгоритми 1)</string>
