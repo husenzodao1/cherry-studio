@@ -45,6 +45,10 @@ data class RowCells(val newest: PixelRect, val neighbor: PixelRect?, val pitch: 
 
     fun readNeighbor(boxes: List<TextBox>): OcrReading? = neighbor?.let { read(it, boxes) }
 
+    /** Every tile of the row, newest first: [count] cells one [pitch] apart, starting at the newest. */
+    fun readTiles(boxes: List<TextBox>, count: Int = ROW_TILES): List<OcrReading> =
+        List(count) { i -> read(PixelRect(newest.left + i * pitch, newest.top, newest.width, newest.height), boxes) }
+
     private fun read(cell: PixelRect, boxes: List<TextBox>): OcrReading {
         val inside = boxes
             .filter { it.centerX >= cell.left && it.centerX <= cell.right && it.centerY >= cell.top && it.centerY <= cell.bottom }
@@ -53,12 +57,15 @@ data class RowCells(val newest: PixelRect, val neighbor: PixelRect?, val pitch: 
         return CoefficientParser.parse(inside.joinToString(" ") { it.text }, confidence)
     }
 
-    private companion object {
+    companion object {
+        /** Tiles of the row read for a catch-up (the game shows about five). */
+        const val ROW_TILES = 6
+
         /** The strip reaches this many cell heights above and below the row. */
-        const val STRIP_MARGIN_CELLS = 2
+        private const val STRIP_MARGIN_CELLS = 2
 
         /** Moves smaller than this share of a cell are text-box jitter, not a moved row. */
-        const val MOVE_TOLERANCE = 0.35f
+        private const val MOVE_TOLERANCE = 0.35f
     }
 }
 

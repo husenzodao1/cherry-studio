@@ -146,7 +146,7 @@ class RowTracker(
         }
         pendingMove = null
         return PipelineStep.Sample(
-            FrameSample(nowMs, newest, grab.neighbor, tracked.readNewest(words), tracked.readNeighbor(words)),
+            FrameSample(nowMs, newest, grab.neighbor, tracked.readNewest(words), tracked.readNeighbor(words), rowReadings = tracked.readTiles(words)),
             anchored = false,
             lost = false,
         )
@@ -249,14 +249,20 @@ class RowTracker(
             signature(frame.crop(found.newest), found.newest) to found.neighbor?.let { signature(frame.crop(it), it) }
         } ?: return null
         lastNewest = signatures.first
-        val sample = FrameSample(takenMs, signatures.first, signatures.second, found.readNewest(words), found.readNeighbor(words))
+        val sample = FrameSample(
+            takenMs, signatures.first, signatures.second, found.readNewest(words), found.readNeighbor(words),
+            rowReadings = found.readTiles(words),
+        )
         return PipelineStep.Sample(sample, anchored = true, lost = false)
     }
 
     private fun sampleAt(found: RowCells, words: List<TextBox>, bitmap: Bitmap, takenMs: Long): FrameSample {
         val newest = signature(bitmap, found.newest)
         lastNewest = newest
-        return FrameSample(takenMs, newest, found.neighbor?.let { signature(bitmap, it) }, found.readNewest(words), found.readNeighbor(words))
+        return FrameSample(
+            takenMs, newest, found.neighbor?.let { signature(bitmap, it) }, found.readNewest(words), found.readNeighbor(words),
+            rowReadings = found.readTiles(words),
+        )
     }
 
     /**

@@ -31,20 +31,20 @@ class BalanceControlTest {
     }
 
     @Test
-    fun `manual mode pauses after its seconds and resumes after 3 s fast again`() {
+    fun `manual mode pauses after its seconds and resumes after 1 s fast again`() {
         val policy = BalanceControl(network = NetworkMode.MANUAL, minKbps = 300, slowSeconds = 4).networkPolicy()!!
         val watch = NetworkWatch(policy)
         val verdicts = watch.feed(
             0L to 200, 2_000L to 250, 4_000L to null, // 4 s below 300: pause
-            6_000L to 900, 8_000L to 100, // fast once, then slow again: still paused
-            10_000L to 800, 12_000L to 700, 13_000L to 650, // fast for 3 s: resume
-            15_000L to 900,
+            6_000L to 900, 7_000L to 100, // fast once, then slow again: still paused
+            8_000L to 800, 9_000L to 700, // fast in two looks a second apart: resume
+            10_000L to 900,
         )
         assertEquals(
             listOf(
                 NetworkVerdict.SLOW, NetworkVerdict.SLOW, NetworkVerdict.PAUSE,
                 NetworkVerdict.SLOW, NetworkVerdict.SLOW,
-                NetworkVerdict.SLOW, NetworkVerdict.SLOW, NetworkVerdict.RESUME,
+                NetworkVerdict.SLOW, NetworkVerdict.RESUME,
                 NetworkVerdict.OK,
             ),
             verdicts,

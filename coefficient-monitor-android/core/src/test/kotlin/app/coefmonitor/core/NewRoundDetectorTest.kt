@@ -300,6 +300,37 @@ class NewRoundDetectorTest {
     }
 
     @Test
+    fun `after a pause every round still shown in the row is caught up in order`() {
+        // Counted last: 3.82x, before it 4.87x and 1.13x. Meanwhile 1.20x, 1.05x and 2.10x ended.
+        val known = listOf(382L, 487L, 113L).map(::Coefficient)
+        val baseline = DetectorBaseline(lastObservedValue = known.first(), lastSequence = 5, lastEventAtMs = 0, recent = known)
+        val d = driver(baseline = baseline, catchUp = true)
+        val row = listOf("2.10x", "1.05x", "1.20x", "3.82x", "4.87x", "1.13x")
+        repeat(5) { d.frame("2.10x", "1.05x", row = row) }
+        assertEquals(listOf(120L, 105L, 210L), d.newRounds.map { it.value.hundredths })
+        assertEquals(listOf(6L, 7L, 8L), d.newRounds.map { it.sequence })
+        // Nothing is missing before them: all confirmed; the newest ended out of view.
+        assertTrue(d.newRounds.all { it.continuity == Continuity.CONFIRMED })
+        assertEquals(DetectionReason.SEEN_LATE, d.newRounds.last().reason)
+        // The detector goes on from the newest as usual: the next round is live.
+        d.waitMs(5_000)
+        d.shiftTo("1.70x", "2.10x", newNeighbor = "2.10x")
+        assertEquals(listOf(120L, 105L, 210L, 170L), d.newRounds.map { it.value.hundredths })
+        assertEquals(DetectionReason.VALUE_CHANGED, d.newRounds.last().reason)
+    }
+
+    @Test
+    fun `after a pause longer than the row the neighbour decides and the gap is flagged`() {
+        val known = listOf(382L, 487L, 113L).map(::Coefficient)
+        val baseline = DetectorBaseline(lastObservedValue = known.first(), lastSequence = 5, lastEventAtMs = 0, recent = known)
+        val d = driver(baseline = baseline, catchUp = true)
+        val row = listOf("2.10x", "1.05x", "1.20x", "7.00x", "1.90x", "1.30x")
+        repeat(5) { d.frame("2.10x", "1.05x", row = row) }
+        assertEquals(listOf(105L, 210L), d.newRounds.map { it.value.hundredths })
+        assertEquals(Continuity.GAP_SUSPECTED, d.newRounds.first().continuity)
+    }
+
+    @Test
     fun `after the row was found again an unchanged row only initialises`() {
         val baseline = DetectorBaseline(lastObservedValue = Coefficient(170), lastSequence = 5, lastEventAtMs = 0)
         val d = driver(baseline = baseline, catchUp = true)

@@ -265,6 +265,18 @@ class PersistenceTest {
     }
 
     @Test
+    fun `the baseline carries the last rounds counted for a catch-up`() = runBlocking {
+        val monitor = MonitorRepository(db, EventRepository(db))
+        AlgorithmRepository(db).addNumbered(10, "Algorithm")
+        listOf(113L, 487L, 382L, 150L).forEachIndexed { i, value -> monitor.applyRound(event(i + 1L, value), threshold) }
+        // Newest first, at most three.
+        assertEquals(listOf(150L, 382L, 487L), monitor.baseline().recent.map { it.hundredths })
+        // A value seen later but not counted: the older rounds no longer follow it directly.
+        monitor.recordObservation(Coefficient(222))
+        assertEquals(listOf(222L), monitor.baseline().recent.map { it.hundredths })
+    }
+
+    @Test
     fun `G - more than 100 algorithms progress without an artificial limit`() = runBlocking {
         AlgorithmRepository(db).addNumbered(150, "Algorithm")
         val monitor = MonitorRepository(db, EventRepository(db))

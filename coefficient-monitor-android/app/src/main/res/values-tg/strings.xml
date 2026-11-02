@@ -254,7 +254,7 @@
     <string name="network_field_kbps">Суръати ҳадди ақал (кбит/с; 8 кбит/с = 1 КБ/с)</string>
     <string name="network_field_seconds">Чанд сония паст будан то қатъ</string>
     <string name="network_manual">Дастӣ</string>
-    <string name="network_manual_hint">Агар суръат дар сонияҳои шумо аз суръати шумо паст бошад, бозмедорад ва вақте суръат баргашт (3 сония), худ давом медиҳад ва даврҳои дар ин вақт тамомшударо ба ҳисоб мегирад.</string>
+    <string name="network_manual_hint">Агар суръат дар сонияҳои шумо аз суръати шумо паст бошад, бозмедорад ва вақте суръат баргашт (тақрибан 1 сония), худ давом медиҳад ва ҳамаи даврҳои дар ин вақт тамомшударо ба ҳисоб мегирад.</string>
     <string name="network_manual_summary">Дастӣ: танаффус аз %1$d кбит/с паст дар %2$d сония</string>
     <string name="network_not_used">Истифода намешавад — OCR дар дастгоҳ кор мекунад</string>
     <string name="network_off">Санҷида нашавад</string>

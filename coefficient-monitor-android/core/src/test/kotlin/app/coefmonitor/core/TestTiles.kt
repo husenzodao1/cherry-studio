@@ -48,7 +48,7 @@ class FrameDriver(val detector: NewRoundDetector, startMs: Long = 1_000_000L) {
     val results = mutableListOf<DetectorResult>()
 
     /** Every emitted round in processing order: a missed round comes before the newest one. */
-    val newRounds: List<RoundEvent> get() = results.filterIsInstance<DetectorResult.NewRound>().flatMap { listOfNotNull(it.missed, it.event) }
+    val newRounds: List<RoundEvent> get() = results.filterIsInstance<DetectorResult.NewRound>().flatMap { it.missed + it.event }
 
     fun frame(
         text: String,
@@ -56,6 +56,7 @@ class FrameDriver(val detector: NewRoundDetector, startMs: Long = 1_000_000L) {
         offsetX: Int = 0,
         reading: OcrReading? = CoefficientParser.parse(text, 0.95f),
         rowVisible: Boolean = true,
+        row: List<String> = emptyList(),
     ): DetectorResult {
         now += FRAME_MS
         val result = detector.onFrame(
@@ -66,6 +67,7 @@ class FrameDriver(val detector: NewRoundDetector, startMs: Long = 1_000_000L) {
                 reading = reading,
                 neighborReading = neighbor?.let { CoefficientParser.parse(it, 0.95f) },
                 rowVisible = rowVisible,
+                rowReadings = row.map { CoefficientParser.parse(it, 0.95f) },
             ),
         )
         results += result

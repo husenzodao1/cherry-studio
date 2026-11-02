@@ -7,6 +7,7 @@ import app.coefmonitor.core.GuardedConfig
 import app.coefmonitor.core.ProcessResult
 import app.coefmonitor.core.RoundEvent
 import app.coefmonitor.core.RoundProcessor
+import app.coefmonitor.core.RowHistory
 import app.coefmonitor.core.SequenceState
 import app.coefmonitor.data.db.AppDatabase
 import app.coefmonitor.data.db.MonitorStateEntity
@@ -30,7 +31,21 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
 
     suspend fun sequenceState(): SequenceState = (stateDao.get() ?: MonitorStateEntity()).toSequenceState()
 
-    suspend fun baseline(): DetectorBaseline = sequenceState().toBaseline()
+    /**
+     * What a new detector continues from, with the rounds counted last (newest first) so a catch-up
+     * can find them in the row. They are only used when the newest of them is the value last seen.
+     */
+    suspend fun baseline(): DetectorBaseline {
+        val baseline = sequenceState().toBaseline()
+        val counted = eventDao.recentValues(RowHistory.MATCH).map(::Coefficient)
+        val observed = baseline.lastObservedValue
+        val recent = when {
+            observed == null -> counted
+            counted.firstOrNull() == observed -> counted
+            else -> listOf(observed)
+        }
+        return baseline.copy(recent = recent)
+    }
 
     /**
      * [startOfSession]: the first round after Start, which only begins the session at Algorithm 1.

@@ -257,7 +257,7 @@
     <string name="network_field_kbps">Lowest speed (kbit/s; 8 kbit/s = 1 KB/s)</string>
     <string name="network_field_seconds">Seconds below it before stopping</string>
     <string name="network_manual">Manual</string>
-    <string name="network_manual_hint">Pauses below your speed for your seconds, and resumes by itself when the speed is back (3 s), counting the rounds that ended meanwhile.</string>
+    <string name="network_manual_hint">Pauses below your speed for your seconds, and resumes by itself when the speed is back (about 1 s), counting every round that ended meanwhile.</string>
     <string name="network_manual_summary">Manual: pause below %1$d kbit/s for %2$d s</string>
     <string name="network_not_used">Not used — OCR runs on the device</string>
     <string name="network_off">Not watched</string>

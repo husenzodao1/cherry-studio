@@ -180,7 +180,7 @@ screen.
 | --- | --- |
 | Not watched | Nothing is measured. |
 | Automatic | Below **128 kbit/s for 5 s**: monitoring and clicks stop for good, with a notification. Start again by hand. |
-| Manual | Below your speed (kbit/s) for your seconds: monitoring pauses and clicks stop at once. When the speed is back for 3 s, monitoring resumes by itself. |
+| Manual | Below your speed (kbit/s) for your seconds: monitoring pauses; no new clicks start (a click run already going finishes, so a stake is never half placed). While paused the speed is measured every second; when two looks a second apart are fast again, monitoring resumes by itself. |
 
 The speed is measured every 2 s by downloading a 13 KB static file from Google's CDN (about
 24 MB an hour) and dividing its size by the whole request time, delay included: that is what a
@@ -192,12 +192,21 @@ There is no official minimum speed for Lucky Jet. Unofficial guides give 3G as t
 automatic mode stops below that. Measure your own connection on the dashboard ("Internet: …
 kbit/s") and use the manual mode for another limit.
 
-After a manual pause the rounds that ended meanwhile are caught up from the row, as after the
-row was lost: the newest tile and its neighbour are counted as seen late (no clicks for them);
-when more rounds ended than the two tiles show, the gap is flagged. With the guarded start a
-stake placed before the pause is settled by its round's result, the round after the pause goes
-unstaked and then the algorithm stakes again, so the martingale goes on where it was. If rounds
-were missed beyond the two tiles, the balance check (below) notices and stops.
+After a manual pause monitoring goes on as if nothing had happened:
+
+- The eye keeps the row (and the balance) where it was, so the first look reads the row; the
+  whole screen is only searched if the game moved.
+- Every round that ended meanwhile is counted, in order, from the row itself: the last rounds
+  counted (up to three) are looked up among the row's tiles, and every tile newer than them is a
+  round that ended meanwhile, all confirmed. At least two of them must match, so a single equal
+  value never decides. They ended out of view, so no clicks run for them; the next round seen
+  live runs its clicks again.
+- Only when more rounds ended than the row shows (about five), or one of those tiles cannot be
+  read, the newest tile and its neighbour are counted and the gap is flagged.
+- With the guarded start a stake placed before the pause is settled by its round's result, the
+  round after the pause goes unstaked and then the algorithm stakes again, so the martingale goes
+  on where it was. If rounds were missed beyond the row, the balance check (below) notices and
+  stops.
 
 ### Balance check
 

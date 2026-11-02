@@ -49,6 +49,8 @@ data class DetectorBaseline(
     val lastObservedValue: Coefficient? = null,
     val lastSequence: Long = 0,
     val lastEventAtMs: Long? = null,
+    /** The last rounds counted, newest first (starting with [lastObservedValue]); lets a catch-up find them in the row. */
+    val recent: List<Coefficient> = emptyList(),
 )
 
 data class FrameSample(
@@ -62,6 +64,8 @@ data class FrameSample(
     val neighborReading: OcrReading? = null,
     /** False when the row was not found anywhere on the screen (scrolled away, another app on top). */
     val rowVisible: Boolean = true,
+    /** Every tile of the row that was read, newest first (the newest and the neighbour included); empty when not read. */
+    val rowReadings: List<OcrReading> = emptyList(),
 )
 
 @Serializable
@@ -122,10 +126,10 @@ sealed interface DetectorResult {
     data class SuppressedByCooldown(val value: Coefficient) : DetectorResult
 
     /**
-     * A new round. [missed] is a round that happened before it but was not seen as newest (read
-     * from the neighbour tile); it must be processed first.
+     * A new round. [missed] are rounds that happened before it but were not seen as newest (read
+     * from the older tiles), oldest first; they must be processed first.
      */
-    data class NewRound(val event: RoundEvent, val missed: RoundEvent? = null) : DetectorResult
+    data class NewRound(val event: RoundEvent, val missed: List<RoundEvent> = emptyList()) : DetectorResult
 }
 
 /**
@@ -170,6 +174,7 @@ class NewRoundDetector(
 ) {
     private val config = config.sanitized()
     private val restoredValue = baseline.lastObservedValue
+    private val recent = baseline.recent
     private var lastSequence = baseline.lastSequence
     private var lastEventAtMs = baseline.lastEventAtMs
 
@@ -288,10 +293,30 @@ class NewRoundDetector(
      * processed and the gap flagged. Either way the newest ended out of view: [DetectionReason.SEEN_LATE].
      */
     private fun catchUpAfterGap(frame: FrameSample, value: Coefficient, confidence: Float?, before: Coefficient): DetectorResult {
+        catchUpFromRow(frame, value, confidence)?.let { return it }
         val neighbor = frame.neighborReading?.let(::acceptedOrNull)?.value
             ?: return emit(frame, value, confidence, DetectionReason.SEEN_LATE, Continuity.GAP_SUSPECTED)
         if (neighbor == before) return emit(frame, value, confidence, DetectionReason.SEEN_LATE, Continuity.CONFIRMED)
         return emitWithMissed(frame, neighbor, Continuity.GAP_SUSPECTED, value, confidence, DetectionReason.SEEN_LATE)
+    }
+
+    /**
+     * Finds the rounds counted last ([DetectorBaseline.recent]) among the tiles of the row: every
+     * tile newer than them is a round that ended meanwhile, counted oldest first, all confirmed.
+     * Null when they cannot be found there (more rounds ended than the row shows, or a tile could
+     * not be read); the neighbour tile then decides as before.
+     */
+    private fun catchUpFromRow(frame: FrameSample, value: Coefficient, confidence: Float?): DetectorResult? {
+        val tiles = frame.rowReadings.map { reading -> acceptedOrNull(reading)?.value }
+        if (tiles.firstOrNull() != value) return null
+        val fresh = RowHistory.newTiles(recent, tiles) ?: return null
+        if (fresh == 0) return null
+        val missed = (fresh - 1 downTo 1).map { index ->
+            lastSequence += 1
+            val reading = frame.rowReadings[index] as? OcrReading.Valid
+            RoundEvent(lastSequence, tiles[index]!!, reading?.confidence, frame.timestampMs, DetectionReason.MISSED_ROUND_NEIGHBOR, Continuity.CONFIRMED)
+        }
+        return emit(frame, value, confidence, DetectionReason.SEEN_LATE, Continuity.CONFIRMED).copy(missed = missed)
     }
 
     /**
@@ -325,7 +350,7 @@ class NewRoundDetector(
             missedContinuity,
         )
         // The newest round follows the missed one directly.
-        return emit(frame, value, confidence, reason, Continuity.CONFIRMED).copy(missed = missedEvent)
+        return emit(frame, value, confidence, reason, Continuity.CONFIRMED).copy(missed = listOf(missedEvent))
     }
 
     private fun emit(

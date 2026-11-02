@@ -62,8 +62,8 @@ data class BalanceControl(
 /** Below [minKbps] for [slowMs] trips; [resumes]: pause and resume when fast again, otherwise stop for good. */
 data class NetworkPolicy(val minKbps: Int, val slowMs: Long, val resumes: Boolean, val recoverMs: Long = RECOVER_MS) {
     companion object {
-        /** After a pause the speed must stay acceptable this long before monitoring resumes. */
-        const val RECOVER_MS = 3_000L
+        /** After a pause the speed must be acceptable in two looks this far apart before monitoring resumes. */
+        const val RECOVER_MS = 1_000L
     }
 }
 

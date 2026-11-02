@@ -254,7 +254,7 @@
     <string name="network_field_kbps">Минимальная скорость (кбит/с; 8 кбит/с = 1 КБ/с)</string>
     <string name="network_field_seconds">Секунд ниже неё до остановки</string>
     <string name="network_manual">Вручную</string>
-    <string name="network_manual_hint">Приостанавливает ниже вашей скорости за ваши секунды и сам продолжает, когда скорость вернулась (3 с), учитывая раунды, закончившиеся за это время.</string>
+    <string name="network_manual_hint">Приостанавливает ниже вашей скорости за ваши секунды и сам продолжает, когда скорость вернулась (около 1 с), учитывая все раунды, закончившиеся за это время.</string>
     <string name="network_manual_summary">Вручную: пауза ниже %1$d кбит/с за %2$d с</string>
     <string name="network_not_used">Не используется — OCR работает на устройстве</string>
     <string name="network_off">Не отслеживать</string>

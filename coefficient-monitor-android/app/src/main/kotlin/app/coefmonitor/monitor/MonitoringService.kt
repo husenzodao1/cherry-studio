@@ -188,11 +188,15 @@ class MonitoringService : LifecycleService() {
         launchLoop()
     }
 
-    private fun pause() {
+    /**
+     * [cancelClicks]: stop a click run in progress. A pause for the internet lets it finish instead,
+     * so a stake is never left half placed and the count stays exact.
+     */
+    private fun pause(cancelClicks: Boolean = true) {
         if (capturer == null) return stopIfIdle()
         loopJob?.cancel()
         loopJob = null
-        container.autoClicker.cancel()
+        if (cancelClicks) container.autoClicker.cancel()
         runtime.update { it.copy(status = MonitorStatus.PAUSED, ocrStatus = OcrStatus.IDLE) }
         log(DiagnosticLevel.INFO, "MONITOR", "Paused")
     }
@@ -287,6 +291,10 @@ class MonitoringService : LifecycleService() {
 
     // ---- Monitoring loop -------------------------------------------------------------------
 
+    /**
+     * [catchUp]: resuming after a pause; the eye keeps following the row (and the balance) where it
+     * was, so the first look already reads the row instead of searching the whole screen again.
+     */
     private fun launchLoop(catchUp: Boolean = false) {
         loopJob?.cancel()
         loopJob = lifecycleScope.launch {
@@ -294,14 +302,15 @@ class MonitoringService : LifecycleService() {
             // Floating mode stays on by itself; this only brings the panel back if Android removed it.
             if (settings.overlayEnabled) FloatingPanelService.sync(this@MonitoringService, enabled = true)
             val engine = ocr ?: return@launch
-            val eye = RowTracker(
+            val kept = tracker.takeIf { catchUp }
+            val eye = kept ?: RowTracker(
                 ocr = engine,
                 onOcrStarted = { runtime.update { it.copy(ocrStatus = if (it.rowBand == null) OcrStatus.SEARCHING else OcrStatus.READING) } },
                 onOcrFinished = ::reportOcrDuration,
                 onRowFound = ::onRowFound,
             )
             tracker = eye
-            balanceEye = BalanceEye(engine)
+            if (kept == null || balanceEye == null) balanceEye = BalanceEye(engine)
             var active = settings
             var detector = newDetector(active, catchUp = catchUp)
             var anchoredBefore = false
@@ -408,7 +417,7 @@ class MonitoringService : LifecycleService() {
                 markReady(result.event.value)
                 if (awaitingStart) return startSession(result.event, s)
                 // A missed round is over already: it moves the sequence, but its clicks would be too late.
-                result.missed?.let { applyRound(it, s, runClicks = false, verifyBalance = false) }
+                result.missed.forEach { applyRound(it, s, runClicks = false, verifyBalance = false) }
                 // So is one that ended out of view: the clicks wait for the next round seen live.
                 val late = result.event.reason == DetectionReason.SEEN_LATE
                 if (late) {
@@ -693,7 +702,7 @@ class MonitoringService : LifecycleService() {
                         networkAlert(R.string.alert_network_pause_title, R.string.alert_network_pause_text, policy)
                         log(DiagnosticLevel.WARNING, "NETWORK", "Below ${policy.minKbps} kbit/s for ${policy.slowMs / 1000} s (last ${kbps ?: 0} kbit/s): paused")
                         runtime.update { it.copy(networkPaused = true) }
-                        pause()
+                        pause(cancelClicks = false)
                     }
                     NetworkVerdict.RESUME -> if (runtime.state.value.networkPaused) {
                         log(DiagnosticLevel.INFO, "NETWORK", "Back to $kbps kbit/s: resumed, rounds that ended meanwhile are caught up")
@@ -702,7 +711,9 @@ class MonitoringService : LifecycleService() {
                     }
                     NetworkVerdict.OK, NetworkVerdict.SLOW -> Unit
                 }
-                delay((PROBE_INTERVAL_MS - (SystemClock.elapsedRealtime() - startedMs)).coerceAtLeast(MIN_IDLE_MS))
+                // While paused for the internet, look every second so monitoring is back as soon as it is.
+                val interval = if (active.paused) PAUSED_PROBE_INTERVAL_MS else PROBE_INTERVAL_MS
+                delay((interval - (SystemClock.elapsedRealtime() - startedMs)).coerceAtLeast(MIN_IDLE_MS))
             }
         }
     }
@@ -779,6 +790,7 @@ class MonitoringService : LifecycleService() {
 
         /** Balance management: one speed measurement every 2 s (about 13 KB each, roughly 24 MB an hour). */
         private const val PROBE_INTERVAL_MS = 2_000L
+        private const val PAUSED_PROBE_INTERVAL_MS = 1_000L
         private const val PROBE_TIMEOUT_MS = 4_000
         private const val SLOW_OCR_MS = 2_000L
         private const val SLOW_OCR_REPORT_INTERVAL_MS = 60_000L

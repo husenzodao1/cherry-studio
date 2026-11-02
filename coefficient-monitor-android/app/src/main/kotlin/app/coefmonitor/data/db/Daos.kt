@@ -85,6 +85,10 @@ interface EventDao {
     @Query("SELECT COUNT(*) FROM events")
     fun observeCount(): Flow<Int>
 
+    /** Coefficients of the last rounds counted, newest first. */
+    @Query("SELECT coefficientHundredths FROM events ORDER BY sequence DESC LIMIT :limit")
+    suspend fun recentValues(limit: Int): List<Long>
+
     @Query("SELECT * FROM events ORDER BY sequence")
     suspend fun getAll(): List<EventEntity>
 
