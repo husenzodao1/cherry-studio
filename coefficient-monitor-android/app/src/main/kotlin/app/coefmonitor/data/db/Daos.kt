@@ -19,8 +19,22 @@ interface AlgorithmDao {
     @Query("SELECT * FROM algorithms WHERE id = :id")
     suspend fun getById(id: Long): AlgorithmEntity?
 
-    @Query("SELECT COUNT(*) FROM algorithms WHERE enabled = 1")
-    suspend fun enabledCount(): Int
+    /** The sequence of a coefficient: its enabled algorithms in order (rows not yet assigned belong to every one). */
+    @Query("SELECT * FROM algorithms WHERE enabled = 1 AND (thresholdHundredths IS NULL OR thresholdHundredths = :threshold) ORDER BY position, id")
+    suspend fun sequence(threshold: Long): List<AlgorithmEntity>
+
+    @Query("SELECT COUNT(*) FROM algorithms WHERE enabled = 1 AND (thresholdHundredths IS NULL OR thresholdHundredths = :threshold)")
+    suspend fun sequenceCount(threshold: Long): Int
+
+    /** Rows made before algorithms had a coefficient join [threshold]. */
+    @Query("UPDATE algorithms SET thresholdHundredths = :threshold WHERE thresholdHundredths IS NULL")
+    suspend fun assignUnassigned(threshold: Long): Int
+
+    @Query("DELETE FROM algorithms WHERE id IN (:ids)")
+    suspend fun deleteIds(ids: List<Long>)
+
+    @Query("DELETE FROM algorithms WHERE thresholdHundredths IS NULL OR thresholdHundredths = :threshold")
+    suspend fun deleteCoefficient(threshold: Long)
 
     @Query("SELECT COUNT(*) FROM algorithms")
     suspend fun count(): Int

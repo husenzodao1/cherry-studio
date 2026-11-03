@@ -9,6 +9,7 @@ activityCompose = "1.9.3"
 lifecycle = "2.8.7"
 navigation = "2.8.5"
 room = "2.6.1"
+reorderable = "2.4.3"
 datastore = "1.1.1"
 coreKtx = "1.13.1"
 appcompat = "1.7.0"
@@ -42,6 +43,8 @@ androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+# Drag to reorder in Compose lazy lists.
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }

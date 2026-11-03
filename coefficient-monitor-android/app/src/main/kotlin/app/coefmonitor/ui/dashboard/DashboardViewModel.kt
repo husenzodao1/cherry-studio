@@ -38,11 +38,11 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
     val state: StateFlow<DashboardState> = combine(
         container.runtime.state,
         container.monitor.state,
-        container.algorithms.algorithms,
+        container.algorithms.sequence,
         container.settings.settings,
         container.events.recent(RECENT_EVENTS),
     ) { runtime, monitor, algorithms, settings, recent ->
-        DashboardState(runtime, monitor, algorithms.filter { it.definition.enabled }, settings, recent)
+        DashboardState(runtime, monitor, algorithms, settings, recent)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
 
     fun resetToFirst() {

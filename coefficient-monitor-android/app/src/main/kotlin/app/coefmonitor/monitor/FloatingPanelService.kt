@@ -139,11 +139,11 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
         combine(
             combine(container.runtime.state, AutoClickService.connected, ::Pair),
             container.monitor.state,
-            container.algorithms.algorithms,
+            container.algorithms.sequence,
             container.events.recent(LOG_LINES),
             container.settings.settings,
         ) { (rt, clickerConnected), state, algorithms, recent, s ->
-            Presentation(rt, clickerConnected, state, algorithms.filter { it.definition.enabled }, recent, s)
+            Presentation(rt, clickerConnected, state, algorithms, recent, s)
         }.collect { render(it) }
     }
 
@@ -287,7 +287,7 @@ class FloatingPanelService : LifecycleService(), OverlayActions {
 
     override fun addAlgorithm() {
         lifecycleScope.launch {
-            val name = "${withAppLocale().getString(R.string.default_algorithm_prefix)} ${container.algorithms.allDefinitions().size + 1}"
+            val name = "${withAppLocale().getString(R.string.default_algorithm_prefix)} ${container.algorithms.definitions(container.settings.current().threshold).size + 1}"
             viewedId = container.algorithms.add(AlgorithmDefinition(name = name.take(AlgorithmLimits.MAX_NAME_LENGTH)))
         }
     }

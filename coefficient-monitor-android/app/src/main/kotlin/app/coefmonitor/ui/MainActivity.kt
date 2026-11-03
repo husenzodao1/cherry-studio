@@ -47,6 +47,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.coefmonitor.R
 import app.coefmonitor.appContainer
+import app.coefmonitor.core.Coefficient
 import app.coefmonitor.data.ThemeMode
 import app.coefmonitor.monitor.FloatingPanelService
 import app.coefmonitor.ui.algorithms.AlgorithmEditorScreen
@@ -107,12 +108,13 @@ class MainActivity : AppCompatActivity() {
 object Routes {
     const val DASHBOARD = "dashboard"
     const val ALGORITHMS = "algorithms"
-    const val ALGORITHM_EDITOR = "algorithm/{id}"
+    const val ALGORITHM_EDITOR = "algorithm/{id}?coef={coef}"
     const val LOG = "log"
     const val PRESETS = "presets"
     const val SETTINGS = "settings"
 
-    fun algorithmEditor(id: Long) = "algorithm/$id"
+    /** [coefficient]: hundredths of the coefficient a new algorithm joins (null: the current one). */
+    fun algorithmEditor(id: Long, coefficient: Long? = null) = "algorithm/$id?coef=${coefficient ?: NO_COEFFICIENT}"
 }
 
 private data class TopDestination(val route: String, val label: Int, val icon: ImageVector)
@@ -197,14 +199,21 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
                 )
             }
             composable(Routes.ALGORITHMS) {
-                AlgorithmsScreen(onEdit = { id -> nav.navigate(Routes.algorithmEditor(id)) })
+                AlgorithmsScreen(onEdit = { id, coefficient -> nav.navigate(Routes.algorithmEditor(id, coefficient)) })
             }
             composable(
                 Routes.ALGORITHM_EDITOR,
-                arguments = listOf(navArgument("id") { type = NavType.LongType }),
+                arguments = listOf(
+                    navArgument("id") { type = NavType.LongType },
+                    navArgument("coef") {
+                        type = NavType.LongType
+                        defaultValue = NO_COEFFICIENT
+                    },
+                ),
             ) { entry ->
                 AlgorithmEditorScreen(
                     algorithmId = entry.arguments?.getLong("id") ?: NEW_ALGORITHM_ID,
+                    coefficient = entry.arguments?.getLong("coef")?.takeIf { it != NO_COEFFICIENT }?.let(::Coefficient),
                     onDone = { nav.popBackStack() },
                 )
             }
@@ -216,3 +225,4 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
 }
 
 const val NEW_ALGORITHM_ID = -1L
+private const val NO_COEFFICIENT = -1L

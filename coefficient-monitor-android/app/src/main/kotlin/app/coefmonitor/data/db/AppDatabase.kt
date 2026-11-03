@@ -8,7 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
- * Version 2 (monitor_state.guardedJson). Every schema change adds a Migration: user data
+ * Version 3 (algorithms.thresholdHundredths). Every schema change adds a Migration: user data
  * (algorithms, event log, sequence position) must never be dropped by a destructive fallback.
  */
 @Database(
@@ -19,7 +19,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PresetEntity::class,
         DiagnosticEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -39,9 +39,16 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Version 2 → 3: every algorithm belongs to a coefficient (threshold). */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `algorithms` ADD COLUMN `thresholdHundredths` INTEGER")
+            }
+        }
+
         fun build(context: Context, name: String = FILE_NAME): AppDatabase =
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, name)
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
     }
 }

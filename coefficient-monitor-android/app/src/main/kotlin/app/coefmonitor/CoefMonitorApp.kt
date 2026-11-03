@@ -18,9 +18,18 @@ import app.coefmonitor.monitor.ScreenImageStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class CoefMonitorApp : Application() {
     val container: AppContainer by lazy { AppContainer(this) }
+
+    override fun onCreate() {
+        super.onCreate()
+        container.followCoefficient()
+    }
 }
 
 /** Manual dependency wiring; everything is created lazily on first use. */
@@ -30,8 +39,9 @@ class AppContainer(context: Context) {
     val database: AppDatabase by lazy { AppDatabase.build(appContext) }
     val settings: SettingsRepository by lazy { SettingsRepository(appContext.settingsDataStore) }
     val events: EventRepository by lazy { EventRepository(database) }
-    val algorithms: AlgorithmRepository by lazy { AlgorithmRepository(database) }
-    val monitor: MonitorRepository by lazy { MonitorRepository(database, events) }
+    private val thresholds by lazy { settings.settings.map { it.threshold }.distinctUntilChanged() }
+    val algorithms: AlgorithmRepository by lazy { AlgorithmRepository(database, { settings.current().threshold }, thresholds) }
+    val monitor: MonitorRepository by lazy { MonitorRepository(database, events) { settings.current().threshold } }
     val presets: PresetRepository by lazy { PresetRepository(database, settings, algorithms) }
     val screenImages: ScreenImageStore by lazy { ScreenImageStore(appContext) }
     val runtime = MonitorRuntime()
@@ -39,6 +49,17 @@ class AppContainer(context: Context) {
     /** Lives as long as the process; used by work that outlives a single service, like the auto-clicker. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     val autoClicker: AutoClicker by lazy { AutoClicker(this, appScope) }
+
+    /**
+     * Algorithms made before they had a coefficient join the current one; when the coefficient
+     * changes later, its own algorithms become the sequence, from Algorithm 1.
+     */
+    fun followCoefficient() {
+        appScope.launch {
+            algorithms.assignUnassigned(settings.current().threshold)
+            thresholds.drop(1).collect { monitor.coefficientChanged(it) }
+        }
+    }
 }
 
 val Context.appContainer: AppContainer get() = (applicationContext as CoefMonitorApp).container

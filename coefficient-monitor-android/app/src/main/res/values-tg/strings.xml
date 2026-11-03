@@ -22,8 +22,10 @@
     <string name="action_close">Пӯшидан</string>
     <string name="action_confirm">Тасдиқ</string>
     <string name="action_continue">Идома</string>
+    <string name="action_copy_to_current">Нусха ба %1$s</string>
     <string name="action_delete">Нест кардан</string>
     <string name="action_disable">Хомӯш кардан</string>
+    <string name="action_drag">Кашондан</string>
     <string name="action_duplicate">Нусхабардорӣ</string>
     <string name="action_edit">Таҳрир</string>
     <string name="action_enable">Дохил кардан</string>
@@ -50,6 +52,7 @@
     <string name="action_resume">Идома</string>
     <string name="action_save">Нигоҳ доштан</string>
     <string name="action_save_preset">Нигоҳ доштани пресет</string>
+    <string name="action_select_all">Ҳамаро интихоб кардан</string>
     <string name="action_set_active">Интихоб ҳамчун фаъол</string>
     <string name="action_show_all">Ҳамаро нишон додан</string>
     <string name="action_start_monitoring">Оғози назорат</string>
@@ -74,9 +77,11 @@
     <string name="algorithm_number">Алгоритми %1$d</string>
     <string name="algorithm_number_named">Алгоритми %1$d · %2$s</string>
     <string name="algorithm_position">Алгоритми %1$d / %2$d</string>
-    <string name="algorithms_count">%1$d дар пайдарпайӣ · ҳамагӣ %2$d</string>
-    <string name="algorithms_empty_text">Алгоритмҳоро якта-якта созед ё якбора чандтоашро илова кунед. Маҳдудияти шумора нест.</string>
+    <string name="algorithms_empty_for">Барои %1$s ҳанӯз алгоритм нест. Онҳоро як-як ё якбора якчандто созед; алгоритмҳои коэффитсиентҳои дигар дар филтр ҳастанд.</string>
     <string name="algorithms_empty_title">Ҳоло алгоритм нест</string>
+    <string name="algorithms_of_all">Ҳамаи коэффитсиентҳо · %1$d</string>
+    <string name="algorithms_of_current">%1$s · %2$d аз %3$d дар пайдарпайӣ</string>
+    <string name="algorithms_of_other">%1$s · %2$d · коэффитсиенти ҷорӣ нест</string>
     <string name="app_name">Назорати коэффитсиентҳо</string>
     <string name="auto_click">Автокликер</string>
     <string name="auto_click_hint">Пас аз ҳар давр кликҳои алгоритми фаъол дар нуқтаҳои сабтшуда як ба як, бо вақти қадамҳо байни онҳо, иҷро мешаванд. Хизматрасонии Accessibility (дар поён) лозим аст. Клик ба он чизе мерасад, ки ҳамон лаҳза дар экран аст; «Таваққуф» ё «Қатъ» кликҳоро бекор мекунад.</string>
@@ -113,6 +118,7 @@
     <string name="confirm_clear_events_title">Журнали ҳодисаҳоро тоза кунем?</string>
     <string name="confirm_delete_algorithm">«%1$s»-ро нест кунем? Инро бекор кардан мумкин нест. Мавқеи фаъол дар доираи рӯйхати боқимонда нигоҳ дошта мешавад.</string>
     <string name="confirm_delete_preset">Пресети «%1$s»-ро нест кунем?</string>
+    <string name="confirm_delete_selected">Алгоритмҳои интихобшуда (%1$d) нест карда шаванд? Инро баргардондан мумкин нест.</string>
     <string name="confirm_delete_title">Нест кунем?</string>
     <string name="confirm_forget_round_text">Мушоҳидаи навбатӣ танҳо детекторро омода мекунад. Агар даври нигоҳдошташуда бо экран мувофиқ набошад, истифода баред.</string>
     <string name="confirm_forget_round_title">Даври охирини дидашударо фаромӯш кунем?</string>
@@ -121,7 +127,7 @@
     <string name="confirm_load_preset_with_algorithms">Танзимоти ҷорӣ ВА тамоми рӯйхати алгоритмҳо бо «%1$s» иваз мешаванд. Мавқеи фаъол, агар ҳанӯз бошад, нигоҳ дошта мешавад; журнал боқӣ мемонад.</string>
     <string name="confirm_overwrite_preset_text">Пресет бо номи «%1$s» аллакай ҳаст. Онро бо танзимоти ҷорӣ иваз кунем?</string>
     <string name="confirm_overwrite_preset_title">Пресетро аз нав нависем?</string>
-    <string name="confirm_replace_text">Ҳамаи алгоритмҳои ҷорӣ (%1$d) нест ва бо рӯйхати воридшуда иваз мешаванд. Мавқеи фаъол, агар ҳанӯз мавҷуд бошад, нигоҳ дошта мешавад.</string>
+    <string name="confirm_replace_for">Ҳамаи алгоритмҳои %1$s нест ва бо рӯйхати воридшуда иваз мешаванд; алгоритмҳои коэффитсиентҳои дигар мемонанд. Ҷойи фаъол, агар ҳанӯз бошад, нигоҳ дошта мешавад.</string>
     <string name="confirm_replace_title">Ҳамаи алгоритмҳоро иваз кунем?</string>
     <string name="confirm_reset_text">Мавқеи фаъол Алгоритми 1 мешавад. Журнали ҳодисаҳо ва алгоритмҳо тағйир намеёбанд.</string>
     <string name="confirm_reset_title">Ба Алгоритми 1 баргардонем?</string>
@@ -164,6 +170,9 @@
     <string name="field_step_text">Номгузорӣ (ихтиёрӣ)</string>
     <string name="filter_above_10">Аз 10x боло</string>
     <string name="filter_all">Ҳамаи даврҳо</string>
+    <string name="filter_all_coefficients">Ҳамаи коэффитсиентҳо (%1$d)</string>
+    <string name="filter_coefficient">%1$s (%2$d)</string>
+    <string name="filter_current_coefficient">Ҷорӣ: %1$s (%2$d)</string>
     <string name="filter_flagged">Аз даст рафта ё дер</string>
     <string name="filter_high">Баланд (&gt; ҳад)</string>
     <string name="filter_low">Паст (≤ ҳад)</string>
@@ -203,7 +212,7 @@
     <string name="guarded_total">Ҳамагӣ: %1$s / %2$s</string>
     <string name="guarded_wins">Бурд дар як давра</string>
     <string name="guarded_wins_off">то пур шудани қисм</string>
-    <string name="import_text">Алгоритмҳои дуруст ёфт шуд: %1$d. Онҳоро ба охир илова кунем ё тамоми рӯйхатро иваз кунем?</string>
+    <string name="import_text_for">Барои %2$s %1$d алгоритми дуруст ёфт шуд. Ба охир илова кунем ё рӯйхати онро иваз кунем?</string>
     <string name="import_title">Импорти алгоритмҳо</string>
     <string name="include_algorithms">Алгоритмҳоро дохил кардан</string>
     <string name="info_active_algorithm">Алгоритме, ки кликҳояш пас аз даври навбатӣ иҷро мешаванд. Коэффитсиенти паст — гузариш ба навбатӣ, баланд — бозгашт ба Алгоритми 1.</string>
@@ -356,6 +365,7 @@
     <string name="screen_capture_value">Танҳо ҳангоми мониторинг</string>
     <string name="screen_image_description">Экране, ки дар он қатори коэффитсиентҳо ёфт шуд</string>
     <string name="search_hint">Ҷустуҷӯ</string>
+    <string name="selected_count">Интихоб: %1$d</string>
     <string name="settings_about">Дар бораи барнома</string>
     <string name="settings_appearance">Намуд ва забон</string>
     <string name="settings_delays">Таъхирҳо</string>

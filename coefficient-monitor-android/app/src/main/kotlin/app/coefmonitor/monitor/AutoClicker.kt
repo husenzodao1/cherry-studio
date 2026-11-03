@@ -45,7 +45,7 @@ class AutoClicker(
      */
     suspend fun run(activeIndex: Int, allowStakeButtonOnly: Boolean = true) {
         val settings = container.settings.current()
-        val definition = container.algorithms.allDefinitions().filter { it.enabled }.getOrNull(activeIndex) ?: return
+        val definition = container.algorithms.sequenceDefinitions().getOrNull(activeIndex) ?: return
         val band = container.runtime.state.value.rowBand
         val again = allowStakeButtonOnly && settings.stakeButtonOnly && lastCompleted == (activeIndex to definition)
         val clicks = if (again) {

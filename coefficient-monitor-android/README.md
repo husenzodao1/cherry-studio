@@ -255,12 +255,23 @@ enough algorithms for the stakes you are prepared to lose.
   Each algorithm has a name, description, enabled flag and ordered steps with optional per-step
   delays (the global delay applies otherwise). Algorithms can be reordered, duplicated, imported
   and exported (JSON).
-- The sequence is the ordered list of **enabled** algorithms. Deleting or disabling algorithms
+- **Every coefficient has its own algorithms.** An algorithm belongs to the coefficient (threshold)
+  it was made for; the list shows the current coefficient's algorithms and only they form the
+  sequence. Changing the coefficient (settings, panel, preset) makes its algorithms the sequence,
+  from Algorithm 1. Algorithms made before this existed join the current coefficient.
+- The **filter** icon on the list shows another coefficient's algorithms (every coefficient that
+  has some is listed, with how many) or all of them; new, imported and exported algorithms go to
+  the coefficient shown. **Long-press** an algorithm to choose several: select all, enable,
+  disable, copy to the current coefficient (when another one is shown) or delete them at once.
+  **Drag** the handle on the right to move an algorithm up or down; up / down in its menu move it
+  among its coefficient's algorithms.
+- The sequence is the ordered list of the current coefficient's **enabled** algorithms. Deleting or disabling algorithms
   clamps the position; it never silently resets to 1.
 - On the last algorithm, a low coefficient keeps the position and posts "Add another algorithm to
   continue". It never wraps.
-- Presets store threshold, detection settings, capture interval, delays and (optionally) the
-  algorithm list. Loading a preset never touches round de-duplication.
+- Presets store threshold, detection settings, capture interval, delays and (optionally) that
+  threshold's algorithms; loading one replaces only that coefficient's algorithms. Loading a
+  preset never touches round de-duplication.
 - The event log has a small search field and a filter icon next to it: **Highest algorithms
   first** (the deepest positions reached, newest first among equal ones), and show only **low**
   (≤ threshold), **high**, **above 10x**, **back to Algorithm 1**, or **missed or late** rounds.

@@ -233,7 +233,7 @@ class PersistenceTest {
         legacy.close()
 
         db = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
             .allowMainThreadQueries()
             .build()
         runBlocking {
@@ -242,6 +242,10 @@ class PersistenceTest {
             assertEquals(41L, state.lastSequence)
             assertEquals(null, state.guarded)
             assertEquals(listOf("Kept"), AlgorithmRepository(db).allDefinitions().map { it.name })
+            // Made before coefficients: it joins the current one.
+            assertEquals(null, db.algorithmDao().getAll().single().thresholdHundredths)
+            AlgorithmRepository(db).assignUnassigned(Coefficient(150))
+            assertEquals(150L, db.algorithmDao().getAll().single().thresholdHundredths)
         }
     }
 
@@ -288,6 +292,60 @@ class PersistenceTest {
         assertEquals(GuardedPhase.WAITING, monitor.sequenceState().guarded!!.phase)
         // Nothing to correct.
         assertEquals(null, monitor.reconcileBalance(Money.parse("10051.05")!!, config))
+    }
+
+    @Test
+    fun `every coefficient has its own algorithms and sequence`() = runBlocking {
+        var current = Coefficient(200)
+        val algorithms = AlgorithmRepository(db, { current })
+        val monitor = MonitorRepository(db, EventRepository(db)) { current }
+        algorithms.addNumbered(3, "Two")
+        algorithms.addNumbered(2, "OneHalf", Coefficient(150))
+        assertEquals(listOf("Two 1", "Two 2", "Two 3"), algorithms.sequenceDefinitions().map { it.name })
+        assertEquals(listOf("OneHalf 1", "OneHalf 2"), algorithms.definitions(Coefficient(150)).map { it.name })
+
+        // The sequence follows the coefficient: at 1.50x only its two algorithms count.
+        current = Coefficient(150)
+        assertEquals(listOf("OneHalf 1", "OneHalf 2"), algorithms.sequenceDefinitions().map { it.name })
+        monitor.applyRound(event(1, 120), current)
+        val end = monitor.applyRound(event(2, 110), current) as ProcessResult.Applied
+        assertEquals(TransitionReason.END_OF_SEQUENCE, end.transition.reason)
+        monitor.coefficientChanged(current)
+        assertEquals(0, monitor.sequenceState().activeIndex)
+
+        // Several at once: copy to the current coefficient, disable, delete.
+        val twos = db.algorithmDao().getAll().filter { it.thresholdHundredths == 200L }.map { it.id }
+        algorithms.copyTo(twos.take(2), current)
+        assertEquals(listOf("OneHalf 1", "OneHalf 2", "Two 1", "Two 2"), algorithms.sequenceDefinitions().map { it.name })
+        assertEquals(3, algorithms.definitions(Coefficient(200)).size)
+        val copies = db.algorithmDao().getAll().filter { it.thresholdHundredths == 150L }.map { it.id }
+        algorithms.setEnabledMany(copies.takeLast(2), enabled = false)
+        assertEquals(listOf("OneHalf 1", "OneHalf 2"), algorithms.sequenceDefinitions().map { it.name })
+        algorithms.deleteMany(copies.takeLast(2))
+        assertEquals(5, db.algorithmDao().getAll().size)
+
+        // Replacing a coefficient's list leaves the others alone.
+        algorithms.replaceAll(listOf(AlgorithmDefinition("Imported")), Coefficient(150))
+        assertEquals(listOf("Imported"), algorithms.definitions(Coefficient(150)).map { it.name })
+        assertEquals(3, algorithms.definitions(Coefficient(200)).size)
+    }
+
+    @Test
+    fun `dragging reorders the list shown, other coefficients keep their places`() = runBlocking {
+        val algorithms = AlgorithmRepository(db)
+        algorithms.addNumbered(3, "A")
+        algorithms.addNumbered(2, "B", Coefficient(150))
+        algorithms.addNumbered(1, "A-more")
+        val rows = db.algorithmDao().getAll()
+        val a = rows.filter { it.thresholdHundredths == 200L }.map { it.id }
+        // The 2.00x list shown is A 1, A 2, A 3, A-more 4: drag A-more 4 to the top.
+        algorithms.reorder(listOf(a[3], a[0], a[1], a[2]))
+        assertEquals(listOf("A-more 4", "A 1", "A 2", "A 3"), algorithms.sequenceDefinitions().map { it.name })
+        assertEquals(listOf("B 1", "B 2"), algorithms.definitions(Coefficient(150)).map { it.name })
+        assertEquals((0 until 6).toList(), db.algorithmDao().getAll().map { it.position })
+        // Up / down moves among the same coefficient's algorithms only.
+        algorithms.move(a[0], -1)
+        assertEquals(listOf("A 1", "A-more 4", "A 2", "A 3"), algorithms.sequenceDefinitions().map { it.name })
     }
 
     @Test

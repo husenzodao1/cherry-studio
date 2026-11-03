@@ -48,6 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.heightIn
 import app.coefmonitor.R
+import app.coefmonitor.core.Coefficient
 import app.coefmonitor.ui.components.SettingRow
 import app.coefmonitor.ui.components.SectionTitle
 import app.coefmonitor.ui.components.ListCard
@@ -58,10 +59,10 @@ import app.coefmonitor.ui.components.SectionCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlgorithmEditorScreen(algorithmId: Long, onDone: () -> Unit) {
+fun AlgorithmEditorScreen(algorithmId: Long, coefficient: Coefficient?, onDone: () -> Unit) {
     val viewModel: AlgorithmEditorViewModel = viewModel(
         key = "algorithm-editor-$algorithmId",
-        factory = AlgorithmEditorViewModel.factory(algorithmId),
+        factory = AlgorithmEditorViewModel.factory(algorithmId, coefficient),
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.saved) { if (state.saved) onDone() }

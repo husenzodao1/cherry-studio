@@ -25,7 +25,12 @@ import kotlinx.coroutines.flow.map
  * threshold rule, writes the new position and the event record in ONE transaction, and refuses
  * any round whose sequence number was already processed.
  */
-class MonitorRepository(private val db: AppDatabase, private val events: EventRepository) {
+class MonitorRepository(
+    private val db: AppDatabase,
+    private val events: EventRepository,
+    /** The current coefficient (threshold): the sequence is its enabled algorithms. */
+    private val currentThreshold: suspend () -> Coefficient = { Coefficient.DEFAULT_THRESHOLD },
+) {
     private val stateDao = db.monitorStateDao()
     private val algorithmDao = db.algorithmDao()
     private val eventDao = db.eventDao()
@@ -65,7 +70,7 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
         startBalance: Long? = null,
     ): ProcessResult = db.withTransaction {
         val stored = stateDao.get() ?: MonitorStateEntity()
-        val enabled = algorithmDao.getAll().filter { it.enabled }
+        val enabled = algorithmDao.sequence(threshold.hundredths)
         val result = RoundProcessor.process(stored.toSequenceState(), event, enabled.size, threshold, startOfSession, guarded, live, startBalance)
         if (result is ProcessResult.Applied) {
             val newState = result.state
@@ -125,6 +130,12 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
         events.log(DiagnosticLevel.INFO, "GUARD", "Guarded start progress reset")
     }
 
+    /** The coefficient changed: its own algorithms are the sequence now, from Algorithm 1. */
+    suspend fun coefficientChanged(threshold: Coefficient) {
+        setActiveIndex(0)
+        events.log(DiagnosticLevel.INFO, "COEFFICIENT", "Coefficient is now $threshold: its algorithms are the sequence, from Algorithm 1")
+    }
+
     /** Explicit user reset — the only non-threshold way back to Algorithm 1. */
     suspend fun resetToFirst() {
         setActiveIndex(0)
@@ -147,7 +158,7 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
 
     private suspend fun setActiveIndex(index: Int) = db.withTransaction {
         val stored = stateDao.get() ?: MonitorStateEntity()
-        val clamped = RoundProcessor.clampIndex(index, algorithmDao.enabledCount())
+        val clamped = RoundProcessor.clampIndex(index, algorithmDao.sequenceCount(currentThreshold().hundredths))
         stateDao.upsert(
             stored.copy(
                 activeIndex = clamped,

@@ -30,13 +30,14 @@ fun encodeSteps(steps: List<AlgorithmStep>): String = StorageJson.encodeToString
 fun AlgorithmEntity.toDefinition(): AlgorithmDefinition =
     AlgorithmDefinition(name = name, description = description, enabled = enabled, steps = decodeSteps(stepsJson))
 
-fun AlgorithmDefinition.toEntity(position: Int, id: Long = 0): AlgorithmEntity = AlgorithmEntity(
+fun AlgorithmDefinition.toEntity(position: Int, threshold: Coefficient?, id: Long = 0): AlgorithmEntity = AlgorithmEntity(
     id = id,
     position = position,
     name = name.trim(),
     description = description,
     enabled = enabled,
     stepsJson = encodeSteps(steps),
+    thresholdHundredths = threshold?.hundredths,
 )
 
 inline fun <reified E : Enum<E>> enumOrDefault(name: String?, default: E): E =

@@ -117,6 +117,9 @@ class FloatingModeTest {
         device.wait(Until.findObject(panel().text("+")), 5_000).click()
         waitFor("threshold 2.01x", 5_000) { runBlocking { container.settings.current().threshold }.takeIf { it == Coefficient(201) } }
         screenshot("floating_02_settings")
+        // Every coefficient has its own algorithms: 2.01x has none, so go back to 2.00x with −.
+        device.wait(Until.findObject(panel().text("−")), 5_000).click()
+        waitFor("threshold 2.00x", 5_000) { runBlocking { container.settings.current().threshold }.takeIf { it == Coefficient(200) } }
 
         // Algorithm tab: ▶ only shows Algorithm 2; Make active makes it the active one.
         button(R.string.overlay_tab_algorithm).click()

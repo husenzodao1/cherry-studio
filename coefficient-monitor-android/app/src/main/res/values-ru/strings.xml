@@ -22,8 +22,10 @@
     <string name="action_close">Закрыть</string>
     <string name="action_confirm">Подтвердить</string>
     <string name="action_continue">Продолжить</string>
+    <string name="action_copy_to_current">Копировать в %1$s</string>
     <string name="action_delete">Удалить</string>
     <string name="action_disable">Отключить</string>
+    <string name="action_drag">Перетащить</string>
     <string name="action_duplicate">Дублировать</string>
     <string name="action_edit">Изменить</string>
     <string name="action_enable">Включить</string>
@@ -50,6 +52,7 @@
     <string name="action_resume">Продолжить</string>
     <string name="action_save">Сохранить</string>
     <string name="action_save_preset">Сохранить пресет</string>
+    <string name="action_select_all">Выбрать все</string>
     <string name="action_set_active">Сделать активным</string>
     <string name="action_show_all">Показать все</string>
     <string name="action_start_monitoring">Начать мониторинг</string>
@@ -74,9 +77,11 @@
     <string name="algorithm_number">Алгоритм %1$d</string>
     <string name="algorithm_number_named">Алгоритм %1$d · %2$s</string>
     <string name="algorithm_position">Алгоритм %1$d / %2$d</string>
-    <string name="algorithms_count">%1$d в последовательности · всего %2$d</string>
-    <string name="algorithms_empty_text">Создавайте алгоритмы по одному или добавьте сразу несколько. Ограничения на количество нет.</string>
+    <string name="algorithms_empty_for">Для %1$s алгоритмов пока нет. Создайте их по одному или сразу несколько; алгоритмы других коэффициентов — в фильтре.</string>
     <string name="algorithms_empty_title">Алгоритмов пока нет</string>
+    <string name="algorithms_of_all">Все коэффициенты · %1$d</string>
+    <string name="algorithms_of_current">%1$s · %2$d из %3$d в последовательности</string>
+    <string name="algorithms_of_other">%1$s · %2$d · не текущий коэффициент</string>
     <string name="app_name">Монитор коэффициентов</string>
     <string name="auto_click">Автокликер</string>
     <string name="auto_click_hint">После каждого раунда клики активного алгоритма выполняются по очереди в сохранённых точках, с временем шагов между ними. Нужна служба специальных возможностей (ниже). Клик попадает в то, что в этот момент на экране; «Пауза» или «Стоп» отменяют клики.</string>
@@ -113,6 +118,7 @@
     <string name="confirm_clear_events_title">Очистить журнал событий?</string>
     <string name="confirm_delete_algorithm">Удалить «%1$s»? Это нельзя отменить. Активная позиция сохранится в пределах оставшегося списка.</string>
     <string name="confirm_delete_preset">Удалить пресет «%1$s»?</string>
+    <string name="confirm_delete_selected">Удалить выбранные алгоритмы (%1$d)? Это нельзя отменить.</string>
     <string name="confirm_delete_title">Удалить?</string>
     <string name="confirm_forget_round_text">Следующее наблюдение только инициализирует детектор. Используйте, если сохранённый раунд больше не совпадает с экраном.</string>
     <string name="confirm_forget_round_title">Забыть последний наблюдаемый раунд?</string>
@@ -121,7 +127,7 @@
     <string name="confirm_load_preset_with_algorithms">Текущие настройки И весь список алгоритмов будут заменены пресетом «%1$s». Активная позиция сохранится, если ещё существует; журнал сохранится.</string>
     <string name="confirm_overwrite_preset_text">Пресет «%1$s» уже существует. Заменить его текущими настройками?</string>
     <string name="confirm_overwrite_preset_title">Перезаписать пресет?</string>
-    <string name="confirm_replace_text">Все текущие алгоритмы (%1$d) будут удалены и заменены импортированными. Активная позиция сохранится, если она ещё существует.</string>
+    <string name="confirm_replace_for">Все алгоритмы %1$s будут удалены и заменены импортированными; у других коэффициентов они останутся. Активная позиция сохранится, если она ещё есть.</string>
     <string name="confirm_replace_title">Заменить все алгоритмы?</string>
     <string name="confirm_reset_text">Активная позиция станет алгоритмом 1. Журнал событий и алгоритмы не изменятся.</string>
     <string name="confirm_reset_title">Сбросить на алгоритм 1?</string>
@@ -164,6 +170,9 @@
     <string name="field_step_text">Подпись (необязательно)</string>
     <string name="filter_above_10">Выше 10x</string>
     <string name="filter_all">Все раунды</string>
+    <string name="filter_all_coefficients">Все коэффициенты (%1$d)</string>
+    <string name="filter_coefficient">%1$s (%2$d)</string>
+    <string name="filter_current_coefficient">Текущий: %1$s (%2$d)</string>
     <string name="filter_flagged">Пропущенные или поздние</string>
     <string name="filter_high">Высокие (&gt; порога)</string>
     <string name="filter_low">Низкие (≤ порога)</string>
@@ -203,7 +212,7 @@
     <string name="guarded_total">Всего: %1$s / %2$s</string>
     <string name="guarded_wins">Выигрышей за серию</string>
     <string name="guarded_wins_off">до набора части</string>
-    <string name="import_text">Найдено корректных алгоритмов: %1$d. Добавить их в конец или заменить весь список?</string>
+    <string name="import_text_for">Найдено %1$d корректных алгоритмов для %2$s. Добавить в конец или заменить его список?</string>
     <string name="import_title">Импорт алгоритмов</string>
     <string name="include_algorithms">Включить алгоритмы</string>
     <string name="info_active_algorithm">Алгоритм, клики которого выполнятся после следующего раунда. Низкий коэффициент — переход к следующему, высокий — возврат к алгоритму 1.</string>
@@ -356,6 +365,7 @@
     <string name="screen_capture_value">Только во время мониторинга</string>
     <string name="screen_image_description">Экран, на котором найден ряд коэффициентов</string>
     <string name="search_hint">Поиск</string>
+    <string name="selected_count">Выбрано: %1$d</string>
     <string name="settings_about">О приложении</string>
     <string name="settings_appearance">Оформление и язык</string>
     <string name="settings_delays">Задержки</string>

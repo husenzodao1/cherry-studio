@@ -1,8 +1,11 @@
 package app.coefmonitor.ui.algorithms
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,26 +18,35 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DragHandle
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
+import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.LibraryAdd
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material.icons.outlined.ToggleOff
 import androidx.compose.material.icons.outlined.ToggleOn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,7 +65,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -61,9 +76,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.material.icons.outlined.Layers
 import app.coefmonitor.R
-import app.coefmonitor.ui.components.ListCard
 import app.coefmonitor.core.AlgorithmDefinition
 import app.coefmonitor.core.ExportFormats
 import app.coefmonitor.core.ImportResult
@@ -71,25 +84,39 @@ import app.coefmonitor.data.StoredAlgorithm
 import app.coefmonitor.ui.NEW_ALGORITHM_ID
 import app.coefmonitor.ui.components.ConfirmDialog
 import app.coefmonitor.ui.components.EmptyState
+import app.coefmonitor.ui.components.ListCard
 import app.coefmonitor.ui.readText
 import app.coefmonitor.ui.writeText
 import kotlinx.coroutines.launch
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
+/**
+ * The algorithms of one coefficient (the current one unless the filter shows another one or all),
+ * dragged by their handle to reorder them. A long press starts choosing several for one action.
+ * [onEdit]: the algorithm id (or [NEW_ALGORITHM_ID]) and, for a new one, the coefficient it joins.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlgorithmsScreen(
-    onEdit: (Long) -> Unit,
+    onEdit: (Long, Long?) -> Unit,
     viewModel: AlgorithmsViewModel = viewModel(factory = AlgorithmsViewModel.Factory),
 ) {
-    val algorithms by viewModel.algorithms.collectAsStateWithLifecycle()
+    val list by viewModel.list.collectAsStateWithLifecycle()
+    val selected by viewModel.selected.collectAsStateWithLifecycle()
     val activeIndex by viewModel.activeIndex.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
     val snackbar = remember { SnackbarHostState() }
     var pendingDelete by remember { mutableStateOf<StoredAlgorithm?>(null) }
+    var confirmDeleteSelected by remember { mutableStateOf(false) }
     var showBulkAdd by remember { mutableStateOf(false) }
+    var filterMenu by remember { mutableStateOf(false) }
     var pendingImport by remember { mutableStateOf<List<AlgorithmDefinition>?>(null) }
     var confirmReplace by remember { mutableStateOf(false) }
+    val choosing = selected.isNotEmpty()
+    BackHandler(enabled = choosing) { viewModel.clearSelection() }
 
     val copySuffix = stringResource(R.string.copy_suffix)
     val exportedMessage = stringResource(R.string.message_exported)
@@ -114,79 +141,184 @@ fun AlgorithmsScreen(
         }
     }
 
-    // Sequence number of each enabled algorithm (disabled ones are skipped by the sequence).
-    val sequenceNumbers = remember(algorithms) {
-        var n = 0
-        algorithms.associate { it.id to if (it.definition.enabled) ++n else null }
+    // The order shown while dragging; written to the database when the drag ends.
+    var order by remember(list.visible) { mutableStateOf(list.visible) }
+    val lazyListState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        val fromIndex = order.indexOfFirst { it.id == from.key }
+        val toIndex = order.indexOfFirst { it.id == to.key }
+        if (fromIndex >= 0 && toIndex >= 0) order = order.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
     }
-    val enabledCount = sequenceNumbers.values.count { it != null }
+    val showingCurrent = list.filter == AlgorithmFilter.Current
+    val inSequence = list.visible.count { it.definition.enabled && it.belongsTo(list.threshold) }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(stringResource(R.string.nav_algorithms))
-                        Text(
-                            stringResource(R.string.algorithms_count, enabledCount, algorithms.size),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showBulkAdd = true }) {
-                        Icon(Icons.Outlined.LibraryAdd, contentDescription = stringResource(R.string.action_add_many))
-                    }
-                    IconButton(onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) }) {
-                        Icon(Icons.Outlined.FileUpload, contentDescription = stringResource(R.string.action_import))
-                    }
-                    IconButton(onClick = { exportLauncher.launch("algorithms.json") }, enabled = algorithms.isNotEmpty()) {
-                        Icon(Icons.Outlined.FileDownload, contentDescription = stringResource(R.string.action_export))
-                    }
-                },
-            )
+            if (choosing) {
+                TopAppBar(
+                    navigationIcon = {
+                        IconButton(onClick = viewModel::clearSelection) {
+                            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.action_close))
+                        }
+                    },
+                    title = { Text(stringResource(R.string.selected_count, selected.size)) },
+                    actions = {
+                        IconButton(onClick = { viewModel.selectAll(list.visible.map { it.id }) }) {
+                            Icon(Icons.Outlined.SelectAll, contentDescription = stringResource(R.string.action_select_all))
+                        }
+                        IconButton(onClick = { viewModel.setSelectedEnabled(true) }) {
+                            Icon(Icons.Outlined.ToggleOn, contentDescription = stringResource(R.string.action_enable))
+                        }
+                        IconButton(onClick = { viewModel.setSelectedEnabled(false) }) {
+                            Icon(Icons.Outlined.ToggleOff, contentDescription = stringResource(R.string.action_disable))
+                        }
+                        if (!showingCurrent) {
+                            IconButton(onClick = viewModel::copySelectedToCurrent) {
+                                Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(R.string.action_copy_to_current, list.threshold.toString()))
+                            }
+                        }
+                        IconButton(onClick = { confirmDeleteSelected = true }) {
+                            Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.action_delete))
+                        }
+                    },
+                )
+            } else {
+                TopAppBar(
+                    title = {
+                        Column {
+                            Text(stringResource(R.string.nav_algorithms))
+                            Text(
+                                when (val filter = list.filter) {
+                                    AlgorithmFilter.Current -> stringResource(R.string.algorithms_of_current, list.threshold.toString(), inSequence, list.visible.size)
+                                    is AlgorithmFilter.Of -> stringResource(R.string.algorithms_of_other, filter.coefficient.toString(), list.visible.size)
+                                    AlgorithmFilter.All -> stringResource(R.string.algorithms_of_all, list.total)
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    },
+                    actions = {
+                        Box {
+                            IconButton(onClick = { filterMenu = true }) {
+                                Icon(
+                                    Icons.Outlined.FilterList,
+                                    contentDescription = stringResource(R.string.action_filter),
+                                    tint = if (showingCurrent) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                            DropdownMenu(expanded = filterMenu, onDismissRequest = { filterMenu = false }) {
+                                list.groups.forEach { group ->
+                                    val filter = if (group.current) AlgorithmFilter.Current else AlgorithmFilter.Of(group.coefficient)
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                if (group.current) {
+                                                    stringResource(R.string.filter_current_coefficient, group.coefficient.toString(), group.count)
+                                                } else {
+                                                    stringResource(R.string.filter_coefficient, group.coefficient.toString(), group.count)
+                                                },
+                                            )
+                                        },
+                                        leadingIcon = { FilterCheck(list.filter == filter) },
+                                        onClick = {
+                                            filterMenu = false
+                                            viewModel.filter.value = filter
+                                        },
+                                    )
+                                }
+                                HorizontalDivider()
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.filter_all_coefficients, list.total)) },
+                                    leadingIcon = { FilterCheck(list.filter == AlgorithmFilter.All) },
+                                    onClick = {
+                                        filterMenu = false
+                                        viewModel.filter.value = AlgorithmFilter.All
+                                    },
+                                )
+                            }
+                        }
+                        IconButton(onClick = { showBulkAdd = true }) {
+                            Icon(Icons.Outlined.LibraryAdd, contentDescription = stringResource(R.string.action_add_many))
+                        }
+                        IconButton(onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) }) {
+                            Icon(Icons.Outlined.FileUpload, contentDescription = stringResource(R.string.action_import))
+                        }
+                        IconButton(onClick = { exportLauncher.launch("algorithms-${list.target.toPlainString()}x.json") }, enabled = list.visible.isNotEmpty()) {
+                            Icon(Icons.Outlined.FileDownload, contentDescription = stringResource(R.string.action_export))
+                        }
+                    },
+                )
+            }
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { onEdit(NEW_ALGORITHM_ID) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.action_add_algorithm)) },
-            )
+            if (!choosing) {
+                ExtendedFloatingActionButton(
+                    onClick = { onEdit(NEW_ALGORITHM_ID, list.target.hundredths) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
+                    text = { Text(stringResource(R.string.action_add_algorithm)) },
+                )
+            }
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        if (algorithms.isEmpty()) {
+        if (order.isEmpty()) {
             EmptyState(
                 icon = Icons.Outlined.Layers,
                 title = stringResource(R.string.algorithms_empty_title),
-                text = stringResource(R.string.algorithms_empty_text),
+                text = stringResource(R.string.algorithms_empty_for, list.target.toString()),
                 modifier = Modifier.padding(padding),
                 action = { TextButton(onClick = { showBulkAdd = true }) { Text(stringResource(R.string.action_add_many)) } },
             )
         } else {
             LazyColumn(
+                state = lazyListState,
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(algorithms, key = { it.id }) { item ->
-                    val number = sequenceNumbers[item.id]
-                    AlgorithmRow(
-                        item = item,
-                        number = number,
-                        isActive = number != null && number - 1 == activeIndex,
-                        isFirst = item.position == 0,
-                        isLast = item.position == algorithms.lastIndex,
-                        onEdit = { onEdit(item.id) },
-                        onSetActive = { number?.let { viewModel.select(it - 1) } },
-                        onMove = { delta -> viewModel.move(item.id, delta) },
-                        onDuplicate = { viewModel.duplicate(item.id, copySuffix) },
-                        onToggle = { viewModel.setEnabled(item.id, !item.definition.enabled) },
-                        onDelete = { pendingDelete = item },
-                    )
+                items(order, key = { it.id }) { item ->
+                    ReorderableItem(reorderState, key = item.id) { dragging ->
+                        val number = list.numbers[item.id]
+                        val current = item.belongsTo(list.threshold)
+                        val groupIds = order.filter { it.coefficient == item.coefficient }.map { it.id }
+                        AlgorithmRow(
+                            item = item,
+                            number = number,
+                            coefficientLabel = if (list.filter == AlgorithmFilter.All) (item.coefficient ?: list.threshold).toString() else null,
+                            isActive = current && number != null && number - 1 == activeIndex,
+                            canSetActive = current && number != null,
+                            isFirst = groupIds.firstOrNull() == item.id,
+                            isLast = groupIds.lastOrNull() == item.id,
+                            dragging = dragging,
+                            choosing = choosing,
+                            chosen = item.id in selected,
+                            dragHandle = {
+                                IconButton(
+                                    onClick = {},
+                                    modifier = Modifier.draggableHandle(
+                                        onDragStarted = { haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                        onDragStopped = { viewModel.reorder(order.map { it.id }) },
+                                    ),
+                                ) {
+                                    Icon(Icons.Outlined.DragHandle, contentDescription = stringResource(R.string.action_drag))
+                                }
+                            },
+                            onClick = { if (choosing) viewModel.toggleSelected(item.id) else onEdit(item.id, null) },
+                            onLongClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                viewModel.toggleSelected(item.id)
+                            },
+                            onSetActive = { number?.let { viewModel.select(it - 1) } },
+                            onMove = { delta -> viewModel.move(item.id, delta) },
+                            onDuplicate = { viewModel.duplicate(item.id, copySuffix) },
+                            onToggle = { viewModel.setEnabled(item.id, !item.definition.enabled) },
+                            onDelete = { pendingDelete = item },
+                        )
+                    }
                 }
             }
         }
@@ -201,6 +333,15 @@ fun AlgorithmsScreen(
             onDismiss = { pendingDelete = null },
         )
     }
+    if (confirmDeleteSelected) {
+        ConfirmDialog(
+            title = stringResource(R.string.confirm_delete_title),
+            text = stringResource(R.string.confirm_delete_selected, selected.size),
+            confirmLabel = stringResource(R.string.action_delete),
+            onConfirm = viewModel::deleteSelected,
+            onDismiss = { confirmDeleteSelected = false },
+        )
+    }
     if (showBulkAdd) {
         BulkAddDialog(
             defaultPrefix = stringResource(R.string.default_algorithm_prefix),
@@ -212,7 +353,7 @@ fun AlgorithmsScreen(
         AlertDialog(
             onDismissRequest = { pendingImport = null },
             title = { Text(stringResource(R.string.import_title)) },
-            text = { Text(stringResource(R.string.import_text, imported.size)) },
+            text = { Text(stringResource(R.string.import_text_for, imported.size, list.target.toString())) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.applyImport(imported, replace = false)
@@ -230,7 +371,7 @@ fun AlgorithmsScreen(
         val imported = pendingImport
         ConfirmDialog(
             title = stringResource(R.string.confirm_replace_title),
-            text = stringResource(R.string.confirm_replace_text, algorithms.size),
+            text = stringResource(R.string.confirm_replace_for, list.target.toString()),
             confirmLabel = stringResource(R.string.action_replace_all),
             onConfirm = {
                 if (imported != null) viewModel.applyImport(imported, replace = true)
@@ -242,13 +383,30 @@ fun AlgorithmsScreen(
 }
 
 @Composable
+private fun FilterCheck(checked: Boolean) {
+    if (checked) {
+        Icon(Icons.Outlined.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+    } else {
+        Spacer(Modifier.size(18.dp))
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 private fun AlgorithmRow(
     item: StoredAlgorithm,
     number: Int?,
+    coefficientLabel: String?,
     isActive: Boolean,
+    canSetActive: Boolean,
     isFirst: Boolean,
     isLast: Boolean,
-    onEdit: () -> Unit,
+    dragging: Boolean,
+    choosing: Boolean,
+    chosen: Boolean,
+    dragHandle: @Composable () -> Unit,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
     onSetActive: () -> Unit,
     onMove: (Int) -> Unit,
     onDuplicate: () -> Unit,
@@ -257,8 +415,16 @@ private fun AlgorithmRow(
 ) {
     var menu by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
-    ListCard(onClick = onEdit, highlighted = isActive) {
+    val shape = MaterialTheme.shapes.large
+    ListCard(
+        modifier = Modifier.clip(shape).combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        highlighted = isActive || chosen || dragging,
+    ) {
         Row(Modifier.padding(start = 12.dp, top = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (choosing) {
+                Checkbox(checked = chosen, onCheckedChange = { onClick() })
+                Spacer(Modifier.width(4.dp))
+            }
             Box(
                 Modifier
                     .size(38.dp)
@@ -293,6 +459,7 @@ private fun AlgorithmRow(
                     }
                 }
                 val details = buildList {
+                    if (coefficientLabel != null) add(coefficientLabel)
                     if (!item.definition.enabled) add(stringResource(R.string.disabled))
                     add(stringResource(R.string.steps_count, item.definition.steps.size))
                     if (item.definition.description.isNotBlank()) add(item.definition.description)
@@ -305,24 +472,29 @@ private fun AlgorithmRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Box {
-                IconButton(onClick = { menu = true }) {
-                    Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.more_actions))
-                }
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    MenuItem(stringResource(R.string.action_edit), Icons.Outlined.Edit) { menu = false; onEdit() }
-                    if (number != null && !isActive) {
-                        MenuItem(stringResource(R.string.action_set_active), Icons.Outlined.CheckCircle) { menu = false; onSetActive() }
+            if (choosing) {
+                Spacer(Modifier.width(8.dp))
+            } else {
+                Box {
+                    IconButton(onClick = { menu = true }) {
+                        Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.more_actions))
                     }
-                    if (!isFirst) MenuItem(stringResource(R.string.action_move_up), Icons.Outlined.ArrowUpward) { menu = false; onMove(-1) }
-                    if (!isLast) MenuItem(stringResource(R.string.action_move_down), Icons.Outlined.ArrowDownward) { menu = false; onMove(1) }
-                    MenuItem(stringResource(R.string.action_duplicate), Icons.Outlined.ContentCopy) { menu = false; onDuplicate() }
-                    MenuItem(
-                        stringResource(if (item.definition.enabled) R.string.action_disable else R.string.action_enable),
-                        if (item.definition.enabled) Icons.Outlined.ToggleOff else Icons.Outlined.ToggleOn,
-                    ) { menu = false; onToggle() }
-                    MenuItem(stringResource(R.string.action_delete), Icons.Outlined.Delete) { menu = false; onDelete() }
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                        MenuItem(stringResource(R.string.action_edit), Icons.Outlined.Edit) { menu = false; onClick() }
+                        if (canSetActive && !isActive) {
+                            MenuItem(stringResource(R.string.action_set_active), Icons.Outlined.CheckCircle) { menu = false; onSetActive() }
+                        }
+                        if (!isFirst) MenuItem(stringResource(R.string.action_move_up), Icons.Outlined.ArrowUpward) { menu = false; onMove(-1) }
+                        if (!isLast) MenuItem(stringResource(R.string.action_move_down), Icons.Outlined.ArrowDownward) { menu = false; onMove(1) }
+                        MenuItem(stringResource(R.string.action_duplicate), Icons.Outlined.ContentCopy) { menu = false; onDuplicate() }
+                        MenuItem(
+                            stringResource(if (item.definition.enabled) R.string.action_disable else R.string.action_enable),
+                            if (item.definition.enabled) Icons.Outlined.ToggleOff else Icons.Outlined.ToggleOn,
+                        ) { menu = false; onToggle() }
+                        MenuItem(stringResource(R.string.action_delete), Icons.Outlined.Delete) { menu = false; onDelete() }
+                    }
                 }
+                dragHandle()
             }
         }
     }

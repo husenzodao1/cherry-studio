@@ -4,7 +4,10 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/** One user-defined algorithm. [position] orders the list; the sequence uses enabled rows only. */
+/**
+ * One user-defined algorithm. [position] orders the list; the sequence uses the enabled rows of the
+ * current coefficient (threshold) only.
+ */
 @Entity(tableName = "algorithms", indices = [Index("position")])
 data class AlgorithmEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -14,6 +17,11 @@ data class AlgorithmEntity(
     val enabled: Boolean,
     /** JSON list of AlgorithmStep. */
     val stepsJson: String,
+    /**
+     * The coefficient (threshold) the algorithm belongs to, in hundredths. Null only for rows made
+     * before version 3: they belong to the current coefficient until the app assigns them to it.
+     */
+    val thresholdHundredths: Long? = null,
 )
 
 /** Event log row. The unique sequence index is a database-level guard against double processing. */

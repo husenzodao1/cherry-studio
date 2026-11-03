@@ -10,6 +10,7 @@ import app.coefmonitor.AppContainer
 import app.coefmonitor.core.AlgorithmDefinition
 import app.coefmonitor.core.AlgorithmLimits
 import app.coefmonitor.core.AlgorithmStep
+import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.ExportFormats
 import app.coefmonitor.core.ImportResult
@@ -22,20 +23,76 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** Which algorithms the list shows. */
+sealed interface AlgorithmFilter {
+    /** The current coefficient's (the sequence). */
+    data object Current : AlgorithmFilter
+
+    /** Another coefficient's. */
+    data class Of(val coefficient: Coefficient) : AlgorithmFilter
+
+    /** Every coefficient's. */
+    data object All : AlgorithmFilter
+}
+
+/** A coefficient that has algorithms (or is the current one), and how many. */
+data class CoefficientGroup(val coefficient: Coefficient, val count: Int, val current: Boolean)
+
+/** What the algorithm list shows. [numbers]: each enabled algorithm's number in its coefficient's sequence. */
+data class AlgorithmListState(
+    val threshold: Coefficient = Coefficient.DEFAULT_THRESHOLD,
+    val filter: AlgorithmFilter = AlgorithmFilter.Current,
+    val visible: List<StoredAlgorithm> = emptyList(),
+    val numbers: Map<Long, Int> = emptyMap(),
+    val groups: List<CoefficientGroup> = emptyList(),
+    val total: Int = 0,
+) {
+    /** The coefficient new, imported and exported algorithms belong to: the one shown, or the current one. */
+    val target: Coefficient get() = (filter as? AlgorithmFilter.Of)?.coefficient ?: threshold
+}
+
 class AlgorithmsViewModel(private val container: AppContainer) : ViewModel() {
 
-    val algorithms: StateFlow<List<StoredAlgorithm>> = container.algorithms.algorithms
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val filter = MutableStateFlow<AlgorithmFilter>(AlgorithmFilter.Current)
+
+    /** Ids of the algorithms chosen for an action on several at once; empty outside selection. */
+    val selected = MutableStateFlow<Set<Long>>(emptySet())
+
+    val list: StateFlow<AlgorithmListState> = combine(
+        container.algorithms.algorithms,
+        container.settings.settings.map { it.threshold },
+        filter,
+    ) { all, threshold, chosen -> listState(all, threshold, chosen) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AlgorithmListState())
 
     val activeIndex: StateFlow<Int> = container.monitor.state.map { it.activeIndex }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
+    fun toggleSelected(id: Long) = selected.update { if (id in it) it - id else it + id }
+
+    fun selectAll(ids: Collection<Long>) = selected.update { it + ids }
+
+    fun clearSelection() {
+        selected.value = emptySet()
+    }
+
+    fun deleteSelected() = launchOnSelection { container.algorithms.deleteMany(it) }
+
+    fun setSelectedEnabled(enabled: Boolean) = launchOnSelection { container.algorithms.setEnabledMany(it, enabled) }
+
+    /** Copies the chosen algorithms to the end of the current coefficient's list. */
+    fun copySelectedToCurrent() = launchOnSelection { container.algorithms.copyTo(it, container.settings.current().threshold) }
+
     fun move(id: Long, delta: Int) = launch { container.algorithms.move(id, delta) }
+
+    /** The list shown, in its new order after a drag. */
+    fun reorder(orderedIds: List<Long>) = launch { container.algorithms.reorder(orderedIds) }
 
     fun duplicate(id: Long, copySuffix: String) = launch { container.algorithms.duplicate(id, copySuffix) }
 
@@ -43,16 +100,23 @@ class AlgorithmsViewModel(private val container: AppContainer) : ViewModel() {
 
     fun setEnabled(id: Long, enabled: Boolean) = launch { container.algorithms.setEnabled(id, enabled) }
 
-    fun addNumbered(count: Int, prefix: String) = launch { container.algorithms.addNumbered(count, prefix) }
+    fun addNumbered(count: Int, prefix: String) = launch { container.algorithms.addNumbered(count, prefix, list.value.target) }
 
     fun select(sequenceIndex: Int) = launch { container.monitor.selectAlgorithm(sequenceIndex) }
 
-    suspend fun exportJson(): String = container.algorithms.exportJson()
+    suspend fun exportJson(): String = container.algorithms.exportJson(list.value.target)
 
     fun parseImport(text: String): ImportResult<List<AlgorithmDefinition>> = ExportFormats.algorithmsFromJson(text)
 
     fun applyImport(definitions: List<AlgorithmDefinition>, replace: Boolean) = launch {
-        if (replace) container.algorithms.replaceAll(definitions) else container.algorithms.appendAll(definitions)
+        val target = list.value.target
+        if (replace) container.algorithms.replaceAll(definitions, target) else container.algorithms.appendAll(definitions, target)
+    }
+
+    private fun launchOnSelection(block: suspend (Set<Long>) -> Unit) {
+        val ids = selected.value
+        selected.value = emptySet()
+        if (ids.isNotEmpty()) launch { block(ids) }
     }
 
     private fun launch(block: suspend () -> Unit) {
@@ -64,6 +128,22 @@ class AlgorithmsViewModel(private val container: AppContainer) : ViewModel() {
 
         val Factory = viewModelFactory {
             initializer { AlgorithmsViewModel(container()) }
+        }
+
+        fun listState(all: List<StoredAlgorithm>, threshold: Coefficient, filter: AlgorithmFilter): AlgorithmListState {
+            fun coefficientOf(item: StoredAlgorithm) = item.coefficient ?: threshold
+            val visible = when (filter) {
+                AlgorithmFilter.Current -> all.filter { it.belongsTo(threshold) }
+                is AlgorithmFilter.Of -> all.filter { coefficientOf(it) == filter.coefficient }
+                AlgorithmFilter.All -> all
+            }
+            val numbers = all.groupBy(::coefficientOf).values.flatMap { group ->
+                group.filter { it.definition.enabled }.mapIndexed { i, item -> item.id to i + 1 }
+            }.toMap()
+            val counts = all.groupingBy(::coefficientOf).eachCount()
+            val groups = (counts.keys + threshold).distinct().sorted()
+                .map { CoefficientGroup(it, counts[it] ?: 0, it == threshold) }
+            return AlgorithmListState(threshold, filter, visible, numbers, groups, all.size)
         }
     }
 }
@@ -97,7 +177,12 @@ data class EditorState(
 
 enum class EditorProblem { NAME_EMPTY, NAME_TOO_LONG, DESCRIPTION_TOO_LONG, STEP_TOO_LONG, DELAY_INVALID, TOO_MANY_STEPS }
 
-class AlgorithmEditorViewModel(private val container: AppContainer, private val algorithmId: Long) : ViewModel() {
+/** [coefficient]: the coefficient a new algorithm joins (null: the current one). */
+class AlgorithmEditorViewModel(
+    private val container: AppContainer,
+    private val algorithmId: Long,
+    private val coefficient: Coefficient? = null,
+) : ViewModel() {
     private val mutableState = MutableStateFlow(EditorState())
     val state: StateFlow<EditorState> = mutableState.asStateFlow()
     private var nextKey = 0L
@@ -209,7 +294,7 @@ class AlgorithmEditorViewModel(private val container: AppContainer, private val 
         }
         viewModelScope.launch {
             if (algorithmId == NEW_ALGORITHM_ID) {
-                container.algorithms.add(definition)
+                container.algorithms.add(definition, coefficient)
             } else {
                 container.algorithms.update(algorithmId, definition)
             }
@@ -218,8 +303,8 @@ class AlgorithmEditorViewModel(private val container: AppContainer, private val 
     }
 
     companion object {
-        fun factory(algorithmId: Long) = viewModelFactory {
-            initializer { AlgorithmEditorViewModel(container(), algorithmId) }
+        fun factory(algorithmId: Long, coefficient: Coefficient?) = viewModelFactory {
+            initializer { AlgorithmEditorViewModel(container(), algorithmId, coefficient) }
         }
     }
 }

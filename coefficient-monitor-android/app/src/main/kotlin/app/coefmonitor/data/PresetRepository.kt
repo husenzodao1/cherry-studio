@@ -32,7 +32,7 @@ class PresetRepository(
             detector = current.detector,
             captureIntervalMs = current.captureIntervalMs,
             globalDelayMs = current.globalDelayMs,
-            algorithms = if (includeAlgorithms) algorithms.allDefinitions() else null,
+            algorithms = if (includeAlgorithms) algorithms.definitions(current.threshold) else null,
         )
         return store(name.trim(), payload)
     }
@@ -41,7 +41,8 @@ class PresetRepository(
         val entity = dao.getById(id) ?: return false
         val parsed = ExportFormats.presetFromJson(entity.payloadJson) as? ImportResult.Success ?: return false
         val payload = parsed.value.second
-        payload.algorithms?.let { algorithms.replaceAll(it) }
+        // A preset's algorithms belong to its coefficient; other coefficients keep theirs.
+        payload.algorithms?.let { algorithms.replaceAll(it, Coefficient(payload.thresholdHundredths)) }
         settings.update {
             it.copy(
                 threshold = Coefficient(payload.thresholdHundredths),

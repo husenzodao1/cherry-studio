@@ -744,8 +744,8 @@ class MonitoringService : LifecycleService() {
     )
 
     private suspend fun observePresentation() {
-        combine(runtime.state, container.monitor.state, container.algorithms.algorithms) { rt, state, algorithms ->
-            Presentation(rt, state, algorithms.filter { it.definition.enabled })
+        combine(runtime.state, container.monitor.state, container.algorithms.sequence) { rt, state, algorithms ->
+            Presentation(rt, state, algorithms)
         }.collect { render(it) }
     }
 
