@@ -22,6 +22,7 @@
     <string name="action_close">Пӯшидан</string>
     <string name="action_confirm">Тасдиқ</string>
     <string name="action_continue">Идома</string>
+    <string name="action_copy_command">Нусхаи фармон</string>
     <string name="action_copy_to_current">Нусха ба %1$s</string>
     <string name="action_delete">Нест кардан</string>
     <string name="action_disable">Хомӯш кардан</string>
@@ -55,9 +56,8 @@
     <string name="action_select_all">Ҳамаро интихоб кардан</string>
     <string name="action_set_active">Интихоб ҳамчун фаъол</string>
     <string name="action_show_all">Ҳамаро нишон додан</string>
-    <string name="action_start_monitoring">Оғози назорат</string>
+    <string name="action_start">Оғоз</string>
     <string name="action_stop">Қатъ</string>
-    <string name="action_to_game">Ба бозӣ</string>
     <string name="action_use_point">Ин нуқтаро истифода баред</string>
     <string name="active_algorithm">Алгоритми фаъол</string>
     <string name="active_badge">Фаъол</string>
@@ -113,6 +113,7 @@
     <string name="channel_monitor">Ҳолати назорат</string>
     <string name="channel_rounds">Натиҷаҳои даврҳо</string>
     <string name="choose_active_title">Алгоритми фаъолро интихоб кунед</string>
+    <string name="command_copied">Нусха шуд</string>
     <string name="confirm_clear_diagnostics_text">Ҳамаи сабтҳои ташхис нест мешаванд.</string>
     <string name="confirm_clear_diagnostics_title">Ташхисро тоза кунем?</string>
     <string name="confirm_clear_events_text">Ҳамаи даврҳои сабтшуда нест мешаванд. Алгоритми фаъол ва ҳимоя аз такрор тағйир намеёбанд.</string>
@@ -271,9 +272,9 @@
     <string name="network_manual">Дастӣ</string>
     <string name="network_manual_hint">Агар суръат дар сонияҳои шумо аз суръати шумо паст бошад, бозмедорад ва вақте суръат баргашт (тақрибан 1 сония), худ давом медиҳад ва ҳамаи даврҳои дар ин вақт тамомшударо ба ҳисоб мегирад.</string>
     <string name="network_manual_summary">Дастӣ: танаффус аз %1$d кбит/с паст дар %2$d сония</string>
-    <string name="network_not_used">Истифода намешавад — OCR дар дастгоҳ кор мекунад</string>
     <string name="network_off">Санҷида нашавад</string>
     <string name="network_speed">Интернет: %1$d кбит/с</string>
+    <string name="network_usage">Танҳо барои санҷиши суръати идораи баланс; OCR дар дастгоҳ кор мекунад</string>
     <string name="new_algorithm">Алгоритми нав</string>
     <string name="next_algorithm">Навбатӣ</string>
     <string name="no_algorithms_short">Алгоритм нест</string>
@@ -367,8 +368,10 @@
     <string name="same_tile_similarity_hint">Барои муайян кардани тағйири катаки ҳамсоя (ҷунбиши қатор бо қиматҳои баробар).</string>
     <string name="save_preset_text">Ҳад, танзимоти шинохт, фосилаи сабт ва таъхирҳоро нигоҳ медорад.</string>
     <string name="screen_capture">Сабти экран</string>
+    <string name="screen_capture_allowed">Бе пурсиш иҷозат аст</string>
+    <string name="screen_capture_asks">Android ҳар дафъа мепурсад</string>
     <string name="screen_capture_explainer">Android ҳар дафъа ҳангоми оғоз розигӣ мепурсад ва ҳангоми кор нишондиҳандаи сабтро нишон медиҳад.</string>
-    <string name="screen_capture_value">Танҳо ҳангоми мониторинг</string>
+    <string name="screen_capture_info">Android намегузорад, ки барнома ин иҷозатро дар хотир нигоҳ дорад: пеш аз ҳар сеанси назорат мепурсад (Танаффус сеансро нигоҳ медорад, Қатъ онро тамом мекунад). Пурсиданро танҳо баъди ин фармон бас мекунад, ки як бор аз компютер тавассути USB ё ислоҳи бесим иҷро мешавад: adb shell appops set %1$s PROJECT_MEDIA allow. Он баъди бозоғозӣ мемонад; PROJECT_MEDIA default онро бекор мекунад. Google инро ҳуҷҷатгузорӣ намекунад, бинобар ин дар баъзе телефонҳо пурсиш метавонад монад.</string>
     <string name="screen_image_description">Экране, ки дар он қатори коэффитсиентҳо ёфт шуд</string>
     <string name="search_hint">Ҷустуҷӯ</string>
     <string name="selected_count">Интихоб: %1$d</string>
@@ -382,6 +385,7 @@
     <string name="stable_frames_hint">Қимат бояд дар ҳамин қадар кадрҳои беҳаракат якхела хонда шавад, то ҳисоб шавад.</string>
     <string name="stake_button_only">Ҳамон алгоритм боз: танҳо тугмаи ставка</string>
     <string name="stake_button_only_hint">Агар алгоритми фаъол ҳамон бошад, ки кликҳояш бори охир то охир иҷро шуданд (масалан, алгоритми 1 баъди бурд дар алгоритми 1), танҳо клики охирини он пахш мешавад: маблағ аллакай гузошта шудааст. Ҳангоми омадан аз алгоритми дигар ҳамаи кликҳо иҷро мешаванд. Клики охирини ҳар алгоритм бояд тугмаи ставка бошад.</string>
+    <string name="start_then_game">назорат, баъд %1$s</string>
     <string name="status_error">Хато</string>
     <string name="status_initializing">Омодасозӣ</string>
     <string name="status_monitoring">Назорат меравад</string>

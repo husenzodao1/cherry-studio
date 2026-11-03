@@ -1,14 +1,13 @@
 package app.coefmonitor.ui.dashboard
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.net.Uri
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.disabled
+import app.coefmonitor.ui.openLink
+import androidx.compose.foundation.background
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.outlined.SportsEsports
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
@@ -113,7 +112,11 @@ fun DashboardScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val clickerConnected by AutoClickService.connected.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val startCapture = rememberCaptureStarter()
+    var gameOpenFailed by remember { mutableStateOf(false) }
+    // Start: monitoring begins (after Android's screen-capture consent), then the game opens.
+    val startCapture = rememberCaptureStarter(onStarted = {
+        state.settings.gameUrl?.let { gameOpenFailed = !openLink(context, it) }
+    })
     var resumeTick by remember { mutableIntStateOf(0) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { resumeTick++ }
     val overlayGranted = remember(resumeTick) { Settings.canDrawOverlays(context) }
@@ -142,6 +145,7 @@ fun DashboardScreen(
                     onOpenAlgorithms = onOpenAlgorithms,
                     onEnableClicker = { context.startActivity(accessibilitySettingsIntent()) },
                     onSaveGameUrl = viewModel::saveGameUrl,
+                    gameOpenFailed = gameOpenFailed,
                 )
             }
             item {
@@ -207,6 +211,7 @@ private fun StatusCard(
     onOpenAlgorithms: () -> Unit,
     onEnableClicker: () -> Unit,
     onSaveGameUrl: (String?) -> Unit,
+    gameOpenFailed: Boolean,
 ) {
     val runtime = state.runtime
     val context = LocalContext.current
@@ -290,72 +295,67 @@ private fun StatusCard(
                     }
                     StopButton(onStop, Modifier.weight(1f))
                 }
-                else -> Button(
-                    onClick = onStart,
+                else -> StartButton(
+                    url = state.settings.gameUrl,
                     enabled = state.total > 0,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                ) {
-                    Icon(Icons.Outlined.PlayArrow, contentDescription = null)
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.action_start_monitoring))
-                }
+                    onStart = onStart,
+                    onSave = onSaveGameUrl,
+                )
             }
         }
-        GameButton(state.settings.gameUrl, onSave = onSaveGameUrl)
+        if (gameOpenFailed) {
+            Text(stringResource(R.string.game_link_open_failed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+        }
     }
 }
 
 /**
- * "To the game": a tap opens the saved link (the game's page, or its app if it handles the link);
- * a long press, or a tap while no link is saved, asks for the link.
+ * Start: monitoring begins (Android asks for screen capture unless that was allowed once from a
+ * computer), then the saved game link opens. A long press asks for the game link.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun GameButton(url: String?, onSave: (String?) -> Unit) {
-    val context = LocalContext.current
+private fun StartButton(url: String?, enabled: Boolean, onStart: () -> Unit, onSave: (String?) -> Unit) {
     var editing by remember { mutableStateOf(false) }
-    var failed by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
+    val container = if (enabled) colors.primary else colors.onSurface.copy(alpha = 0.12f)
+    val content = if (enabled) colors.onPrimary else colors.onSurface.copy(alpha = 0.38f)
     Row(
         Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = 56.dp)
             .clip(CircleShape)
-            .border(1.dp, colors.outline, CircleShape)
+            .background(container, CircleShape)
             .combinedClickable(
-                onClickLabel = stringResource(R.string.action_to_game),
+                onClickLabel = stringResource(R.string.action_start),
                 onLongClickLabel = stringResource(R.string.game_link_title),
-                onClick = {
-                    if (url == null) editing = true else failed = !openLink(context, url)
-                },
+                onClick = { if (enabled) onStart() },
                 onLongClick = { editing = true },
             )
+            // Without algorithms it cannot start (the game link can still be set with a long press).
+            .semantics { if (!enabled) disabled() }
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        Icon(Icons.Outlined.SportsEsports, contentDescription = null, tint = colors.primary, modifier = Modifier.size(20.dp))
+        Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = content)
         Spacer(Modifier.width(8.dp))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(stringResource(R.string.action_to_game), style = MaterialTheme.typography.labelLarge, color = colors.primary)
+            Text(stringResource(R.string.action_start), style = MaterialTheme.typography.titleSmall, color = content)
             Text(
-                url?.let(GameLink::label) ?: stringResource(R.string.game_link_none),
+                url?.let { stringResource(R.string.start_then_game, GameLink.label(it)) } ?: stringResource(R.string.game_link_none),
                 style = MaterialTheme.typography.labelSmall,
-                color = colors.onSurfaceVariant,
+                color = content.copy(alpha = 0.8f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
-    }
-    if (failed) {
-        Text(stringResource(R.string.game_link_open_failed), style = MaterialTheme.typography.bodySmall, color = colors.error)
     }
     if (editing) {
         GameLinkDialog(
             initial = url.orEmpty(),
             onSave = { saved ->
                 onSave(saved)
-                failed = false
                 editing = false
             },
             onDismiss = { editing = false },
@@ -405,13 +405,6 @@ private fun GameLinkDialog(initial: String, onSave: (String?) -> Unit, onDismiss
     )
 }
 
-/** Opens [url] in the app that handles it (the game's app, or the browser); false if none can. */
-private fun openLink(context: Context, url: String): Boolean = try {
-    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-    true
-} catch (e: ActivityNotFoundException) {
-    false
-}
 
 @Composable
 private fun StopButton(onStop: () -> Unit, modifier: Modifier) {
@@ -652,7 +645,7 @@ private fun DetectionCard(
             relevant = true,
             onGrant = onGrantNotifications,
         )
-        InfoRow(stringResource(R.string.network), stringResource(R.string.network_not_used))
+        InfoRow(stringResource(R.string.network), stringResource(R.string.network_usage))
     }
 }
 

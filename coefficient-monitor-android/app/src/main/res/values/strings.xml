@@ -22,6 +22,7 @@
     <string name="action_close">Close</string>
     <string name="action_confirm">Confirm</string>
     <string name="action_continue">Continue</string>
+    <string name="action_copy_command">Copy command</string>
     <string name="action_copy_to_current">Copy to %1$s</string>
     <string name="action_delete">Delete</string>
     <string name="action_disable">Disable</string>
@@ -55,9 +56,8 @@
     <string name="action_select_all">Select all</string>
     <string name="action_set_active">Make active</string>
     <string name="action_show_all">Show all</string>
-    <string name="action_start_monitoring">Start monitoring</string>
+    <string name="action_start">Start</string>
     <string name="action_stop">Stop</string>
-    <string name="action_to_game">To the game</string>
     <string name="action_use_point">Use this point</string>
     <string name="active_algorithm">Active algorithm</string>
     <string name="active_badge">Active</string>
@@ -113,6 +113,7 @@
     <string name="channel_monitor">Monitoring status</string>
     <string name="channel_rounds">Round results</string>
     <string name="choose_active_title">Choose the active algorithm</string>
+    <string name="command_copied">Copied</string>
     <string name="confirm_clear_diagnostics_text">All diagnostic entries will be deleted.</string>
     <string name="confirm_clear_diagnostics_title">Clear diagnostics?</string>
     <string name="confirm_clear_events_text">All logged rounds will be deleted. The active algorithm and round de-duplication are not affected.</string>
@@ -274,9 +275,9 @@
     <string name="network_manual">Manual</string>
     <string name="network_manual_hint">Pauses below your speed for your seconds, and resumes by itself when the speed is back (about 1 s), counting every round that ended meanwhile.</string>
     <string name="network_manual_summary">Manual: pause below %1$d kbit/s for %2$d s</string>
-    <string name="network_not_used">Not used — OCR runs on the device</string>
     <string name="network_off">Not watched</string>
     <string name="network_speed">Internet: %1$d kbit/s</string>
+    <string name="network_usage">Only for the balance management\'s speed check; OCR runs on the device</string>
     <string name="new_algorithm">New algorithm</string>
     <string name="next_algorithm">Next</string>
     <string name="no_algorithms_short">No algorithms</string>
@@ -370,8 +371,10 @@
     <string name="same_tile_similarity_hint">Used to decide whether the next tile changed (row shift with equal values).</string>
     <string name="save_preset_text">Saves threshold, detection settings, capture interval and delays.</string>
     <string name="screen_capture">Screen capture</string>
+    <string name="screen_capture_allowed">Allowed without asking</string>
+    <string name="screen_capture_asks">Android asks at every start</string>
     <string name="screen_capture_explainer">Android asks for consent every time monitoring starts and shows a capture indicator while it runs.</string>
-    <string name="screen_capture_value">Only while monitoring</string>
+    <string name="screen_capture_info">Android does not let an app remember this permission: it asks before every monitoring session (Pause keeps the session; Stop ends it). It stops asking only after this command, run once from a computer with USB or wireless debugging: adb shell appops set %1$s PROJECT_MEDIA allow. It stays after restarts; PROJECT_MEDIA default undoes it. Google does not document this, so some phones may still ask.</string>
     <string name="screen_image_description">Screen where the coefficient row was found</string>
     <string name="search_hint">Search</string>
     <string name="selected_count">%1$d selected</string>
@@ -385,6 +388,7 @@
     <string name="stable_frames_hint">A value must be read identically on this many still frames before it counts.</string>
     <string name="stake_button_only">Same algorithm again: stake button only</string>
     <string name="stake_button_only_hint">When the active algorithm is the one whose clicks last ran to the end (e.g. Algorithm 1 after a win on Algorithm 1), only its last click is tapped: its amount is still set. Coming from another algorithm, all its clicks run. The last click of every algorithm must be the stake button.</string>
+    <string name="start_then_game">monitoring, then %1$s</string>
     <string name="status_error">Error</string>
     <string name="status_initializing">Initializing</string>
     <string name="status_monitoring">Monitoring</string>

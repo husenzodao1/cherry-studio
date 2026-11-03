@@ -40,12 +40,21 @@ test it with plain Maven Central access: `cd core && gradle test`.
   The `events.sequence` column has a unique index, so the database itself also rejects a round
   that was already processed.
 
-## To the game
+## Start: monitoring, then the game
 
-Under **Start monitoring** on the dashboard, **To the game** opens the game: a tap opens the saved
-link (the game's page in the browser, or the game's app if it handles that link). A long press
-(or a tap while no link is saved) asks for the link; without `https://` it is added. The button
-shows the site it opens; saving an empty link removes it.
+The dashboard has one **Start** button: it starts monitoring and then opens the game link (the
+game's page in the browser, or the game's app if it handles that link). A long press asks for the
+link; without `https://` it is added, and an empty link removes it. The button shows the site it
+opens; without a link it only starts monitoring.
+
+**Screen capture consent.** Android does not let an app remember the screen-capture permission:
+it asks before every capture session (Pause keeps the session, Stop ends it). It stops asking only
+after a one-time command from a computer (USB or wireless debugging):
+
+    adb shell appops set app.coefmonitor PROJECT_MEDIA allow
+
+It survives restarts; `PROJECT_MEDIA default` undoes it. Google does not document this, so some
+phones may still ask. Settings → Permissions shows whether it is set and copies the command.
 
 ## Where the app looks: the tile right of `?`
 
@@ -377,7 +386,7 @@ segmented control for its tabs.
 
 | Permission | Why |
 | --- | --- |
-| Screen capture (MediaProjection consent) | Read the tile. Android asks every time monitoring starts. |
+| Screen capture (MediaProjection consent) | Read the tile. Android asks every time monitoring starts, unless allowed once with the command in [Start](#start-monitoring-then-the-game). |
 | `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PROJECTION` | Continuous capture requires a visible foreground service. |
 | `POST_NOTIFICATIONS` | Monitoring status, "add another algorithm", capture stopped. |
 | `SYSTEM_ALERT_WINDOW` (optional) | Floating panel; only if granted in system settings. |

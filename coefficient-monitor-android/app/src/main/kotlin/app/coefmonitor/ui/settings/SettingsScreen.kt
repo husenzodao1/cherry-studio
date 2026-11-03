@@ -1,5 +1,12 @@
 package app.coefmonitor.ui.settings
 
+import app.coefmonitor.ui.theme.LocalSemanticColors
+import app.coefmonitor.ui.screenCaptureCommand
+import app.coefmonitor.ui.screenCaptureAllowedWithoutAsking
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.LocalClipboardManager
 import android.content.Intent
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatDelegate
@@ -602,7 +609,10 @@ private fun PermissionsSection(settings: AppSettings, viewModel: SettingsViewMod
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { resumeTick++ }
     val overlayGranted = remember(resumeTick) { Settings.canDrawOverlays(context) }
     val notificationsGranted = remember(resumeTick) { hasNotificationPermission(context) }
+    val captureAllowed = remember(resumeTick) { screenCaptureAllowedWithoutAsking(context) }
     SectionCard(title = stringResource(R.string.settings_permissions)) {
+        ScreenCaptureRow(captureAllowed)
+        HorizontalDivider()
         SwitchRow(
             title = stringResource(R.string.floating_panel),
             hint = stringResource(R.string.floating_panel_hint),
@@ -665,8 +675,7 @@ private fun PermissionsSection(settings: AppSettings, viewModel: SettingsViewMod
             onChange = { enabled -> viewModel.update { it.copy(logRejectedReadings = enabled) } },
         )
         HorizontalDivider()
-        InfoRow(stringResource(R.string.screen_capture), stringResource(R.string.screen_capture_value), info = stringResource(R.string.screen_capture_explainer))
-        InfoRow(stringResource(R.string.network), stringResource(R.string.network_not_used))
+        InfoRow(stringResource(R.string.network), stringResource(R.string.network_usage))
     }
 }
 
@@ -718,6 +727,36 @@ private fun SliderSetting(
             onValueChangeFinished = { onCommit(local) },
             colors = SliderDefaults.colors(inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest),
         )
+    }
+}
+
+/**
+ * Screen capture: Android asks before every monitoring session; only a one-time command from a
+ * computer makes it stop asking. The row says which is the case and offers to copy that command.
+ */
+@Composable
+private fun ScreenCaptureRow(allowed: Boolean) {
+    val context = LocalContext.current
+    val clipboard = LocalClipboardManager.current
+    val command = remember { screenCaptureCommand(context) }
+    var copied by remember { mutableStateOf(false) }
+    InfoRow(
+        stringResource(R.string.screen_capture),
+        stringResource(if (allowed) R.string.screen_capture_allowed else R.string.screen_capture_asks),
+        valueColor = if (allowed) LocalSemanticColors.current.running else Color.Unspecified,
+        info = stringResource(R.string.screen_capture_info, context.packageName),
+    )
+    if (!allowed) {
+        Text(
+            command,
+            style = MaterialTheme.typography.bodySmall,
+            fontFamily = FontFamily.Monospace,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        TextButton(onClick = {
+            clipboard.setText(AnnotatedString(command))
+            copied = true
+        }) { Text(stringResource(if (copied) R.string.command_copied else R.string.action_copy_command)) }
     }
 }
 

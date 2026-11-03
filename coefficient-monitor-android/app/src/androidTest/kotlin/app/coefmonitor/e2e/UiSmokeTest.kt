@@ -76,8 +76,9 @@ class UiSmokeTest {
 
     @Test
     fun walkThroughAllScreens() {
-        waitText("Start monitoring")
-        compose.onNodeWithText("Start monitoring").assertIsNotEnabled()
+        // Start (monitoring, then the game) cannot start without algorithms.
+        waitText("Start")
+        compose.onNodeWithText("Start").assertIsNotEnabled()
         shot("ui_01_dashboard_empty")
 
         // Algorithms: bulk-add 120, then edit the first one.
@@ -86,7 +87,7 @@ class UiSmokeTest {
         compose.onNode(hasText("Add several") and hasClickAction()).performClick()
         compose.onNode(hasSetTextAction() and hasText("10")).performTextReplacement("120")
         compose.onNode(hasText("Add") and hasClickAction()).performClick()
-        waitText("120 in sequence · 120 total")
+        waitText("2.00x · 120 of 120 in the sequence")
         shot("ui_02_algorithms_120")
 
         compose.onNodeWithText("Algorithm 1").performClick()
@@ -106,7 +107,7 @@ class UiSmokeTest {
         waitText("Click: ", substring = true)
         shot("ui_03_algorithm_editor")
         compose.onNodeWithText("Save").performClick()
-        waitText("120 in sequence · 120 total")
+        waitText("2.00x · 120 of 120 in the sequence")
 
         nav("Monitor")
         waitText("Plan for low rounds")
@@ -154,9 +155,14 @@ class UiSmokeTest {
         nav("Назорат")
         waitText("Алгоритми фаъол")
         shot("ui_10_dashboard_tajik")
+        // Every coefficient has its own algorithms: at 2.50x there are none yet; the filter shows the 2.00x ones.
         nav("Алгоритмҳо")
-        waitText("120 дар пайдарпайӣ · ҳамагӣ 120")
+        waitText("2.50x · 0 аз 0 дар пайдарпайӣ")
+        compose.onNodeWithContentDescription("Филтр").performClick()
+        waitText("2.00x (120)")
         shot("ui_11_algorithms_tajik")
+        compose.onNodeWithText("2.00x (120)").performClick()
+        waitText("2.00x · 120 · коэффитсиенти ҷорӣ нест")
 
         // Russian.
         nav("Танзимот")

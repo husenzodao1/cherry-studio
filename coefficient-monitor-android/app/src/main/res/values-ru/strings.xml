@@ -22,6 +22,7 @@
     <string name="action_close">Закрыть</string>
     <string name="action_confirm">Подтвердить</string>
     <string name="action_continue">Продолжить</string>
+    <string name="action_copy_command">Копировать команду</string>
     <string name="action_copy_to_current">Копировать в %1$s</string>
     <string name="action_delete">Удалить</string>
     <string name="action_disable">Отключить</string>
@@ -55,9 +56,8 @@
     <string name="action_select_all">Выбрать все</string>
     <string name="action_set_active">Сделать активным</string>
     <string name="action_show_all">Показать все</string>
-    <string name="action_start_monitoring">Начать мониторинг</string>
+    <string name="action_start">Старт</string>
     <string name="action_stop">Стоп</string>
-    <string name="action_to_game">К игре</string>
     <string name="action_use_point">Использовать точку</string>
     <string name="active_algorithm">Активный алгоритм</string>
     <string name="active_badge">Активный</string>
@@ -113,6 +113,7 @@
     <string name="channel_monitor">Статус мониторинга</string>
     <string name="channel_rounds">Результаты раундов</string>
     <string name="choose_active_title">Выберите активный алгоритм</string>
+    <string name="command_copied">Скопировано</string>
     <string name="confirm_clear_diagnostics_text">Все записи диагностики будут удалены.</string>
     <string name="confirm_clear_diagnostics_title">Очистить диагностику?</string>
     <string name="confirm_clear_events_text">Все записанные раунды будут удалены. Активный алгоритм и защита от повторов не затрагиваются.</string>
@@ -271,9 +272,9 @@
     <string name="network_manual">Вручную</string>
     <string name="network_manual_hint">Приостанавливает ниже вашей скорости за ваши секунды и сам продолжает, когда скорость вернулась (около 1 с), учитывая все раунды, закончившиеся за это время.</string>
     <string name="network_manual_summary">Вручную: пауза ниже %1$d кбит/с за %2$d с</string>
-    <string name="network_not_used">Не используется — OCR работает на устройстве</string>
     <string name="network_off">Не отслеживать</string>
     <string name="network_speed">Интернет: %1$d кбит/с</string>
+    <string name="network_usage">Только для проверки скорости управления балансом; OCR работает на устройстве</string>
     <string name="new_algorithm">Новый алгоритм</string>
     <string name="next_algorithm">Следующий</string>
     <string name="no_algorithms_short">Нет алгоритмов</string>
@@ -367,8 +368,10 @@
     <string name="same_tile_similarity_hint">Помогает понять, изменилась ли соседняя плитка (сдвиг ряда при равных значениях).</string>
     <string name="save_preset_text">Сохраняет порог, настройки распознавания, интервал захвата и задержки.</string>
     <string name="screen_capture">Захват экрана</string>
+    <string name="screen_capture_allowed">Разрешён без вопроса</string>
+    <string name="screen_capture_asks">Android спрашивает при каждом старте</string>
     <string name="screen_capture_explainer">Android запрашивает согласие при каждом запуске и показывает индикатор захвата во время работы.</string>
-    <string name="screen_capture_value">Только во время мониторинга</string>
+    <string name="screen_capture_info">Android не позволяет приложению запомнить это разрешение: он спрашивает перед каждым сеансом мониторинга (Пауза сохраняет сеанс, Стоп завершает его). Спрашивать он перестаёт только после этой команды, выполненной один раз с компьютера по USB или беспроводной отладке: adb shell appops set %1$s PROJECT_MEDIA allow. Она сохраняется после перезагрузки; PROJECT_MEDIA default отменяет её. Google это не документирует, поэтому на некоторых телефонах вопрос может остаться.</string>
     <string name="screen_image_description">Экран, на котором найден ряд коэффициентов</string>
     <string name="search_hint">Поиск</string>
     <string name="selected_count">Выбрано: %1$d</string>
@@ -382,6 +385,7 @@
     <string name="stable_frames_hint">Значение должно быть прочитано одинаково на стольких неподвижных кадрах, прежде чем оно засчитается.</string>
     <string name="stake_button_only">Тот же алгоритм снова: только кнопка ставки</string>
     <string name="stake_button_only_hint">Если активен алгоритм, чьи клики в последний раз прошли до конца (например, алгоритм 1 после выигрыша на алгоритме 1), нажимается только его последний клик: сумма уже установлена. При переходе с другого алгоритма выполняются все его клики. Последний клик каждого алгоритма должен быть кнопкой ставки.</string>
+    <string name="start_then_game">мониторинг, затем %1$s</string>
     <string name="status_error">Ошибка</string>
     <string name="status_initializing">Инициализация</string>
     <string name="status_monitoring">Мониторинг</string>

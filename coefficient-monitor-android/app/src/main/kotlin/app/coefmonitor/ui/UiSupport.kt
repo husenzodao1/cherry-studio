@@ -1,16 +1,21 @@
 package app.coefmonitor.ui
 
+import android.Manifest
 import android.app.Activity
+import android.app.AppOpsManager
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
-import android.Manifest
-import android.content.pm.PackageManager
+import android.os.Process
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -70,13 +75,15 @@ fun hasNotificationPermission(context: Context): Boolean =
  * and then starts [MonitoringService]. Every capture session needs new consent.
  */
 @Composable
-fun rememberCaptureStarter(): () -> Unit {
+fun rememberCaptureStarter(onStarted: () -> Unit = {}): () -> Unit {
     val context = LocalContext.current
+    val started by rememberUpdatedState(onStarted)
 
     val consent = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val data = result.data
         if (result.resultCode == Activity.RESULT_OK && data != null) {
             MonitoringService.start(context, result.resultCode, data)
+            started()
         } else {
             context.appContainer.runtime.update { it.copy(status = MonitorStatus.ERROR, error = MonitorError.CAPTURE_DENIED) }
         }
@@ -98,6 +105,34 @@ fun rememberCaptureStarter(): () -> Unit {
             launchConsent()
         }
     }
+}
+
+/**
+ * Whether Android grants screen capture to this app without its dialog. Only a one-time command
+ * from a computer does that ([screenCaptureCommand]); Android itself asks before every session.
+ */
+fun screenCaptureAllowedWithoutAsking(context: Context): Boolean = runCatching {
+    val appOps = context.getSystemService(AppOpsManager::class.java)
+    val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        appOps.unsafeCheckOpNoThrow(OP_PROJECT_MEDIA, Process.myUid(), context.packageName)
+    } else {
+        @Suppress("DEPRECATION")
+        appOps.checkOpNoThrow(OP_PROJECT_MEDIA, Process.myUid(), context.packageName)
+    }
+    mode == AppOpsManager.MODE_ALLOWED
+}.getOrDefault(false)
+
+/** The command (USB or wireless debugging) after which Android no longer asks before screen capture. */
+fun screenCaptureCommand(context: Context): String = "adb shell appops set ${context.packageName} PROJECT_MEDIA allow"
+
+private const val OP_PROJECT_MEDIA = "android:project_media"
+
+/** Opens [url] in the app that handles it (the game's app, or the browser); false if none can. */
+fun openLink(context: Context, url: String): Boolean = try {
+    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    true
+} catch (e: ActivityNotFoundException) {
+    false
 }
 
 fun overlaySettingsIntent(context: Context): Intent =
