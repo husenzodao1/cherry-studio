@@ -96,6 +96,20 @@ class RoundProcessorTest {
     }
 
     @Test
+    fun `when a run made its wins the sequence goes back to Algorithm 1 without clicks`() {
+        val config = GuardedConfig(lowsInRow = 1, amount = 200 * Money.ONE, parts = 4, startStake = 2 * Money.ONE, winsPerRun = 1)
+        var state = SequenceState()
+        val results = listOf(140L, 130L, 250L, 120L).mapIndexed { i, value ->
+            (RoundProcessor.process(state, event(i + 1L, value), 25, threshold, startOfSession = i == 0, guarded = config) as ProcessResult.Applied)
+                .also { state = it.state }
+        }
+        // Start (low: run complete), lose at 1, win at 2: the run's one win is made, wait.
+        assertEquals(listOf(1, 2, 1, 1), results.map { it.record.newAlgorithm })
+        assertEquals(TransitionReason.GUARD_RUN_DONE, results[2].transition.reason)
+        assertEquals(listOf(true, true, false, true), results.map { it.runClicks })
+    }
+
+    @Test
     fun `guarded start is off without settings or at a 1_00x threshold`() {
         val config = GuardedConfig(lowsInRow = 3)
         val off = RoundProcessor.process(SequenceState(), event(1, 150), 25, threshold) as ProcessResult.Applied

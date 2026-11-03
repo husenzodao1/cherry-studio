@@ -140,12 +140,18 @@ Settings → **Guarded start** (*Оғози монеадор*). Turning it on as
 | Amount | 200 | Total profit to make. |
 | Parts | 4 | The amount is made in parts of amount / parts (here 50), each one started by its own run of lows. |
 | Start stake | 2 | Stake of Algorithm 1. |
+| Wins before waiting again (optional) | 5 | After this many wins the algorithms stop staking and wait for a new run of lows; the part goes on. Empty: they stake until the part is made. |
 
 While waiting, Algorithm 1 stays active and no clicks run. When the run of lows is complete,
 Algorithm 1's clicks run and the threshold rule moves the sequence as usual. When a part is made,
 the sequence goes back to Algorithm 1 and waits for a new run of lows; after the last part,
 monitoring and clicks stop and a notification says so. The first round after Start counts towards
-the run. Saving the settings, or turning the feature off, starts again from part 1; Stop/Start
+the run.
+
+With **wins before waiting again** (e.g. 5) a run of lows lets the algorithms stake only until
+they won that many times: at 2.00x and start 2, 2+, 2−, 4+, … until the fifth win, then the
+sequence goes back to Algorithm 1 and waits for the next run of lows, with the part's profit kept.
+A part made inside a run ends the run too. The dashboard and the panel show "wins 2/5". Saving the settings, or turning the feature off, starts again from part 1; Stop/Start
 keeps the part and its profit (a cycle that was broken off keeps its losses in it).
 
 **Stakes follow the threshold T** (the cash-out coefficient), so that a win brings back
@@ -205,8 +211,8 @@ After a manual pause monitoring goes on as if nothing had happened:
   read, the newest tile and its neighbour are counted and the gap is flagged.
 - With the guarded start a stake placed before the pause is settled by its round's result, the
   round after the pause goes unstaked and then the algorithm stakes again, so the martingale goes
-  on where it was. If rounds were missed beyond the row, the balance check (below) notices and
-  stops.
+  on where it was. If rounds were missed beyond the row, the balance check (below) takes the
+  balance on the screen as it is.
 
 ### Balance check
 
@@ -219,11 +225,15 @@ next to the wallet; amounts below the row, such as bets, are never taken):
   notification ask: *The balance does not match what was seen: screen balance {balance} (expected
   …). Continue with this balance?* **Continue** goes on and calculates from the balance on the
   screen; **Stop** stops.
-- **After every round, before any click,** the balance must be exactly the martingale's: the
+- **After every round, before any click,** the balance is compared with the martingale's: the
   start balance plus every win (stake × (T − 1)) and minus every lost stake. At 2.00x it only
-  moves by 2, 4, 8, 16, …; a stake of 20 or 30, a manual bet or a deposit is another amount, and
-  monitoring and clicks stop at once with a notification (expected and seen amounts) and an error
-  on the dashboard. A balance that cannot be read stops too.
+  moves by 2, 4, 8, 16, …. Another amount (a stake of 20 or 30, a bet that went wrong) does **not
+  stop** anything: the balance on the screen is taken as it is, the difference goes into the
+  part's profit, and the run goes on from the real balance until the target is reached. Example:
+  16 of 50 made from 10000 means 10016; the screen shows 10024, so the part stands at 24 of 50 and
+  the algorithms go on to 50. If the corrected balance already makes the part, the part is made
+  (back to Algorithm 1, waiting). A balance that cannot be read leaves the martingale's count as
+  it is. The diagnostics log records every check and correction.
 - The last cent digit is not compared: differences below 0.10 are ignored (10000.47 counts as
   10000.4x).
 - Reading is strict: an amount needs exactly two decimals and must be the only one in the text; a
@@ -283,6 +293,13 @@ click**:
    "Auto-click: step 2 of 3 · next in 250 ms", and its **Run clicks** button runs the active
    algorithm's clicks right away, over any app and also while monitoring is stopped. A new run,
    a new round, **Stop clicks**, **Pause** and **Stop** cancel a run in progress.
+5. **Same algorithm again: stake button only** (Settings → Auto-clicker, on by default): when the
+   active algorithm is the one whose clicks last ran to the end, unchanged (e.g. Algorithm 1 after
+   a win on Algorithm 1, or the last algorithm again), only its last click is tapped, since the
+   amount is still set in the game. Coming from another algorithm (e.g. back to Algorithm 1 after
+   a win on Algorithm 3) all its clicks run, to set the amount again and stake. A run that was cut
+   off or missed a tap does not count, so the next run is a full one. **The last click of every
+   algorithm must be the stake button.** Run clicks on the panel always runs all clicks.
 
 Points are normalised to the screen and scaled to the current screen. Taps on the row being read
 right now are skipped (the step still waits its time). Every run is logged there too ("Algorithm 2: 3 click(s) performed"), as are taps that

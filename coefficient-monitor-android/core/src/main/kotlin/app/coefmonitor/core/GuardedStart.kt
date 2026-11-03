@@ -44,6 +44,11 @@ data class GuardedConfig(
     val startStake: Long = 2 * Money.ONE,
     /** Balance expected on the screen at the start; null: the balance is not checked. */
     val balance: Long? = null,
+    /**
+     * After this many wins the algorithms stop staking and wait for a new run of lows (the part
+     * goes on). Null: they stake until the part is made.
+     */
+    val winsPerRun: Int? = null,
 ) {
     /** Returns a description of the first problem, or null if the configuration is valid. */
     fun problem(): String? = when {
@@ -52,10 +57,12 @@ data class GuardedConfig(
         parts !in 1..MAX_PARTS -> "parts outside 1..$MAX_PARTS"
         startStake <= 0 || startStake % 100 != 0L -> "start stake must be whole cents above zero"
         balance != null && balance <= 0 -> "balance must be above zero"
+        winsPerRun != null && winsPerRun !in 1..MAX_WINS_PER_RUN -> "wins per run outside 1..$MAX_WINS_PER_RUN"
         else -> null
     }
 
     companion object {
+        const val MAX_WINS_PER_RUN = 1_000
         const val MAX_LOWS_IN_ROW = 50
         const val MAX_PARTS = 100
     }
@@ -89,6 +96,8 @@ data class GuardedState(
     val cycleLoss: Long = 0,
     /** Stake on the round being played now; null when nothing was staked on it. */
     val stake: Long? = null,
+    /** Wins since the current run of lows started the algorithms (see [GuardedConfig.winsPerRun]). */
+    val runWins: Int = 0,
     /**
      * Balance the screen must show when a round has ended (before the next stake is placed): the
      * start balance plus every win and minus every lost stake. Null while the balance is not checked.
@@ -115,6 +124,15 @@ enum class GuardedEvent {
 
     /** The stake won: back to Algorithm 1. */
     WON,
+
+    /** The win was the last one of this run ([GuardedConfig.winsPerRun]): wait for a new run of lows. */
+    RUN_DONE,
+
+    /**
+     * The balance on the screen was not the martingale's: it is taken as it is and the part's
+     * profit follows it, so the run goes on from the real balance to the target.
+     */
+    BALANCE_CORRECTED,
 
     /** The win completed the current part: wait for a new run of lows. */
     PART_DONE,
@@ -232,6 +250,7 @@ object GuardedStart {
             lowStreak = streak,
             cycleLoss = 0,
             stake = stake(config, 0, threshold),
+            runWins = 0,
         )
         return GuardedStep(started, GuardedEvent.STARTED, 0)
     }
@@ -254,17 +273,45 @@ object GuardedStart {
             partProfit = state.partProfit + won,
             totalProfit = state.totalProfit + won,
             cycleLoss = 0,
+            runWins = state.runWins + 1,
         )
+        val runDone = config.winsPerRun?.let { after.runWins >= it } == true
         return when {
-            !isPartMade(after.partProfit, config) ->
-                GuardedStep(after.copy(stake = stake(config, 0, threshold)), GuardedEvent.WON, won)
-            after.part >= config.parts ->
-                GuardedStep(after.copy(phase = GuardedPhase.DONE, stake = null), GuardedEvent.FINISHED, won)
-            else -> GuardedStep(
-                after.copy(phase = GuardedPhase.WAITING, lowStreak = 0, part = after.part + 1, partProfit = 0, stake = null),
+            isPartMade(after.partProfit, config) -> partMade(config, after, won)
+            runDone -> GuardedStep(after.copy(phase = GuardedPhase.WAITING, lowStreak = 0, stake = null, runWins = 0), GuardedEvent.RUN_DONE, won)
+            else -> GuardedStep(after.copy(stake = stake(config, 0, threshold)), GuardedEvent.WON, won)
+        }
+    }
+
+    /** The current part is made: the next one waits for a run of lows, or, after the last part, everything is done. */
+    private fun partMade(config: GuardedConfig, state: GuardedState, change: Long): GuardedStep =
+        if (state.part >= config.parts) {
+            GuardedStep(state.copy(phase = GuardedPhase.DONE, stake = null, cycleLoss = 0), GuardedEvent.FINISHED, change)
+        } else {
+            GuardedStep(
+                state.copy(phase = GuardedPhase.WAITING, lowStreak = 0, part = state.part + 1, partProfit = 0, stake = null, cycleLoss = 0, runWins = 0),
                 GuardedEvent.PART_DONE,
-                won,
+                change,
             )
         }
+
+    /**
+     * The balance on the screen after a round is [screen], not the martingale's [GuardedState.balance]
+     * (another stake was placed, a bet went wrong). Nothing stops: the screen is taken as it is, the
+     * difference goes into the part's (and the total) profit, and the run goes on from there to the
+     * target; if that already makes the part, it is made. Null when the balance is not checked, the
+     * screen matches (differences below [BalanceCheck.TOLERANCE]) or everything is done already.
+     */
+    fun reconcile(config: GuardedConfig, state: GuardedState?, screen: Long): GuardedStep? {
+        val expected = state?.balance ?: return null
+        if (state.phase == GuardedPhase.DONE || BalanceCheck.matches(screen, expected)) return null
+        val difference = screen - expected
+        val corrected = state.copy(
+            balance = screen,
+            partProfit = state.partProfit + difference,
+            totalProfit = state.totalProfit + difference,
+        )
+        if (isPartMade(corrected.partProfit, config)) return partMade(config, corrected, difference)
+        return GuardedStep(corrected, GuardedEvent.BALANCE_CORRECTED, difference)
     }
 }

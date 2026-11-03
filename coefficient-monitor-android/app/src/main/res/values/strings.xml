@@ -59,8 +59,6 @@
     <string name="active_badge">Active</string>
     <string name="advanced_detection">Advanced detection</string>
     <string name="alert_balance_prompt_title">Balance does not match</string>
-    <string name="alert_balance_stop_text">The martingale expects %1$s, the screen shows %2$s. Monitoring and clicks stopped.</string>
-    <string name="alert_balance_stop_title">Stopped: balance</string>
     <string name="alert_capture_stopped_text">Monitoring ended because screen capture was stopped. Your active algorithm was kept.</string>
     <string name="alert_capture_stopped_title">Screen capture stopped</string>
     <string name="alert_end_text">Algorithm %1$d is the last configured one. The position was kept (no wrap to Algorithm 1). Add more algorithms to continue the sequence.</string>
@@ -152,8 +150,6 @@
     <string name="diagnostics_empty_title">No diagnostics</string>
     <string name="disabled">Disabled</string>
     <string name="edit_algorithm">Edit algorithm</string>
-    <string name="error_balance_mismatch">The balance did not follow the martingale: stopped (see the notification and the diagnostics log).</string>
-    <string name="error_balance_unreadable">The balance could not be read: stopped. Keep it visible and not covered by the panel.</string>
     <string name="error_capture_denied">Screen capture permission was not granted.</string>
     <string name="error_capture_failed">Screen capture could not start. Try again.</string>
     <string name="error_capture_revoked">Screen capture stopped — start again to continue</string>
@@ -185,6 +181,7 @@
     <string name="guard_line_active">Part %1$d/%2$d · %3$s / %4$s · stake %5$s</string>
     <string name="guard_line_done">Done: %1$s</string>
     <string name="guard_line_waiting">Waiting for lows %1$d/%2$d · part %3$d/%4$d</string>
+    <string name="guard_run_wins">wins %1$d/%2$d</string>
     <string name="guarded_amount">Amount / parts</string>
     <string name="guarded_balance">Balance check</string>
     <string name="guarded_balance_line">Balance: screen %1$s · must be %2$s</string>
@@ -194,6 +191,7 @@
     <string name="guarded_field_lows">Lows in a row to wait for (≤ threshold)</string>
     <string name="guarded_field_parts">Split into parts</string>
     <string name="guarded_field_stake">Start stake (Algorithm 1)</string>
+    <string name="guarded_field_wins">Wins before waiting again (empty: until the part is made)</string>
     <string name="guarded_lows">Lows in a row</string>
     <string name="guarded_preview">One part: %1$s. At %2$s a win makes +%3$s, so a part takes %4$d wins.</string>
     <string name="guarded_stakes">Stakes of Algorithms 1, 2, 3…: %1$s</string>
@@ -203,6 +201,8 @@
     <string name="guarded_threshold_too_low">The threshold must be above 1.00x.</string>
     <string name="guarded_title">Guarded start</string>
     <string name="guarded_total">Total: %1$s / %2$s</string>
+    <string name="guarded_wins">Wins per run</string>
+    <string name="guarded_wins_off">until the part is made</string>
     <string name="import_text">Found %1$d valid algorithms. Append them to the end, or replace the whole list?</string>
     <string name="import_title">Import algorithms</string>
     <string name="include_algorithms">Include algorithm definitions</string>
@@ -331,6 +331,7 @@
     <string name="reason_guard_finished">Whole amount made: stopped</string>
     <string name="reason_guard_no_stake">Nothing was staked on this round</string>
     <string name="reason_guard_part_done">Part made: waiting for lows again</string>
+    <string name="reason_guard_run_done">Wins of this run made: waiting for lows again</string>
     <string name="reason_guard_started">Lows in a row reached: algorithms start</string>
     <string name="reason_guard_waiting">Guarded start: waiting for lows</string>
     <string name="reason_high">Coefficient above the threshold</string>
@@ -366,6 +367,8 @@
     <string name="settings_recovery">Reset &amp; recovery</string>
     <string name="stable_frames">Stable frames required</string>
     <string name="stable_frames_hint">A value must be read identically on this many still frames before it counts.</string>
+    <string name="stake_button_only">Same algorithm again: stake button only</string>
+    <string name="stake_button_only_hint">When the active algorithm is the one whose clicks last ran to the end (e.g. Algorithm 1 after a win on Algorithm 1), only its last click is tapped: its amount is still set. Coming from another algorithm, all its clicks run. The last click of every algorithm must be the stake button.</string>
     <string name="status_error">Error</string>
     <string name="status_initializing">Initializing</string>
     <string name="status_monitoring">Monitoring</string>

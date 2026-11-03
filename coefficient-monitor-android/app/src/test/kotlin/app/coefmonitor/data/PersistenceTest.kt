@@ -14,6 +14,7 @@ import app.coefmonitor.core.Continuity
 import app.coefmonitor.core.DetectionReason
 import app.coefmonitor.core.DetectorConfig
 import app.coefmonitor.core.GuardedConfig
+import app.coefmonitor.core.GuardedEvent
 import app.coefmonitor.core.GuardedPhase
 import app.coefmonitor.core.Money
 import app.coefmonitor.core.NetworkMode
@@ -265,6 +266,31 @@ class PersistenceTest {
     }
 
     @Test
+    fun `a balance that is not the martingale's is taken as it is and stored`() = runBlocking {
+        val monitor = MonitorRepository(db, EventRepository(db))
+        AlgorithmRepository(db).addNumbered(10, "Algorithm")
+        val config = GuardedConfig(lowsInRow = 1, amount = Money.parse("200")!!, parts = 4, startStake = Money.parse("2")!!, balance = Money.parse("10000"))
+        // Start round (low: algorithms start), lose 2 at Algorithm 1: Algorithm 2, balance 9998.
+        monitor.applyRound(event(1, 150), threshold, startOfSession = true, guarded = config, startBalance = Money.parse("10000"))
+        monitor.applyRound(event(2, 130), threshold, guarded = config)
+        assertEquals("9998.00", Money.format(monitor.sequenceState().guarded!!.balance!!))
+        // The screen shows 10006: taken as it is, the part's profit follows, the position stays.
+        val corrected = monitor.reconcileBalance(Money.parse("10006")!!, config)!!
+        assertEquals(GuardedEvent.BALANCE_CORRECTED, corrected.event)
+        val state = monitor.sequenceState()
+        assertEquals(1, state.activeIndex)
+        assertEquals("10006.00", Money.format(state.guarded!!.balance!!))
+        assertEquals("6.00", Money.format(state.guarded!!.partProfit))
+        // A balance that already makes the part (50) makes it: back to Algorithm 1, waiting.
+        val made = monitor.reconcileBalance(Money.parse("10051")!!, config)!!
+        assertEquals(GuardedEvent.PART_DONE, made.event)
+        assertEquals(0, monitor.sequenceState().activeIndex)
+        assertEquals(GuardedPhase.WAITING, monitor.sequenceState().guarded!!.phase)
+        // Nothing to correct.
+        assertEquals(null, monitor.reconcileBalance(Money.parse("10051.05")!!, config))
+    }
+
+    @Test
     fun `the baseline carries the last rounds counted for a catch-up`() = runBlocking {
         val monitor = MonitorRepository(db, EventRepository(db))
         AlgorithmRepository(db).addNumbered(10, "Algorithm")
@@ -331,7 +357,7 @@ class PersistenceTest {
         val scope1 = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val store1 = PreferenceDataStoreFactory.create(scope = scope1) { file }
         val repo1 = SettingsRepository(store1)
-        val guarded = GuardedConfig(lowsInRow = 4, amount = Money.parse("300")!!, parts = 3, startStake = Money.parse("1.50")!!)
+        val guarded = GuardedConfig(lowsInRow = 4, amount = Money.parse("300")!!, parts = 3, startStake = Money.parse("1.50")!!, winsPerRun = 5)
         repo1.update { it.copy(threshold = Coefficient(250), detector = DetectorConfig(requiredStableFrames = 5), guarded = guarded) }
         scope1.coroutineContext.job.cancelAndJoin()
 
@@ -342,6 +368,9 @@ class PersistenceTest {
         assertEquals(Coefficient(250), restored.threshold)
         assertEquals(5, restored.detector.requiredStableFrames)
         assertEquals(guarded, restored.guarded)
+        assertTrue(restored.stakeButtonOnly)
+        repo2.update { it.copy(stakeButtonOnly = false) }
+        assertEquals(false, repo2.current().stakeButtonOnly)
         repo2.update { it.copy(guarded = null) }
         assertEquals(null, repo2.current().guarded)
 

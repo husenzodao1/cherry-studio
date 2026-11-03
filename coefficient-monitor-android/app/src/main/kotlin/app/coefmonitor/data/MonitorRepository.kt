@@ -4,6 +4,9 @@ import androidx.room.withTransaction
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DetectorBaseline
 import app.coefmonitor.core.GuardedConfig
+import app.coefmonitor.core.GuardedEvent
+import app.coefmonitor.core.GuardedStart
+import app.coefmonitor.core.GuardedStep
 import app.coefmonitor.core.ProcessResult
 import app.coefmonitor.core.RoundEvent
 import app.coefmonitor.core.RoundProcessor
@@ -92,6 +95,25 @@ class MonitorRepository(private val db: AppDatabase, private val events: EventRe
         if (stored.lastObservedHundredths != value.hundredths) {
             stateDao.upsert(stored.copy(lastObservedHundredths = value.hundredths, updatedAtMs = System.currentTimeMillis()))
         }
+    }
+
+    /**
+     * The balance on the screen is not the guarded start's: takes it as it is (see
+     * [GuardedStart.reconcile]). When that makes the part, the sequence goes back to Algorithm 1.
+     * Null when there was nothing to correct.
+     */
+    suspend fun reconcileBalance(screen: Long, config: GuardedConfig): GuardedStep? = db.withTransaction {
+        val stored = stateDao.get() ?: MonitorStateEntity()
+        val step = GuardedStart.reconcile(config, stored.toSequenceState().guarded, screen) ?: return@withTransaction null
+        val partMade = step.event == GuardedEvent.PART_DONE || step.event == GuardedEvent.FINISHED
+        stateDao.upsert(
+            stored.copy(
+                activeIndex = if (partMade) 0 else stored.activeIndex,
+                guardedJson = step.state.toJson(),
+                updatedAtMs = System.currentTimeMillis(),
+            ),
+        )
+        step
     }
 
     /** Forgets the guarded start's progress: the next round begins a new run from part 1. */

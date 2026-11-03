@@ -37,6 +37,9 @@ enum class TransitionReason {
     /** Guarded start: the win completed a part; back to Algorithm 1 and waiting again. */
     GUARD_PART_DONE,
 
+    /** Guarded start: the run made its wins; back to Algorithm 1 and waiting for a new run of lows. */
+    GUARD_RUN_DONE,
+
     /** Guarded start: the win completed the whole amount; everything stops. */
     GUARD_FINISHED,
 }

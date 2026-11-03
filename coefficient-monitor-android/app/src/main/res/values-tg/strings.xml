@@ -59,8 +59,6 @@
     <string name="active_badge">Фаъол</string>
     <string name="advanced_detection">Танзимоти иловагӣ</string>
     <string name="alert_balance_prompt_title">Баланс мувофиқ нест</string>
-    <string name="alert_balance_stop_text">Аз рӯи мартингейл %1$s интизор буд, дар экран %2$s. Мониторинг ва кликҳо қатъ шуданд.</string>
-    <string name="alert_balance_stop_title">Қатъ шуд: баланс</string>
     <string name="alert_capture_stopped_text">Назорат анҷом ёфт, зеро сабти экран қатъ шуд. Алгоритми фаъоли шумо нигоҳ дошта шуд.</string>
     <string name="alert_capture_stopped_title">Сабти экран қатъ шуд</string>
     <string name="alert_end_text">Алгоритми %1$d охирини танзимшуда аст. Мавқеъ нигоҳ дошта шуд (бе бозгашт ба Алгоритми 1). Барои идомаи пайдарпайӣ алгоритмҳо илова кунед.</string>
@@ -152,8 +150,6 @@
     <string name="diagnostics_empty_title">Ташхис нест</string>
     <string name="disabled">Хомӯш</string>
     <string name="edit_algorithm">Таҳрири алгоритм</string>
-    <string name="error_balance_mismatch">Баланс бо мартингейл мувофиқ наомад: қатъ шуд (огоҳинома ва журнали ташхисро бинед).</string>
-    <string name="error_balance_unreadable">Балансро хондан нашуд: қатъ шуд. Онро намоён нигоҳ доред ва бо панел напӯшонед.</string>
     <string name="error_capture_denied">Иҷозати сабти экран дода нашуд.</string>
     <string name="error_capture_failed">Сабти экран оғоз нашуд. Боз кӯшиш кунед.</string>
     <string name="error_capture_revoked">Сабти экран қатъ шуд — аз нав оғоз кунед</string>
@@ -185,6 +181,7 @@
     <string name="guard_line_active">Қисм %1$d/%2$d · %3$s / %4$s · ставка %5$s</string>
     <string name="guard_line_done">Тамом: %1$s</string>
     <string name="guard_line_waiting">Интизори пастҳо %1$d/%2$d · қисм %3$d/%4$d</string>
+    <string name="guard_run_wins">бурд %1$d/%2$d</string>
     <string name="guarded_amount">Рақам / қисмҳо</string>
     <string name="guarded_balance">Санҷиши баланс</string>
     <string name="guarded_balance_line">Баланс: экран %1$s · бояд %2$s бошад</string>
@@ -194,6 +191,7 @@
     <string name="guarded_field_lows">Чанд пасти пайдарпай интизор шавад (≤ ҳад)</string>
     <string name="guarded_field_parts">Ба чанд қисм ҷудо шавад</string>
     <string name="guarded_field_stake">Рақами аввали оғоз (алгоритми 1)</string>
+    <string name="guarded_field_wins">Бурдҳо то интизории нав (холӣ: то пур шудани қисм)</string>
     <string name="guarded_lows">Пастҳои пайдарпай</string>
     <string name="guarded_preview">Як қисм: %1$s. Дар %2$s ҳар бурд +%3$s медиҳад, қисм бо %4$d бурд пур мешавад.</string>
     <string name="guarded_stakes">Ставкаҳои алгоритмҳои 1, 2, 3…: %1$s</string>
@@ -203,6 +201,8 @@
     <string name="guarded_threshold_too_low">Ҳад бояд аз 1.00x боло бошад.</string>
     <string name="guarded_title">Оғози монеадор</string>
     <string name="guarded_total">Ҳамагӣ: %1$s / %2$s</string>
+    <string name="guarded_wins">Бурд дар як давра</string>
+    <string name="guarded_wins_off">то пур шудани қисм</string>
     <string name="import_text">Алгоритмҳои дуруст ёфт шуд: %1$d. Онҳоро ба охир илова кунем ё тамоми рӯйхатро иваз кунем?</string>
     <string name="import_title">Импорти алгоритмҳо</string>
     <string name="include_algorithms">Алгоритмҳоро дохил кардан</string>
@@ -328,6 +328,7 @@
     <string name="reason_guard_finished">Тамоми рақам пур шуд: қатъ шуд</string>
     <string name="reason_guard_no_stake">Ба ин давр ставка гузошта нашуд</string>
     <string name="reason_guard_part_done">Қисм пур шуд: боз интизори пастҳо</string>
+    <string name="reason_guard_run_done">Бурдҳои ин давра пур шуд: боз интизори пастҳо</string>
     <string name="reason_guard_started">Пастҳои пайдарпай пур шуд: алгоритмҳо сар мешаванд</string>
     <string name="reason_guard_waiting">Оғози монеадор: интизори пастҳо</string>
     <string name="reason_high">Коэффитсиент аз ҳад баланд аст</string>
@@ -363,6 +364,8 @@
     <string name="settings_recovery">Бозгашт ва барқарорсозӣ</string>
     <string name="stable_frames">Кадрҳои устувори зарурӣ</string>
     <string name="stable_frames_hint">Қимат бояд дар ҳамин қадар кадрҳои беҳаракат якхела хонда шавад, то ҳисоб шавад.</string>
+    <string name="stake_button_only">Ҳамон алгоритм боз: танҳо тугмаи ставка</string>
+    <string name="stake_button_only_hint">Агар алгоритми фаъол ҳамон бошад, ки кликҳояш бори охир то охир иҷро шуданд (масалан, алгоритми 1 баъди бурд дар алгоритми 1), танҳо клики охирини он пахш мешавад: маблағ аллакай гузошта шудааст. Ҳангоми омадан аз алгоритми дигар ҳамаи кликҳо иҷро мешаванд. Клики охирини ҳар алгоритм бояд тугмаи ставка бошад.</string>
     <string name="status_error">Хато</string>
     <string name="status_initializing">Омодасозӣ</string>
     <string name="status_monitoring">Назорат меравад</string>

@@ -13,7 +13,7 @@ enum class MonitorStatus { STOPPED, INITIALIZING, MONITORING, PAUSED, ERROR }
 
 enum class OcrStatus { IDLE, WAITING_FOR_SCREEN, TRANSITIONING, READING, OK, REJECTED, PLACEHOLDER, FAILED, SEARCHING }
 
-enum class MonitorError { CAPTURE_DENIED, CAPTURE_REVOKED, CAPTURE_FAILED, NO_ALGORITHMS, OCR_FAILED, BALANCE_MISMATCH, BALANCE_UNREADABLE, NETWORK_SLOW }
+enum class MonitorError { CAPTURE_DENIED, CAPTURE_REVOKED, CAPTURE_FAILED, NO_ALGORITHMS, OCR_FAILED, NETWORK_SLOW }
 
 /** At the start the balance on the screen was not the expected one; the user decides whether to go on with it. */
 data class BalancePrompt(val screen: Long, val expected: Long)

@@ -62,8 +62,6 @@ object Labels {
         MonitorError.CAPTURE_FAILED -> R.string.error_capture_failed
         MonitorError.NO_ALGORITHMS -> R.string.error_no_algorithms
         MonitorError.OCR_FAILED -> R.string.error_ocr
-        MonitorError.BALANCE_MISMATCH -> R.string.error_balance_mismatch
-        MonitorError.BALANCE_UNREADABLE -> R.string.error_balance_unreadable
         MonitorError.NETWORK_SLOW -> R.string.error_network_slow
     }
 
@@ -86,6 +84,7 @@ object Labels {
         TransitionReason.GUARD_STARTED -> R.string.reason_guard_started
         TransitionReason.GUARD_NO_STAKE -> R.string.reason_guard_no_stake
         TransitionReason.GUARD_PART_DONE -> R.string.reason_guard_part_done
+        TransitionReason.GUARD_RUN_DONE -> R.string.reason_guard_run_done
         TransitionReason.GUARD_FINISHED -> R.string.reason_guard_finished
     }
 
@@ -130,7 +129,7 @@ object Labels {
                 Money.format(s.partProfit),
                 Money.format(GuardedStart.partTarget(config)),
                 s.stake?.let(Money::format) ?: "—",
-            )
+            ) + config.winsPerRun?.let { wins -> " · " + context.getString(R.string.guard_run_wins, s.runWins, wins) }.orEmpty()
             GuardedPhase.DONE -> context.getString(R.string.guard_line_done, Money.format(s.totalProfit))
         }
     }

@@ -30,6 +30,13 @@ object ClickPlan {
         return if (planned.any { it.point != null }) planned else emptyList()
     }
 
+    /**
+     * Only the stake button: the algorithm's last click, when the same algorithm runs again and its
+     * amount is still set from the previous run. Empty when it has no allowed click.
+     */
+    fun stakeButtonOnly(steps: List<AlgorithmStep>, globalDelayMs: Long, readingBand: NormalizedRect?): List<PlannedClick> =
+        plan(steps, globalDelayMs, readingBand).lastOrNull { it.point != null }?.let { listOf(it.copy(delayMs = 0)) }.orEmpty()
+
     /** Taps on the row being read are not allowed: a popup opened there would hide the coefficient. */
     fun isAllowed(point: NormalizedPoint, readingBand: NormalizedRect?): Boolean =
         readingBand == null ||

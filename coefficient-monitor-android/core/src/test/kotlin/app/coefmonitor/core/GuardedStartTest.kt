@@ -192,5 +192,85 @@ class GuardedStartTest {
         assertTrue(example.copy(lowsInRow = 0).problem() != null)
         assertTrue(example.copy(parts = 0).problem() != null)
         assertTrue(example.copy(startStake = 0).problem() != null)
+        assertTrue(example.copy(winsPerRun = 0).problem() != null)
+        assertNull(example.copy(winsPerRun = 5).problem())
+    }
+
+    @Test
+    fun `after 5 wins of a run the algorithms wait for a new run of lows, the part goes on`() {
+        // Coefficient 2, start 2, five wins a run: 2+, 2-, 4+, ... until five wins, then wait.
+        val config = example.copy(winsPerRun = 5)
+        val steps = play(
+            config, t2,
+            listOf("1.5", "1.5", "1.5") + // run of lows: start
+                listOf("2.5", "1.3", "3.0", "2.2", "1.1", "1.4", "5.0", "2.1") + // wins 1..5
+                listOf("1.2", "2.5", "1.2", "1.3", "1.1"), // waiting: no stakes, run broken, new run
+        )
+        assertEquals(
+            listOf(
+                GuardedEvent.LOW_COUNTED, GuardedEvent.LOW_COUNTED, GuardedEvent.STARTED,
+                GuardedEvent.WON, GuardedEvent.LOST, GuardedEvent.WON, GuardedEvent.WON,
+                GuardedEvent.LOST, GuardedEvent.LOST, GuardedEvent.WON, GuardedEvent.RUN_DONE,
+                GuardedEvent.LOW_COUNTED, GuardedEvent.RUN_BROKEN, GuardedEvent.LOW_COUNTED, GuardedEvent.LOW_COUNTED,
+                GuardedEvent.STARTED,
+            ),
+            steps.map { it.event },
+        )
+        // 2+, 2-, 4+, 2+, 2-, 4-, 8+, 2+: five wins make 10; the part (50) goes on.
+        val done = steps[10]
+        assertEquals("10.00", done.state.partProfit.text())
+        assertEquals(GuardedPhase.WAITING, done.state.phase)
+        assertEquals(1, done.state.part)
+        assertFalse(done.stakesNext)
+        // Nothing is staked while waiting again; the new run starts counting wins from zero.
+        assertEquals(listOf(0L, 0L, 0L, 0L, 0L), steps.subList(11, 16).map { it.change })
+        assertEquals(0, steps.last().state.runWins)
+        assertEquals("2.00", steps.last().state.stake!!.text())
+    }
+
+    @Test
+    fun `a part made inside a run ends it, whatever the wins`() {
+        val config = example.copy(amount = money("8"), parts = 2, winsPerRun = 5, lowsInRow = 1)
+        // Parts of 4: two wins make one; the second part needs its own low first.
+        val steps = play(config, t2, listOf("1.5", "2.5", "2.5", "1.5", "2.5", "2.5"))
+        assertEquals(GuardedEvent.PART_DONE, steps[2].event)
+        assertEquals(0, steps[2].state.runWins)
+        assertEquals(GuardedEvent.FINISHED, steps.last().event)
+    }
+
+    @Test
+    fun `a balance that is not the martingale's is taken as it is and the run goes on to the target`() {
+        // The martingale says 16 of 50 made from 10000, so 10016; the screen shows 10024 after a stake went wrong.
+        val config = example.copy(balance = money("10000"))
+        val state = GuardedState(phase = GuardedPhase.ACTIVE, part = 1, partProfit = money("16"), totalProfit = money("16"), stake = money("2"), balance = money("10016"))
+        val corrected = GuardedStart.reconcile(config, state, money("10024"))!!
+        assertEquals(GuardedEvent.BALANCE_CORRECTED, corrected.event)
+        assertEquals("8.00", corrected.change.text())
+        assertEquals("24.00", corrected.state.partProfit.text())
+        assertEquals("10024.00", corrected.state.balance!!.text())
+        // It keeps staking: 13 more wins of +2 make the part (24 + 26 = 50).
+        var running = corrected.state
+        repeat(12) { running = GuardedStart.onRound(config, running, x("2.5"), t2).state }
+        assertEquals(GuardedPhase.ACTIVE, running.phase)
+        val last = GuardedStart.onRound(config, running, x("2.5"), t2)
+        assertEquals(GuardedEvent.PART_DONE, last.event)
+        assertEquals("10050.00", last.state.balance!!.text())
+    }
+
+    @Test
+    fun `a lower balance means more wins, and a balance that already makes the part makes it`() {
+        val config = example.copy(balance = money("10000"))
+        val state = GuardedState(phase = GuardedPhase.ACTIVE, part = 2, partProfit = money("16"), totalProfit = money("66"), stake = money("2"), balance = money("10066"))
+        val lower = GuardedStart.reconcile(config, state, money("10046"))!!
+        assertEquals("-4.00", lower.state.partProfit.text())
+        assertEquals(GuardedPhase.ACTIVE, lower.state.phase)
+        val higher = GuardedStart.reconcile(config, state, money("10101"))!!
+        assertEquals(GuardedEvent.PART_DONE, higher.event)
+        assertEquals(3, higher.state.part)
+        assertNull(higher.state.stake)
+        // Matching (the last cent digit is not compared), not checked, or done: nothing to correct.
+        assertNull(GuardedStart.reconcile(config, state, money("10066.07")))
+        assertNull(GuardedStart.reconcile(config, state.copy(balance = null), money("10101")))
+        assertNull(GuardedStart.reconcile(config, state.copy(phase = GuardedPhase.DONE), money("10101")))
     }
 }

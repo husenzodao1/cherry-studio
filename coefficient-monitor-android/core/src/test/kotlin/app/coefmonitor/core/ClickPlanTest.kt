@@ -9,6 +9,22 @@ import org.junit.Test
 class ClickPlanTest {
 
     @Test
+    fun `the same algorithm again taps only its last click, the stake button`() {
+        val steps = listOf(
+            AlgorithmStep("Amount", delayMs = 300, point = NormalizedPoint(0.5f, 0.7f)),
+            AlgorithmStep("2", delayMs = 300, point = NormalizedPoint(0.6f, 0.75f)),
+            AlgorithmStep("Bet", delayMs = 400, point = NormalizedPoint(0.5f, 0.9f)),
+            AlgorithmStep("wait"),
+        )
+        val only = ClickPlan.stakeButtonOnly(steps, globalDelayMs = 250, readingBand = null)
+        assertEquals(listOf(3), only.map { it.stepNumber })
+        assertEquals(NormalizedPoint(0.5f, 0.9f), only.single().point)
+        assertEquals(0L, only.single().delayMs)
+        // Pauses only: nothing to tap.
+        assertTrue(ClickPlan.stakeButtonOnly(listOf(AlgorithmStep("wait")), 250, null).isEmpty())
+    }
+
+    @Test
     fun `steps run in order with their delays and steps without a point are pauses`() {
         val steps = listOf(
             AlgorithmStep("Bet", delayMs = 250, point = NormalizedPoint(0.5f, 0.8f)),

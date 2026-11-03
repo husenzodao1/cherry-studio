@@ -149,6 +149,9 @@ object RoundProcessor {
                 toFirst(if (startOfSession) TransitionReason.SESSION_START else TransitionReason.GUARD_WAITING)
             GuardedEvent.STARTED -> toFirst(TransitionReason.GUARD_STARTED)
             GuardedEvent.PART_DONE -> toFirst(TransitionReason.GUARD_PART_DONE)
+            GuardedEvent.RUN_DONE -> toFirst(TransitionReason.GUARD_RUN_DONE)
+            // A round never corrects the balance; only the check after it does.
+            GuardedEvent.BALANCE_CORRECTED -> Transition(current, current, TransitionType.NO_POSITION_CHANGE, TransitionReason.GUARD_WAITING)
             GuardedEvent.FINISHED -> toFirst(TransitionReason.GUARD_FINISHED)
         }
     }

@@ -321,6 +321,7 @@ private fun GuardedSection(settings: AppSettings, viewModel: SettingsViewModel) 
                 "${Money.format(config.amount)} / ${config.parts} = ${Money.format(GuardedStart.partTarget(config))}",
             )
             InfoRow(stringResource(R.string.guarded_start_stake), Money.format(config.startStake))
+            InfoRow(stringResource(R.string.guarded_wins), config.winsPerRun?.toString() ?: stringResource(R.string.guarded_wins_off))
             TextButton(onClick = { editing = true }) { Text(stringResource(R.string.action_edit)) }
         }
     }
@@ -344,13 +345,17 @@ private fun GuardedDialog(initial: GuardedConfig, threshold: Coefficient, onSave
     var amount by remember { mutableStateOf(Money.format(initial.amount)) }
     var parts by remember { mutableStateOf(initial.parts.toString()) }
     var stake by remember { mutableStateOf(Money.format(initial.startStake)) }
+    var wins by remember { mutableStateOf(initial.winsPerRun?.toString().orEmpty()) }
     val lowsValue = lows.toIntOrNull()?.takeIf { it in 1..GuardedConfig.MAX_LOWS_IN_ROW }
     val amountValue = Money.parse(amount)
     val partsValue = parts.toIntOrNull()?.takeIf { it in 1..GuardedConfig.MAX_PARTS }
     val stakeValue = Money.parse(stake)
+    // Empty: the algorithms stake until the part is made.
+    val winsValue = wins.toIntOrNull()?.takeIf { it in 1..GuardedConfig.MAX_WINS_PER_RUN }
+    val winsValid = wins.isBlank() || winsValue != null
     val usableThreshold = threshold > Coefficient.MIN_THRESHOLD
-    val config = if (lowsValue != null && amountValue != null && partsValue != null && stakeValue != null) {
-        GuardedConfig(lowsValue, amountValue, partsValue, stakeValue).takeIf { it.problem() == null }
+    val config = if (lowsValue != null && amountValue != null && partsValue != null && stakeValue != null && winsValid) {
+        GuardedConfig(lowsValue, amountValue, partsValue, stakeValue, winsPerRun = winsValue).takeIf { it.problem() == null }
     } else {
         null
     }
@@ -363,6 +368,7 @@ private fun GuardedDialog(initial: GuardedConfig, threshold: Coefficient, onSave
                 NumberField(stringResource(R.string.guarded_field_amount), amount, amountValue != null, decimal = true) { amount = it }
                 NumberField(stringResource(R.string.guarded_field_parts), parts, partsValue != null, decimal = false) { parts = it }
                 NumberField(stringResource(R.string.guarded_field_stake), stake, stakeValue != null, decimal = true) { stake = it }
+                NumberField(stringResource(R.string.guarded_field_wins), wins, winsValid, decimal = false) { wins = it }
                 if (!usableThreshold) {
                     Text(stringResource(R.string.guarded_threshold_too_low), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 } else if (config != null) {
@@ -616,6 +622,12 @@ private fun PermissionsSection(settings: AppSettings, viewModel: SettingsViewMod
             onChange = { enabled -> viewModel.update { it.copy(autoClickEnabled = enabled) } },
         )
         if (settings.autoClickEnabled) {
+            SwitchRow(
+                title = stringResource(R.string.stake_button_only),
+                hint = stringResource(R.string.stake_button_only_hint),
+                checked = settings.stakeButtonOnly,
+                onChange = { enabled -> viewModel.update { it.copy(stakeButtonOnly = enabled) } },
+            )
             val clickerConnected by AutoClickService.connected.collectAsStateWithLifecycle()
             InfoRow(
                 stringResource(R.string.auto_click_service),

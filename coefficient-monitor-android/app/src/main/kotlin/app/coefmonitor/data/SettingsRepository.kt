@@ -35,6 +35,8 @@ data class AppSettings(
     val roundNotifications: Boolean = false,
     /** Tap the active algorithm's step points one by one after each round (needs the accessibility service). */
     val autoClickEnabled: Boolean = true,
+    /** The same algorithm again (its amount still set): tap only its last click, the stake button. */
+    val stakeButtonOnly: Boolean = true,
     val activePresetId: Long? = null,
     /** Guarded start ("Оғози монеадор"); null while it is off. */
     val guarded: GuardedConfig? = null,
@@ -66,6 +68,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val OVERLAY = booleanPreferencesKey("overlay_enabled")
         val ROUND_NOTIFICATIONS = booleanPreferencesKey("round_notifications")
         val AUTO_CLICK = booleanPreferencesKey("auto_click")
+        val STAKE_BUTTON_ONLY = booleanPreferencesKey("stake_button_only")
         val ACTIVE_PRESET = longPreferencesKey("active_preset_id")
         val GUARDED = stringPreferencesKey("guarded_json")
         val BALANCE_CONTROL = stringPreferencesKey("balance_control_json")
@@ -97,6 +100,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
             overlayEnabled = this[Keys.OVERLAY] ?: defaults.overlayEnabled,
             roundNotifications = this[Keys.ROUND_NOTIFICATIONS] ?: defaults.roundNotifications,
             autoClickEnabled = this[Keys.AUTO_CLICK] ?: defaults.autoClickEnabled,
+            stakeButtonOnly = this[Keys.STAKE_BUTTON_ONLY] ?: defaults.stakeButtonOnly,
             activePresetId = this[Keys.ACTIVE_PRESET],
             guarded = this[Keys.GUARDED]?.let { json ->
                 runCatching { StorageJson.decodeFromString(GuardedConfig.serializer(), json) }.getOrNull()?.takeIf { it.problem() == null }
@@ -119,6 +123,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         this[Keys.OVERLAY] = settings.overlayEnabled
         this[Keys.ROUND_NOTIFICATIONS] = settings.roundNotifications
         this[Keys.AUTO_CLICK] = settings.autoClickEnabled
+        this[Keys.STAKE_BUTTON_ONLY] = settings.stakeButtonOnly
         val presetId = settings.activePresetId
         if (presetId == null) remove(Keys.ACTIVE_PRESET) else this[Keys.ACTIVE_PRESET] = presetId
         val guarded = settings.guarded

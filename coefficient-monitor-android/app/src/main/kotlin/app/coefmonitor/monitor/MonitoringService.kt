@@ -488,33 +488,35 @@ class MonitoringService : LifecycleService() {
     }
 
     /**
-     * After a round, before any click: the balance on the screen must be what the martingale says.
-     * Otherwise (another stake, a manual bet, a misread that does not go away) everything stops.
+     * After a round, before any click: the balance on the screen against the martingale's. A
+     * different balance is taken as it is and the run goes on from it to the target; it never stops
+     * for it. An unreadable balance leaves the martingale's count as it is. Returns whether the
+     * round's clicks may still run (not when the corrected balance already made the part).
      */
-    private suspend fun balanceFollows(expected: Long): Boolean {
-        val eye = balanceEye
-        val capture = capturer
+    private suspend fun reconcileBalance(expected: Long, s: AppSettings): Boolean {
+        val config = s.effectiveGuarded ?: return true
+        val eye = balanceEye ?: return true
+        val capture = capturer ?: return true
         val startedMs = SystemClock.elapsedRealtime()
-        val seen = if (eye != null && capture != null) {
-            eye.readSettled(capture, tracker?.cells, expected, BALANCE_SETTLE_MS, BALANCE_LOOK_MS)
-        } else {
-            null
-        }
-        runtime.update { it.copy(screenBalance = seen ?: it.screenBalance) }
-        if (seen != null && BalanceCheck.matches(seen, expected)) {
-            log(DiagnosticLevel.INFO, "BALANCE", "Balance ${Money.format(seen)} as expected (checked in ${SystemClock.elapsedRealtime() - startedMs} ms)")
+        val seen = eye.readSettled(capture, tracker?.cells, expected, BALANCE_SETTLE_MS, BALANCE_LOOK_MS)
+        val tookMs = SystemClock.elapsedRealtime() - startedMs
+        if (seen == null) {
+            log(DiagnosticLevel.WARNING, "BALANCE", "Balance not readable ($tookMs ms): going on with the martingale's ${Money.format(expected)}")
             return true
         }
-        val shown = seen?.let(Money::format) ?: "—"
-        container.events.log(DiagnosticLevel.ERROR, "BALANCE", "Expected ${Money.format(expected)} by the martingale, the screen shows $shown: stopped")
-        val str = withAppLocale()
-        notifications.alert(
-            MonitorNotifications.ID_BALANCE,
-            str.getString(R.string.alert_balance_stop_title),
-            str.getString(R.string.alert_balance_stop_text, Money.format(expected), shown),
+        runtime.update { it.copy(screenBalance = seen) }
+        val step = container.monitor.reconcileBalance(seen, config)
+        if (step == null) {
+            log(DiagnosticLevel.INFO, "BALANCE", "Balance ${Money.format(seen)} as expected (checked in $tookMs ms)")
+            return true
+        }
+        log(
+            DiagnosticLevel.WARNING,
+            "BALANCE",
+            "Balance ${Money.format(seen)} instead of ${Money.format(expected)} (${signed(step.change)}): going on from the balance on the screen",
         )
-        shutdown(if (seen == null) MonitorError.BALANCE_UNREADABLE else MonitorError.BALANCE_MISMATCH)
-        return false
+        onGuardStep(step, s)
+        return step.event == GuardedEvent.BALANCE_CORRECTED
     }
 
     /** The eye found the row by reading the whole screen. The first screen of a session is kept for the in-app point picker. */
@@ -615,10 +617,12 @@ class MonitoringService : LifecycleService() {
                     )
                     else -> Unit
                 }
-                val expectedBalance = result.state.guarded?.balance
-                if (verifyBalance && expectedBalance != null && balanceChecked(s) && !balanceFollows(expectedBalance)) return
                 result.guard?.let { onGuardStep(it, s) }
-                if (s.autoClickEnabled && runClicks && result.runClicks) container.autoClicker.run(result.transition.newIndex)
+                if (result.guard?.event == GuardedEvent.FINISHED) return
+                val expectedBalance = result.state.guarded?.balance
+                val checked = verifyBalance && expectedBalance != null && balanceChecked(s)
+                val clicksAllowed = !checked || reconcileBalance(expectedBalance!!, s)
+                if (s.autoClickEnabled && runClicks && result.runClicks && clicksAllowed) container.autoClicker.run(result.transition.newIndex)
                 if (s.roundNotifications) {
                     notifications.round(
                         str.getString(R.string.notif_round_title, event.value.toString()),
@@ -641,9 +645,11 @@ class MonitoringService : LifecycleService() {
             GuardedEvent.RUN_BROKEN -> "high round: lows in a row start again (0/${config.lowsInRow})"
             GuardedEvent.STARTED -> "${config.lowsInRow} lows in a row: algorithms start; $progress$stake"
             GuardedEvent.NO_STAKE -> "nothing was staked on this round; $progress$stake"
-            GuardedEvent.LOST, GuardedEvent.WON -> "${Money.format(step.change)}; $progress$stake"
-            GuardedEvent.PART_DONE -> "+${Money.format(step.change)}: part ${state.part - 1}/${config.parts} made; waiting for lows again; total ${Money.format(state.totalProfit)}"
-            GuardedEvent.FINISHED -> "+${Money.format(step.change)}: all ${config.parts} parts made, total ${Money.format(state.totalProfit)}; stopped"
+            GuardedEvent.LOST, GuardedEvent.WON -> "${signed(step.change)}; $progress$stake"
+            GuardedEvent.RUN_DONE -> "${signed(step.change)}: ${config.winsPerRun} win(s) of this run made; waiting for lows again; $progress"
+            GuardedEvent.BALANCE_CORRECTED -> "balance taken from the screen (${signed(step.change)}); $progress$stake"
+            GuardedEvent.PART_DONE -> "${signed(step.change)}: part ${state.part - 1}/${config.parts} made; waiting for lows again; total ${Money.format(state.totalProfit)}"
+            GuardedEvent.FINISHED -> "${signed(step.change)}: all ${config.parts} parts made, total ${Money.format(state.totalProfit)}; stopped"
         }
         container.events.log(DiagnosticLevel.INFO, "GUARD", message)
         if (step.event == GuardedEvent.FINISHED) {
@@ -656,6 +662,8 @@ class MonitoringService : LifecycleService() {
             shutdown(error = null)
         }
     }
+
+    private fun signed(amount: Long): String = (if (amount >= 0) "+" else "") + Money.format(amount)
 
     // ---- Balance management: internet speed ---------------------------------------------
 
