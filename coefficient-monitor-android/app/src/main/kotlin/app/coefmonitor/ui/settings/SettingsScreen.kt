@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.platform.LocalClipboardManager
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Arrangement
@@ -85,6 +86,7 @@ import app.coefmonitor.core.NetworkMode
 import app.coefmonitor.data.AppSettings
 import app.coefmonitor.data.ThemeMode
 import app.coefmonitor.monitor.AutoClickService
+import app.coefmonitor.monitor.MonitorTileService
 import app.coefmonitor.ui.accessibilitySettingsIntent
 import app.coefmonitor.ui.appNotificationSettingsIntent
 import app.coefmonitor.ui.components.ConfirmDialog
@@ -613,6 +615,8 @@ private fun PermissionsSection(settings: AppSettings, viewModel: SettingsViewMod
     SectionCard(title = stringResource(R.string.settings_permissions)) {
         ScreenCaptureRow(captureAllowed)
         HorizontalDivider()
+        QuickTileRow()
+        HorizontalDivider()
         SwitchRow(
             title = stringResource(R.string.floating_panel),
             hint = stringResource(R.string.floating_panel_hint),
@@ -757,6 +761,36 @@ private fun ScreenCaptureRow(allowed: Boolean) {
             clipboard.setText(AnnotatedString(command))
             copied = true
         }) { Text(stringResource(if (copied) R.string.command_copied else R.string.action_copy_command)) }
+    }
+}
+
+/**
+ * The tile in the phone's top panel. Android 13+ adds it after one system question; older
+ * versions only by editing the panel, which the row explains.
+ */
+@Composable
+private fun QuickTileRow() {
+    val context = LocalContext.current
+    var added by remember { mutableStateOf(false) }
+    SettingRow(stringResource(R.string.quick_tile), stringResource(R.string.quick_tile_info)) {
+        if (added) {
+            Text(
+                stringResource(R.string.quick_tile_added),
+                style = MaterialTheme.typography.bodySmall,
+                color = LocalSemanticColors.current.running,
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            TextButton(onClick = { MonitorTileService.requestAdd(context) { added = true } }) {
+                Text(stringResource(R.string.action_add))
+            }
+        }
+    }
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        Text(
+            stringResource(R.string.quick_tile_manual),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

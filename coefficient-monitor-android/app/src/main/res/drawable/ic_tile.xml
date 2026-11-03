@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick settings tile: the app icon's scan frame and pupil with "×", in one colour (the system tints it). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:fillColor="#00000000"
+        android:pathData="M3,8V3h5M16,3h5v5M21,16v5h-5M8,21H3v-5" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:fillColor="#00000000"
+        android:pathData="M6.5,12a5.5,5.5 0,1 0,11 0a5.5,5.5 0,1 0,-11 0z" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round"
+        android:pathData="M10.1,10.1l3.8,3.8M13.9,10.1l-3.8,3.8" />
+</vector>

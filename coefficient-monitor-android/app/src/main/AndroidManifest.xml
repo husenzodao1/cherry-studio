@@ -36,7 +36,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Floating panel's Start button: shows the screen-capture consent dialog, then closes. -->
+        <!-- Floating panel's Start button and the quick settings tile: shows the screen-capture consent dialog, then closes. -->
         <activity
             android:name=".ui.CaptureConsentActivity"
             android:excludeFromRecents="true"
@@ -56,6 +56,21 @@
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Floating control panel shown over other apps until the user closes it" />
+        </service>
+
+        <!-- Tile in the phone's quick settings: starts monitoring with the floating window, or stops it. -->
+        <service
+            android:name=".monitor.MonitorTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
         </service>
 
         <!-- Auto-clicker taps. Android only lets an app tap on other apps through an accessibility

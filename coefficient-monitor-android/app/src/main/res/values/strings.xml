@@ -471,4 +471,8 @@
     <string name="calc_footnote_bet_too_large">The initial bet is larger than the starting balance. No round is affordable.</string>
     <string name="calc_footnote_stop_round">Stop before round %1$d: the next bet would exceed the remaining bankroll. Losses are not recovered by any later round.</string>
     <string name="calc_footnote_scan_limit">The maximum affordable round is beyond the calculation limit.</string>
+    <string name="quick_tile">Top panel tile</string>
+    <string name="quick_tile_info">A tile in the phone\'s top panel (quick settings). Tap: monitoring starts with the floating window, without opening the game link. Tap again: monitoring stops. The tile is lit while monitoring runs.</string>
+    <string name="quick_tile_manual">Pull the top panel down, tap ✎ and drag this app\'s tile up.</string>
+    <string name="quick_tile_added">Added</string>
 </resources>

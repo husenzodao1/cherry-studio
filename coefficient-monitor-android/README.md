@@ -50,6 +50,12 @@ opening the game again. A long press asks for the
 link; without `https://` it is added, and an empty link removes it. The button shows the site it
 opens; without a link it only starts monitoring.
 
+**Top panel tile.** The app also has a tile in the phone's quick settings (`MonitorTileService`).
+Tap it: monitoring starts with the floating window, without opening the game link; tap it again:
+monitoring stops. It is lit while a session runs and shows the status under its name. Without
+"display over other apps" it opens the app instead. Settings → Permissions adds it to the panel
+(Android 13+; older versions: edit the panel and drag the tile in).
+
 **Screen capture consent.** Android does not let an app remember the screen-capture permission:
 it asks before every capture session (Pause keeps the session, Stop ends it). It stops asking only
 after a one-time command from a computer (USB or wireless debugging):
