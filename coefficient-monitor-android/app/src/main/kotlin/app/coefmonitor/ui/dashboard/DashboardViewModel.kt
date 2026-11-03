@@ -45,7 +45,12 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
         DashboardState(runtime, monitor, algorithms, settings, recent)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
 
-    /** The link "To the game" opens; null removes it. */
+    /** Start opens the floating window too: floating mode stays on until its ✕ closes it. */
+    fun turnOnFloatingMode() {
+        viewModelScope.launch { container.settings.update { it.copy(overlayEnabled = true) } }
+    }
+
+    /** The link Start opens after monitoring starts; null removes it. */
     fun saveGameUrl(url: String?) {
         viewModelScope.launch { container.settings.update { it.copy(gameUrl = url) } }
     }

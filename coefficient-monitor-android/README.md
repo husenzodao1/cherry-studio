@@ -42,8 +42,11 @@ test it with plain Maven Central access: `cd core && gradle test`.
 
 ## Start: monitoring, then the game
 
-The dashboard has one **Start** button: it starts monitoring and then opens the game link (the
-game's page in the browser, or the game's app if it handles that link). A long press asks for the
+The dashboard has one **Start** button: it starts monitoring, turns floating mode on (the floating
+window appears over everything; it needs "display over other apps", which the dashboard offers to
+allow) and then opens the game link (the game's page in the browser, or the game's app if it
+handles that link). The floating window's own Start starts monitoring the same way, without
+opening the game again. A long press asks for the
 link; without `https://` it is added, and an empty link removes it. The button shows the site it
 opens; without a link it only starts monitoring.
 

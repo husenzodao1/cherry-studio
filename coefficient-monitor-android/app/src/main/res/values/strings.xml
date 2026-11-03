@@ -388,7 +388,8 @@
     <string name="stable_frames_hint">A value must be read identically on this many still frames before it counts.</string>
     <string name="stake_button_only">Same algorithm again: stake button only</string>
     <string name="stake_button_only_hint">When the active algorithm is the one whose clicks last ran to the end (e.g. Algorithm 1 after a win on Algorithm 1), only its last click is tapped: its amount is still set. Coming from another algorithm, all its clicks run. The last click of every algorithm must be the stake button.</string>
-    <string name="start_then_game">monitoring, then %1$s</string>
+    <string name="start_needs_overlay">Start also opens the floating window, which needs this permission.</string>
+    <string name="start_then_game">monitoring + floating window, then %1$s</string>
     <string name="status_error">Error</string>
     <string name="status_initializing">Initializing</string>
     <string name="status_monitoring">Monitoring</string>

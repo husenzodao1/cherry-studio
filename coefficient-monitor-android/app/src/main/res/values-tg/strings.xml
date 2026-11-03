@@ -385,7 +385,8 @@
     <string name="stable_frames_hint">Қимат бояд дар ҳамин қадар кадрҳои беҳаракат якхела хонда шавад, то ҳисоб шавад.</string>
     <string name="stake_button_only">Ҳамон алгоритм боз: танҳо тугмаи ставка</string>
     <string name="stake_button_only_hint">Агар алгоритми фаъол ҳамон бошад, ки кликҳояш бори охир то охир иҷро шуданд (масалан, алгоритми 1 баъди бурд дар алгоритми 1), танҳо клики охирини он пахш мешавад: маблағ аллакай гузошта шудааст. Ҳангоми омадан аз алгоритми дигар ҳамаи кликҳо иҷро мешаванд. Клики охирини ҳар алгоритм бояд тугмаи ставка бошад.</string>
-    <string name="start_then_game">назорат, баъд %1$s</string>
+    <string name="start_needs_overlay">Оғоз панели шинокунандаро низ мекушояд, барои он ин иҷозат лозим аст.</string>
+    <string name="start_then_game">назорат + панел, баъд %1$s</string>
     <string name="status_error">Хато</string>
     <string name="status_initializing">Омодасозӣ</string>
     <string name="status_monitoring">Назорат меравад</string>

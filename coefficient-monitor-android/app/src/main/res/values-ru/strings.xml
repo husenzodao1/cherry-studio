@@ -385,7 +385,8 @@
     <string name="stable_frames_hint">Значение должно быть прочитано одинаково на стольких неподвижных кадрах, прежде чем оно засчитается.</string>
     <string name="stake_button_only">Тот же алгоритм снова: только кнопка ставки</string>
     <string name="stake_button_only_hint">Если активен алгоритм, чьи клики в последний раз прошли до конца (например, алгоритм 1 после выигрыша на алгоритме 1), нажимается только его последний клик: сумма уже установлена. При переходе с другого алгоритма выполняются все его клики. Последний клик каждого алгоритма должен быть кнопкой ставки.</string>
-    <string name="start_then_game">мониторинг, затем %1$s</string>
+    <string name="start_needs_overlay">Старт открывает и плавающее окно, для него нужно это разрешение.</string>
+    <string name="start_then_game">мониторинг + плавающее окно, затем %1$s</string>
     <string name="status_error">Ошибка</string>
     <string name="status_initializing">Инициализация</string>
     <string name="status_monitoring">Мониторинг</string>

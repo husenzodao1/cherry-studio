@@ -1,5 +1,6 @@
 package app.coefmonitor.ui.dashboard
 
+import app.coefmonitor.monitor.FloatingPanelService
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.disabled
 import app.coefmonitor.ui.openLink
@@ -113,8 +114,11 @@ fun DashboardScreen(
     val clickerConnected by AutoClickService.connected.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var gameOpenFailed by remember { mutableStateOf(false) }
-    // Start: monitoring begins (after Android's screen-capture consent), then the game opens.
+    // Start: monitoring begins (after Android's screen-capture consent, or without it once allowed
+    // from a computer), the floating window opens over everything, then the game opens.
     val startCapture = rememberCaptureStarter(onStarted = {
+        viewModel.turnOnFloatingMode()
+        FloatingPanelService.sync(context, enabled = true)
         state.settings.gameUrl?.let { gameOpenFailed = !openLink(context, it) }
     })
     var resumeTick by remember { mutableIntStateOf(0) }
@@ -146,6 +150,8 @@ fun DashboardScreen(
                     onEnableClicker = { context.startActivity(accessibilitySettingsIntent()) },
                     onSaveGameUrl = viewModel::saveGameUrl,
                     gameOpenFailed = gameOpenFailed,
+                    overlayGranted = overlayGranted,
+                    onGrantOverlay = { context.startActivity(overlaySettingsIntent(context)) },
                 )
             }
             item {
@@ -212,6 +218,8 @@ private fun StatusCard(
     onEnableClicker: () -> Unit,
     onSaveGameUrl: (String?) -> Unit,
     gameOpenFailed: Boolean,
+    overlayGranted: Boolean,
+    onGrantOverlay: () -> Unit,
 ) {
     val runtime = state.runtime
     val context = LocalContext.current
@@ -305,6 +313,15 @@ private fun StatusCard(
         }
         if (gameOpenFailed) {
             Text(stringResource(R.string.game_link_open_failed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+        }
+        // Start also opens the floating window, which needs "display over other apps".
+        if (!overlayGranted && !runtime.captureActive) {
+            Text(
+                stringResource(R.string.start_needs_overlay),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            TextButton(onClick = onGrantOverlay) { Text(stringResource(R.string.action_allow_overlay)) }
         }
     }
 }
