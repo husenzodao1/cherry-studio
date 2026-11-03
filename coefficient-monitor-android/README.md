@@ -320,14 +320,24 @@ auto-clicker can be turned off in Settings without touching the accessibility se
 
 ## Floating mode
 
-Settings → **Floating mode** puts a movable panel over every app. It stays there until you close it
-with **✕** (or the notification's *Close*), whether monitoring runs or not; it runs in its own
-foreground service, so Android does not remove it when you switch apps or swipe the app away.
-Drag it by the title. **–** (top right) shrinks it to a small circle showing the active
-algorithm's number (coloured by state: running, paused, stopped, clicking); drag the circle anywhere
-and tap it to open the panel again. It has three tabs, each row on one line:
+Settings → **Floating mode** puts a floating window over every app, drawn like the pop-up windows
+of recent Android versions. It stays there until you close it with **✕** (or the notification's
+*Close*), whether monitoring runs or not; it runs in its own foreground service, so Android does not
+remove it when you switch apps or swipe the app away.
 
-- **Status**: active algorithm, last coefficient, monitoring and OCR status, auto-click progress,
+- **Move**: drag the thin bar at the top centre.
+- **Resize**: drag any side edge, the bottom edge or a corner; the opposite edges stay where they
+  are (the border lights up while resizing). Pages scroll inside the window whatever its size;
+  tab labels shrink in a narrow window.
+- **Dock**: throw the window to the left or right edge, drag it past the edge, or tap **–**: it
+  slides out and only a slim tab stays at the edge, showing the active algorithm's number (coloured
+  by state: running, paused, stopped, clicking). Drag the tab along the edge to move it; tap it or
+  pull it out to open the window again next to that edge.
+- Position, size and the docked side are remembered.
+
+It has three tabs, each row on one line:
+
+- **Status**: active algorithm (number and name), last coefficient, monitoring and OCR status, auto-click progress,
   warnings, the last log lines, and the buttons **Start** (shows Android's screen-capture dialog
   and starts monitoring without opening the app) or **Pause**/**Resume**, **Stop** and **Find row**
   (see [Finding the row again](#finding-the-row-again)), **Run clicks**/**Stop clicks**, and

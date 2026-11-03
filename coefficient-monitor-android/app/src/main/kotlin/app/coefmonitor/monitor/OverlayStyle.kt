@@ -20,11 +20,11 @@ internal class OverlayStyle(private val context: Context) {
 
     fun dp(value: Int): Int = (value * context.resources.displayMetrics.density).toInt()
 
-    /** The window's card: translucent graphite, rounded, hairline border. */
-    fun card(radiusDp: Int): GradientDrawable = GradientDrawable().apply {
+    /** The window's card: translucent graphite, rounded, hairline border ([stroke] while it is resized). */
+    fun card(radiusDp: Int, stroke: Int = HAIRLINE): GradientDrawable = GradientDrawable().apply {
         cornerRadius = dp(radiusDp).toFloat()
         setColor(BACKGROUND)
-        setStroke(dp(1), HAIRLINE)
+        setStroke(dp(1), stroke)
     }
 
     fun pill(color: Int): GradientDrawable = GradientDrawable().apply {
@@ -57,6 +57,9 @@ internal class OverlayStyle(private val context: Context) {
     companion object {
         const val BACKGROUND = 0xF215171C.toInt()
         const val HAIRLINE = 0xFF2C3039.toInt()
+
+        /** The thin bar at the top of the floating window that moves it. */
+        const val HANDLE = 0x66ECEEF2
         const val TEXT = 0xFFECEEF2.toInt()
         const val MUTED = 0xFF8D939E.toInt()
         const val CHIP = 0xFF23262D.toInt()

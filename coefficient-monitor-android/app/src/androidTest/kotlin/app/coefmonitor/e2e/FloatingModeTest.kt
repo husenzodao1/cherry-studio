@@ -141,7 +141,7 @@ class FloatingModeTest {
         assertNotNull("panel not back after picking", device.wait(Until.findObject(panel().textContains("2 / 2")), 5_000))
         screenshot("floating_05_algorithm_with_click")
 
-        // – shrinks the panel to a circle with the active algorithm's number; tapping the circle opens it again.
+        // – docks the window at the nearest edge: a tab with the active algorithm's number; tapping it opens the window again.
         device.findObject(panel().desc(app.getString(R.string.overlay_minimize))).click()
         val circle = device.wait(Until.findObject(panel().desc(app.getString(R.string.overlay_expand))), 5_000)
         assertNotNull("panel not minimised", circle)
