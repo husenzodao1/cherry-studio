@@ -70,11 +70,11 @@ object E2e {
             "beep=${AppState.senderBeepActive} receiver=${AppState.receiverRunning} " +
             "status='${AppState.receiverStatus}' connected=${AppState.receiverConnectedTo}\nlog:\n${AppState.logText()}"
 
-    fun waitFor(what: String, timeoutMs: Long, condition: () -> Boolean) {
+    fun waitFor(what: String, timeoutMs: Long, acceptDialogs: Boolean = true, condition: () -> Boolean) {
         val deadline = SystemClock.uptimeMillis() + timeoutMs
         while (SystemClock.uptimeMillis() < deadline) {
             if (condition()) return
-            acceptCaptureDialogIfShown()
+            if (acceptDialogs) acceptCaptureDialogIfShown()
             SystemClock.sleep(100)
         }
         if (condition()) return
@@ -83,21 +83,36 @@ object E2e {
         fail("Timed out after ${timeoutMs} ms waiting for $what\n$s")
     }
 
-    /** Accepts the system screen-capture dialog if it appears ("Entire screen" + "Start now"). */
+    private val captureButton = By.pkg("com.android.systemui").clickable(true).text(Pattern.compile("(?i)start now|start|share screen"))
+
+    /** Accepts the system screen-capture dialog if it appears ("Start now"). */
     fun acceptCaptureDialogIfShown() {
-        val ui = By.pkg("com.android.systemui")
-        device.findObject(ui.clickable(true).text(Pattern.compile("(?i)start now|start|share screen")))?.click()
+        device.findObject(captureButton)?.click()
     }
 
+    fun captureDialogShown(): Boolean = device.findObject(captureButton) != null
+
+    /** Chooses "send" and presses the ring, as a person does. */
     fun startSender(activity: MainActivity) {
-        click(activity, R.id.btn_send)
+        click(activity, R.id.mode_send)
+        click(activity, R.id.btn_main)
         waitFor("sender to run", 30_000) { AppState.senderRunning }
     }
 
-    fun stopAll(activity: MainActivity?) {
-        if (activity != null) click(activity, R.id.btn_stop)
+    /** Chooses "receive" (optionally with phone A's address) and presses the ring. */
+    fun startReceiver(activity: MainActivity, ip: String = "") {
+        click(activity, R.id.mode_receive)
+        typeIp(activity, ip)
+        click(activity, R.id.btn_main)
+        waitFor("receiver to run", 10_000) { AppState.receiverRunning }
+    }
+
+    fun stopAll(@Suppress("UNUSED_PARAMETER") activity: MainActivity?) {
+        val context = instrumentation.targetContext
+        tj.hamnavo.SenderService.stop(context)
+        tj.hamnavo.ReceiverService.stop(context)
         val deadline = SystemClock.uptimeMillis() + 10_000
-        while ((AppState.senderRunning || AppState.receiverRunning) && SystemClock.uptimeMillis() < deadline) {
+        while ((AppState.sender != AppState.Sender.OFF || AppState.receiverRunning) && SystemClock.uptimeMillis() < deadline) {
             SystemClock.sleep(100)
         }
         AppState.senderFrameListener = null

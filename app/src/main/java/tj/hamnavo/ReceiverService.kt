@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.media.AudioTimestamp
 import android.media.AudioTrack
 import android.net.ConnectivityManager
 import android.net.LinkProperties
@@ -15,21 +16,26 @@ import android.os.IBinder
 import android.os.Process
 import android.util.Log
 import tj.hamnavo.core.AudioClient
+import tj.hamnavo.core.ClockSync
 import tj.hamnavo.core.Discovery
 import tj.hamnavo.core.HostScanner
-import tj.hamnavo.core.JitterBuffer
 import tj.hamnavo.core.NetUtil
-import tj.hamnavo.core.Pcm
+import tj.hamnavo.core.Playout
 import tj.hamnavo.core.Protocol
 import tj.hamnavo.core.ReceiverPlan
 import tj.hamnavo.core.StreamHeader
+import tj.hamnavo.core.TimeSyncClient
+import java.net.DatagramSocket
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import javax.net.SocketFactory
 import kotlin.concurrent.thread
 
-/** Phone B: finds phone A on the Wi-Fi, connects and plays the stream. */
+/**
+ * Phone B (any number of them): finds phone A on the Wi-Fi, connects and plays the stream in step
+ * with every other phone ([Playout], clock sync over UDP).
+ */
 class ReceiverService : Service() {
     companion object {
         const val ACTION_START = "tj.hamnavo.RECV_START"
@@ -47,13 +53,18 @@ class ReceiverService : Service() {
 
     private lateinit var keepAwake: KeepAwake
     private lateinit var cm: ConnectivityManager
-    private val jitter = JitterBuffer()
 
     @Volatile private var running = false
     @Volatile private var manualHost: String? = null
     @Volatile private var wifiNetwork: Network? = null
     @Volatile private var header: StreamHeader? = null
     @Volatile private var client: AudioClient? = null
+    /** Playback state of the current connection (null when not connected). */
+    private class Session(val playout: Playout, val sync: ClockSync, val startedNs: Long) {
+        /** Clock offset to phone A; from arrival times if clock sync gets no answers within 2 s. */
+        fun offsetNs(now: Long): Long? = sync.offsetAt(now) ?: if (now - startedNs > 2_000_000_000L) playout.fallbackOffsetNs else null
+    }
+    @Volatile private var session: Session? = null
     private var netThread: Thread? = null
     private var playThread: Thread? = null
 
@@ -90,7 +101,7 @@ class ReceiverService : Service() {
     private fun start() {
         val notification = buildNotification(
             getString(R.string.notif_receiving),
-            Intent(this, ReceiverService::class.java).setAction(ACTION_STOP),
+            listOf(getString(R.string.act_off) to Intent(this, ReceiverService::class.java).setAction(ACTION_STOP)),
         )
         startForeground(NOTIF_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
         // Listen for Wi-Fi even if it has no internet (a hotspot used only for audio).
@@ -121,6 +132,7 @@ class ReceiverService : Service() {
                 continue
             }
             val wifiFactory = net?.socketFactory ?: SocketFactory.getDefault()
+            val wifiBind: (DatagramSocket) -> Unit = { s -> net?.bindSocket(s) }
             val gateway = gateway(lp)
             val wifiAddress = lp?.linkAddresses?.map { it.address }?.firstOrNull { it is Inet4Address } as Inet4Address?
             val info = getString(R.string.log_wifi, wifiAddress?.hostAddress ?: "—", gateway?.hostAddress ?: "—")
@@ -135,9 +147,9 @@ class ReceiverService : Service() {
             for (host in plan.candidates) {
                 if (!running) return
                 val addr = InetSocketAddress(host, Protocol.TCP_PORT)
-                if (connect(addr, wifiFactory)) continue
+                if (connect(addr, wifiFactory, wifiBind)) continue
                 // A manually typed address may be reachable only outside the Wi-Fi network.
-                if (host == manual && net != null) connect(addr, SocketFactory.getDefault())
+                if (host == manual && net != null) connect(addr, SocketFactory.getDefault()) {}
             }
             if (!running) return
 
@@ -148,7 +160,7 @@ class ReceiverService : Service() {
                 ) { s -> net?.bindSocket(s) }
             }.getOrNull()
             if (found != null && found.address !in own) {
-                connect(found, wifiFactory)
+                connect(found, wifiFactory, wifiBind)
                 continue
             }
             if (round == 1) AppState.log(getString(R.string.log_discovery_none))
@@ -159,7 +171,7 @@ class ReceiverService : Service() {
                 AppState.log(getString(R.string.log_scan, hosts.size))
                 val hit = HostScanner.findServer(hosts, factory = wifiFactory)
                 if (hit != null) {
-                    connect(hit, wifiFactory)
+                    connect(hit, wifiFactory, wifiBind)
                     continue
                 }
             }
@@ -168,28 +180,33 @@ class ReceiverService : Service() {
     }
 
     /** Plays from [addr] until the connection ends. Returns false if it could not connect at all. */
-    private fun connect(addr: InetSocketAddress, factory: SocketFactory): Boolean {
+    private fun connect(addr: InetSocketAddress, factory: SocketFactory, bind: (DatagramSocket) -> Unit): Boolean {
         val host = addr.address.hostAddress ?: addr.toString()
-        AppState.receiverStatus = getString(R.string.recv_connecting, host)
+        AppState.receiverStatus = getString(R.string.recv_connecting)
         val c = AudioClient(factory)
         client = c
         var connected = false
+        var timeSync: TimeSyncClient? = null
         try {
             c.run(
                 addr,
                 onHeader = { h ->
                     connected = true
-                    jitter.clear()
+                    val s = Session(Playout(h.channels, h.sampleRate), ClockSync(), System.nanoTime())
+                    timeSync = TimeSyncClient(
+                        InetSocketAddress(addr.address, Protocol.DISCOVERY_PORT), s.sync,
+                        requestedDelayMs = { s.playout.requestedDelayMs }, configure = bind,
+                    ).start()
                     header = h
+                    session = s
                     AppState.receiverConnectedTo = host
                     AppState.log(getString(R.string.log_connected, host))
                 },
                 onFrame = { f ->
-                    jitter.push(f)
-                    AppState.receiverStatus = getString(
-                        R.string.recv_connected, host, AppState.receiverBufferMs + AppState.receiverTrackMs,
-                        AppState.receiverGlitches,
-                    )
+                    session?.let { s ->
+                        val now = System.nanoTime()
+                        s.playout.push(f, now, s.offsetNs(now))
+                    }
                 },
             )
         } catch (e: Exception) {
@@ -199,10 +216,11 @@ class ReceiverService : Service() {
                 AppState.log(if (connected) getString(R.string.log_disconnected, host) else getString(R.string.log_failed, host, reason))
             }
         } finally {
+            timeSync?.close()
             client = null
+            session = null
             header = null
             AppState.receiverConnectedTo = null
-            jitter.clear()
         }
         return connected
     }
@@ -227,40 +245,57 @@ class ReceiverService : Service() {
     private fun playLoop() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO)
         var track: AudioTrack? = null
-        var trackHeader: StreamHeader? = null
+        var trackSession: Session? = null
         var trackUnderruns = 0
+        var written = 0L
+        var out = ShortArray(0)
+        val ts = AudioTimestamp()
         try {
             while (running) {
                 val h = header
-                if (h == null) {
-                    track?.let { if (it.playState == AudioTrack.PLAYSTATE_PLAYING) { it.pause(); it.flush() } }
+                val s = session
+                if (h == null || s == null) {
+                    track?.let { runCatching { it.stop() }; it.release() }
+                    track = null
                     AppState.receiverLevel = 0f
                     sleep(20)
                     continue
                 }
-                if (h != trackHeader || track == null) {
-                    track?.release()
+                if (track == null || s !== trackSession) {
+                    // New connection: new track, so its timestamps match what this session wrote.
+                    track?.let { runCatching { it.stop() }; it.release() }
                     track = AudioOut.createTrack(h)
-                    trackHeader = h
+                    trackSession = s
                     trackUnderruns = 0
-                    AppState.receiverTrackMs = AudioOut.START_MS
+                    written = 0
+                    out = ShortArray(s.playout.blockSamples * h.channels)
+                    track.play()
                 }
-                if (track.playState != AudioTrack.PLAYSTATE_PLAYING) track.play()
-                // Play silence while (re)buffering; the track clock paces this loop.
-                val frame = jitter.poll() ?: ByteArray(h.frameBytes)
-                val level = Pcm.peak(frame) / 32768f
+                // When will the next sample we write be heard? From the speaker's own timestamps.
+                val now = System.nanoTime()
+                val presentNs = if (track.getTimestamp(ts) && ts.framePosition > 0) {
+                    ts.nanoTime + (written - ts.framePosition) * 1_000_000_000L / h.sampleRate
+                } else {
+                    now + track.bufferSizeInFrames * 1_000_000_000L / h.sampleRate
+                }
+                s.playout.render(presentNs, now, s.offsetNs(now), out)
+                track.write(out, 0, out.size, AudioTrack.WRITE_BLOCKING)
+                written += s.playout.blockSamples
+
+                var peak = 0
+                for (v in out) peak = maxOf(peak, kotlin.math.abs(v.toInt()))
+                val level = peak / 32768f
                 AppState.receiverLevel = level
-                track.write(frame, 0, frame.size, AudioTrack.WRITE_BLOCKING)
                 AppState.receiverPlayedFrames = track.playbackHeadPosition.toLong() and 0xFFFFFFFFL
                 val u = track.underrunCount
                 if (u > trackUnderruns) {
                     // The speaker ran dry (the phone was busy): keep a little more audio in it.
                     trackUnderruns = u
-                    AppState.receiverTrackMs = AudioOut.grow(track, h)
+                    AudioOut.grow(track, h)
                 }
-                AppState.receiverBufferMs = jitter.bufferedMs
-                AppState.receiverTargetMs = jitter.targetMs
-                AppState.receiverGlitches = jitter.underruns + jitter.dropped + trackUnderruns
+                AppState.receiverDelayMs = s.playout.delayMs
+                AppState.receiverGlitches = s.playout.gaps + s.playout.jumps + trackUnderruns
+                AppState.receiverStatus = getString(R.string.recv_live, s.playout.delayMs)
                 AppState.receiverFrameListener?.invoke(level)
             }
         } finally {
@@ -285,6 +320,7 @@ class ReceiverService : Service() {
         AppState.receiverStatus = ""
         AppState.receiverLevel = 0f
         AppState.receiverConnectedTo = null
+        AppState.receiverDelayMs = 0
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

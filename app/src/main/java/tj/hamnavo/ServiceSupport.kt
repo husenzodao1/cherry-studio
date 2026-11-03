@@ -12,7 +12,8 @@ import android.os.PowerManager
 
 private const val CHANNEL_ID = "hamnavo"
 
-fun Service.buildNotification(text: String, stopIntent: Intent): Notification {
+/** Ongoing notification with [actions] (label, service intent). */
+fun Service.buildNotification(text: String, actions: List<Pair<String, Intent>>): Notification {
     val nm = getSystemService(NotificationManager::class.java)
     nm.createNotificationChannel(
         NotificationChannel(CHANNEL_ID, getString(R.string.notif_channel), NotificationManager.IMPORTANCE_LOW)
@@ -20,17 +21,17 @@ fun Service.buildNotification(text: String, stopIntent: Intent): Notification {
     val open = PendingIntent.getActivity(
         this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE
     )
-    val stop = PendingIntent.getService(
-        this, 1, stopIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
-    return Notification.Builder(this, CHANNEL_ID)
+    val builder = Notification.Builder(this, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_notif)
         .setContentTitle(getString(R.string.app_name))
         .setContentText(text)
         .setContentIntent(open)
         .setOngoing(true)
-        .addAction(Notification.Action.Builder(null, getString(R.string.btn_stop), stop).build())
-        .build()
+    actions.forEachIndexed { i, (label, intent) ->
+        val pi = PendingIntent.getService(this, 10 + i, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        builder.addAction(Notification.Action.Builder(null, label, pi).build())
+    }
+    return builder.build()
 }
 
 /**

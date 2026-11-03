@@ -103,17 +103,37 @@ class SinglePhoneTest {
     @Test fun onePhoneHasOneRole() {
         val a = activity!!
         E2e.startSender(a)
-        E2e.click(a, R.id.btn_receive)
-        E2e.waitFor("receiver to replace sender", 10_000) { AppState.receiverRunning && !AppState.senderRunning }
-        E2e.click(a, R.id.btn_send)
-        E2e.waitFor("sender to replace receiver", 30_000) { AppState.senderRunning && !AppState.receiverRunning }
+        E2e.click(a, R.id.mode_receive)
+        E2e.waitFor("sender to end when choosing receive", 10_000) { AppState.sender == AppState.Sender.OFF }
+        E2e.click(a, R.id.btn_main)
+        E2e.waitFor("receiver to run", 10_000) { AppState.receiverRunning }
+        E2e.click(a, R.id.mode_send)
+        E2e.waitFor("receiver to end when choosing send", 10_000) { !AppState.receiverRunning }
+        E2e.click(a, R.id.btn_main)
+        E2e.waitFor("sender to run", 30_000) { AppState.senderRunning }
     }
 
     @Test fun receiverSkipsOwnAddress() {
         val a = activity!!
-        E2e.typeIp(a, "127.0.0.1")
-        E2e.click(a, R.id.btn_receive)
+        E2e.startReceiver(a, "127.0.0.1")
         E2e.waitFor("own address to be skipped", 10_000) { AppState.logText().contains("127.0.0.1 —") }
         assertEquals(null, AppState.receiverConnectedTo)
+    }
+
+    /** Consent is asked once: after "stop", pressing the ring again streams without any dialog. */
+    @Test fun secondStartAsksNothing() {
+        val a = activity!!
+        E2e.startSender(a)
+        E2e.click(a, R.id.btn_main)
+        E2e.waitFor("pause", 10_000) { AppState.sender == AppState.Sender.READY }
+        // From now on a new consent request would show the system dialog.
+        E2e.shell("appops set tj.hamnavo PROJECT_MEDIA default")
+        try {
+            E2e.click(a, R.id.btn_main)
+            E2e.waitFor("streaming again without asking", 5_000, acceptDialogs = false) { AppState.senderRunning }
+            assertFalse("a permission dialog was shown", E2e.captureDialogShown())
+        } finally {
+            E2e.shell("appops set tj.hamnavo PROJECT_MEDIA allow")
+        }
     }
 }

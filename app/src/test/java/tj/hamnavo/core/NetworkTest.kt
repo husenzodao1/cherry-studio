@@ -40,9 +40,11 @@ class NetworkTest {
                             InetSocketAddress(loopback, server.localPort),
                             onHeader = { headers += it },
                             onFrame = { f ->
-                                assertEquals(header.frameBytes, f.size)
-                                received[idx] += Pcm.getSample(f, 0).toInt()
-                                if (Pcm.getSample(f, 0).toInt() == frameCount - 1) done.countDown()
+                                assertEquals(header.frameBytes, f.pcm.size)
+                                assertEquals(f.seq * 10_000_000L, f.captureNs)
+                                assertEquals(120, f.delayMs)
+                                received[idx] += Pcm.getSample(f.pcm, 0).toInt()
+                                if (Pcm.getSample(f.pcm, 0).toInt() == frameCount - 1) done.countDown()
                             },
                         )
                     } catch (_: Exception) {
@@ -53,7 +55,7 @@ class NetworkTest {
             for (i in 0 until frameCount) {
                 val f = ByteArray(header.frameBytes)
                 Pcm.setSample(f, 0, i.toShort())
-                server.broadcast(f)
+                server.broadcast(AudioFrame(i.toLong(), i * 10_000_000L, 120, f))
                 Thread.sleep(2)
             }
             assertTrue("clients did not get the last frame", done.await(5, TimeUnit.SECONDS))
@@ -66,7 +68,7 @@ class NetworkTest {
             // A closed client is removed on the next write; frames keep flowing in real use.
             clients.forEach { it.close() }
             waitFor(3000) {
-                server.broadcast(ByteArray(header.frameBytes))
+                server.broadcast(AudioFrame(0, 0, 0, ByteArray(header.frameBytes)))
                 server.clientCount == 0
             }
         }

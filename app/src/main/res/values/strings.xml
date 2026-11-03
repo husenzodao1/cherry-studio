@@ -1,40 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ҳамнаво</string>
-    <string name="intro">Як телефон садоро мефиристад (А), дигаре мегирад (Б). Дар як телефон танҳо як нақш кор мекунад.</string>
+    <string name="brand">ҳамнаво</string>
 
-    <string name="section_sender">Телефони А — фиристанда</string>
-    <string name="hint_sender">1) Нуқтаи дастрасии Wi-Fi (hotspot)-ро фаъол кунед.\n2) «Фиристодан»-ро пахш кунед ва иҷозат диҳед.\n3) Мусиқиро дар ҳар барнома оғоз кунед.</string>
-    <string name="btn_hotspot">Танзимоти нуқтаи дастрасӣ</string>
-    <string name="btn_send">Фиристодан</string>
-    <string name="btn_beep">Садои санҷишӣ</string>
-    <string name="btn_beep_stop">Қатъи садои санҷишӣ</string>
+    <string name="mode_send">фиристодан</string>
+    <string name="mode_receive">гирифтан</string>
+    <string name="tap">пахш кунед</string>
+    <string name="ready">омода</string>
+    <string name="sender_waiting">интизори телефонҳо</string>
+    <string name="sender_live">%1$d телефон · %2$d мс</string>
+    <string name="no_sound">садо нест</string>
 
-    <string name="section_receiver">Телефони Б — гиранда</string>
-    <string name="hint_receiver">Ба Wi-Fi-и телефони А пайваст шавед ва «Гирифтан»-ро пахш кунед. IP-ро танҳо агар худкор наёбад нависед — IP-и телефони А, на ҳамин телефон.</string>
-    <string name="hint_ip">IP-и телефони А (ихтиёрӣ)</string>
-    <string name="btn_receive">Гирифтан</string>
+    <string name="recv_no_wifi">ба wi-fi-и телефони фиристанда пайваст шавед</string>
+    <string name="recv_searching">ҷустуҷӯ</string>
+    <string name="recv_connecting">пайвастшавӣ</string>
+    <string name="recv_live">%1$d мс</string>
+    <string name="hint_ip">IP-и телефони фиристанда</string>
 
-    <string name="btn_stop">Қатъ</string>
-    <string name="btn_battery">Иҷозати кор дар замина (батарея)</string>
+    <string name="act_beep">бип</string>
+    <string name="act_wifi">wi-fi</string>
+    <string name="act_ip">ip</string>
+    <string name="act_battery">батарея</string>
+    <string name="act_log">сабт</string>
+    <string name="main_desc_start">оғоз</string>
+    <string name="main_desc_stop">қатъ</string>
+
     <string name="battery_ok">Маҳдудияти батарея аллакай хомӯш аст</string>
     <string name="need_mic">Бе иҷозати сабти садо фиристодан ғайриимкон аст</string>
-    <string name="projection_denied">Иҷозати сабти садо дода нашуд</string>
+    <string name="projection_denied">Иҷозат дода нашуд</string>
 
     <string name="notif_channel">Пахши садо</string>
     <string name="notif_sending">Садо фиристода мешавад</string>
+    <string name="notif_ready">Омода — бе иҷозати нав оғоз мешавад</string>
     <string name="notif_receiving">Садо қабул мешавад</string>
-
-    <string name="sender_off">Фиристанда хомӯш аст</string>
-    <string name="sender_on">Фиристода мешавад · IP: %1$s\nТелефонҳои пайваст: %2$d\nСатҳи садо: %3$s</string>
-    <string name="sender_no_sound">Садо нест: мусиқиро оғоз кунед. Баъзе барномаҳо сабтро манъ мекунанд.</string>
-    <string name="receiver_off">Гиранда хомӯш аст</string>
-    <string name="receiver_on">%1$s\nСатҳи садо: %2$s</string>
-
-    <string name="recv_no_wifi">Wi-Fi нест. Ба нуқтаи дастрасии телефони А пайваст шавед.</string>
-    <string name="recv_searching">Ҷустуҷӯи телефони А…</string>
-    <string name="recv_connecting">Пайвастшавӣ ба %1$s…</string>
-    <string name="recv_connected">Пайваст ба %1$s · таъхир %2$d мс · қатъшавӣ: %3$d</string>
+    <string name="act_pause">Қатъ</string>
+    <string name="act_resume">Фиристодан</string>
+    <string name="act_off">Хомӯш</string>
 
     <string name="log_wifi">Wi-Fi: IP %1$s, шлюз %2$s</string>
     <string name="log_own_ip">%1$s — IP-и ҳамин телефон аст, гузаронида шуд</string>

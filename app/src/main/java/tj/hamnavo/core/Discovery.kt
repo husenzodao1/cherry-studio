@@ -60,8 +60,17 @@ object Discovery {
     }
 }
 
-/** Answers discovery requests on [port] with the TCP port of the audio server. */
-class DiscoveryResponder(port: Int, private val tcpPort: Int, private val instanceId: String) : Closeable {
+/**
+ * Answers discovery requests on [port] with the TCP port of the audio server, and clock-sync
+ * requests ([TimeSync]) with this phone's clock; the delay each phone asks for goes to [onDelayRequest].
+ */
+class DiscoveryResponder(
+    port: Int,
+    private val tcpPort: Int,
+    private val instanceId: String,
+    private val clock: () -> Long = System::nanoTime,
+    private val onDelayRequest: (from: String, ms: Int) -> Unit = { _, _ -> },
+) : Closeable {
     private val socket = DatagramSocket(null).apply {
         reuseAddress = true
         broadcast = true
@@ -77,7 +86,13 @@ class DiscoveryResponder(port: Int, private val tcpPort: Int, private val instan
                 val p = DatagramPacket(buf, buf.size)
                 try {
                     socket.receive(p)
-                    if (String(p.data, 0, p.length) == Discovery.REQUEST) {
+                    val t2 = clock()
+                    val time = TimeSync.parseRequest(p.data, p.length)
+                    if (time != null) {
+                        val r = TimeSync.reply(time.first, t2)
+                        socket.send(DatagramPacket(r, r.size, p.socketAddress))
+                        onDelayRequest(p.socketAddress.toString(), time.second)
+                    } else if (String(p.data, 0, p.length) == Discovery.REQUEST) {
                         socket.send(DatagramPacket(reply, reply.size, p.socketAddress))
                     }
                 } catch (_: IOException) {

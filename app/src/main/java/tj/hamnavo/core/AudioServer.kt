@@ -45,9 +45,11 @@ class AudioServer(
         return this
     }
 
-    /** Queues [frame] for all clients. The array must not be modified afterwards. */
-    fun broadcast(frame: ByteArray) {
-        for (c in clients) c.queue.offer(frame)
+    /** Queues [frame] for all clients; it is encoded once and shared. */
+    fun broadcast(frame: AudioFrame) {
+        if (clients.isEmpty()) return
+        val bytes = Protocol.encodeFrame(frame)
+        for (c in clients) c.queue.offer(bytes)
     }
 
     override fun close() {

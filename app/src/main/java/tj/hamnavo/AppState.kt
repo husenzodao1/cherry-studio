@@ -10,8 +10,13 @@ object AppState {
     /** Random id of this phone's sender, so the receiver never connects to its own phone. */
     val instanceId: String = UUID.randomUUID().toString()
 
-    @Volatile var senderRunning = false
+    enum class Sender { OFF, READY, STREAMING }
+
+    /** READY: the screen-capture session is kept, so streaming starts again without asking. */
+    @Volatile var sender = Sender.OFF
+    val senderRunning: Boolean get() = sender == Sender.STREAMING
     @Volatile var senderClients = 0
+    @Volatile var senderDelayMs = 0
     @Volatile var senderCaptureLevel = 0f
     @Volatile var senderLastSoundAt = 0L
     @Volatile var senderBeepActive = false
@@ -21,16 +26,14 @@ object AppState {
     @Volatile var receiverLevel = 0f
     @Volatile var receiverConnectedTo: String? = null
     @Volatile var receiverPlayedFrames = 0L
-    @Volatile var receiverBufferMs = 0
-    @Volatile var receiverTargetMs = 0
-    @Volatile var receiverTrackMs = 0
-    /** Audible problems: gaps (buffer empty) + dropped frames + speaker underruns. */
+    @Volatile var receiverDelayMs = 0
+    /** Audible problems: gaps, large corrections and speaker underruns. */
     @Volatile var receiverGlitches = 0L
 
     /** Called for every captured frame: level before and after the test beep is mixed in. */
     @Volatile var senderFrameListener: ((captured: Float, sent: Float) -> Unit)? = null
 
-    /** Called for every frame the receiver writes to the speaker (silence included). */
+    /** Called for every block the receiver writes to the speaker (silence included). */
     @Volatile var receiverFrameListener: ((played: Float) -> Unit)? = null
 
     private val logLines = ArrayDeque<String>()
@@ -42,9 +45,4 @@ object AppState {
     }
 
     fun logText(): String = synchronized(logLines) { logLines.joinToString("\n") }
-
-    fun levelBar(level: Float): String {
-        val n = (level.coerceIn(0f, 1f) * 10).toInt()
-        return "▮".repeat(n) + "▯".repeat(10 - n) + " " + (level * 100).toInt() + "%"
-    }
 }

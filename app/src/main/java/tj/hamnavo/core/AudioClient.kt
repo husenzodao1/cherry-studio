@@ -17,7 +17,7 @@ class AudioClient(private val socketFactory: SocketFactory = SocketFactory.getDe
         connectTimeoutMs: Int = 2000,
         readTimeoutMs: Int = 3000,
         onHeader: (StreamHeader) -> Unit,
-        onFrame: (ByteArray) -> Unit,
+        onFrame: (AudioFrame) -> Unit,
     ) {
         val s = socketFactory.createSocket()
         socket = s
@@ -30,9 +30,11 @@ class AudioClient(private val socketFactory: SocketFactory = SocketFactory.getDe
             val header = Protocol.decodeHeader(headerBytes)
             onHeader(header)
             while (true) {
-                val frame = ByteArray(header.frameBytes)
-                input.readFully(frame)
-                onFrame(frame)
+                val meta = ByteArray(Protocol.FRAME_HEADER_SIZE)
+                input.readFully(meta)
+                val pcm = ByteArray(header.frameBytes)
+                input.readFully(pcm)
+                onFrame(Protocol.decodeFrame(meta, pcm))
             }
         } finally {
             runCatching { s.close() }

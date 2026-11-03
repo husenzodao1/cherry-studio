@@ -57,8 +57,7 @@ class TwoPhonesTest {
         val a = activity!!
         val played = LevelRecorder()
         AppState.receiverFrameListener = { played.add(it) }
-        E2e.typeIp(a, PHONE_A_IP)
-        E2e.click(a, R.id.btn_receive)
+        E2e.startReceiver(a, PHONE_A_IP)
         E2e.waitFor("connection to phone A", 240_000) { AppState.receiverConnectedTo != null }
         val connectedAt = SystemClock.uptimeMillis()
         E2e.screenshot("phoneB_connected")
