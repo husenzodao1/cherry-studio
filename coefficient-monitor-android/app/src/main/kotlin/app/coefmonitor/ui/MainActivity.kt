@@ -2,16 +2,36 @@ package app.coefmonitor.ui
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.History
@@ -29,9 +49,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -47,6 +75,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.coefmonitor.R
 import app.coefmonitor.appContainer
+import app.coefmonitor.calc.ui.CalcScreen
+import app.coefmonitor.calc.ui.LogoMark
+import app.coefmonitor.calc.ui.theme.ProvideCalcColors
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.data.ThemeMode
 import app.coefmonitor.monitor.FloatingPanelService
@@ -140,7 +171,9 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
     }
     val backStack by nav.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
-    val showBottomBar = topDestinations.any { it.route == route }
+    var side by rememberSaveable { mutableStateOf(AppSide.MONITOR) }
+    BackHandler(enabled = side == AppSide.CALC) { side = AppSide.MONITOR }
+    val showBottomBar = side == AppSide.MONITOR && topDestinations.any { it.route == route }
 
     fun navigateTop(destination: String) {
         nav.navigate(destination) {
@@ -152,6 +185,7 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = { AppSwitcher(side, onSelect = { side = it }) },
         bottomBar = {
             if (showBottomBar) {
                 // Flat bar on the page colour, separated by a hairline; the selected item gets the accent.
@@ -187,6 +221,10 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
             }
         },
     ) { padding ->
+        if (side == AppSide.CALC) {
+            Box(Modifier.padding(padding).consumeWindowInsets(padding)) { CalcScreen() }
+            return@Scaffold
+        }
         NavHost(
             navController = nav,
             startDestination = Routes.DASHBOARD,
@@ -221,6 +259,95 @@ private fun AppRoot(openTarget: MutableStateFlow<String?>) {
             composable(Routes.PRESETS) { PresetsScreen() }
             composable(Routes.SETTINGS) { SettingsScreen() }
         }
+    }
+}
+
+/** The two apps in one: this monitor and the LuckyJetCalc martingale calculator. */
+private enum class AppSide { MONITOR, CALC }
+
+/**
+ * A long, minimal switch at the top: this app with its icon on the left, LuckyJetCalc on the
+ * right. The selected side sits on a soft pill that slides across.
+ */
+@Composable
+private fun AppSwitcher(side: AppSide, onSelect: (AppSide) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .background(colors.background)
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+    ) {
+        BoxWithConstraints(
+            Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .clip(CircleShape)
+                .background(colors.surfaceContainerHigh)
+                .padding(3.dp),
+        ) {
+            val half = maxWidth / 2
+            val offset by animateDpAsState(if (side == AppSide.MONITOR) 0.dp else half, label = "app switcher")
+            Box(
+                Modifier
+                    .offset(x = offset)
+                    .width(half)
+                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(colors.primaryContainer),
+            )
+            Row(Modifier.fillMaxSize()) {
+                SwitcherSide(
+                    selected = side == AppSide.MONITOR,
+                    label = stringResource(R.string.switcher_monitor),
+                    icon = {
+                        Box(
+                            Modifier
+                                .size(22.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(colorResource(R.color.launcher_background)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = null, modifier = Modifier.requiredSize(37.dp))
+                        }
+                    },
+                    onClick = { onSelect(AppSide.MONITOR) },
+                    modifier = Modifier.weight(1f),
+                )
+                SwitcherSide(
+                    selected = side == AppSide.CALC,
+                    label = stringResource(R.string.calc_app_name),
+                    icon = { ProvideCalcColors { LogoMark(Modifier.size(22.dp)) } },
+                    onClick = { onSelect(AppSide.CALC) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SwitcherSide(selected: Boolean, label: String, icon: @Composable () -> Unit, onClick: () -> Unit, modifier: Modifier) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        modifier
+            .fillMaxHeight()
+            .clip(CircleShape)
+            .selectable(selected = selected, onClick = onClick, role = Role.Tab)
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        icon()
+        Spacer(Modifier.width(8.dp))
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

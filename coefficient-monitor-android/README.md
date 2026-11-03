@@ -376,6 +376,16 @@ Hold − or + to repeat. Every change is saved at once, exactly as if it was mad
 Changing detection settings while monitoring runs re-initialises the detector (the visible round
 is not processed).
 
+## LuckyJetCalc
+
+A long two-part switch at the top of the app opens either side: **Monitor** (this app, with its
+icon) or **LuckyJetCalc**, the offline martingale calculator from
+`husenzodao1/-:lucky-jet-martingale`, built into the app under `app.coefmonitor.calc`. It takes a
+target multiplier, a starting balance and an initial bet, lists every round's stake until the
+balance runs out, and exports the table as PDF or DOCX. It uses the app's theme (its colors come
+from the host palette via `ProvideCalcColors`) and keeps its state while you switch sides; Back
+returns to Monitor. The calculator never connects to the game and places no bets.
+
 ## Design
 
 Minimal on purpose: graphite (dark) or paper (light) surfaces separated by hairlines, one soft
