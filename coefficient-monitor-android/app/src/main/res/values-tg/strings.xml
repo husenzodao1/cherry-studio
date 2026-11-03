@@ -57,6 +57,7 @@
     <string name="action_show_all">Ҳамаро нишон додан</string>
     <string name="action_start_monitoring">Оғози назорат</string>
     <string name="action_stop">Қатъ</string>
+    <string name="action_to_game">Ба бозӣ</string>
     <string name="action_use_point">Ин нуқтаро истифода баред</string>
     <string name="active_algorithm">Алгоритми фаъол</string>
     <string name="active_badge">Фаъол</string>
@@ -185,6 +186,11 @@
     <string name="floating_panel">Режими шинокунанда</string>
     <string name="floating_panel_hint">Панел болои ҳамаи барномаҳо: ҳолат, автокликер, алгоритмҳо бо кликҳо (нуқтаҳо рост дар экран интихоб мешаванд) ва танзимот. «–» онро ба доира хурд мекунад; то он даме ки бо ✕ пӯшед, дар экран мемонад, ҳатто вақте назорат қатъ шудааст. Онро аз қатори катакҳо ва нуқтаҳои клик дур нигоҳ доред.</string>
     <string name="frames_value">Кадрҳо: %1$d</string>
+    <string name="game_link_invalid">Пайванд дуруст нест</string>
+    <string name="game_link_none">Барои илова кардани пайванд пахш карда истед</string>
+    <string name="game_link_open_failed">Ягон барнома ин пайвандро кушода наметавонад. Барои иваз кардан «Ба бозӣ»-ро пахш карда истед.</string>
+    <string name="game_link_text">Саҳифаи бозӣ (ё пайванде, ки барномаи он мекушояд). Пахши «Ба бозӣ» онро мекушояд, пахш карда истодан онро иваз мекунад. Холӣ — нест кардан.</string>
+    <string name="game_link_title">Пайванди бозӣ</string>
     <string name="global_delay">Таъхири умумӣ</string>
     <string name="global_delay_hint">Вақти пешфарз то клики навбатӣ барои қадамҳое, ки вақти худ надоранд.</string>
     <string name="guard_line_active">Қисм %1$d/%2$d · %3$s / %4$s · ставка %5$s</string>

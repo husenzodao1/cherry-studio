@@ -45,6 +45,11 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
         DashboardState(runtime, monitor, algorithms, settings, recent)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
 
+    /** The link "To the game" opens; null removes it. */
+    fun saveGameUrl(url: String?) {
+        viewModelScope.launch { container.settings.update { it.copy(gameUrl = url) } }
+    }
+
     fun resetToFirst() {
         viewModelScope.launch { container.monitor.resetToFirst() }
     }

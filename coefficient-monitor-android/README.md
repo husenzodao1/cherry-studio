@@ -40,6 +40,13 @@ test it with plain Maven Central access: `cd core && gradle test`.
   The `events.sequence` column has a unique index, so the database itself also rejects a round
   that was already processed.
 
+## To the game
+
+Under **Start monitoring** on the dashboard, **To the game** opens the game: a tap opens the saved
+link (the game's page in the browser, or the game's app if it handles that link). A long press
+(or a tap while no link is saved) asks for the link; without `https://` it is added. The button
+shows the site it opens; saving an empty link removes it.
+
 ## Where the app looks: the tile right of `?`
 
 ```

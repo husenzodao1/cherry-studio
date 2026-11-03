@@ -1,5 +1,18 @@
 package app.coefmonitor.ui.dashboard
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.net.Uri
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.outlined.SportsEsports
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.KeyboardType
+import app.coefmonitor.core.GameLink
 import app.coefmonitor.core.GuardedConfig
 import app.coefmonitor.core.GuardedStart
 import app.coefmonitor.core.Money
@@ -128,6 +141,7 @@ fun DashboardScreen(
                     onStop = { MonitoringService.command(context, MonitoringService.ACTION_STOP) },
                     onOpenAlgorithms = onOpenAlgorithms,
                     onEnableClicker = { context.startActivity(accessibilitySettingsIntent()) },
+                    onSaveGameUrl = viewModel::saveGameUrl,
                 )
             }
             item {
@@ -192,6 +206,7 @@ private fun StatusCard(
     onStop: () -> Unit,
     onOpenAlgorithms: () -> Unit,
     onEnableClicker: () -> Unit,
+    onSaveGameUrl: (String?) -> Unit,
 ) {
     val runtime = state.runtime
     val context = LocalContext.current
@@ -286,7 +301,116 @@ private fun StatusCard(
                 }
             }
         }
+        GameButton(state.settings.gameUrl, onSave = onSaveGameUrl)
     }
+}
+
+/**
+ * "To the game": a tap opens the saved link (the game's page, or its app if it handles the link);
+ * a long press, or a tap while no link is saved, asks for the link.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun GameButton(url: String?, onSave: (String?) -> Unit) {
+    val context = LocalContext.current
+    var editing by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clip(CircleShape)
+            .border(1.dp, colors.outline, CircleShape)
+            .combinedClickable(
+                onClickLabel = stringResource(R.string.action_to_game),
+                onLongClickLabel = stringResource(R.string.game_link_title),
+                onClick = {
+                    if (url == null) editing = true else failed = !openLink(context, url)
+                },
+                onLongClick = { editing = true },
+            )
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        Icon(Icons.Outlined.SportsEsports, contentDescription = null, tint = colors.primary, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(8.dp))
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(stringResource(R.string.action_to_game), style = MaterialTheme.typography.labelLarge, color = colors.primary)
+            Text(
+                url?.let(GameLink::label) ?: stringResource(R.string.game_link_none),
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+    if (failed) {
+        Text(stringResource(R.string.game_link_open_failed), style = MaterialTheme.typography.bodySmall, color = colors.error)
+    }
+    if (editing) {
+        GameLinkDialog(
+            initial = url.orEmpty(),
+            onSave = { saved ->
+                onSave(saved)
+                failed = false
+                editing = false
+            },
+            onDismiss = { editing = false },
+        )
+    }
+}
+
+@Composable
+private fun GameLinkDialog(initial: String, onSave: (String?) -> Unit, onDismiss: () -> Unit) {
+    var text by remember { mutableStateOf(initial) }
+    val parsed = GameLink.parse(text)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.game_link_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.game_link_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it.take(GameLink.MAX_LENGTH) },
+                    placeholder = { Text("https://…") },
+                    isError = parsed is GameLink.Parsed.Invalid,
+                    supportingText = if (parsed is GameLink.Parsed.Invalid) {
+                        { Text(stringResource(R.string.game_link_invalid)) }
+                    } else {
+                        null
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    when (parsed) {
+                        is GameLink.Parsed.Valid -> onSave(parsed.url)
+                        GameLink.Parsed.Empty -> onSave(null)
+                        GameLink.Parsed.Invalid -> Unit
+                    }
+                },
+                enabled = parsed !is GameLink.Parsed.Invalid,
+            ) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+/** Opens [url] in the app that handles it (the game's app, or the browser); false if none can. */
+private fun openLink(context: Context, url: String): Boolean = try {
+    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    true
+} catch (e: ActivityNotFoundException) {
+    false
 }
 
 @Composable

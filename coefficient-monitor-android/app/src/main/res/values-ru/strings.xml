@@ -57,6 +57,7 @@
     <string name="action_show_all">Показать все</string>
     <string name="action_start_monitoring">Начать мониторинг</string>
     <string name="action_stop">Стоп</string>
+    <string name="action_to_game">К игре</string>
     <string name="action_use_point">Использовать точку</string>
     <string name="active_algorithm">Активный алгоритм</string>
     <string name="active_badge">Активный</string>
@@ -185,6 +186,11 @@
     <string name="floating_panel">Плавающий режим</string>
     <string name="floating_panel_hint">Панель поверх всех приложений: статус, автокликер, алгоритмы с кликами (точки выбираются прямо на экране) и настройки. «–» сворачивает её в кружок; она остаётся, пока вы не закроете её ✕, даже когда мониторинг остановлен. Не закрывайте ею ряд плиток и точки кликов.</string>
     <string name="frames_value">Кадров: %1$d</string>
+    <string name="game_link_invalid">Неверная ссылка</string>
+    <string name="game_link_none">Удерживайте, чтобы добавить ссылку</string>
+    <string name="game_link_open_failed">Нет приложения, которое откроет эту ссылку. Удерживайте «К игре», чтобы изменить её.</string>
+    <string name="game_link_text">Страница игры (или ссылка, которую открывает её приложение). Нажатие «К игре» открывает её, удержание — меняет. Пусто — удалить.</string>
+    <string name="game_link_title">Ссылка на игру</string>
     <string name="global_delay">Общая задержка</string>
     <string name="global_delay_hint">Время до следующего клика по умолчанию для шагов без собственного времени.</string>
     <string name="guard_line_active">Часть %1$d/%2$d · %3$s / %4$s · ставка %5$s</string>

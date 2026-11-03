@@ -57,6 +57,7 @@
     <string name="action_show_all">Show all</string>
     <string name="action_start_monitoring">Start monitoring</string>
     <string name="action_stop">Stop</string>
+    <string name="action_to_game">To the game</string>
     <string name="action_use_point">Use this point</string>
     <string name="active_algorithm">Active algorithm</string>
     <string name="active_badge">Active</string>
@@ -185,6 +186,11 @@
     <string name="floating_panel">Floating mode</string>
     <string name="floating_panel_hint">Panel over all apps: status, the auto-clicker, the algorithms with their clicks (picked right on the screen) and the settings. – shrinks it to a circle; it stays until you close it with ✕, also when monitoring is stopped. Keep it away from the tile row and from the click points.</string>
     <string name="frames_value">Frames: %1$d</string>
+    <string name="game_link_invalid">Not a valid link</string>
+    <string name="game_link_none">Long-press to add the link</string>
+    <string name="game_link_open_failed">No app can open this link. Long-press To the game to change it.</string>
+    <string name="game_link_text">The page of the game (or a link its app opens). A tap on To the game opens it; a long press changes it. Empty removes it.</string>
+    <string name="game_link_title">Game link</string>
     <string name="global_delay">Global delay</string>
     <string name="global_delay_hint">Default time until the next click for steps that have no own time.</string>
     <string name="guard_line_active">Part %1$d/%2$d · %3$s / %4$s · stake %5$s</string>

@@ -14,6 +14,7 @@ import app.coefmonitor.core.BalanceControl
 import app.coefmonitor.core.Coefficient
 import app.coefmonitor.core.DelayPolicy
 import app.coefmonitor.core.DetectorConfig
+import app.coefmonitor.core.GameLink
 import app.coefmonitor.core.GuardedConfig
 import app.coefmonitor.data.db.StorageJson
 import kotlinx.coroutines.flow.Flow
@@ -42,6 +43,8 @@ data class AppSettings(
     val guarded: GuardedConfig? = null,
     /** Balance management ("Идораи баланс"): internet speed and balance checks; null while it is off. */
     val balanceControl: BalanceControl? = null,
+    /** The link "To the game" opens; null until one is saved. */
+    val gameUrl: String? = null,
 ) {
     /** The guarded start as it runs: with the balance check of [balanceControl], if any. */
     val effectiveGuarded: GuardedConfig? get() = guarded?.copy(balance = balanceControl?.balance)
@@ -72,6 +75,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val ACTIVE_PRESET = longPreferencesKey("active_preset_id")
         val GUARDED = stringPreferencesKey("guarded_json")
         val BALANCE_CONTROL = stringPreferencesKey("balance_control_json")
+        val GAME_URL = stringPreferencesKey("game_url")
     }
 
     val settings: Flow<AppSettings> = dataStore.data
@@ -107,6 +111,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
                     // The balance belongs to the balance management now.
                     ?.copy(balance = null)
             },
+            gameUrl = (this[Keys.GAME_URL]?.let(GameLink::parse) as? GameLink.Parsed.Valid)?.url,
             balanceControl = this[Keys.BALANCE_CONTROL]?.let { json ->
                 runCatching { StorageJson.decodeFromString(BalanceControl.serializer(), json) }.getOrNull()?.takeIf { it.problem() == null }
             },
@@ -128,6 +133,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         if (presetId == null) remove(Keys.ACTIVE_PRESET) else this[Keys.ACTIVE_PRESET] = presetId
         val guarded = settings.guarded
         if (guarded == null) remove(Keys.GUARDED) else this[Keys.GUARDED] = StorageJson.encodeToString(GuardedConfig.serializer(), guarded)
+        val gameUrl = settings.gameUrl
+        if (gameUrl == null) remove(Keys.GAME_URL) else this[Keys.GAME_URL] = gameUrl
         val control = settings.balanceControl
         if (control == null) {
             remove(Keys.BALANCE_CONTROL)

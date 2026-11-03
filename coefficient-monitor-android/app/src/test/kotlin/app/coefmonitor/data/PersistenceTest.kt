@@ -427,6 +427,10 @@ class PersistenceTest {
         assertEquals(5, restored.detector.requiredStableFrames)
         assertEquals(guarded, restored.guarded)
         assertTrue(restored.stakeButtonOnly)
+        repo2.update { it.copy(gameUrl = "https://1win.com/casino/play/lucky-jet") }
+        assertEquals("https://1win.com/casino/play/lucky-jet", repo2.current().gameUrl)
+        repo2.update { it.copy(gameUrl = null) }
+        assertEquals(null, repo2.current().gameUrl)
         repo2.update { it.copy(stakeButtonOnly = false) }
         assertEquals(false, repo2.current().stakeButtonOnly)
         repo2.update { it.copy(guarded = null) }
