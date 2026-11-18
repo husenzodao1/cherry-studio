@@ -6,7 +6,7 @@ import { useState } from 'react'
 
 import { Icon } from '@/web/components/Icon'
 import { Empty, ErrorState, Loading } from '@/web/components/States'
-import { ART, SCHOOL_ART } from '@/web/art'
+import { ART } from '@/web/art'
 import { GlassScene } from '@/web/glass/GlassScene'
 import { usePrefs } from '@/web/prefs'
 import { useApi } from '@/web/useApi'
@@ -37,17 +37,15 @@ export default function SchoolPage() {
   return (
     <>
       {back}
-      <div style={{ position: 'relative', marginTop: 52 }}>
-        {SCHOOL_ART[s.slug] ? (
-          <img className="art-pop float-slow" src={SCHOOL_ART[s.slug].src} alt="" aria-hidden="true"
-            style={{ right: 18, top: -64, height: 'clamp(130px, 22vw, 190px)', width: 'auto' }} />
-        ) : null}
-        <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true" style={{ left: -20, bottom: -30, width: 140, transform: 'rotate(-8deg)' }} />
+      <div style={{ position: 'relative', marginTop: 70 }}>
+        <img className="art-pop float-slow" src={ART.rose.src} alt="" aria-hidden="true"
+          style={{ right: 6, top: -78, width: 'clamp(170px, 34vw, 260px)', height: 'auto' }} />
+        <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true" style={{ left: -24, bottom: -36, width: 'clamp(160px, 28vw, 240px)', transform: 'rotate(-6deg)' }} />
         <section className="hero-card" style={{ height: 'clamp(260px, 46vw, 380px)' }} aria-hidden="true">
           <GlassScene word={s.title} variant="sculpture" accent={s.theme_color ?? '#59446e'} />
         </section>
       </div>
-      <div className="section" style={{ marginTop: 20 }}>
+      <div className="section" style={{ marginTop: 52 }}>
         <div className="eyebrow">{t('nav.schools')}</div>
         <h1 className="h-page">{s.title}</h1>
         {s.description ? <p className="muted" style={{ margin: 0 }}>{s.description}</p> : null}

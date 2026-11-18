@@ -14,7 +14,7 @@ export default function Schools() {
       <div style={{ marginTop: 18 }}>
         {schools.error ? <ErrorState error={schools.error} onRetry={schools.reload} />
           : !schools.data ? <Loading />
-            : <div className="grid-auto pop-row" style={{ rowGap: 54 }}>{schools.data.map((s, i) => <SchoolCard key={s.id} school={s} index={i} />)}</div>}
+            : <div className="grid-auto pop-row" style={{ rowGap: 64, gridTemplateColumns: 'repeat(auto-fill, minmax(min(46%, 230px), 1fr))' }}>{schools.data.map((s, i) => <SchoolCard key={s.id} school={s} index={i} />)}</div>}
       </div>
     </>
   )

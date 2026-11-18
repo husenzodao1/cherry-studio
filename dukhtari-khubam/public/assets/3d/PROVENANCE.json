@@ -1,17 +1,76 @@
 {
   "note": "Pre-rendered 3D assets (spec §8.9, §9). Rendered offline with tools/render-assets (three.js, physically based materials, HDRI lighting). No AI-generated imagery.",
-  "lighting": { "hdri": "Studio Small 09", "author": "Sergej Majboroda", "source": "https://polyhaven.com/a/studio_small_09", "license": "CC0 1.0" },
+  "lighting": {
+    "hdri": "Studio Small 09",
+    "author": "Sergej Majboroda",
+    "source": "https://polyhaven.com/a/studio_small_09",
+    "license": "CC0 1.0"
+  },
   "assets": {
-    "icon-religion.webp": { "model": "Brass Diya Lantern", "author": "Bhargav Kubal", "source": "https://polyhaven.com/a/brass_diya_lantern", "license": "CC0 1.0" },
-    "icon-ethics.webp": { "model": "Heart (procedural geometry, glossy clear-coat material)", "author": "Dukhtari Khubam project", "license": "project-owned" },
-    "icon-culture.webp": { "model": "Brass Vase 02", "author": "Rico Cilliers", "source": "https://polyhaven.com/a/brass_vase_02", "license": "CC0 1.0" },
-    "icon-family.webp": { "model": "Tea Set 01 (teapot)", "author": "James Ray Cock, Rico Cilliers, Jurita Burger", "source": "https://polyhaven.com/a/tea_set_01", "license": "CC0 1.0" },
-    "icon-health.webp": { "model": "Periwinkle Plant (photo-scanned)", "author": "Amal Kumar", "source": "https://polyhaven.com/a/periwinkle_plant", "license": "CC0 1.0" },
-    "icon-growth.webp": { "model": "Star (procedural geometry, gold metal material)", "author": "Dukhtari Khubam project", "license": "project-owned" },
-    "icon-modern.webp": { "model": "Alarm Clock 01", "author": "James Ray Cock, Yann Kervran", "source": "https://polyhaven.com/a/alarm_clock_01", "license": "CC0 1.0" },
-    "flower-branch.webp": { "model": "Periwinkle Plant (photo-scanned)", "author": "Amal Kumar", "source": "https://polyhaven.com/a/periwinkle_plant", "license": "CC0 1.0" },
-    "flower-cluster.webp": { "model": "Periwinkle Plant (photo-scanned)", "author": "Amal Kumar", "source": "https://polyhaven.com/a/periwinkle_plant", "license": "CC0 1.0" },
-    "diamond-cluster.webp": { "model": "Round brilliant cut (procedural facets), ray-traced IOR 2.42 with dispersion and internal reflection", "author": "Dukhtari Khubam project", "license": "project-owned" },
-    "diamond-single.webp": { "model": "Round brilliant cut (procedural facets)", "author": "Dukhtari Khubam project", "license": "project-owned" }
+    "icon-religion.webp": {
+      "model": "Lotus bloom (procedural petals: parametric surfaces, vein texture, sheen, translucency)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned"
+    },
+    "icon-ethics.webp": {
+      "model": "Heart (procedural geometry, glossy clear-coat material)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned"
+    },
+    "icon-culture.webp": {
+      "model": "Brass Vase 02",
+      "author": "Rico Cilliers",
+      "source": "https://polyhaven.com/a/brass_vase_02",
+      "license": "CC0 1.0",
+      "note": "rose-gold tint applied at render time"
+    },
+    "icon-family.webp": {
+      "model": "Tea Set 01 (teapot)",
+      "author": "James Ray Cock, Rico Cilliers, Jurita Burger",
+      "source": "https://polyhaven.com/a/tea_set_01",
+      "license": "CC0 1.0"
+    },
+    "icon-health.webp": {
+      "model": "Lotus bloom (procedural petals: parametric surfaces, vein texture, sheen, translucency)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned"
+    },
+    "icon-growth.webp": {
+      "model": "Star (procedural geometry, gold metal material)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned"
+    },
+    "icon-modern.webp": {
+      "model": "Alarm Clock 01",
+      "author": "James Ray Cock, Yann Kervran",
+      "source": "https://polyhaven.com/a/alarm_clock_01",
+      "license": "CC0 1.0",
+      "note": "lavender tint applied at render time"
+    },
+    "flower-cluster.webp": {
+      "model": "Lotus blooms, bud and amethyst-style crystals (procedural; crystals ray-traced IOR 1.55)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned"
+    },
+    "diamond-cluster.webp": {
+      "model": "Round brilliant cut (procedural facets), ray-traced IOR 2.42 with dispersion and internal reflection",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned"
+    },
+    "diamond-single.webp": {
+      "model": "Round brilliant cut (procedural facets)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned"
+    },
+    "flower-lotus.webp": {
+      "model": "Lotus bloom (procedural petals: parametric surfaces, vein texture, sheen, translucency)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned"
+    },
+    "rose.webp": {
+      "model": "Rose/peony bloom (procedural golden-angle petal spiral)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned"
+    }
   }
 }

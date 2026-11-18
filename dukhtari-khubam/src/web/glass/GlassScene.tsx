@@ -218,9 +218,9 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
     const radius = variant === 'sphere' ? 1.3 : 0.86
     const center = new THREE.Vector3(variant === 'sphere' ? 0.9 : 0.55, variant === 'sphere' ? -0.62 : -0.1, 0.6)
     if (variant === 'sphere') {
-      const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.36, 64, 48), glossy('#b493d9'))
+      const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.48, 64, 48), glossy('#b493d9'))
       pearl.position.set(1.95, 0.55, -0.6)
-      const pearl2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 48, 32), glossy('#e7b7cf'))
+      const pearl2 = new THREE.Mesh(new THREE.SphereGeometry(0.3, 48, 32), glossy('#e7b7cf'))
       pearl2.position.set(-0.1, 0.6, -0.9)
       const ring = new THREE.Mesh(new THREE.TorusGeometry(1.65, 0.028, 24, 200), chrome)
       ring.position.copy(center).setZ(-0.35)
@@ -246,7 +246,7 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
         [1.55, -0.4, -0.5, 0.5, purple], [-0.2, -0.85, -0.2, 0.3, purple]
       ]
       for (const [x, y, z, r, m] of balls) {
-        const b = new THREE.Mesh(new THREE.SphereGeometry(r, 64, 48), m)
+        const b = new THREE.Mesh(new THREE.SphereGeometry(r * 1.38, 64, 48), m)
         b.position.set(x, y, z)
         objects.add(b)
       }

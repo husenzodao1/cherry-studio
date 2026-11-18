@@ -285,7 +285,7 @@ textarea.input { border-radius: 18px; padding: 14px 18px; min-height: 120px; res
 :root[data-theme='dark'] .art-pop, :root[data-theme='dark'] .deco { filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.55)); }
 .page-deco { position: fixed; pointer-events: none; z-index: 0; height: auto; opacity: 0.6; }
 .app > :not(.page-deco) { position: relative; z-index: 1; }
-.pop-row { padding-top: 40px; }
+.pop-row { padding-top: 52px; }
 @media (prefers-reduced-motion: no-preference) {
   :root:not([data-motion='reduce']) .float-slow { animation: float 6s ease-in-out infinite alternate; }
 }

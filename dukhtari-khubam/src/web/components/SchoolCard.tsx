@@ -23,20 +23,18 @@ export function SchoolCard({ school, index }: { school: SchoolSummary; index: nu
   const art = school.icon?.url ? { src: school.icon.url, w: 1, h: 1 } : SCHOOL_ART[school.slug]
   return (
     <Link href={`/schools/${school.slug}`} className={`card card-pad ${tone}`}
-      style={{ display: 'flex', flexDirection: 'column', gap: 18, minHeight: 190, textDecoration: 'none', position: 'relative', overflow: 'visible' }}>
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 10, minHeight: 230,
+        paddingTop: 92, textDecoration: 'none', position: 'relative', overflow: 'visible' }}>
       {art ? (
         <img className="art-pop" src={art.src} alt="" aria-hidden="true" loading="lazy" decoding="async"
-          style={{ top: -38, right: 6, height: 112, width: 'auto', maxWidth: 120 }} />
+          style={{ top: -54, left: '50%', transform: 'translateX(-50%)', height: 136, width: 'auto', maxWidth: '86%', objectFit: 'contain' }} />
       ) : null}
-      <div className="row" style={{ alignItems: 'flex-start', paddingRight: 92 }}>
-        <b style={{ flex: 1, fontWeight: 500, fontSize: '1.08em', lineHeight: 1.25 }}>{school.title}</b>
-      </div>
-      <div style={{ marginTop: 'auto' }} className="row">
-        <div>
+      <b style={{ fontWeight: 500, fontSize: '1.05em', lineHeight: 1.25 }}>{school.title}</b>
+      <div className="row" style={{ marginTop: 'auto', width: '100%', textAlign: 'start' }}>
+        <div style={{ flex: 1 }}>
           <div className="eyebrow">{t('section.courses')}</div>
-          <div className="big-number">{school.course_count}</div>
+          <div className="big-number" style={{ fontSize: '2.2rem' }}>{school.course_count}</div>
         </div>
-        <span className="spacer" style={{ flex: 1 }} />
         <span className="btn" style={{ width: 40, minHeight: 40, padding: 0 }} aria-hidden="true"><Icon name="arrow" size={16} /></span>
       </div>
     </Link>

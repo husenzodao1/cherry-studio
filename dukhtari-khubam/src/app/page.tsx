@@ -36,11 +36,12 @@ export default function Home() {
         <Link href="/profile" className="icon-btn" aria-label={t('nav.profile')}><Icon name="user" /></Link>
       </header>
 
-      <img className="page-deco" src={ART.diamonds.src} alt="" aria-hidden="true" style={{ top: 6, right: -46, width: 170 }} />
+      <img className="page-deco" src={ART.diamonds.src} alt="" aria-hidden="true" style={{ top: 560, left: -64, width: 180 }} />
       <div style={{ position: 'relative', marginTop: 18 }}>
-      <img className="deco" src={ART.flowerBranch.src} alt="" aria-hidden="true"
-        style={{ right: -14, top: -46, width: 132, ['--r' as string]: '14deg', transform: 'scaleX(-1) rotate(14deg)' }} />
-      <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true" style={{ left: -22, bottom: -34, width: 150, transform: 'rotate(-10deg)' }} />
+      <img className="deco float-slow" src={ART.lotus.src} alt="" aria-hidden="true"
+        style={{ right: -16, top: -14, width: 'clamp(110px, 18vw, 160px)', ['--r' as string]: '8deg' }} />
+      <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true"
+        style={{ left: -26, bottom: -40, width: 'clamp(170px, 30vw, 260px)', transform: 'rotate(-6deg)' }} />
       <section className="hero-card" style={{ height: 'clamp(300px, 52vw, 440px)' }} aria-label={t('home.inspiration')}>
         <GlassScene word="дониш" variant="sphere" />
         {inspiration.data ? (
@@ -56,6 +57,7 @@ export default function Home() {
         ) : null}
       </section>
       </div>
+      <div style={{ height: 22 }} />
 
       {cont.data ? (
         <section className="section">
