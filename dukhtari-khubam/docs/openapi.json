@@ -1617,6 +1617,282 @@
         ]
       }
     },
+    "/bundle": {
+      "get": {
+        "tags": [
+          "Offline app"
+        ],
+        "summary": "Whole published catalogue for offline use (lessons, quizzes with answer keys, texts); send If-None-Match",
+        "operationId": "getBundle",
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "tg",
+              "type": "string",
+              "enum": [
+                "tg",
+                "ru",
+                "ar"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/sync": {
+      "post": {
+        "tags": [
+          "Offline app"
+        ],
+        "summary": "Back up progress under the learner code; returns the merged progress (phone and backup combined)",
+        "operationId": "postProfileSync",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "v": {
+                        "type": "number",
+                        "const": 1
+                      },
+                      "lessons": {
+                        "default": {},
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "additionalProperties": {
+                          "type": "object",
+                          "properties": {
+                            "p": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "done": {
+                              "type": "string",
+                              "maxLength": 40
+                            },
+                            "at": {
+                              "type": "string",
+                              "maxLength": 40
+                            }
+                          },
+                          "required": [
+                            "p",
+                            "at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "quizzes": {
+                        "default": {},
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "additionalProperties": {
+                          "type": "object",
+                          "properties": {
+                            "best": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "passed": {
+                              "type": "boolean"
+                            },
+                            "tries": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100000
+                            },
+                            "at": {
+                              "type": "string",
+                              "maxLength": 40
+                            }
+                          },
+                          "required": [
+                            "best",
+                            "passed",
+                            "tries",
+                            "at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "bookmarks": {
+                        "default": {},
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "additionalProperties": {
+                          "type": "object",
+                          "properties": {
+                            "on": {
+                              "type": "boolean"
+                            },
+                            "at": {
+                              "type": "string",
+                              "maxLength": 40
+                            }
+                          },
+                          "required": [
+                            "on",
+                            "at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "achievements": {
+                        "default": {},
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "additionalProperties": {
+                          "type": "string",
+                          "maxLength": 40
+                        }
+                      },
+                      "last": {
+                        "type": "object",
+                        "properties": {
+                          "lesson": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "at": {
+                            "type": "string",
+                            "maxLength": 40
+                          }
+                        },
+                        "required": [
+                          "lesson",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "v"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "code",
+                  "name",
+                  "data"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/restore": {
+      "post": {
+        "tags": [
+          "Offline app"
+        ],
+        "summary": "Restore name and progress with the learner code (after reinstalling or on a new phone)",
+        "operationId": "postProfileRestore",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/schools": {
       "get": {
         "tags": [

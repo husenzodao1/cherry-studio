@@ -2,10 +2,11 @@
 export const env = {
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
   supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-  corsOrigins: (process.env.CORS_ORIGINS ?? '')
+  // The Android app (Capacitor) serves its pages from these origins and calls the API cross-origin.
+  corsOrigins: ['https://localhost', 'capacitor://localhost', ...(process.env.CORS_ORIGINS ?? '')
     .split(',')
     .map((s) => s.trim())
-    .filter(Boolean)
+    .filter(Boolean)]
 }
 
 export function isConfigured(): boolean {
