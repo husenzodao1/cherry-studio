@@ -22,7 +22,10 @@ const server = http.createServer((req, res) => {
     const t = Date.now()
     const out = await page.evaluate((j) => window.renderJob(j), job)
     fs.mkdirSync('out', { recursive: true })
-    fs.writeFileSync(`out/${job.name}.png`, Buffer.from(out.colorUrl.split(',')[1], 'base64'))
+    if (out.blackUrl) {
+      fs.writeFileSync(`out/${job.name}.b.png`, Buffer.from(out.blackUrl.split(',')[1], 'base64'))
+      fs.writeFileSync(`out/${job.name}.w.png`, Buffer.from(out.whiteUrl.split(',')[1], 'base64'))
+    } else fs.writeFileSync(`out/${job.name}.png`, Buffer.from(out.colorUrl.split(',')[1], 'base64'))
     if (out.maskUrl) fs.writeFileSync(`out/${job.name}.mask.png`, Buffer.from(out.maskUrl.split(',')[1], 'base64'))
     console.log(job.name, 'rendered in', Date.now() - t, 'ms')
     await page.close()

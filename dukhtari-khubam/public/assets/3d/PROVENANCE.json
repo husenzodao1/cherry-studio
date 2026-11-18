@@ -1,5 +1,5 @@
 {
- "note": "Pre-rendered 3D assets (spec §8.9, §9). Rendered offline with tools/render-assets (three.js, physically based materials, HDRI lighting). No AI-generated imagery.",
+ "note": "Pre-rendered 3D assets. Rendered offline with tools/render-assets (three.js, physically based materials with real transmission for glass, HDRI lighting); glass is shot on black and on white and matte.py recovers true transparency. No AI-generated imagery.",
  "lighting": {
   "hdri": "Studio Small 09",
   "author": "Sergej Majboroda",
@@ -7,193 +7,102 @@
   "license": "CC0 1.0"
  },
  "assets": {
-  "icon-religion.webp": {
-   "model": "Lotus on lily pads with dew (procedural petals with inner glow, sheen and clearcoat; animated-film look)",
+  "glass-flower.webp": {
+   "model": "Glass crocus (procedural petals, transmissive iridescent glass, golden anthers)",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-film.json)"
+   "source": "tools/render-assets (jobs-glass.json: gf-hero)"
   },
-  "icon-ethics.webp": {
-   "model": "Heart (procedural geometry, glossy clear-coat material)",
+  "glass-flower-side.webp": {
+   "model": "Glass crocus, side view",
    "author": "Dukhtari Khubam project",
-   "license": "project-owned"
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-glass.json: gf-side)"
   },
-  "icon-culture.webp": {
-   "model": "Brass Vase 02",
-   "author": "Rico Cilliers",
-   "source": "https://polyhaven.com/a/brass_vase_02",
-   "license": "CC0 1.0",
-   "note": "rose-gold tint applied at render time"
+  "glass-flower-open.webp": {
+   "model": "Glass crocus, open, seen from above",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-glass.json: gf-open)"
   },
-  "icon-family.webp": {
-   "model": "Tea Set 01 (teapot)",
-   "author": "James Ray Cock, Rico Cilliers, Jurita Burger",
-   "source": "https://polyhaven.com/a/tea_set_01",
-   "license": "CC0 1.0"
+  "glass-lens.webp": {
+   "model": "Glass lens (flattened sphere, transmissive glass)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-glass.json: lens-a)"
   },
-  "icon-health.webp": {
-   "model": "Pink water lily (photograph) on a calathea leaf",
+  "glass-bubble.webp": {
+   "model": "Glass sphere",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-glass.json: lens-b)"
+  },
+  "school-religion.webp": {
+   "model": "Mosque (procedural geometry, glossy lavender and gold)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-icons.json: ic-mosque)"
+  },
+  "school-ethics.webp": {
+   "model": "Heart (procedural geometry, pink-to-violet glossy finish)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-icons.json: ic-heart)"
+  },
+  "school-culture.webp": {
+   "model": "Flower (procedural petals, glossy finish)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-icons.json: ic-cosmos)"
+  },
+  "school-family.webp": {
+   "model": "House (procedural geometry, glossy finish)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-icons.json: ic-house)"
+  },
+  "school-health.webp": {
+   "model": "Sprout (procedural leaves)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-icons.json: ic-sprout)"
+  },
+  "school-growth.webp": {
+   "model": "Faceted crystal star (transmissive glass)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-icons.json: ic-star)"
+  },
+  "school-modern.webp": {
+   "model": "Light bulb (glass bulb, brass base, glowing filament)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-icons.json: ic-bulb)"
+  },
+  "book-open.webp": {
+   "model": "Open book on a rehal stand (procedural; abstract text lines, no real script)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-shrine.json: book-open)"
+  },
+  "hero-religion.webp": {
+   "model": "Open book on a rehal under a glass arch, with a hanging lantern and petals",
    "sources": [
     {
-     "title": "File:Hortus Haren. Waterlelie. (Nymphaea).JPG",
-     "author": "Dominicus Johannes Bergsma",
-     "license": "CC BY-SA 4.0",
-     "source": "https://commons.wikimedia.org/wiki/File:Hortus_Haren._Waterlelie._(Nymphaea).JPG"
+     "title": "Book, rehal, glass arch, petals",
+     "author": "Dukhtari Khubam project",
+     "license": "project-owned",
+     "source": "tools/render-assets (jobs-shrine.json: shrine)"
     },
     {
-     "title": "Calathea Orbifolia 01 (scan)",
-     "author": "Rob Tuytel, Rico Cilliers",
+     "title": "Brass Diya Lantern",
+     "author": "Bhargav Kubal",
      "license": "CC0 1.0",
-     "source": "https://polyhaven.com/a/calathea_orbifolia_01"
+     "source": "https://polyhaven.com/a/brass_diya_lantern",
+     "note": "glass panes given a warm glow at render time"
     }
    ],
-   "license": "CC BY-SA 4.0",
-   "processing": "Photograph cut out (rembg isnet-general-use segmentation, no generative fill), colour-graded, composed over scanned leaves by tools/render-assets/bouquet.py. Derived image shared under the photograph's licence."
-  },
-  "icon-growth.webp": {
-   "model": "Star (procedural geometry, gold metal material)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned"
-  },
-  "icon-modern.webp": {
-   "model": "Alarm Clock 01",
-   "author": "James Ray Cock, Yann Kervran",
-   "source": "https://polyhaven.com/a/alarm_clock_01",
-   "license": "CC0 1.0",
-   "note": "lavender tint applied at render time"
-  },
-  "flower-cluster.webp": {
-   "model": "Water lily, periwinkle and plumeria (photographs) on anthurium leaves",
-   "sources": [
-    {
-     "title": "File:Hortus Haren. Waterlelie. (Nymphaea).JPG",
-     "author": "Dominicus Johannes Bergsma",
-     "license": "CC BY-SA 4.0",
-     "source": "https://commons.wikimedia.org/wiki/File:Hortus_Haren._Waterlelie._(Nymphaea).JPG"
-    },
-    {
-     "title": "File:Catharanthus roseus — flower with water droplets on black background.jpg",
-     "author": "Fahim Shahriyar Rifat",
-     "license": "CC BY-SA 4.0",
-     "source": "https://commons.wikimedia.org/wiki/File:Catharanthus_roseus_%E2%80%94_flower_with_water_droplets_on_black_background.jpg"
-    },
-    {
-     "title": "File:White Plumeria from Kannur - Kerala.jpg",
-     "author": "Mullookkaaran",
-     "license": "CC BY-SA 3.0",
-     "source": "https://commons.wikimedia.org/wiki/File:White_Plumeria_from_Kannur_-_Kerala.jpg"
-    },
-    {
-     "title": "Anthurium Botany 01 (scan)",
-     "author": "Rob Tuytel, Rico Cilliers",
-     "license": "CC0 1.0",
-     "source": "https://polyhaven.com/a/anthurium_botany_01"
-    }
-   ],
-   "license": "CC BY-SA 4.0 (most restrictive source)",
-   "processing": "Photograph cut out (rembg isnet-general-use segmentation, no generative fill), colour-graded, composed over scanned leaves by tools/render-assets/bouquet.py. Derived image shared under the photograph's licence."
-  },
-  "diamond-cluster.webp": {
-   "model": "Round brilliant cut (procedural facets), ray-traced IOR 2.42 with dispersion and internal reflection",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned"
-  },
-  "diamond-single.webp": {
-   "model": "Round brilliant cut (procedural facets)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned"
-  },
-  "flower-lotus.webp": {
-   "model": "Water lily, Nymphaea capensis (photograph) on calathea leaves",
-   "sources": [
-    {
-     "title": "File:Nymphaea capensis flower in jaffna 3.JPG",
-     "author": "Aathavan jaffna",
-     "license": "CC BY-SA 3.0",
-     "source": "https://commons.wikimedia.org/wiki/File:Nymphaea_capensis_flower_in_jaffna_3.JPG"
-    },
-    {
-     "title": "Calathea Orbifolia 01 (scan)",
-     "author": "Rob Tuytel, Rico Cilliers",
-     "license": "CC0 1.0",
-     "source": "https://polyhaven.com/a/calathea_orbifolia_01"
-    }
-   ],
-   "license": "CC BY-SA 3.0",
-   "processing": "Photograph cut out (rembg isnet-general-use segmentation, no generative fill), colour-graded, composed over scanned leaves by tools/render-assets/bouquet.py. Derived image shared under the photograph's licence."
-  },
-  "gems/round.webp": {
-   "model": "Gem, round brilliant: convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-gems.json)"
-  },
-  "gems/pear.webp": {
-   "model": "Gem, pear brilliant: convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-gems.json)"
-  },
-  "gems/emerald.webp": {
-   "model": "Gem, emerald step cut: convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-gems.json)"
-  },
-  "gems/marquise.webp": {
-   "model": "Gem, marquise brilliant: convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-gems.json)"
-  },
-  "gems/princess.webp": {
-   "model": "Gem, princess (square brilliant): convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-gems.json)"
-  },
-  "gems/oval.webp": {
-   "model": "Gem, oval brilliant: convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-gems.json)"
-  },
-  "gems/trillion.webp": {
-   "model": "Gem, trillion brilliant: convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-gems.json)"
-  },
-  "gems/baguette.webp": {
-   "model": "Gem, baguette step cut: convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-gems.json)"
-  },
-  "garland.webp": {
-   "model": "Garland: periwinkle and plumeria (photographs) with rendered rose-gold stars on threads",
-   "sources": [
-    {
-     "title": "File:Catharanthus roseus — flower with water droplets on black background.jpg",
-     "author": "Fahim Shahriyar Rifat",
-     "license": "CC BY-SA 4.0",
-     "source": "https://commons.wikimedia.org/wiki/File:Catharanthus_roseus_%E2%80%94_flower_with_water_droplets_on_black_background.jpg"
-    },
-    {
-     "title": "File:White Plumeria from Kannur - Kerala.jpg",
-     "author": "Mullookkaaran",
-     "license": "CC BY-SA 3.0",
-     "source": "https://commons.wikimedia.org/wiki/File:White_Plumeria_from_Kannur_-_Kerala.jpg"
-    }
-   ],
-   "license": "CC BY-SA 4.0 (most restrictive source)",
-   "processing": "Photograph cut out (rembg isnet-general-use segmentation, no generative fill), colour-graded, composed over scanned leaves by tools/render-assets/bouquet.py. Derived image shared under the photograph's licence. Stars: tools/render-assets (jobs-leaves.json), project-owned."
-  },
-  "shapes.webp": {
-   "model": "Glossy geometric shapes in the interface palette (torus, spheres, rounded cube, cone, capsule, cylinder, icosahedron, chrome ring)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-shapes.json)"
+   "license": "project-owned (lantern model CC0)"
   }
  }
 }

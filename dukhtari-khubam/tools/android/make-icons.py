@@ -1,4 +1,4 @@
-"""Launcher icons and splash screens for the Android app from the 3D lotus (public/assets/3d/icon-religion.webp).
+"""Launcher icons and splash screens for the Android app from the rendered glass flower (public/assets/3d/glass-flower.webp).
 
 Usage: python3 tools/android/make-icons.py   (writes into android/app/src/main/res)
 """
@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 RES = os.path.join(ROOT, 'android', 'app', 'src', 'main', 'res')
-LOTUS = Image.open(os.path.join(ROOT, 'public', 'assets', '3d', 'icon-religion.webp')).convert('RGBA')
+LOTUS = Image.open(os.path.join(ROOT, 'public', 'assets', '3d', 'glass-flower.webp')).convert('RGBA')
 TOP, BOTTOM = (246, 240, 251), (224, 207, 238)  # interface lavender → lilac
 
 

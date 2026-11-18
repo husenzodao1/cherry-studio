@@ -8,6 +8,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js'
 import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
+import { buildKind } from './kit.js'
 
 // Brilliant-cut diamond: girdle 16, crown with table and star/kite facets, pavilion to culet.
 function brilliant() {
@@ -359,13 +360,14 @@ function crystalGeo(r = 0.18, h = 1, tip = 0.32) {
   const g = new THREE.BufferGeometry().setFromPoints(pts); g.computeVertexNormals(); return g
 }
 
+window.kitDeps = { petalGeo, placePetal, heartGeo }
 window.renderJob = async (job) => {
   const size = job.size ?? 1024
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true })
   renderer.setPixelRatio(1)
   renderer.setSize(size, size)
   renderer.outputColorSpace = THREE.SRGBColorSpace
-  renderer.toneMapping = job.tone === 'neutral' ? THREE.NeutralToneMapping : THREE.AgXToneMapping
+  renderer.toneMapping = job.tone === 'none' ? THREE.NoToneMapping : job.tone === 'neutral' ? THREE.NeutralToneMapping : THREE.AgXToneMapping
   renderer.toneMappingExposure = job.exposure ?? 1.1
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -378,8 +380,10 @@ window.renderJob = async (job) => {
   scene.environmentIntensity = job.envIntensity ?? 1
   scene.environmentRotation = new THREE.Euler(0, job.envRotation ?? 0, 0)
 
-  let object
-  if (job.kind === 'bloom') {
+  let object = await buildKind(job)
+  if (object) {
+    // built by kit.js
+  } else if (job.kind === 'bloom') {
     object = new THREE.Group()
     for (const f of job.flowers) {
       const b = bloom({ bud: f.bud, seed: f.seed, palette: f.palette, style: f.style, glow: f.glow, glowIntensity: f.glowIntensity, sheen: f.sheen, film: f.film, glowBase: f.glowBase, glowTip: f.glowTip })
@@ -502,6 +506,13 @@ window.renderJob = async (job) => {
     renderer.render(scene, camera)
     const maskUrl = renderer.domElement.toDataURL('image/png')
     return { colorUrl, maskUrl }
+  }
+  if (job.matte) {
+    // shoot on black and on white: matte.py recovers true transparency (glass, shadows) from the pair
+    renderer.setClearColor('#000000', 1); renderer.render(scene, camera)
+    const blackUrl = renderer.domElement.toDataURL('image/png')
+    renderer.setClearColor('#ffffff', 1); renderer.render(scene, camera)
+    return { blackUrl, whiteUrl: renderer.domElement.toDataURL('image/png') }
   }
   renderer.setClearColor('#000000', 0)
   renderer.render(scene, camera)
