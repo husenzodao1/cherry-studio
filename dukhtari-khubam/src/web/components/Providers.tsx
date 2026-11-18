@@ -7,6 +7,7 @@ import { AuthProvider } from '../auth'
 import { ContentProvider, useContent } from '../offline/content'
 import { LearnerProvider, useLearner } from '../offline/learner'
 import { PrefsProvider, usePrefs } from '../prefs'
+import { AppUpdate } from './AppUpdate'
 import { Dock } from './Dock'
 
 /** Pages a visitor may open before choosing a name or entering a code. */
@@ -44,6 +45,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <LearnerProvider>
             <Gate>{children}</Gate>
             <Dock />
+            <AppUpdate />
           </LearnerProvider>
         </ContentProvider>
       </PrefsProvider>

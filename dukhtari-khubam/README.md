@@ -9,7 +9,7 @@
 | REST API v1 (188 амалиёт, OpenAPI 3.1) | ✅ сохта шуд · `/api/v1/openapi.json` |
 | Web (хонанда) бо Real 3D Glass | ✅ сохта шуд |
 | Admin Panel (мундариҷа, Full Text Editor, Quiz Builder, медиа, матнҳо, корбарон) | ✅ `/admin`, аз ҷустуҷӯ бо калимаи махфии кормандон кушода мешавад |
-| Android (Kotlin + Compose) | ⏳ марҳилаи навбатӣ (аз ҳамин API истифода мебарад) |
+| Android (APK, офлайн) | ✅ Capacitor: ҳамин саҳифаҳо дар дохили APK, бе интернет кор мекунад · `npm run apk` · `/download/dukhtari-khubam.apk` |
 
 ## Структура
 
@@ -59,21 +59,38 @@ CORS_ORIGINS=                      # optional, comma-separated, for other web or
 
 Apply `supabase/migrations/*.sql` in filename order (Supabase CLI `supabase db push`, or the SQL editor).
 
-### E-mail codes
+## Offline app and learner codes
 
-Sign-up and code sign-in send a one-time code. In Supabase → Authentication → Emails, paste
-`supabase/templates/confirm-signup.html` into “Confirm signup” and `magic-link.html` into
-“Magic Link” (both use `{{ .Token }}`). The built-in Supabase mailer sends only a few e-mails per
-hour; connect your own SMTP for real use.
+- Learners have no e-mail account. `/start` asks for a name and shows a personal **15-digit code**
+  made on the phone; “Ворид” takes the code and restores progress from the backup.
+- The published catalogue (lessons, quizzes with answer keys, texts, achievements) is one document,
+  `GET /api/v1/bundle`, stored on the phone (IndexedDB) and refreshed by ETag whenever online.
+  Quizzes are graded on the phone with the same rules as the database.
+- Progress (reading, completed lessons, bookmarks, quiz results, achievements) is saved on the phone
+  and merged into the backup (`POST /profile/sync`, stored under sha256 of the code).
+- Because answer keys ship to the phone, quizzes are for learning, not for exams.
+
+### Android
+
+```bash
+npm run apk     # static export (out/) → content bundle embedded → cap sync → Gradle debug APK
+```
+
+Needs JDK 21 and the Android SDK (platform 36). The APK holds every page, font and image, so it
+opens and works without a connection; content updates arrive by themselves when online. A new app
+version (new code) is announced in the app from `/app-version.json`: raise `versionCode` there and
+in `android/app/build.gradle`, build, and publish the APK at `public/download/`. The current APK is a
+debug build for direct installation; Google Play needs a release build signed with your own key.
 
 ### First owner account
 
-1. Sign up on the website (`/login`).
+1. Create the owner account in Supabase → Authentication → Users (e-mail and password).
 2. In the Supabase SQL editor (runs as `postgres`, not reachable from the API):
    ```sql
    select private.grant_role_by_email('owner@example.com', 'super_admin');
    ```
-3. The owner then grants roles to others with `POST /api/v1/admin/users/{id}/roles`.
+3. Open the staff panel: type the staff passphrase in search, sign in with that e-mail and password.
+   The owner grants roles to other staff in the panel (Корбарон).
 
 Roles: `super_admin`, `content_admin` (publish), `author` (own content), `editor`, `reviewer`,
 `media_manager`, `analytics_viewer`.
