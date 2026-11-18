@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { ErrorState, Loading } from '../components/States'
+import { youtubeId } from '../components/YouTube'
 import { useApi } from '../useApi'
 import { MediaPicker } from './Media'
 import { Field, fromRich, LocaleTabs, Note, send, toRich, useAction, type Loc } from './ui'
@@ -19,7 +20,8 @@ const TYPES: { type: string; label: string }[] = [
   { type: 'heading', label: 'Сарлавҳа' }, { type: 'lead', label: 'Муқаддима' }, { type: 'paragraph', label: 'Параграф' },
   { type: 'bullet_list', label: 'Рӯйхат' }, { type: 'ordered_list', label: 'Рӯйхати рақамдор' }, { type: 'quote', label: 'Иқтибос' },
   { type: 'callout', label: 'Огоҳӣ / Маслиҳат' }, { type: 'practical_task', label: 'Супориши амалӣ' }, { type: 'source', label: 'Манбаъ' },
-  { type: 'image', label: 'Сурат' }, { type: 'video', label: 'Видео' }, { type: 'audio', label: 'Аудио' }, { type: 'divider', label: 'Ҷудокунанда' }
+  { type: 'image', label: 'Сурат' }, { type: 'youtube', label: 'Видеои YouTube (пайванд)' }, { type: 'video', label: 'Видео (файл)' },
+  { type: 'audio', label: 'Аудио' }, { type: 'divider', label: 'Ҷудокунанда' }
 ]
 const LABEL = Object.fromEntries(TYPES.map((t) => [t.type, t.label]))
 const RICH = new Set(['heading', 'subheading', 'paragraph', 'lead', 'caption', 'footnote'])
@@ -159,6 +161,20 @@ function BlockFields({ block, loc, onChange }: { block: Block; loc: Loc; onChang
           <input className="input" placeholder="Сол" value={(c.year as string) ?? ''} onChange={(e) => setContent({ ...c, year: e.target.value || undefined })} />
         </div>
         <input className="input" placeholder="https://…" value={(block.props.url as string) ?? ''} onChange={(e) => setProps({ url: e.target.value || undefined })} />
+      </>
+    )
+  }
+  if (block.type === 'youtube') {
+    // only the 11-character video id is stored; nothing is uploaded
+    const id = block.props.video_id as string | undefined
+    return (
+      <>
+        <input className="input" placeholder="https://youtu.be/… ё https://www.youtube.com/watch?v=…" defaultValue={id ? `https://youtu.be/${id}` : ''}
+          onChange={(e) => setProps({ video_id: youtubeId(e.target.value) ?? undefined })} />
+        {id ? <img src={`https://i.ytimg.com/vi/${id}/mqdefault.jpg`} alt="" style={{ width: 200, borderRadius: 14 }} />
+          : <p className="muted" style={{ margin: 0, fontSize: '0.85em' }}>Пайванди видеоро аз YouTube гузоред.</p>}
+        <input className="input" dir={dir} placeholder="Ном" value={(c.title as string) ?? ''} onChange={(e) => setContent({ ...c, title: e.target.value || undefined })} />
+        <input className="input" dir={dir} placeholder="Тавзеҳ (caption)" value={(c.caption as string) ?? ''} onChange={(e) => setContent({ ...c, caption: e.target.value || undefined })} />
       </>
     )
   }

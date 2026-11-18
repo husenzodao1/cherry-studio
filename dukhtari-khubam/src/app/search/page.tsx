@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
+import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { Empty } from '@/web/components/States'
 import { useContent, type Bundle } from '@/web/offline/content'
@@ -80,20 +81,21 @@ export default function SearchPage() {
   const hits = useMemo(() => (bundle && debounced.length >= 2 ? searchBundle(bundle, debounced) : null), [bundle, debounced])
   return (
     <>
-      <header className="topbar">
-        <Link href="/" className="icon-btn" aria-label={t('action.back')}><Icon name="back" /></Link>
-        <label style={{ flex: 1, position: 'relative' }}>
-          <span className="sr-only">{t('action.search')}</span>
-          <input className="input" type="search" autoFocus placeholder={t('action.search')} value={q} onChange={(e) => setQ(e.target.value)} />
-        </label>
-      </header>
-      <div className="section" aria-live="polite">
-        {hits && hits.length === 0 ? <Empty title={t('state.empty_search')} /> : null}
+      <Header back="/" title={t('action.search')} />
+      <label className="glass search-bar" style={{ marginTop: 18 }}>
+        <Icon name="search" />
+        <span className="sr-only">{t('action.search')}</span>
+        <input type="search" autoFocus placeholder={t('search.placeholder')} value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />
+      </label>
+      <div className="section stagger" aria-live="polite" key={debounced}>
+        {hits && hits.length === 0 ? <Empty icon="search" title={t('state.empty_search')} /> : null}
         {hits?.map((h) => (
-          <Link key={`${h.type}-${h.id}`} href={HREF[h.type](h.id)} className="card card-pad" style={{ textDecoration: 'none' }}>
-            <div className="eyebrow">{h.type === 'school' ? t('nav.schools') : h.type === 'course' ? t('section.courses') : t('section.lessons')}</div>
-            <b style={{ fontWeight: 500 }}>{h.title}</b>
-            {h.snippet ? <div className="muted" style={{ fontSize: '0.9em' }}>{h.snippet}</div> : null}
+          <Link key={`${h.type}-${h.id}`} href={HREF[h.type](h.id)} className="glass list-row">
+            <span className="row-icon"><Icon name={h.type === 'school' ? 'cap' : h.type === 'course' ? 'layers' : 'book'} /></span>
+            <span className="row-main">
+              <b>{h.title}</b>
+              <span className="row-sub">{h.snippet ?? (h.type === 'school' ? t('nav.schools') : h.type === 'course' ? t('section.courses') : t('section.lessons'))}</span>
+            </span>
           </Link>
         ))}
       </div>

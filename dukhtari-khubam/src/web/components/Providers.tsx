@@ -9,6 +9,7 @@ import { LearnerProvider, useLearner } from '../offline/learner'
 import { PrefsProvider, usePrefs } from '../prefs'
 import { AppUpdate } from './AppUpdate'
 import { Dock } from './Dock'
+import { NotifyBridge } from './NotifyBridge'
 
 /** Pages a visitor may open before choosing a name or entering a code. */
 const OPEN = /^\/(start|admin|page)(\/|$)/
@@ -36,16 +37,34 @@ function CmsStrings() {
   return null
 }
 
+/** Long presses and right clicks open no browser menu (text fields keep theirs). */
+function AppFeel() {
+  useEffect(() => {
+    const block = (e: Event) => {
+      if (!(e.target as Element | null)?.closest?.('input, textarea, select, [contenteditable="true"]')) e.preventDefault()
+    }
+    document.addEventListener('contextmenu', block)
+    document.addEventListener('dragstart', block)
+    return () => {
+      document.removeEventListener('contextmenu', block)
+      document.removeEventListener('dragstart', block)
+    }
+  }, [])
+  return null
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
       <PrefsProvider>
         <ContentProvider>
           <CmsStrings />
+          <AppFeel />
           <LearnerProvider>
             <Gate>{children}</Gate>
             <Dock />
             <AppUpdate />
+            <NotifyBridge />
           </LearnerProvider>
         </ContentProvider>
       </PrefsProvider>

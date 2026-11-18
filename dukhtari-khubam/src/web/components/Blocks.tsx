@@ -1,12 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { api } from '../api'
 import { useOfflineSrc } from '../offline/media'
 import { usePrefs } from '../prefs'
 import { Icon, type IconName } from './Icon'
+import { YouTube } from './YouTube'
 
 /** Renderer for CMS content blocks (schema v1) — the same structure Android renders natively. */
 
@@ -86,7 +87,9 @@ function Picture({ asset, caption, full }: { asset?: Asset; caption?: string; fu
     <figure style={full ? { marginInline: 'calc(50% - 50vw + 8px)' } : undefined}>
       {url ? (
         <img src={url} alt={asset.alt ?? ''} loading="lazy" decoding="async" width={asset.width ?? undefined}
-          height={asset.height ?? undefined} style={{ height: 'auto' }} />
+          height={asset.height ?? undefined} style={{ height: 'auto' }} className="fade"
+          ref={(el) => { if (el?.complete && el.naturalWidth) el.classList.add('is-ready') }}
+          onLoad={(e) => e.currentTarget.classList.add('is-ready')} />
       ) : <div className="skeleton" style={{ aspectRatio: '16 / 10' }} />}
       {caption || asset.caption ? <figcaption>{caption ?? asset.caption}</figcaption> : null}
     </figure>
@@ -111,13 +114,31 @@ function Video({ asset, poster, title, caption }: { asset?: Asset; poster?: Asse
   )
 }
 
+const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+
+/** Audio in a frosted glass player: round play button, time, seek bar. */
 function Audio({ asset, title, speaker }: { asset?: Asset; title?: string; speaker?: string }) {
   const url = useAssetUrl(asset)
+  const el = useRef<HTMLAudioElement>(null)
+  const [playing, setPlaying] = useState(false)
+  const [time, setTime] = useState(0)
+  const [duration, setDuration] = useState(0)
   if (!asset) return null
+  const name = title ?? asset.title ?? ''
   return (
-    <div className="card card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div className="row"><Icon name="play" /><b>{title ?? asset.title ?? ''}</b>{speaker ? <span className="muted">· {speaker}</span> : null}</div>
-      {url ? <audio controls preload="metadata" src={url} style={{ width: '100%' }} /> : <div className="skeleton" style={{ height: 40 }} />}
+    <div className="stack" style={{ gap: 8 }}>
+      {name ? <div className="row" style={{ gap: 8 }}><b style={{ fontWeight: 500 }}>{name}</b>{speaker ? <span className="muted">· {speaker}</span> : null}</div> : null}
+      <div className="player glass">
+        <button type="button" className="play-btn" style={{ width: 42, height: 42 }} disabled={!url} aria-label={name || 'audio'}
+          onClick={() => (el.current?.paused ? el.current.play() : el.current?.pause())}>
+          <Icon name={playing ? 'pause' : 'play'} size={18} fill="currentColor" />
+        </button>
+        <span className="time">{clock(time)} / {clock(duration)}</span>
+        <input type="range" min={0} max={Math.max(duration, 1)} step={1} value={time} aria-label="seek"
+          onChange={(e) => { if (el.current) el.current.currentTime = Number(e.target.value) }} />
+        {url ? <audio ref={el} preload="metadata" src={url} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
+          onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)} onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)} /> : null}
+      </div>
       {asset.transcript ? <details><summary>Транскрипт</summary><p>{asset.transcript}</p></details> : null}
     </div>
   )
@@ -172,6 +193,13 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return <Video asset={a(p.asset_id)} poster={a(p.poster_asset_id)} title={c.title} caption={c.caption} />
     case 'audio':
       return <Audio asset={a(p.asset_id)} title={c.title} speaker={c.speaker} />
+    case 'youtube':
+      return typeof p.video_id === 'string' ? (
+        <div className="stack" style={{ gap: 8 }}>
+          <YouTube id={p.video_id} start={p.start} title={c.title} />
+          {c.caption ? <p className="muted" style={{ fontSize: '0.88em' }}>{c.caption}</p> : null}
+        </div>
+      ) : null
     case 'quote':
       return (
         <blockquote className="quote" style={{ margin: 0 }}>
@@ -183,7 +211,7 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
     case 'callout':
       return (
         <aside className={`callout callout-${p.variant ?? 'note'}`}>
-          <Icon name={CALLOUT_ICON[p.variant] ?? 'info'} size={22} />
+          <Icon name={CALLOUT_ICON[p.variant] ?? 'info'} size={20} />
           <div>{c.title ? <b>{c.title}</b> : null}<RichText value={c.body} as="div" /></div>
         </aside>
       )
@@ -218,8 +246,10 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return <div className="card card-pad card-lilac"><b>{c.title}</b><RichText value={c.body} as="div" /></div>
     case 'quiz':
       return block.ref ? (
-        <Link href={`/quiz?id=${block.ref.id}`} className="card card-pad row" style={{ textDecoration: 'none' }}>
-          <Icon name="check" /><div style={{ flex: 1 }}><b>{block.ref.title}</b><div className="muted">{block.ref.question_count} {t('quiz.question').toLowerCase()}</div></div><Icon name="forward" />
+        <Link href={`/quiz?id=${block.ref.id}`} className="glass list-row">
+          <span className="row-icon"><Icon name="check" /></span>
+          <span className="row-main"><b>{block.ref.title}</b><span className="row-sub">{block.ref.question_count} {t('quiz.question').toLowerCase()}</span></span>
+          <Icon name="forward" />
         </Link>
       ) : null
     case 'related_lesson':

@@ -9,7 +9,11 @@ const config: CapacitorConfig = {
   appName: 'Духтари хубам',
   webDir: 'out',
   server: { androidScheme: 'https' },
-  android: { backgroundColor: '#f1eef5' }
+  android: { backgroundColor: '#ebe3fa' },
+  plugins: {
+    // daily lesson reminder and inspiration (src/web/offline/notify.ts)
+    LocalNotifications: { smallIcon: 'ic_stat_notify', iconColor: '#7A4FD8' }
+  }
 }
 
 export default config

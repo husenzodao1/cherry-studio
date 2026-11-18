@@ -6,9 +6,8 @@ const tg = {
   'nav.home': 'Асосӣ', 'nav.schools': 'Мактабҳо', 'nav.saved': 'Захираҳо', 'nav.profile': 'Профил',
   'home.greeting': 'Салом', 'home.continue_learning': 'Идомаи омӯзиш', 'home.seven_schools': 'Ҳафт мактаби дониш',
   'home.all_schools': 'Ҳамаи мактабҳо', 'home.inspiration': 'Илҳоми рӯз',
-  'glass.motto_1': 'Ту метавонӣ!', 'glass.motto_2': 'Хеле зебоед', 'glass.motto_3': 'Ба худ бовар кун',
   'app.update': 'Версияи нави барнома омода аст', 'app.update_action': 'Навсозӣ',
-  'start.welcome': 'Хуш омадед', 'start.tagline': 'Ҳамаи дарсҳо бе интернет ҳам кушода мешаванд.',
+  'start.welcome': 'Хуш омадед', 'start.subtitle': 'Зебоӣ дар дониш аст',
   'start.register': 'Бақайдгирӣ', 'start.login': 'Ворид', 'start.name': 'Номи шумо', 'start.create': 'Давом',
   'start.your_code': 'Коди шахсии шумо', 'start.keep_code': 'Ин кодро нависед ё акс гиред. Бо он пас аз насби дубора ё дар телефони дигар ҳамаи пешрафти шумо бармегардад.',
   'start.copy': 'Нусха гирифтан', 'start.copied': 'Нусха гирифта шуд', 'start.saved_it': 'Кодро сабт кардам',
@@ -25,10 +24,9 @@ const tg = {
   'section.progress': 'Пешрафт', 'section.results': 'Натиҷаҳо', 'section.courses': 'Курсҳо', 'section.about': 'Тавсиф',
   'section.achievements': 'Дастовардҳо', 'section.lessons': 'Дарсҳо', 'section.goals': 'Ҳадафҳо', 'section.quizzes': 'Тестҳо',
   'settings.title': 'Танзимот', 'settings.language': 'Забон', 'settings.theme': 'Режими намоиш',
-  'settings.notifications': 'Огоҳиҳо', 'settings.animation': 'Аниматсия', 'settings.text_size': 'Андозаи матн',
+  'settings.notifications': 'Огоҳиҳои ҳаррӯза', 'settings.text_size': 'Андозаи матн',
   'settings.privacy': 'Махфият', 'settings.about': 'Дар бораи барнома', 'settings.export': 'Маълумоти ман',
   'theme.light': 'Равшан', 'theme.dark': 'Торик', 'theme.system': 'Система',
-  'motion.full': 'Пурра', 'motion.reduce': 'Кам',
   'state.empty_courses': 'Ҳанӯз курс нест', 'state.empty_saved': 'Ҳанӯз захира нест', 'state.empty_results': 'Ҳанӯз натиҷа нест',
   'state.empty_search': 'Чизе ёфт нашуд', 'state.error': 'Хато шуд', 'state.offline': 'Пайваст нест',
   'state.not_configured': 'Сервер ҳанӯз танзим нашудааст', 'state.locked': 'Барои Premium', 'state.signin_needed': 'Ворид шавед',
@@ -38,7 +36,20 @@ const tg = {
   'quiz.your_answer': 'Ҷавоб', 'quiz.score': 'Хол', 'quiz.match_pick': 'Интихоб',
   'lesson.of': 'аз', 'lesson.minutes': 'дақ.', 'lesson.completed': 'Анҷом ёфт', 'lesson.mark_done': 'Анҷом', 'lesson.lesson': 'Дарси',
   'lesson.source': 'Манбаъ', 'lesson.important': 'Муҳим', 'profile.lessons': 'Дарсҳо', 'profile.courses': 'Курсҳо',
-  'profile.quizzes': 'Тестҳо', 'profile.badges': 'Нишонҳо'
+  'profile.quizzes': 'Тестҳо', 'profile.badges': 'Нишонҳо',
+  'greet.morning': 'Субҳ ба хайр', 'greet.day': 'Рӯз ба хайр', 'greet.evening': 'Шом ба хайр', 'greet.night': 'Шаб ба хайр',
+  'home.motto': 'Зебоӣ дар дониш аст.', 'home.continue_course': 'Идома додани курс', 'home.start_learning': 'Оғози омӯзиш',
+  'home.choose_school': 'Мактаберо интихоб кунед', 'home.all': 'Ҳамааш', 'home.quote': 'Дониш — нурест, ки роҳро равшан мекунад.',
+  'school.banner': 'Омӯзиш — қадами нур', 'school.courses_n': '{n} курс', 'course.modules_n': '{n} модул', 'course.lessons_n': '{n} дарс',
+  'lesson.next_page': 'Саҳифаи оянда', 'lesson.prev_page': 'Саҳифаи қаблӣ',
+  'profile.tagline': 'Духтари хубам', 'profile.streak': 'Рӯзҳо пай дар пай', 'profile.achievements': 'Дастовард',
+  'profile.night': 'Режими шабона', 'profile.my_saved': 'Захираҳои ман', 'profile.my_progress': 'Пешрафти ман',
+  'settings.code_hint': 'Бо ин код пешрафти худро дар телефони дигар ё баъди насби дубора бармегардонед.',
+  'settings.version': 'Версия', 'notify.daily': 'Ёдраси дарс ва илҳоми рӯз', 'notify.time': 'Вақт',
+  'notify.lesson_title': 'Вақти дарс 💜', 'notify.lesson_body': 'Дарси навбатии худро идома диҳед', 'notify.lesson_named': 'Идома диҳед: {title}',
+  'notify.inspiration_title': 'Илҳоми рӯз', 'notify.denied': 'Иҷозати огоҳиҳо дода нашуд. Онро дар танзимоти телефон фаъол кунед.',
+  'video.play': 'Тамошо', 'video.pause': 'Таваққуф', 'video.offline': 'Барои тамошои видео интернет лозим аст', 'video.mute': 'Овоз',
+  'search.placeholder': 'Ҷустуҷӯ…'
 }
 
 export type UiKey = keyof typeof tg
@@ -46,9 +57,8 @@ export type UiKey = keyof typeof tg
 const ru: Partial<Record<UiKey, string>> = {
   'nav.home': 'Главная', 'nav.schools': 'Школы', 'nav.saved': 'Сохранённое', 'nav.profile': 'Профиль',
   'home.greeting': 'Здравствуйте', 'home.continue_learning': 'Продолжить', 'home.seven_schools': 'Семь школ знаний',
-  'glass.motto_1': 'Ты сможешь!', 'glass.motto_2': 'Вы прекрасны', 'glass.motto_3': 'Верь в себя',
   'app.update': 'Доступна новая версия приложения', 'app.update_action': 'Обновить',
-  'start.welcome': 'Добро пожаловать', 'start.tagline': 'Все уроки открываются и без интернета.',
+  'start.welcome': 'Добро пожаловать', 'start.subtitle': 'Красота — в знании',
   'start.register': 'Регистрация', 'start.login': 'Вход', 'start.name': 'Ваше имя', 'start.create': 'Далее',
   'start.your_code': 'Ваш личный код', 'start.keep_code': 'Запишите или сфотографируйте этот код: по нему весь прогресс вернётся после переустановки или на другом телефоне.',
   'start.copy': 'Копировать', 'start.copied': 'Скопировано', 'start.saved_it': 'Я сохранила код',
@@ -61,17 +71,29 @@ const ru: Partial<Record<UiKey, string>> = {
   'home.all_schools': 'Все школы', 'action.continue': 'Продолжить', 'action.back': 'Назад', 'action.next': 'Далее',
   'action.prev': 'Назад', 'action.search': 'Поиск',
   'settings.title': 'Настройки', 'settings.language': 'Язык', 'settings.theme': 'Тема', 'settings.notifications': 'Уведомления',
-  'settings.animation': 'Анимация', 'settings.text_size': 'Размер текста', 'settings.privacy': 'Конфиденциальность',
+  'settings.text_size': 'Размер текста', 'settings.privacy': 'Конфиденциальность',
   'theme.light': 'Светлая', 'theme.dark': 'Тёмная', 'theme.system': 'Системная', 'state.error': 'Ошибка',
-  'state.empty_courses': 'Пока нет курсов', 'state.not_configured': 'Сервер ещё не настроен'
+  'state.empty_courses': 'Пока нет курсов', 'state.not_configured': 'Сервер ещё не настроен',
+  'greet.morning': 'Доброе утро', 'greet.day': 'Добрый день', 'greet.evening': 'Добрый вечер', 'greet.night': 'Доброй ночи',
+  'home.motto': 'Красота — в знании.', 'home.continue_course': 'Продолжить курс', 'home.start_learning': 'Начать обучение',
+  'home.choose_school': 'Выберите школу', 'home.all': 'Все', 'home.quote': 'Знание — свет, освещающий путь.',
+  'school.banner': 'Учёба — шаг к свету', 'school.courses_n': 'Курсов: {n}', 'course.modules_n': 'Модулей: {n}', 'course.lessons_n': 'Уроков: {n}',
+  'lesson.next_page': 'Следующая страница', 'lesson.prev_page': 'Предыдущая',
+  'profile.streak': 'Дней подряд', 'profile.achievements': 'Достижения', 'profile.night': 'Ночной режим',
+  'profile.my_saved': 'Моё сохранённое', 'profile.my_progress': 'Мой прогресс',
+  'settings.code_hint': 'С этим кодом прогресс вернётся на другом телефоне или после переустановки.',
+  'settings.version': 'Версия', 'notify.daily': 'Напоминание об уроке и вдохновение дня', 'notify.time': 'Время',
+  'notify.lesson_title': 'Время урока 💜', 'notify.lesson_body': 'Продолжите следующий урок', 'notify.lesson_named': 'Продолжите: {title}',
+  'notify.inspiration_title': 'Вдохновение дня', 'notify.denied': 'Уведомления не разрешены. Включите их в настройках телефона.',
+  'video.play': 'Смотреть', 'video.pause': 'Пауза', 'video.offline': 'Для просмотра видео нужен интернет', 'video.mute': 'Звук',
+  'search.placeholder': 'Поиск…'
 }
 
 const ar: Partial<Record<UiKey, string>> = {
   'nav.home': 'الرئيسية', 'nav.schools': 'المدارس', 'nav.saved': 'المحفوظات', 'nav.profile': 'الملف الشخصي',
   'home.greeting': 'مرحبًا', 'home.continue_learning': 'متابعة التعلّم', 'home.all_schools': 'كل المدارس',
-  'glass.motto_1': 'أنتِ قادرة!', 'glass.motto_2': 'أنتِ جميلة جدًا', 'glass.motto_3': 'ثقي بنفسك',
   'app.update': 'يتوفر إصدار جديد من التطبيق', 'app.update_action': 'تحديث',
-  'start.welcome': 'أهلًا بكِ', 'start.tagline': 'كل الدروس تعمل دون إنترنت.',
+  'start.welcome': 'أهلًا بكِ', 'start.subtitle': 'الجمال في المعرفة',
   'start.register': 'تسجيل', 'start.login': 'دخول', 'start.name': 'اسمكِ', 'start.create': 'متابعة',
   'start.your_code': 'رمزكِ الشخصي', 'start.keep_code': 'احفظي هذا الرمز: به يعود تقدّمكِ بعد إعادة التثبيت أو على هاتف آخر.',
   'start.copy': 'نسخ', 'start.copied': 'تم النسخ', 'start.saved_it': 'حفظتُ الرمز',
@@ -83,8 +105,21 @@ const ar: Partial<Record<UiKey, string>> = {
   'state.offline_empty': 'لم يُحمّل المحتوى بعد. اتصلي بالإنترنت مرة واحدة.',
   'action.continue': 'متابعة', 'action.back': 'رجوع', 'action.next': 'التالي', 'action.prev': 'السابق', 'action.search': 'بحث',
   'settings.title': 'الإعدادات', 'settings.language': 'اللغة', 'settings.theme': 'المظهر', 'settings.notifications': 'الإشعارات',
-  'settings.animation': 'الحركة', 'settings.text_size': 'حجم النص', 'settings.privacy': 'الخصوصية',
-  'theme.light': 'فاتح', 'theme.dark': 'داكن', 'theme.system': 'النظام', 'state.error': 'حدث خطأ'
+  'settings.text_size': 'حجم النص', 'settings.privacy': 'الخصوصية',
+  'theme.light': 'فاتح', 'theme.dark': 'داكن', 'theme.system': 'النظام', 'state.error': 'حدث خطأ',
+  'greet.morning': 'صباح الخير', 'greet.day': 'نهارك سعيد', 'greet.evening': 'مساء الخير', 'greet.night': 'تصبحين على خير',
+  'home.motto': 'الجمال في المعرفة.', 'home.continue_course': 'متابعة الدورة', 'home.start_learning': 'ابدئي التعلّم',
+  'home.choose_school': 'اختاري مدرسة', 'home.all': 'الكل', 'home.quote': 'العلم نورٌ يضيء الطريق.',
+  'school.banner': 'التعلّم خطوة نحو النور', 'school.courses_n': '{n} دورات', 'course.modules_n': '{n} وحدات', 'course.lessons_n': '{n} دروس',
+  'lesson.next_page': 'الصفحة التالية', 'lesson.prev_page': 'السابقة',
+  'profile.streak': 'أيام متتالية', 'profile.achievements': 'إنجازات', 'profile.night': 'الوضع الليلي',
+  'profile.my_saved': 'محفوظاتي', 'profile.my_progress': 'تقدّمي',
+  'settings.code_hint': 'بهذا الرمز يعود تقدّمكِ على هاتف آخر أو بعد إعادة التثبيت.',
+  'settings.version': 'الإصدار', 'notify.daily': 'تذكير بالدرس وإلهام اليوم', 'notify.time': 'الوقت',
+  'notify.lesson_title': 'وقت الدرس 💜', 'notify.lesson_body': 'تابعي درسكِ التالي', 'notify.lesson_named': 'تابعي: {title}',
+  'notify.inspiration_title': 'إلهام اليوم', 'notify.denied': 'لم يُسمح بالإشعارات. فعّليها من إعدادات الهاتف.',
+  'video.play': 'مشاهدة', 'video.pause': 'إيقاف مؤقت', 'video.offline': 'تحتاجين الإنترنت لمشاهدة الفيديو', 'video.mute': 'الصوت',
+  'search.placeholder': 'بحث…'
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, ar }

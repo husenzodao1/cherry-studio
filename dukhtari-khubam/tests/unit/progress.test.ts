@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 
 import { describe, expect, it } from 'vitest'
 
-import { emptyProgress, formatCode, isCode, mergeProgress, newCode, ProgressData } from '@/lib/progress'
+import { emptyProgress, formatCode, isCode, mergeProgress, newCode, ProgressData, streak, withDay } from '@/lib/progress'
 
 describe('progress merge', () => {
   const a: ProgressData = {
@@ -53,5 +53,27 @@ describe('learner codes', () => {
     expect(isCode('012345678901234')).toBe(false)
     expect(isCode('12345')).toBe(false)
     expect(formatCode('123456789012345')).toBe('12345 67890 12345')
+  })
+})
+
+describe('study days', () => {
+  it('records each day once and merges days from two phones', () => {
+    const p = withDay(withDay(emptyProgress(), '2026-11-17'), '2026-11-17')
+    expect(p.days).toEqual(['2026-11-17'])
+    const other = withDay(emptyProgress(), '2026-11-15')
+    expect(mergeProgress(p, other).days).toEqual(['2026-11-15', '2026-11-17'])
+  })
+
+  it('counts consecutive days ending today or yesterday', () => {
+    const today = new Date(2026, 10, 18, 9)
+    expect(streak(['2026-11-16', '2026-11-17', '2026-11-18'], today)).toBe(3)
+    expect(streak(['2026-11-16', '2026-11-17'], today)).toBe(2)
+    expect(streak(['2026-11-10', '2026-11-16'], today)).toBe(0)
+    expect(streak([], today)).toBe(0)
+  })
+
+  it('accepts backups saved before days were tracked', () => {
+    const old = ProgressData.parse({ v: 1, lessons: {}, quizzes: {}, bookmarks: {}, achievements: {} })
+    expect(old.days).toEqual([])
   })
 })

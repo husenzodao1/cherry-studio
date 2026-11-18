@@ -7,6 +7,7 @@ import { z } from 'zod'
  */
 
 const Iso = z.string().max(40)
+const MAX_DAYS = 400
 const Id = z.string().min(1).max(80)
 
 export const LessonProgress = z.strictObject({ p: z.number().min(0).max(100), done: Iso.optional(), at: Iso })
@@ -19,11 +20,37 @@ export const ProgressData = z.strictObject({
   quizzes: z.record(Id, QuizResult).default({}),
   bookmarks: z.record(Id, Bookmark).default({}),
   achievements: z.record(Id, Iso).default({}),
-  last: z.strictObject({ lesson: Id, at: Iso }).optional()
+  last: z.strictObject({ lesson: Id, at: Iso }).optional(),
+  /** local dates (YYYY-MM-DD) on which the learner studied, for the day streak */
+  days: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(MAX_DAYS).default([])
 })
 export type ProgressData = z.infer<typeof ProgressData>
 
-export const emptyProgress = (): ProgressData => ({ v: 1, lessons: {}, quizzes: {}, bookmarks: {}, achievements: {} })
+export const emptyProgress = (): ProgressData => ({ v: 1, lessons: {}, quizzes: {}, bookmarks: {}, achievements: {}, days: [] })
+
+/** Calendar date on the phone's own clock. */
+export const localDay = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+const keepDays = (days: Iterable<string>) => [...new Set(days)].sort().slice(-MAX_DAYS)
+
+/** Records a day of study (no change if it is already there). */
+export function withDay(p: ProgressData, day = localDay()): ProgressData {
+  return p.days.includes(day) ? p : { ...p, days: keepDays([...p.days, day]) }
+}
+
+/** Consecutive study days ending today (or yesterday, so the streak survives until the day is over). */
+export function streak(days: string[], today = new Date()): number {
+  const set = new Set(days)
+  const d = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  if (!set.has(localDay(d))) d.setDate(d.getDate() - 1)
+  let n = 0
+  while (set.has(localDay(d))) {
+    n++
+    d.setDate(d.getDate() - 1)
+  }
+  return n
+}
 
 const later = (a?: string, b?: string) => (!a ? b : !b ? a : a >= b ? a : b)
 const earlier = (a?: string, b?: string) => (!a ? b : !b ? a : a <= b ? a : b)
@@ -56,6 +83,7 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   }
   const last = !a.last ? b.last : !b.last ? a.last : a.last.at >= b.last.at ? a.last : b.last
   if (last) out.last = last
+  out.days = keepDays([...a.days, ...b.days])
   return out
 }
 

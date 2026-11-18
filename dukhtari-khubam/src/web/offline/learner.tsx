@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
-import { emptyProgress, isCode, mergeProgress, newCode, ProgressData } from '@/lib/progress'
+import { emptyProgress, isCode, mergeProgress, newCode, ProgressData, withDay } from '@/lib/progress'
 
 import { apiUrl } from './base'
 import { useContent, type Bundle } from './content'
@@ -209,10 +209,10 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     readLesson: (id, percent) => update((p) => {
       const cur = p.lessons[id]
       const pct = Math.max(cur?.p ?? 0, Math.min(100, Math.round(percent)))
-      if (cur && cur.p >= pct && p.last?.lesson === id) return p
-      return { ...p, lessons: { ...p.lessons, [id]: { ...cur, p: pct, at: now() } }, last: { lesson: id, at: now() } }
+      if (cur && cur.p >= pct && p.last?.lesson === id) return withDay(p)
+      return withDay({ ...p, lessons: { ...p.lessons, [id]: { ...cur, p: pct, at: now() } }, last: { lesson: id, at: now() } })
     }),
-    completeLesson: (id) => update((p) => ({
+    completeLesson: (id) => update((p) => withDay({
       ...p,
       lessons: { ...p.lessons, [id]: { p: 100, done: p.lessons[id]?.done ?? now(), at: now() } },
       last: { lesson: id, at: now() }
@@ -220,10 +220,10 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     toggleBookmark: (id) => update((p) => ({ ...p, bookmarks: { ...p.bookmarks, [id]: { on: !p.bookmarks[id]?.on, at: now() } } })),
     recordQuiz: (id, percent, passed) => update((p) => {
       const cur = p.quizzes[id]
-      return {
+      return withDay({
         ...p,
         quizzes: { ...p.quizzes, [id]: { best: Math.max(cur?.best ?? 0, percent), passed: (cur?.passed ?? false) || passed, tries: (cur?.tries ?? 0) + 1, at: now() } }
-      }
+      })
     })
   }), [ready, learner, progress, sync, update])
 

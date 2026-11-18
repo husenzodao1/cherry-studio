@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geologica, Lora, Noto_Naskh_Arabic } from 'next/font/google'
 import type { ReactNode } from 'react'
 
-import { GemField } from '@/web/components/GemField'
+import { Backdrop } from '@/web/components/Backdrop'
 import { Providers } from '@/web/components/Providers'
 
 import './globals.css'
@@ -21,11 +21,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f1eef5' },
-    { media: '(prefers-color-scheme: dark)', color: '#120e17' }
+    { media: '(prefers-color-scheme: light)', color: '#f1ebfc' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1333' }
   ],
   width: 'device-width',
   initialScale: 1,
+  // an app, not a page: no pinch zoom (text size is a setting)
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: 'cover'
 }
 
@@ -40,7 +43,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <Providers>
-          <GemField />
+          <Backdrop />
           <main className="app">{children}</main>
         </Providers>
       </body>

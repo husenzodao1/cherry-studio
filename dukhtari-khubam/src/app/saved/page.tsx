@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 
+import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { Empty } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
@@ -19,13 +20,13 @@ export default function SavedPage() {
     .filter((l) => !!l)
   return (
     <>
-      <header className="topbar"><h1 className="h-page">{t('nav.saved')}</h1></header>
-      <div className="section">
-        {saved.length === 0 ? <Empty title={t('state.empty_saved')} /> : saved.map((l) => (
-          <Link key={l!.id} href={`/lesson?id=${l!.id}`} className="card card-pad row" style={{ textDecoration: 'none' }}>
-            <Icon name="bookmark" fill="currentColor" />
-            <div style={{ flex: 1 }}><b style={{ fontWeight: 500 }}>{l!.title}</b><div className="eyebrow">{l!.context.school.title} · {l!.context.course.title}</div></div>
-            <Icon name="forward" />
+      <Header back="/" title={t('nav.saved')} />
+      <div className="section stagger">
+        {saved.length === 0 ? <Empty icon="bookmark" title={t('state.empty_saved')} /> : saved.map((l) => (
+          <Link key={l!.id} href={`/lesson?id=${l!.id}`} className="glass list-row">
+            <span className="row-icon"><Icon name="bookmark" fill="currentColor" /></span>
+            <span className="row-main"><b>{l!.title}</b><span className="row-sub">{l!.context.school.title} · {l!.context.course.title}</span></span>
+            <Icon name="forward" size={18} />
           </Link>
         ))}
       </div>

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Suspense, useMemo, useState } from 'react'
 
+import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { Empty, Loading } from '@/web/components/States'
 import { useContent, type OfflineOption as Option, type OfflineQuiz } from '@/web/offline/content'
@@ -26,8 +27,8 @@ function Quiz() {
   const { t } = usePrefs()
   const { bundle, loading } = useContent()
   const quiz = bundle?.quizzes[id]
-  if (!bundle) return loading ? <Loading /> : <p className="muted">{t('state.offline_empty')}</p>
-  if (!quiz) return <Empty title={t('state.empty_courses')} />
+  if (!bundle) return <><Header back="/" />{loading ? <Loading /> : <Empty icon="info" title={t('state.offline_empty')} />}</>
+  if (!quiz) return <><Header back="/" /><Empty title={t('state.empty_courses')} /></>
   return <Player key={id} quiz={quiz} />
 }
 
@@ -75,16 +76,17 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
 
   if (result) {
     return (
-      <section className="stack" style={{ maxWidth: 680, margin: '0 auto' }} aria-live="polite">
-        <div className="card card-pad card-lilac stack" style={{ alignItems: 'center', textAlign: 'center' }}>
+      <section className="stack stagger" style={{ maxWidth: 680, margin: '0 auto' }} aria-live="polite">
+        <Header back="/" title={policy.title} />
+        <div className="glass card-pad stack" style={{ alignItems: 'center', textAlign: 'center' }}>
           <div className="eyebrow">{t('quiz.score')}</div>
-          <div className="big-number">{Math.round(result.percent)}%</div>
+          <div className="pct-circle glass" style={{ width: 110, height: 110, fontSize: '1.8rem' }}>{Math.round(result.percent)}%</div>
           <b>{result.passed ? t('quiz.passed') : t('quiz.failed')}</b>
           <span className="muted">{result.score} / {result.max_score}</span>
           {result.completion_text ? <p style={{ margin: 0 }}>{result.completion_text}</p> : null}
         </div>
         {result.questions.map((q, i) => (
-          <div key={q.id} className="card card-pad stack" style={{ gap: 6 }}>
+          <div key={q.id} className="glass card-pad stack" style={{ gap: 6 }}>
             <div className="eyebrow">{t('quiz.question')} {i + 1}</div>
             <b style={{ fontWeight: 500 }}>{q.prompt}</b>
             <span className={q.status === 'correct' ? 't-sage' : q.status === 'pending_review' ? 't-champagne' : 't-rose'}>
@@ -94,7 +96,7 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
             {q.explanation ? <p className="muted" style={{ margin: 0 }}><b>{t('quiz.explanation')}: </b>{q.explanation}</p> : null}
           </div>
         ))}
-        {quiz.settings.allow_retry ? <button className="btn" onClick={start}>{t('action.retry_quiz')}</button> : null}
+        {quiz.settings.allow_retry ? <button className="btn btn-lg" onClick={start}>{t('action.retry_quiz')}</button> : null}
         <Link href="/" className="btn btn-soft">{t('nav.home')}</Link>
       </section>
     )
@@ -102,12 +104,15 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
 
   if (!started) {
     return (
-      <div className="card card-pad stack" style={{ maxWidth: 680, margin: '40px auto 0', textAlign: 'center', alignItems: 'center' }}>
-        <Icon name="check" size={28} />
-        <h1 className="h-page" style={{ margin: 0 }}>{policy.title}</h1>
-        {policy.instructions ? <p className="muted" style={{ margin: 0 }}>{policy.instructions}</p> : null}
-        <span className="muted">{questions.length} {t('quiz.question').toLowerCase()}</span>
-        <button className="btn" onClick={start} disabled={!questions.length}>{t('action.start')}</button>
+      <div className="stack" style={{ maxWidth: 680, margin: '0 auto' }}>
+        <Header back="/" />
+        <div className="glass card-pad stack question" style={{ textAlign: 'center', alignItems: 'center', marginTop: 24 }}>
+          <span className="note-icon"><Icon name="check" size={26} /></span>
+          <h1 className="h-page" style={{ margin: 0 }}>{policy.title}</h1>
+          {policy.instructions ? <p className="muted" style={{ margin: 0 }}>{policy.instructions}</p> : null}
+          <span className="muted">{questions.length} {t('quiz.question').toLowerCase()}</span>
+        </div>
+        <button className="btn btn-lg btn-block" onClick={start} disabled={!questions.length}>{t('action.start')} <Icon name="forward" size={18} /></button>
       </div>
     )
   }
@@ -153,19 +158,25 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
   return (
     <section style={{ maxWidth: 680, margin: '0 auto' }} className="stack">
       <header className="topbar">
-        <Link href="/" className="icon-btn" aria-label={t('action.close')}><Icon name="x" /></Link>
-        <div style={{ flex: 1 }}>
-          <div className="eyebrow">{t('quiz.question')} {index + 1} {t('quiz.of')} {total}</div>
-          <div className="progress" style={{ marginTop: 6 }}><span style={{ width: `${((index + 1) / total) * 100}%` }} /></div>
+        {index > 0
+          ? <button type="button" className="icon-btn" aria-label={t('action.prev')} onClick={() => setIndex((i) => Math.max(0, i - 1))}><Icon name="back" /></button>
+          : <Link href="/" className="icon-btn" aria-label={t('action.close')}><Icon name="back" /></Link>}
+        <div className="quiz-bar">
+          <div className="progress" role="progressbar" aria-valuenow={index + 1} aria-valuemin={1} aria-valuemax={total} aria-label={`${t('quiz.question')} ${index + 1} ${t('quiz.of')} ${total}`}>
+            <span style={{ width: `${((index + 1) / total) * 100}%` }} />
+          </div>
+          <span className="quiz-count">{index + 1} / {total}</span>
         </div>
       </header>
-      {q.section ? <div className="eyebrow">{q.section}</div> : null}
-      <h1 id={`q-${q.id}`} style={{ margin: 0, fontWeight: 400, fontSize: '1.4em', lineHeight: 1.35 }}>{q.prompt}</h1>
-      {q.media?.url ? <img src={q.media.url} alt={q.media.alt ?? ''} style={{ borderRadius: 18 }} /> : null}
+      <div className="glass question" key={q.id} style={{ animation: 'rise 0.5s var(--ease) both' }}>
+        {q.section ? <div className="eyebrow" style={{ marginBottom: 6 }}>{q.section}</div> : null}
+        <h1 id={`q-${q.id}`}>{q.prompt}</h1>
+        {q.media?.url ? <img src={q.media.url} alt={q.media.alt ?? ''} style={{ borderRadius: 18, marginTop: 12 }} /> : null}
+      </div>
       {q.hint ? <details><summary className="muted">!</summary><p className="muted">{q.hint}</p></details> : null}
 
       {['single_choice', 'true_false', 'multiple_choice'].includes(q.type) ? (
-        <div role={q.type === 'multiple_choice' ? 'group' : 'radiogroup'} aria-labelledby={`q-${q.id}`} className="stack" style={{ gap: 10 }}>
+        <div role={q.type === 'multiple_choice' ? 'group' : 'radiogroup'} aria-labelledby={`q-${q.id}`} className="stack stagger" style={{ gap: 10 }} key={`o-${q.id}`}>
           {q.options.map((o) => {
             const multi = q.type === 'multiple_choice'
             const on = multi ? !!answer?.option_ids?.includes(o.id) : answer?.option_id === o.id
@@ -174,7 +185,7 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
                 onClick={() => setAnswer(multi
                   ? { option_ids: on ? (answer?.option_ids ?? []).filter((x) => x !== o.id) : [...(answer?.option_ids ?? []), o.id] }
                   : { option_id: o.id })}>
-                <Icon name={on ? 'check' : 'sparkle'} size={18} style={{ opacity: on ? 1 : 0.35 }} />
+                <span className={`radio${multi ? ' square' : ''}`} aria-hidden="true" />
                 <span>{o.text}</span>
               </button>
             )
@@ -185,7 +196,7 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
       {q.type === 'matching' ? (
         <div className="stack" style={{ gap: 10 }}>
           {left.map((l) => (
-            <label key={l.id} className="card card-pad row" style={{ gap: 10 }}>
+            <label key={l.id} className="glass card-pad row" style={{ gap: 10 }}>
               <span style={{ flex: 1 }}>{l.text}</span>
               <select className="input" style={{ maxWidth: '55%' }} value={answer?.pairs?.[l.id] ?? ''}
                 onChange={(e) => setAnswer({ pairs: { ...(answer?.pairs ?? {}), [l.id]: e.target.value } })}>
@@ -202,7 +213,7 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
           {order.map((oid, i) => {
             const o = q.options.find((x) => x.id === oid)
             return (
-              <li key={oid} className="card card-pad row">
+              <li key={oid} className="glass card-pad row">
                 <b style={{ width: 24 }}>{i + 1}</b><span style={{ flex: 1 }}>{o?.text}</span>
                 <button type="button" className="icon-btn" aria-label="↑" onClick={() => move(i, i - 1)}><Icon name="up" size={16} /></button>
                 <button type="button" className="icon-btn" aria-label="↓" onClick={() => move(i, i + 1)}><Icon name="down" size={16} /></button>
@@ -220,19 +231,18 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
       ) : null}
 
       {reveal ? (
-        <div className="card card-pad" role="status">
+        <div className="glass card-pad" role="status">
           <b>{reveal.status === 'correct' ? t('quiz.correct') : reveal.status === 'pending_review' ? t('quiz.pending') : t('quiz.incorrect')}</b>
           {reveal.explanation ? <p className="muted" style={{ margin: '6px 0 0' }}>{reveal.explanation}</p> : null}
         </div>
       ) : null}
 
-      <div className="row" style={{ marginTop: 8 }}>
-        <button className="btn btn-soft" onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index === 0}>{t('action.prev')}</button>
-        <span style={{ flex: 1 }} />
-        {perQuestion && !reveal && answer ? <button className="btn btn-soft" onClick={check} >{t('action.check')}</button> : null}
-        {index < total - 1
-          ? <button className="btn" onClick={() => setIndex((i) => i + 1)}>{t('action.next')}</button>
-          : <button className="btn" onClick={submit}>{t('action.submit')}</button>}
+      <div className="stack" style={{ marginTop: 10, gap: 10 }}>
+        {perQuestion && !reveal
+          ? <button className="btn btn-lg btn-block" onClick={check} disabled={!answer}>{t('action.check')} <Icon name="forward" size={18} /></button>
+          : index < total - 1
+            ? <button className="btn btn-lg btn-block" onClick={() => setIndex((i) => i + 1)}>{t('action.next')} <Icon name="forward" size={18} /></button>
+            : <button className="btn btn-lg btn-block" onClick={submit}>{t('action.submit')} <Icon name="forward" size={18} /></button>}
       </div>
     </section>
   )

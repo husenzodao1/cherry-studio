@@ -1,5 +1,6 @@
 'use client'
 
+import { apiUrl } from './offline/base'
 import { browserSupabase } from './supabase-browser'
 
 export class ApiFailure extends Error {
@@ -21,7 +22,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
   const t = await token()
   if (t) headers.authorization = `Bearer ${t}`
   if (init.body !== undefined) headers['content-type'] = 'application/json'
-  const res = await fetch(`/api/v1${path}`, {
+  const res = await fetch(apiUrl(path), {
     method: init.method ?? 'GET',
     headers,
     body: init.body === undefined ? undefined : JSON.stringify(init.body),

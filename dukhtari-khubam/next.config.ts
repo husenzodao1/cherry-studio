@@ -14,7 +14,7 @@ const securityHeaders = [
 // left out by the page extension list; the app calls the deployed API (NEXT_PUBLIC_API_BASE).
 const forApp = process.env.BUILD_TARGET === 'app'
 // One version for the app code and the APK: public/app-version.json (Gradle reads it too).
-const appVersion = JSON.parse(readFileSync(new URL('./public/app-version.json', import.meta.url), 'utf8')) as { versionCode: number }
+const appVersion = JSON.parse(readFileSync(new URL('./public/app-version.json', import.meta.url), 'utf8')) as { versionCode: number; versionName: string }
 
 const config: NextConfig = forApp
   ? {
@@ -23,12 +23,13 @@ const config: NextConfig = forApp
       pageExtensions: ['tsx'],
       trailingSlash: true,
       images: { unoptimized: true },
-      env: { NEXT_PUBLIC_APP_VERSION_CODE: String(appVersion.versionCode) },
+      env: { NEXT_PUBLIC_APP_VERSION_CODE: String(appVersion.versionCode), NEXT_PUBLIC_APP_VERSION_NAME: appVersion.versionName },
       turbopack: { root: import.meta.dirname }
     }
   : {
       reactStrictMode: true,
       poweredByHeader: false,
+      env: { NEXT_PUBLIC_APP_VERSION_NAME: appVersion.versionName },
       outputFileTracingRoot: import.meta.dirname,
       turbopack: { root: import.meta.dirname },
       async headers() {

@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "openapi": "vitest run tests/unit/openapi.test.ts",
-    "build:app": "BUILD_TARGET=app NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE:-https://dukhtari-khubam.vercel.app} next build && node tools/android/prepare-app.mjs && cap sync android",
-    "apk": "npm run build:app && cd android && ./gradlew assembleDebug"
+    "build:app": "BUILD_TARGET=app NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE:-https://dukhtari-khubam.vercel.app} NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-https://kqaifxethiofrefisvcv.supabase.co} NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-sb_publishable_0zJAQcyPqCmceO0EGEgshw_qbHHpG05} next build && node tools/android/prepare-app.mjs && cap sync android",
+    "apk": "npm run build:app && cd android && ./gradlew clean assembleDebug"
   },
   "engines": {
     "node": ">=20.9"
@@ -19,6 +19,7 @@
   "dependencies": {
     "@capacitor/android": "^8.6.2",
     "@capacitor/core": "^8.6.2",
+    "@capacitor/local-notifications": "8.3.1",
     "@supabase/supabase-js": "^2.119.0",
     "idb-keyval": "^6.2.2",
     "next": "^16.4.6",

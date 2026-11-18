@@ -23,14 +23,29 @@ const PATHS = {
   up: 'M12 19V5M6 11l6-6 6 6',
   down: 'M12 5v14M6 13l6 6 6-6',
   text: 'M4 19 9 5h1l5 14M6 14h7M16 19l3-8 3 8M17 16.5h4',
-  sparkle: 'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18'
+  sparkle: 'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18',
+  cap: 'M2 9.5 12 4.5l10 5-10 5zM6 11.5v4.8c0 1.5 2.7 3.2 6 3.2s6-1.7 6-3.2v-4.8M22 9.5v5.5',
+  more: 'M5.5 12h.01M12 12h.01M18.5 12h.01',
+  moon: 'M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z',
+  globe: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z',
+  chart: 'M5 20v-8M11 20V5M17 20v-5M3 20h18',
+  bell: 'M6 16.5V11a6 6 0 1 1 12 0v5.5l1.8 1.8H4.2zM10 20.5a2 2 0 0 0 4 0',
+  copy: 'M9 9h11v11H9zM5.5 15H4V4h11v1.5',
+  eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  eyeOff: 'M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a10 10 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2',
+  volume: 'M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12',
+  mute: 'M4 9h4l5-4v14l-5-4H4zM17 9.5l5 5M22 9.5l-5 5',
+  trophy: 'M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5a3.5 3.5 0 0 0 3.6 4M16 6h3.5a3.5 3.5 0 0 1-3.6 4M12 13v4M8.5 20h7M10 17h4',
+  flame: 'M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-3.4 2.4-5.5 4-7.6.6 1.6 1.6 2.6 2.7 3 .3-2.8 1.6-5.2 3.4-7.2.6 3.4 3.9 5.4 3.9 10.1 0 4.5-3 7.9-7.5 7.9z',
+  logout: 'M14 4h5v16h-5M10 8l-4 4 4 4M6 12h11',
+  expand: 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5'
 } as const
 
 export type IconName = keyof typeof PATHS
 
 export function Icon({ name, size = 20, ...rest }: { name: IconName; size?: number } & SVGProps<SVGSVGElement>) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7}
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={name === 'more' ? 3.4 : 1.7}
       strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...rest}>
       <path d={PATHS[name]} />
     </svg>

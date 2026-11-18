@@ -1,7 +1,11 @@
 'use client'
 
-import { SchoolCard } from '@/web/components/SchoolCard'
-import { Loading } from '@/web/components/States'
+import Link from 'next/link'
+
+import { Header } from '@/web/components/Header'
+import { Icon } from '@/web/components/Icon'
+import { SchoolTile } from '@/web/components/SchoolTile'
+import { Empty, Skeleton } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
 import { usePrefs } from '@/web/prefs'
 
@@ -10,14 +14,21 @@ export default function Schools() {
   const { bundle, offlineEmpty } = useContent()
   return (
     <>
-      <header className="topbar"><h1 className="h-page">{t('nav.schools')}</h1></header>
-      <div style={{ marginTop: 18 }}>
+      <Header back="/" title={t('nav.schools')} />
+      <Link href="/search" className="glass search-bar" style={{ marginTop: 18 }}>
+        <Icon name="search" /> <span>{t('search.placeholder')}</span>
+      </Link>
+      <section className="section">
         {bundle ? (
-          <div className="grid-auto pop-row" style={{ rowGap: 46, gridTemplateColumns: 'repeat(auto-fill, minmax(min(46%, 180px), 1fr))' }}>
-            {bundle.schools.map((s, i) => <SchoolCard key={s.id} school={s} index={i} />)}
+          <div className="stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
+            {bundle.schools.map((s) => <SchoolTile key={s.id} school={s} wide />)}
           </div>
-        ) : offlineEmpty ? <p className="muted">{t('state.offline_empty')}</p> : <Loading />}
-      </div>
+        ) : offlineEmpty ? <Empty icon="info" title={t('state.offline_empty')} /> : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
+            {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} height={170} radius={22} />)}
+          </div>
+        )}
+      </section>
     </>
   )
 }

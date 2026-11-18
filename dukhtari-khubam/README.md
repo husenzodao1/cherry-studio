@@ -103,25 +103,25 @@ snapshot**: readers always see the snapshot, so editing a draft never changes th
 until it is reviewed and published again. Every publish, review submission and restore is in
 Revision History; every staff change is in the audit log.
 
-## Real 3D Glass (spec §8)
+## Look and feel
 
-- `src/web/glass/GlassScene.tsx` — a solid glass sphere **ray-traced in a shader**: each view ray
-  refracts on entry and exit (Snell's law, IOR ≈ 1.5, separate IOR per RGB channel for dispersion),
-  travels the sphere's real thickness, then samples what is behind it (backdrop lines, lettering and
-  the 3D objects rendered into a target). Schlick Fresnel mixes in studio reflections; absorption
-  depends on path length. The background is visibly bent, magnified and inverted — not blurred.
-  Glossy spheres and chrome tubes are real geometry lit by a PMREM environment.
-  Several spheres float in each scene and carry short phrases printed on their curved surface
-  (UI strings `glass.motto_1..3`, editable in the CMS); a garland of real flowers and stars hangs
-  inside the scene, so the glass refracts it.
-- Art (`public/assets/3d`, sources and licences in `PROVENANCE.json`): flowers are real photographs
-  (Wikimedia Commons, CC BY-SA) cut out and set on CC0 scanned leaves (`tools/render-assets/bouquet.py`);
-  gems and objects are ray-traced/rendered offline (`tools/render-assets`).
-- `src/web/glass/LiquidGlass.tsx` — UI glass (bottom navigation, floating controls): a displacement
-  map is computed from a squircle bezel profile and Snell's law and applied to the page behind it via
-  an SVG `backdrop-filter`, so content scrolling under the dock is optically bent at the rim.
-- Fallbacks: no WebGL2 → layered static glass; non-Chromium browsers → frosted blur with the same
-  rim lighting. Reduced Motion stops all decorative motion.
+- Lavender glass design system (`src/app/globals.css`): frosted white glass cards (`.glass`), purple
+  gradient pills, a glass tab bar whose current tab sits in a raised glass circle.
+- `src/web/components/Backdrop.tsx` — fixed backdrop (never moves while scrolling): a lavender sky with
+  rendered glass flowers and glass lenses at the edges, blurred by the frosted cards above them.
+- Art (`public/assets/3d`, sources and licences in `PROVENANCE.json`) is rendered offline with
+  `tools/render-assets` (three.js, physically based materials, HDRI lighting). Glass uses real
+  transmission; each job is shot on black and on white and `matte.py` recovers true transparency.
+  School icons, the glass flowers and the "book on a rehal" scene are procedural; the lantern is a CC0
+  Poly Haven model.
+- The app behaves like an app: no text selection or long-press menus outside text fields, no pinch
+  zoom (text size is a setting), screens and images appear with short entrance animations, which always
+  play (there is no animation setting).
+- Greeting by the phone's clock (morning/day/evening/night), day streak from local study days.
+- Lessons can link a YouTube video (block `youtube`, only the video id is stored): YouTube's cover
+  (kept on the phone), playback inside the app with our own minimal glass controls.
+- Android app: daily local notifications (lesson reminder, inspiration of the day) at times chosen in
+  Settings (`src/web/offline/notify.ts`).
 
 ## Known limitations
 

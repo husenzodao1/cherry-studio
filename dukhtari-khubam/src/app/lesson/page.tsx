@@ -6,7 +6,6 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { BlockView } from '@/web/components/Blocks'
 import { Icon } from '@/web/components/Icon'
 import { Empty, Loading } from '@/web/components/States'
-import { LiquidGlass } from '@/web/glass/LiquidGlass'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
@@ -62,11 +61,10 @@ function Lesson() {
 
   return (
     <article className="reader" lang={l.locale} dir={l.locale === 'ar' ? 'rtl' : 'ltr'}>
-      <div role="progressbar" aria-label={t('section.progress')} aria-valuenow={read} aria-valuemin={0} aria-valuemax={100}
-        style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3, background: 'var(--lilac)', zIndex: 50 }}>
-        <div style={{ width: `${read}%`, height: '100%', background: 'linear-gradient(90deg, var(--primary), var(--plum))' }} />
+      <div className="read-bar" role="progressbar" aria-label={t('section.progress')} aria-valuenow={read} aria-valuemin={0} aria-valuemax={100}>
+        <div style={{ width: `${read}%` }} />
       </div>
-      <header className="topbar" style={{ position: 'sticky', top: 8, zIndex: 30 }}>
+      <header className="topbar" style={{ position: 'sticky', top: 'max(8px, env(safe-area-inset-top))', zIndex: 30 }}>
         <Link href={`/course?id=${l.context.course.id}`} className="icon-btn" aria-label={t('action.back')}><Icon name="back" /></Link>
         <span className="spacer" />
         <button type="button" className="icon-btn" aria-pressed={saved} aria-label={saved ? t('action.saved') : t('action.save')} onClick={() => toggleBookmark(id)}>
@@ -74,19 +72,19 @@ function Lesson() {
         </button>
         <button type="button" className="icon-btn" aria-label={t('action.text_size')}
           onClick={() => set({ textScale: SCALES[(SCALES.indexOf(textScale) + 1) % SCALES.length] ?? 1 })}>
-          <Icon name="text" />
+          <span style={{ fontWeight: 600, fontSize: 15 }} aria-hidden="true">Aa</span>
         </button>
       </header>
 
-      <div className="eyebrow" style={{ marginTop: 12 }}>
-        {l.context.school.title} · {l.context.course.title}
+      <div className="eyebrow" style={{ marginTop: 14 }}>
+        {l.context.course.title}
         {l.position.index ? ` · ${t('lesson.lesson')} ${l.position.index} ${t('lesson.of')} ${l.position.total}` : ''}
       </div>
       <h1>{l.title}</h1>
       {l.summary ? <p className="lead">{l.summary}</p> : null}
 
       {l.locked ? (
-        <div className="card card-pad card-lilac row" style={{ marginTop: 24 }}>
+        <div className="glass card-pad row" style={{ marginTop: 24 }}>
           <Icon name="lock" /> <b>{t('state.locked')}</b>
         </div>
       ) : (
@@ -94,21 +92,20 @@ function Lesson() {
       )}
 
       {!l.locked ? (
-        <button type="button" className={`btn ${done ? 'btn-soft' : ''}`} style={{ marginTop: 28 }} onClick={() => completeLesson(id)} disabled={done}>
+        <button type="button" className="btn btn-soft" style={{ marginTop: 28 }} onClick={() => completeLesson(id)} disabled={done}>
           <Icon name="check" size={18} /> {done ? t('lesson.completed') : t('lesson.mark_done')}
         </button>
       ) : null}
 
       <nav className="reader-nav" aria-label={t('section.lessons')}>
         {l.prev_lesson_id ? (
-          <LiquidGlass radius={26} bezel={12} style={{ flex: 1 }}>
-            <Link href={`/lesson?id=${l.prev_lesson_id}`} className="row" style={{ position: 'relative', zIndex: 2, minHeight: 52, justifyContent: 'center', textDecoration: 'none', fontWeight: 500 }}>
-              <Icon name="back" size={16} /> {t('action.prev')}
-            </Link>
-          </LiquidGlass>
-        ) : <span style={{ flex: 1 }} />}
+          <Link href={`/lesson?id=${l.prev_lesson_id}`} className="icon-btn" style={{ width: 52, height: 52 }} aria-label={t('lesson.prev_page')}><Icon name="back" /></Link>
+        ) : null}
+        <span style={{ flex: 1 }} />
         {l.next_lesson_id ? (
-          <Link href={`/lesson?id=${l.next_lesson_id}`} className="btn" style={{ flex: 1, minHeight: 52 }}>{t('action.next')} <Icon name="forward" size={16} /></Link>
+          <Link href={`/lesson?id=${l.next_lesson_id}`} className="btn">
+            {t('lesson.next_page')} <Icon name="arrow" size={16} />
+          </Link>
         ) : null}
       </nav>
     </article>

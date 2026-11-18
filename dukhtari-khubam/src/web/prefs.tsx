@@ -7,64 +7,52 @@ import { DEFAULT_STRINGS, type Locale, type UiKey } from './i18n'
 export interface Prefs {
   locale: Locale
   theme: 'light' | 'dark' | 'system'
-  motion: 'full' | 'reduce' | 'system'
   textScale: number
 }
 
 interface PrefsApi extends Prefs {
   set: (patch: Partial<Prefs>) => void
-  reducedMotion: boolean
   t: (key: UiKey) => string
   help: Record<string, { title?: string | null; body: string; icon: string }>
   /** CMS strings and help texts, supplied from the content bundle stored on the phone */
   setCms: (cms: { strings?: Record<string, string>; help?: PrefsApi['help'] }) => void
 }
 
-const DEFAULTS: Prefs = { locale: 'tg', theme: 'system', motion: 'system', textScale: 1 }
+const DEFAULTS: Prefs = { locale: 'tg', theme: 'system', textScale: 1 }
 const KEY = 'dk.prefs'
 const PrefsContext = createContext<PrefsApi | null>(null)
 
 function read(): Prefs {
   try {
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') }
+    const { locale, theme, textScale } = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') }
+    return { locale, theme, textScale }
   } catch {
     return DEFAULTS
   }
 }
 
-/** Theme, language, motion and text size; applied to <html> and stored on this device. */
+/** Theme, language and text size; applied to <html> and stored on this device. Animations always play in full. */
 export function PrefsProvider({ children }: { children: ReactNode }) {
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS)
   const [systemDark, setSystemDark] = useState(false)
-  const [systemReduce, setSystemReduce] = useState(false)
   const [cms, setCms] = useState<{ strings: Record<string, string>; help: PrefsApi['help'] }>({ strings: {}, help: {} })
 
   useEffect(() => {
     setPrefs(read())
     const dark = matchMedia('(prefers-color-scheme: dark)')
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)')
     setSystemDark(dark.matches)
-    setSystemReduce(reduce.matches)
     const onDark = (e: MediaQueryListEvent) => setSystemDark(e.matches)
-    const onReduce = (e: MediaQueryListEvent) => setSystemReduce(e.matches)
     dark.addEventListener('change', onDark)
-    reduce.addEventListener('change', onReduce)
-    return () => {
-      dark.removeEventListener('change', onDark)
-      reduce.removeEventListener('change', onReduce)
-    }
+    return () => dark.removeEventListener('change', onDark)
   }, [])
-
-  const reducedMotion = prefs.motion === 'reduce' || (prefs.motion === 'system' && systemReduce)
 
   useEffect(() => {
     const root = document.documentElement
     root.dataset.theme = prefs.theme === 'system' ? (systemDark ? 'dark' : 'light') : prefs.theme
-    root.dataset.motion = reducedMotion ? 'reduce' : 'full'
     root.lang = prefs.locale
     root.dir = prefs.locale === 'ar' ? 'rtl' : 'ltr'
     root.style.setProperty('--text-scale', String(prefs.textScale))
-  }, [prefs, systemDark, reducedMotion])
+  }, [prefs, systemDark])
 
   const applyCms = useCallback((c: { strings?: Record<string, string>; help?: PrefsApi['help'] }) => {
     setCms({ strings: c.strings ?? {}, help: c.help ?? {} })
@@ -88,8 +76,8 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       if (prefs.locale === 'tg' && cms.strings[key]) return cms.strings[key]
       return local[key] ?? cms.strings[key] ?? DEFAULT_STRINGS.tg[key] ?? key
     }
-    return { ...prefs, set, reducedMotion, t, help: cms.help, setCms: applyCms }
-  }, [prefs, set, reducedMotion, cms, applyCms])
+    return { ...prefs, set, t, help: cms.help, setCms: applyCms }
+  }, [prefs, set, cms, applyCms])
 
   return <PrefsContext.Provider value={value}>{children}</PrefsContext.Provider>
 }

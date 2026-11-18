@@ -70,6 +70,11 @@ const BLOCKS = {
     props: z.strictObject({ asset_id: Uuid, poster_asset_id: Uuid.optional() }),
     content: z.strictObject({ title: Plain(200).optional(), caption: Plain(1000).optional() })
   },
+  youtube: {
+    // a link to a YouTube video: only its id is stored; the cover and the player come from YouTube
+    props: z.strictObject({ video_id: z.string().regex(/^[A-Za-z0-9_-]{11}$/, 'invalid YouTube video id'), start: z.number().int().min(0).max(86400).optional() }),
+    content: z.strictObject({ title: Plain(200).optional(), caption: Plain(1000).optional() })
+  },
   audio: {
     props: z.strictObject({ asset_id: Uuid, cover_asset_id: Uuid.optional() }),
     content: z.strictObject({ title: Plain(200).optional(), speaker: Plain(200).optional(), caption: Plain(1000).optional() })
