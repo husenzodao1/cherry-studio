@@ -91,7 +91,7 @@ export default function StartPage() {
           </div>
           <p className="muted" style={{ margin: 0, fontSize: '0.9em' }}>{t('start.keep_code')}</p>
           <CodeImageButton />
-          <button type="button" className="btn btn-soft btn-block" onClick={copy}><Icon name={copied ? 'check' : 'copy'} size={18} /> {copied ? t('start.copied') : t('start.copy')}</button>
+          <button type="button" className="btn btn-soft btn-block" onClick={copy}><Icon name={copied ? 'check' : 'copy'} size={18} /> {t('start.copy')}</button>
           <button type="button" className="btn btn-block btn-lg" onClick={() => router.replace('/')}>{t('start.saved_it')} <Icon name="arrow" size={18} /></button>
         </div>
       </div>

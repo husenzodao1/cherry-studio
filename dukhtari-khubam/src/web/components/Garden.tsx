@@ -2,45 +2,37 @@
 
 import type { CSSProperties } from 'react'
 
-import type { Bloom } from '../offline/garden'
+import type { Bed, Bloom } from '../offline/garden'
 
 const DAY = 24 * 60 * 60 * 1000
 
 /**
- * The garden scene: glass flowers standing on a soft lavender meadow, back rows smaller and higher.
- * Flowers grown in the last day bloom in with a sparkle; a study streak adds drifting light.
+ * The garden as a glass cabinet: one glass shelf per school, its icon and count above, the flowers
+ * standing in an even row on the shelf. A flower grown in the last day opens with a glint.
  */
-export function GardenScene({ blooms, rows, streak = 0, compact = false, picked, onPick }: {
-  blooms: Bloom[]; rows: number; streak?: number; compact?: boolean; picked?: string | null; onPick?: (b: Bloom) => void
-}) {
+export function GardenShelves({ beds, picked, onPick }: { beds: Bed[]; picked?: string | null; onPick: (b: Bloom) => void }) {
   const now = Date.now()
-  const height = compact ? 150 : Math.min(620, 220 + rows * 54)
   return (
-    <div className={`garden${compact ? ' garden-compact' : ''}`} style={{ height }}>
-      <span className="garden-hill garden-hill-back" />
-      <span className="garden-hill garden-hill-front" />
-      {streak >= 3 ? Array.from({ length: Math.min(12, streak + 3) }, (_, i) => (
-        <i key={i} className="garden-light" style={{ left: `${(i * 37) % 96}%`, top: `${10 + ((i * 53) % 60)}%`, animationDelay: `${(i % 6) * 0.7}s` }} />
-      )) : null}
-      {blooms.map((b) => {
-        const fresh = now - Date.parse(b.at) < DAY
-        const size = (compact ? 30 + b.depth * 22 : 40 + b.depth * 34) * (b.big ? 1.7 : 1)
-        const style = {
-          left: `${b.x}%`,
-          bottom: `${(compact ? 10 : 6) + (1 - b.depth) * (compact ? 46 : 58)}%`,
-          width: size,
-          zIndex: Math.round(b.depth * 100) + (b.big ? 1 : 0),
-          ['--hue' as string]: `${b.hue}deg`,
-          ['--tilt' as string]: `${b.tilt}deg`
-        } as CSSProperties
-        const art = <img src={b.art.src} alt="" decoding="async" />
-        return onPick ? (
-          <button key={b.id} type="button" className={`bloom${b.big ? ' bloom-big' : ''}${fresh ? ' bloom-new' : ''}${picked === b.id ? ' bloom-picked' : ''}`}
-            style={style} aria-label={b.title} onClick={() => onPick(b)}>{art}</button>
-        ) : (
-          <span key={b.id} className={`bloom${b.big ? ' bloom-big' : ''}${fresh ? ' bloom-new' : ''}`} style={style} aria-hidden="true">{art}</span>
-        )
-      })}
+    <div className="shelves stagger">
+      {beds.map((bed) => (
+        <section key={bed.school} className="shelf" aria-label={bed.title}>
+          <header className="shelf-head">
+            {bed.icon ? <img src={bed.icon.src} alt="" aria-hidden="true" /> : null}
+            <span className="shelf-title">{bed.title}</span>
+            <span className="shelf-count">{bed.lessons}</span>
+          </header>
+          <div className="shelf-row">
+            {bed.blooms.map((b, i) => (
+              <button key={b.id} type="button" aria-label={b.title} onClick={() => onPick(b)}
+                className={`bloom${b.big ? ' bloom-big' : ''}${now - Date.parse(b.at) < DAY ? ' bloom-new' : ''}${picked === b.id ? ' bloom-picked' : ''}`}
+                style={{ ['--hue' as string]: `${b.hue}deg`, animationDelay: `${Math.min(i, 12) * 0.05}s` } as CSSProperties}>
+                <img src={b.art.src} alt="" decoding="async" />
+              </button>
+            ))}
+          </div>
+          <span className="shelf-glass" aria-hidden="true" />
+        </section>
+      ))}
     </div>
   )
 }

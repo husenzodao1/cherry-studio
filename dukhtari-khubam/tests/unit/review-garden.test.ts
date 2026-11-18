@@ -60,14 +60,18 @@ describe('spaced repetition', () => {
 })
 
 describe('garden', () => {
-  it('grows a flower per finished lesson and a large bloom per finished course', () => {
+  it('puts a flower per finished lesson and a large bloom per finished course on the school shelf', () => {
     const one = { ...emptyProgress(), lessons: { l1: { p: 100, done: '2026-11-17T10:00:00Z', at: '2026-11-17T10:00:00Z' } } }
-    expect(gardenOf(bundle, one)).toMatchObject({ flowers: 1, courses: 0, bySchool: { 'marifati-dini': 1 } })
+    expect(gardenOf(bundle, one)).toMatchObject({ flowers: 1, courses: 0, beds: [{ school: 'marifati-dini', lessons: 1, courses: 0 }] })
     const both = { ...one, lessons: { ...one.lessons, l2: { p: 100, done: '2026-11-18T10:00:00Z', at: '2026-11-18T10:00:00Z' } } }
     const g = gardenOf(bundle, both)
     expect(g).toMatchObject({ flowers: 2, courses: 1 })
-    expect(g.blooms.map((b) => b.id)).toEqual(['l1', 'course:c1', 'l2'])
-    // stable: the same progress gives the same garden
-    expect(gardenOf(bundle, both).blooms).toEqual(g.blooms)
+    // the course bloom stands first, then the lessons in the order they were finished
+    expect(g.beds[0].blooms.map((b) => b.id)).toEqual(['course:c1', 'l1', 'l2'])
+    expect(gardenOf(bundle, both)).toEqual(g)
+  })
+
+  it('is empty before the first finished lesson', () => {
+    expect(gardenOf(bundle, emptyProgress()).beds).toEqual([])
   })
 })

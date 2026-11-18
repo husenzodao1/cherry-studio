@@ -28,7 +28,7 @@ const START: Piece[] = [[ART.bubble, 'bd-bubble', 'float'], [ART.leaves, 'bd-lea
 
 export function Backdrop() {
   const path = usePathname() ?? '/'
-  const set = /^\/admin(\/|$)/.test(path) ? [] : /^\/(lesson|page)(\/|$)/.test(path) ? CALM : /^\/(quiz|review)(\/|$)/.test(path) ? QUIZ
+  const set = /^\/admin(\/|$)/.test(path) ? [] : /^\/(lesson|page|garden)(\/|$)/.test(path) ? CALM : /^\/(quiz|review)(\/|$)/.test(path) ? QUIZ
     : /^\/start(\/|$)/.test(path) ? START : FULL
   return (
     <div className="backdrop" aria-hidden="true">

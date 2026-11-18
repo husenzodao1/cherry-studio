@@ -3,16 +3,12 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 
-import { streak } from '@/lib/progress'
-
 import { ART } from '@/web/art'
-import { GardenScene } from '@/web/components/Garden'
 import { Avatar } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { SchoolGrid } from '@/web/components/SchoolTile'
 import { Empty, Skeleton } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
-import { gardenOf } from '@/web/offline/garden'
 import { useLearner } from '@/web/offline/learner'
 import { reviewStats } from '@/web/offline/review'
 import { usePrefs } from '@/web/prefs'
@@ -35,7 +31,6 @@ export default function Home() {
   }, [])
 
   const name = learner?.name
-  const garden = useMemo(() => gardenOf(bundle, progress), [bundle, progress])
   const review = useMemo(() => (bundle ? reviewStats(bundle, progress) : { total: 0, today: 0 }), [bundle, progress])
   const lastLesson = progress.last ? bundle?.lessons[progress.last.lesson] : undefined
   const cont = lastLesson && !progress.lessons[lastLesson.id]?.done ? lastLesson : null
@@ -100,16 +95,6 @@ export default function Home() {
         ) : null}
       </section>
 
-      {bundle ? (
-        <Link href="/garden" className="glass garden-card">
-          <div className="section-head" style={{ padding: '14px 18px 0' }}>
-            <h2 className="h-section">{t('garden.title')}</h2>
-            <span className="muted" style={{ fontSize: '0.86em' }}>{t('garden.flowers').replace('{n}', String(garden.flowers))} <Icon name="arrow" size={14} /></span>
-          </div>
-          <GardenScene blooms={garden.blooms.slice(-15)} rows={1} streak={streak(progress.days)} compact />
-          {garden.blooms.length === 0 ? <span className="garden-card-hint">{t('garden.empty')}</span> : null}
-        </Link>
-      ) : null}
     </>
   )
 }

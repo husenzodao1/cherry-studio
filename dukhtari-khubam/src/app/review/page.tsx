@@ -39,7 +39,7 @@ export default function ReviewPage() {
         ) : (
           <div className="glass card-pad stack question" style={{ alignItems: 'center', textAlign: 'center', marginTop: 24 }}>
             <span className="pct-circle glass" style={{ width: 110, height: 110, fontSize: '1.7rem' }}>{right}/{session.length}</span>
-            <h1 className="h-page">{right === session.length ? t('review.great') : t('review.result').replace('{ok}', String(right)).replace('{n}', String(session.length))}</h1>
+            <h1 className="h-page">{t('review.result').replace('{ok}', String(right)).replace('{n}', String(session.length))}</h1>
             <p className="muted" style={{ margin: 0 }}>{t('review.keep')}</p>
           </div>
         )}
@@ -54,7 +54,7 @@ export default function ReviewPage() {
             <span className="muted" style={{ fontSize: '0.84em' }}>{t('review.how')}</span>
           </div>
         ) : null}
-        <Link href="/garden" className="btn btn-block btn-lg" style={{ marginTop: 18 }}>{t('garden.open')} <Icon name="arrow" size={18} /></Link>
+        <Link href="/" className="btn btn-block btn-lg" style={{ marginTop: 18 }}>{t('nav.home')} <Icon name="arrow" size={18} /></Link>
       </>
     )
   }
@@ -109,7 +109,7 @@ export default function ReviewPage() {
       ) : null}
       {checked === null
         ? <button className="btn btn-lg btn-block" onClick={check} disabled={!answer}>{t('action.check')} <Icon name="forward" size={18} /></button>
-        : <button className="btn btn-lg btn-block" onClick={next}>{index < session.length - 1 ? t('action.next') : t('review.great')} <Icon name="forward" size={18} /></button>}
+        : <button className="btn btn-lg btn-block" onClick={next}>{index < session.length - 1 ? t('action.next') : t('lesson.mark_done')} <Icon name="forward" size={18} /></button>}
     </section>
   )
 }

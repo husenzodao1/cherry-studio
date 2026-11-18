@@ -95,10 +95,6 @@ function School() {
         <Link href={`/lesson?id=${next}`} className="btn btn-block btn-lg" style={{ marginTop: 20 }}>{t('action.continue')} <Icon name="arrow" size={18} /></Link>
       ) : null}
 
-      <div className="glass banner" style={{ marginTop: 24 }}>
-        <p>{t('school.banner')} <span aria-hidden="true">💜</span></p>
-        <img className="float-slow" src={ART.flowerSide.src} alt="" aria-hidden="true" decoding="async" />
-      </div>
     </>
   )
 }

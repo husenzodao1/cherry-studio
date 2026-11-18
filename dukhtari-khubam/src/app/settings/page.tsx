@@ -16,7 +16,7 @@ import { usePrefs } from '@/web/prefs'
 /** The learner's code on this phone, shown on request and easy to copy. */
 function CodeCard() {
   const { t } = usePrefs()
-  const { learner, sync } = useLearner()
+  const { learner } = useLearner()
   const [show, setShow] = useState(false)
   const [copied, setCopied] = useState(false)
   if (!learner) return null
@@ -44,9 +44,6 @@ function CodeCard() {
       <div className="code-box" aria-live="polite">{show ? formatCode(learner.code) : '••••• ••••• •••••'}</div>
       <span className="muted" style={{ fontSize: '0.84em' }}>{t('settings.code_hint')}</span>
       <CodeImageButton />
-      <span className="muted" style={{ fontSize: '0.8em' }}>
-        {sync === 'synced' ? `✓ ${t('profile.synced')}` : sync === 'offline' || sync === 'error' ? t('profile.sync_offline') : '…'}
-      </span>
     </div>
   )
 }

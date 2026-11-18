@@ -134,8 +134,8 @@ Revision History; every staff change is in the audit log.
 - Greeting by the phone's clock (morning/day/evening/night), day streak from local study days.
 - Lessons can link a YouTube video (block `youtube`, only the video id is stored): YouTube's cover
   (kept on the phone), playback inside the app with our own minimal glass controls.
-- "Боғи ман" (`/garden`, `src/web/offline/garden.ts`): every finished lesson grows a glass flower, each
-  school with its own flower and tint; a finished course grows a large golden-lit bloom.
+- "Боғи ман" (`/garden`, `src/web/offline/garden.ts`): glass shelves, one per school; every finished
+  lesson is a glass flower in the school's flower and tint, every finished course a large golden-lit bloom.
 - "Такрори рӯз" (`/review`, `src/web/offline/review.ts`): daily spaced repetition (Leitner boxes,
   intervals 1/2/4/8/16 days) over choice questions from quizzes the learner has met; answers sync with
   the progress backup.
