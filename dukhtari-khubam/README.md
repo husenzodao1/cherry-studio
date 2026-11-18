@@ -8,7 +8,7 @@
 | База (Supabase Postgres), RLS, workflow, revisions, Quiz grading | ✅ сохта ва бо тестҳо санҷида шуд |
 | REST API v1 (188 амалиёт, OpenAPI 3.1) | ✅ сохта шуд · `/api/v1/openapi.json` |
 | Web (хонанда) бо Real 3D Glass | ✅ сохта шуд |
-| Admin Panel UI (Full Text Editor, Quiz Builder) | ⏳ API тайёр аст, интерфейс марҳилаи навбатӣ · дизайни PoC: `design/canvas` |
+| Admin Panel (мундариҷа, Full Text Editor, Quiz Builder, медиа, матнҳо, корбарон) | ✅ `/admin`, аз ҷустуҷӯ бо калимаи махфии кормандон кушода мешавад |
 | Android (Kotlin + Compose) | ⏳ марҳилаи навбатӣ (аз ҳамин API истифода мебарад) |
 
 ## Структура
@@ -59,6 +59,13 @@ CORS_ORIGINS=                      # optional, comma-separated, for other web or
 
 Apply `supabase/migrations/*.sql` in filename order (Supabase CLI `supabase db push`, or the SQL editor).
 
+### E-mail codes
+
+Sign-up and code sign-in send a one-time code. In Supabase → Authentication → Emails, paste
+`supabase/templates/confirm-signup.html` into “Confirm signup” and `magic-link.html` into
+“Magic Link” (both use `{{ .Token }}`). The built-in Supabase mailer sends only a few e-mails per
+hour; connect your own SMTP for real use.
+
 ### First owner account
 
 1. Sign up on the website (`/login`).
@@ -101,8 +108,9 @@ Revision History; every staff change is in the audit log.
 
 ## Known limitations
 
-- **Admin Panel UI and the Android app are not built yet.** Every Admin operation (Full Text Editor
-  blocks, Quiz Builder, media, workflow, roles) is available and tested through the API.
+- **The Android app is not built yet**; it uses the same API.
+- The admin panel opens from search with the staff passphrase. That only hides the entry point:
+  access is granted by staff roles, checked in the database for every request.
 - Push delivery (FCM/Web Push) is not connected: notifications are stored, scheduled and shown
   in-app; device tokens are collected. Sending needs FCM credentials.
 - No payment provider: Premium is granted by staff (`entitlements`), as the spec requires until a
