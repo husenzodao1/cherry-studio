@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { Icon } from '@/web/components/Icon'
@@ -9,18 +10,40 @@ import { usePrefs } from '@/web/prefs'
 import { useApi } from '@/web/useApi'
 
 interface Hit { type: 'school' | 'course' | 'module' | 'topic' | 'lesson'; id: string; title: string; snippet?: string | null }
+// SHA-256 of the staff passphrase that opens the admin panel from search. Only the hash ships in the
+// bundle; the panel itself is protected by the staff roles checked in the database.
+const ADMIN_KEY = '23dbbe5ca1da746b77afa49530cdf0dce81e513182b05f2ff9bfe43a72ecb732'
+
+async function sha256(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('')
+}
+
 const HREF: Record<Hit['type'], (id: string) => string | null> = {
   school: (id) => `/schools/${id}`, course: (id) => `/courses/${id}`, lesson: (id) => `/lessons/${id}`, module: () => null, topic: () => null
 }
 
 export default function SearchPage() {
   const { t, locale } = usePrefs()
+  const router = useRouter()
   const [q, setQ] = useState('')
   const [debounced, setDebounced] = useState('')
   useEffect(() => {
-    const h = setTimeout(() => setDebounced(q.trim()), 300)
-    return () => clearTimeout(h)
-  }, [q])
+    let alive = true
+    const typed = q.trim()
+    // the passphrase is checked before any search request, so it never reaches the API or its logs
+    const h = setTimeout(async () => {
+      if (typed.length >= 8 && (await sha256(typed)) === ADMIN_KEY) {
+        if (alive) router.push('/admin')
+        return
+      }
+      if (alive) setDebounced(typed)
+    }, 300)
+    return () => {
+      alive = false
+      clearTimeout(h)
+    }
+  }, [q, router])
   const hits = useApi<Hit[]>(debounced.length >= 2 ? `/search?q=${encodeURIComponent(debounced)}&locale=${locale}` : null)
   return (
     <>
