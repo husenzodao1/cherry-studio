@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "openapi": "vitest run tests/unit/openapi.test.ts",
-    "build:app": "BUILD_TARGET=app NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE:-https://dukhtari-khubam.vercel.app} next build && node tools/android/embed-bundle.mjs && cap sync android",
+    "build:app": "BUILD_TARGET=app NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE:-https://dukhtari-khubam.vercel.app} next build && node tools/android/prepare-app.mjs && cap sync android",
     "apk": "npm run build:app && cd android && ./gradlew assembleDebug"
   },
   "engines": {

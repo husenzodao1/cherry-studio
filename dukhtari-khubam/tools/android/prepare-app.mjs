@@ -1,6 +1,10 @@
-// Ships the current published catalogue inside the APK (out/offline/bundle-<locale>.json), so the very
-// first launch works without a connection. Skips quietly when the API cannot be reached.
-import { mkdir, writeFile } from 'node:fs/promises'
+// Prepares the static export (out/) for the APK:
+// - drops website-only files (the APK download itself must not end up inside the next APK);
+// - ships the current published catalogue (out/offline/bundle-<locale>.json), so the very first launch
+//   works without a connection. Skips quietly when the API cannot be reached.
+import { mkdir, rm, writeFile } from 'node:fs/promises'
+
+await rm('out/download', { recursive: true, force: true })
 
 const api = process.env.NEXT_PUBLIC_API_BASE ?? 'https://dukhtari-khubam.vercel.app'
 await mkdir('out/offline', { recursive: true })
