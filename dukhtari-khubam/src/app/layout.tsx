@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Geologica, Lora, Noto_Naskh_Arabic } from 'next/font/google'
+import { Geologica, Lora, Noto_Naskh_Arabic, Pacifico } from 'next/font/google'
 import type { ReactNode } from 'react'
 
 import { Backdrop } from '@/web/components/Backdrop'
@@ -10,6 +10,8 @@ import './globals.css'
 // Glyph coverage for ӣ қ ғ ҳ ҷ ӯ verified for these families (Manrope lacks them).
 const geologica = Geologica({ subsets: ['latin', 'cyrillic', 'cyrillic-ext'], variable: '--font-geologica', display: 'swap' })
 const lora = Lora({ subsets: ['latin', 'cyrillic', 'cyrillic-ext'], style: ['normal', 'italic'], variable: '--font-lora', display: 'swap' })
+// Brush script for the name "Духтари хубам"; covers ӣ қ ғ ҳ ҷ ӯ (checked against its cmap).
+const pacifico = Pacifico({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], weight: '400', variable: '--font-pacifico', display: 'swap' })
 // Arabic is only needed when that language is chosen: do not preload it for everyone.
 const naskh = Noto_Naskh_Arabic({ subsets: ['arabic'], variable: '--font-naskh', display: 'swap', preload: false })
 
@@ -37,7 +39,7 @@ const boot = `try{var p=JSON.parse(localStorage.getItem('dk.prefs')||'{}');var d
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="tg" className={`${geologica.variable} ${lora.variable} ${naskh.variable}`} suppressHydrationWarning>
+    <html lang="tg" className={`${geologica.variable} ${lora.variable} ${pacifico.variable} ${naskh.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: boot }} />
       </head>

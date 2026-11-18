@@ -47,7 +47,7 @@ export default function Profile() {
       <div className="profile-head">
         <span className="bloom-in"><Avatar name={learner.name} size={96} /></span>
         <h1 className="h-page" style={{ marginTop: 10 }}>{learner.name}</h1>
-        <span className="tag">{t('profile.tagline')} <span aria-hidden="true">💜</span></span>
+        <span className="tag">{t('profile.tagline')}</span>
       </div>
 
       <div className="stats stagger" style={{ marginTop: 22 }}>

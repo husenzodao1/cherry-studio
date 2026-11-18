@@ -16,25 +16,36 @@ import { usePrefs } from '@/web/prefs'
 export default function StartPage() {
   const { t } = usePrefs()
   const router = useRouter()
-  const { learner, register, restore } = useLearner()
+  const { learner, progress, register, restore, setAge } = useLearner()
   const [mode, setMode] = useState<'register' | 'login'>('register')
   const [name, setName] = useState('')
+  const [age, setAgeText] = useState('')
+  const ageNum = Number.parseInt(age, 10)
+  const ageOk = Number.isInteger(ageNum) && ageNum >= 5 && ageNum <= 99
   const [code, setCode] = useState('')
   const [created, setCreated] = useState<Learner | null>(null)
   const [copied, setCopied] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
+  const needsAge = !!learner && progress.born === undefined
   // already set up on this phone
   useEffect(() => {
-    if (learner && !created) router.replace('/')
-  }, [learner, created, router])
+    if (learner && !needsAge && !created) router.replace('/')
+  }, [learner, needsAge, created, router])
 
   const onRegister = (e: FormEvent) => {
     e.preventDefault()
-    if (!name.trim()) return
-    setCreated(register(name))
+    if (!name.trim() || !ageOk) return
+    setCreated(register(name, ageNum))
   }
+  const ageField = (
+    <label className="stack" style={{ gap: 8, textAlign: 'start' }}>
+      <span className="eyebrow" style={{ paddingInline: 8 }}>{t('start.age')}</span>
+      <input className="input" inputMode="numeric" autoComplete="off" value={age} maxLength={2}
+        onChange={(e) => setAgeText(e.target.value.replace(/\D/g, '').slice(0, 2))} style={{ fontVariantNumeric: 'tabular-nums' }} />
+    </label>
+  )
   const onLogin = async (e: FormEvent) => {
     e.preventDefault()
     setBusy(true)
@@ -52,6 +63,19 @@ export default function StartPage() {
     } catch {
       setCopied(false)
     }
+  }
+
+  if (needsAge && !created) {
+    return (
+      <div className="start">
+        <img className="start-art bloom-in" style={{ width: 'min(52vw, 210px)' }} src={ART.flower.src} alt="" aria-hidden="true" />
+        <h1 className="h-page">{learner?.name}</h1>
+        <form className="stack" style={{ width: '100%', maxWidth: 420 }} onSubmit={(e) => { e.preventDefault(); if (ageOk) { setAge(ageNum); router.replace('/') } }}>
+          {ageField}
+          <button className="btn btn-block btn-lg" disabled={!ageOk}>{t('start.create')} <Icon name="arrow" size={18} /></button>
+        </form>
+      </div>
+    )
   }
 
   if (created) {
@@ -89,7 +113,8 @@ export default function StartPage() {
             <span className="eyebrow" style={{ paddingInline: 8 }}>{t('start.name')}</span>
             <input className="input" value={name} maxLength={80} autoComplete="given-name" onChange={(e) => setName(e.target.value)} />
           </label>
-          <button className="btn btn-block btn-lg" disabled={!name.trim()}>{t('start.create')} <Icon name="arrow" size={18} /></button>
+          {ageField}
+          <button className="btn btn-block btn-lg" disabled={!name.trim() || !ageOk}>{t('start.create')} <Icon name="arrow" size={18} /></button>
         </form>
       ) : (
         <form onSubmit={onLogin} className="stack" style={{ width: '100%', maxWidth: 420 }} key="l">

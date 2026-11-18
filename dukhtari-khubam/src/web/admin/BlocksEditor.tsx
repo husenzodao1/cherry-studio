@@ -74,6 +74,10 @@ export function BlocksEditor({ lessonId }: { lessonId: string }) {
         <LocaleTabs value={loc} onChange={setLoc} />
         <span className="muted" style={{ fontSize: '0.85em' }}>**ғафс**, *курсив*</span>
       </div>
+      <p className="muted" style={{ margin: 0, fontSize: '0.82em' }}>
+        Барои синну сол: дар аввали матни блок ё номи мавзӯъ/дарс нависед <code>&lt;синну сол&gt;16&lt;/синну сол&gt;</code> —
+        он танҳо ба 16-солаҳо ва хурдтар нишон дода мешавад.
+      </p>
       {blocks.map((b, i) => (
         <div key={b.id ?? `new-${i}`} className="card card-pad stack" style={{ gap: 10 }}>
           <div className="row" style={{ gap: 6 }}>

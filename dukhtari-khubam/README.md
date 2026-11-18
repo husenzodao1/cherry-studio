@@ -89,8 +89,22 @@ debug build for direct installation; Google Play needs a release build signed wi
    ```sql
    select private.grant_role_by_email('owner@example.com', 'super_admin');
    ```
-3. Open the staff panel: type the staff passphrase in search, sign in with that e-mail and password.
+3. Open the staff panel at `/admin` and sign in with that e-mail and password.
    The owner grants roles to other staff in the panel (Корбарон).
+
+Typing the staff passphrase in search opens the panel straight away: the passphrase is the password
+of a separate staff account (`panel@dukhtari-khubam.invalid`, role `super_admin`), checked by Supabase
+Auth. The app carries only the first 16 bits of the passphrase's SHA-256 (to skip ordinary queries).
+To change the passphrase, change that account's password in Supabase → Authentication → Users and
+update `KEY_PREFIX` in `src/app/search/page.tsx`.
+
+### Content by age
+
+Learners give their age when they register (stored as a year of birth with their progress). A title
+(course, module, topic, lesson, quiz) or a text block that begins with
+`<синну сол>барои 16 солаҳо</синну сол>` is shown only to learners of that age or younger; the tag
+itself is never shown (`src/web/offline/age.ts`). This shapes the display; the published catalogue
+stays public.
 
 Roles: `super_admin`, `content_admin` (publish), `author` (own content), `editor`, `reviewer`,
 `media_manager`, `analytics_viewer`.
@@ -126,8 +140,8 @@ Revision History; every staff change is in the audit log.
 ## Known limitations
 
 - **The Android app is not built yet**; it uses the same API.
-- The admin panel opens from search with the staff passphrase. That only hides the entry point:
-  access is granted by staff roles, checked in the database for every request.
+- The staff passphrase is a full `super_admin` password: anyone who knows it can manage everything.
+  Keep it long and private.
 - Push delivery (FCM/Web Push) is not connected: notifications are stored, scheduled and shown
   in-app; device tokens are collected. Sending needs FCM credentials.
 - No payment provider: Premium is granted by staff (`entitlements`), as the spec requires until a

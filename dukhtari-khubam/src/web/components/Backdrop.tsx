@@ -2,30 +2,39 @@
 
 import { usePathname } from 'next/navigation'
 
-import { ART } from '../art'
+import { ART, type Art } from '../art'
 
 /**
- * Fixed page backdrop: a lavender sky with rendered glass flowers and glass lenses resting at the edges,
- * so frosted cards blur them as content scrolls over. It is sized to the large viewport (lvh) and never
- * moves with scrolling. Reading and quiz screens keep a calmer version with one flower.
+ * Fixed page backdrop: a lavender sky with rendered glass pieces resting at the screen edges — a crocus,
+ * a water lily, a tulip, a leafy spray, a crystal cluster, loose petals and glass lenses. It never moves
+ * with scrolling (sized to the large viewport); cards above it blur and bend it. Reading screens keep a
+ * calmer set so nothing sits behind running text.
  */
+type Piece = [Art, string, string?]
+
+const FULL: Piece[] = [
+  [ART.bubble, 'bd-bubble', 'float'],
+  [ART.leaves, 'bd-leaves', 'float-slow'],
+  [ART.tulip, 'bd-tulip', 'float'],
+  [ART.crystals, 'bd-crystals'],
+  [ART.petals, 'bd-petals', 'float-slow'],
+  [ART.lens, 'bd-lens', 'float'],
+  [ART.lotus, 'bd-lotus'],
+  [ART.flowerOpen, 'bd-crocus']
+]
+const QUIZ: Piece[] = [[ART.bubble, 'bd-bubble', 'float'], [ART.crystals, 'bd-crystals'], [ART.petals, 'bd-petals', 'float-slow'], [ART.flowerSide, 'bd-side']]
+const CALM: Piece[] = [[ART.bubble, 'bd-bubble', 'float'], [ART.leaves, 'bd-calm-leaves']]
+const START: Piece[] = [[ART.bubble, 'bd-bubble', 'float'], [ART.leaves, 'bd-leaves', 'float-slow'], [ART.crystals, 'bd-crystals'], [ART.lens, 'bd-lens', 'float'], [ART.petals, 'bd-petals', 'float-slow']]
+
 export function Backdrop() {
   const path = usePathname() ?? '/'
-  if (/^\/admin(\/|$)/.test(path)) return <div className="backdrop" aria-hidden="true" />
-  const calm = /^\/(lesson|page)(\/|$)/.test(path)
-  const quiz = /^\/quiz(\/|$)/.test(path)
-  // the start screen has its own large flower; keep only the glass lenses behind it
-  const start = /^\/start(\/|$)/.test(path)
+  const set = /^\/admin(\/|$)/.test(path) ? [] : /^\/(lesson|page)(\/|$)/.test(path) ? CALM : /^\/quiz(\/|$)/.test(path) ? QUIZ
+    : /^\/start(\/|$)/.test(path) ? START : FULL
   return (
     <div className="backdrop" aria-hidden="true">
-      {calm ? null : (
-        <>
-          <img className="bd bd-bubble float" src={ART.bubble.src} alt="" decoding="async" />
-          <img className="bd bd-lens float-slow" src={ART.lens.src} alt="" decoding="async" />
-          {quiz || start ? null : <img className="bd bd-flower-open" src={ART.flowerOpen.src} alt="" decoding="async" />}
-        </>
-      )}
-      {start ? null : <img className={`bd bd-flower-side${quiz ? ' bd-quiz' : ''}`} src={ART.flowerSide.src} alt="" decoding="async" />}
+      {set.map(([art, cls, motion]) => (
+        <img key={cls} className={`bd ${cls}${motion ? ` ${motion}` : ''}`} src={art.src} alt="" decoding="async" />
+      ))}
     </div>
   )
 }

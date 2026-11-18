@@ -21,6 +21,8 @@ export const ProgressData = z.strictObject({
   bookmarks: z.record(Id, Bookmark).default({}),
   achievements: z.record(Id, Iso).default({}),
   last: z.strictObject({ lesson: Id, at: Iso }).optional(),
+  /** year of birth, from the age given at registration (so the age stays current over the years) */
+  born: z.number().int().min(1900).max(2100).optional(),
   /** local dates (YYYY-MM-DD) on which the learner studied, for the day streak */
   days: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(MAX_DAYS).default([])
 })
@@ -33,6 +35,9 @@ export const localDay = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
 const keepDays = (days: Iterable<string>) => [...new Set(days)].sort().slice(-MAX_DAYS)
+
+/** Age in whole years from the stored year of birth (null when not given yet). */
+export const ageOf = (p: ProgressData, today = new Date()) => (p.born === undefined ? null : today.getFullYear() - p.born)
 
 /** Records a day of study (no change if it is already there). */
 export function withDay(p: ProgressData, day = localDay()): ProgressData {
@@ -84,6 +89,8 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   const last = !a.last ? b.last : !b.last ? a.last : a.last.at >= b.last.at ? a.last : b.last
   if (last) out.last = last
   out.days = keepDays([...a.days, ...b.days])
+  const born = a.born ?? b.born
+  if (born !== undefined) out.born = born
   return out
 }
 

@@ -21,7 +21,8 @@ interface LearnerApi {
   learner: Learner | null
   progress: ProgressData
   sync: SyncState
-  register: (name: string) => Learner
+  register: (name: string, age: number) => Learner
+  setAge: (age: number) => void
   restore: (code: string) => Promise<'ok' | 'not_found' | 'offline'>
   signOut: () => void
   readLesson: (lessonId: string, percent: number) => void
@@ -169,12 +170,14 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     learner,
     progress,
     sync,
-    register: (name) => {
+    register: (name, age) => {
       const l = { name: name.trim().slice(0, 80), code: newCode((n) => crypto.getRandomValues(new Uint8Array(n))) }
       writeJson(LEARNER_KEY, l)
       setLearner(l)
+      update((p) => ({ ...p, born: new Date().getFullYear() - age }))
       return l
     },
+    setAge: (age) => update((p) => ({ ...p, born: new Date().getFullYear() - age })),
     restore: async (raw) => {
       const code = raw.replace(/\D/g, '')
       if (!isCode(code)) return 'not_found'

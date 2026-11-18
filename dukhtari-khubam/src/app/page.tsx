@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { ART } from '@/web/art'
 import { Avatar } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
-import { SchoolTile } from '@/web/components/SchoolTile'
+import { SchoolGrid } from '@/web/components/SchoolTile'
 import { Empty, Skeleton } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
@@ -46,7 +46,7 @@ export default function Home() {
       <section className="hello">
         <div className="hello-text">
           <p className="greet">{hour === null ? ' ' : `${t(greetingKey(hour))}${name ? `, ${name}` : ''}!`}</p>
-          <h1 className="h-hero">{t('home.motto')} <span aria-hidden="true">💜</span></h1>
+          <h1 className="h-hero">{t('home.motto')}{'\u00a0'}<span aria-hidden="true">💜</span></h1>
         </div>
         <img className="hello-flower bloom-in" src={ART.flower.src} alt="" aria-hidden="true" decoding="async" />
       </section>
@@ -77,9 +77,9 @@ export default function Home() {
           <Link href="/schools">{t('home.all')} <Icon name="arrow" size={14} /></Link>
         </div>
         {bundle ? (
-          <div className="tile-grid stagger">{bundle.schools.map((s) => <SchoolTile key={s.id} school={s} />)}</div>
+          <SchoolGrid schools={bundle.schools} cols={3} />
         ) : offlineEmpty ? <Empty icon="info" title={t('state.offline_empty')} /> : loading ? (
-          <div className="tile-grid">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} height={104} radius={22} />)}</div>
+          <div className="tile-grid tile-grid-3">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} height={104} radius={22} />)}</div>
         ) : null}
       </section>
 

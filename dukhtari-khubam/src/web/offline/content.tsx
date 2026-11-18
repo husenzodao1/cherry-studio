@@ -5,6 +5,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 
 import type { Asset, Block } from '../components/Blocks'
 import { usePrefs } from '../prefs'
+import { filterBundleForAge } from './age'
 import { apiUrl } from './base'
 import { bundleImageUrls, prefetchMedia } from './media'
 
@@ -148,3 +149,11 @@ export function ContentProvider({ children }: { children: ReactNode }) {
 }
 
 export const useContent = () => useContext(ContentContext)
+
+/** Re-provides the catalogue with age-tagged content limited to the learner's age (see age.ts). */
+export function AgeFilter({ age, children }: { age: number | null; children: ReactNode }) {
+  const parent = useContext(ContentContext)
+  const bundle = useMemo(() => (parent.bundle ? filterBundleForAge(parent.bundle, age) : null), [parent.bundle, age])
+  const value = useMemo(() => ({ ...parent, bundle }), [parent, bundle])
+  return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>
+}

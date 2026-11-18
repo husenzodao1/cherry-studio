@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+import { LiquidGlass } from '../glass/LiquidGlass'
 import { usePrefs } from '../prefs'
 import { Icon, type IconName } from './Icon'
 
@@ -13,23 +14,23 @@ const ITEMS: { href: string; key: 'nav.home' | 'nav.schools' | 'nav.saved' | 'na
   { href: '/profile', key: 'nav.profile', icon: 'user', match: /^\/(profile|settings)/ }
 ]
 
-/** Floating frosted-glass tab bar; the current tab sits in a raised glass circle. */
+/** Floating tab bar in clear, refracting glass; the current tab sits in a raised glass circle. */
 export function Dock() {
   const path = usePathname() ?? '/'
   const { t } = usePrefs()
   if (/^\/(lesson|quiz|start|admin)(\/|$)/.test(path)) return null
   return (
     <div className="dock-wrap">
-      <nav className="dock glass" aria-label={t('nav.home')}>
+      <LiquidGlass as="nav" label={t('nav.home')} radius={36} bezel={20} className="dock">
         {ITEMS.map((item) => {
           const on = item.match.test(path)
           return (
             <Link key={item.href} href={item.href} aria-current={on ? 'page' : undefined} aria-label={t(item.key)}>
-              <span className="dock-icon"><Icon name={item.icon} size={23} fill={on && item.icon !== 'cap' ? 'currentColor' : 'none'} /></span>
+              <Icon name={item.icon} size={23} fill={on && item.icon !== 'cap' ? 'currentColor' : 'none'} />
             </Link>
           )
         })}
-      </nav>
+      </LiquidGlass>
     </div>
   )
 }

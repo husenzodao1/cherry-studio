@@ -9,6 +9,7 @@ import { Icon } from '@/web/components/Icon'
 import { Empty } from '@/web/components/States'
 import { useContent, type Bundle } from '@/web/offline/content'
 import { usePrefs } from '@/web/prefs'
+import { browserSupabase } from '@/web/supabase-browser'
 
 interface Hit { type: 'school' | 'course' | 'lesson'; id: string; title: string; snippet?: string | null }
 
@@ -43,9 +44,11 @@ function searchBundle(bundle: Bundle, q: string): Hit[] {
   }
   return hits.slice(0, 50)
 }
-// SHA-256 of the staff passphrase that opens the admin panel from search. Only the hash ships in the
-// bundle; the panel itself is protected by the staff roles checked in the database.
-const ADMIN_KEY = '23dbbe5ca1da746b77afa49530cdf0dce81e513182b05f2ff9bfe43a72ecb732'
+// The staff passphrase opens the panel straight from search. It is the password of the panel's own staff
+// account, checked by Supabase Auth (rate-limited); the app only carries the first 16 bits of its SHA-256,
+// enough to skip ordinary queries but useless for guessing the passphrase offline.
+const PANEL_EMAIL = 'panel@dukhtari-khubam.invalid'
+const KEY_PREFIX = '23db'
 
 async function sha256(text: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
@@ -65,11 +68,15 @@ export default function SearchPage() {
   useEffect(() => {
     let alive = true
     const typed = q.trim()
-    // the passphrase is checked before any search request, so it never reaches the API or its logs
+    // search runs on the phone; only text matching the passphrase prefix is sent, and only to Supabase Auth
     const h = setTimeout(async () => {
-      if (typed.length >= 8 && (await sha256(typed)) === ADMIN_KEY) {
-        if (alive) router.push('/admin')
-        return
+      if (typed.length >= 8 && (await sha256(typed)).startsWith(KEY_PREFIX)) {
+        const sb = browserSupabase()
+        const signed = sb ? !(await sb.auth.signInWithPassword({ email: PANEL_EMAIL, password: typed }).catch(() => ({ error: true }))).error : false
+        if (signed) {
+          if (alive) router.push('/admin')
+          return
+        }
       }
       if (alive) setDebounced(typed)
     }, 300)
