@@ -28,8 +28,10 @@ const tg = {
   'quiz.your_answer': 'Ҷавоб', 'quiz.score': 'Хол', 'quiz.match_pick': 'Интихоб',
   'lesson.of': 'аз', 'lesson.minutes': 'дақ.', 'lesson.completed': 'Анҷом ёфт', 'lesson.mark_done': 'Анҷом', 'lesson.lesson': 'Дарси',
   'lesson.source': 'Манбаъ', 'lesson.important': 'Муҳим',
-  'auth.email': 'Почтаи электронӣ', 'auth.password': 'Рамз', 'auth.magic': 'Пайванд ба почта',
-  'auth.sent': 'Пайванд фиристода шуд', 'auth.name': 'Ном', 'auth.have_account': 'Ҳисоб доред?', 'auth.no_account': 'Ҳисоб надоред?',
+  'auth.email': 'Почтаи электронӣ', 'auth.password': 'Рамз', 'auth.magic': 'Воридшавӣ бо коди почта',
+  'auth.sent': 'Коди тасдиқ ба почтаи шумо фиристода шуд', 'auth.name': 'Ном', 'auth.have_account': 'Ҳисоб доред?', 'auth.no_account': 'Ҳисоб надоред?',
+  'auth.code': 'Коди тасдиқ', 'auth.verify': 'Тасдиқ', 'auth.resend': 'Кодро аз нав фиристед', 'auth.resend_in': 'Аз нав фиристодан пас аз',
+  'auth.change_email': 'Почтаи дигар', 'auth.code_wrong': 'Код нодуруст ё кӯҳна аст. Аз нав кӯшиш кунед.',
   'profile.free': 'Ҳисоби ройгон', 'profile.premium': 'Premium', 'profile.lessons': 'Дарсҳо', 'profile.courses': 'Курсҳо',
   'profile.quizzes': 'Тестҳо', 'profile.badges': 'Нишонҳо'
 }
