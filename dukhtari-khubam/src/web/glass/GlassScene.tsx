@@ -237,7 +237,8 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
     const serif = cssVar('--font-lora', 'Georgia, serif')
     const rtl = locale === 'ar'
     const mottoFont = rtl ? cssVar('--font-naskh', 'serif') : serif
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75))
+    // 1.5× is visually indistinguishable on phones and halves the per-pixel ray tracing of 3× screens
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.NoToneMapping
     renderer.domElement.setAttribute('aria-hidden', 'true')
@@ -339,7 +340,7 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
     const mottoTextures: THREE.CanvasTexture[] = []
     const glasses = specs.map((spec, i) => {
       const uniforms = { ...shared, uCenter: { value: new THREE.Vector3(...spec.c) }, uRadius: { value: spec.r } }
-      const mesh = new THREE.Mesh(new THREE.SphereGeometry(spec.r, 128, 96), new THREE.ShaderMaterial({ uniforms, vertexShader: vert, fragmentShader: frag }))
+      const mesh = new THREE.Mesh(new THREE.SphereGeometry(spec.r, 96, 64), new THREE.ShaderMaterial({ uniforms, vertexShader: vert, fragmentShader: frag }))
       const canvas = document.createElement('canvas')
       canvas.width = 1024
       canvas.height = 512
@@ -356,7 +357,7 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
       // a cap of ±54° × ±29° facing the camera, just above the glass surface
       const a = 0.95
       const b = 0.5
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(spec.r * 1.004, 64, 32, Math.PI / 2 - a, 2 * a, Math.PI / 2 - b, 2 * b),
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(spec.r * 1.004, 48, 24, Math.PI / 2 - a, 2 * a, Math.PI / 2 - b, 2 * b),
         new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }))
       mesh.add(cap)
       scene.add(mesh)
@@ -375,7 +376,7 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
       const dist = camera.position.z - planeZ
       const ph = 2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
       backdrop.scale.set(ph * camera.aspect * 1.02, ph * 1.02, 1)
-      const scale = Math.min(window.devicePixelRatio, 1.75)
+      const scale = Math.min(window.devicePixelRatio, 1.5)
       backCanvas.width = Math.min(2048, Math.round(width * scale))
       backCanvas.height = Math.round(backCanvas.width / camera.aspect)
       drawBackdrop(backCanvas, word, dark, accent, serif)
@@ -431,12 +432,17 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
       renderer.render(scene, camera)
     }
 
+    // the motion is slow, so 30 fps looks the same as 60 and halves GPU work
     let raf = 0
     let visible = true
-    const loop = () => {
+    let last = 0
+    const loop = (now = performance.now()) => {
       raf = 0
       if (!visible || document.hidden) return
-      render()
+      if (now - last >= 32 || !motion) {
+        last = now
+        render()
+      }
       if (motion) raf = requestAnimationFrame(loop)
     }
     const kick = () => {

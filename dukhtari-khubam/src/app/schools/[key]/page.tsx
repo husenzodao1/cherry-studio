@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { Icon } from '@/web/components/Icon'
 import { Empty, ErrorState, Loading } from '@/web/components/States'
 import { ART } from '@/web/art'
-import { GlassScene } from '@/web/glass/GlassScene'
+import { GlassScene } from '@/web/glass/LazyGlassScene'
 import { usePrefs } from '@/web/prefs'
 import { useApi } from '@/web/useApi'
 

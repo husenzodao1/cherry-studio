@@ -286,23 +286,21 @@ textarea.input { border-radius: 18px; padding: 14px 18px; min-height: 120px; res
 :root[data-theme='dark'] .art-pop, :root[data-theme='dark'] .deco { filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.55)); }
 .app > * { position: relative; z-index: 1; }
 
-/* Gem backdrop: fixed, behind the content; far gems sit out of focus. */
-.gem-field { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.gem { position: absolute; display: block; transform: rotate(var(--tilt, 0deg)); filter: drop-shadow(0 10px 10px rgba(58, 40, 80, 0.16)); }
+/* Gem backdrop: fixed, behind the content, never moves; far gems sit out of focus. */
+.gem-field { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; overflow: hidden; contain: strict; transform: translateZ(0); }
+.gem { position: absolute; display: block; opacity: 0.78; filter: saturate(0.82) drop-shadow(0 10px 10px rgba(58, 40, 80, 0.12)); }
 .gem img { width: 100%; height: auto; }
-.gem-far { filter: blur(0.6px); opacity: 0.72; }
-:root[data-theme='dark'] .gem { filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.5)) brightness(0.92); }
-:root[data-theme='dark'] .gem-far { filter: blur(0.6px) brightness(0.85); opacity: 0.6; }
-.glint { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; opacity: 0.9;
+.gem-far { filter: saturate(0.8) blur(0.6px); opacity: 0.5; }
+:root[data-theme='dark'] .gem { opacity: 0.62; filter: saturate(0.8) brightness(0.88) drop-shadow(0 10px 12px rgba(0, 0, 0, 0.45)); }
+:root[data-theme='dark'] .gem-far { opacity: 0.4; filter: saturate(0.8) blur(0.6px) brightness(0.8); }
+.glint { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; opacity: 0.8;
   background:
     radial-gradient(circle, #fff 0 1.5px, rgba(255, 255, 255, 0.55) 2.5px, transparent 5px),
     linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.95) 50%, transparent 100%) center / 100% 1.2px no-repeat,
     linear-gradient(0deg, transparent 0, rgba(255, 255, 255, 0.95) 50%, transparent 100%) center / 1.2px 100% no-repeat; }
 @media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion='reduce']) .gem { animation: drift 11s ease-in-out infinite alternate; }
   :root:not([data-motion='reduce']) .glint { animation: twinkle 4.2s ease-in-out infinite; }
 }
-@keyframes drift { from { transform: translateY(0) rotate(var(--tilt, 0deg)); } to { transform: translateY(-7px) rotate(calc(var(--tilt, 0deg) + 3deg)); } }
 @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.4) rotate(0deg); } 45% { opacity: 1; transform: scale(1) rotate(45deg); } 60% { opacity: 0.2; transform: scale(0.7) rotate(60deg); } }
 .pop-row { padding-top: 34px; }
 

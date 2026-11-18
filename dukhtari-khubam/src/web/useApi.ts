@@ -12,32 +12,55 @@ export interface ApiState<T> {
   reload: () => void
 }
 
+/**
+ * Stale-while-revalidate memory cache: a page seen before renders instantly from the last
+ * response while a fresh copy loads; identical requests in flight are shared.
+ */
+const cache = new Map<string, unknown>()
+const inflight = new Map<string, Promise<unknown>>()
+
+function load<T>(key: string, path: string): Promise<T> {
+  let p = inflight.get(key) as Promise<T> | undefined
+  if (!p) {
+    p = api<T>(path).finally(() => inflight.delete(key))
+    inflight.set(key, p)
+  }
+  return p
+}
+
 /** Loading / error / success state for a GET endpoint; refetches when the session changes. */
 export function useApi<T>(path: string | null): ApiState<T> {
   const { session } = useAuth()
-  const [state, setState] = useState<{ data?: T; error?: ApiFailure; loading: boolean }>({ loading: !!path })
+  const userKey = session?.user.id ?? 'anon'
+  const key = path ? `${userKey}|${path}` : ''
+  const [state, setState] = useState<{ data?: T; error?: ApiFailure; loading: boolean }>(() =>
+    key && cache.has(key) ? { data: cache.get(key) as T, loading: false } : { loading: !!path })
   const [nonce, setNonce] = useState(0)
   const reload = useCallback(() => setNonce((n) => n + 1), [])
-  const userKey = session?.user.id ?? 'anon'
 
   useEffect(() => {
     if (!path) {
       setState({ loading: false })
       return
     }
-    const ctrl = new AbortController()
-    setState((s) => ({ ...s, loading: true, error: undefined }))
-    api<T>(path, { signal: ctrl.signal })
-      .then((data) => setState({ data, loading: false }))
-      .catch((error: unknown) => {
-        if (ctrl.signal.aborted) return
-        setState({
-          loading: false,
-          error: error instanceof ApiFailure ? error : new ApiFailure(0, 'network', 'Пайваст нест.')
-        })
+    let alive = true
+    const cached = cache.get(key) as T | undefined
+    setState(cached !== undefined ? { data: cached, loading: false } : (s) => ({ ...s, loading: true, error: undefined }))
+    load<T>(key, path)
+      .then((data) => {
+        cache.set(key, data)
+        if (alive) setState({ data, loading: false })
       })
-    return () => ctrl.abort()
-  }, [path, nonce, userKey])
+      .catch((error: unknown) => {
+        if (!alive) return
+        const failure = error instanceof ApiFailure ? error : new ApiFailure(0, 'network', 'Пайваст нест.')
+        // keep showing the last good data when a background refresh fails
+        setState((s) => (s.data !== undefined ? { ...s, loading: false } : { loading: false, error: failure }))
+      })
+    return () => {
+      alive = false
+    }
+  }, [path, key, nonce])
 
   return { data: state.data, error: state.error, loading: state.loading, reload }
 }
