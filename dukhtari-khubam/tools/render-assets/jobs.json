@@ -114,7 +114,8 @@
      -0.6
     ]
    }
-  ]
+  ],
+  "color": "#f08cbc"
  },
  {
   "name": "icon-culture",
@@ -143,7 +144,10 @@
      -0.5
     ]
    }
-  ]
+  ],
+  "tint": {
+   "brass_vase_02": "#ffd0dc"
+  }
  },
  {
   "name": "icon-family",
@@ -175,7 +179,10 @@
      -0.5
     ]
    }
-  ]
+  ],
+  "tint": {
+   "tea_set_01": "#f6e9ff"
+  }
  },
  {
   "name": "icon-health",
@@ -217,7 +224,8 @@
      -0.6
     ]
    }
-  ]
+  ],
+  "color": "#e7a39d"
  },
  {
   "name": "icon-modern",
@@ -246,7 +254,10 @@
      -0.5
     ]
    }
-  ]
+  ],
+  "tint": {
+   "alarm_clock_01": "#c7a6f6"
+  }
  },
  {
   "name": "diamond-cluster",
