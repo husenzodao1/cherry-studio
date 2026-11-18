@@ -9,6 +9,7 @@ import { HDRLoader } from 'three/addons/loaders/HDRLoader.js'
 import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { buildKind } from './kit.js'
+import { buildKind2 } from './kit2.js'
 
 // Brilliant-cut diamond: girdle 16, crown with table and star/kite facets, pavilion to culet.
 function brilliant() {
@@ -380,7 +381,7 @@ window.renderJob = async (job) => {
   scene.environmentIntensity = job.envIntensity ?? 1
   scene.environmentRotation = new THREE.Euler(0, job.envRotation ?? 0, 0)
 
-  let object = await buildKind(job)
+  let object = (await buildKind(job)) ?? buildKind2(job)
   if (object) {
     // built by kit.js
   } else if (job.kind === 'bloom') {

@@ -8,22 +8,22 @@
  },
  "assets": {
   "glass-flower.webp": {
-   "model": "Glass crocus (procedural petals, transmissive iridescent glass, golden anthers)",
+   "model": "Glass crocus with solid, bevelled glass petals and golden anthers",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-glass.json: gf-hero)"
+   "source": "tools/render-assets (jobs-v2.json: v2-crocus)"
   },
   "glass-flower-side.webp": {
    "model": "Glass crocus, side view",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-glass.json: gf-side)"
+   "source": "tools/render-assets (jobs-v2b.json: v2-crocus-side)"
   },
   "glass-flower-open.webp": {
    "model": "Glass crocus, open, seen from above",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-glass.json: gf-open)"
+   "source": "tools/render-assets (jobs-v2b.json: v2-crocus-open)"
   },
   "glass-lens.webp": {
    "model": "Glass lens (flattened sphere, transmissive glass)",
@@ -38,46 +38,46 @@
    "source": "tools/render-assets (jobs-glass.json: lens-b)"
   },
   "school-religion.webp": {
-   "model": "Mosque (procedural geometry, glossy lavender and gold)",
+   "model": "Mosque with four minarets, ribbed gold-trimmed dome and arcade",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons.json: ic-mosque)"
+   "source": "tools/render-assets (jobs-icons2.json: i2-mosque)"
   },
   "school-ethics.webp": {
-   "model": "Heart (procedural geometry, pink-to-violet glossy finish)",
+   "model": "Glossy heart with a gold band, small hearts and pearls",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons.json: ic-heart)"
+   "source": "tools/render-assets (jobs-icons2.json: i2-heart)"
   },
   "school-culture.webp": {
-   "model": "Flower (procedural petals, glossy finish)",
+   "model": "Gold-banded vase with three flowers",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons.json: ic-cosmos)"
+   "source": "tools/render-assets (jobs-icons2.json: i2-culture)"
   },
   "school-family.webp": {
-   "model": "House (procedural geometry, glossy finish)",
+   "model": "House with tiled roof, windows with flower boxes, bushes and fence",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons.json: ic-house)"
+   "source": "tools/render-assets (jobs-icons2.json: i2-house)"
   },
   "school-health.webp": {
-   "model": "Sprout (procedural leaves)",
+   "model": "Seedling in a glossy pot with a dew drop",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons.json: ic-sprout)"
+   "source": "tools/render-assets (jobs-icons2.json: i2-plant)"
   },
   "school-growth.webp": {
-   "model": "Faceted crystal star (transmissive glass)",
+   "model": "Crystal star on a gold-rimmed pedestal with small stars",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons.json: ic-star)"
+   "source": "tools/render-assets (jobs-icons2.json: i2-star)"
   },
   "school-modern.webp": {
-   "model": "Light bulb (glass bulb, brass base, glowing filament)",
+   "model": "Light bulb with glowing filament and a glass halo",
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons.json: ic-bulb)"
+   "source": "tools/render-assets (jobs-icons2.json: i2-bulb)"
   },
   "book-open.webp": {
    "model": "Open book on a rehal stand (procedural; abstract text lines, no real script)",
@@ -103,6 +103,36 @@
     }
    ],
    "license": "project-owned (lantern model CC0)"
+  },
+  "glass-lotus.webp": {
+   "model": "Glass water lily (four rings of solid glass petals)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-v2.json: v2-lotus)"
+  },
+  "glass-tulip.webp": {
+   "model": "Glass tulip with stem and leaves",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-v2b.json: v2-tulip)"
+  },
+  "glass-leaves.webp": {
+   "model": "Spray of glass leaves",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-v2b.json: v2-leaves)"
+  },
+  "glass-crystals.webp": {
+   "model": "Cluster of hexagonal glass crystals",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-v2b.json: v2-crystals)"
+  },
+  "glass-petals.webp": {
+   "model": "Loose glass petals",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-v2b.json: v2-petals)"
   }
  }
 }

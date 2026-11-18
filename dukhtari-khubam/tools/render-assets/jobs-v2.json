@@ -1,0 +1,9 @@
+[
+ {"name": "v2-crocus", "kind": "crocus2", "matte": true, "tone": "none", "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 24, "azimuth": 18, "zoom": 0.76, "size": 1100, "noShadow": true, "envIntensity": 1.0, "keyIntensity": 1.6,
+  "rims": [{"color": "#f0e0ff", "intensity": 7, "dir": [0.6, 0.5, -1]}, {"color": "#ffd6f0", "intensity": 5, "dir": [-1, 0.3, -0.5]}, {"color": "#d8e8ff", "intensity": 4, "dir": [0, -0.6, 1]}],
+  "flowers": [{"rot": [0.35, 0, -0.25], "seed": 7, "open": 0.42}]},
+ {"name": "v2-lotus", "kind": "lotus2", "matte": true, "tone": "none", "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 30, "azimuth": 0, "zoom": 0.78, "size": 1100, "noShadow": true, "envIntensity": 1.0, "keyIntensity": 1.6,
+  "rims": [{"color": "#f0e0ff", "intensity": 7, "dir": [0.6, 0.5, -1]}, {"color": "#ffd6f0", "intensity": 5, "dir": [-1, 0.3, -0.5]}], "flowers": [{"rot": [0.1, 0, 0]}]},
+ {"name": "v2-tulip", "kind": "tulip2", "matte": true, "tone": "none", "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 8, "azimuth": 0, "zoom": 0.8, "size": 1100, "noShadow": true, "envIntensity": 1.0, "keyIntensity": 1.6,
+  "rims": [{"color": "#ffe0f4", "intensity": 7, "dir": [0.6, 0.5, -1]}, {"color": "#e0d6ff", "intensity": 5, "dir": [-1, 0.3, -0.5]}], "flowers": [{"rot": [0, 0, 0.18]}]}
+]

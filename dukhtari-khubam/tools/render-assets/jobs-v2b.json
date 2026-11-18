@@ -1,0 +1,307 @@
+[
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "noShadow": true,
+  "envIntensity": 1.0,
+  "keyIntensity": 1.6,
+  "rims": [
+   {
+    "color": "#f0e0ff",
+    "intensity": 7,
+    "dir": [
+     0.6,
+     0.5,
+     -1
+    ]
+   },
+   {
+    "color": "#ffd6f0",
+    "intensity": 5,
+    "dir": [
+     -1,
+     0.3,
+     -0.5
+    ]
+   },
+   {
+    "color": "#d8e8ff",
+    "intensity": 4,
+    "dir": [
+     0,
+     -0.6,
+     1
+    ]
+   }
+  ],
+  "name": "v2-crocus-side",
+  "kind": "crocus2",
+  "pitch": 10,
+  "azimuth": -30,
+  "zoom": 0.78,
+  "size": 1000,
+  "flowers": [
+   {
+    "rot": [
+     0.15,
+     0.6,
+     0.3
+    ],
+    "seed": 19,
+    "open": 0.6
+   }
+  ]
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "noShadow": true,
+  "envIntensity": 1.0,
+  "keyIntensity": 1.6,
+  "rims": [
+   {
+    "color": "#f0e0ff",
+    "intensity": 7,
+    "dir": [
+     0.6,
+     0.5,
+     -1
+    ]
+   },
+   {
+    "color": "#ffd6f0",
+    "intensity": 5,
+    "dir": [
+     -1,
+     0.3,
+     -0.5
+    ]
+   },
+   {
+    "color": "#d8e8ff",
+    "intensity": 4,
+    "dir": [
+     0,
+     -0.6,
+     1
+    ]
+   }
+  ],
+  "name": "v2-crocus-open",
+  "kind": "crocus2",
+  "pitch": 58,
+  "azimuth": 10,
+  "zoom": 0.74,
+  "size": 1100,
+  "flowers": [
+   {
+    "rot": [
+     0.1,
+     0.3,
+     0.05
+    ],
+    "seed": 31,
+    "open": 0.18
+   }
+  ]
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "noShadow": true,
+  "envIntensity": 1.0,
+  "keyIntensity": 1.6,
+  "rims": [
+   {
+    "color": "#f0e0ff",
+    "intensity": 7,
+    "dir": [
+     0.6,
+     0.5,
+     -1
+    ]
+   },
+   {
+    "color": "#ffd6f0",
+    "intensity": 5,
+    "dir": [
+     -1,
+     0.3,
+     -0.5
+    ]
+   },
+   {
+    "color": "#d8e8ff",
+    "intensity": 4,
+    "dir": [
+     0,
+     -0.6,
+     1
+    ]
+   }
+  ],
+  "name": "v2-tulip",
+  "kind": "tulip2",
+  "pitch": 8,
+  "azimuth": 0,
+  "zoom": 0.8,
+  "size": 1000,
+  "flowers": [
+   {
+    "rot": [
+     0,
+     0.5,
+     0.18
+    ],
+    "seed": 9
+   }
+  ]
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "noShadow": true,
+  "envIntensity": 1.0,
+  "keyIntensity": 1.6,
+  "rims": [
+   {
+    "color": "#f0e0ff",
+    "intensity": 7,
+    "dir": [
+     0.6,
+     0.5,
+     -1
+    ]
+   },
+   {
+    "color": "#ffd6f0",
+    "intensity": 5,
+    "dir": [
+     -1,
+     0.3,
+     -0.5
+    ]
+   },
+   {
+    "color": "#d8e8ff",
+    "intensity": 4,
+    "dir": [
+     0,
+     -0.6,
+     1
+    ]
+   }
+  ],
+  "name": "v2-leaves",
+  "kind": "leaves2",
+  "pitch": 12,
+  "azimuth": 0,
+  "zoom": 0.82,
+  "size": 900,
+  "items": [
+   {
+    "rot": [
+     0,
+     0,
+     -0.3
+    ]
+   }
+  ]
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "noShadow": true,
+  "envIntensity": 1.0,
+  "keyIntensity": 1.6,
+  "rims": [
+   {
+    "color": "#f0e0ff",
+    "intensity": 7,
+    "dir": [
+     0.6,
+     0.5,
+     -1
+    ]
+   },
+   {
+    "color": "#ffd6f0",
+    "intensity": 5,
+    "dir": [
+     -1,
+     0.3,
+     -0.5
+    ]
+   },
+   {
+    "color": "#d8e8ff",
+    "intensity": 4,
+    "dir": [
+     0,
+     -0.6,
+     1
+    ]
+   }
+  ],
+  "name": "v2-crystals",
+  "kind": "crystals2",
+  "pitch": 14,
+  "azimuth": 20,
+  "zoom": 0.82,
+  "size": 800,
+  "items": [
+   {}
+  ]
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "noShadow": true,
+  "envIntensity": 1.0,
+  "keyIntensity": 1.6,
+  "rims": [
+   {
+    "color": "#f0e0ff",
+    "intensity": 7,
+    "dir": [
+     0.6,
+     0.5,
+     -1
+    ]
+   },
+   {
+    "color": "#ffd6f0",
+    "intensity": 5,
+    "dir": [
+     -1,
+     0.3,
+     -0.5
+    ]
+   },
+   {
+    "color": "#d8e8ff",
+    "intensity": 4,
+    "dir": [
+     0,
+     -0.6,
+     1
+    ]
+   }
+  ],
+  "name": "v2-petals",
+  "kind": "petals2",
+  "pitch": 20,
+  "azimuth": 0,
+  "zoom": 0.8,
+  "size": 900,
+  "items": [
+   {}
+  ]
+ }
+]

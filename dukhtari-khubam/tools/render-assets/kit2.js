@@ -1,0 +1,448 @@
+// Second set of scene builders: solid glass petals (real thickness, so the edges catch light like
+// cast glass), more glass flowers for the backdrop, and the detailed school icons.
+import * as THREE from 'three'
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
+
+const D = () => window.kitDeps
+const C = (c) => new THREE.Color(c)
+
+// ---------------------------------------------------------------- materials
+export function glass2(o = {}) {
+  return new THREE.MeshPhysicalMaterial({
+    color: C(o.color ?? '#ffffff'), vertexColors: !!o.vertexColors, transmission: 1, thickness: o.thickness ?? 0.06, ior: o.ior ?? 1.5,
+    roughness: o.roughness ?? 0.02, metalness: 0, attenuationColor: C(o.attenuation ?? '#cdb6f4'), attenuationDistance: o.attDist ?? 2.5,
+    iridescence: o.irid ?? 0.9, iridescenceIOR: 1.35, iridescenceThicknessMinimum: 220, iridescenceThicknessMaximum: 640,
+    clearcoat: 1, clearcoatRoughness: 0.015, specularIntensity: 1, specularColor: C('#ffffff'), envMapIntensity: o.env ?? 1.7,
+    side: THREE.FrontSide, dispersion: o.dispersion ?? 0.4
+  })
+}
+const glossy = (color, o = {}) => new THREE.MeshPhysicalMaterial({
+  color: C(color), roughness: o.roughness ?? 0.22, metalness: o.metalness ?? 0, clearcoat: 1, clearcoatRoughness: o.cc ?? 0.06,
+  sheen: o.sheen ?? 0.3, sheenColor: C(o.sheenColor ?? '#ffffff'), iridescence: o.irid ?? 0, envMapIntensity: o.env ?? 1.15,
+  vertexColors: !!o.vertexColors, side: o.side ?? THREE.FrontSide, flatShading: !!o.flat,
+  emissive: C(o.emissive ?? '#000000'), emissiveIntensity: o.emissiveIntensity ?? 0
+})
+const gold = (o = {}) => new THREE.MeshPhysicalMaterial({ color: C(o.color ?? '#eab964'), metalness: 1, roughness: o.roughness ?? 0.18, clearcoat: 0.6, envMapIntensity: 1.5 })
+const mesh = (geo, mat, pos = [0, 0, 0], rot = [0, 0, 0], scale = 1) => {
+  const m = new THREE.Mesh(geo, mat); m.position.fromArray(pos); m.rotation.fromArray(rot)
+  typeof scale === 'number' ? m.scale.setScalar(scale) : m.scale.fromArray(scale)
+  m.castShadow = true; m.receiveShadow = true; return m
+}
+const lathe = (profile, seg = 96) => new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(r, y)), seg)
+let seed = 7
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+
+// ---------------------------------------------------------------- solid petals
+/** Turns a (segU+1)×(segV+1) petal surface into a closed slab of thickness t (front, back and rim). */
+export function solidify(geo, segU, segV, t) {
+  geo.computeVertexNormals()
+  const P = geo.attributes.position, N = geo.attributes.normal, Cc = geo.attributes.color, U = geo.attributes.uv
+  const n = P.count, pos = [], col = [], uv = [], idx = []
+  for (const side of [1, -1]) for (let i = 0; i < n; i++) {
+    // thinner towards the rim and the tip, like a hand-shaped glass petal
+    const u = U.getY(i), v = U.getX(i) * 2 - 1
+    const k = t * (0.35 + 0.65 * Math.sqrt(Math.max(0, 1 - v * v))) * (1 - 0.6 * u)
+    pos.push(P.getX(i) + N.getX(i) * k * side * 0.5, P.getY(i) + N.getY(i) * k * side * 0.5, P.getZ(i) + N.getZ(i) * k * side * 0.5)
+    if (Cc) col.push(Cc.getX(i), Cc.getY(i), Cc.getZ(i))
+    uv.push(U.getX(i), U.getY(i))
+  }
+  const at = (i, j) => i * (segV + 1) + j
+  for (let i = 0; i < segU; i++) for (let j = 0; j < segV; j++) {
+    const a = at(i, j), b = at(i + 1, j), c = at(i, j + 1), d = at(i + 1, j + 1)
+    idx.push(a, b, c, b, d, c)                    // front
+    idx.push(n + a, n + c, n + b, n + b, n + c, n + d) // back
+  }
+  const ring = []
+  for (let j = 0; j <= segV; j++) ring.push(at(0, j))
+  for (let i = 1; i <= segU; i++) ring.push(at(i, segV))
+  for (let j = segV - 1; j >= 0; j--) ring.push(at(segU, j))
+  for (let i = segU - 1; i >= 1; i--) ring.push(at(i, 0))
+  for (let r = 0; r < ring.length; r++) {
+    const a = ring[r], b = ring[(r + 1) % ring.length]
+    idx.push(a, n + a, b, b, n + a, n + b)
+  }
+  const g = new THREE.BufferGeometry()
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+  if (col.length) g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3))
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2))
+  g.setIndex(idx); g.computeVertexNormals()
+  return g
+}
+function petal(o, mat) {
+  const { petalGeo } = D()
+  const segU = o.segU ?? 56, segV = o.segV ?? 24
+  const surf = petalGeo({ ...o, segU, segV })
+  return new THREE.Mesh(solidify(surf, segU, segV, o.thick ?? 0.05), mat)
+}
+function place(m, az, elev, r = 0, y = 0) {
+  D().placePetal(m, az, elev); m.updateMatrix = () => {}
+  m.matrix.setPosition(Math.cos(az) * r, y, Math.sin(az) * r); m.castShadow = true
+  return m
+}
+function stamens(g, n = 3, h = 0.42) {
+  const anther = glossy('#f0b02a', { roughness: 0.35, sheen: 1, sheenColor: '#fff0b0' })
+  const style = glossy('#f27a1d', { roughness: 0.35, sheen: 0.8, sheenColor: '#ffd2a0' })
+  const fil = glossy('#f8ecc4', { roughness: 0.45 })
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + 0.4
+    const top = new THREE.Vector3(Math.cos(a) * 0.1, h, Math.sin(a) * 0.1)
+    g.add(mesh(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(new THREE.Vector3(0, 0.02, 0), new THREE.Vector3(Math.cos(a) * 0.05, h * 0.5, Math.sin(a) * 0.05), top), 16, 0.009, 8), fil))
+    const an = mesh(new THREE.CapsuleGeometry(0.022, 0.12, 8, 16), anther, [top.x * 1.05, top.y + 0.07, top.z * 1.05])
+    an.lookAt(top.clone().multiplyScalar(2.2).setY(1.4)); an.rotateX(Math.PI / 2); g.add(an)
+  }
+  for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2 + 1.45
+    const end = new THREE.Vector3(Math.cos(a) * 0.11, h + 0.05, Math.sin(a) * 0.11)
+    g.add(mesh(new THREE.TubeGeometry(new THREE.CubicBezierCurve3(new THREE.Vector3(0, 0.02, 0), new THREE.Vector3(0, h * 0.7, 0), new THREE.Vector3(Math.cos(a) * 0.05, h, Math.sin(a) * 0.05), end), 20, 0.01, 8), style))
+    g.add(mesh(new THREE.SphereGeometry(0.03, 20, 14), style, [end.x, end.y + 0.01, end.z], [0, 0, 0], [1.2, 0.7, 1.2]))
+  }
+}
+
+// ---------------------------------------------------------------- glass flowers
+export function crocus2(o = {}) {
+  seed = o.seed ?? 7
+  const g = new THREE.Group()
+  const mat = glass2({ vertexColors: true, attenuation: o.attenuation ?? '#c7aaf3', attDist: o.attDist ?? 1.6, thickness: 0.08 })
+  const palette = o.palette ?? ['#9d6be6', '#e7dafc', '#ffffff']
+  const open = o.open ?? 0.5
+  for (const r of [{ n: 3, len: 1.1, wid: 0.4, elev: open, curl: -0.3, cup: 0.5, rot: 0 }, { n: 3, len: 1.02, wid: 0.38, elev: open + 0.22, curl: -0.08, cup: 0.55, rot: Math.PI / 3 }]) {
+    for (let i = 0; i < r.n; i++) {
+      const az = r.rot + (i / r.n) * Math.PI * 2 + (rnd() - 0.5) * 0.12
+      g.add(place(petal({ length: r.len * (1 + (rnd() - 0.5) * 0.08), width: r.wid, cup: r.cup, curl: r.curl + (rnd() - 0.5) * 0.1, colors: palette, ruffle: 0.01, thick: 0.06 }, mat), az, r.elev + (rnd() - 0.5) * 0.08, 0.05))
+    }
+  }
+  stamens(g)
+  return g
+}
+
+export function lotus2(o = {}) {
+  seed = o.seed ?? 11
+  const g = new THREE.Group()
+  const mat = glass2({ vertexColors: true, attenuation: o.attenuation ?? '#e3b4ee', attDist: 1.8, thickness: 0.06 })
+  const palette = o.palette ?? ['#c47ad8', '#f3dcf7', '#ffffff']
+  const rings = [
+    { n: 9, len: 0.95, wid: 0.3, elev: 0.12, curl: -0.25, cup: 0.45, r: 0.18 },
+    { n: 8, len: 0.85, wid: 0.3, elev: 0.5, curl: -0.05, cup: 0.5, r: 0.14 },
+    { n: 7, len: 0.7, wid: 0.28, elev: 0.88, curl: 0.12, cup: 0.5, r: 0.1 },
+    { n: 5, len: 0.48, wid: 0.24, elev: 1.15, curl: 0.15, cup: 0.45, r: 0.06 }
+  ]
+  rings.forEach((r, ri) => {
+    for (let i = 0; i < r.n; i++) {
+      const az = (i / r.n) * Math.PI * 2 + ri * 0.4 + (rnd() - 0.5) * 0.08
+      g.add(place(petal({ length: r.len * (1 + (rnd() - 0.5) * 0.1), width: r.wid, cup: r.cup, curl: r.curl + (rnd() - 0.5) * 0.12, colors: palette, ruffle: 0.012, thick: 0.045, segU: 44, segV: 18 }, mat), az, r.elev + (rnd() - 0.5) * 0.06, r.r, ri * 0.04))
+    }
+  })
+  const gm = glossy('#f3c23d', { roughness: 0.4, sheen: 1, sheenColor: '#fff3b8' })
+  g.add(mesh(new THREE.CylinderGeometry(0.13, 0.1, 0.1, 40), glossy('#d8e88a', { roughness: 0.4 }), [0, 0.1, 0]))
+  for (let i = 0; i < 40; i++) {
+    const a = i * 2.39996, r = 0.12 + 0.08 * (i / 40)
+    const tip = new THREE.Vector3(Math.cos(a) * r, 0.2 + 0.05 * Math.sin(i), Math.sin(a) * r)
+    g.add(mesh(new THREE.TubeGeometry(new THREE.LineCurve3(new THREE.Vector3(Math.cos(a) * 0.1, 0.12, Math.sin(a) * 0.1), tip), 1, 0.006, 6), gm))
+    g.add(mesh(new THREE.SphereGeometry(0.014, 10, 8), gm, tip.toArray()))
+  }
+  return g
+}
+
+export function tulip2(o = {}) {
+  seed = o.seed ?? 5
+  const g = new THREE.Group()
+  const mat = glass2({ vertexColors: true, attenuation: o.attenuation ?? '#f0b7dc', attDist: 1.4, thickness: 0.08 })
+  const palette = o.palette ?? ['#c85aa8', '#f6cfe8', '#fff7fc']
+  const head = new THREE.Group()
+  for (const r of [{ n: 3, len: 1.0, wid: 0.5, elev: 1.15, curl: 0.35, cup: 0.75, rot: 0 }, { n: 3, len: 0.96, wid: 0.48, elev: 1.25, curl: 0.4, cup: 0.8, rot: Math.PI / 3 }]) {
+    for (let i = 0; i < r.n; i++) {
+      const az = r.rot + (i / r.n) * Math.PI * 2 + (rnd() - 0.5) * 0.1
+      head.add(place(petal({ length: r.len, width: r.wid, cup: r.cup, curl: r.curl, colors: palette, ruffle: 0.008, thick: 0.07, round: true }, mat), az, r.elev, 0.05))
+    }
+  }
+  head.position.y = 1.5; g.add(head)
+  const stemMat = glass2({ attenuation: '#b9e3c4', attDist: 1.2, thickness: 0.1, irid: 0.5 })
+  const stem = new THREE.CatmullRomCurve3([[0, 0, 0], [0.05, 0.5, 0], [-0.02, 1.0, 0.02], [0, 1.52, 0]].map((p) => new THREE.Vector3(...p)))
+  g.add(mesh(new THREE.TubeGeometry(stem, 48, 0.035, 16), stemMat))
+  const leafMat = glass2({ vertexColors: true, attenuation: '#bfe6c9', attDist: 1.4, thickness: 0.06, irid: 0.6 })
+  for (const [az, elev, len] of [[0.3, 0.75, 1.1], [Math.PI + 0.2, 0.9, 0.9]]) {
+    const leaf = place(petal({ length: len, width: 0.26, cup: 0.45, curl: -0.35, colors: ['#9fd6ad', '#e3f6e8', '#ffffff'], ruffle: 0.008, thick: 0.05 }, leafMat), az, elev, 0.02, 0.1)
+    g.add(leaf)
+  }
+  return g
+}
+
+export function leaves2(o = {}) {
+  seed = o.seed ?? 3
+  const g = new THREE.Group()
+  const mat = glass2({ vertexColors: true, attenuation: o.attenuation ?? '#cbb4f3', attDist: 2, thickness: 0.05 })
+  const stem = new THREE.CatmullRomCurve3([[0, 0, 0], [0.1, 0.6, 0], [0.05, 1.2, 0.05], [-0.1, 1.7, 0]].map((p) => new THREE.Vector3(...p)))
+  g.add(mesh(new THREE.TubeGeometry(stem, 48, 0.022, 12), glossy('#c9b2f2', { roughness: 0.15, irid: 0.3 })))
+  for (let k = 0; k < 7; k++) {
+    const t = 0.15 + k * 0.12, p = stem.getPoint(t)
+    const az = k % 2 ? 0.2 : Math.PI - 0.2
+    const leaf = petal({ length: 0.62 - k * 0.04, width: 0.24, cup: 0.4, curl: -0.25, colors: ['#b593ea', '#efe6fd', '#ffffff'], ruffle: 0.006, thick: 0.04, segU: 40, segV: 16 }, mat)
+    D().placePetal(leaf, az, 0.55 + (rnd() - 0.5) * 0.2); leaf.updateMatrix = () => {}
+    leaf.matrix.setPosition(p.x, p.y, p.z); g.add(leaf)
+  }
+  return g
+}
+
+export function crystals2(o = {}) {
+  seed = o.seed ?? 13
+  const g = new THREE.Group()
+  const mat = glass2({ attenuation: o.attenuation ?? '#b392f0', attDist: 0.9, thickness: 0.5, ior: 1.55, irid: 0.4, dispersion: 0.8 })
+  const prism = (r, h, tip) => {
+    const pts = []
+    const ring = (y, rad) => Array.from({ length: 6 }, (_, i) => new THREE.Vector3(Math.cos(i * Math.PI / 3) * rad, y, Math.sin(i * Math.PI / 3) * rad))
+    const b = ring(0, r), t = ring(h, r * 0.92), apex = new THREE.Vector3(0, h + tip, 0), bottom = new THREE.Vector3(0, 0, 0)
+    for (let i = 0; i < 6; i++) { const j = (i + 1) % 6; pts.push(b[i], t[i], b[j], b[j], t[i], t[j], t[i], apex, t[j], b[i], b[j], bottom) }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts); geo.computeVertexNormals(); return geo
+  }
+  // a geode-like fan of hexagonal points growing from one base
+  const spec = o.spec ?? [[0, 0.17, 1.15, 0.3, 0], [-0.38, 0.12, 0.8, 0.22, 0.1], [0.42, 0.13, 0.85, 0.24, -0.08], [-0.72, 0.09, 0.55, 0.16, 0.05], [0.78, 0.09, 0.5, 0.15, 0.1], [0.15, 0.08, 0.45, 0.14, 0.35], [-0.2, 0.07, 0.38, 0.12, -0.3]]
+  for (const [lean, r, h, tip, tilt] of spec) g.add(mesh(prism(r, h, tip), mat, [Math.sin(lean) * 0.1, 0, tilt * 0.3], [tilt, rnd() * 0.8, -lean]))
+  g.add(mesh(new THREE.SphereGeometry(0.28, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), glass2({ attenuation: '#9f7fe0', attDist: 0.6, thickness: 0.4, roughness: 0.25 }), [0, -0.02, 0], [0, 0, 0], [1.4, 0.45, 0.9]))
+  return g
+}
+
+export function petals2(o = {}) {
+  seed = o.seed ?? 21
+  const g = new THREE.Group()
+  const mat = glass2({ vertexColors: true, attenuation: o.attenuation ?? '#d7b8f4', attDist: 2, thickness: 0.05 })
+  for (const [x, y, z, rx, ry, rz, s] of o.spec ?? [[0, 0, 0, 0.4, 0.3, 0.2, 1], [0.9, 0.35, -0.2, -0.5, 1.4, 0.8, 0.8], [-0.7, 0.5, 0.1, 1.0, -0.6, -0.5, 0.7]]) {
+    const p = petal({ length: 0.8, width: 0.4, cup: 0.5, curl: 0.25, colors: ['#a77ae8', '#ecdffc', '#ffffff'], ruffle: 0.01, thick: 0.05, segU: 40, segV: 18 }, mat)
+    p.position.set(x, y, z); p.rotation.set(rx, ry, rz); p.scale.setScalar(s); g.add(p)
+  }
+  return g
+}
+
+// ---------------------------------------------------------------- detailed school icons
+function onion(r = 0.5, h = 0.84) {
+  return lathe([[0, 0], [r * 0.88, 0], [r, h * 0.14], [r * 0.98, h * 0.33], [r * 0.8, h * 0.55], [r * 0.52, h * 0.71], [r * 0.24, h * 0.86], [r * 0.08, h * 0.95], [0, h]])
+}
+function ribs(g, r, h, y, mat, n = 12) {
+  const prof = [[r * 0.88, 0], [r, h * 0.14], [r * 0.98, h * 0.33], [r * 0.8, h * 0.55], [r * 0.52, h * 0.71], [r * 0.24, h * 0.86], [r * 0.08, h * 0.95]]
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2
+    const pts = prof.map(([rr, yy]) => new THREE.Vector3(Math.cos(a) * rr * 1.01, y + yy, Math.sin(a) * rr * 1.01))
+    g.add(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 32, 0.008, 6), mat))
+  }
+}
+function arch(w, h, peak = 0.62) {
+  const s = new THREE.Shape(), x = w / 2
+  s.moveTo(-x, 0); s.lineTo(-x, h)
+  s.bezierCurveTo(-x, h + w * peak * 0.55, -w * 0.12, h + w * peak * 0.8, 0, h + w * peak)
+  s.bezierCurveTo(w * 0.12, h + w * peak * 0.8, x, h + w * peak * 0.55, x, h)
+  s.lineTo(x, 0); s.closePath(); return s
+}
+const ext = (shape, depth, bevel = 0.01) => { const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: bevel > 0, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 3, curveSegments: 32 }); g.translate(0, 0, -depth / 2); g.computeVertexNormals(); return g }
+function crescent(g, pos, s, mat) {
+  g.add(mesh(new THREE.TorusGeometry(0.075 * s, 0.017 * s, 12, 48, Math.PI * 1.35), mat, pos, [0, 0, -Math.PI * 0.18]))
+}
+
+export function mosque2() {
+  const g = new THREE.Group()
+  const wall = glossy('#f4eefc', { roughness: 0.28 }), dome = glossy('#8d6be6', { irid: 0.3, roughness: 0.18 }), dark = glossy('#4f2f9c', { roughness: 0.3 })
+  const tr = gold()
+  g.add(mesh(new RoundedBoxGeometry(2.6, 0.1, 1.5, 4, 0.03), glossy('#e2d6f6'), [0, 0.05, 0]))
+  g.add(mesh(new RoundedBoxGeometry(2.4, 0.08, 1.35, 4, 0.03), glossy('#ece4fa'), [0, 0.14, 0]))
+  g.add(mesh(new RoundedBoxGeometry(1.8, 0.72, 1.0, 6, 0.05), wall, [0, 0.54, 0]))
+  g.add(mesh(new RoundedBoxGeometry(1.86, 0.06, 1.06, 4, 0.02), tr, [0, 0.92, 0]))
+  // arcade: five pointed arches with gold frames
+  for (let i = 0; i < 5; i++) {
+    const x = -0.68 + i * 0.34, big = i === 2
+    g.add(mesh(ext(arch(big ? 0.24 : 0.17, big ? 0.3 : 0.22), 0.03, 0.006), dark, [x, 0.2, 0.505]))
+    g.add(mesh(new THREE.TorusGeometry(big ? 0.13 : 0.095, 0.01, 8, 32, Math.PI), tr, [x, 0.2 + (big ? 0.3 : 0.22), 0.52]))
+  }
+  for (const x of [-0.6, -0.3, 0.3, 0.6]) g.add(mesh(ext(arch(0.07, 0.07), 0.02, 0.004), dark, [x, 0.72, 0.505]))
+  g.add(mesh(new THREE.CylinderGeometry(0.46, 0.48, 0.24, 64), wall, [0, 1.07, 0]))
+  for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; g.add(mesh(ext(arch(0.06, 0.06), 0.02, 0.004), dark, [Math.sin(a) * 0.47, 1.0, Math.cos(a) * 0.47], [0, a, 0])) }
+  g.add(mesh(new THREE.TorusGeometry(0.47, 0.022, 12, 64), tr, [0, 1.19, 0], [Math.PI / 2, 0, 0]))
+  g.add(mesh(onion(0.5, 0.86), dome, [0, 1.19, 0]))
+  ribs(g, 0.5, 0.86, 1.19, tr)
+  g.add(mesh(new THREE.SphereGeometry(0.04, 20, 16), tr, [0, 2.06, 0]))
+  g.add(mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.16, 12), tr, [0, 2.12, 0]))
+  crescent(g, [0, 2.27, 0], 1, tr)
+  for (const x of [-0.66, 0.66]) {
+    g.add(mesh(new THREE.CylinderGeometry(0.2, 0.21, 0.12, 48), wall, [x, 0.98, 0.1]))
+    g.add(mesh(onion(0.22, 0.38), dome, [x, 1.04, 0.1]))
+    ribs(g, 0.22, 0.38, 1.04, tr, 8)
+    g.add(mesh(new THREE.SphereGeometry(0.022, 14, 10), tr, [x, 1.44, 0.1]))
+  }
+  // four minarets with two balconies each
+  for (const [x, z, h] of [[-1.15, 0.45, 2.1], [1.15, 0.45, 2.1], [-1.0, -0.5, 1.75], [1.0, -0.5, 1.75]]) {
+    g.add(mesh(new THREE.CylinderGeometry(0.09, 0.12, h, 32), wall, [x, 0.18 + h / 2, z]))
+    for (const f of [0.55, 0.82]) {
+      g.add(mesh(new THREE.CylinderGeometry(0.14, 0.11, 0.06, 32), wall, [x, 0.18 + h * f, z]))
+      g.add(mesh(new THREE.TorusGeometry(0.14, 0.014, 8, 32), tr, [x, 0.21 + h * f, z], [Math.PI / 2, 0, 0]))
+    }
+    g.add(mesh(new THREE.ConeGeometry(0.11, 0.36, 32), dome, [x, 0.18 + h + 0.18, z]))
+    g.add(mesh(new THREE.SphereGeometry(0.02, 12, 10), tr, [x, 0.18 + h + 0.38, z]))
+  }
+  return g
+}
+
+export function heart2() {
+  const { heartGeo } = D()
+  const g = new THREE.Group()
+  const shade = (geo, top, bottom) => {
+    const pos = geo.attributes.position, col = []; geo.computeBoundingBox(); const { min, max } = geo.boundingBox
+    for (let i = 0; i < pos.count; i++) { const t = (pos.getY(i) - min.y) / (max.y - min.y); const c = C(bottom).lerp(C(top), Math.pow(t, 0.8)); col.push(c.r, c.g, c.b) }
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); return geo
+  }
+  g.add(mesh(shade(heartGeo(), '#f9b4ea', '#a947d6'), glossy('#ffffff', { vertexColors: true, roughness: 0.12, cc: 0.02, irid: 0.35, sheen: 0.4, sheenColor: '#ffe3f6' }), [0, 0, 0], [-0.1, 0.32, 0]))
+  // golden band around the heart's side (the extruded outline, pushed out by the bevel)
+  const sh = new THREE.Shape()
+  sh.moveTo(0, -1.0)
+  sh.bezierCurveTo(-0.35, -0.68, -1.05, -0.28, -1.05, 0.28); sh.bezierCurveTo(-1.05, 0.78, -0.62, 1.02, -0.3, 1.0)
+  sh.bezierCurveTo(-0.1, 0.99, 0.0, 0.82, 0.0, 0.66); sh.bezierCurveTo(0.0, 0.82, 0.1, 0.99, 0.3, 1.0)
+  sh.bezierCurveTo(0.62, 1.02, 1.05, 0.78, 1.05, 0.28); sh.bezierCurveTo(1.05, -0.28, 0.35, -0.68, 0, -1.0)
+  const outline = sh.getSpacedPoints(160).map((p) => new THREE.Vector3(p.x * 1.2, p.y * 1.2 + 0.02, 0))
+  g.add(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(outline, true), 320, 0.035, 10, true), gold(), [0, 0, 0], [-0.1, 0.32, 0]))
+  // two small hearts in front and pearls
+  g.add(mesh(shade(heartGeo(), '#ffd0f0', '#e07ad0'), glossy('#ffffff', { vertexColors: true, roughness: 0.15, irid: 0.3 }), [1.12, -0.55, 0.75], [0.1, -0.4, 0.3], 0.3))
+  g.add(mesh(heartGeo(), glass2({ attenuation: '#f1a9e0', attDist: 0.6, thickness: 0.4 }), [-1.12, -0.25, 0.7], [0.2, 0.5, -0.35], 0.24))
+  for (const [x, y, z, r] of [[-0.95, -0.62, 0.7, 0.07], [-0.78, -0.78, 0.72, 0.05], [0.86, -0.88, 0.72, 0.06], [1.15, 0.2, 0.5, 0.05]]) g.add(mesh(new THREE.SphereGeometry(r, 32, 24), glossy('#fbf3ff', { roughness: 0.1, irid: 0.8, sheen: 1, sheenColor: '#ffe0f8' }), [x, y, z]))
+  return g
+}
+
+export function culture2() {
+  const { petalGeo, placePetal } = D()
+  const g = new THREE.Group()
+  // glossy vase with gold bands
+  const vase = lathe([[0.001, 0], [0.26, 0], [0.32, 0.08], [0.4, 0.3], [0.38, 0.5], [0.24, 0.72], [0.16, 0.86], [0.2, 0.96], [0.2, 0.98]])
+  g.add(mesh(vase, glossy('#6b3fc8', { roughness: 0.16, irid: 0.25 })))
+  for (const [y, r] of [[0.08, 0.322], [0.42, 0.397], [0.86, 0.165]]) g.add(mesh(new THREE.TorusGeometry(r, 0.016, 10, 64), gold(), [0, y, 0], [Math.PI / 2, 0, 0]))
+  // ornament dots around the belly
+  for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2; g.add(mesh(new THREE.SphereGeometry(0.022, 12, 10), gold(), [Math.cos(a) * 0.405, 0.3, Math.sin(a) * 0.405])) }
+  const petalsMat = glossy('#ffffff', { vertexColors: true, roughness: 0.28, side: THREE.DoubleSide, sheen: 0.3, sheenColor: '#ffd9fb', irid: 0.15 })
+  const flower = (pos, rot, s, cols) => {
+    const f = new THREE.Group()
+    for (let i = 0; i < 8; i++) { const m = new THREE.Mesh(petalGeo({ length: 0.5, width: 0.22, cup: 0.35, curl: -0.12, colors: cols, ruffle: 0.015 }), petalsMat); placePetal(m, (i / 8) * Math.PI * 2, 0.3); m.updateMatrix = () => {}; m.castShadow = true; f.add(m) }
+    for (let i = 0; i < 6; i++) { const m = new THREE.Mesh(petalGeo({ length: 0.3, width: 0.18, cup: 0.4, curl: 0.1, colors: cols, ruffle: 0.012 }), petalsMat); placePetal(m, (i / 6) * Math.PI * 2 + 0.3, 0.75); m.updateMatrix = () => {}; f.add(m) }
+    f.add(mesh(new THREE.SphereGeometry(0.09, 32, 20), glossy('#f2b630', { roughness: 0.4, sheen: 1, sheenColor: '#fff2b8' }), [0, 0.05, 0], [0, 0, 0], [1, 0.55, 1]))
+    f.position.fromArray(pos); f.rotation.fromArray(rot); f.scale.setScalar(s); g.add(f)
+    const stem = new THREE.QuadraticBezierCurve3(new THREE.Vector3(0, 0.9, 0), new THREE.Vector3(pos[0] * 0.4, (0.9 + pos[1]) / 2, pos[2] * 0.4), new THREE.Vector3(...pos))
+    g.add(mesh(new THREE.TubeGeometry(stem, 16, 0.016, 8), glossy('#4f9a4a')))
+  }
+  flower([0, 1.55, 0.05], [0.35, 0, 0], 1, ['#7a1fa8', '#c447d8', '#f3b0ef'])
+  flower([-0.45, 1.3, 0.1], [0.4, 0, 0.5], 0.75, ['#a8338f', '#e568b9', '#ffd0ea'])
+  flower([0.48, 1.28, 0.05], [0.4, 0, -0.5], 0.7, ['#5a2fb8', '#9a76ea', '#e6dcff'])
+  const leafMat = glossy('#ffffff', { vertexColors: true, roughness: 0.3, side: THREE.DoubleSide })
+  for (const [az, el] of [[0.4, 0.5], [2.6, 0.45], [4.4, 0.55]]) { const m = new THREE.Mesh(petalGeo({ length: 0.55, width: 0.2, cup: 0.3, curl: -0.3, colors: ['#2e7d34', '#4cb848', '#8dd468'] }), leafMat); placePetal(m, az, el); m.updateMatrix = () => {}; m.matrix.setPosition(0, 0.95, 0); m.castShadow = true; g.add(m) }
+  return g
+}
+
+export function house2() {
+  const g = new THREE.Group()
+  const wall = glossy('#a985ee'), roof = glossy('#6a3fc7', { irid: 0.2 }), white = glossy('#f7f2ff', { roughness: 0.3 }), green = glossy('#6fbf73', { roughness: 0.35 })
+  g.add(mesh(new RoundedBoxGeometry(2.2, 0.06, 1.7, 4, 0.03), glossy('#e7dcf8'), [0, 0.03, 0]))
+  g.add(mesh(new RoundedBoxGeometry(1.25, 0.9, 1.0, 6, 0.06), wall, [0, 0.51, 0]))
+  // tiled roof: rows of rounded tiles on both slopes
+  const tri = new THREE.Shape(); tri.moveTo(-0.82, 0); tri.lineTo(0, 0.64); tri.lineTo(0.82, 0); tri.closePath()
+  g.add(mesh(new THREE.ExtrudeGeometry(tri, { depth: 1.14, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.04, bevelSegments: 4 }).translate(0, 0, -0.57), roof, [0, 0.95, 0]))
+  for (const side of [-1, 1]) for (let r = 0; r < 5; r++) for (let c = 0; c < 7; c++) {
+    const t = (r + 0.5) / 5, x = side * (0.82 - t * 0.82) + side * 0.02, y = 0.95 + t * 0.64 + 0.04
+    g.add(mesh(new THREE.CapsuleGeometry(0.035, 0.1, 4, 8), roof, [x, y, -0.5 + c * 0.167], [0, 0, side * (Math.PI / 2 - Math.atan2(0.64, 0.82))]))
+  }
+  g.add(mesh(new RoundedBoxGeometry(0.18, 0.4, 0.18, 4, 0.03), roof, [0.4, 1.4, -0.22]))
+  for (let i = 0; i < 3; i++) g.add(mesh(new THREE.SphereGeometry(0.07 + i * 0.025, 20, 16), glass2({ attenuation: '#e8defa', attDist: 3, thickness: 0.2 }), [0.42 + i * 0.07, 1.68 + i * 0.13, -0.22]))
+  // door, steps, knob, heart
+  g.add(mesh(ext(arch(0.3, 0.3, 0.5), 0.05, 0.012), white, [0, 0.07, 0.5]))
+  g.add(mesh(ext(arch(0.24, 0.27, 0.5), 0.02, 0.008), glossy('#c9b2f6'), [0, 0.09, 0.53]))
+  g.add(mesh(new THREE.SphereGeometry(0.022, 12, 10), gold(), [0.07, 0.25, 0.555]))
+  g.add(mesh(new RoundedBoxGeometry(0.46, 0.05, 0.16, 3, 0.015), white, [0, 0.085, 0.6]))
+  // windows with frames, sills and shutters
+  for (const x of [-0.38, 0.38]) {
+    g.add(mesh(new RoundedBoxGeometry(0.26, 0.26, 0.04, 3, 0.02), white, [x, 0.58, 0.5]))
+    g.add(mesh(new RoundedBoxGeometry(0.2, 0.2, 0.03, 3, 0.015), glass2({ attenuation: '#cfe2ff', attDist: 1, thickness: 0.05 }), [x, 0.58, 0.515]))
+    g.add(mesh(new THREE.BoxGeometry(0.02, 0.2, 0.05), white, [x, 0.58, 0.52]))
+    g.add(mesh(new THREE.BoxGeometry(0.2, 0.02, 0.05), white, [x, 0.58, 0.52]))
+    g.add(mesh(new RoundedBoxGeometry(0.32, 0.04, 0.1, 3, 0.012), white, [x, 0.44, 0.54]))
+    for (let k = 0; k < 3; k++) g.add(mesh(new THREE.SphereGeometry(0.035, 12, 10), glossy(k % 2 ? '#f08fcf' : '#ffd36e', { roughness: 0.3 }), [x - 0.08 + k * 0.08, 0.48, 0.56]))
+  }
+  // bushes and a little fence
+  for (const [x, z, r] of [[-0.85, 0.35, 0.2], [-0.7, 0.62, 0.15], [0.85, 0.4, 0.19], [0.72, 0.65, 0.13]]) g.add(mesh(new THREE.SphereGeometry(r, 24, 18), green, [x, r * 0.8, z]))
+  for (let i = 0; i < 9; i++) { const x = -1.0 + i * 0.25; if (Math.abs(x) < 0.3) continue; g.add(mesh(new RoundedBoxGeometry(0.06, 0.26, 0.04, 2, 0.015), white, [x, 0.16, 0.8])) }
+  g.add(mesh(new THREE.BoxGeometry(0.75, 0.035, 0.03), white, [-0.66, 0.2, 0.8])); g.add(mesh(new THREE.BoxGeometry(0.75, 0.035, 0.03), white, [0.66, 0.2, 0.8]))
+  return g
+}
+
+export function plant2() {
+  const { petalGeo, placePetal } = D()
+  const g = new THREE.Group()
+  const pot = lathe([[0.001, 0], [0.32, 0], [0.4, 0.5], [0.46, 0.52], [0.46, 0.62], [0.001, 0.62]])
+  g.add(mesh(pot, glossy('#8e66ea', { roughness: 0.16, irid: 0.25 })))
+  g.add(mesh(new THREE.TorusGeometry(0.455, 0.02, 10, 64), gold(), [0, 0.57, 0], [Math.PI / 2, 0, 0]))
+  g.add(mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.04, 48), glossy('#6b4a3e', { roughness: 0.8 }), [0, 0.61, 0]))
+  const stemMat = glossy('#3f8f3f', { roughness: 0.35 })
+  g.add(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[0, 0.6, 0], [0.02, 0.85, 0], [-0.02, 1.05, 0]].map((p) => new THREE.Vector3(...p))), 24, 0.03, 10), stemMat))
+  const leafMat = glossy('#ffffff', { vertexColors: true, roughness: 0.26, side: THREE.DoubleSide, sheen: 0.1 })
+  for (const [az, el, len, y] of [[Math.PI * 0.95, 0.75, 0.62, 1.04], [0.05, 0.8, 0.58, 1.04], [Math.PI * 0.5, 0.95, 0.42, 0.9], [Math.PI * 1.5, 0.9, 0.4, 0.86]]) {
+    const m = new THREE.Mesh(petalGeo({ length: len, width: 0.36, cup: 0.3, curl: -0.25, colors: ['#1f6e2a', '#38a23c', '#74c850'], ruffle: 0.006 }), leafMat)
+    placePetal(m, az, el); m.updateMatrix = () => {}; m.matrix.setPosition(0, y, 0); m.castShadow = true; g.add(m)
+  }
+  g.add(mesh(new THREE.SphereGeometry(0.06, 32, 24), glass2({ attenuation: '#d9f2ff', attDist: 4, thickness: 0.12 }), [-0.38, 1.2, 0.15], [0, 0, 0], [1, 0.85, 1]))
+  return g
+}
+
+export function star2() {
+  const g = new THREE.Group()
+  const starGeo = (rIn = 0.46, depth = 0.42) => {
+    const pts = [], front = new THREE.Vector3(0, 0, depth), back = new THREE.Vector3(0, 0, -depth)
+    const rim = Array.from({ length: 10 }, (_, i) => { const r = i % 2 ? rIn : 1.05, a = Math.PI / 2 + (i * Math.PI) / 5; return new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, 0) })
+    for (let i = 0; i < 10; i++) { const a = rim[i], b = rim[(i + 1) % 10]; pts.push(front, a, b, back, b, a) }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts); geo.computeVertexNormals(); return geo
+  }
+  const crystal = glass2({ attenuation: '#9b6ff0', attDist: 1.1, thickness: 0.8, ior: 1.6, irid: 0.5, color: '#f5efff', dispersion: 0.8 })
+  g.add(mesh(starGeo(), crystal, [0, 1.55, 0], [0, 0.35, 0.08]))
+  // pedestal with a gold rim
+  g.add(mesh(new THREE.CylinderGeometry(0.62, 0.7, 0.22, 64), glossy('#efe7fc', { roughness: 0.2 }), [0, 0.11, 0]))
+  g.add(mesh(new THREE.CylinderGeometry(0.5, 0.56, 0.14, 64), glossy('#8d6be6', { roughness: 0.16 }), [0, 0.29, 0]))
+  g.add(mesh(new THREE.TorusGeometry(0.565, 0.02, 10, 64), gold(), [0, 0.36, 0], [Math.PI / 2, 0, 0]))
+  g.add(mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.76, 16), gold(), [0, 0.73, 0]))
+  // small stars and sparkles around
+  g.add(mesh(starGeo(0.46, 0.4), glossy('#f2c35a', { metalness: 1, roughness: 0.2 }), [-0.95, 1.85, 0.1], [0, -0.4, 0.3], 0.22))
+  g.add(mesh(starGeo(0.46, 0.4), crystal, [1.0, 1.75, -0.1], [0, 0.5, -0.25], 0.26))
+  for (const [x, y, z, s] of [[-0.8, 0.9, 0.3, 0.07], [0.85, 0.95, 0.35, 0.06], [0.4, 2.35, 0.1, 0.05], [-0.45, 2.25, 0.2, 0.045]]) g.add(mesh(new THREE.OctahedronGeometry(s), gold(), [x, y, z], [0.3, 0.6, 0]))
+  return g
+}
+
+export function bulb2() {
+  const g = new THREE.Group()
+  const glassProfile = [[0.001, 1.64], [0.2, 1.62], [0.4, 1.52], [0.54, 1.33], [0.57, 1.12], [0.51, 0.9], [0.35, 0.66], [0.26, 0.5], [0.25, 0.42]]
+  g.add(mesh(lathe(glassProfile, 128), glass2({ attenuation: '#d7c2ff', attDist: 6, thickness: 0.04, irid: 0.8, side: THREE.DoubleSide })))
+  const base = []
+  for (let i = 0; i <= 16; i++) base.push([0.26 + (i % 2 ? 0.028 : 0), 0.42 - i * 0.022])
+  base.push([0.19, 0.04], [0.12, -0.02], [0.001, -0.03])
+  g.add(mesh(lathe(base, 96), gold({ color: '#ddb066', roughness: 0.22 })))
+  g.add(mesh(new THREE.CylinderGeometry(0.13, 0.17, 0.05, 48), glossy('#3a2a5a'), [0, 0.06, 0]))
+  g.add(mesh(new THREE.SphereGeometry(0.07, 24, 16), gold({ color: '#d6a95c' }), [0, -0.03, 0], [0, 0, 0], [1, 0.5, 1]))
+  // inner glass stem and filament supports
+  g.add(mesh(lathe([[0.001, 0.82], [0.05, 0.8], [0.08, 0.6], [0.13, 0.45], [0.001, 0.45]]), glass2({ attenuation: '#efe6ff', attDist: 6, thickness: 0.05 })))
+  const wire = glossy('#b9b9c6', { metalness: 1, roughness: 0.3 })
+  for (const x of [-0.1, 0.1]) g.add(mesh(new THREE.TubeGeometry(new THREE.LineCurve3(new THREE.Vector3(x * 0.4, 0.78, 0), new THREE.Vector3(x, 1.02, 0)), 1, 0.006, 6), wire))
+  const fil = new THREE.CatmullRomCurve3(Array.from({ length: 41 }, (_, i) => { const t = i / 40; return new THREE.Vector3(-0.1 + t * 0.2, 1.02 + 0.05 * Math.sin(t * Math.PI), Math.sin(t * Math.PI * 12) * 0.018) }))
+  g.add(mesh(new THREE.TubeGeometry(fil, 200, 0.008, 6), new THREE.MeshStandardMaterial({ color: '#ffd28a', emissive: C('#ffb347'), emissiveIntensity: 4 })))
+  const light = new THREE.PointLight('#ffc070', 1.6, 0, 2); light.position.set(0, 1.05, 0); g.add(light)
+  // halo ring and sparkles
+  g.add(mesh(new THREE.TorusGeometry(0.85, 0.018, 12, 128), glass2({ attenuation: '#cdb4ff', attDist: 2, thickness: 0.05 }), [0, 1.1, 0], [1.25, 0.2, 0.25]))
+  for (const [x, y, z, s] of [[-0.78, 1.55, 0.2, 0.06], [0.82, 1.6, 0.1, 0.05], [0.7, 0.5, 0.3, 0.045]]) g.add(mesh(new THREE.OctahedronGeometry(s), gold(), [x, y, z], [0.3, 0.6, 0]))
+  return g
+}
+
+export function buildKind2(job) {
+  const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
+  switch (job.kind) {
+    case 'crocus2': return many(crocus2, job.flowers ?? [{}])
+    case 'lotus2': return many(lotus2, job.flowers ?? [{}])
+    case 'tulip2': return many(tulip2, job.flowers ?? [{}])
+    case 'leaves2': return many(leaves2, job.items ?? [{}])
+    case 'crystals2': return many(crystals2, job.items ?? [{}])
+    case 'petals2': return many(petals2, job.items ?? [{}])
+    case 'mosque2': return mosque2()
+    case 'heart2': return heart2()
+    case 'culture2': return culture2()
+    case 'house2': return house2()
+    case 'plant2': return plant2()
+    case 'star2': return star2()
+    case 'bulb2': return bulb2()
+    default: return null
+  }
+}
