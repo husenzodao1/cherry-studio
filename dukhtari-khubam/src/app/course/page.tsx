@@ -5,7 +5,9 @@ import { Suspense } from 'react'
 
 import { ART } from '@/web/art'
 import { Header } from '@/web/components/Header'
+import { CourseDownload } from '@/web/components/CourseDownload'
 import { Icon } from '@/web/components/Icon'
+import { CertificateButton } from '@/web/components/Keepsakes'
 import { Empty, Loading } from '@/web/components/States'
 import { useContent, type QuizCard } from '@/web/offline/content'
 import { courseLessonIds, courseProgress, useLearner } from '@/web/offline/learner'
@@ -64,6 +66,14 @@ function Course() {
         </div>
         <span className="pct-circle glass">{progress.percent}%</span>
       </div>
+      {progress.total > 0 && progress.percent === 100 ? (
+        <div className="glass card-pad stack cert-card" style={{ marginTop: 14, alignItems: 'center', textAlign: 'center', gap: 10 }}>
+          <img src="/assets/3d/glass-lotus.webp" alt="" aria-hidden="true" className="bloom-in" style={{ width: 120 }} />
+          <b>{t('cert.congrats')}</b>
+          <CertificateButton course={c.title} school={c.school?.title ?? ''} date={ids.map((lid) => learnerProgress.lessons[lid]?.done ?? '').sort().at(-1) ?? new Date().toISOString()} />
+        </div>
+      ) : null}
+      <CourseDownload lessons={ids.map((lid) => bundle.lessons[lid]).filter((l) => !!l)} />
       {start ? (
         <Link href={`/lesson?id=${start}`} className="btn btn-block btn-lg" style={{ marginTop: 14 }}>
           {resume || progress.completed ? t('action.continue') : t('action.start_course')} <Icon name="arrow" size={18} />

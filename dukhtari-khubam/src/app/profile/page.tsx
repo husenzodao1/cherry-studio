@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 import { streak } from '@/lib/progress'
 import { Avatar } from '@/web/components/Header'
+import { CertificateButton } from '@/web/components/Keepsakes'
 import { Icon, type IconName } from '@/web/components/Icon'
 import { LOCALE_LABELS } from '@/web/i18n'
 import { useContent } from '@/web/offline/content'
@@ -29,6 +30,12 @@ export default function Profile() {
     return { id: s.id, slug: s.slug, title: s.title, percent: total ? Math.round((done * 100) / total) : 0 }
   }).filter((s) => s.percent > 0)
   const achievements = bundle?.achievements ?? []
+  // finished courses, newest first, with the day their last lesson was done
+  const finished = Object.values(bundle?.courses ?? {}).flatMap((c) => {
+    const ids = c.modules.flatMap((m) => m.topics.flatMap((tp) => tp.lessons.filter((l) => !l.locked).map((l) => l.id)))
+    if (!ids.length || !ids.every((id) => progress.lessons[id]?.done)) return []
+    return [{ id: c.id, title: c.title, school: c.school?.title ?? '', date: ids.map((id) => progress.lessons[id].done!).sort().at(-1)! }]
+  }).sort((a, b) => b.date.localeCompare(a.date))
   const dark = prefs.theme === 'dark' || (prefs.theme === 'system' && typeof window !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches)
 
   const stats: [IconName, number, string][] = [
@@ -61,6 +68,8 @@ export default function Profile() {
       </div>
 
       <div className="glass menu" style={{ marginTop: 18 }}>
+        <Link href="/garden" className="menu-row"><Icon name="sparkle" /><span className="grow">{t('garden.title')}</span><Icon name="forward" size={18} /></Link>
+        <Link href="/review" className="menu-row"><Icon name="check" /><span className="grow">{t('review.title')}</span><Icon name="forward" size={18} /></Link>
         <Link href="/schools" className="menu-row"><Icon name="chart" /><span className="grow">{t('profile.my_progress')}</span><Icon name="forward" size={18} /></Link>
         <Link href="/saved" className="menu-row"><Icon name="bookmark" /><span className="grow">{t('profile.my_saved')}</span><Icon name="forward" size={18} /></Link>
         <Link href="/settings" className="menu-row"><Icon name="settings" /><span className="grow">{t('settings.title')}</span><Icon name="forward" size={18} /></Link>
@@ -81,6 +90,19 @@ export default function Profile() {
               <div className="row"><span style={{ flex: 1 }}>{s.title}</span><span className="muted">{s.percent}%</span></div>
               <div className="progress" style={{ marginTop: 10 }}><span style={{ width: `${s.percent}%` }} /></div>
             </Link>
+          ))}
+        </section>
+      ) : null}
+
+      {finished.length ? (
+        <section className="section">
+          <h2 className="h-section">{t('cert.section')}</h2>
+          {finished.map((c) => (
+            <div key={c.id} className="glass list-row">
+              <span className="row-icon"><Icon name="trophy" /></span>
+              <span className="row-main"><b>{c.title}</b><span className="row-sub">{c.school}</span></span>
+              <CertificateButton course={c.title} school={c.school} date={c.date} className="chip" />
+            </div>
           ))}
         </section>
       ) : null}

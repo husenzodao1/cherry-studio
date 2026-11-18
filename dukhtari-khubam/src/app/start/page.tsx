@@ -6,6 +6,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { formatCode } from '@/lib/progress'
 import { ART } from '@/web/art'
 import { Icon } from '@/web/components/Icon'
+import { CodeImageButton } from '@/web/components/Keepsakes'
 import { useLearner, type Learner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
 
@@ -89,6 +90,7 @@ export default function StartPage() {
             <div className="code-box" aria-label={created.code.split('').join(' ')}>{formatCode(created.code)}</div>
           </div>
           <p className="muted" style={{ margin: 0, fontSize: '0.9em' }}>{t('start.keep_code')}</p>
+          <CodeImageButton />
           <button type="button" className="btn btn-soft btn-block" onClick={copy}><Icon name={copied ? 'check' : 'copy'} size={18} /> {copied ? t('start.copied') : t('start.copy')}</button>
           <button type="button" className="btn btn-block btn-lg" onClick={() => router.replace('/')}>{t('start.saved_it')} <Icon name="arrow" size={18} /></button>
         </div>

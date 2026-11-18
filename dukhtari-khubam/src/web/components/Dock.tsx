@@ -18,7 +18,7 @@ const ITEMS: { href: string; key: 'nav.home' | 'nav.schools' | 'nav.saved' | 'na
 export function Dock() {
   const path = usePathname() ?? '/'
   const { t } = usePrefs()
-  if (/^\/(lesson|quiz|start|admin)(\/|$)/.test(path)) return null
+  if (/^\/(lesson|quiz|review|start|admin)(\/|$)/.test(path)) return null
   return (
     <div className="dock-wrap">
       <LiquidGlass as="nav" label={t('nav.home')} radius={36} bezel={20} className="dock">

@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 
 import { describe, expect, it } from 'vitest'
 
-import { emptyProgress, formatCode, isCode, mergeProgress, newCode, ProgressData, streak, withDay } from '@/lib/progress'
+import { emptyProgress, formatCode, formatDay, isCode, mergeProgress, newCode, ProgressData, streak, withDay } from '@/lib/progress'
 
 describe('progress merge', () => {
   const a: ProgressData = {
@@ -75,5 +75,11 @@ describe('study days', () => {
   it('accepts backups saved before days were tracked', () => {
     const old = ProgressData.parse({ v: 1, lessons: {}, quizzes: {}, bookmarks: {}, achievements: {} })
     expect(old.days).toEqual([])
+  })
+})
+
+describe('dates', () => {
+  it('writes Tajik month names', () => {
+    expect(formatDay('2026-11-02T10:00:00', 'tg')).toBe('2 ноябри 2026')
   })
 })

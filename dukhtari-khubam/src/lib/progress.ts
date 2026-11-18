@@ -13,6 +13,9 @@ const Id = z.string().min(1).max(80)
 export const LessonProgress = z.strictObject({ p: z.number().min(0).max(100), done: Iso.optional(), at: Iso })
 export const QuizResult = z.strictObject({ best: z.number().min(0).max(100), passed: z.boolean(), tries: z.number().int().min(0).max(100000), at: Iso })
 export const Bookmark = z.strictObject({ on: z.boolean(), at: Iso })
+const Day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+/** spaced repetition (Leitner): box 1–5, the day the question is due again, when it was last answered */
+export const ReviewCard = z.strictObject({ box: z.number().int().min(1).max(5), due: Day, at: Iso })
 
 export const ProgressData = z.strictObject({
   v: z.literal(1),
@@ -24,11 +27,12 @@ export const ProgressData = z.strictObject({
   /** year of birth, from the age given at registration (so the age stays current over the years) */
   born: z.number().int().min(1900).max(2100).optional(),
   /** local dates (YYYY-MM-DD) on which the learner studied, for the day streak */
-  days: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(MAX_DAYS).default([])
+  days: z.array(Day).max(MAX_DAYS).default([]),
+  review: z.record(Id, ReviewCard).default({})
 })
 export type ProgressData = z.infer<typeof ProgressData>
 
-export const emptyProgress = (): ProgressData => ({ v: 1, lessons: {}, quizzes: {}, bookmarks: {}, achievements: {}, days: [] })
+export const emptyProgress = (): ProgressData => ({ v: 1, lessons: {}, quizzes: {}, bookmarks: {}, achievements: {}, days: [], review: {} })
 
 /** Calendar date on the phone's own clock. */
 export const localDay = (d = new Date()) =>
@@ -89,6 +93,11 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   const last = !a.last ? b.last : !b.last ? a.last : a.last.at >= b.last.at ? a.last : b.last
   if (last) out.last = last
   out.days = keepDays([...a.days, ...b.days])
+  for (const id of new Set([...Object.keys(a.review), ...Object.keys(b.review)])) {
+    const x = a.review[id]
+    const y = b.review[id]
+    out.review[id] = !x || !y ? (x ?? y)! : x.at >= y.at ? x : y
+  }
   const born = a.born ?? b.born
   if (born !== undefined) out.born = born
   return out
@@ -115,3 +124,12 @@ export function newCode(randomBytes: (n: number) => Uint8Array): string {
 
 /** Shown as 5-5-5 so it is easy to read out and write down. */
 export const formatCode = (code: string) => code.replace(/(\d{5})(?=\d)/g, '$1 ')
+
+const TG_MONTHS = ['январи', 'феврали', 'марти', 'апрели', 'майи', 'июни', 'июли', 'августи', 'сентябри', 'октябри', 'ноябри', 'декабри']
+
+/** "2 ноябри 2026" in Tajik (browsers have no Tajik month names); other languages use the platform. */
+export function formatDay(iso: string, locale: string): string {
+  const d = new Date(iso)
+  if (locale === 'tg') return `${d.getDate()} ${TG_MONTHS[d.getMonth()]} ${d.getFullYear()}`
+  return d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
+}

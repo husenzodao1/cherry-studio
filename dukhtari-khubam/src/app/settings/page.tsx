@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { formatCode } from '@/lib/progress'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
+import { CodeImageButton } from '@/web/components/Keepsakes'
 import { LOCALE_LABELS, type Locale } from '@/web/i18n'
 import { useLearner } from '@/web/offline/learner'
 import { allowNotifications, canNotify, DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyPrefs } from '@/web/offline/notify'
@@ -42,6 +43,7 @@ function CodeCard() {
       </div>
       <div className="code-box" aria-live="polite">{show ? formatCode(learner.code) : '••••• ••••• •••••'}</div>
       <span className="muted" style={{ fontSize: '0.84em' }}>{t('settings.code_hint')}</span>
+      <CodeImageButton />
       <span className="muted" style={{ fontSize: '0.8em' }}>
         {sync === 'synced' ? `✓ ${t('profile.synced')}` : sync === 'offline' || sync === 'error' ? t('profile.sync_offline') : '…'}
       </span>

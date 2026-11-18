@@ -2,10 +2,11 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
-import { emptyProgress, isCode, mergeProgress, newCode, ProgressData, withDay } from '@/lib/progress'
+import { emptyProgress, isCode, localDay, mergeProgress, newCode, ProgressData, withDay } from '@/lib/progress'
 
 import { apiUrl } from './base'
 import { useContent, type Bundle } from './content'
+import { schedule as nextReview } from './review'
 
 /**
  * The learner: a name and a 15-digit code, no e-mail or password. Everything is kept on the phone;
@@ -29,6 +30,8 @@ interface LearnerApi {
   completeLesson: (lessonId: string) => void
   toggleBookmark: (lessonId: string) => void
   recordQuiz: (quizId: string, percent: number, passed: boolean) => void
+  /** daily review answer: moves the question between Leitner boxes */
+  recordReview: (questionId: string, correct: boolean) => void
 }
 
 const LEARNER_KEY = 'dk.learner'
@@ -227,6 +230,11 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
         ...p,
         quizzes: { ...p.quizzes, [id]: { best: Math.max(cur?.best ?? 0, percent), passed: (cur?.passed ?? false) || passed, tries: (cur?.tries ?? 0) + 1, at: now() } }
       })
+    })
+    ,
+    recordReview: (qid, correct) => update((p) => {
+      const today = localDay()
+      return withDay({ ...p, review: { ...p.review, [qid]: { ...nextReview(p.review[qid]?.box, correct, today), at: now() } } })
     })
   }), [ready, learner, progress, sync, update])
 

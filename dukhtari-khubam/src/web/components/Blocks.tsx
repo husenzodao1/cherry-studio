@@ -118,7 +118,7 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60))
 
 /** Audio in a frosted glass player: round play button, time, seek bar. */
 function Audio({ asset, title, speaker }: { asset?: Asset; title?: string; speaker?: string }) {
-  const url = useAssetUrl(asset)
+  const url = useOfflineSrc(useAssetUrl(asset))
   const el = useRef<HTMLAudioElement>(null)
   const [playing, setPlaying] = useState(false)
   const [time, setTime] = useState(0)

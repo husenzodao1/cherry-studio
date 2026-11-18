@@ -5,7 +5,7 @@ const tg = {
   'app.name': 'Духтари хубам',
   'nav.home': 'Асосӣ', 'nav.schools': 'Мактабҳо', 'nav.saved': 'Захираҳо', 'nav.profile': 'Профил',
   'home.greeting': 'Салом', 'home.continue_learning': 'Идомаи омӯзиш', 'home.seven_schools': 'Ҳафт мактаби дониш',
-  'home.all_schools': 'Ҳамаи мактабҳо', 'home.inspiration': 'Илҳоми рӯз',
+  'home.all_schools': 'Ҳамаи мактабҳо',
   'app.update': 'Версияи нави барнома омода аст', 'app.update_action': 'Навсозӣ',
   'start.welcome': 'Хуш омадед', 'start.subtitle': 'Зебоӣ дар дониш аст', 'start.age': 'Синну соли шумо',
   'start.register': 'Бақайдгирӣ', 'start.login': 'Ворид', 'start.name': 'Номи шумо', 'start.create': 'Давом',
@@ -49,7 +49,21 @@ const tg = {
   'notify.lesson_title': 'Вақти дарс 💜', 'notify.lesson_body': 'Дарси навбатии худро идома диҳед', 'notify.lesson_named': 'Идома диҳед: {title}',
   'notify.inspiration_title': 'Илҳоми рӯз', 'notify.denied': 'Иҷозати огоҳиҳо дода нашуд. Онро дар танзимоти телефон фаъол кунед.',
   'video.play': 'Тамошо', 'video.pause': 'Таваққуф', 'video.offline': 'Барои тамошои видео интернет лозим аст', 'video.mute': 'Овоз',
-  'search.placeholder': 'Ҷустуҷӯ…'
+  'search.placeholder': 'Ҷустуҷӯ…',
+  'garden.title': 'Боғи ман', 'garden.flowers': '{n} гул', 'garden.courses': '{n} курси пурра', 'garden.open': 'Ба боғ',
+  'garden.empty': 'Дарси аввалро анҷом диҳед — гули аввал мерӯяд.',
+  'garden.hint': 'Ҳар дарси анҷомёфта як гул мерӯёнад; курси пурра — гули калони заррин. Гули навро пахш кунед — номи дарс намоён мешавад.',
+  'review.title': 'Такрори рӯз', 'review.count': '{n} савол', 'review.done_today': 'Имрӯз такрор анҷом шуд',
+  'review.empty': 'Тесте супоред — саволҳои он барои такрор ин ҷо меоянд.', 'review.result': '{ok} аз {n} дуруст',
+  'review.great': 'Офарин!', 'review.keep': 'Саволҳои нодуруст пагоҳ боз меоянд, дурустҳо — баъдтар.',
+  'review.how': 'Ҷавоби дуруст саволро ба қуттии навбатӣ мебарад: он пас аз 1, 2, 4, 8 ё 16 рӯз бармегардад.', 'review.boxes': 'Қуттиҳо',
+  'cert.title': 'Шаҳодатнома', 'cert.awarded': 'Ин шаҳодатнома ба', 'cert.for': 'барои бомуваффақият анҷом додани курси',
+  'cert.congrats': 'Табрик! Курс пурра анҷом ёфт.', 'cert.section': 'Шаҳодатномаҳо', 'cert.saving': 'Тайёр мешавад…',
+  'code.card_title': 'Коди шахсии ман', 'code.card_hint': 'Бо ин код пешрафти худро дар ҳар телефон бармегардонед. Онро ба бегонагон надиҳед.',
+  'code.save_image': 'Ҳамчун сурат нигоҳ доштан',
+  'download.course': 'Боргирӣ барои бе интернет', 'download.files': '{n} файл', 'download.progress': 'Боргирӣ {done}/{total}',
+  'download.ready': 'Ҳама дар телефон аст', 'download.offline': 'Барои боргирӣ интернет лозим аст',
+  'download.mobile': 'Шумо бо интернети мобилӣ пайвастед ва боргирӣ трафик сарф мекунад. Идома диҳем?'
 }
 
 export type UiKey = keyof typeof tg
@@ -86,7 +100,21 @@ const ru: Partial<Record<UiKey, string>> = {
   'notify.lesson_title': 'Время урока 💜', 'notify.lesson_body': 'Продолжите следующий урок', 'notify.lesson_named': 'Продолжите: {title}',
   'notify.inspiration_title': 'Вдохновение дня', 'notify.denied': 'Уведомления не разрешены. Включите их в настройках телефона.',
   'video.play': 'Смотреть', 'video.pause': 'Пауза', 'video.offline': 'Для просмотра видео нужен интернет', 'video.mute': 'Звук',
-  'search.placeholder': 'Поиск…'
+  'search.placeholder': 'Поиск…',
+  'garden.title': 'Мой сад', 'garden.flowers': 'Цветов: {n}', 'garden.courses': 'Курсов пройдено: {n}', 'garden.open': 'В сад',
+  'garden.empty': 'Завершите первый урок — вырастет первый цветок.',
+  'garden.hint': 'Каждый завершённый урок выращивает цветок, пройденный курс — большой золотистый. Нажмите на цветок, чтобы увидеть урок.',
+  'review.title': 'Повторение дня', 'review.count': 'Вопросов: {n}', 'review.done_today': 'Сегодня повторение выполнено',
+  'review.empty': 'Пройдите тест — его вопросы появятся здесь для повторения.', 'review.result': 'Верно {ok} из {n}',
+  'review.great': 'Отлично!', 'review.keep': 'Ошибочные вопросы вернутся завтра, верные — позже.',
+  'review.how': 'Верный ответ переносит вопрос в следующую коробку: он вернётся через 1, 2, 4, 8 или 16 дней.', 'review.boxes': 'Коробки',
+  'cert.title': 'Сертификат', 'cert.awarded': 'Настоящий сертификат вручается', 'cert.for': 'за успешное прохождение курса',
+  'cert.congrats': 'Поздравляем! Курс пройден полностью.', 'cert.section': 'Сертификаты', 'cert.saving': 'Готовим…',
+  'code.card_title': 'Мой личный код', 'code.card_hint': 'С этим кодом прогресс вернётся на любом телефоне. Не передавайте его чужим.',
+  'code.save_image': 'Сохранить как картинку',
+  'download.course': 'Скачать для работы без интернета', 'download.files': 'Файлов: {n}', 'download.progress': 'Загрузка {done}/{total}',
+  'download.ready': 'Всё сохранено на телефоне', 'download.offline': 'Для загрузки нужен интернет',
+  'download.mobile': 'Вы подключены через мобильный интернет, загрузка расходует трафик. Продолжить?'
 }
 
 const ar: Partial<Record<UiKey, string>> = {
@@ -119,7 +147,21 @@ const ar: Partial<Record<UiKey, string>> = {
   'notify.lesson_title': 'وقت الدرس 💜', 'notify.lesson_body': 'تابعي درسكِ التالي', 'notify.lesson_named': 'تابعي: {title}',
   'notify.inspiration_title': 'إلهام اليوم', 'notify.denied': 'لم يُسمح بالإشعارات. فعّليها من إعدادات الهاتف.',
   'video.play': 'مشاهدة', 'video.pause': 'إيقاف مؤقت', 'video.offline': 'تحتاجين الإنترنت لمشاهدة الفيديو', 'video.mute': 'الصوت',
-  'search.placeholder': 'بحث…'
+  'search.placeholder': 'بحث…',
+  'garden.title': 'حديقتي', 'garden.flowers': '{n} زهرة', 'garden.courses': '{n} دورة مكتملة', 'garden.open': 'إلى الحديقة',
+  'garden.empty': 'أكملي الدرس الأول — تنمو الزهرة الأولى.',
+  'garden.hint': 'كل درس مكتمل ينبت زهرة، والدورة المكتملة زهرة ذهبية كبيرة. اضغطي على زهرة لرؤية الدرس.',
+  'review.title': 'مراجعة اليوم', 'review.count': '{n} أسئلة', 'review.done_today': 'أُنجزت مراجعة اليوم',
+  'review.empty': 'أجيبي عن اختبار — تظهر أسئلته هنا للمراجعة.', 'review.result': '{ok} من {n} صحيحة',
+  'review.great': 'أحسنتِ!', 'review.keep': 'الأسئلة الخاطئة تعود غدًا، والصحيحة لاحقًا.',
+  'review.how': 'الإجابة الصحيحة تنقل السؤال إلى الصندوق التالي: يعود بعد 1 أو 2 أو 4 أو 8 أو 16 يومًا.', 'review.boxes': 'الصناديق',
+  'cert.title': 'شهادة', 'cert.awarded': 'تُمنح هذه الشهادة إلى', 'cert.for': 'لإتمامها بنجاح دورة',
+  'cert.congrats': 'تهانينا! اكتملت الدورة.', 'cert.section': 'الشهادات', 'cert.saving': 'جارٍ التحضير…',
+  'code.card_title': 'رمزي الشخصي', 'code.card_hint': 'بهذا الرمز يعود تقدّمكِ على أي هاتف. لا تعطيه للغرباء.',
+  'code.save_image': 'حفظ كصورة',
+  'download.course': 'تنزيل للعمل دون إنترنت', 'download.files': '{n} ملفات', 'download.progress': 'تنزيل {done}/{total}',
+  'download.ready': 'كل شيء محفوظ على الهاتف', 'download.offline': 'يلزم الإنترنت للتنزيل',
+  'download.mobile': 'أنتِ متصلة عبر بيانات الجوال والتنزيل يستهلكها. هل نتابع؟'
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, ar }

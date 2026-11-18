@@ -86,3 +86,39 @@ export function bundleImageUrls(value: unknown, out = new Set<string>()): string
   }
   return [...out]
 }
+
+/** Every downloadable file a course's lessons use (pictures, audio, attached files; YouTube streams stay online). */
+export function courseMediaUrls(lessons: { assets: Record<string, { url: string | null; kind: string; protected?: boolean }> }[]): string[] {
+  const out = new Set<string>()
+  for (const l of lessons) for (const a of Object.values(l.assets)) {
+    if (a.url && /^https:/.test(a.url) && !a.protected && ['image', 'audio', 'file'].includes(a.kind)) out.add(a.url)
+  }
+  return [...out]
+}
+
+/** How many of these files are already on the phone. */
+export async function storedCount(urls: string[]): Promise<number> {
+  if (!store || !urls.length) return 0
+  const have = new Set((await keys(store).catch(() => [])) as string[])
+  return urls.filter((u) => have.has(u)).length
+}
+
+/** Downloads the files that are missing, reporting progress; returns how many are on the phone at the end. */
+export async function downloadAll(urls: string[], onProgress: (done: number, total: number) => void): Promise<number> {
+  if (!store) return 0
+  const have = new Set((await keys(store).catch(() => [])) as string[])
+  let done = urls.filter((u) => have.has(u)).length
+  onProgress(done, urls.length)
+  for (const url of urls) {
+    if (have.has(url)) continue
+    if (await save(url)) done++
+    onProgress(done, urls.length)
+  }
+  return done
+}
+
+/** True when the phone is on mobile data (where the browser can tell). */
+export function onMobileData(): boolean {
+  const c = (navigator as Navigator & { connection?: { type?: string } }).connection
+  return c?.type === 'cellular'
+}
