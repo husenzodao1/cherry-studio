@@ -37,15 +37,15 @@ export default function SchoolPage() {
   return (
     <>
       {back}
-      <div style={{ position: 'relative', marginTop: 70 }}>
+      <div style={{ position: 'relative', marginTop: 40 }}>
         <img className="art-pop float-slow" src={ART.rose.src} alt="" aria-hidden="true"
-          style={{ right: 6, top: -78, width: 'clamp(170px, 34vw, 260px)', height: 'auto' }} />
-        <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true" style={{ left: -24, bottom: -36, width: 'clamp(160px, 28vw, 240px)', transform: 'rotate(-6deg)' }} />
+          style={{ right: 'clamp(-90px, -12vw, -40px)', top: 26, width: 'clamp(220px, 56vw, 380px)', height: 'auto' }} />
+        <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true" style={{ left: -12, bottom: -24, width: 'clamp(108px, 19vw, 160px)', transform: 'rotate(-6deg)' }} />
         <section className="hero-card" style={{ height: 'clamp(260px, 46vw, 380px)' }} aria-hidden="true">
           <GlassScene word={s.title} variant="sculpture" accent={s.theme_color ?? '#59446e'} />
         </section>
       </div>
-      <div className="section" style={{ marginTop: 52 }}>
+      <div className="section" style={{ marginTop: 34 }}>
         <div className="eyebrow">{t('nav.schools')}</div>
         <h1 className="h-page">{s.title}</h1>
         {s.description ? <p className="muted" style={{ margin: 0 }}>{s.description}</p> : null}

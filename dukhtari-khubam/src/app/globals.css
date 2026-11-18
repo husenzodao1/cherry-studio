@@ -110,6 +110,7 @@ img, video, canvas { display: block; max-width: 100%; }
   max-width: 1120px;
   margin: 0 auto;
   padding: 20px 16px 140px;
+  overflow-x: clip; /* art that bleeds off the side (e.g. the school rose) never adds a horizontal scroll */
 }
 @media (min-width: 900px) { .app { padding: 32px 32px 150px; } }
 
@@ -126,7 +127,7 @@ img, video, canvas { display: block; max-width: 100%; }
 .section { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
 .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 14px; }
-.scroller { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; margin: 0 -16px; padding-inline: 16px; scrollbar-width: none; }
+.scroller { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; padding-bottom: 6px; margin: 0 -16px; padding-inline: 16px; scrollbar-width: none; }
 .scroller::-webkit-scrollbar { display: none; }
 .scroller > * { scroll-snap-align: start; flex: none; }
 
@@ -283,9 +284,38 @@ textarea.input { border-radius: 18px; padding: 14px 18px; min-height: 120px; res
 .art-pop { position: absolute; pointer-events: none; z-index: 3; height: auto; filter: drop-shadow(0 16px 14px rgba(58, 40, 80, 0.26)); }
 .deco { position: absolute; pointer-events: none; user-select: none; z-index: 4; height: auto; filter: drop-shadow(0 10px 12px rgba(58, 40, 80, 0.18)); }
 :root[data-theme='dark'] .art-pop, :root[data-theme='dark'] .deco { filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.55)); }
-.page-deco { position: fixed; pointer-events: none; z-index: 0; height: auto; opacity: 0.6; }
-.app > :not(.page-deco) { position: relative; z-index: 1; }
-.pop-row { padding-top: 52px; }
+.app > * { position: relative; z-index: 1; }
+
+/* Gem backdrop: fixed, behind the content; far gems sit out of focus. */
+.gem-field { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.gem { position: absolute; display: block; transform: rotate(var(--tilt, 0deg)); filter: drop-shadow(0 10px 10px rgba(58, 40, 80, 0.16)); }
+.gem img { width: 100%; height: auto; }
+.gem-far { filter: blur(0.6px); opacity: 0.72; }
+:root[data-theme='dark'] .gem { filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.5)) brightness(0.92); }
+:root[data-theme='dark'] .gem-far { filter: blur(0.6px) brightness(0.85); opacity: 0.6; }
+.glint { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; opacity: 0.9;
+  background:
+    radial-gradient(circle, #fff 0 1.5px, rgba(255, 255, 255, 0.55) 2.5px, transparent 5px),
+    linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.95) 50%, transparent 100%) center / 100% 1.2px no-repeat,
+    linear-gradient(0deg, transparent 0, rgba(255, 255, 255, 0.95) 50%, transparent 100%) center / 1.2px 100% no-repeat; }
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion='reduce']) .gem { animation: drift 11s ease-in-out infinite alternate; }
+  :root:not([data-motion='reduce']) .glint { animation: twinkle 4.2s ease-in-out infinite; }
+}
+@keyframes drift { from { transform: translateY(0) rotate(var(--tilt, 0deg)); } to { transform: translateY(-7px) rotate(calc(var(--tilt, 0deg) + 3deg)); } }
+@keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.4) rotate(0deg); } 45% { opacity: 1; transform: scale(1) rotate(45deg); } 60% { opacity: 0.2; transform: scale(0.7) rotate(60deg); } }
+.pop-row { padding-top: 34px; }
+
+/* School tile: every icon sits in the same 96×84 box, so tiles line up regardless of the object's shape. */
+.school-card {
+  position: relative; overflow: visible; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  min-height: 178px; padding: 58px 14px 14px; text-align: center; text-decoration: none;
+}
+.school-card-art { top: -30px; left: 50%; transform: translateX(-50%); width: 96px; height: 84px; object-fit: contain; }
+.school-card-title { font-weight: 500; font-size: 0.95em; line-height: 1.25; min-height: 2.5em; display: flex; align-items: center; }
+.school-card-foot { margin-top: auto; width: 100%; text-align: start; }
+.school-card-foot .big-number { font-size: 1.9rem; }
+.school-card-foot .btn { width: 34px; min-height: 34px; padding: 0; }
 @media (prefers-reduced-motion: no-preference) {
   :root:not([data-motion='reduce']) .float-slow { animation: float 6s ease-in-out infinite alternate; }
 }

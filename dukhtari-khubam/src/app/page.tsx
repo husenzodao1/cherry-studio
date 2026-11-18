@@ -36,12 +36,11 @@ export default function Home() {
         <Link href="/profile" className="icon-btn" aria-label={t('nav.profile')}><Icon name="user" /></Link>
       </header>
 
-      <img className="page-deco" src={ART.diamonds.src} alt="" aria-hidden="true" style={{ top: 560, left: -64, width: 180 }} />
-      <div style={{ position: 'relative', marginTop: 18 }}>
+      <div style={{ position: 'relative', marginTop: 40 }}>
       <img className="deco float-slow" src={ART.lotus.src} alt="" aria-hidden="true"
-        style={{ right: -16, top: -14, width: 'clamp(110px, 18vw, 160px)', ['--r' as string]: '8deg' }} />
+        style={{ right: -10, top: -34, width: 'clamp(100px, 18vw, 132px)', ['--r' as string]: '6deg' }} />
       <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true"
-        style={{ left: -26, bottom: -40, width: 'clamp(170px, 30vw, 260px)', transform: 'rotate(-6deg)' }} />
+        style={{ left: -14, bottom: -30, width: 'clamp(128px, 23vw, 184px)', transform: 'rotate(-4deg)' }} />
       <section className="hero-card" style={{ height: 'clamp(300px, 52vw, 440px)' }} aria-label={t('home.inspiration')}>
         <GlassScene word="дониш" variant="sphere" />
         {inspiration.data ? (
@@ -57,7 +56,7 @@ export default function Home() {
         ) : null}
       </section>
       </div>
-      <div style={{ height: 22 }} />
+      <div style={{ height: 28 }} />
 
       {cont.data ? (
         <section className="section">
@@ -81,8 +80,8 @@ export default function Home() {
         {schools.error ? <ErrorState error={schools.error} onRetry={schools.reload} /> : null}
         <div className="scroller pop-row">
           {schools.loading && !schools.data
-            ? Array.from({ length: 4 }, (_, i) => <div key={i} style={{ width: 200 }}><Skeleton height={190} /></div>)
-            : schools.data?.map((s, i) => <div key={s.id} style={{ width: 210 }}><SchoolCard school={s} index={i} /></div>)}
+            ? Array.from({ length: 4 }, (_, i) => <div key={i} style={{ width: 164 }}><Skeleton height={178} /></div>)
+            : schools.data?.map((s, i) => <div key={s.id} style={{ width: 164 }}><SchoolCard school={s} index={i} /></div>)}
         </div>
       </section>
     </>

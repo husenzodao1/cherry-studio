@@ -13,6 +13,8 @@ import { usePrefs } from '../prefs'
  * actually behind it — the backdrop, the lettering and the 3D objects rendered into a target.
  * Fresnel (Schlick) mixes in reflections of a studio environment; path length tints absorption.
  * The image behind the glass is therefore bent, magnified and inverted like a physical lens.
+ * Several spheres float in one scene; each carries a short phrase printed on its curved surface,
+ * and a garland of real flowers and stars hangs inside the scene so the glass refracts it too.
  */
 
 const vert = /* glsl */ `
@@ -97,6 +99,24 @@ const frag = /* glsl */ `
 
 export type SceneVariant = 'sphere' | 'sculpture'
 
+/** Glass spheres per variant: centre, radius, bobbing phase. The first one follows the pointer. */
+const GLASSES: Record<SceneVariant, { c: [number, number, number]; r: number; phase: number }[]> = {
+  // a gentle arc along the lower half: small, large (over the lettering), small
+  sphere: [
+    { c: [0.6, -0.6, 0.6], r: 1.1, phase: 0 },
+    { c: [-1.35, -0.05, 0.4], r: 0.55, phase: 1.3 },
+    { c: [2.15, -1.35, 0.4], r: 0.5, phase: 2.4 }
+  ],
+  sculpture: [
+    { c: [-0.05, -0.1, 0.6], r: 0.85, phase: 0 },
+    { c: [-1.6, -0.55, 0.4], r: 0.6, phase: 1.7 }
+  ]
+}
+
+/** The garland hangs from the top edge: centre x as a fraction of the half-width, height as a fraction of the frame. */
+const GARLAND: Record<SceneVariant, { x: number; h: number }> = { sphere: { x: 0.6, h: 0.66 }, sculpture: { x: -0.62, h: 0.62 } }
+const GARLAND_SRC = { url: '/assets/3d/garland.webp', w: 700, h: 1539 }
+
 interface Props {
   word: string
   variant?: SceneVariant
@@ -109,6 +129,41 @@ interface Props {
 function cssVar(name: string, fallback: string): string {
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   return v || fallback
+}
+
+/** A phrase printed on the glass: embossed ink on a transparent canvas, mapped onto a spherical cap. */
+function drawMotto(canvas: HTMLCanvasElement, text: string, dark: boolean, font: string, rtl: boolean) {
+  const ctx = canvas.getContext('2d')!
+  const { width: w, height: h } = canvas
+  ctx.clearRect(0, 0, w, h)
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.direction = rtl ? 'rtl' : 'ltr'
+  const words = text.split(' ')
+  let size = h * 0.38
+  let lines = [text]
+  ctx.font = `italic 600 ${size}px ${font}`
+  if (ctx.measureText(text).width > w * 0.86 && words.length > 1) {
+    const mid = Math.ceil(words.length / 2)
+    lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')]
+    size = h * 0.3
+  }
+  ctx.font = `italic 600 ${size}px ${font}`
+  while (Math.max(...lines.map((l) => ctx.measureText(l).width)) > w * 0.86 && size > 12) {
+    size *= 0.94
+    ctx.font = `italic 600 ${size}px ${font}`
+  }
+  const lh = size * 1.08
+  lines.forEach((line, i) => {
+    const y = h / 2 + (i - (lines.length - 1) / 2) * lh
+    ctx.shadowColor = dark ? 'rgba(20,12,30,0.7)' : 'rgba(255,255,255,0.95)'
+    ctx.shadowBlur = size * 0.12
+    ctx.fillStyle = dark ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.9)'
+    ctx.fillText(line, w / 2, y + size * 0.045)
+    ctx.shadowBlur = 0
+    ctx.fillStyle = dark ? 'rgba(250,244,255,0.95)' : 'rgba(74,52,99,0.9)'
+    ctx.fillText(line, w / 2, y)
+  })
 }
 
 function drawBackdrop(canvas: HTMLCanvasElement, word: string, dark: boolean, accent: string, serif: string) {
@@ -158,7 +213,9 @@ function drawBackdrop(canvas: HTMLCanvasElement, word: string, dark: boolean, ac
 
 export function GlassScene({ word, variant = 'sphere', accent = '#59446e', className, interactive = true }: Props) {
   const host = useRef<HTMLDivElement>(null)
-  const { reducedMotion } = usePrefs()
+  const { reducedMotion, t, locale } = usePrefs()
+  const mottos = [t('glass.motto_1'), t('glass.motto_2'), t('glass.motto_3')]
+  const mottoKey = mottos.join('|')
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
@@ -178,6 +235,8 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
     }
     const dark = document.documentElement.dataset.theme === 'dark'
     const serif = cssVar('--font-lora', 'Georgia, serif')
+    const rtl = locale === 'ar'
+    const mottoFont = rtl ? cssVar('--font-naskh', 'serif') : serif
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75))
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.NoToneMapping
@@ -215,8 +274,8 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
       new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.22, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, sheen: 0.6, sheenColor: new THREE.Color('#ffd6f0'), envMapIntensity: 1.1 })
     const chrome = new THREE.MeshStandardMaterial({ color: '#f1eef7', metalness: 1, roughness: 0.12, envMapIntensity: 1.3 })
 
-    const radius = variant === 'sphere' ? 1.3 : 0.86
-    const center = new THREE.Vector3(variant === 'sphere' ? 0.9 : 0.55, variant === 'sphere' ? -0.62 : -0.1, 0.6)
+    const specs = GLASSES[variant]
+    const center = new THREE.Vector3(...specs[0].c)
     if (variant === 'sphere') {
       const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.48, 64, 48), glossy('#b493d9'))
       pearl.position.set(1.95, 0.55, -0.6)
@@ -257,13 +316,19 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
       objects.add(new THREE.Mesh(new THREE.TubeGeometry(curve2, 120, 0.05, 20, false), chrome))
     }
 
-    // the glass
+    // garland of flowers and stars (composed from photographs, see PROVENANCE.json), placed against the frame in resize()
+    const garlandZ = -1.05
+    const garlandTex = new THREE.TextureLoader().load(GARLAND_SRC.url, () => kick())
+    garlandTex.colorSpace = THREE.SRGBColorSpace
+    const garland = new THREE.Mesh(new THREE.PlaneGeometry(1, GARLAND_SRC.h / GARLAND_SRC.w),
+      new THREE.MeshBasicMaterial({ map: garlandTex, transparent: true, depthWrite: false }))
+    scene.add(garland)
+
+    // the glass spheres, each with its phrase
     const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 0 })
-    const uniforms = {
+    const shared = {
       uScene: { value: rt.texture },
       uViewProj: { value: new THREE.Matrix4() },
-      uCenter: { value: center.clone() },
-      uRadius: { value: radius },
       uIor: { value: new THREE.Vector3(1.485, 1.5, 1.518) },
       uPlaneZ: { value: planeZ },
       uAbsorb: { value: dark ? new THREE.Vector3(0.05, 0.09, 0.04) : new THREE.Vector3(0.025, 0.05, 0.02) },
@@ -271,10 +336,32 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
       uEnvBottom: { value: new THREE.Color(dark ? '#17131e' : '#cdbbe3') },
       uLight: { value: new THREE.Vector3(-0.5, 0.6, 0.62) }
     }
-    const glassMat = new THREE.ShaderMaterial({ uniforms, vertexShader: vert, fragmentShader: frag })
-    const glass = new THREE.Mesh(new THREE.SphereGeometry(radius, 128, 96), glassMat)
-    glass.position.copy(center)
-    scene.add(glass)
+    const mottoTextures: THREE.CanvasTexture[] = []
+    const glasses = specs.map((spec, i) => {
+      const uniforms = { ...shared, uCenter: { value: new THREE.Vector3(...spec.c) }, uRadius: { value: spec.r } }
+      const mesh = new THREE.Mesh(new THREE.SphereGeometry(spec.r, 128, 96), new THREE.ShaderMaterial({ uniforms, vertexShader: vert, fragmentShader: frag }))
+      const canvas = document.createElement('canvas')
+      canvas.width = 1024
+      canvas.height = 512
+      const tex = new THREE.CanvasTexture(canvas)
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.anisotropy = 4
+      mottoTextures.push(tex)
+      const draw = () => {
+        drawMotto(canvas, mottos[i % mottos.length], dark, mottoFont, rtl)
+        tex.needsUpdate = true
+      }
+      draw()
+      document.fonts?.ready.then(() => { draw(); kick() })
+      // a cap of ±54° × ±29° facing the camera, just above the glass surface
+      const a = 0.95
+      const b = 0.5
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(spec.r * 1.004, 64, 32, Math.PI / 2 - a, 2 * a, Math.PI / 2 - b, 2 * b),
+        new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }))
+      mesh.add(cap)
+      scene.add(mesh)
+      return { mesh, uniforms, spec }
+    })
 
     let width = 0
     let height = 0
@@ -298,8 +385,16 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
       // keep the sculpture framed on narrow screens
       const fit = Math.min(1, camera.aspect / 1.6)
       objects.scale.setScalar(Math.max(0.62, fit))
-      glass.scale.setScalar(Math.max(0.85, fit))
-      uniforms.uRadius.value = radius * glass.scale.x
+      for (const g of glasses) {
+        g.mesh.scale.setScalar(Math.max(0.85, fit))
+        g.uniforms.uRadius.value = g.spec.r * g.mesh.scale.x
+      }
+      // garland: hangs from just above the top edge
+      const halfH = (camera.position.z - garlandZ) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
+      const gl = GARLAND[variant]
+      const gh = 2 * halfH * gl.h
+      garland.scale.setScalar(gh / (GARLAND_SRC.h / GARLAND_SRC.w))
+      garland.position.set(gl.x * halfH * camera.aspect, halfH + 0.06 - gh / 2, garlandZ)
     }
 
     const target = new THREE.Vector2(0, 0)
@@ -316,22 +411,22 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
       const t = clock.getElapsedTime()
       if (motion) {
         pointer.lerp(target, 0.06)
-        glass.position.set(
-          center.x * glass.scale.x + pointer.x * 0.35,
-          center.y + Math.sin((t / 5) * Math.PI * 2) * 0.07 + pointer.y * 0.22,
-          center.z
-        )
         objects.rotation.y = Math.sin((t / 6) * Math.PI * 2) * 0.06
-      } else {
-        glass.position.set(center.x * glass.scale.x, center.y, center.z)
+        garland.rotation.z = Math.sin((t / 7) * Math.PI * 2) * 0.01
       }
-      uniforms.uCenter.value.copy(glass.position)
+      glasses.forEach(({ mesh, uniforms, spec }, i) => {
+        const follow = i === 0 ? 1 : 0.35
+        const bob = motion ? Math.sin((t / 5) * Math.PI * 2 + spec.phase) * (i === 0 ? 0.07 : 0.05) : 0
+        mesh.position.set(spec.c[0] * mesh.scale.x + pointer.x * 0.35 * follow, spec.c[1] + bob + pointer.y * 0.22 * follow, spec.c[2])
+        mesh.rotation.y = motion ? Math.sin((t / 8) * Math.PI * 2 + spec.phase) * 0.08 : 0
+        uniforms.uCenter.value.copy(mesh.position)
+      })
       camera.updateMatrixWorld()
-      uniforms.uViewProj.value.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
-      glass.visible = false
+      shared.uViewProj.value.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+      for (const g of glasses) g.mesh.visible = false
       renderer.setRenderTarget(rt)
       renderer.render(scene, camera)
-      glass.visible = true
+      for (const g of glasses) g.mesh.visible = true
       renderer.setRenderTarget(null)
       renderer.render(scene, camera)
     }
@@ -383,13 +478,16 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
         else m?.dispose()
       })
       backTex.dispose()
+      garlandTex.dispose()
+      mottoTextures.forEach((x) => x.dispose())
       envTex.dispose()
       pmrem.dispose()
       rt.dispose()
       renderer.dispose()
       renderer.domElement.remove()
     }
-  }, [word, variant, accent, reducedMotion, interactive])
+    // mottos are read through mottoKey (a new array every render)
+  }, [word, variant, accent, reducedMotion, interactive, mottoKey, locale])
 
   return (
     <div ref={host} className={className} style={{ position: 'absolute', inset: 0 }}>

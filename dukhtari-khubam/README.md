@@ -87,6 +87,12 @@ Revision History; every staff change is in the audit log.
   the 3D objects rendered into a target). Schlick Fresnel mixes in studio reflections; absorption
   depends on path length. The background is visibly bent, magnified and inverted — not blurred.
   Glossy spheres and chrome tubes are real geometry lit by a PMREM environment.
+  Several spheres float in each scene and carry short phrases printed on their curved surface
+  (UI strings `glass.motto_1..3`, editable in the CMS); a garland of real flowers and stars hangs
+  inside the scene, so the glass refracts it.
+- Art (`public/assets/3d`, sources and licences in `PROVENANCE.json`): flowers are real photographs
+  (Wikimedia Commons, CC BY-SA) cut out and set on CC0 scanned leaves (`tools/render-assets/bouquet.py`);
+  gems and objects are ray-traced/rendered offline (`tools/render-assets`).
 - `src/web/glass/LiquidGlass.tsx` — UI glass (bottom navigation, floating controls): a displacement
   map is computed from a squircle bezel profile and Snell's law and applied to the page behind it via
   an SVG `backdrop-filter`, so content scrolling under the dock is optically bent at the rim.

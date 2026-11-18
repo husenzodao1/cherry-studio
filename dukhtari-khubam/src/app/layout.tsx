@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geologica, Lora, Noto_Naskh_Arabic } from 'next/font/google'
 import type { ReactNode } from 'react'
 
+import { GemField } from '@/web/components/GemField'
 import { Providers } from '@/web/components/Providers'
 
 import './globals.css'
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <Providers>
+          <GemField />
           <main className="app">{children}</main>
         </Providers>
       </body>

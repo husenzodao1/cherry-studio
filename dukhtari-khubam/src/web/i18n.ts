@@ -6,6 +6,7 @@ const tg = {
   'nav.home': 'Асосӣ', 'nav.schools': 'Мактабҳо', 'nav.saved': 'Захираҳо', 'nav.profile': 'Профил',
   'home.greeting': 'Салом', 'home.continue_learning': 'Идомаи омӯзиш', 'home.seven_schools': 'Ҳафт мактаби дониш',
   'home.all_schools': 'Ҳамаи мактабҳо', 'home.inspiration': 'Илҳоми рӯз',
+  'glass.motto_1': 'Ту метавонӣ!', 'glass.motto_2': 'Хеле зебоед', 'glass.motto_3': 'Ба худ бовар кун',
   'action.continue': 'Идома', 'action.start_course': 'Оғози курс', 'action.save': 'Захира', 'action.saved': 'Захира шуд',
   'action.retry': 'Такрор', 'action.back': 'Бозгашт', 'action.next': 'Навбатӣ', 'action.prev': 'Қаблӣ',
   'action.check': 'Санҷиш', 'action.submit': 'Супоридан', 'action.signin': 'Воридшавӣ', 'action.signout': 'Баромад',
@@ -38,6 +39,7 @@ export type UiKey = keyof typeof tg
 const ru: Partial<Record<UiKey, string>> = {
   'nav.home': 'Главная', 'nav.schools': 'Школы', 'nav.saved': 'Сохранённое', 'nav.profile': 'Профиль',
   'home.greeting': 'Здравствуйте', 'home.continue_learning': 'Продолжить', 'home.seven_schools': 'Семь школ знаний',
+  'glass.motto_1': 'Ты сможешь!', 'glass.motto_2': 'Вы прекрасны', 'glass.motto_3': 'Верь в себя',
   'home.all_schools': 'Все школы', 'action.continue': 'Продолжить', 'action.back': 'Назад', 'action.next': 'Далее',
   'action.prev': 'Назад', 'action.signin': 'Войти', 'action.signout': 'Выйти', 'action.search': 'Поиск',
   'settings.title': 'Настройки', 'settings.language': 'Язык', 'settings.theme': 'Тема', 'settings.notifications': 'Уведомления',
@@ -49,6 +51,7 @@ const ru: Partial<Record<UiKey, string>> = {
 const ar: Partial<Record<UiKey, string>> = {
   'nav.home': 'الرئيسية', 'nav.schools': 'المدارس', 'nav.saved': 'المحفوظات', 'nav.profile': 'الملف الشخصي',
   'home.greeting': 'مرحبًا', 'home.continue_learning': 'متابعة التعلّم', 'home.all_schools': 'كل المدارس',
+  'glass.motto_1': 'أنتِ قادرة!', 'glass.motto_2': 'أنتِ جميلة جدًا', 'glass.motto_3': 'ثقي بنفسك',
   'action.continue': 'متابعة', 'action.back': 'رجوع', 'action.next': 'التالي', 'action.prev': 'السابق',
   'action.signin': 'تسجيل الدخول', 'action.signout': 'تسجيل الخروج', 'action.search': 'بحث',
   'settings.title': 'الإعدادات', 'settings.language': 'اللغة', 'settings.theme': 'المظهر', 'settings.notifications': 'الإشعارات',
