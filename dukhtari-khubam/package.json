@@ -2,19 +2,23 @@
   "name": "dukhtari-khubam",
   "version": "0.1.0",
   "private": true,
-  "description": "Духтари хубам — Backend API (Next.js on Vercel + Supabase)",
+  "description": "Духтари хубам — offline-first learning app (Web, Android) and its API (Next.js on Vercel + Supabase)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "openapi": "vitest run tests/unit/openapi.test.ts"
+    "openapi": "vitest run tests/unit/openapi.test.ts",
+    "build:app": "BUILD_TARGET=app NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE:-https://dukhtari-khubam.vercel.app} next build && node tools/android/embed-bundle.mjs && cap sync android",
+    "apk": "npm run build:app && cd android && ./gradlew assembleDebug"
   },
   "engines": {
     "node": ">=20.9"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
     "@supabase/supabase-js": "^2.119.0",
     "idb-keyval": "^6.2.2",
     "next": "^16.4.6",
@@ -24,6 +28,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "@electric-sql/pglite": "^0.5.16",
     "@types/node": "^22.19.1",
     "@types/react": "^19.2.7",
