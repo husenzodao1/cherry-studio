@@ -122,12 +122,6 @@
    "license": "CC BY-SA 3.0",
    "processing": "Photograph cut out (rembg isnet-general-use segmentation, no generative fill), colour-graded, composed over scanned leaves by tools/render-assets/bouquet.py. Derived image shared under the photograph's licence."
   },
-  "rose.webp": {
-   "model": "Rose (animated-film style): one petal ribbon wound in a widening spiral with a scalloped, outward-curling rim; glossy leaves",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-film.json)"
-  },
   "gems/round.webp": {
    "model": "Gem, round brilliant: convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
    "author": "Dukhtari Khubam project",
@@ -194,6 +188,12 @@
    ],
    "license": "CC BY-SA 4.0 (most restrictive source)",
    "processing": "Photograph cut out (rembg isnet-general-use segmentation, no generative fill), colour-graded, composed over scanned leaves by tools/render-assets/bouquet.py. Derived image shared under the photograph's licence. Stars: tools/render-assets (jobs-leaves.json), project-owned."
+  },
+  "shapes.webp": {
+   "model": "Glossy geometric shapes in the interface palette (torus, spheres, rounded cube, cone, capsule, cylinder, icosahedron, chrome ring)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-shapes.json)"
   }
  }
 }

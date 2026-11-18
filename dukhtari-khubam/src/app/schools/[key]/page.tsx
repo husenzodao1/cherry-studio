@@ -38,8 +38,8 @@ export default function SchoolPage() {
     <>
       {back}
       <div style={{ position: 'relative', marginTop: 40 }}>
-        <img className="art-pop float-slow" src={ART.rose.src} alt="" aria-hidden="true"
-          style={{ right: 'clamp(-90px, -12vw, -40px)', top: 26, width: 'clamp(220px, 56vw, 380px)', height: 'auto' }} />
+        <img className="art-pop float-slow" src={ART.shapes.src} alt="" aria-hidden="true"
+          style={{ right: 'clamp(-80px, -10vw, -32px)', top: 6, width: 'clamp(200px, 50vw, 340px)', height: 'auto' }} />
         <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true" style={{ left: -12, bottom: -24, width: 'clamp(108px, 19vw, 160px)', transform: 'rotate(-6deg)' }} />
         <section className="hero-card" style={{ height: 'clamp(260px, 46vw, 380px)' }} aria-hidden="true">
           <GlassScene word={s.title} variant="sculpture" accent={s.theme_color ?? '#59446e'} />
