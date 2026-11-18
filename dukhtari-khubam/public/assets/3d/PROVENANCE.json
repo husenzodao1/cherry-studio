@@ -8,23 +8,10 @@
  },
  "assets": {
   "icon-religion.webp": {
-   "model": "Water lily, Nymphaea capensis (photograph) on a calathea leaf",
-   "sources": [
-    {
-     "title": "File:Nymphaea capensis flower in jaffna 3.JPG",
-     "author": "Aathavan jaffna",
-     "license": "CC BY-SA 3.0",
-     "source": "https://commons.wikimedia.org/wiki/File:Nymphaea_capensis_flower_in_jaffna_3.JPG"
-    },
-    {
-     "title": "Calathea Orbifolia 01 (scan)",
-     "author": "Rob Tuytel, Rico Cilliers",
-     "license": "CC0 1.0",
-     "source": "https://polyhaven.com/a/calathea_orbifolia_01"
-    }
-   ],
-   "license": "CC BY-SA 3.0",
-   "processing": "Photograph cut out (rembg isnet-general-use segmentation, no generative fill), colour-graded, composed over scanned leaves by tools/render-assets/bouquet.py. Derived image shared under the photograph's licence."
+   "model": "Lotus on lily pads with dew (procedural petals with inner glow, sheen and clearcoat; animated-film look)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-film.json)"
   },
   "icon-ethics.webp": {
    "model": "Heart (procedural geometry, glossy clear-coat material)",

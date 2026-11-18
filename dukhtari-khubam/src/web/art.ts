@@ -4,7 +4,7 @@ export interface Art { src: string; w: number; h: number }
 const a = (name: string, w: number, h: number): Art => ({ src: `/assets/3d/${name}.webp`, w, h })
 
 export const SCHOOL_ART: Record<string, Art> = {
-  'marifati-dini': a('icon-religion', 300, 371),
+  'marifati-dini': a('icon-religion', 320, 215),
   'odob-va-akhloq': a('icon-ethics', 600, 523),
   'farhangi-tojik': a('icon-culture', 430, 600),
   'oila-va-munosibatho': a('icon-family', 592, 529),

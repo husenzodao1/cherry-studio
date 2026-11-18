@@ -157,13 +157,13 @@ function diamondMaterial(geo, env, tint, absorb) {
 }
 
 // ---------------------------------------------------------------- procedural lotus / clematis bloom
-function veinTexture() {
+function veinTexture(soft = false) {
   const c = document.createElement('canvas'); c.width = c.height = 512
   const g = c.getContext('2d')
   g.fillStyle = '#ffffff'; g.fillRect(0, 0, 512, 512)
   for (let k = 0; k <= 26; k++) {
     const t = k / 26, x0 = 256 + (t - 0.5) * 40, x1 = t * 512
-    g.strokeStyle = k % 3 ? 'rgba(150, 95, 200, 0.16)' : 'rgba(255, 255, 255, 0.55)'
+    g.strokeStyle = k % 3 ? `rgba(150, 95, 200, ${soft ? 0.06 : 0.16})` : `rgba(255, 255, 255, ${soft ? 0.35 : 0.55})`
     g.lineWidth = k % 3 ? 1.4 : 2.2
     g.beginPath(); g.moveTo(x0, 512); g.bezierCurveTo(x0, 330, x1 * 0.6 + x0 * 0.4, 160, x1, -10); g.stroke()
   }
@@ -213,14 +213,25 @@ function placePetal(mesh, azimuth, elevation) {
   const xAx = new THREE.Vector3().crossVectors(yAx, zAx)
   mesh.matrix.makeBasis(xAx, yAx, zAx); mesh.matrixAutoUpdate = false
 }
+// Inner glow along the petal (uv.y = 0 at the base): stands in for light passing through thin petals.
+function glowTexture(base, tip) {
+  const c = document.createElement('canvas'); c.width = 4; c.height = 256
+  const g = c.getContext('2d'), gr = g.createLinearGradient(0, 256, 0, 0)
+  gr.addColorStop(0, base); gr.addColorStop(0.45, tip); gr.addColorStop(1, '#000000')
+  g.fillStyle = gr; g.fillRect(0, 0, 4, 256)
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t
+}
 function bloom(o = {}) {
   const group = new THREE.Group()
-  const vein = veinTexture()
+  const film = !!o.film
+  const vein = veinTexture(film)
   const palette = o.palette ?? ['#fdf4ff', '#c493ee', '#6b2fb8']
   const mat = new THREE.MeshPhysicalMaterial({
-    vertexColors: true, map: vein, bumpMap: vein, bumpScale: 0.6, roughness: 0.42, metalness: 0,
-    sheen: 0.7, sheenColor: new THREE.Color(o.sheen ?? '#ffe8fb'), sheenRoughness: 0.45, clearcoat: 0.25, clearcoatRoughness: 0.55,
-    specularIntensity: 0.55, side: THREE.DoubleSide, emissive: new THREE.Color(o.glow ?? '#5a2896'), emissiveIntensity: o.glowIntensity ?? 0.16 })
+    vertexColors: true, map: vein, bumpMap: vein, bumpScale: film ? 0.15 : 0.6, roughness: film ? 0.34 : 0.42, metalness: 0,
+    sheen: film ? 1 : 0.7, sheenColor: new THREE.Color(o.sheen ?? '#ffe8fb'), sheenRoughness: film ? 0.32 : 0.45,
+    clearcoat: film ? 0.45 : 0.25, clearcoatRoughness: film ? 0.32 : 0.55,
+    specularIntensity: 0.55, side: THREE.DoubleSide, emissive: new THREE.Color(film ? '#ffffff' : (o.glow ?? '#5a2896')),
+    emissiveIntensity: o.glowIntensity ?? (film ? 0.5 : 0.16), emissiveMap: film ? glowTexture(o.glowBase ?? '#ffd9f4', o.glowTip ?? '#5b2a9a') : null })
   const spiral = o.style === 'rose'
   const rings = spiral ? [] : o.bud
     ? [{ n: 5, len: 0.78, wid: 0.36, elev: 1.38, curl: 0.9, cup: 0.6, jitter: 0.05, base: 0.05, y: 0 }]
@@ -280,6 +291,41 @@ function bloom(o = {}) {
   }
   return group
 }
+// Lily pad: a round leaf with a notch, rim lifted slightly, radial ribs; glossy like an animated-film prop.
+function lilyPad(o = {}) {
+  const c = document.createElement('canvas'); c.width = c.height = 512
+  const g = c.getContext('2d')
+  const gr = g.createRadialGradient(256, 256, 10, 256, 256, 256)
+  gr.addColorStop(0, o.center ?? '#b9e3a6'); gr.addColorStop(0.6, o.mid ?? '#6fbf86'); gr.addColorStop(1, o.edge ?? '#3f9a74')
+  g.fillStyle = gr; g.fillRect(0, 0, 512, 512)
+  for (let k = 0; k < 28; k++) {
+    const a = (k / 28) * Math.PI * 2
+    g.strokeStyle = 'rgba(225, 248, 205, 0.18)'; g.lineWidth = 2
+    g.beginPath(); g.moveTo(256, 256); g.quadraticCurveTo(256 + Math.cos(a + 0.12) * 140, 256 + Math.sin(a + 0.12) * 140, 256 + Math.cos(a) * 250, 256 + Math.sin(a) * 250); g.stroke()
+  }
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace
+  const shape = new THREE.Shape(), notch = 0.32
+  shape.moveTo(0, 0)
+  shape.absarc(0, 0, 1, notch / 2, Math.PI * 2 - notch / 2, false)
+  shape.lineTo(0, 0)
+  const geo = new THREE.ShapeGeometry(shape, 96)
+  const pos = geo.attributes.position, uv = geo.attributes.uv
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), r = Math.hypot(x, y)
+    pos.setZ(i, 0.12 * Math.pow(r, 6) + 0.02 * Math.sin(Math.atan2(y, x) * 7) * Math.pow(r, 4))
+    uv.setXY(i, 0.5 + x * 0.5, 0.5 + y * 0.5)
+  }
+  geo.computeVertexNormals()
+  const m = new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({ map: tex, bumpMap: tex, bumpScale: 0.4, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.18, sheen: 0.4, sheenColor: new THREE.Color('#e8ffe0'), side: THREE.DoubleSide }))
+  m.rotation.x = -Math.PI / 2
+  const group = new THREE.Group(); group.add(m)
+  for (const d of o.drops ?? []) {
+    const drop = new THREE.Mesh(new THREE.SphereGeometry(d[2], 32, 24), new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.02, transmission: 1, ior: 1.33, thickness: d[2] * 1.6, clearcoat: 1 }))
+    drop.position.set(d[0], 0.13 * Math.pow(Math.hypot(d[0], d[1]), 6) + d[2] * 0.55, -d[1]); drop.scale.y = 0.62
+    group.add(drop)
+  }
+  return group
+}
 function crystalGeo(r = 0.18, h = 1, tip = 0.32) {
   const pts = []
   const ring = (y, rad) => Array.from({ length: 6 }, (_, i) => new THREE.Vector3(Math.cos(i * Math.PI / 3) * rad, y, Math.sin(i * Math.PI / 3) * rad))
@@ -314,9 +360,14 @@ window.renderJob = async (job) => {
   if (job.kind === 'bloom') {
     object = new THREE.Group()
     for (const f of job.flowers) {
-      const b = bloom({ bud: f.bud, seed: f.seed, palette: f.palette, style: f.style, glow: f.glow, glowIntensity: f.glowIntensity, sheen: f.sheen })
+      const b = bloom({ bud: f.bud, seed: f.seed, palette: f.palette, style: f.style, glow: f.glow, glowIntensity: f.glowIntensity, sheen: f.sheen, film: f.film, glowBase: f.glowBase, glowTip: f.glowTip })
       b.position.fromArray(f.pos); b.rotation.fromArray(f.rot); b.scale.setScalar(f.scale ?? 1)
       object.add(b)
+    }
+    for (const p of job.pads ?? []) {
+      const pad = lilyPad(p)
+      pad.position.fromArray(p.pos); pad.rotation.fromArray(p.rot ?? [0, 0, 0]); pad.scale.setScalar(p.scale ?? 1)
+      object.add(pad)
     }
     for (const c of job.crystals ?? []) {
       const geo = crystalGeo(c.r ?? 0.18, c.h ?? 1, c.tip ?? 0.32)
