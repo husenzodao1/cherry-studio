@@ -1,0 +1,336 @@
+[
+ {
+  "name": "flower-periwinkle-a",
+  "model": "models/periwinkle_plant/model.gltf",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "onlyNode": 5,
+  "pitch": 28,
+  "azimuth": 40,
+  "zoom": 0.62,
+  "size": 1200,
+  "noShadow": true,
+  "exposure": 1.15
+ },
+ {
+  "name": "flower-periwinkle-b",
+  "model": "models/periwinkle_plant/model.gltf",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "onlyNode": 3,
+  "pitch": 55,
+  "azimuth": -30,
+  "zoom": 0.62,
+  "size": 1200,
+  "noShadow": true,
+  "exposure": 1.15
+ },
+ {
+  "name": "flower-sorrel",
+  "model": "models/shrub_sorrel_01/model.gltf",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 30,
+  "azimuth": 10,
+  "zoom": 0.7,
+  "size": 1000,
+  "noShadow": true
+ },
+ {
+  "name": "flower-jacaranda",
+  "model": "models/jacaranda_tree/model.gltf",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "focus": [
+   [
+    0.55,
+    0.72,
+    0.35
+   ],
+   [
+    0.85,
+    0.95,
+    0.65
+   ]
+  ],
+  "pitch": 8,
+  "azimuth": 0,
+  "zoom": 0.75,
+  "size": 1200,
+  "noShadow": true
+ },
+ {
+  "name": "icon-religion",
+  "model": "models/brass_diya_lantern/model.gltf",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "focus": [
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    1,
+    0.5,
+    1
+   ]
+  ],
+  "pitch": 14,
+  "azimuth": 25,
+  "zoom": 0.95,
+  "size": 900,
+  "rims": [
+   {
+    "color": "#d8b4ff",
+    "intensity": 6,
+    "dir": [
+     1,
+     0.3,
+     -0.6
+    ]
+   },
+   {
+    "color": "#ffc4e1",
+    "intensity": 4,
+    "dir": [
+     -1,
+     0.2,
+     -0.5
+    ]
+   }
+  ]
+ },
+ {
+  "name": "icon-ethics",
+  "kind": "heart",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 10,
+  "azimuth": 0,
+  "zoom": 0.95,
+  "size": 900,
+  "rims": [
+   {
+    "color": "#d8b4ff",
+    "intensity": 5,
+    "dir": [
+     1,
+     0.3,
+     -0.6
+    ]
+   }
+  ]
+ },
+ {
+  "name": "icon-culture",
+  "model": "models/brass_vase_02/model.gltf",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 16,
+  "azimuth": 20,
+  "zoom": 0.95,
+  "size": 900,
+  "rims": [
+   {
+    "color": "#d8b4ff",
+    "intensity": 6,
+    "dir": [
+     1,
+     0.3,
+     -0.6
+    ]
+   },
+   {
+    "color": "#ffc4e1",
+    "intensity": 4,
+    "dir": [
+     -1,
+     0.2,
+     -0.5
+    ]
+   }
+  ]
+ },
+ {
+  "name": "icon-family",
+  "model": "models/tea_set_01/model.gltf",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "keep": [
+   "teapot_01"
+  ],
+  "pitch": 14,
+  "azimuth": 30,
+  "zoom": 0.95,
+  "size": 900,
+  "rims": [
+   {
+    "color": "#d8b4ff",
+    "intensity": 6,
+    "dir": [
+     1,
+     0.3,
+     -0.6
+    ]
+   },
+   {
+    "color": "#ffc4e1",
+    "intensity": 4,
+    "dir": [
+     -1,
+     0.2,
+     -0.5
+    ]
+   }
+  ]
+ },
+ {
+  "name": "icon-health",
+  "model": "models/periwinkle_plant/model.gltf",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "onlyNode": 3,
+  "pitch": 40,
+  "azimuth": -20,
+  "zoom": 0.7,
+  "size": 900,
+  "rims": [
+   {
+    "color": "#d8b4ff",
+    "intensity": 5,
+    "dir": [
+     1,
+     0.3,
+     -0.6
+    ]
+   }
+  ]
+ },
+ {
+  "name": "icon-growth",
+  "kind": "star",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 8,
+  "azimuth": 0,
+  "zoom": 0.95,
+  "size": 900,
+  "tilt": -0.25,
+  "rims": [
+   {
+    "color": "#ffc4e1",
+    "intensity": 5,
+    "dir": [
+     1,
+     0.3,
+     -0.6
+    ]
+   }
+  ]
+ },
+ {
+  "name": "icon-modern",
+  "model": "models/alarm_clock_01/model.gltf",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 12,
+  "azimuth": 30,
+  "zoom": 0.95,
+  "size": 900,
+  "rims": [
+   {
+    "color": "#d8b4ff",
+    "intensity": 6,
+    "dir": [
+     1,
+     0.3,
+     -0.6
+    ]
+   },
+   {
+    "color": "#ffc4e1",
+    "intensity": 4,
+    "dir": [
+     -1,
+     0.2,
+     -0.5
+    ]
+   }
+  ]
+ },
+ {
+  "name": "diamond-cluster",
+  "kind": "diamond",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 26,
+  "azimuth": 0,
+  "zoom": 0.82,
+  "size": 1100,
+  "noShadow": true,
+  "exposure": 1.05,
+  "diamonds": [
+   {
+    "pos": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0.55,
+     0.3,
+     0.25
+    ],
+    "scale": 1.0,
+    "tint": "#ffffff",
+    "absorb": 0.0
+   },
+   {
+    "pos": [
+     1.55,
+     -0.45,
+     -0.6
+    ],
+    "rot": [
+     0.9,
+     1.1,
+     -0.4
+    ],
+    "scale": 0.62,
+    "tint": "#f4c7e0",
+    "absorb": 0.35
+   },
+   {
+    "pos": [
+     -1.35,
+     -0.6,
+     0.3
+    ],
+    "rot": [
+     -0.2,
+     0.7,
+     0.9
+    ],
+    "scale": 0.48,
+    "tint": "#d9c4f5",
+    "absorb": 0.35
+   }
+  ]
+ },
+ {
+  "name": "diamond-single",
+  "kind": "diamond",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 22,
+  "azimuth": 0,
+  "zoom": 0.9,
+  "size": 800,
+  "noShadow": true,
+  "diamonds": [
+   {
+    "pos": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0.45,
+     0.2,
+     -0.3
+    ],
+    "scale": 1.0,
+    "tint": "#efe2ff",
+    "absorb": 0.35
+   }
+  ]
+ }
+]

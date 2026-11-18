@@ -1,0 +1,231 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script type="importmap">{ "imports": { "three": "./three/build/three.module.js", "three/addons/": "./three/examples/jsm/" } }</script>
+<style>html,body{margin:0;background:transparent}</style></head>
+<body><script type="module">
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js'
+
+// Brilliant-cut diamond: girdle 16, crown with table and star/kite facets, pavilion to culet.
+function brilliant() {
+  const g = [], ring = (n, r, y, rot = 0) => Array.from({ length: n }, (_, i) => {
+    const a = rot + (i / n) * Math.PI * 2; return new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r) })
+  const table = ring(8, 0.56, 0.17), star = ring(8, 0.8, 0.105, Math.PI / 8), girdle = ring(16, 1, 0)
+  const girdleLow = ring(16, 1, -0.025), lower = ring(8, 0.5, -0.4, Math.PI / 8), culet = new THREE.Vector3(0, -0.86, 0)
+  const top = new THREE.Vector3(0, 0.17, 0)
+  const tri = (a, b, c) => g.push(a, b, c)
+  for (let i = 0; i < 8; i++) {
+    const t0 = table[i], t1 = table[(i + 1) % 8], s = star[i]
+    tri(top, t1, t0); tri(t0, t1, s)                         // table + star facet
+    const gA = girdle[2 * i], gB = girdle[2 * i + 1], gC = girdle[(2 * i + 2) % 16]
+    const sPrev = star[(i + 7) % 8]
+    tri(t0, s, gB); tri(t0, gB, sPrev)                        // kite (bezel) facets
+    tri(s, gC, gB); tri(sPrev, gB, gA)                        // upper girdle facets
+  }
+  for (let i = 0; i < 16; i++) { const a = girdle[i], b = girdle[(i + 1) % 16], c = girdleLow[i], d = girdleLow[(i + 1) % 16]; tri(a, c, b); tri(b, c, d) }
+  for (let i = 0; i < 8; i++) {
+    const l = lower[i], gA = girdleLow[2 * i + 1], gB = girdleLow[(2 * i + 2) % 16], gP = girdleLow[2 * i]
+    tri(gA, l, gB); tri(gP, l, gA)                            // lower girdle facets
+    tri(l, culet, lower[(i + 1) % 8]); tri(l, lower[(i + 1) % 8], gB) // pavilion mains
+  }
+  const geo = new THREE.BufferGeometry().setFromPoints(g)
+  geo.computeVertexNormals()
+  return geo
+}
+
+function heartGeo() {
+  const sh = new THREE.Shape()
+  sh.moveTo(0, -1.0)
+  sh.bezierCurveTo(-0.35, -0.68, -1.05, -0.28, -1.05, 0.28)
+  sh.bezierCurveTo(-1.05, 0.78, -0.62, 1.02, -0.3, 1.0)
+  sh.bezierCurveTo(-0.1, 0.99, 0.0, 0.82, 0.0, 0.66)
+  sh.bezierCurveTo(0.0, 0.82, 0.1, 0.99, 0.3, 1.0)
+  sh.bezierCurveTo(0.62, 1.02, 1.05, 0.78, 1.05, 0.28)
+  sh.bezierCurveTo(1.05, -0.28, 0.35, -0.68, 0, -1.0)
+  const g = new THREE.ExtrudeGeometry(sh, { depth: 0.32, bevelEnabled: true, bevelThickness: 0.28, bevelSize: 0.22, bevelSegments: 24, curveSegments: 96 })
+  g.center(); g.computeVertexNormals(); return g
+}
+function starGeo() {
+  const sh = new THREE.Shape()
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 ? 0.46 : 1.05, a = Math.PI / 2 + (i * Math.PI) / 5
+    const x = Math.cos(a) * r, y = Math.sin(a) * r
+    i ? sh.lineTo(x, y) : sh.moveTo(x, y)
+  }
+  sh.closePath()
+  const g = new THREE.ExtrudeGeometry(sh, { depth: 0.16, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.12, bevelSegments: 12, curveSegments: 4 })
+  g.center(); g.computeVertexNormals(); return g
+}
+// Convex facet planes (object space) of a geometry: dot(n, x) = w, n pointing outward.
+function facetPlanes(geo) {
+  const pos = geo.attributes.position, planes = []
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3()
+  for (let i = 0; i < pos.count; i += 3) {
+    a.fromBufferAttribute(pos, i); b.fromBufferAttribute(pos, i + 1); c.fromBufferAttribute(pos, i + 2)
+    const n = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a))
+    if (n.lengthSq() < 1e-12) continue
+    n.normalize()
+    const centroid = a.clone().add(b).add(c).multiplyScalar(1 / 3)
+    if (n.dot(centroid) < 0) n.negate()
+    const w = n.dot(a)
+    if (!planes.some((p) => p.n.dot(n) > 0.9995 && Math.abs(p.w - w) < 1e-3)) planes.push({ n, w })
+  }
+  return planes.map((p) => new THREE.Vector4(p.n.x, p.n.y, p.n.z, p.w))
+}
+function diamondMaterial(geo, env, tint, absorb) {
+  const planes = facetPlanes(geo)
+  while (planes.length < 96) planes.push(new THREE.Vector4(0, 0, 0, 1e6))
+  return new THREE.ShaderMaterial({
+    uniforms: { uRot: { value: new THREE.Matrix3() }, uPlanes: { value: planes }, uEnv: { value: env }, uTint: { value: new THREE.Color(tint) }, uAbsorb: { value: absorb } },
+    vertexShader: `varying vec3 vPos; varying vec3 vN; varying vec3 vCam;
+      void main(){ vPos = position; vN = normal; vCam = (inverse(modelMatrix) * vec4(cameraPosition,1.0)).xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `uniform mat3 uRot; uniform vec4 uPlanes[96]; uniform sampler2D uEnv; uniform vec3 uTint; uniform float uAbsorb;
+      varying vec3 vPos; varying vec3 vN; varying vec3 vCam;
+      vec3 envAt(vec3 dObj){ vec3 d = normalize(uRot * dObj);
+        vec2 uv = vec2(atan(d.z, d.x) / 6.2831853 + 0.5, acos(clamp(d.y,-1.0,1.0)) / 3.1415926);
+        return texture2D(uEnv, uv).rgb; }
+      float exitPlane(vec3 p, vec3 d, out vec3 n){ float tmin = 1e9; n = vec3(0.0,1.0,0.0);
+        for (int i = 0; i < 96; i++){ vec4 pl = uPlanes[i]; float dn = dot(pl.xyz, d);
+          if (dn > 1e-5){ float t = (pl.w - dot(pl.xyz, p)) / dn; if (t > 1e-4 && t < tmin){ tmin = t; n = pl.xyz; } } }
+        return tmin; }
+      float channel(vec3 v, vec3 nrm, float ior, int c){
+        vec3 d = refract(v, nrm, 1.0 / ior); vec3 p = vPos; float len = 0.0; vec3 col = vec3(0.0);
+        bool done = false;
+        for (int b = 0; b < 7; b++){
+          vec3 n; float t = exitPlane(p, d, n); p += d * t; len += t;
+          vec3 o = refract(d, -n, ior);
+          if (dot(o,o) > 1e-4){ float ct = clamp(dot(o, n), 0.0, 1.0);
+            col = envAt(o) * (1.0 - pow(1.0 - ct, 5.0) * 0.6); done = true; break; }
+          d = reflect(d, -n);
+        }
+        if (!done) col = envAt(d) * 0.6;
+        col *= mix(vec3(1.0), uTint, clamp(len * uAbsorb, 0.0, 1.0));
+        return c == 0 ? col.r : (c == 1 ? col.g : col.b); }
+      void main(){
+        vec3 v = normalize(vPos - vCam); vec3 n = normalize(vN);
+        if (dot(n, v) > 0.0) n = -n;
+        vec3 refr = vec3(channel(v, n, 2.40, 0), channel(v, n, 2.42, 1), channel(v, n, 2.45, 2));
+        float f0 = 0.172; float fr = f0 + (1.0 - f0) * pow(1.0 - clamp(dot(-v, n), 0.0, 1.0), 5.0);
+        vec3 col = mix(refr, envAt(reflect(v, n)), fr);
+        gl_FragColor = vec4(col, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`
+  })
+}
+window.renderJob = async (job) => {
+  const size = job.size ?? 1024
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true })
+  renderer.setPixelRatio(1)
+  renderer.setSize(size, size)
+  renderer.outputColorSpace = THREE.SRGBColorSpace
+  renderer.toneMapping = THREE.AgXToneMapping
+  renderer.toneMappingExposure = job.exposure ?? 1.1
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  document.body.appendChild(renderer.domElement)
+  const scene = new THREE.Scene()
+  const hdr = await new HDRLoader().loadAsync(job.hdri)
+  hdr.mapping = THREE.EquirectangularReflectionMapping
+  const pmrem = new THREE.PMREMGenerator(renderer)
+  scene.environment = pmrem.fromEquirectangular(hdr).texture
+  scene.environmentIntensity = job.envIntensity ?? 1
+  scene.environmentRotation = new THREE.Euler(0, job.envRotation ?? 0, 0)
+
+  let object
+  if (job.kind === 'heart' || job.kind === 'star') {
+    object = new THREE.Group()
+    const geo = job.kind === 'heart' ? heartGeo() : starGeo()
+    const mat = job.kind === 'heart'
+      ? new THREE.MeshPhysicalMaterial({ color: job.color ?? '#f3a6c8', roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.04, sheen: 0.5, sheenColor: new THREE.Color('#ffe3f1'), iridescence: 0.25, iridescenceIOR: 1.35, envMapIntensity: 1.2 })
+      : new THREE.MeshPhysicalMaterial({ color: job.color ?? '#e9c48e', metalness: 1, roughness: 0.17, clearcoat: 0.6, clearcoatRoughness: 0.08, envMapIntensity: 1.4 })
+    const m = new THREE.Mesh(geo, mat); m.castShadow = true
+    m.rotation.set(job.tilt ?? -0.15, 0.35, job.kind === 'star' ? 0.12 : 0)
+    object.add(m)
+  } else if (job.kind === 'diamond') {
+    object = new THREE.Group()
+    for (const d of job.diamonds) {
+      const geo = brilliant()
+      const flat = geo; flat.computeVertexNormals()
+      const m = new THREE.Mesh(flat, diamondMaterial(flat, hdr, d.tint ?? '#ffffff', d.absorb ?? 0.0))
+      m.onBeforeRender = () => m.material.uniforms.uRot.value.setFromMatrix4(m.matrixWorld)
+      m.position.fromArray(d.pos); m.rotation.fromArray(d.rot); m.scale.setScalar(d.scale ?? 1)
+      object.add(m)
+    }
+  } else {
+    const gltf = await new GLTFLoader().loadAsync(job.model)
+    object = gltf.scene
+    if (job.keep) object.children.forEach((c) => { c.visible = job.keep.some((k) => c.name.includes(k)) })
+    if (job.keep) { const g2 = new THREE.Group(); [...object.children].filter((c) => c.visible).forEach((c) => g2.add(c)); object = g2 }
+    if (job.onlyNode != null) object.children.forEach((c, i) => { c.visible = i === job.onlyNode })
+    if (job.onlyNode != null) { const keep = object.children[job.onlyNode]; object = new THREE.Group(); keep.position.set(0, keep.position.y, 0); object.add(keep) }
+    object.traverse((o) => {
+      if (!o.isMesh) return
+      o.castShadow = true; o.receiveShadow = true
+      const mats = Array.isArray(o.material) ? o.material : [o.material]
+      for (const m of mats) {
+        if (job.hide && job.hide.some((h) => (m.name || '').includes(h) || (o.name || '').includes(h))) o.visible = false
+        if (job.tint && job.tint[m.name]) { m.color = new THREE.Color(job.tint[m.name]); }
+        if (/glass/i.test(m.name)) { m.transparent = true; m.opacity = 0.22; m.roughness = 0.04; m.metalness = 0; m.color = new THREE.Color('#fbf6ff'); m.depthWrite = false }
+        if (/flame/i.test(m.name)) { m.emissive = new THREE.Color('#ffb46b'); m.emissiveIntensity = 2.5 }
+        m.envMapIntensity = job.matEnv ?? 1
+      }
+    })
+  }
+  scene.add(object)
+  object.rotation.y = job.yaw ?? 0
+  object.updateMatrixWorld(true)
+
+  // frame: optional focus box (fraction of bounds) for close-ups
+  const box = new THREE.Box3().setFromObject(object)
+  if (job.focus) {
+    const s = box.getSize(new THREE.Vector3()), mn = box.min.clone()
+    box.set(mn.clone().add(s.clone().multiply(new THREE.Vector3(...job.focus[0]))), mn.clone().add(s.clone().multiply(new THREE.Vector3(...job.focus[1]))))
+  }
+  const center = box.getCenter(new THREE.Vector3()), dims = box.getSize(new THREE.Vector3())
+  const radius = dims.length() / 2
+  const camera = new THREE.PerspectiveCamera(job.fov ?? 28, 1, radius / 100, radius * 100)
+  const pitch = THREE.MathUtils.degToRad(job.pitch ?? 18), az = THREE.MathUtils.degToRad(job.azimuth ?? 0)
+  const dist = (radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2))) * (job.zoom ?? 1)
+  camera.position.set(center.x + Math.sin(az) * Math.cos(pitch) * dist, center.y + Math.sin(pitch) * dist, center.z + Math.cos(az) * Math.cos(pitch) * dist)
+  camera.lookAt(center)
+
+  // soft key light for contact shadows, and palette rim lights
+  const key = new THREE.DirectionalLight('#ffffff', job.keyIntensity ?? 1.2)
+  key.position.copy(center).add(new THREE.Vector3(-radius * 2, radius * 4, radius * 2.5))
+  key.target.position.copy(center); key.castShadow = !job.noShadow
+  key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 8; key.shadow.blurSamples = 16
+  const sc = key.shadow.camera; sc.left = sc.bottom = -radius * 1.5; sc.right = sc.top = radius * 1.5; sc.near = 0.01; sc.far = radius * 12
+  scene.add(key, key.target)
+  for (const r of job.rims ?? []) {
+    const l = new THREE.PointLight(r.color, r.intensity * radius * radius * 4, 0, 2)
+    l.position.copy(center).add(new THREE.Vector3(...r.dir).multiplyScalar(radius * 2.2)); scene.add(l)
+  }
+  if (!job.noShadow) {
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(radius * 8, radius * 8), new THREE.ShadowMaterial({ opacity: job.shadowOpacity ?? 0.22, color: '#3a2850' }))
+    ground.rotation.x = -Math.PI / 2; ground.position.y = new THREE.Box3().setFromObject(object).min.y + 0.0005; ground.receiveShadow = true
+    scene.add(ground)
+  }
+
+  if (false) {
+    // (unused) refraction against a background: render with HDRI background, then cut alpha with a mask pass
+    scene.background = hdr; scene.backgroundBlurriness = 0.35; scene.backgroundIntensity = job.bgIntensity ?? 0.9
+    renderer.render(scene, camera)
+    const colorUrl = renderer.domElement.toDataURL('image/png')
+    scene.background = null
+    const mats = []
+    object.traverse((o) => { if (o.isMesh) { mats.push([o, o.material]); o.material = new THREE.MeshBasicMaterial({ color: '#ffffff' }) } })
+    renderer.toneMapping = THREE.NoToneMapping
+    renderer.setClearColor('#000000', 1)
+    renderer.render(scene, camera)
+    const maskUrl = renderer.domElement.toDataURL('image/png')
+    return { colorUrl, maskUrl }
+  }
+  renderer.setClearColor('#000000', 0)
+  renderer.render(scene, camera)
+  return { colorUrl: renderer.domElement.toDataURL('image/png') }
+}
+window.ready = true
+</script></body></html>
