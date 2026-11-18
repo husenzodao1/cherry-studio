@@ -16,5 +16,5 @@ export const SCHOOL_ART: Record<string, Art> = {
 export const ART = {
   lotus: a('flower-lotus', 360, 285),
   flowerCluster: a('flower-cluster', 480, 374),
-  rose: a('rose', 820, 869)
+  rose: a('rose', 760, 602)
 }

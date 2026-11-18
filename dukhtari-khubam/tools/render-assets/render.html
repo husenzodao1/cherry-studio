@@ -233,7 +233,8 @@ function bloom(o = {}) {
     specularIntensity: 0.55, side: THREE.DoubleSide, emissive: new THREE.Color(film ? '#ffffff' : (o.glow ?? '#5a2896')),
     emissiveIntensity: o.glowIntensity ?? (film ? 0.5 : 0.16), emissiveMap: film ? glowTexture(o.glowBase ?? '#ffd9f4', o.glowTip ?? '#5b2a9a') : null })
   const spiral = o.style === 'rose'
-  const rings = spiral ? [] : o.bud
+  const filmRose = o.style === 'ribbon-rose'
+  const rings = spiral || filmRose ? [] : o.bud
     ? [{ n: 5, len: 0.78, wid: 0.36, elev: 1.38, curl: 0.9, cup: 0.6, jitter: 0.05, base: 0.05, y: 0 }]
     : [
         { n: 9, len: 1.0, wid: 0.5, elev: 0.1, curl: -0.28, cup: 0.36, jitter: 0.08, base: 0.2, y: 0.0 },
@@ -273,7 +274,18 @@ function bloom(o = {}) {
       group.add(m)
     }
   })
-  if (!o.bud && o.style !== 'rose') {
+  if (filmRose) group.add(new THREE.Mesh(ribbonRoseGeo(o.ribbon ?? {}, palette), mat))
+  for (const l of o.leaves ?? []) {
+    // a leaf lies flat pointing outward at azimuth `az`, drooping slightly
+    const leaf = filmLeaf(l.color ?? '#5daa6a', l.tip ?? '#a5d98f')
+    const holder = new THREE.Group(); holder.add(leaf)
+    leaf.rotation.z = -(l.droop ?? 0.18)
+    leaf.scale.setScalar(l.scale ?? 1)
+    holder.rotation.y = l.az
+    holder.position.y = l.y ?? -0.02
+    group.add(holder)
+  }
+  if (!o.bud && o.style !== 'rose' && !filmRose) {
     const sMat = new THREE.MeshStandardMaterial({ color: '#f4e7c2', roughness: 0.5 })
     const aMat = new THREE.MeshPhysicalMaterial({ color: '#f0b93e', roughness: 0.3, sheen: 0.8, sheenColor: new THREE.Color('#fff2c4'), emissive: new THREE.Color('#7a4a00'), emissiveIntensity: 0.15 })
     for (let i = 0; i < 46; i++) {
@@ -290,6 +302,68 @@ function bloom(o = {}) {
     pistil.position.y = 0.16; pistil.scale.set(1, 0.7, 1); group.add(pistil)
   }
   return group
+}
+// A smooth glossy leaf (film look): pointed oval, folded on the midrib, gently arched, tip lighter.
+function filmLeaf(base, tip) {
+  const sh = new THREE.Shape()
+  sh.moveTo(0, 0)
+  sh.bezierCurveTo(0.34, 0.2, 0.36, 0.72, 0, 1.15)
+  sh.bezierCurveTo(-0.36, 0.72, -0.34, 0.2, 0, 0)
+  const g = new THREE.ShapeGeometry(sh, 48)
+  const pos = g.attributes.position, col = []
+  const c0 = new THREE.Color(base), c1 = new THREE.Color(tip)
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i)
+    pos.setZ(i, Math.abs(x) * 0.35 - 0.18 * Math.sin((y / 1.15) * Math.PI))
+    const c = c0.clone().lerp(c1, Math.pow(y / 1.15, 1.4)); c.multiplyScalar(1 - 0.18 * Math.exp(-Math.pow(x * 30, 2)))
+    col.push(c.r, c.g, c.b)
+  }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3))
+  g.computeVertexNormals()
+  const m = new THREE.Mesh(g, new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.28, clearcoat: 0.9, clearcoatRoughness: 0.15,
+    sheen: 0.5, sheenColor: new THREE.Color('#eaffde'), side: THREE.DoubleSide }))
+  m.rotation.set(-Math.PI / 2, 0, -Math.PI / 2)   // shape +y → world +x, lying flat
+  const group = new THREE.Group(); group.add(m)
+  return group
+}
+// Ribbon rose: one continuous petal strip wound in a widening spiral, its rim rolling outward on the
+// outer turns — the clean, readable rose of animated films; it never self-intersects.
+function ribbonRoseGeo(o, palette) {
+  const turns = o.turns ?? 3.3, segT = 520, segS = 26
+  const r0 = 0.06, r1 = o.radius ?? 0.95, H = o.height ?? 0.62
+  const pos = [], uv = [], col = [], idx = []
+  const cBase = new THREE.Color(palette[0]), cMid = new THREE.Color(palette[1]), cTip = new THREE.Color(palette[2])
+  for (let i = 0; i <= segT; i++) {
+    const t = i / segT, th = t * turns * Math.PI * 2
+    const rad = (u) => r0 + (r1 - r0) * Math.pow(Math.max(0, u), 0.8)
+    const r = rad(t), rIn = rad(t - 1 / turns) * 0.96   // each turn rises from the base of the turn inside it
+    const open = 0.04 + 0.34 * t * t                    // outer turns open up a little
+    const tuck = 1 - 0.75 * Math.max(0, (t - 0.94) / 0.06) ** 1.5   // the ribbon's outer end tucks down (at the back)
+    const h = H * (0.78 + 0.22 * Math.sin(Math.PI * Math.min(1, t * 1.2))) * tuck
+    for (let j = 0; j <= segS; j++) {
+      const s = j / segS
+      const lobe = Math.pow(Math.abs(Math.sin(th * 0.8 + 0.6)), 0.6)  // petal-like scallops along the rim
+      const wave = (0.05 * lobe - 0.03) * Math.pow(s, 3)
+      const roll = (0.03 + 0.14 * t * t) * Math.pow(s, 5)   // rim curls outward
+      const R = rIn + (r * (1 + open * s * s) - rIn) * Math.pow(s, 0.55) + roll
+      const y = s * h + wave - 0.02 * Math.pow(s, 6) * t
+      pos.push(Math.cos(th) * R, y, Math.sin(th) * R); uv.push(t, s)
+      const k = Math.min(1, s * (0.75 + 0.35 * t))
+      const c = k < 0.5 ? cBase.clone().lerp(cMid, k / 0.5) : cMid.clone().lerp(cTip, (k - 0.5) / 0.5)
+      c.multiplyScalar(0.82 + 0.18 * t)                  // the inner turns sit in soft shade
+      col.push(c.r, c.g, c.b)
+    }
+  }
+  for (let i = 0; i < segT; i++) for (let j = 0; j < segS; j++) {
+    const a = i * (segS + 1) + j, b = a + segS + 1
+    idx.push(a, b, a + 1, b, b + 1, a + 1)
+  }
+  const g = new THREE.BufferGeometry()
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2))
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3))
+  g.setIndex(idx); g.computeVertexNormals()
+  return g
 }
 // Lily pad: a round leaf with a notch, rim lifted slightly, radial ribs; glossy like an animated-film prop.
 function lilyPad(o = {}) {
@@ -360,7 +434,7 @@ window.renderJob = async (job) => {
   if (job.kind === 'bloom') {
     object = new THREE.Group()
     for (const f of job.flowers) {
-      const b = bloom({ bud: f.bud, seed: f.seed, palette: f.palette, style: f.style, glow: f.glow, glowIntensity: f.glowIntensity, sheen: f.sheen, film: f.film, glowBase: f.glowBase, glowTip: f.glowTip })
+      const b = bloom({ bud: f.bud, seed: f.seed, palette: f.palette, style: f.style, glow: f.glow, glowIntensity: f.glowIntensity, sheen: f.sheen, film: f.film, glowBase: f.glowBase, glowTip: f.glowTip, leaves: f.leaves, ribbon: f.ribbon })
       b.position.fromArray(f.pos); b.rotation.fromArray(f.rot); b.scale.setScalar(f.scale ?? 1)
       object.add(b)
     }

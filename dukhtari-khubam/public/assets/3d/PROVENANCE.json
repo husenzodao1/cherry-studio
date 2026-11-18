@@ -123,23 +123,10 @@
    "processing": "Photograph cut out (rembg isnet-general-use segmentation, no generative fill), colour-graded, composed over scanned leaves by tools/render-assets/bouquet.py. Derived image shared under the photograph's licence."
   },
   "rose.webp": {
-   "model": "Rose (photograph) on anthurium leaves",
-   "sources": [
-    {
-     "title": "File:Night view of a rose.jpg",
-     "author": "This photograph was taken with a Motorola XT1562 mobile phone by u:Artsajith . This image was created with Adobe Photoshop by u:Gpkp .",
-     "license": "CC BY-SA 4.0",
-     "source": "https://commons.wikimedia.org/wiki/File:Night_view_of_a_rose.jpg"
-    },
-    {
-     "title": "Anthurium Botany 01 (scan)",
-     "author": "Rob Tuytel, Rico Cilliers",
-     "license": "CC0 1.0",
-     "source": "https://polyhaven.com/a/anthurium_botany_01"
-    }
-   ],
-   "license": "CC BY-SA 4.0",
-   "processing": "Photograph cut out (rembg isnet-general-use segmentation, no generative fill), colour-graded, composed over scanned leaves by tools/render-assets/bouquet.py. Derived image shared under the photograph's licence."
+   "model": "Rose (animated-film style): one petal ribbon wound in a widening spiral with a scalloped, outward-curling rim; glossy leaves",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets (jobs-film.json)"
   },
   "gems/round.webp": {
    "model": "Gem, round brilliant: convex hull of the cut's vertices, ray-traced offline (IOR 2.40–2.45 dispersion, up to 7 internal reflections); shadows lifted toward the interface lavender",
