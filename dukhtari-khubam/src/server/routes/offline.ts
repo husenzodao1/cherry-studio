@@ -58,7 +58,10 @@ export async function buildBundle(sb: SupabaseClient, locale: string) {
   })
   lessons.forEach((l) => l.blocks?.forEach((b: Json) => b.type === 'quiz' && b.ref?.id && quizIds.add(b.ref.id)))
   const quizzes = (await pool([...quizIds], 6, (id) => optional(call<Json | null>(sb, 'api_offline_quiz', { p_quiz: id, ...L })))).filter(Boolean) as Json[]
-  const pages = (await pool(['about', 'privacy', 'terms'], 3, (slug) => optional(call<Json>(sb, 'api_page', { p_slug: slug, ...L })))).filter(Boolean) as Json[]
+  const pages = (await pool(['about', 'privacy', 'terms'], 3, async (slug) => {
+    const page = await optional(call<Json>(sb, 'api_page', { p_slug: slug, ...L }))
+    return page ? { ...page, slug } : null
+  })).filter(Boolean) as Json[]
 
   const content = withMediaUrls({
     schools,

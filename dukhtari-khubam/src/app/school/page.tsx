@@ -1,39 +1,38 @@
 'use client'
 
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 
 import { Icon } from '@/web/components/Icon'
-import { Empty, ErrorState, Loading } from '@/web/components/States'
+import { Empty, Loading } from '@/web/components/States'
 import { ART } from '@/web/art'
 import { GlassScene } from '@/web/glass/LazyGlassScene'
+import { useContent } from '@/web/offline/content'
+import { courseProgress, useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
-import { useApi } from '@/web/useApi'
-
-interface CourseCard {
-  id: string; title: string; description?: string | null; level?: string | null; estimated_minutes?: number | null
-  locked: boolean; module_count: number; progress: { total: number; completed: number; percent: number }
-}
-interface School {
-  id: string; slug: string; title: string; description?: string | null; theme_color?: string | null
-  courses: CourseCard[]; progress: { completed: number; total: number }
-}
+import { useQueryParam } from '@/web/useQueryParam'
 
 export default function SchoolPage() {
-  const { key } = useParams<{ key: string }>()
-  const { t, locale } = usePrefs()
-  const school = useApi<School>(`/schools/${encodeURIComponent(key)}?locale=${locale}`)
+  return <Suspense fallback={<Loading />}><School /></Suspense>
+}
+
+function School() {
+  const key = useQueryParam('key')
+  const { t } = usePrefs()
+  const { bundle, loading } = useContent()
+  const { progress } = useLearner()
   const [tab, setTab] = useState<'courses' | 'about' | 'results'>('courses')
   const back = (
     <header className="topbar">
       <Link href="/schools" className="icon-btn" aria-label={t('action.back')}><Icon name="back" /></Link>
     </header>
   )
-  if (school.error) return <>{back}<ErrorState error={school.error} onRetry={school.reload} /></>
-  if (!school.data) return <>{back}<Loading /></>
-  const s = school.data
-  const pct = s.progress.total ? Math.round((s.progress.completed * 100) / s.progress.total) : 0
+  if (!bundle) return <>{back}{loading ? <Loading /> : <p className="muted">{t('state.offline_empty')}</p>}</>
+  const s = bundle.schoolDetails[key]
+  if (!s) return <>{back}<Empty title={t('state.empty_courses')} /></>
+  const courses = s.courses.map((c) => ({ ...c, progress: courseProgress(bundle, progress, c.id) }))
+  const totals = courses.reduce((acc, c) => ({ completed: acc.completed + c.progress.completed, total: acc.total + c.progress.total }), { completed: 0, total: 0 })
+  const pct = totals.total ? Math.round((totals.completed * 100) / totals.total) : 0
   return (
     <>
       {back}
@@ -64,8 +63,8 @@ export default function SchoolPage() {
       </div>
       <div className="section" role="tabpanel">
         {tab === 'courses' ? (
-          s.courses.length === 0 ? <Empty title={t('state.empty_courses')} /> : s.courses.map((c) => (
-            <Link key={c.id} href={`/courses/${c.id}`} className="card card-pad row" style={{ textDecoration: 'none', alignItems: 'flex-start' }}>
+          courses.length === 0 ? <Empty title={t('state.empty_courses')} /> : courses.map((c) => (
+            <Link key={c.id} href={`/course?id=${c.id}`} className="card card-pad row" style={{ textDecoration: 'none', alignItems: 'flex-start' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <b style={{ fontWeight: 500, fontSize: '1.05em' }}>{c.title}</b>
                 {c.description ? <div className="muted" style={{ fontSize: '0.9em', marginTop: 2 }}>{c.description}</div> : null}
@@ -77,8 +76,8 @@ export default function SchoolPage() {
         ) : tab === 'about' ? (
           <div className="card card-pad">{s.description ?? '—'}</div>
         ) : (
-          s.progress.completed === 0 ? <Empty title={t('state.empty_results')} />
-            : <div className="card card-pad row"><div className="big-number">{s.progress.completed}</div><span className="muted">/ {s.progress.total} {t('section.lessons').toLowerCase()}</span></div>
+          totals.completed === 0 ? <Empty title={t('state.empty_results')} />
+            : <div className="card card-pad row"><div className="big-number">{totals.completed}</div><span className="muted">/ {totals.total} {t('section.lessons').toLowerCase()}</span></div>
         )}
       </div>
     </>

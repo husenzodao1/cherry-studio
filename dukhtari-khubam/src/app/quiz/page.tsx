@@ -1,70 +1,77 @@
 'use client'
 
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import { useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 
-import { api, ApiFailure } from '@/web/api'
-import { useAuth } from '@/web/auth'
-import type { Asset } from '@/web/components/Blocks'
 import { Icon } from '@/web/components/Icon'
-import { ErrorState } from '@/web/components/States'
+import { Empty, Loading } from '@/web/components/States'
+import { useContent, type OfflineOption as Option, type OfflineQuiz } from '@/web/offline/content'
+import { gradeQuestion, gradeQuiz, shuffled, type Answer, type QuestionResult } from '@/web/offline/grade'
+import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
+import { useQueryParam } from '@/web/useQueryParam'
 
-type Answer = { option_id?: string; option_ids?: string[]; pairs?: Record<string, string>; order?: string[]; text?: string }
-interface Option { id: string; text?: string | null; side?: 'left' | 'right' | null; media?: Asset | null }
-interface Question { id: string; type: string; points: number; prompt: string; hint?: string | null; section?: string | null; media?: Asset | null; options: Option[] }
-interface Player {
-  locale: string
-  quiz: { id: string; title: string; instructions?: string | null; show_explanations: string; show_correct_answers: string; question_count: number }
-  questions: Question[]
-}
-interface Start { attempt: { id: string; answers: Record<string, Answer>; checked: string[] }; player: Player }
-interface Reveal { id: string; status: string; points?: number; max_points?: number; explanation?: string; correct_option_ids?: string[]; prompt?: string; comment?: string }
-interface Result {
-  status: string; score: number; max_score: number; percent: number; passed: boolean | null; completion_text?: string | null
-  can_retry: boolean; questions: Reveal[]
-}
+/** Quiz played and graded on the phone (works offline); the best result is saved with the learner's progress. */
+
+interface Reveal extends QuestionResult { id: string; prompt: string; explanation?: string | null; correct_option_ids?: string[] }
+interface Result { score: number; max_score: number; percent: number; passed: boolean; completion_text?: string | null; questions: Reveal[] }
+type Show = 'answers' | 'explanations' | 'both'
 
 export default function QuizPage() {
-  const { id } = useParams<{ id: string }>()
-  const { t, locale } = usePrefs()
-  const { session, ready } = useAuth()
-  const [state, setState] = useState<Start | null>(null)
+  return <Suspense fallback={<Loading />}><Quiz /></Suspense>
+}
+
+function Quiz() {
+  const id = useQueryParam('id')
+  const { t } = usePrefs()
+  const { bundle, loading } = useContent()
+  const quiz = bundle?.quizzes[id]
+  if (!bundle) return loading ? <Loading /> : <p className="muted">{t('state.offline_empty')}</p>
+  if (!quiz) return <Empty title={t('state.empty_courses')} />
+  return <Player key={id} quiz={quiz} />
+}
+
+function revealOf(quiz: OfflineQuiz, qid: string, r: QuestionResult, show: Show): Reveal {
+  const q = quiz.questions.find((x) => x.id === qid)!
+  const g = quiz.grading[qid]
+  const ok = r.status === 'correct'
+  return {
+    ...r, id: qid, prompt: q.prompt,
+    explanation: show !== 'answers' ? (ok ? g?.explanation_correct : g?.explanation_incorrect ?? g?.explanation_correct) : null,
+    correct_option_ids: show !== 'explanations' ? g?.key.correct_option_ids : undefined
+  }
+}
+
+function Player({ quiz }: { quiz: OfflineQuiz }) {
+  const { t } = usePrefs()
+  const { recordQuiz } = useLearner()
+  const [round, setRound] = useState(0)
+  const questions = useMemo(() => {
+    const ordered = quiz.settings.shuffle_questions ? shuffled(quiz.questions) : quiz.questions
+    return ordered.map((q) => ({
+      ...q,
+      options: (quiz.settings.shuffle_options && ['single_choice', 'multiple_choice'].includes(q.type)) || q.type === 'ordering' ? shuffled(q.options) : q.options
+    }))
+    // `round` changes on every (re)start, so each attempt gets a fresh order
+  }, [quiz, round])
+  const [started, setStarted] = useState(false)
   const [answers, setAnswers] = useState<Record<string, Answer>>({})
   const [checked, setChecked] = useState<Record<string, Reveal>>({})
   const [index, setIndex] = useState(0)
   const [result, setResult] = useState<Result | null>(null)
-  const [error, setError] = useState<unknown>(null)
-  const [busy, setBusy] = useState(false)
+  const policy = quiz.quiz
+  const showAnswers = policy.show_correct_answers
+  const showExpl = policy.show_explanations
+  const mode = (when: string): Show => (showAnswers === when && showExpl === when ? 'both' : showAnswers === when ? 'answers' : 'explanations')
 
-  const start = async () => {
-    setBusy(true)
-    setError(null)
-    try {
-      const s = await api<Start>(`/quizzes/${id}/attempts`, { method: 'POST', body: { locale } })
-      setState(s)
-      setAnswers(s.attempt.answers ?? {})
-      setChecked({})
-      setIndex(0)
-      setResult(null)
-    } catch (e) {
-      setError(e)
-    } finally {
-      setBusy(false)
-    }
+  const start = () => {
+    setRound((r) => r + 1)
+    setAnswers({})
+    setChecked({})
+    setIndex(0)
+    setResult(null)
+    setStarted(true)
   }
-
-  if (!ready) return null
-  if (!session) {
-    return (
-      <div className="card state" style={{ marginTop: 40 }}>
-        <Icon name="lock" size={26} /><b>{t('state.signin_needed')}</b>
-        <Link className="btn" href={`/login?next=/quizzes/${id}`}>{t('action.signin')}</Link>
-      </div>
-    )
-  }
-  if (error) return <ErrorState error={error} onRetry={start} />
 
   if (result) {
     return (
@@ -72,7 +79,7 @@ export default function QuizPage() {
         <div className="card card-pad card-lilac stack" style={{ alignItems: 'center', textAlign: 'center' }}>
           <div className="eyebrow">{t('quiz.score')}</div>
           <div className="big-number">{Math.round(result.percent)}%</div>
-          <b>{result.passed === null ? t('quiz.pending') : result.passed ? t('quiz.passed') : t('quiz.failed')}</b>
+          <b>{result.passed ? t('quiz.passed') : t('quiz.failed')}</b>
           <span className="muted">{result.score} / {result.max_score}</span>
           {result.completion_text ? <p style={{ margin: 0 }}>{result.completion_text}</p> : null}
         </div>
@@ -85,54 +92,53 @@ export default function QuizPage() {
               {q.max_points ? ` · ${q.points}/${q.max_points}` : ''}
             </span>
             {q.explanation ? <p className="muted" style={{ margin: 0 }}><b>{t('quiz.explanation')}: </b>{q.explanation}</p> : null}
-            {q.comment ? <p className="muted" style={{ margin: 0 }}>{q.comment}</p> : null}
           </div>
         ))}
-        {result.can_retry ? <button className="btn" onClick={start} disabled={busy}>{t('action.retry_quiz')}</button> : null}
+        {quiz.settings.allow_retry ? <button className="btn" onClick={start}>{t('action.retry_quiz')}</button> : null}
+        <Link href="/" className="btn btn-soft">{t('nav.home')}</Link>
       </section>
     )
   }
 
-  if (!state) {
+  if (!started) {
     return (
       <div className="card card-pad stack" style={{ maxWidth: 680, margin: '40px auto 0', textAlign: 'center', alignItems: 'center' }}>
         <Icon name="check" size={28} />
-        <button className="btn" onClick={start} disabled={busy}>{t('action.start')}</button>
+        <h1 className="h-page" style={{ margin: 0 }}>{policy.title}</h1>
+        {policy.instructions ? <p className="muted" style={{ margin: 0 }}>{policy.instructions}</p> : null}
+        <span className="muted">{questions.length} {t('quiz.question').toLowerCase()}</span>
+        <button className="btn" onClick={start} disabled={!questions.length}>{t('action.start')}</button>
       </div>
     )
   }
 
+  const state = { player: { quiz: policy, questions } }
   const q = state.player.questions[index]
   const total = state.player.questions.length
   const answer = answers[q.id]
   const setAnswer = (a: Answer) => !checked[q.id] && setAnswers((s) => ({ ...s, [q.id]: a }))
   const reveal = checked[q.id]
-  const perQuestion = state.player.quiz.show_explanations === 'after_each' || state.player.quiz.show_correct_answers === 'after_each'
+  const perQuestion = showExpl === 'after_each' || showAnswers === 'after_each'
   const left = q.options.filter((o) => o.side === 'left')
   const right = q.options.filter((o) => o.side === 'right')
   const order = answer?.order ?? q.options.map((o) => o.id)
 
-  const check = async () => {
+  const check = () => {
     if (!answer) return
-    setBusy(true)
-    try {
-      const r = await api<Reveal>(`/attempts/${state.attempt.id}/check`, { method: 'POST', body: { question_id: q.id, answer } })
-      setChecked((c) => ({ ...c, [q.id]: r }))
-    } catch (e) {
-      if (!(e instanceof ApiFailure && e.code === 'already_checked')) setError(e)
-    } finally {
-      setBusy(false)
-    }
+    const r = gradeQuestion(q, quiz.grading[q.id], answer, quiz.locale)
+    setChecked((c) => ({ ...c, [q.id]: revealOf(quiz, q.id, r, mode('after_each')) }))
   }
-  const submit = async () => {
-    setBusy(true)
-    try {
-      setResult(await api<Result>(`/attempts/${state.attempt.id}/submit`, { method: 'POST', body: { answers } }))
-    } catch (e) {
-      setError(e)
-    } finally {
-      setBusy(false)
-    }
+  const submit = () => {
+    const g = gradeQuiz(questions, quiz.grading, answers, quiz.locale)
+    const passed = g.percent >= policy.pass_score_percent
+    recordQuiz(quiz.quiz.id, g.percent, passed)
+    const end = mode('after_submit')
+    setResult({
+      score: g.score, max_score: g.max_score, percent: g.percent, passed, completion_text: quiz.settings.completion_text,
+      questions: questions.map((x) => showAnswers === 'never' && showExpl === 'never'
+        ? { ...g.results[x.id], id: x.id, prompt: x.prompt }
+        : revealOf(quiz, x.id, g.results[x.id], end))
+    })
   }
   const move = (from: number, to: number) => {
     if (to < 0 || to >= order.length) return
@@ -223,10 +229,10 @@ export default function QuizPage() {
       <div className="row" style={{ marginTop: 8 }}>
         <button className="btn btn-soft" onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index === 0}>{t('action.prev')}</button>
         <span style={{ flex: 1 }} />
-        {perQuestion && !reveal && answer ? <button className="btn btn-soft" onClick={check} disabled={busy}>{t('action.check')}</button> : null}
+        {perQuestion && !reveal && answer ? <button className="btn btn-soft" onClick={check} >{t('action.check')}</button> : null}
         {index < total - 1
           ? <button className="btn" onClick={() => setIndex((i) => i + 1)}>{t('action.next')}</button>
-          : <button className="btn" onClick={submit} disabled={busy}>{t('action.submit')}</button>}
+          : <button className="btn" onClick={submit}>{t('action.submit')}</button>}
       </div>
     </section>
   )

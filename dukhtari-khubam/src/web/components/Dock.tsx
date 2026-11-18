@@ -9,16 +9,16 @@ import { Icon, type IconName } from './Icon'
 
 const ITEMS: { href: string; key: 'nav.home' | 'nav.schools' | 'nav.saved' | 'nav.profile'; icon: IconName; match: RegExp }[] = [
   { href: '/', key: 'nav.home', icon: 'home', match: /^\/$/ },
-  { href: '/schools', key: 'nav.schools', icon: 'layers', match: /^\/(schools|courses)/ },
+  { href: '/schools', key: 'nav.schools', icon: 'layers', match: /^\/(schools|school|course)(\/|$)/ },
   { href: '/saved', key: 'nav.saved', icon: 'bookmark', match: /^\/saved/ },
-  { href: '/profile', key: 'nav.profile', icon: 'user', match: /^\/(profile|settings|login)/ }
+  { href: '/profile', key: 'nav.profile', icon: 'user', match: /^\/(profile|settings)/ }
 ]
 
 /** Floating bottom navigation in physically-refracting glass (spec §8.8: Premium Real Glass). */
 export function Dock() {
   const path = usePathname() ?? '/'
   const { t } = usePrefs()
-  if (/^\/(lessons|quizzes)\//.test(path)) return null
+  if (/^\/(lesson|quiz|start|admin)(\/|$)/.test(path)) return null
   return (
     <div className="dock-wrap">
       <LiquidGlass as="nav" label="Навигатсия" radius={34} bezel={18} className="dock">

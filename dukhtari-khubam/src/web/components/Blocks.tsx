@@ -217,12 +217,12 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return <div className="card card-pad card-lilac"><b>{c.title}</b><RichText value={c.body} as="div" /></div>
     case 'quiz':
       return block.ref ? (
-        <Link href={`/quizzes/${block.ref.id}`} className="card card-pad row" style={{ textDecoration: 'none' }}>
+        <Link href={`/quiz?id=${block.ref.id}`} className="card card-pad row" style={{ textDecoration: 'none' }}>
           <Icon name="check" /><div style={{ flex: 1 }}><b>{block.ref.title}</b><div className="muted">{block.ref.question_count} {t('quiz.question').toLowerCase()}</div></div><Icon name="forward" />
         </Link>
       ) : null
     case 'related_lesson':
-      return block.ref ? <Link href={`/lessons/${block.ref.id}`} className="chip"><Icon name="book" size={16} />{block.ref.title}</Link> : null
+      return block.ref ? <Link href={`/lesson?id=${block.ref.id}`} className="chip"><Icon name="book" size={16} />{block.ref.title}</Link> : null
     case 'model3d': {
       const m = a(p.asset_id)
       return m?.url ? <a className="chip" href={m.url} download><Icon name="sparkle" size={16} />3D · {m.title ?? 'GLB'}</a> : null

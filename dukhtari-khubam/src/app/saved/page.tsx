@@ -2,35 +2,32 @@
 
 import Link from 'next/link'
 
-import { useAuth } from '@/web/auth'
 import { Icon } from '@/web/components/Icon'
-import { Empty, ErrorState, Loading } from '@/web/components/States'
+import { Empty } from '@/web/components/States'
+import { useContent } from '@/web/offline/content'
+import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
-import { useApi } from '@/web/useApi'
-
-interface Saved { lesson_id: string; title: string; school: { title: string }; course: { title: string } }
 
 export default function SavedPage() {
-  const { t, locale } = usePrefs()
-  const { session, ready } = useAuth()
-  const saved = useApi<Saved[]>(session ? `/me/bookmarks?locale=${locale}` : null)
-  if (!ready) return null
+  const { t } = usePrefs()
+  const { bundle } = useContent()
+  const { progress } = useLearner()
+  const saved = Object.entries(progress.bookmarks)
+    .filter(([, b]) => b.on)
+    .sort((a, b) => (a[1].at < b[1].at ? 1 : -1))
+    .map(([id]) => bundle?.lessons[id])
+    .filter((l) => !!l)
   return (
     <>
       <header className="topbar"><h1 className="h-page">{t('nav.saved')}</h1></header>
       <div className="section">
-        {!session ? (
-          <div className="card state"><Icon name="bookmark" size={26} /><b>{t('state.signin_needed')}</b><Link className="btn" href="/login?next=/saved">{t('action.signin')}</Link></div>
-        ) : saved.error ? <ErrorState error={saved.error} onRetry={saved.reload} />
-          : !saved.data ? <Loading />
-            : saved.data.length === 0 ? <Empty title={t('state.empty_saved')} />
-              : saved.data.map((s) => (
-                <Link key={s.lesson_id} href={`/lessons/${s.lesson_id}`} className="card card-pad row" style={{ textDecoration: 'none' }}>
-                  <Icon name="bookmark" fill="currentColor" />
-                  <div style={{ flex: 1 }}><b style={{ fontWeight: 500 }}>{s.title}</b><div className="eyebrow">{s.school.title} · {s.course.title}</div></div>
-                  <Icon name="forward" />
-                </Link>
-              ))}
+        {saved.length === 0 ? <Empty title={t('state.empty_saved')} /> : saved.map((l) => (
+          <Link key={l!.id} href={`/lesson?id=${l!.id}`} className="card card-pad row" style={{ textDecoration: 'none' }}>
+            <Icon name="bookmark" fill="currentColor" />
+            <div style={{ flex: 1 }}><b style={{ fontWeight: 500 }}>{l!.title}</b><div className="eyebrow">{l!.context.school.title} · {l!.context.course.title}</div></div>
+            <Icon name="forward" />
+          </Link>
+        ))}
       </div>
     </>
   )

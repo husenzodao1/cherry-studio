@@ -16,6 +16,8 @@ interface PrefsApi extends Prefs {
   reducedMotion: boolean
   t: (key: UiKey) => string
   help: Record<string, { title?: string | null; body: string; icon: string }>
+  /** CMS strings and help texts, supplied from the content bundle stored on the phone */
+  setCms: (cms: { strings?: Record<string, string>; help?: PrefsApi['help'] }) => void
 }
 
 const DEFAULTS: Prefs = { locale: 'tg', theme: 'system', motion: 'system', textScale: 1 }
@@ -64,16 +66,9 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     root.style.setProperty('--text-scale', String(prefs.textScale))
   }, [prefs, systemDark, reducedMotion])
 
-  useEffect(() => {
-    let alive = true
-    fetch(`/api/v1/ui?locale=${prefs.locale}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => alive && data && setCms({ strings: data.strings ?? {}, help: data.help ?? {} }))
-      .catch(() => undefined)
-    return () => {
-      alive = false
-    }
-  }, [prefs.locale])
+  const applyCms = useCallback((c: { strings?: Record<string, string>; help?: PrefsApi['help'] }) => {
+    setCms({ strings: c.strings ?? {}, help: c.help ?? {} })
+  }, [])
 
   const set = useCallback((patch: Partial<Prefs>) => {
     setPrefs((p) => {
@@ -93,8 +88,8 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       if (prefs.locale === 'tg' && cms.strings[key]) return cms.strings[key]
       return local[key] ?? cms.strings[key] ?? DEFAULT_STRINGS.tg[key] ?? key
     }
-    return { ...prefs, set, reducedMotion, t, help: cms.help }
-  }, [prefs, set, reducedMotion, cms])
+    return { ...prefs, set, reducedMotion, t, help: cms.help, setCms: applyCms }
+  }, [prefs, set, reducedMotion, cms, applyCms])
 
   return <PrefsContext.Provider value={value}>{children}</PrefsContext.Provider>
 }

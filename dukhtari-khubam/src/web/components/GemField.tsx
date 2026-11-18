@@ -36,7 +36,7 @@ const EDGES: Gem[] = [
 
 export function GemField() {
   const path = usePathname()
-  if (/^\/(lessons|quizzes|admin)(\/|$)/.test(path)) return null
+  if (/^\/(lesson|quiz|admin)(\/|$)/.test(path)) return null
   return (
     <div className="gem-field" aria-hidden="true">
       {(path === '/' ? HOME : EDGES).map((g, i) => (

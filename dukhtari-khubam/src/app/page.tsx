@@ -2,28 +2,26 @@
 
 import Link from 'next/link'
 
-import { useAuth } from '@/web/auth'
 import { Icon } from '@/web/components/Icon'
-import { ErrorState, Skeleton } from '@/web/components/States'
-import { SchoolCard, type SchoolSummary } from '@/web/components/SchoolCard'
+import { SchoolCard } from '@/web/components/SchoolCard'
+import { Skeleton } from '@/web/components/States'
 import { GlassScene } from '@/web/glass/LazyGlassScene'
 import { LiquidGlass } from '@/web/glass/LiquidGlass'
+import { useContent } from '@/web/offline/content'
+import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
 import { ART } from '@/web/art'
-import { useApi } from '@/web/useApi'
-
-interface Inspiration { body: string; author_name?: string | null; source_title?: string | null }
-interface Continue { lesson_id: string; title: string; percent: number; course?: { title: string; progress: { completed: number; total: number } } }
-interface Me { profile?: { display_name?: string | null } }
 
 export default function Home() {
-  const { t, locale } = usePrefs()
-  const { session } = useAuth()
-  const schools = useApi<SchoolSummary[]>(`/schools?locale=${locale}`)
-  const inspiration = useApi<Inspiration | null>(`/inspiration?locale=${locale}`)
-  const cont = useApi<Continue | null>(session ? `/me/continue?locale=${locale}` : null)
-  const me = useApi<Me>(session ? '/me' : null)
-  const name = me.data?.profile?.display_name
+  const { t } = usePrefs()
+  const { bundle, loading, offlineEmpty } = useContent()
+  const { learner, progress } = useLearner()
+  const name = learner?.name
+  const inspiration = bundle?.inspiration ?? null
+  const lastLesson = progress.last ? bundle?.lessons[progress.last.lesson] : undefined
+  const cont = lastLesson && !progress.lessons[lastLesson.id]?.done
+    ? { lesson_id: lastLesson.id, title: lastLesson.title, percent: progress.lessons[lastLesson.id]?.p ?? 0, course: lastLesson.context.course }
+    : null
 
   return (
     <>
@@ -43,13 +41,13 @@ export default function Home() {
         style={{ left: -14, bottom: -30, width: 'clamp(128px, 23vw, 184px)', transform: 'rotate(-4deg)' }} />
       <section className="hero-card" style={{ height: 'clamp(300px, 52vw, 440px)' }} aria-label={t('home.inspiration')}>
         <GlassScene word="дониш" variant="sphere" />
-        {inspiration.data ? (
+        {inspiration ? (
           <LiquidGlass radius={22} bezel={14} style={{ position: 'absolute', left: 14, top: 14, maxWidth: 'min(62%, 420px)', padding: '12px 16px', zIndex: 2 }}>
             <div className="eyebrow" style={{ position: 'relative', zIndex: 2, color: 'var(--ink-2)' }}>{t('home.inspiration')}</div>
-            <p className="serif" style={{ position: 'relative', zIndex: 2, margin: '4px 0 0', fontStyle: 'italic', fontSize: '1.05em', color: 'var(--ink)' }}>“{inspiration.data.body}”</p>
-            {inspiration.data.author_name || inspiration.data.source_title ? (
+            <p className="serif" style={{ position: 'relative', zIndex: 2, margin: '4px 0 0', fontStyle: 'italic', fontSize: '1.05em', color: 'var(--ink)' }}>“{inspiration.body}”</p>
+            {inspiration.author_name || inspiration.source_title ? (
               <div className="eyebrow" style={{ position: 'relative', zIndex: 2, marginTop: 6, color: 'var(--ink-2)' }}>
-                — {[inspiration.data.author_name, inspiration.data.source_title].filter(Boolean).join(', ')}
+                — {[inspiration.author_name, inspiration.source_title].filter(Boolean).join(', ')}
               </div>
             ) : null}
           </LiquidGlass>
@@ -58,14 +56,14 @@ export default function Home() {
       </div>
       <div style={{ height: 28 }} />
 
-      {cont.data ? (
+      {cont ? (
         <section className="section">
           <h2 className="h-section">{t('home.continue_learning')}</h2>
-          <Link href={`/lessons/${cont.data.lesson_id}`} className="card card-pad row" style={{ textDecoration: 'none' }}>
+          <Link href={`/lesson?id=${cont.lesson_id}`} className="card card-pad row" style={{ textDecoration: 'none' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="eyebrow">{cont.data.course?.title}</div>
-              <b style={{ display: 'block', fontWeight: 500, fontSize: '1.05em' }}>{cont.data.title}</b>
-              <div className="progress" style={{ marginTop: 10 }}><span style={{ width: `${cont.data.percent}%` }} /></div>
+              <div className="eyebrow">{cont.course.title}</div>
+              <b style={{ display: 'block', fontWeight: 500, fontSize: '1.05em' }}>{cont.title}</b>
+              <div className="progress" style={{ marginTop: 10 }}><span style={{ width: `${cont.percent}%` }} /></div>
             </div>
             <span className="btn" style={{ width: 48, padding: 0 }} aria-label={t('action.continue')}><Icon name="play" /></span>
           </Link>
@@ -77,11 +75,11 @@ export default function Home() {
           <h2 className="h-section">{t('home.seven_schools')}</h2>
           <Link href="/schools" className="chip">{t('home.all_schools')} <Icon name="arrow" size={14} /></Link>
         </div>
-        {schools.error ? <ErrorState error={schools.error} onRetry={schools.reload} /> : null}
+        {offlineEmpty && !bundle ? <p className="muted" style={{ margin: 0 }}>{t('state.offline_empty')}</p> : null}
         <div className="scroller pop-row">
-          {schools.loading && !schools.data
+          {loading || (!bundle && !offlineEmpty)
             ? Array.from({ length: 4 }, (_, i) => <div key={i} style={{ width: 164 }}><Skeleton height={178} /></div>)
-            : schools.data?.map((s, i) => <div key={s.id} style={{ width: 164 }}><SchoolCard school={s} index={i} /></div>)}
+            : bundle?.schools.map((s, i) => <div key={s.id} style={{ width: 164 }}><SchoolCard school={s} index={i} /></div>)}
         </div>
       </section>
     </>

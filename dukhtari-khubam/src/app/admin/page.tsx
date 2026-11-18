@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 
 import { Content } from '@/web/admin/Content'
 import { MediaLibrary } from '@/web/admin/Media'
@@ -11,6 +11,7 @@ import { Users } from '@/web/admin/Users'
 import { useAuth } from '@/web/auth'
 import { Icon } from '@/web/components/Icon'
 import { ErrorState, Loading } from '@/web/components/States'
+import { browserSupabase } from '@/web/supabase-browser'
 import { useApi } from '@/web/useApi'
 
 /**
@@ -30,15 +31,7 @@ export default function AdminPage() {
   const [tab, setTab] = useState<Tab>('home')
 
   if (!ready || (session && !me.data && !me.error)) return <Loading />
-  if (!session) {
-    return (
-      <div className="card card-pad stack" style={{ maxWidth: 440, margin: '40px auto 0' }}>
-        <h1 className="h-page">Идора</h1>
-        <p className="muted" style={{ margin: 0 }}>Аввал ба ҳисоби кормандон ворид шавед.</p>
-        <Link href="/login?next=/admin" className="btn btn-block">Ворид шудан</Link>
-      </div>
-    )
-  }
+  if (!session) return <StaffLogin />
   if (me.error) return <ErrorState error={me.error} onRetry={me.reload} />
   if (!me.data?.roles.length) {
     return (
@@ -64,6 +57,33 @@ export default function AdminPage() {
       </nav>
       {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'content' ? <Content /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : <Users />}
     </div>
+  )
+}
+
+/** Staff accounts are created by the owner in Supabase (Authentication → Users); learners never sign in here. */
+function StaffLogin() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const sb = browserSupabase()
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!sb) return
+    setBusy(true)
+    const { error } = await sb.auth.signInWithPassword({ email, password })
+    setBusy(false)
+    setMessage(error ? error.message : null)
+  }
+  return (
+    <form onSubmit={submit} className="card card-pad stack" style={{ maxWidth: 440, margin: '40px auto 0' }}>
+      <h1 className="h-page">Идора</h1>
+      <p className="muted" style={{ margin: 0 }}>Воридшавии кормандон.</p>
+      <input className="input" type="email" placeholder="Почта" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" />
+      <input className="input" type="password" placeholder="Рамз" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+      {message ? <p role="status" style={{ margin: 0, color: 'var(--bad)' }}>{message}</p> : null}
+      <button className="btn btn-block" disabled={busy || !sb}>Ворид шудан</button>
+    </form>
   )
 }
 
