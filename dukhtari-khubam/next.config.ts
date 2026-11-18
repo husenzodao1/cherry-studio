@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+
 import type { NextConfig } from 'next'
 
 const securityHeaders = [
@@ -11,6 +13,8 @@ const securityHeaders = [
 // BUILD_TARGET=app builds the Android app's pages as static files (out/). The API route (route.ts) is
 // left out by the page extension list; the app calls the deployed API (NEXT_PUBLIC_API_BASE).
 const forApp = process.env.BUILD_TARGET === 'app'
+// One version for the app code and the APK: public/app-version.json (Gradle reads it too).
+const appVersion = JSON.parse(readFileSync(new URL('./public/app-version.json', import.meta.url), 'utf8')) as { versionCode: number }
 
 const config: NextConfig = forApp
   ? {
@@ -19,6 +23,7 @@ const config: NextConfig = forApp
       pageExtensions: ['tsx'],
       trailingSlash: true,
       images: { unoptimized: true },
+      env: { NEXT_PUBLIC_APP_VERSION_CODE: String(appVersion.versionCode) },
       turbopack: { root: import.meta.dirname }
     }
   : {

@@ -7,8 +7,10 @@ android {
         applicationId "tj.dukhtarikhubam.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0.0"
+        // single source of the app version: public/app-version.json (also read by the web build)
+        def appVersion = new groovy.json.JsonSlurper().parse(file('../../public/app-version.json'))
+        versionCode appVersion.versionCode
+        versionName appVersion.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
