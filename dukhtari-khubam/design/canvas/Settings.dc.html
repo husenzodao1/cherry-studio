@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="tg">
+<head>
+<meta charset="utf-8">
+<title>Танзимот</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Lora:ital,wght@0,500;0,600;0,700;1,500&amp;display=swap">
+<style>
+body{margin:0}
+.dk{--bg:#FBF9FD;--surface:#FFFFFF;--lav:#EEE7F6;--lilac:#DCCCEB;--primary:#A78BCB;--plum:#59446E;--rose:#EBDCE4;--champ:#E8D7B9;--sage:#DDE9DF;--ink:#2E2338;--muted:#6B5A7B;--accent-ink:#6B4F8F;--glass:rgba(255,255,255,.55);--glass-strong:rgba(255,255,255,.8);--edge:rgba(255,255,255,.92);--edge-low:rgba(167,139,203,.24);--shadow:rgba(89,68,110,.18);--bloom1:rgba(220,204,235,.9);--bloom2:rgba(235,220,228,.85);--track-off:#CFC2DD;font-family:'Onest',system-ui,sans-serif;color:var(--ink);background:var(--bg);transition:background .35s,color .35s}
+.dk.dark{--bg:#17131E;--surface:#211B2A;--lav:#30263B;--lilac:#4A3C5A;--primary:#B7A0D3;--plum:#D8C8EA;--rose:#3A2B36;--champ:#CBB58F;--sage:#2F3F35;--ink:#F4EFF8;--muted:#BDB1CB;--accent-ink:#D8C8EA;--glass:rgba(48,38,59,.5);--glass-strong:rgba(48,38,59,.82);--edge:rgba(216,200,234,.26);--edge-low:rgba(0,0,0,.35);--shadow:rgba(0,0,0,.5);--bloom1:rgba(120,92,158,.38);--bloom2:rgba(183,143,164,.22);--track-off:#5A4B6B}
+.serif{font-family:'Lora',Georgia,serif}
+.glass{background:linear-gradient(140deg,var(--glass-strong),var(--glass));border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--edge),inset 0 -1px 0 var(--edge-low),0 14px 34px -12px var(--shadow);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)}
+.ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--plum);text-decoration:none;flex:none}
+.group{border-radius:24px;overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;min-height:56px;padding:0 16px;border-bottom:1px solid var(--lilac);font-size:15px;font-weight:500;color:var(--ink);text-decoration:none;box-sizing:border-box}
+.row:last-child{border-bottom:0}
+.row .lbl{flex:1;display:flex;align-items:center;gap:8px}
+.row .val{font-size:14px;color:var(--muted);font-weight:400}
+.help{width:22px;height:22px;border-radius:50%;border:1px solid var(--lilac);background:var(--glass-strong);color:var(--accent-ink);font-family:inherit;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex:none}
+.sw{position:relative;width:52px;height:32px;border-radius:16px;border:0;padding:0;cursor:pointer;background:var(--track-off);transition:background .25s;flex:none}
+.sw.on{background:linear-gradient(180deg,#8A6FB0,#59446E)}
+.sw span{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:radial-gradient(120% 120% at 30% 25%,#FFFFFF,#EEE7F6);box-shadow:0 2px 6px rgba(0,0,0,.25),inset 0 1px 0 #FFFFFF;transition:transform .25s}
+.sw.on span{transform:translateX(20px)}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;border-radius:20px;background:var(--lav)}
+.seg button{height:36px;border:0;border-radius:16px;background:transparent;color:var(--muted);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.seg button.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 4px 12px -6px var(--shadow),inset 0 1px 0 var(--edge)}
+.pop{margin:0 16px 12px;padding:12px 14px;border-radius:16px;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:var(--ink)}
+.pop button{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:2px;flex:none;border-radius:8px}
+input[type=range]{width:100%;accent-color:#7C61A3}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+</style>
+</helmet>
+<div class="{{rootClass}}" style="width:390px;height:844px;position:relative;overflow:hidden;box-sizing:border-box">
+<div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(55% 24% at 100% 0%,var(--bloom1),transparent 70%),radial-gradient(50% 24% at 0% 80%,var(--bloom2),transparent 70%)"></div>
+
+<header style="position:absolute;left:16px;right:16px;top:48px;display:flex;align-items:center;gap:8px">
+<a href="Profile.dc.html" class="glass ico" aria-label="Бозгашт">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<h1 class="serif" style="margin:0;flex:1;text-align:center;font-size:26px;line-height:1.2;font-weight:600;color:var(--plum);padding-right:52px">Танзимот</h1>
+</header>
+
+<div style="position:absolute;left:20px;right:20px;top:112px;display:flex;flex-direction:column;gap:16px">
+<div class="glass group">
+<a href="Main.dc.html" class="row"><span class="lbl">Забон</span><span class="val">Тоҷикӣ</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></a>
+<div class="row" style="flex-direction:column;align-items:stretch;gap:10px;padding:14px 16px">
+<span class="lbl" id="theme-l">Режими намоиш</span>
+<div class="seg" role="radiogroup" aria-labelledby="theme-l">
+<sc-for list="{{themes}}" as="t" hint-placeholder-count="3">
+<button type="button" role="radio" class="{{t.cls}}" aria-checked="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}</button>
+</sc-for>
+</div>
+</div>
+<div style="border-bottom:1px solid var(--lilac)">
+<div class="row" style="border-bottom:0">
+<span class="lbl" id="notif-l">Огоҳиҳо <button type="button" class="help" aria-label="Шарҳ: Огоҳиҳо" aria-expanded="{{help.notifExp}}" onClick="{{help.notif}}">!</button></span>
+<button type="button" role="switch" class="{{sw.notif}}" aria-checked="{{sw.notifOn}}" aria-labelledby="notif-l" onClick="{{toggle.notif}}"><span></span></button>
+</div>
+<sc-if value="{{help.notifOpen}}" hint-placeholder-val="{{false}}">
+<div class="glass pop" role="note"><span style="flex:1">Барои гирифтани хабарҳои курсҳо ва ёдрасии дарсҳо.</span><button type="button" aria-label="Пӯшидан" onClick="{{help.close}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+</sc-if>
+</div>
+<div style="border-bottom:1px solid var(--lilac)">
+<div class="row" style="border-bottom:0">
+<span class="lbl" id="anim-l">Аниматсия <button type="button" class="help" aria-label="Шарҳ: Аниматсия" aria-expanded="{{help.animExp}}" onClick="{{help.anim}}">!</button></span>
+<button type="button" role="switch" class="{{sw.anim}}" aria-checked="{{sw.animOn}}" aria-labelledby="anim-l" onClick="{{toggle.anim}}"><span></span></button>
+</div>
+<sc-if value="{{help.animOpen}}" hint-placeholder-val="{{false}}">
+<div class="glass pop" role="note"><span style="flex:1">Ҳаракатҳои ороиширо фаъол ё хомӯш мекунад.</span><button type="button" aria-label="Пӯшидан" onClick="{{help.close}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+</sc-if>
+</div>
+<label class="row" style="flex-direction:column;align-items:stretch;gap:8px;padding:14px 16px">
+<span class="lbl">Андозаи матн</span>
+<span style="display:flex;align-items:center;gap:12px"><span style="font-size:13px;color:var(--muted)">А</span><input type="range" min="0" max="2" step="1" value="1"><span style="font-size:19px;color:var(--muted)">А</span></span>
+</label>
+</div>
+
+<div class="glass group">
+<a href="Profile.dc.html" class="row"><span class="lbl">Махфият</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></a>
+<a href="Profile.dc.html" class="row"><span class="lbl">Дар бораи барнома</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></a>
+<a href="Profile.dc.html" class="row"><span class="lbl">Ҳисоб</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></a>
+</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0">
+<dc-import name="BottomNav" active="profile" dark="{{dark}}" embedded="1" hint-size="390px,120px"></dc-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Theme"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { theme: null, notif: true, anim: true, help: null };
+  }
+  renderVals() {
+    const theme = this.state.theme || (this.props.dark ? 'dark' : 'light');
+    const systemDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const dark = theme === 'dark' || (theme === 'system' && systemDark);
+    const themes = [
+      { id: 'light', label: 'Равшан' },
+      { id: 'dark', label: 'Торик' },
+      { id: 'system', label: 'Система' }
+    ].map((t) => ({
+      ...t,
+      cls: theme === t.id ? 'on' : '',
+      sel: theme === t.id ? 'true' : 'false',
+      pick: () => this.setState({ theme: t.id })
+    }));
+    const h = this.state.help;
+    const openHelp = (k) => () => this.setState({ help: h === k ? null : k });
+    return {
+      rootClass: dark ? 'dk dark' : 'dk',
+      dark,
+      themes,
+      sw: {
+        notif: this.state.notif ? 'sw on' : 'sw',
+        notifOn: this.state.notif ? 'true' : 'false',
+        anim: this.state.anim ? 'sw on' : 'sw',
+        animOn: this.state.anim ? 'true' : 'false'
+      },
+      toggle: {
+        notif: () => this.setState({ notif: !this.state.notif }),
+        anim: () => this.setState({ anim: !this.state.anim })
+      },
+      help: {
+        notif: openHelp('notif'),
+        anim: openHelp('anim'),
+        notifOpen: h === 'notif',
+        animOpen: h === 'anim',
+        notifExp: h === 'notif' ? 'true' : 'false',
+        animExp: h === 'anim' ? 'true' : 'false',
+        close: () => this.setState({ help: null })
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

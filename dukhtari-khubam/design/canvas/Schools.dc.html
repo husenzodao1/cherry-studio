@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="tg">
+<head>
+<meta charset="utf-8">
+<title>Мактабҳо</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Lora:ital,wght@0,500;0,600;0,700;1,500&amp;display=swap">
+<style>
+body{margin:0}
+.dk{--bg:#FBF9FD;--surface:#FFFFFF;--lav:#EEE7F6;--lilac:#DCCCEB;--primary:#A78BCB;--plum:#59446E;--rose:#EBDCE4;--champ:#E8D7B9;--sage:#DDE9DF;--ink:#2E2338;--muted:#6B5A7B;--accent-ink:#6B4F8F;--glass:rgba(255,255,255,.55);--glass-strong:rgba(255,255,255,.8);--edge:rgba(255,255,255,.92);--edge-low:rgba(167,139,203,.24);--shadow:rgba(89,68,110,.18);--btn-top:#7C61A3;--btn-bot:#59446E;--on-btn:#FFFFFF;--bloom1:rgba(220,204,235,.9);--bloom2:rgba(235,220,228,.85);--bloom3:rgba(232,215,185,.5);font-family:'Onest',system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+.dk.dark{--bg:#17131E;--surface:#211B2A;--lav:#30263B;--lilac:#4A3C5A;--primary:#B7A0D3;--plum:#D8C8EA;--rose:#3A2B36;--champ:#CBB58F;--sage:#2F3F35;--ink:#F4EFF8;--muted:#BDB1CB;--accent-ink:#D8C8EA;--glass:rgba(48,38,59,.5);--glass-strong:rgba(48,38,59,.82);--edge:rgba(216,200,234,.26);--edge-low:rgba(0,0,0,.35);--shadow:rgba(0,0,0,.5);--btn-top:#CDBBE3;--btn-bot:#B7A0D3;--on-btn:#17131E;--bloom1:rgba(120,92,158,.38);--bloom2:rgba(183,143,164,.22);--bloom3:rgba(203,181,143,.14)}
+.serif{font-family:'Lora',Georgia,serif}
+.glass{background:linear-gradient(140deg,var(--glass-strong),var(--glass));border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--edge),inset 0 -1px 0 var(--edge-low),0 14px 34px -12px var(--shadow);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)}
+.ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--plum);text-decoration:none;flex:none}
+.card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:136px;border-radius:24px;text-decoration:none;color:var(--ink);text-align:center;padding:10px;box-sizing:border-box}
+.card b{font-size:14px;font-weight:600;line-height:18px}
+.card small{font-size:12px;color:var(--muted)}
+.search{display:flex;align-items:center;gap:10px;height:52px;border-radius:26px;padding:0 18px;box-sizing:border-box;color:var(--muted)}
+.search input{flex:1;border:0;background:transparent;font:inherit;font-size:15px;color:var(--ink);outline:none;min-width:0}
+.search input::placeholder{color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+a:focus-visible,button:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.search:focus-within{outline:2px solid var(--primary);outline-offset:2px}
+</style>
+</helmet>
+<div class="{{rootClass}}" style="width:390px;height:844px;position:relative;overflow:hidden;box-sizing:border-box">
+<div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(55% 30% at 100% 0%,var(--bloom1),transparent 70%),radial-gradient(50% 30% at 0% 70%,var(--bloom2),transparent 70%),radial-gradient(60% 26% at 100% 100%,var(--bloom3),transparent 70%)"></div>
+
+<header style="position:absolute;left:16px;right:16px;top:48px;display:flex;align-items:center;gap:8px">
+<a href="Home.dc.html" class="glass ico" aria-label="Бозгашт">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<h1 class="serif" style="margin:0;flex:1;text-align:center;font-size:26px;line-height:1.2;font-weight:600;color:var(--plum);padding-right:52px">Мактабҳо</h1>
+</header>
+
+<label class="glass search" style="position:absolute;left:20px;right:20px;top:112px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<span class="sr">Ҷустуҷӯ</span>
+<input type="search" placeholder="Ҷустуҷӯ">
+</label>
+
+<div style="position:absolute;left:20px;right:20px;top:184px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<a href="School.dc.html" class="glass card"><dc-import name="Art" kind="religion" size="64" hint-size="64px,64px"></dc-import><b>Маърифати динӣ</b><small>[N] курс</small></a>
+<a href="School.dc.html" class="glass card"><dc-import name="Art" kind="ethics" size="64" hint-size="64px,64px"></dc-import><b>Одоб ва ахлоқ</b><small>[N] курс</small></a>
+<a href="School.dc.html" class="glass card"><dc-import name="Art" kind="culture" size="64" hint-size="64px,64px"></dc-import><b>Фарҳанги тоҷик</b><small>[N] курс</small></a>
+<a href="School.dc.html" class="glass card"><dc-import name="Art" kind="family" size="64" hint-size="64px,64px"></dc-import><b>Оила ва муносибатҳо</b><small>[N] курс</small></a>
+<a href="School.dc.html" class="glass card"><dc-import name="Art" kind="health" size="64" hint-size="64px,64px"></dc-import><b>Илм ва саломатӣ</b><small>[N] курс</small></a>
+<a href="School.dc.html" class="glass card"><dc-import name="Art" kind="growth" size="64" hint-size="64px,64px"></dc-import><b>Рушди шахсият</b><small>[N] курс</small></a>
+<a href="School.dc.html" class="glass card"><dc-import name="Art" kind="modern" size="64" hint-size="64px,64px"></dc-import><b>Зиндагии муосир</b><small>[N] курс</small></a>
+</div>
+<div aria-hidden="true" style="position:absolute;right:-18px;top:640px;pointer-events:none">
+<dc-import name="Art" kind="lotus" size="150" hint-size="150px,150px"></dc-import>
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0">
+<dc-import name="BottomNav" active="schools" dark="{{dark}}" embedded="1" hint-size="390px,120px"></dc-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Theme"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = !!this.props.dark;
+    return { rootClass: dark ? 'dk dark' : 'dk', dark };
+  }
+}
+</script>
+</body>
+</html>

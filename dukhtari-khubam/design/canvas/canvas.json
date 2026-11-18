@@ -1,0 +1,45 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-11-18T12:00:00Z"},
+  "title": "Духтари хубам — Design PoC",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 390, "h": 844, "title": "01 · Welcome", "radius": 44, "is_interactive": true},
+    "Home.dc.html": {"x": 470, "y": 0, "w": 390, "h": 844, "title": "02 · Асосӣ", "radius": 44},
+    "Schools.dc.html": {"x": 940, "y": 0, "w": 390, "h": 844, "title": "Мактабҳо", "radius": 44},
+    "School.dc.html": {"x": 1410, "y": 0, "w": 390, "h": 844, "title": "03 · Мактаб / Курсҳо", "radius": 44, "is_interactive": true},
+    "Lesson.dc.html": {"x": 1880, "y": 0, "w": 390, "h": 844, "title": "04 · Дарс", "radius": 44, "is_interactive": true},
+    "Quiz.dc.html": {"x": 2350, "y": 0, "w": 390, "h": 844, "title": "05 · Тест", "radius": 44, "is_interactive": true},
+    "Progress.dc.html": {"x": 2820, "y": 0, "w": 390, "h": 844, "title": "06 · Пешрафт", "radius": 44},
+    "Profile.dc.html": {"x": 3290, "y": 0, "w": 390, "h": 844, "title": "07 · Профил", "radius": 44},
+    "Settings.dc.html": {"x": 3760, "y": 0, "w": 390, "h": 844, "title": "08 · Танзимот", "radius": 44, "is_interactive": true},
+    "DesignSystem.dc.html": {"x": 0, "y": 1300, "w": 1280, "h": 1560, "title": "Design System · Tokens"},
+    "Editor.dc.html": {"x": 1360, "y": 1300, "w": 1440, "h": 960, "title": "Admin · Full Text Editor", "is_interactive": true},
+    "BottomNav.dc.html": {"x": 2880, "y": 1300, "w": 390, "h": 120, "title": "Component · Glass Dock"},
+    "Art.dc.html": {"x": 2880, "y": 1540, "w": 160, "h": 160, "title": "Component · 3D Art (placeholder)"}
+  },
+  "order": [
+    "Main.dc.html",
+    "Home.dc.html",
+    "Schools.dc.html",
+    "School.dc.html",
+    "Lesson.dc.html",
+    "Quiz.dc.html",
+    "Progress.dc.html",
+    "Profile.dc.html",
+    "Settings.dc.html",
+    "DesignSystem.dc.html",
+    "Editor.dc.html",
+    "BottomNav.dc.html",
+    "Art.dc.html"
+  ],
+  "notes": {
+    "t1": {"x": 0, "y": -300, "text": "Ҳашт экрани асосӣ · Android / Web", "kind": "title1", "maxW": 4150},
+    "t2": {"x": 0, "y": 990, "text": "Design System · Admin · Компонентҳо", "kind": "title1", "maxW": 3270},
+    "n1": {"x": 4230, "y": 0, "w": 320, "text": "Матни таълимӣ, саволҳо ва иқтибосҳо дар [қавс] — ҷойи мундариҷаи CMS. Агент мундариҷа намесозад (§0.3).", "fill": "purple"},
+    "n2": {"x": 4230, "y": 460, "w": 320, "text": "Тасвирҳо векторҳои муваққатӣ мебошанд. Иваз бо акс ё рендери 3D-и литсензиядор аз Asset Library (§9).", "fill": "orange"},
+    "n3": {"x": 3110, "y": 1540, "w": 320, "text": "Шиша дар ин канвас — CSS + SVG displacement (fallback). Real 3D Glass бо WebGL/Three.js ҳамчун PoC-и алоҳида сохта мешавад (§8).", "fill": "pink"}
+  },
+  "designSystems": []
+}

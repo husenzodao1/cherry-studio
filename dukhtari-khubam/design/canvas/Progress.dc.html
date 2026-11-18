@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="tg">
+<head>
+<meta charset="utf-8">
+<title>Пешрафт</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Lora:ital,wght@0,500;0,600;0,700;1,500&amp;display=swap">
+<style>
+body{margin:0}
+.dk{--bg:#FBF9FD;--surface:#FFFFFF;--lav:#EEE7F6;--lilac:#DCCCEB;--primary:#A78BCB;--plum:#59446E;--rose:#EBDCE4;--champ:#E8D7B9;--sage:#DDE9DF;--ink:#2E2338;--muted:#6B5A7B;--accent-ink:#6B4F8F;--glass:rgba(255,255,255,.55);--glass-strong:rgba(255,255,255,.8);--edge:rgba(255,255,255,.92);--edge-low:rgba(167,139,203,.24);--shadow:rgba(89,68,110,.18);--bloom1:rgba(220,204,235,.9);--bloom2:rgba(235,220,228,.85);--bloom3:rgba(232,215,185,.5);font-family:'Onest',system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+.dk.dark{--bg:#17131E;--surface:#211B2A;--lav:#30263B;--lilac:#4A3C5A;--primary:#B7A0D3;--plum:#D8C8EA;--rose:#3A2B36;--champ:#CBB58F;--sage:#2F3F35;--ink:#F4EFF8;--muted:#BDB1CB;--accent-ink:#D8C8EA;--glass:rgba(48,38,59,.5);--glass-strong:rgba(48,38,59,.82);--edge:rgba(216,200,234,.26);--edge-low:rgba(0,0,0,.35);--shadow:rgba(0,0,0,.5);--bloom1:rgba(120,92,158,.38);--bloom2:rgba(183,143,164,.22);--bloom3:rgba(203,181,143,.14)}
+.serif{font-family:'Lora',Georgia,serif}
+.glass{background:linear-gradient(140deg,var(--glass-strong),var(--glass));border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--edge),inset 0 -1px 0 var(--edge-low),0 14px 34px -12px var(--shadow);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)}
+.ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--plum);text-decoration:none;flex:none}
+.stat{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:84px;border-radius:22px}
+.stat b{font-size:22px;font-weight:700;color:var(--plum)}
+.stat span{font-size:12px;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--lilac);overflow:hidden}
+.bar span{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),var(--plum))}
+.prow{display:flex;flex-direction:column;gap:8px}
+.prow div:first-child{display:flex;justify-content:space-between;font-size:14px}
+.badge{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted);text-align:center;line-height:14px}
+.disc{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+a:focus-visible,button:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+</style>
+</helmet>
+<div class="{{rootClass}}" style="width:390px;height:844px;position:relative;overflow:hidden;box-sizing:border-box">
+<div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(70% 30% at 50% 12%,var(--bloom1),transparent 70%),radial-gradient(50% 24% at 0% 70%,var(--bloom2),transparent 70%),radial-gradient(60% 24% at 100% 96%,var(--bloom3),transparent 70%)"></div>
+
+<header style="position:absolute;left:16px;right:16px;top:48px;display:flex;align-items:center;gap:8px">
+<a href="Profile.dc.html" class="glass ico" aria-label="Бозгашт">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<h1 class="serif" style="margin:0;flex:1;text-align:center;font-size:26px;line-height:1.2;font-weight:600;color:var(--plum);padding-right:52px">Пешрафт</h1>
+</header>
+
+<div style="position:absolute;left:0;right:0;top:110px;display:flex;flex-direction:column;align-items:center;gap:6px">
+<div style="position:relative;width:170px;height:170px;display:flex;align-items:center;justify-content:center">
+<div class="glass" aria-hidden="true" style="position:absolute;left:25px;right:25px;bottom:6px;height:36px;border-radius:50%"></div>
+<div style="position:relative"><dc-import name="Art" kind="trophy" size="150" hint-size="150px,150px"></dc-import></div>
+<div aria-hidden="true" style="position:absolute;right:-8px;top:6px"><dc-import name="Art" kind="crystal" size="52" hint-size="52px,52px"></dc-import></div>
+</div>
+<span style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink)">Охирин дастовард</span>
+<b class="serif" style="font-size:22px;font-weight:600;color:var(--plum)">[Номи дастовард]</b>
+</div>
+
+<div style="position:absolute;left:20px;right:20px;top:368px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+<div class="glass stat"><b>[N]</b><span>Курсҳо</span></div>
+<div class="glass stat"><b>[N]</b><span>Дарсҳо</span></div>
+<div class="glass stat"><b>[N]</b><span>Тестҳо</span></div>
+</div>
+
+<h2 style="position:absolute;left:24px;top:478px;margin:0;font-size:18px;line-height:24px;font-weight:600">Мактабҳо</h2>
+<div style="position:absolute;left:24px;right:24px;top:514px;display:flex;flex-direction:column;gap:14px">
+<div class="prow"><div><span>Маърифати динӣ</span><span style="color:var(--muted)">[N]%</span></div><div class="bar"><span style="width:60%"></span></div></div>
+<div class="prow"><div><span>Одоб ва ахлоқ</span><span style="color:var(--muted)">[N]%</span></div><div class="bar"><span style="width:35%"></span></div></div>
+<div class="prow"><div><span>Фарҳанги тоҷик</span><span style="color:var(--muted)">[N]%</span></div><div class="bar"><span style="width:15%"></span></div></div>
+</div>
+
+<h2 style="position:absolute;left:24px;top:648px;margin:0;font-size:18px;line-height:24px;font-weight:600">Нишонҳо</h2>
+<div style="position:absolute;left:20px;right:20px;top:684px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+<div class="badge"><div class="disc glass"><dc-import name="Art" kind="growth" size="46" hint-size="46px,46px"></dc-import></div>[Нишон]</div>
+<div class="badge"><div class="disc glass"><dc-import name="Art" kind="ethics" size="46" hint-size="46px,46px"></dc-import></div>[Нишон]</div>
+<div class="badge"><div class="disc glass"><dc-import name="Art" kind="culture" size="46" hint-size="46px,46px"></dc-import></div>[Нишон]</div>
+<div class="badge"><div class="disc" style="background:var(--lav);border:1.5px dashed var(--lilac);color:var(--muted)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" role="img" aria-label="Қулф"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></div>[Нишон]</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0">
+<dc-import name="BottomNav" active="profile" dark="{{dark}}" embedded="1" hint-size="390px,120px"></dc-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Theme"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = !!this.props.dark;
+    return { rootClass: dark ? 'dk dark' : 'dk', dark };
+  }
+}
+</script>
+</body>
+</html>
