@@ -1,0 +1,10 @@
+[
+ {"name": "gem-round", "kind": "gem", "cut": "round", "tint": "#ffffff", "absorb": 0.0, "rot": [0.62, 0.3, 0.18], "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 24, "zoom": 0.86, "size": 720, "noShadow": true, "exposure": 1.3},
+ {"name": "gem-pear", "kind": "gem", "cut": "pear", "tint": "#f29cc4", "absorb": 0.85, "rot": [0.75, 0.9, -0.35], "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 26, "zoom": 0.86, "size": 720, "noShadow": true, "exposure": 1.3},
+ {"name": "gem-emerald", "kind": "gem", "cut": "emerald", "tint": "#c3a6f5", "absorb": 0.85, "rot": [0.55, -0.5, 0.25], "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 28, "zoom": 0.86, "size": 720, "noShadow": true, "exposure": 1.3},
+ {"name": "gem-marquise", "kind": "gem", "cut": "marquise", "tint": "#ffffff", "absorb": 0.0, "rot": [0.5, 0.45, 0.5], "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 22, "zoom": 0.86, "size": 720, "noShadow": true, "exposure": 1.3},
+ {"name": "gem-princess", "kind": "gem", "cut": "princess", "tint": "#f08bb6", "absorb": 0.8, "rot": [0.7, 0.62, -0.2], "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 26, "zoom": 0.86, "size": 720, "noShadow": true, "exposure": 1.3},
+ {"name": "gem-oval", "kind": "gem", "cut": "oval", "tint": "#cbb3f7", "absorb": 0.8, "rot": [0.48, -0.85, 0.3], "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 24, "zoom": 0.86, "size": 720, "noShadow": true, "exposure": 1.3},
+ {"name": "gem-trillion", "kind": "gem", "cut": "trillion", "tint": "#ffffff", "absorb": 0.0, "rot": [0.6, 0.2, -0.4], "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 26, "zoom": 0.86, "size": 720, "noShadow": true, "exposure": 1.3},
+ {"name": "gem-baguette", "kind": "gem", "cut": "baguette", "tint": "#e2d2ff", "absorb": 0.5, "rot": [0.55, 0.35, 0.9], "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 24, "zoom": 0.86, "size": 720, "noShadow": true, "exposure": 1.3}
+]

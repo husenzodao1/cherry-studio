@@ -6,6 +6,7 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js'
+import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js'
 
 // Brilliant-cut diamond: girdle 16, crown with table and star/kite facets, pavilion to culet.
 function brilliant() {
@@ -57,6 +58,43 @@ function starGeo() {
   const g = new THREE.ExtrudeGeometry(sh, { depth: 0.16, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.12, bevelSegments: 12, curveSegments: 4 })
   g.center(); g.computeVertexNormals(); return g
 }
+
+// ---------------------------------------------------------------- gem cuts (convex hull of the cut's vertices)
+// Each outline maps an angle to a point on the unit girdle; rings of the brilliant pattern are scaled copies.
+const vesica = (a, w) => { const c = (1 - w * w) / (2 * w), s = Math.abs(Math.sin(a)); const t = (-2 * c * s + Math.sqrt(4 * c * c * s * s + 4 * (2 * c * w + w * w))) / 2; return [Math.cos(a) * t, Math.sin(a) * t] }
+const OUTLINES = {
+  round: (a) => [Math.cos(a), Math.sin(a)],
+  oval: (a) => [Math.cos(a), Math.sin(a) * 0.74],
+  marquise: (a) => vesica(a, 0.5),
+  pear: (a) => (Math.cos(a) >= 0 ? vesica(a, 0.62) : [Math.cos(a) * 0.66, Math.sin(a) * 0.62]),
+  princess: (a) => { const t = 0.78 / Math.max(Math.abs(Math.cos(a)), Math.abs(Math.sin(a))); return [Math.cos(a) * t, Math.sin(a) * t] },
+  trillion: (a) => { let m = 0; for (let k = 0; k < 3; k++) m = Math.max(m, Math.cos(a - Math.PI / 2 - (k * 2 * Math.PI) / 3)); const t = 0.5 / Math.pow(m, 0.8); return [Math.cos(a) * t, Math.sin(a) * t] }
+}
+function brilliantCut(outline, n = 16, depth = 1) {
+  const pts = [], h = n / 2
+  const ring = (count, s, y, rot = 0) => { for (let i = 0; i < count; i++) { const [x, z] = outline(rot + (i / count) * Math.PI * 2); pts.push(new THREE.Vector3(x * s, y, z * s)) } }
+  ring(h, 0.56, 0.17); ring(h, 0.8, 0.105, Math.PI / h); ring(n, 1, 0); ring(n, 1, -0.025)
+  ring(h, 0.5, -0.4 * depth, Math.PI / h); pts.push(new THREE.Vector3(0, -0.86 * depth, 0))
+  return pts
+}
+function stepCut(w = 1, d = 0.68, corner = 0.2) {
+  const pts = []
+  const oct = (s, y) => { const hw = w * s, hd = d * s, c = corner * s
+    for (const [x, z] of [[hw - c, hd], [hw, hd - c], [hw, -hd + c], [hw - c, -hd], [-hw + c, -hd], [-hw, -hd + c], [-hw, hd - c], [-hw + c, hd]]) pts.push(new THREE.Vector3(x, y, z)) }
+  oct(1, 0); oct(1, -0.03); oct(0.9, 0.075); oct(0.8, 0.13)
+  oct(0.84, -0.17); oct(0.62, -0.33); oct(0.38, -0.46)
+  pts.push(new THREE.Vector3(-0.3 * w, -0.56, 0), new THREE.Vector3(0.3 * w, -0.56, 0))
+  return pts
+}
+function gemGeo(cut) {
+  const pts = cut === 'emerald' ? stepCut(1, 0.68, 0.2) : cut === 'baguette' ? stepCut(1, 0.34, 0.04)
+    : brilliantCut(OUTLINES[cut], cut === 'round' ? 16 : 24, cut === 'princess' ? 0.92 : 1)
+  const g = new ConvexGeometry(pts)
+  g.center()
+  return g
+}
+
+
 // Convex facet planes (object space) of a geometry: dot(n, x) = w, n pointing outward.
 function facetPlanes(geo) {
   const pos = geo.attributes.position, planes = []
@@ -75,19 +113,21 @@ function facetPlanes(geo) {
 }
 function diamondMaterial(geo, env, tint, absorb) {
   const planes = facetPlanes(geo)
-  while (planes.length < 96) planes.push(new THREE.Vector4(0, 0, 0, 1e6))
+  const NP = Math.max(96, Math.ceil(planes.length / 16) * 16)
+  while (planes.length < NP) planes.push(new THREE.Vector4(0, 0, 0, 1e6))
   return new THREE.ShaderMaterial({
+    defines: { NP },
     uniforms: { uIors: { value: new THREE.Vector3(2.40, 2.42, 2.45) }, uRot: { value: new THREE.Matrix3() }, uPlanes: { value: planes }, uEnv: { value: env }, uTint: { value: new THREE.Color(tint) }, uAbsorb: { value: absorb } },
     vertexShader: `varying vec3 vPos; varying vec3 vN; varying vec3 vCam;
       void main(){ vPos = position; vN = normal; vCam = (inverse(modelMatrix) * vec4(cameraPosition,1.0)).xyz;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-    fragmentShader: `uniform vec3 uIors; uniform mat3 uRot; uniform vec4 uPlanes[96]; uniform sampler2D uEnv; uniform vec3 uTint; uniform float uAbsorb;
+    fragmentShader: `uniform vec3 uIors; uniform mat3 uRot; uniform vec4 uPlanes[NP]; uniform sampler2D uEnv; uniform vec3 uTint; uniform float uAbsorb;
       varying vec3 vPos; varying vec3 vN; varying vec3 vCam;
       vec3 envAt(vec3 dObj){ vec3 d = normalize(uRot * dObj);
         vec2 uv = vec2(atan(d.z, d.x) / 6.2831853 + 0.5, acos(clamp(d.y,-1.0,1.0)) / 3.1415926);
         return texture2D(uEnv, uv).rgb; }
       float exitPlane(vec3 p, vec3 d, out vec3 n){ float tmin = 1e9; n = vec3(0.0,1.0,0.0);
-        for (int i = 0; i < 96; i++){ vec4 pl = uPlanes[i]; float dn = dot(pl.xyz, d);
+        for (int i = 0; i < NP; i++){ vec4 pl = uPlanes[i]; float dn = dot(pl.xyz, d);
           if (dn > 1e-5){ float t = (pl.w - dot(pl.xyz, p)) / dn; if (t > 1e-4 && t < tmin){ tmin = t; n = pl.xyz; } } }
         return tmin; }
       float channel(vec3 v, vec3 nrm, float ior, int c){
@@ -294,6 +334,14 @@ window.renderJob = async (job) => {
       : new THREE.MeshPhysicalMaterial({ color: job.color ?? '#e9c48e', metalness: 1, roughness: 0.17, clearcoat: 0.6, clearcoatRoughness: 0.08, envMapIntensity: 1.4 })
     const m = new THREE.Mesh(geo, mat); m.castShadow = true
     m.rotation.set(job.tilt ?? -0.15, 0.35, job.kind === 'star' ? 0.12 : 0)
+    object.add(m)
+  } else if (job.kind === 'gem') {
+    object = new THREE.Group()
+    const geo = gemGeo(job.cut)
+    const m = new THREE.Mesh(geo, diamondMaterial(geo, hdr, job.tint ?? '#ffffff', job.absorb ?? 0))
+    if (job.ior) m.material.uniforms.uIors.value.set(job.ior - 0.02, job.ior, job.ior + 0.03)
+    m.onBeforeRender = () => m.material.uniforms.uRot.value.setFromMatrix4(m.matrixWorld)
+    m.rotation.fromArray(job.rot ?? [0, 0, 0])
     object.add(m)
   } else if (job.kind === 'diamond') {
     object = new THREE.Group()
