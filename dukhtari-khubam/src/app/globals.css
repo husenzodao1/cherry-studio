@@ -278,3 +278,15 @@ textarea.input { border-radius: 18px; padding: 14px 18px; min-height: 120px; res
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
+
+/* ---------------------------------------------------------------- real 3D art: pop-outs and decorations */
+.art-pop { position: absolute; pointer-events: none; z-index: 3; height: auto; filter: drop-shadow(0 16px 14px rgba(58, 40, 80, 0.26)); }
+.deco { position: absolute; pointer-events: none; user-select: none; z-index: 4; height: auto; filter: drop-shadow(0 10px 12px rgba(58, 40, 80, 0.18)); }
+:root[data-theme='dark'] .art-pop, :root[data-theme='dark'] .deco { filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.55)); }
+.page-deco { position: fixed; pointer-events: none; z-index: 0; height: auto; opacity: 0.6; }
+.app > :not(.page-deco) { position: relative; z-index: 1; }
+.pop-row { padding-top: 40px; }
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion='reduce']) .float-slow { animation: float 6s ease-in-out infinite alternate; }
+}
+@keyframes float { from { transform: translateY(0) rotate(var(--r, 0deg)); } to { transform: translateY(-8px) rotate(var(--r, 0deg)); } }

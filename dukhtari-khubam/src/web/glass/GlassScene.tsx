@@ -226,6 +226,18 @@ export function GlassScene({ word, variant = 'sphere', accent = '#59446e', class
       ring.position.copy(center).setZ(-0.35)
       ring.rotation.set(1.15, 0.25, 0)
       objects.add(pearl, pearl2, ring)
+      // pre-rendered brilliant-cut diamonds (ray-traced offline) placed in the scene, so the glass refracts them
+      const loader = new THREE.TextureLoader()
+      const sprite = (url: string, w: number, h: number, x: number, y: number, z: number, size: number) => {
+        const tex = loader.load(url, () => kick())
+        tex.colorSpace = THREE.SRGBColorSpace
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(size, (size * h) / w),
+          new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }))
+        m.position.set(x, y, z)
+        objects.add(m)
+      }
+      sprite('/assets/3d/diamond-cluster.webp', 900, 488, -1.75, 1.0, -0.95, 2.2)
+      sprite('/assets/3d/diamond-single.webp', 418, 321, 2.5, -1.05, -0.5, 0.95)
     } else {
       const purple = glossy(tint.clone().lerp(new THREE.Color('#8e5bd0'), 0.55))
       const pink = glossy('#d9a1c4')

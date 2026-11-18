@@ -9,6 +9,7 @@ import { SchoolCard, type SchoolSummary } from '@/web/components/SchoolCard'
 import { GlassScene } from '@/web/glass/GlassScene'
 import { LiquidGlass } from '@/web/glass/LiquidGlass'
 import { usePrefs } from '@/web/prefs'
+import { ART } from '@/web/art'
 import { useApi } from '@/web/useApi'
 
 interface Inspiration { body: string; author_name?: string | null; source_title?: string | null }
@@ -35,7 +36,12 @@ export default function Home() {
         <Link href="/profile" className="icon-btn" aria-label={t('nav.profile')}><Icon name="user" /></Link>
       </header>
 
-      <section className="hero-card" style={{ height: 'clamp(300px, 52vw, 440px)', marginTop: 18 }} aria-label={t('home.inspiration')}>
+      <img className="page-deco" src={ART.diamonds.src} alt="" aria-hidden="true" style={{ top: 6, right: -46, width: 170 }} />
+      <div style={{ position: 'relative', marginTop: 18 }}>
+      <img className="deco" src={ART.flowerBranch.src} alt="" aria-hidden="true"
+        style={{ right: -14, top: -46, width: 132, ['--r' as string]: '14deg', transform: 'scaleX(-1) rotate(14deg)' }} />
+      <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true" style={{ left: -22, bottom: -34, width: 150, transform: 'rotate(-10deg)' }} />
+      <section className="hero-card" style={{ height: 'clamp(300px, 52vw, 440px)' }} aria-label={t('home.inspiration')}>
         <GlassScene word="дониш" variant="sphere" />
         {inspiration.data ? (
           <LiquidGlass radius={22} bezel={14} style={{ position: 'absolute', left: 14, top: 14, maxWidth: 'min(62%, 420px)', padding: '12px 16px', zIndex: 2 }}>
@@ -49,6 +55,7 @@ export default function Home() {
           </LiquidGlass>
         ) : null}
       </section>
+      </div>
 
       {cont.data ? (
         <section className="section">
@@ -70,7 +77,7 @@ export default function Home() {
           <Link href="/schools" className="chip">{t('home.all_schools')} <Icon name="arrow" size={14} /></Link>
         </div>
         {schools.error ? <ErrorState error={schools.error} onRetry={schools.reload} /> : null}
-        <div className="scroller">
+        <div className="scroller pop-row">
           {schools.loading && !schools.data
             ? Array.from({ length: 4 }, (_, i) => <div key={i} style={{ width: 200 }}><Skeleton height={190} /></div>)
             : schools.data?.map((s, i) => <div key={s.id} style={{ width: 210 }}><SchoolCard school={s} index={i} /></div>)}

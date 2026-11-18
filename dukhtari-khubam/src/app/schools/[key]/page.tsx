@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import { Icon } from '@/web/components/Icon'
 import { Empty, ErrorState, Loading } from '@/web/components/States'
+import { ART, SCHOOL_ART } from '@/web/art'
 import { GlassScene } from '@/web/glass/GlassScene'
 import { usePrefs } from '@/web/prefs'
 import { useApi } from '@/web/useApi'
@@ -15,7 +16,7 @@ interface CourseCard {
   locked: boolean; module_count: number; progress: { total: number; completed: number; percent: number }
 }
 interface School {
-  id: string; title: string; description?: string | null; theme_color?: string | null
+  id: string; slug: string; title: string; description?: string | null; theme_color?: string | null
   courses: CourseCard[]; progress: { completed: number; total: number }
 }
 
@@ -36,9 +37,16 @@ export default function SchoolPage() {
   return (
     <>
       {back}
-      <section className="hero-card" style={{ height: 'clamp(260px, 46vw, 380px)', marginTop: 12 }} aria-hidden="true">
-        <GlassScene word={s.title} variant="sculpture" accent={s.theme_color ?? '#59446e'} />
-      </section>
+      <div style={{ position: 'relative', marginTop: 52 }}>
+        {SCHOOL_ART[s.slug] ? (
+          <img className="art-pop float-slow" src={SCHOOL_ART[s.slug].src} alt="" aria-hidden="true"
+            style={{ right: 18, top: -64, height: 'clamp(130px, 22vw, 190px)', width: 'auto' }} />
+        ) : null}
+        <img className="deco" src={ART.flowerCluster.src} alt="" aria-hidden="true" style={{ left: -20, bottom: -30, width: 140, transform: 'rotate(-8deg)' }} />
+        <section className="hero-card" style={{ height: 'clamp(260px, 46vw, 380px)' }} aria-hidden="true">
+          <GlassScene word={s.title} variant="sculpture" accent={s.theme_color ?? '#59446e'} />
+        </section>
+      </div>
       <div className="section" style={{ marginTop: 20 }}>
         <div className="eyebrow">{t('nav.schools')}</div>
         <h1 className="h-page">{s.title}</h1>

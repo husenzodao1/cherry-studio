@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 
+import { SCHOOL_ART } from '../art'
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
 
@@ -19,12 +20,16 @@ export interface SchoolSummary {
 export function SchoolCard({ school, index }: { school: SchoolSummary; index: number }) {
   const { t } = usePrefs()
   const tone = index % 3 === 0 ? 'card-lilac' : index % 3 === 1 ? 'card-rose' : ''
+  const art = school.icon?.url ? { src: school.icon.url, w: 1, h: 1 } : SCHOOL_ART[school.slug]
   return (
     <Link href={`/schools/${school.slug}`} className={`card card-pad ${tone}`}
-      style={{ display: 'flex', flexDirection: 'column', gap: 18, minHeight: 190, textDecoration: 'none', position: 'relative', overflow: 'hidden' }}>
-      <div className="row" style={{ alignItems: 'flex-start' }}>
+      style={{ display: 'flex', flexDirection: 'column', gap: 18, minHeight: 190, textDecoration: 'none', position: 'relative', overflow: 'visible' }}>
+      {art ? (
+        <img className="art-pop" src={art.src} alt="" aria-hidden="true" loading="lazy" decoding="async"
+          style={{ top: -38, right: 6, height: 112, width: 'auto', maxWidth: 120 }} />
+      ) : null}
+      <div className="row" style={{ alignItems: 'flex-start', paddingRight: 92 }}>
         <b style={{ flex: 1, fontWeight: 500, fontSize: '1.08em', lineHeight: 1.25 }}>{school.title}</b>
-        {school.icon?.url ? <img src={school.icon.url} alt="" width={44} height={44} style={{ borderRadius: 12 }} /> : null}
       </div>
       <div style={{ marginTop: 'auto' }} className="row">
         <div>
