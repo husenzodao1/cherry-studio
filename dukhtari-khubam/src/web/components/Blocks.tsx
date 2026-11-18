@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState, type ReactNode } from 'react'
 
 import { api } from '../api'
+import { useOfflineSrc } from '../offline/media'
 import { usePrefs } from '../prefs'
 import { Icon, type IconName } from './Icon'
 
@@ -79,7 +80,7 @@ function useAssetUrl(asset?: Asset | null): string | null {
 }
 
 function Picture({ asset, caption, full }: { asset?: Asset; caption?: string; full?: boolean }) {
-  const url = useAssetUrl(asset)
+  const url = useOfflineSrc(useAssetUrl(asset))
   if (!asset) return null
   return (
     <figure style={full ? { marginInline: 'calc(50% - 50vw + 8px)' } : undefined}>

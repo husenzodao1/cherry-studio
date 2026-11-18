@@ -6,6 +6,12 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { Asset, Block } from '../components/Blocks'
 import { usePrefs } from '../prefs'
 import { apiUrl } from './base'
+import { bundleImageUrls, prefetchMedia } from './media'
+
+/** After a content update, save its images on the phone without blocking the screen. */
+function keepImages(bundle: Bundle) {
+  setTimeout(() => prefetchMedia(bundleImageUrls(bundle)).catch(() => undefined), 3000)
+}
 
 /**
  * The published catalogue lives on the phone (IndexedDB), so every screen works offline.
@@ -105,6 +111,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         setBundle(next)
         setOfflineEmpty(false)
         await set(key(locale), next).catch(() => undefined)
+        keepImages(next)
       }
     } catch {
       if (!current.current) setOfflineEmpty(true)
