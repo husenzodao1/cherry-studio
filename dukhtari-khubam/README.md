@@ -242,8 +242,8 @@ The free built-in mailer sends only a few letters an hour and cannot change the 
 2. Supabase → Authentication → Emails → SMTP Settings: enable custom SMTP (host `smtp.resend.com`,
    port 465, user `resend`, password = API key, sender `no-reply@<your domain>`, name "Духтари хубам").
 3. Supabase → Authentication → Emails → Templates: "Magic Link" and "Confirm signup" must show
-   `{{ .Token }}` (the code) instead of the link; the Tajik letters are in the repository history
-   (scratchpad `auth-config.mjs`) and can be applied through the Management API once SMTP is on.
+   `{{ .Token }}` (the code) instead of the link: `node tools/supabase/auth-email.mjs <project ref>` applies
+   the Tajik letters through the Management API once SMTP is on.
 4. Authentication → Rate Limits: raise "emails per hour" as needed.
 
 ### Launcher icons and widgets (Android)
