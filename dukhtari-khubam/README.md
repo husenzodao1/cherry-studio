@@ -82,6 +82,15 @@ version (new code) is announced in the app from `/app-version.json`: raise `vers
 in `android/app/build.gradle`, build, and publish the APK at `public/download/`. The current APK is a
 debug build for direct installation; Google Play needs a release build signed with your own key.
 
+### Supabase project
+
+Since 2026-11-19 the backend is the project `dqavtyrdipwwgeckxxhr` (org of the owner's Supabase account),
+created from `supabase/migrations/*` (applied in order, migration history recorded). The earlier project
+`kqaifxethiofrefisvcv` was outside the owner's account; staff-edited UI strings were copied over. Learner
+backups return by themselves: each phone backs its progress up under its code at the next connection
+(logins set on the old project must be set again in Settings). The staff panel account
+`panel@dukhtari-khubam.invalid` was created again with a new passphrase (same `KEY_PREFIX`).
+
 ### Signing the APK
 
 Every published APK must be signed with the same key, or phones refuse to install it over the previous
@@ -227,7 +236,7 @@ Revision History; every staff change is in the audit log.
    Testing). Enable the **People API** (for the age).
 2. Credentials → OAuth client ID → **Web application**: authorised JavaScript origins
    `https://dukhtari-khubam.vercel.app`; authorised redirect URIs `https://dukhtari-khubam.vercel.app/start/`
-   and `https://kqaifxethiofrefisvcv.supabase.co/auth/v1/callback`. Copy its client ID and secret.
+   and `https://dqavtyrdipwwgeckxxhr.supabase.co/auth/v1/callback`. Copy its client ID and secret.
 3. Credentials → OAuth client ID → **Android**: package `tj.dukhtarikhubam.app` and the SHA-1 of the key
    that signs the APK (`cd android && ./gradlew signingReport`; one client per signing key).
 4. Supabase → Authentication → Sign In / Providers → **Google**: enable, paste the Web client ID and secret.
