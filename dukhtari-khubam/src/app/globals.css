@@ -788,3 +788,25 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
   color: #fff; background: var(--pill); box-shadow: var(--pill-shadow), 0 0 0 3px var(--bg); font-variant-numeric: tabular-nums; }
 .school-hero-meta { margin: 6px 0 0; font-size: 0.86rem; color: var(--muted); letter-spacing: 0.01em; }
 .school-hero-go { min-height: 44px; padding: 0 22px; gap: 8px; font-size: 0.95rem; }
+
+/* ---------------------------------------------------------------- document pages (about, privacy, terms): plain, like a PDF */
+.backdrop.backdrop-paper, :root[data-palette][data-theme] .backdrop.backdrop-paper { background: #eeecf1; }
+:root[data-theme='dark'] .backdrop.backdrop-paper, :root[data-palette][data-theme='dark'] .backdrop.backdrop-paper { background: #0e0c12; }
+.backdrop.backdrop-paper::after { display: none; }
+.doc { margin: 10px 0 0; padding: 30px 24px 36px; background: #fff; color: #1f1d24; border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 10px 30px -18px rgba(30, 20, 50, 0.3); font-family: var(--font-serif); font-size: 1rem; line-height: 1.7; }
+:root[data-theme='dark'] .doc { background: #1a171f; color: #e9e6ee; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); }
+.doc-head { border-bottom: 1px solid rgba(0, 0, 0, 0.1); padding-bottom: 14px; margin-bottom: 18px; }
+:root[data-theme='dark'] .doc-head { border-color: rgba(255, 255, 255, 0.12); }
+.doc-brand { display: block; font-family: var(--font-ui); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.55; }
+.doc-head h1 { margin: 6px 0 0; font-family: var(--font-ui); font-size: 1.45rem; font-weight: 600; line-height: 1.25; color: inherit; }
+.doc-body h2 { margin: 1.5em 0 0.4em; font-family: var(--font-ui); font-size: 1.1rem; font-weight: 600; color: inherit; }
+.doc-body h3 { margin: 1.2em 0 0.3em; font-family: var(--font-ui); font-size: 0.98rem; font-weight: 600; color: inherit; }
+.doc-body p { margin: 0 0 0.85em; }
+.doc-body ul, .doc-body ol { margin: 0 0 0.9em; padding-inline-start: 1.3em; }
+.doc-body li { margin: 0.2em 0; }
+.doc-body hr { border: 0; border-top: 1px solid rgba(0, 0, 0, 0.12); margin: 1.4em 0; }
+:root[data-theme='dark'] .doc-body hr { border-color: rgba(255, 255, 255, 0.14); }
+.doc-body blockquote.quote { margin: 0 0 0.9em !important; padding: 2px 0 2px 14px; border-inline-start: 2px solid rgba(0, 0, 0, 0.18); background: none; box-shadow: none; font-style: italic; }
+.doc-body blockquote.quote > span[aria-hidden] { display: none; }
+.doc-body .callout, .doc-body .glass { background: none; border: 1px solid rgba(0, 0, 0, 0.12); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }

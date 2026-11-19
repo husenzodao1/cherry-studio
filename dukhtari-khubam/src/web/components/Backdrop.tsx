@@ -29,7 +29,9 @@ const START: Piece[] = [[ART.bubble, 'bd-bubble'], [ART.leaves, 'bd-leaves'], [A
 
 export function Backdrop() {
   const path = usePathname() ?? '/'
-  const set = /^\/admin(\/|$)/.test(path) ? [] : /^\/(lesson|page|garden|support)(\/|$)/.test(path) ? CALM : /^\/(quiz|review)(\/|$)/.test(path) ? QUIZ
+  // documents are plain paper: no glass pieces around them
+  if (/^\/page(\/|$)/.test(path)) return <div className="backdrop backdrop-paper" aria-hidden="true" />
+  const set = /^\/admin(\/|$)/.test(path) ? [] : /^\/(lesson|garden|support)(\/|$)/.test(path) ? CALM : /^\/(quiz|review)(\/|$)/.test(path) ? QUIZ
     : /^\/start(\/|$)/.test(path) ? START : FULL
   return (
     <div className="backdrop" aria-hidden="true">

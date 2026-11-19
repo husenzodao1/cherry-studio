@@ -176,6 +176,9 @@ Revision History; every staff change is in the audit log.
 - School page: the school's icon inside a ring that fills with progress, the numbers and "Идома".
 - Themes: white (default), dark, Сакура, Шафтолу, Наъно, Шафақ (`data-palette` on top of the light or
   dark base; the glass flowers take the theme's hue). The smallest text size is the default.
+- Document pages (about, privacy, terms): written in the panel (Саҳифаҳо) as plain text — `#` heading,
+  `-` / `1.` lists, `>` quote, `---` line (`src/web/admin/docText.ts`) — and shown plainly, like a
+  printed document, with no decoration.
 - App PIN (`src/web/offline/pin.ts`, `AppLock.tsx`, `PinSettings.tsx`): four digits asked when the app
   opens and after a minute away; on/off and change in Settings; a salted hash only, 30 s wait after five
   wrong tries; "forgot" asks the phone's lock or the login password and removes the PIN.
