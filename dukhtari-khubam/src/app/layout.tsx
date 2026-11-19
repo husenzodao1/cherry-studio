@@ -17,7 +17,7 @@ const naskh = Noto_Naskh_Arabic({ subsets: ['arabic'], variable: '--font-naskh',
 
 export const metadata: Metadata = {
   title: { default: 'Духтари хубам', template: '%s · Духтари хубам' },
-  description: 'Платформаи таълимӣ: ҳафт мактаби дониш.',
+  description: 'Платформаи таълимӣ: 7 оинаи духтар.',
   applicationName: 'Духтари хубам'
 }
 

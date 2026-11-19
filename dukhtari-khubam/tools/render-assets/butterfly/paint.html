@@ -1,0 +1,125 @@
+<!doctype html><html><body style="margin:0;background:#e9e0fa">
+<canvas id="w" width="700" height="760"></canvas><canvas id="b" width="160" height="380"></canvas>
+<script>
+// Right half of a butterfly; the hinge (body side) is x = 0, the head points up.
+function rnd(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647 }
+const r = rnd(11)
+const cub = (p0, c1, c2, p1, t) => { const u = 1 - t; return [u*u*u*p0[0] + 3*u*u*t*c1[0] + 3*u*t*t*c2[0] + t*t*t*p1[0], u*u*u*p0[1] + 3*u*u*t*c1[1] + 3*u*t*t*c2[1] + t*t*t*p1[1]] }
+// each wing: start point, cubic segments; `outer` = indices of the segments on the outer margin
+const FORE = { start: [0, 300], seg: [
+  [[30, 180], [150, 70], [330, 40]], [[470, 18], [610, 28], [652, 72]], [[660, 150], [606, 250], [562, 330]],
+  [[520, 400], [420, 412], [300, 398]], [[180, 384], [70, 352], [0, 330]]], outer: [1, 2, 3], center: [200, 230] }
+const HIND = { start: [0, 336], seg: [
+  [[120, 330], [300, 360], [440, 440]], [[540, 500], [562, 600], [502, 652]], [[470, 682], [432, 692], [402, 722]],
+  [[386, 748], [360, 754], [352, 728]], [[344, 700], [320, 690], [280, 680]], [[170, 650], [60, 560], [20, 450]], [[8, 410], [0, 380], [0, 336]]],
+  outer: [1, 2, 3, 4, 5], center: [200, 470] }
+function path(g, w) { g.beginPath(); g.moveTo(...w.start); for (const s of w.seg) g.bezierCurveTo(...s[0], ...s[1], ...s[2]); g.closePath() }
+function points(w, idx, n) {
+  const out = []; let p = w.start
+  w.seg.forEach((s, i) => { if (idx.includes(i)) for (let k = 0; k < n; k++) out.push(cub(p, s[0], s[1], s[2], k / n)); p = s[2] })
+  return out
+}
+function marginPath(g, w) {
+  let p = w.start; let started = false
+  g.beginPath()
+  w.seg.forEach((s, i) => { if (w.outer.includes(i)) { if (!started) { g.moveTo(...p); started = true } g.bezierCurveTo(...s[0], ...s[1], ...s[2]) } p = s[2] })
+}
+function wing(g, w, pal) {
+  g.save(); path(g, w); g.clip()
+  // ground colour from the hinge outwards
+  const base = g.createRadialGradient(0, w.start[1] + 20, 10, 0, w.start[1] + 20, 700)
+  base.addColorStop(0, pal[0]); base.addColorStop(0.18, pal[1]); base.addColorStop(0.5, pal[2]); base.addColorStop(0.85, pal[3]); base.addColorStop(1, '#f6efff')
+  g.fillStyle = base; g.fillRect(0, 0, 700, 760)
+  // structural colour: blue and pink sheen sweeping across the scales
+  g.globalCompositeOperation = 'soft-light'
+  const sheen = g.createLinearGradient(60, 0, 620, 700)
+  sheen.addColorStop(0, 'rgba(120,190,255,0.95)'); sheen.addColorStop(0.5, 'rgba(255,140,220,0.8)'); sheen.addColorStop(1, 'rgba(140,200,255,0.9)')
+  g.fillStyle = sheen; g.fillRect(0, 0, 700, 760)
+  g.globalCompositeOperation = 'source-over'
+  // veins: curved, branching, dark with a light edge, fading to the margin
+  for (let k = 0; k < 9; k++) {
+    const a0 = w === FORE ? -0.95 + k * 0.17 : -0.05 + k * 0.17
+    const len = 560 + r() * 120
+    const ex = Math.cos(a0) * len, ey = w.start[1] + 15 + Math.sin(a0) * len
+    const mx = ex * 0.45 + (r() - 0.5) * 50, my = (w.start[1] + 15 + ey) / 2 + (r() - 0.5) * 60
+    const grad = g.createLinearGradient(0, w.start[1], ex, ey)
+    grad.addColorStop(0, 'rgba(40,12,90,0.75)'); grad.addColorStop(0.7, 'rgba(40,12,90,0.35)'); grad.addColorStop(1, 'rgba(40,12,90,0.05)')
+    g.strokeStyle = grad; g.lineWidth = 3.4 - k * 0.15; g.lineCap = 'round'
+    g.beginPath(); g.moveTo(4, w.start[1] + 14); g.quadraticCurveTo(mx, my, ex, ey); g.stroke()
+    g.strokeStyle = 'rgba(255,255,255,0.12)'; g.lineWidth = 1.2
+    g.beginPath(); g.moveTo(6, w.start[1] + 12); g.quadraticCurveTo(mx + 2, my - 2, ex + 2, ey - 2); g.stroke()
+  }
+  // cross vein closing the cell
+  g.strokeStyle = 'rgba(40,12,90,0.35)'; g.lineWidth = 2.5
+  g.beginPath(); g.moveTo(w.center[0] - 40, w.center[1] - 60); g.quadraticCurveTo(w.center[0] + 10, w.center[1], w.center[0] - 10, w.center[1] + 50); g.stroke()
+  // soft dark margin: several strokes of the outer edge only, darkest at the edge
+  for (const [lw, a, blur] of [[120, 0.18, 30], [80, 0.35, 18], [48, 0.7, 8], [22, 0.95, 2]]) {
+    g.save(); g.filter = `blur(${blur}px)`; marginPath(g, w); g.strokeStyle = `rgba(30,8,70,${a})`; g.lineWidth = lw; g.stroke(); g.restore()
+  }
+  // submarginal spots, set inwards from the edge
+  const pts = points(w, w.outer, 4)
+  pts.forEach(([x, y], i) => {
+    if (i % 2) return
+    const dx = w.center[0] - x, dy = w.center[1] - y, d = Math.hypot(dx, dy)
+    const sx = x + (dx / d) * 34, sy = y + (dy / d) * 34
+    const s = g.createRadialGradient(sx, sy, 0, sx, sy, 13)
+    s.addColorStop(0, 'rgba(255,255,255,0.95)'); s.addColorStop(0.55, 'rgba(232,214,255,0.75)'); s.addColorStop(1, 'rgba(232,214,255,0)')
+    g.fillStyle = s; g.beginPath(); g.ellipse(sx, sy, 13, 8, Math.atan2(dy, dx), 0, Math.PI * 2); g.fill()
+  })
+  // fur and dark scales at the wing base
+  const fur = g.createRadialGradient(0, w.start[1] + 15, 0, 0, w.start[1] + 15, 140)
+  fur.addColorStop(0, 'rgba(34,10,70,0.95)'); fur.addColorStop(1, 'rgba(34,10,70,0)')
+  g.fillStyle = fur; g.fillRect(0, 0, 220, 760)
+  for (let i = 0; i < 500; i++) {
+    const a = (r() - 0.5) * 2.2, rr = r() * 110, x = Math.cos(a) * rr, y = w.start[1] + 15 + Math.sin(a) * rr
+    g.strokeStyle = `rgba(${r() < 0.4 ? '200,180,255' : '30,8,70'},${0.18 + r() * 0.25})`; g.lineWidth = 1
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * (6 + r() * 8), y + Math.sin(a) * (6 + r() * 8)); g.stroke()
+  }
+  // scale speckle and a soft gloss
+  for (let i = 0; i < 12000; i++) {
+    const x = r() * 700, y = r() * 760, a = r() * 0.08
+    g.fillStyle = r() < 0.55 ? `rgba(255,255,255,${a})` : `rgba(30,8,70,${a})`; g.fillRect(x, y, 1.5, 1.5)
+  }
+  const hl = g.createLinearGradient(80, w.start[1] - 260, 380, w.start[1] + 40)
+  hl.addColorStop(0, 'rgba(255,255,255,0)'); hl.addColorStop(0.5, 'rgba(255,255,255,0.28)'); hl.addColorStop(0.62, 'rgba(255,255,255,0)')
+  g.fillStyle = hl; g.fillRect(0, 0, 700, 760)
+  g.restore()
+  // fine fringe along the margin
+  g.save(); marginPath(g, w); g.strokeStyle = 'rgba(255,255,255,0.55)'; g.lineWidth = 2; g.setLineDash([2, 3]); g.stroke(); g.restore()
+}
+function eyespot(g, x, y, R) {
+  g.save(); g.filter = 'blur(0.6px)'
+  for (const [rr, c] of [[R * 1.25, 'rgba(30,8,70,0.35)'], [R, '#2b0f5e'], [R * 0.8, '#f0b648'], [R * 0.6, '#1a0634'], [R * 0.34, '#7b5be0']]) {
+    g.fillStyle = c; g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill()
+  }
+  g.restore()
+  g.fillStyle = 'rgba(255,255,255,0.95)'; g.beginPath(); g.ellipse(x - R * 0.14, y - R * 0.16, R * 0.17, R * 0.11, -0.5, 0, Math.PI * 2); g.fill()
+}
+const w = document.getElementById('w').getContext('2d')
+wing(w, HIND, ['#1d0840', '#4b1fa6', '#8f63ec', '#c9adf8'])
+eyespot(w, 412, 610, 22)
+wing(w, FORE, ['#1d0840', '#4a1da4', '#8a5ce8', '#cdb2f9'])
+
+// body: head up, furry thorax, segmented abdomen ending near the middle of the hind wing
+const b = document.getElementById('b').getContext('2d'), cx = 80
+b.strokeStyle = '#24093f'; b.lineWidth = 2.6; b.lineCap = 'round'
+for (const s of [-1, 1]) {
+  b.beginPath(); b.moveTo(cx + s * 4, 58); b.bezierCurveTo(cx + s * 12, 34, cx + s * 26, 14, cx + s * 40, 4); b.stroke()
+  b.fillStyle = '#24093f'; b.beginPath(); b.ellipse(cx + s * 41, 5, 4.5, 6.5, s * 0.6, 0, Math.PI * 2); b.fill()
+}
+let gr = b.createRadialGradient(cx - 4, 64, 2, cx, 70, 14); gr.addColorStop(0, '#9a7ae0'); gr.addColorStop(1, '#22083d')
+b.fillStyle = gr; b.beginPath(); b.ellipse(cx, 70, 12, 11, 0, 0, Math.PI * 2); b.fill()
+gr = b.createRadialGradient(cx - 7, 104, 4, cx, 118, 36); gr.addColorStop(0, '#b294f2'); gr.addColorStop(0.55, '#4a2392'); gr.addColorStop(1, '#1d0736')
+b.fillStyle = gr; b.beginPath(); b.ellipse(cx, 118, 24, 40, 0, 0, Math.PI * 2); b.fill()
+for (let i = 0; i < 420; i++) {
+  const a = r() * Math.PI * 2, rr = Math.sqrt(r()), x = cx + Math.cos(a) * 24 * rr, y = 118 + Math.sin(a) * 40 * rr
+  b.strokeStyle = `rgba(${r() < 0.5 ? '225,210,255' : '30,8,70'},${0.15 + r() * 0.25})`; b.lineWidth = 1
+  b.beginPath(); b.moveTo(x, y); b.lineTo(x + (r() - 0.5) * 7, y + (r() - 0.5) * 7); b.stroke()
+}
+gr = b.createLinearGradient(cx - 14, 0, cx + 14, 0); gr.addColorStop(0, '#1f0738'); gr.addColorStop(0.45, '#7250c8'); gr.addColorStop(1, '#1f0738')
+b.fillStyle = gr; b.beginPath(); b.moveTo(cx - 15, 156); b.bezierCurveTo(cx - 17, 240, cx - 9, 320, cx, 360); b.bezierCurveTo(cx + 9, 320, cx + 17, 240, cx + 15, 156); b.closePath(); b.fill()
+b.strokeStyle = 'rgba(230,215,255,0.32)'; b.lineWidth = 1.8
+for (let y = 176; y < 345; y += 21) { const half = 15.5 * (1 - (y - 156) / 230); b.beginPath(); b.moveTo(cx - half, y); b.quadraticCurveTo(cx, y + 5, cx + half, y); b.stroke() }
+b.fillStyle = 'rgba(255,255,255,0.32)'; b.beginPath(); b.ellipse(cx - 6, 108, 5, 17, 0, 0, Math.PI * 2); b.fill()
+window.done = true
+</script></body></html>

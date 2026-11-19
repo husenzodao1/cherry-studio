@@ -12,17 +12,21 @@ import { PrefsProvider, usePrefs } from '../prefs'
 import { AppUpdate } from './AppUpdate'
 import { Dock } from './Dock'
 import { NotifyBridge } from './NotifyBridge'
+import { SupportWatch } from './SupportWatch'
 
 /** Pages a visitor may open before choosing a name or entering a code. */
-const OPEN = /^\/(start|admin|page)(\/|$)/
+const OPEN = /^\/(start|admin|page|support)(\/|$)/
 
 /** Sends a first-time visitor to /start (name → code, or code → restore). */
 function Gate({ children }: { children: ReactNode }) {
   const { ready, learner, progress } = useLearner()
   const path = usePathname() ?? '/'
   const router = useRouter()
-  // a new learner, or one registered before the age question existed
-  const needsStart = ready && (!learner || progress.born === undefined) && !OPEN.test(path)
+  // a new learner; one registered before the age or login questions existed (login only when online);
+  // or one signed in with a temporary password, who must choose her own
+  const online = typeof navigator === 'undefined' || navigator.onLine !== false
+  const needsStart = ready && !OPEN.test(path)
+    && (!learner || progress.born === undefined || !!learner.mustChange || (!learner.username && online))
   useEffect(() => {
     if (needsStart) router.replace('/start')
   }, [needsStart, router])
@@ -75,6 +79,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <Dock />
               <AppUpdate />
               <NotifyBridge />
+              <SupportWatch />
             </ForAge>
           </LearnerProvider>
         </ContentProvider>

@@ -43,6 +43,7 @@ function CodeCard() {
       </div>
       <div className="code-box" aria-live="polite">{show ? formatCode(learner.code) : '••••• ••••• •••••'}</div>
       <span className="muted" style={{ fontSize: '0.84em' }}>{t('settings.code_hint')}</span>
+      {learner.username ? <span style={{ fontSize: '0.9em' }}>{t('start.username')}: <b>{learner.username}</b></span> : null}
       <CodeImageButton />
     </div>
   )
@@ -128,6 +129,7 @@ export default function Settings() {
             onChange={(e) => prefs.set({ textScale: Number(e.target.value) })} />
         </label>
         <div className="glass menu">
+          <Link href="/support" className="menu-row"><Icon name="bell" /><span className="grow">{t('support.title')}</span><Icon name="forward" size={18} /></Link>
           <Link href="/page?slug=privacy" className="menu-row"><Icon name="lock" /><span className="grow">{t('settings.privacy')}</span><Icon name="forward" size={18} /></Link>
           <Link href="/page?slug=about" className="menu-row"><Icon name="info" /><span className="grow">{t('settings.about')}</span><Icon name="forward" size={18} /></Link>
           {learner ? <button type="button" className="menu-row danger" onClick={leave}><Icon name="logout" /><span className="grow">{t('profile.signout')}</span></button> : null}

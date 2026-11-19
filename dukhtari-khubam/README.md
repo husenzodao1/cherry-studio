@@ -98,6 +98,17 @@ Auth. The app carries only the first 16 bits of the passphrase's SHA-256 (to ski
 To change the passphrase, change that account's password in Supabase → Authentication → Users and
 update `KEY_PREFIX` in `src/app/search/page.tsx`.
 
+### Learner sign-in and support
+
+- Registration asks name, age, login and password; the 15-digit code is made on the phone.
+- Sign in with the code; if it is lost, with login and password; if both are lost, through the
+  support chat (`/support`, no account needed — a thread belongs to a random token kept on the phone).
+- The phone encrypts the code with a key derived from the password (PBKDF2 → AES-GCM,
+  `src/web/offline/account.ts`); the server keeps that ciphertext and a bcrypt hash of the password,
+  never the code. Eight wrong passwords in a row lock the login for 15 minutes.
+- Staff answer in the panel (Дастгирӣ). A super admin can issue a temporary password: it also issues
+  a new code (the old one stops working) and the learner must choose a new password at sign-in.
+
 ### Content by age
 
 Learners give their age when they register (stored as a year of birth with their progress). A title
@@ -143,6 +154,9 @@ Revision History; every staff change is in the audit log.
   (`src/web/offline/cards.ts`) and saved or shared through the system share sheet.
 - A course can be kept on the phone with its pictures and audio ("Боргирӣ барои бе интернет"), with a
   warning on mobile data; audio plays from the phone's copy.
+- A butterfly lives on the home screen (`src/web/components/Butterfly.tsx`): painted wings
+  (`tools/render-assets/butterfly`) rotating in 3D, flap-and-glide flight, landings on tiles and cards
+  (it scrolls with what it sits on), and it flies off when a finger comes near.
 - Android app: daily local notifications (lesson reminder, inspiration of the day) at times chosen in
   Settings (`src/web/offline/notify.ts`).
 

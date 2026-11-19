@@ -4,7 +4,7 @@ export type Locale = 'tg' | 'ru' | 'ar'
 const tg = {
   'app.name': 'Духтари хубам',
   'nav.home': 'Асосӣ', 'nav.schools': 'Мактабҳо', 'nav.saved': 'Захираҳо', 'nav.profile': 'Профил',
-  'home.greeting': 'Салом', 'home.continue_learning': 'Идомаи омӯзиш', 'home.seven_schools': 'Ҳафт мактаби дониш',
+  'home.greeting': 'Салом', 'home.continue_learning': 'Идомаи омӯзиш', 'home.seven_schools': '7 оинаи духтар',
   'home.all_schools': 'Ҳамаи мактабҳо',
   'app.update': 'Версияи нав дастрас аст', 'app.update_action': 'Навсозӣ',
   'start.welcome': 'Хуш омадед', 'start.subtitle': 'Зебоӣ дар дониш аст', 'start.age': 'Синну соли шумо',
@@ -60,14 +60,15 @@ const tg = {
   'code.save_image': 'Сабт ҳамчун сурат',
   'download.course': 'Боргирии курс', 'download.files': '{n} файл', 'download.progress': 'Боргирӣ {done}/{total}',
   'download.ready': 'Курс боргирӣ шуд', 'download.offline': 'Интернет лозим аст',
-  'download.mobile': 'Интернети мобилӣ: трафик сарф мешавад. Идома?'
+  'download.mobile': 'Интернети мобилӣ: трафик сарф мешавад. Идома?',
+  'start.username': 'Логин', 'start.password': 'Парол', 'start.new_password': 'Пароли нав', 'start.username_hint': 'Ҳарфҳои лотинӣ, рақам, _ ва . (3–32 аломат)', 'start.password_hint': 'Ҳадди ақал 6 аломат', 'start.show_password': 'Нишон додани парол', 'start.by_code': 'Ворид бо код', 'start.forgot_code': 'Код фаромӯш шуд? Ворид бо логин', 'start.forgot_all': 'Логин ҳам фаромӯш шуд? Навиштан ба дастгирӣ', 'start.invalid_login': 'Логин ё парол нодуруст', 'start.locked': 'Логин барои 15 дақиқа баста шуд', 'start.taken': 'Ин логин банд аст', 'start.account_title': 'Логин ва парол', 'start.account_hint': 'Барои воридшавӣ бе код', 'start.new_code': 'Коди нави шумо', 'start.save': 'Сабт', 'start.later_offline': 'Логин ва парол ҳангоми пайвастшавӣ сабт мешавад', 'support.title': 'Дастгирӣ', 'support.hint': 'Мушкилиро нависед. Ҷавоб дар ҳамин ҷо меояд.', 'support.placeholder': 'Паём…', 'support.send': 'Фиристодан', 'support.staff': 'Дастгирӣ', 'support.name': 'Ном', 'support.username': 'Логин', 'support.offline': 'Интернет лозим аст', 'support.new_reply': 'Ҷавоби нав аз дастгирӣ', 'support.closed': 'Мурожиат баста шуд'
 }
 
 export type UiKey = keyof typeof tg
 
 const ru: Partial<Record<UiKey, string>> = {
   'nav.home': 'Главная', 'nav.schools': 'Школы', 'nav.saved': 'Сохранённое', 'nav.profile': 'Профиль',
-  'home.greeting': 'Здравствуйте', 'home.continue_learning': 'Продолжить', 'home.seven_schools': 'Семь школ знаний',
+  'home.greeting': 'Здравствуйте', 'home.continue_learning': 'Продолжить', 'home.seven_schools': '7 зеркал девушки',
   'app.update': 'Доступна новая версия', 'app.update_action': 'Обновить',
   'start.welcome': 'Добро пожаловать', 'start.subtitle': 'Красота — в знании', 'start.age': 'Ваш возраст',
   'start.register': 'Регистрация', 'start.login': 'Вход', 'start.name': 'Ваше имя', 'start.create': 'Далее',
@@ -108,7 +109,8 @@ const ru: Partial<Record<UiKey, string>> = {
   'code.save_image': 'Сохранить как изображение',
   'download.course': 'Скачать курс', 'download.files': 'Файлов: {n}', 'download.progress': 'Загрузка {done}/{total}',
   'download.ready': 'Курс скачан', 'download.offline': 'Нужен интернет',
-  'download.mobile': 'Мобильный интернет: расходуется трафик. Продолжить?'
+  'download.mobile': 'Мобильный интернет: расходуется трафик. Продолжить?',
+  'start.username': 'Логин', 'start.password': 'Пароль', 'start.new_password': 'Новый пароль', 'start.username_hint': 'Латинские буквы, цифры, _ и . (3–32 символа)', 'start.password_hint': 'Не менее 6 символов', 'start.show_password': 'Показать пароль', 'start.by_code': 'Вход по коду', 'start.forgot_code': 'Забыли код? Вход по логину', 'start.forgot_all': 'Забыли и логин? Написать в поддержку', 'start.invalid_login': 'Неверный логин или пароль', 'start.locked': 'Логин заблокирован на 15 минут', 'start.taken': 'Логин занят', 'start.account_title': 'Логин и пароль', 'start.account_hint': 'Для входа без кода', 'start.new_code': 'Ваш новый код', 'start.save': 'Сохранить', 'start.later_offline': 'Логин и пароль сохранятся при подключении', 'support.title': 'Поддержка', 'support.hint': 'Опишите проблему. Ответ придёт здесь.', 'support.placeholder': 'Сообщение…', 'support.send': 'Отправить', 'support.staff': 'Поддержка', 'support.name': 'Имя', 'support.username': 'Логин', 'support.offline': 'Нужен интернет', 'support.new_reply': 'Новый ответ поддержки', 'support.closed': 'Обращение закрыто'
 }
 
 const ar: Partial<Record<UiKey, string>> = {
@@ -152,7 +154,9 @@ const ar: Partial<Record<UiKey, string>> = {
   'code.save_image': 'حفظ كصورة',
   'download.course': 'تنزيل الدورة', 'download.files': '{n} ملفات', 'download.progress': 'تنزيل {done}/{total}',
   'download.ready': 'تم تنزيل الدورة', 'download.offline': 'يلزم الإنترنت',
-  'download.mobile': 'بيانات الجوال: سيُستهلك الرصيد. متابعة؟'
+  'download.mobile': 'بيانات الجوال: سيُستهلك الرصيد. متابعة؟',
+  'start.username': 'اسم المستخدم', 'start.password': 'كلمة المرور', 'start.new_password': 'كلمة مرور جديدة', 'start.username_hint': 'حروف لاتينية وأرقام و _ و . (3–32)', 'start.password_hint': '6 أحرف على الأقل', 'start.show_password': 'إظهار كلمة المرور', 'start.by_code': 'الدخول بالرمز', 'start.forgot_code': 'نسيتِ الرمز؟ الدخول باسم المستخدم', 'start.forgot_all': 'نسيتِ اسم المستخدم أيضًا؟ راسلي الدعم', 'start.invalid_login': 'اسم المستخدم أو كلمة المرور غير صحيحة', 'start.locked': 'الحساب مقفل 15 دقيقة', 'start.taken': 'اسم المستخدم محجوز', 'start.account_title': 'اسم المستخدم وكلمة المرور', 'start.account_hint': 'للدخول دون رمز', 'start.new_code': 'رمزكِ الجديد', 'start.save': 'حفظ', 'start.later_offline': 'يُحفظ اسم المستخدم وكلمة المرور عند الاتصال', 'support.title': 'الدعم', 'support.hint': 'اكتبي المشكلة. يصل الرد هنا.', 'support.placeholder': 'رسالة…', 'support.send': 'إرسال', 'support.staff': 'الدعم', 'support.name': 'الاسم', 'support.username': 'اسم المستخدم', 'support.offline': 'يلزم الإنترنت', 'support.new_reply': 'رد جديد من الدعم', 'support.closed': 'أُغلق الطلب',
+  'home.seven_schools': '7 مرايا للفتاة'
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, ar }

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 
 import { ART } from '@/web/art'
+import { Butterfly } from '@/web/components/Butterfly'
 import { Avatar } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { SchoolGrid } from '@/web/components/SchoolTile'
@@ -47,7 +48,7 @@ export default function Home() {
       <section className="hello">
         <div className="hello-text">
           <p className="greet">{hour === null ? ' ' : `${t(greetingKey(hour))}${name ? `, ${name}` : ''}!`}</p>
-          <h1 className="h-hero">{t('home.motto')}{'\u00a0'}<span aria-hidden="true">💜</span></h1>
+          <h1 className="h-hero">{t('home.motto')}{'\u00a0'}<span className="bf-anchor" aria-hidden="true" /></h1>
         </div>
         <img className="hello-flower bloom-in" src={ART.flower.src} alt="" aria-hidden="true" decoding="async" />
       </section>
@@ -95,6 +96,7 @@ export default function Home() {
         ) : null}
       </section>
 
+      <Butterfly anchor=".bf-anchor" />
     </>
   )
 }

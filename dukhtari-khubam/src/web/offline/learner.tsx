@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 
 import { emptyProgress, isCode, localDay, mergeProgress, newCode, ProgressData, withDay } from '@/lib/progress'
 
+import { decryptCode, encryptCode, isPassword, isUsername, normalizeUsername } from './account'
 import { apiUrl } from './base'
 import { useContent, type Bundle } from './content'
 import { schedule as nextReview } from './review'
@@ -14,7 +15,15 @@ import { schedule as nextReview } from './review'
  * after reinstalling the app brings it all back.
  */
 
-export interface Learner { name: string; code: string }
+export interface Learner {
+  name: string
+  code: string
+  /** login for signing in without the code (set once, online) */
+  username?: string
+  /** signed in with a temporary password from support: a new password must be chosen */
+  mustChange?: boolean
+}
+export type LoginResult = 'ok' | 'invalid' | 'locked' | 'taken' | 'offline' | 'error'
 type SyncState = 'idle' | 'syncing' | 'synced' | 'offline' | 'error'
 
 interface LearnerApi {
@@ -25,6 +34,12 @@ interface LearnerApi {
   register: (name: string, age: number) => Learner
   setAge: (age: number) => void
   restore: (code: string) => Promise<'ok' | 'not_found' | 'offline'>
+  /** whether a login can be taken */
+  checkUsername: (username: string) => Promise<'free' | 'taken' | 'invalid' | 'offline'>
+  /** sets (or changes) the login and password of this phone's learner */
+  setLogin: (username: string, password: string) => Promise<LoginResult>
+  /** signs in with login and password when the code is lost */
+  loginWithPassword: (username: string, password: string) => Promise<LoginResult>
   signOut: () => void
   readLesson: (lessonId: string, percent: number) => void
   completeLesson: (lessonId: string) => void
@@ -177,6 +192,8 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       const l = { name: name.trim().slice(0, 80), code: newCode((n) => crypto.getRandomValues(new Uint8Array(n))) }
       writeJson(LEARNER_KEY, l)
       setLearner(l)
+      // the login is usually set right after; it must see the new learner before React re-renders
+      latest.current = { ...latest.current, learner: l }
       update((p) => ({ ...p, born: new Date().getFullYear() - age }))
       return l
     },
@@ -204,6 +221,68 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
         return 'ok'
       } catch {
         return 'offline'
+      }
+    },
+    checkUsername: async (raw) => {
+      const u = normalizeUsername(raw)
+      if (!isUsername(u)) return 'invalid'
+      if (isOffline()) return 'offline'
+      try {
+        const res = await fetch(apiUrl(`/profile/username?username=${encodeURIComponent(u)}`))
+        if (!res.ok) return 'offline'
+        return ((await res.json()) as { free: boolean }).free ? 'free' : 'taken'
+      } catch {
+        return 'offline'
+      }
+    },
+    setLogin: async (raw, password) => {
+      const l = latest.current.learner
+      const username = normalizeUsername(raw)
+      if (!l || !isUsername(username) || !isPassword(password)) return 'invalid'
+      if (isOffline()) return 'offline'
+      try {
+        await pushNow() // the profile must exist on the server before it gets a login
+        const res = await fetch(apiUrl('/profile/login-set'), {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ code: l.code, username, password, code_enc: await encryptCode(l.code, password) })
+        })
+        if (res.status === 409) return 'taken'
+        if (!res.ok) return res.status === 422 ? 'invalid' : 'error'
+        const next = { ...l, username, mustChange: false }
+        writeJson(LEARNER_KEY, next)
+        setLearner(next)
+        return 'ok'
+      } catch {
+        return isOffline() ? 'offline' : 'error'
+      }
+    },
+    loginWithPassword: async (raw, password) => {
+      const username = normalizeUsername(raw)
+      if (!isUsername(username) || !password) return 'invalid'
+      if (isOffline()) return 'offline'
+      try {
+        const res = await fetch(apiUrl('/profile/login'), {
+          method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username, password })
+        })
+        if (res.status === 401) return 'invalid'
+        if (res.status === 429) return 'locked'
+        if (!res.ok) return 'error'
+        const body = (await res.json()) as { name: string; data: unknown; code_enc: string | null; code: string | null; must_change: boolean }
+        // a new code issued by staff comes as is; otherwise the password opens the stored one
+        const code = body.code ?? (body.code_enc ? await decryptCode(body.code_enc, password) : null)
+        if (!code || !isCode(code)) return 'error'
+        const l: Learner = { name: body.name, code, username, mustChange: body.must_change || !!body.code }
+        writeJson(LEARNER_KEY, l)
+        setLearner(l)
+        const server = ProgressData.safeParse(body.data)
+        setProgress((cur) => {
+          const merged = server.success ? mergeProgress(cur, server.data) : cur
+          writeJson(PROGRESS_KEY, merged)
+          return merged
+        })
+        return 'ok'
+      } catch {
+        return isOffline() ? 'offline' : 'error'
       }
     },
     signOut: () => {
@@ -236,7 +315,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       const today = localDay()
       return withDay({ ...p, review: { ...p.review, [qid]: { ...nextReview(p.review[qid]?.box, correct, today), at: now() } } })
     })
-  }), [ready, learner, progress, sync, update])
+  }), [ready, learner, progress, sync, update, pushNow])
 
   return <LearnerContext.Provider value={api}>{children}</LearnerContext.Provider>
 }
