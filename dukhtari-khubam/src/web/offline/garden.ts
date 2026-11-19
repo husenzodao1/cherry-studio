@@ -4,7 +4,7 @@ import { ART, SCHOOL_ART, type Art } from '../art'
 import type { Bundle } from './content'
 
 /**
- * "Боғи ман" — the learner's garden, laid out as glass shelves: one shelf per school, in the schools'
+ * "Чаман" — the learner's garden, laid out as glass shelves: one shelf per school, in the schools'
  * order. Every finished lesson is one glass flower in the school's own flower and tint; every finished
  * course is a large bloom at the front of its shelf. Within a shelf flowers stand in the order earned.
  */

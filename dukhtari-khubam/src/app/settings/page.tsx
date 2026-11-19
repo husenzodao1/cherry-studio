@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 
 import { formatCode } from '@/lib/progress'
 import { Header } from '@/web/components/Header'
@@ -11,40 +11,87 @@ import { CodeImageButton } from '@/web/components/Keepsakes'
 import { LOCALE_LABELS, type Locale } from '@/web/i18n'
 import { useLearner } from '@/web/offline/learner'
 import { allowNotifications, canNotify, DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyPrefs } from '@/web/offline/notify'
+import { checkPassword, unlockWithPhone } from '@/web/offline/unlock'
 import { usePrefs } from '@/web/prefs'
 
-/** The learner's code on this phone, shown on request and easy to copy. */
+/**
+ * The learner's code and login, at the end of the settings and small: hidden until the phone's own lock
+ * (fingerprint, face or screen PIN) — or, on the website, the login password — confirms it is her.
+ * It hides itself again after a minute.
+ */
 function CodeCard() {
   const { t } = usePrefs()
   const { learner } = useLearner()
-  const [show, setShow] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [asking, setAsking] = useState(false)
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    if (!open) return
+    const timer = setTimeout(() => setOpen(false), 60_000)
+    return () => clearTimeout(timer)
+  }, [open])
   if (!learner) return null
+  const reveal = async () => {
+    setMessage(null)
+    if (open) return setOpen(false)
+    const r = await unlockWithPhone(t('settings.unlock_title'), t('settings.unlock_reason'))
+    if (r === 'ok') setOpen(true)
+    // no lock to ask for: check the login password; without a login there is nothing to check against
+    else if (r === 'password') learner.username ? setAsking(true) : setOpen(true)
+  }
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    const r = await checkPassword(learner.username!, password)
+    setBusy(false)
+    if (r === 'ok') {
+      setOpen(true)
+      setAsking(false)
+      setPassword('')
+    } else setMessage(t(r === 'invalid' ? 'start.invalid_login' : r === 'locked' ? 'start.locked' : 'start.need_online'))
+  }
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(learner.code)
       setCopied(true)
       setTimeout(() => setCopied(false), 1800)
     } catch {
-      setShow(true)
+      /* the code stays on screen to copy by hand */
     }
   }
   return (
-    <div className="glass card-pad stack" style={{ gap: 10 }}>
-      <div className="row">
-        <Icon name="lock" style={{ color: 'var(--primary)' }} />
-        <b style={{ flex: 1, fontWeight: 500 }}>{t('profile.code')}</b>
-        <button type="button" className="icon-btn" style={{ width: 38, height: 38 }} aria-label={show ? t('profile.hide_code') : t('profile.show_code')} onClick={() => setShow(!show)}>
-          <Icon name={show ? 'eyeOff' : 'eye'} size={18} />
-        </button>
-        <button type="button" className="icon-btn" style={{ width: 38, height: 38 }} aria-label={t('start.copy')} onClick={copy}>
-          <Icon name={copied ? 'check' : 'copy'} size={18} />
+    <div className="glass code-card">
+      <div className="row" style={{ gap: 10 }}>
+        <span className="code-card-icon" aria-hidden="true"><Icon name="lock" size={16} /></span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <b>{t('profile.code')}</b>
+          {learner.username ? <span className="row-sub">{t('start.username')}: {learner.username}</span> : null}
+        </span>
+        <button type="button" className="chip" onClick={reveal} aria-expanded={open}>
+          <Icon name={open ? 'eyeOff' : 'eye'} size={16} /> {t(open ? 'profile.hide_code' : 'profile.show_code')}
         </button>
       </div>
-      <div className="code-box" aria-live="polite">{show ? formatCode(learner.code) : '••••• ••••• •••••'}</div>
-      <span className="muted" style={{ fontSize: '0.84em' }}>{t('settings.code_hint')}</span>
-      {learner.username ? <span style={{ fontSize: '0.9em' }}>{t('start.username')}: <b>{learner.username}</b></span> : null}
-      <CodeImageButton />
+      {asking && !open ? (
+        <form className="row" style={{ gap: 8 }} onSubmit={submit}>
+          <input className="input" type="password" autoComplete="current-password" placeholder={t('settings.unlock_password')}
+            aria-label={t('settings.unlock_password')} value={password} onChange={(e) => setPassword(e.target.value)} style={{ minHeight: 44 }} />
+          <button className="btn btn-soft" disabled={busy || !password} aria-label={t('profile.show_code')}><Icon name="arrow" size={18} /></button>
+        </form>
+      ) : null}
+      {message ? <span className="muted" role="status" style={{ fontSize: '0.84em' }}>{message}</span> : null}
+      {open ? (
+        <>
+          <div className="code-box code-box-sm" aria-live="polite">{formatCode(learner.code)}</div>
+          <span className="muted" style={{ fontSize: '0.8em' }}>{t('settings.code_hint')}</span>
+          <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+            <button type="button" className="chip" onClick={copy}><Icon name={copied ? 'check' : 'copy'} size={16} /> {t('start.copy')}</button>
+            <CodeImageButton className="chip" />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }
@@ -69,7 +116,7 @@ function Notifications() {
       <Icon name={key === 'lesson' ? 'book' : 'sparkle'} />
       <span className="grow">{label}</span>
       {prefs[key].on ? (
-        <input type="time" className="input" style={{ width: 104, minHeight: 38, padding: '0 10px', textAlign: 'center' }} aria-label={t('notify.time')}
+        <input type="time" className="time-plain" aria-label={t('notify.time')}
           value={prefs[key].time} onChange={(e) => e.target.value && change(key, { time: e.target.value })} />
       ) : null}
       <button type="button" role="switch" className="switch" aria-checked={prefs[key].on} aria-label={label} onClick={() => change(key, { on: !prefs[key].on })} />
@@ -103,7 +150,6 @@ export default function Settings() {
     <>
       <Header back="/profile" title={t('settings.title')} />
       <div className="section stagger">
-        <CodeCard />
         {native ? <Notifications /> : null}
         <div className="glass card-pad stack" style={{ gap: 10 }}>
           <span className="eyebrow">{t('settings.language')}</span>
@@ -134,6 +180,7 @@ export default function Settings() {
           <Link href="/page?slug=about" className="menu-row"><Icon name="info" /><span className="grow">{t('settings.about')}</span><Icon name="forward" size={18} /></Link>
           {learner ? <button type="button" className="menu-row danger" onClick={leave}><Icon name="logout" /><span className="grow">{t('profile.signout')}</span></button> : null}
         </div>
+        <CodeCard />
         <p className="muted" style={{ textAlign: 'center', fontSize: '0.8em', margin: 0 }}>{t('settings.version')} {process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}</p>
       </div>
     </>

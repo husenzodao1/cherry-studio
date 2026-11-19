@@ -98,9 +98,11 @@ interface Props {
   children: ReactNode
   as?: 'div' | 'nav'
   label?: string
+  /** bend the content behind (costly: redrawn whenever that content moves); false keeps clear frosted glass */
+  refract?: boolean
 }
 
-export function LiquidGlass({ radius, bezel = 16, className, style, children, as = 'div', label }: Props) {
+export function LiquidGlass({ radius, bezel = 16, className, style, children, as = 'div', label, refract: bend = true }: Props) {
   const ref = useRef<HTMLElement | null>(null)
   const rawId = useId()
   const filterId = `lg${rawId.replace(/[^a-zA-Z0-9]/g, '')}`
@@ -108,8 +110,8 @@ export function LiquidGlass({ radius, bezel = 16, className, style, children, as
   const [svgOk, setSvgOk] = useState(false)
 
   useEffect(() => {
-    setSvgOk(supportsSvgBackdrop())
-  }, [])
+    setSvgOk(bend && supportsSvgBackdrop())
+  }, [bend])
 
   useEffect(() => {
     const el = ref.current

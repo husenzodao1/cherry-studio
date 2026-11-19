@@ -25,7 +25,7 @@
   --glass-edge: rgba(255, 255, 255, 0.85);
   --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 1px rgba(150, 120, 220, 0.12),
     0 14px 30px -16px rgba(86, 56, 160, 0.42), 0 2px 8px -4px rgba(86, 56, 160, 0.16);
-  --glass-blur: blur(18px) saturate(1.35);
+  --glass-blur: blur(14px) saturate(1.35);
   --pill: linear-gradient(180deg, #a07bf2 0%, #7b50d9 52%, #6939c8 100%);
   --pill-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -2px 4px rgba(60, 20, 140, 0.25), 0 12px 24px -10px rgba(105, 57, 200, 0.6);
   --surface: #ffffff;
@@ -145,7 +145,7 @@ img, video, canvas { display: block; max-width: 100%; }
     radial-gradient(70% 50% at 100% 100%, rgba(205, 184, 246, 0.8), transparent 70%),
     linear-gradient(170deg, var(--sky-1) 0%, var(--sky-2) 48%, var(--sky-3) 100%);
 }
-.bd { position: absolute; height: auto; animation: fade-in 1.1s var(--ease) both; }
+.bd { position: absolute; height: auto; animation: fade-in 0.6s var(--ease) both; }
 /* Backdrop pieces: rendered glass flowers, leaves, crystals and lenses resting at the screen edges. */
 .bd-crocus { left: -30vw; bottom: -5vh; width: min(72vw, 380px); transform: rotate(-12deg); }
 .bd-lotus { right: -24vw; bottom: 13vh; width: min(52vw, 260px); transform: rotate(-8deg); opacity: 0.95; }
@@ -253,10 +253,10 @@ a.card:active, a.glass:active, button.card:active, .press:active { transform: sc
 }
 .chip[aria-pressed='true'], .chip[aria-selected='true'] { background: var(--pill); color: #fff; border-color: transparent; box-shadow: var(--pill-shadow); }
 .segmented {
-  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; padding: 5px; border-radius: 999px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; padding: 4px; border-radius: 999px; overflow: hidden;
   background: var(--glass); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow);
 }
-.segmented button { min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-2); cursor: pointer; transition: background 0.25s var(--ease), color 0.25s; white-space: nowrap; }
+.segmented button { min-width: 0; min-height: 40px; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; border: 0; border-radius: 999px; background: transparent; color: var(--ink-2); cursor: pointer; transition: background 0.25s var(--ease), color 0.25s; white-space: nowrap; }
 .segmented button[aria-selected='true'], .segmented button[aria-pressed='true'] { background: var(--pill); color: #fff; box-shadow: var(--pill-shadow); }
 .tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
 .tabs::-webkit-scrollbar { display: none; }
@@ -319,23 +319,22 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 /* ---------------------------------------------------------------- bottom navigation */
 .dock-wrap { position: fixed; left: 0; right: 0; bottom: max(14px, env(safe-area-inset-bottom)); display: flex; justify-content: center; z-index: 40; pointer-events: none; }
 .dock {
-  pointer-events: auto; display: flex; align-items: center; justify-content: space-around; gap: 4px; padding: 0 10px;
+  pointer-events: auto; display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 0 8px;
   width: min(400px, calc(100vw - 36px)); height: 72px;
 }
 /* each tab is exactly its circle, so the pressed state never shows a box of another size */
 .dock a {
-  position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 50%;
+  position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%;
   color: var(--ink-2); outline-offset: 2px; transition: background 0.3s var(--ease), box-shadow 0.3s var(--ease), color 0.3s, transform 0.25s var(--ease);
 }
 .dock a:active { transform: scale(0.9); }
 .dock a[aria-current='page'] {
-  color: var(--primary); transform: translateY(-2px);
+  color: var(--primary);
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(240, 232, 255, 0.55));
   box-shadow: inset 0 1px 0 #fff, inset 0 -2px 6px rgba(122, 79, 216, 0.12), 0 10px 20px -8px rgba(105, 57, 200, 0.45);
 }
-.dock a[aria-current='page']:active { transform: translateY(-2px) scale(0.9); }
 :root[data-theme='dark'] .dock a[aria-current='page'] { background: rgba(255, 255, 255, 0.16); }
-.dock a[aria-current='page']::after { content: ''; position: absolute; bottom: -9px; width: 18px; height: 3px; border-radius: 2px; background: var(--primary); }
+.dock a[aria-current='page']::after { content: ''; position: absolute; bottom: 7px; width: 14px; height: 3px; border-radius: 2px; background: var(--primary); }
 
 /* ---------------------------------------------------------------- home */
 .home-top { display: flex; align-items: center; gap: 10px; min-height: 60px; }
@@ -462,6 +461,26 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .stat .stat-icon { width: 38px; height: 38px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: var(--pill); box-shadow: var(--pill-shadow); margin-bottom: 4px; }
 .stat .big-number { font-size: 1.35rem; }
 .stat span:last-child { font-size: 0.74rem; color: var(--muted); line-height: 1.2; }
+/* profile numbers: a coloured orb with a white glyph and a soft glow of the same colour in the tile */
+.stat-courses { --stat-a: #b79cff; --stat-b: #7447e0; --stat-glow: rgba(140, 100, 240, 0.2); }
+.stat-achievements { --stat-a: #ffc6e6; --stat-b: #d955a8; --stat-glow: rgba(230, 110, 180, 0.18); }
+.stat-streak { --stat-a: #ffd08a; --stat-b: #f0657d; --stat-glow: rgba(245, 140, 110, 0.18); }
+.stat[class*='stat-'] { gap: 6px; padding: 16px 6px 14px; background-image: radial-gradient(90% 70% at 50% 0%, var(--stat-glow), transparent 72%), var(--glass); }
+.stat-orb { position: relative; width: 46px; height: 46px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 4px;
+  background: linear-gradient(150deg, var(--stat-a), var(--stat-b)); box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -3px 6px rgba(60, 20, 120, 0.18), 0 10px 18px -8px var(--stat-b); }
+.stat-orb::before { content: ''; position: absolute; left: 9px; top: 5px; width: 20px; height: 10px; border-radius: 50%; background: rgba(255, 255, 255, 0.45); filter: blur(2px); }
+.stat-orb svg { position: relative; filter: drop-shadow(0 1px 1px rgba(60, 20, 120, 0.25)); }
+.stat[class*='stat-'] .big-number { font-size: 1.55rem; font-weight: 700; }
+.stat .stat-label { font-size: 0.74rem; color: var(--muted); line-height: 1.2; letter-spacing: 0.01em; }
+/* profile photo */
+.avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.profile-photo { position: relative; display: inline-flex; }
+.photo-btn { position: relative; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
+.photo-badge { position: absolute; right: -2px; bottom: 2px; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; background: var(--pill); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), var(--pill-shadow); }
+.photo-remove { position: absolute; left: -2px; bottom: 2px; width: 26px; height: 26px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2); background: var(--glass-flat); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9); }
+:root[data-theme='dark'] .photo-badge, :root[data-theme='dark'] .photo-remove { box-shadow: 0 0 0 3px rgba(30, 20, 50, 0.9); }
 .menu { padding: 6px; border-radius: 26px; }
 .menu-row { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 54px; padding: 8px 14px; border: 0; background: transparent; border-radius: 18px; color: var(--ink); text-align: start; cursor: pointer; font-size: 1em; }
 .menu-row + .menu-row { border-top: 1px solid var(--line); border-radius: 0; }
@@ -471,6 +490,20 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .menu-row.danger { color: var(--bad); }
 .menu-row.danger > svg:first-child { color: var(--bad); }
 .code-box { font-size: clamp(1.2rem, 6vw, 1.5rem); letter-spacing: 0.08em; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.code-box-sm { font-size: 1.1rem; }
+/* settings: the code, small and last */
+.code-card { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 22px; font-size: 0.92em; }
+.code-card b { display: block; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.code-card .chip { min-height: 34px; padding: 0 12px; font-size: 0.84em; flex: none; }
+.code-card .row-sub { display: block; font-size: 0.86em; color: var(--muted); margin-top: 1px; }
+.code-card-icon { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none;
+  color: var(--primary); background: rgba(255, 255, 255, 0.7); box-shadow: inset 0 1px 0 #fff; }
+:root[data-theme='dark'] .code-card-icon { background: rgba(255, 255, 255, 0.1); box-shadow: none; }
+/* settings: reminder times as plain text, no box */
+.time-plain { flex: none; border: 0; background: transparent; padding: 0; margin: 0; width: auto; min-width: 3.4em; min-height: 0; font: inherit; font-weight: 600;
+  font-variant-numeric: tabular-nums; color: var(--primary); text-align: end; cursor: pointer; }
+.time-plain::-webkit-calendar-picker-indicator { display: none; }
+.time-plain::-webkit-datetime-edit { padding: 0; }
 
 /* ---------------------------------------------------------------- start */
 .start { min-height: 92dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 20px 0 40px; text-align: center; }
@@ -532,7 +565,8 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 
 /* ---------------------------------------------------------------- butterfly (Butterfly.tsx) */
 .bf-anchor { display: inline-block; width: 40px; height: 0.8em; vertical-align: -0.05em; }
-.bf-layer { position: fixed; inset: 0; z-index: 35; pointer-events: none; overflow: hidden; }
+/* above the tab bar, so the bar's glass does not redraw under every wing beat */
+.bf-layer { position: fixed; inset: 0; z-index: 44; pointer-events: none; overflow: hidden; }
 .bf { position: absolute; left: 0; top: 0; width: 64px; height: 44px; transform-origin: 32px 14.6px; perspective: 220px; will-change: transform; }
 .bf-wing { position: absolute; top: 0; width: 32px; height: auto; backface-visibility: visible; will-change: transform;
   filter: drop-shadow(0 0 0.5px rgba(40, 12, 90, 0.4)); }
@@ -572,27 +606,23 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 /* ---------------------------------------------------------------- motion: always on, soft and quick */
 @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes rise { from { opacity: 0; transform: translateY(16px) scale(0.985); } to { opacity: 1; transform: none; } }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
 @keyframes bloom-in { from { opacity: 0; transform: translateY(18px) scale(0.86) rotate(-6deg); } to { opacity: 1; transform: none; } }
 @keyframes float { from { translate: 0 0; } to { translate: 0 -10px; } }
-.app > * { animation: rise 0.6s var(--ease) both; }
-.app > :nth-child(2) { animation-delay: 0.05s; }
-.app > :nth-child(3) { animation-delay: 0.1s; }
-.app > :nth-child(4) { animation-delay: 0.15s; }
-.app > :nth-child(5) { animation-delay: 0.2s; }
-.app > :nth-child(6) { animation-delay: 0.25s; }
-.app > :nth-child(n + 7) { animation-delay: 0.3s; }
-.stagger > * { animation: rise 0.55s var(--ease) both; }
-.stagger > :nth-child(2) { animation-delay: 0.05s; }
-.stagger > :nth-child(3) { animation-delay: 0.1s; }
-.stagger > :nth-child(4) { animation-delay: 0.15s; }
-.stagger > :nth-child(5) { animation-delay: 0.2s; }
-.stagger > :nth-child(6) { animation-delay: 0.25s; }
-.stagger > :nth-child(n + 7) { animation-delay: 0.3s; }
+.app > * { animation: rise 0.4s var(--ease) both; }
+.app > :nth-child(2) { animation-delay: 0.03s; }
+.app > :nth-child(3) { animation-delay: 0.06s; }
+.app > :nth-child(4) { animation-delay: 0.09s; }
+.app > :nth-child(5) { animation-delay: 0.12s; }
+.app > :nth-child(n + 6) { animation-delay: 0.15s; }
+.stagger > * { animation: rise 0.38s var(--ease) both; }
+.stagger > :nth-child(2) { animation-delay: 0.03s; }
+.stagger > :nth-child(3) { animation-delay: 0.06s; }
+.stagger > :nth-child(4) { animation-delay: 0.09s; }
+.stagger > :nth-child(5) { animation-delay: 0.12s; }
+.stagger > :nth-child(n + 6) { animation-delay: 0.15s; }
 .bloom-in { animation: bloom-in 0.9s 0.1s var(--ease) both; }
 .float { animation: float 6s ease-in-out infinite alternate; }
-.float-slow { animation: float 8s 1s ease-in-out infinite alternate; }
-.bd.float, .bd.float-slow { animation: fade-in 1.1s var(--ease) both, float 7s 1.1s ease-in-out infinite alternate; }
 img.fade { opacity: 0; transition: opacity 0.6s var(--ease); }
 img.fade.is-ready { opacity: 1; }

@@ -12,7 +12,7 @@ import { gardenOf, type Bloom } from '@/web/offline/garden'
 import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
 
-/** "Боғи ман": finished lessons and courses as glass flowers, one shelf per school. */
+/** "Чаман": finished lessons and courses as glass flowers, one shelf per school. */
 export default function GardenPage() {
   const { t, locale } = usePrefs()
   const { bundle } = useContent()

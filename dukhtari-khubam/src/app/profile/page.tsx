@@ -1,15 +1,65 @@
 'use client'
 
 import Link from 'next/link'
+import { useRef } from 'react'
 
 import { streak } from '@/lib/progress'
 import { Avatar } from '@/web/components/Header'
 import { CertificateButton } from '@/web/components/Keepsakes'
-import { Icon, type IconName } from '@/web/components/Icon'
+import { Icon } from '@/web/components/Icon'
 import { LOCALE_LABELS } from '@/web/i18n'
 import { useContent } from '@/web/offline/content'
 import { courseProgress, useLearner } from '@/web/offline/learner'
+import { clearPhoto, savePhoto, usePhoto } from '@/web/offline/photo'
 import { usePrefs } from '@/web/prefs'
+
+/** Small filled glyphs for the three numbers, drawn white on a coloured orb. */
+function StatGlyph({ kind }: { kind: 'courses' | 'achievements' | 'streak' }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      {kind === 'courses' ? (
+        <>
+          <path d="M12 6.6C10 5 7.1 4.6 4 5.2v12.7c3-.5 5.9-.1 8 1.4z" fill="#fff" />
+          <path d="M12 6.6c2-1.6 4.9-2 8-1.4v12.7c-3-.5-5.9-.1-8 1.4z" fill="#fff" opacity="0.72" />
+        </>
+      ) : kind === 'achievements' ? (
+        <>
+          <path d="M7.6 2.6h3.2l1.7 5.2H9.3zM16.4 2.6h-3.2l-1.7 5.2h3.2z" fill="#fff" opacity="0.72" />
+          <circle cx="12" cy="14.6" r="6" fill="#fff" />
+          <path d="m12 11.4 1 2 2.2.3-1.6 1.6.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.6 2.2-.3z" fill="var(--stat-b)" />
+        </>
+      ) : (
+        <>
+          <path d="M12 21.4c-4 0-6.6-2.7-6.6-6.3 0-3.5 2.5-5.6 4.1-7.8.6 1.6 1.6 2.7 2.8 3.1.3-2.9 1.6-5.3 3.5-7.4.6 3.5 4 5.5 4 10.3 0 4.6-3.1 8.1-7.8 8.1z" fill="#fff" />
+          <path d="M12 21.4c-2 0-3.3-1.4-3.3-3.2 0-1.8 1.3-2.8 2.2-4 .4.9.9 1.4 1.5 1.6.2-1.5 1-2.8 1.9-3.8.4 1.9 2 3 2 5.5 0 2.4-1.6 3.9-4.3 3.9z" fill="var(--stat-b)" opacity="0.85" />
+        </>
+      )}
+    </svg>
+  )
+}
+
+/** The avatar with a camera button: the photo is cut square and kept on this phone only. */
+function ProfilePhoto({ name }: { name: string }) {
+  const { t } = usePrefs()
+  const photo = usePhoto()
+  const input = useRef<HTMLInputElement>(null)
+  return (
+    <span className="profile-photo bloom-in">
+      <button type="button" className="photo-btn" onClick={() => input.current?.click()} aria-label={t('profile.photo')}>
+        <Avatar name={name} size={96} />
+        <span className="photo-badge" aria-hidden="true"><Icon name="camera" size={15} /></span>
+      </button>
+      {photo ? (
+        <button type="button" className="photo-remove" onClick={clearPhoto} aria-label={t('profile.photo_remove')}><Icon name="x" size={13} /></button>
+      ) : null}
+      <input ref={input} type="file" accept="image/*" hidden onChange={async (e) => {
+        const file = e.target.files?.[0]
+        e.target.value = ''
+        if (file) await savePhoto(file)
+      }} />
+    </span>
+  )
+}
 
 /** Name, numbers and achievements — all read from the phone. */
 export default function Profile() {
@@ -38,10 +88,10 @@ export default function Profile() {
   }).sort((a, b) => b.date.localeCompare(a.date))
   const dark = prefs.theme === 'dark' || (prefs.theme === 'system' && typeof window !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches)
 
-  const stats: [IconName, number, string][] = [
-    ['book', coursesStarted, t('profile.courses')],
-    ['trophy', achievementsGot, t('profile.achievements')],
-    ['flame', days, t('profile.streak')]
+  const stats: ['courses' | 'achievements' | 'streak', number, string][] = [
+    ['courses', coursesStarted, t('profile.courses')],
+    ['achievements', achievementsGot, t('profile.achievements')],
+    ['streak', days, t('profile.streak')]
   ]
 
   return (
@@ -52,17 +102,17 @@ export default function Profile() {
         <Link href="/settings" className="icon-btn" aria-label={t('settings.title')}><Icon name="settings" /></Link>
       </header>
       <div className="profile-head">
-        <span className="bloom-in"><Avatar name={learner.name} size={96} /></span>
+        <ProfilePhoto name={learner.name} />
         <h1 className="h-page" style={{ marginTop: 10 }}>{learner.name}</h1>
         <span className="tag">{t('profile.tagline')}</span>
       </div>
 
       <div className="stats stagger" style={{ marginTop: 22 }}>
-        {stats.map(([icon, value, label]) => (
-          <div key={label} className="glass stat">
-            <span className="stat-icon"><Icon name={icon} size={20} /></span>
+        {stats.map(([kind, value, label]) => (
+          <div key={kind} className={`glass stat stat-${kind}`}>
+            <span className="stat-orb"><StatGlyph kind={kind} /></span>
             <span className="big-number">{value}</span>
-            <span>{label}</span>
+            <span className="stat-label">{label}</span>
           </div>
         ))}
       </div>

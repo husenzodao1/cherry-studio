@@ -147,7 +147,7 @@ Revision History; every staff change is in the audit log.
 - Greeting by the phone's clock (morning/day/evening/night), day streak from local study days.
 - Lessons can link a YouTube video (block `youtube`, only the video id is stored): YouTube's cover
   (kept on the phone), playback inside the app with our own minimal glass controls.
-- "Боғи ман" (`/garden`, `src/web/offline/garden.ts`): glass shelves, one per school; every finished
+- "Чаман" (`/garden`, `src/web/offline/garden.ts`): glass shelves, one per school; every finished
   lesson is a glass flower in the school's flower and tint, every finished course a large golden-lit bloom.
 - "Такрори рӯз" (`/review`, `src/web/offline/review.ts`): daily spaced repetition (Leitner boxes,
   intervals 1/2/4/8/16 days) over choice questions from quizzes the learner has met; answers sync with
@@ -156,13 +156,21 @@ Revision History; every staff change is in the audit log.
   (`src/web/offline/cards.ts`) and saved or shared through the system share sheet.
 - A course can be kept on the phone with its pictures and audio ("Боргирӣ барои бе интернет"), with a
   warning on mobile data; audio plays from the phone's copy.
-- Butterflies of four kinds (`src/web/components/Butterfly.tsx`; wings painted in
-  `tools/render-assets/butterfly`: violet, blue morpho, pink kite swallowtail, pearl white) rotate their
-  wings in 3D and fly each in its own way (beat rate, glides, flutter). Two live on the home screen and
-  land on tiles and cards; on the list pages (schools, a school, a course, the garden, the profile,
-  saved) three sit on the boxes as the page opens and scatter, one of them staying. Scrolling makes a
-  perched butterfly take off and find another place; a finger nearby startles it. Off when the system
-  asks for reduced motion.
+- Butterflies (`src/web/components/Butterfly.tsx`): one kind, a "white", painted in four colours
+  (`tools/render-assets/butterfly/species.html`). Flight is simulated: lift and thrust only on the
+  down-stroke of each wing beat, gravity and drag between, a random-walk heading biased to the goal and
+  sideways zigzags, so the path bobs and jinks; landings slow, sometimes circle, settle with dying beats
+  and turn head-up. Two live on the home screen; on the list pages (schools, a school, a course, the
+  garden, the profile, saved) three sit on the boxes as the page opens and scatter, one of them staying.
+  Scrolling makes a perched butterfly take off and find another place; a finger nearby startles it.
+  Off when the system asks for reduced motion.
+- Profile photo: chosen on the profile, cut square to 256 px and kept on the phone only
+  (`src/web/offline/photo.ts`); it is never sent to the server.
+- The code and login in Settings are shown only after the phone's own lock (fingerprint, face or screen
+  PIN; `@capgo/capacitor-native-biometric`); on the website, or a phone without a lock, after the login
+  password is checked online (`src/web/offline/unlock.ts`).
+- Speed: the backdrop stays still and only the tab bar bends the content behind it (school tiles use
+  frosted glass), so scrolling does not redraw refracting glass on every frame.
 - Android app: daily local notifications (lesson reminder, inspiration of the day) at times chosen in
   Settings (`src/web/offline/notify.ts`).
 

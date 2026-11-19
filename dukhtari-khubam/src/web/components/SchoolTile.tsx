@@ -16,7 +16,7 @@ export function SchoolTile({ school, count = false, long = false }: { school: Sc
   const art = school.icon?.url ? { src: school.icon.url } : SCHOOL_ART[school.slug]
   return (
     <Link href={`/school?key=${encodeURIComponent(school.slug)}`} className={`tile-link${long ? ' tile-long' : ''}`}>
-      <LiquidGlass radius={24} bezel={14} className={`tile${count ? ' tile-wide' : ''}`}>
+      <LiquidGlass radius={24} bezel={14} refract={false} className={`tile${count ? ' tile-wide' : ''}`}>
         {art ? <img className="tile-art" src={art.src} alt="" aria-hidden="true" decoding="async" /> : <span className="tile-art" />}
         <span className="tile-text">
           <span className="tile-title">{school.title}</span>
