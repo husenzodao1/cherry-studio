@@ -34,6 +34,10 @@ const config: NextConfig = forApp
       turbopack: { root: import.meta.dirname },
       async headers() {
         return [{ source: '/:path*', headers: securityHeaders }]
+      },
+      // short, stable addresses for the Google sign-in screen and the stores
+      async redirects() {
+        return ['privacy', 'terms', 'about'].map((slug) => ({ source: `/${slug}`, destination: `/page?slug=${slug}`, permanent: false }))
       }
     }
 

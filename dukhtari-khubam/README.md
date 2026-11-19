@@ -230,10 +230,40 @@ Revision History; every staff change is in the audit log.
 - Android app: daily local notifications (lesson reminder, inspiration of the day) at times chosen in
   Settings (`src/web/offline/notify.ts`).
 
+### E-mail sign-in (6-digit code)
+
+Registration asks the name, age and e-mail; Supabase Auth sends a 6-digit code (`signInWithOtp`,
+`verifyOtp`), and the confirmed address keeps the profile like a Google account does
+(`src/web/offline/email.ts`, `accountAuth.ts`). Without a connection the profile is made at once and the
+address is confirmed once online. The code length (6) and expiry (10 min) are set in the project.
+The free built-in mailer sends only a few letters an hour and cannot change the letter, so:
+
+1. Create a mail account at an SMTP provider (for example Resend: verify a domain, create an API key).
+2. Supabase → Authentication → Emails → SMTP Settings: enable custom SMTP (host `smtp.resend.com`,
+   port 465, user `resend`, password = API key, sender `no-reply@<your domain>`, name "Духтари хубам").
+3. Supabase → Authentication → Emails → Templates: "Magic Link" and "Confirm signup" must show
+   `{{ .Token }}` (the code) instead of the link; the Tajik letters are in the repository history
+   (scratchpad `auth-config.mjs`) and can be applied through the Management API once SMTP is on.
+4. Authentication → Rate Limits: raise "emails per hour" as needed.
+
+### Launcher icons and widgets (Android)
+
+- 24 alternative icons (`src/web/app-icons.json` → `node tools/android/app-icons.mjs` writes the drawables
+  and the `<activity-alias>` entries); chosen in Settings, optionally changing by themselves each time the
+  app is closed (`AppIconPlugin.java`).
+- Home-screen widgets (`DkWidgets.java`, `WidgetsPlugin.java`, `src/web/offline/widgets.ts`): days in a
+  row (2×1), today's progress with "continue" (2×2), words of the day (4×2), the week (4×1). A tap opens
+  the matching screen (`tj.dukhtarikhubam.app://open/<path>`).
+
 ### Setting up Google sign-in
 
-1. Google Cloud Console → APIs & Services: OAuth consent screen (External; add test users while it is in
-   Testing). Enable the **People API** (for the age).
+1. Google Cloud Console → Google Auth Platform → **Branding**: app name «Духтари хубам», logo, support e-mail,
+   home page `https://dukhtari-khubam.vercel.app`, privacy `https://dukhtari-khubam.vercel.app/privacy`,
+   terms `https://dukhtari-khubam.vercel.app/terms`, authorised domain `dukhtari-khubam.vercel.app`. Google
+   shows the app name, logo and these two links on the sign-in sheet ("by continuing you agree to the
+   Terms of Service and Privacy Policy") once the branding is verified (Branding → "Verify branding";
+   prove the site in Google Search Console first). Audience: External; add test users while in Testing.
+   Enable the **People API** (for the age).
 2. Credentials → OAuth client ID → **Web application**: authorised JavaScript origins
    `https://dukhtari-khubam.vercel.app`; authorised redirect URIs `https://dukhtari-khubam.vercel.app/start/`
    and `https://dqavtyrdipwwgeckxxhr.supabase.co/auth/v1/callback`. Copy its client ID and secret.

@@ -1,8 +1,8 @@
 'use client'
 
 import { Capacitor } from '@capacitor/core'
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
+import { accountAuth, accountProfile, endAccount, linkAccount } from './accountAuth'
 import { apiUrl } from './base'
 
 /**
@@ -58,16 +58,6 @@ export interface GoogleAccount {
 }
 export type GoogleResult = GoogleAccount | 'cancelled' | 'not_configured' | 'offline' | 'error'
 
-// a separate, in-memory Auth client: the learner's Google session never mixes with a staff session
-let client: SupabaseClient | null = null
-function auth(): SupabaseClient | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key) return null
-  client ??= createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'dk-google' } })
-  return client
-}
-
 let ready: Promise<void> | null = null
 async function plugin(webClientId: string) {
   const { SocialLogin } = await import('@capgo/capacitor-social-login')
@@ -103,7 +93,7 @@ export async function signInWithGoogle(): Promise<GoogleResult> {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'offline'
   const id = await clientId()
   if (!id) return 'not_configured'
-  const sb = auth()
+  const sb = accountAuth()
   if (!sb) return 'not_configured'
   try {
     const SocialLogin = await plugin(id)
@@ -118,15 +108,15 @@ export async function signInWithGoogle(): Promise<GoogleResult> {
     if (result.responseType !== 'online' || !result.idToken) return 'error'
     const { error } = await sb.auth.signInWithIdToken({ provider: 'google', token: result.idToken, nonce })
     if (error) return 'error'
-    const { data: profile, error: pErr } = await sb.rpc('api_google_profile')
-    if (pErr) return 'error'
+    const profile = await accountProfile()
+    if (profile === 'error') return 'error'
     const p = result.profile
     return {
       email: p.email,
       name: (p.givenName || p.name || '').trim().slice(0, 80),
       photo: p.imageUrl,
       age: result.accessToken?.token ? await birthdayAge(result.accessToken.token) : null,
-      profile: profile && typeof profile === 'object' ? { code: String((profile as GoogleProfile).code), name: String((profile as GoogleProfile).name) } : null
+      profile
     }
   } catch (e) {
     const text = String((e as Error)?.message ?? e).toLowerCase()
@@ -135,23 +125,9 @@ export async function signInWithGoogle(): Promise<GoogleResult> {
 }
 
 /** Ties the Google account signed in above to this phone's profile, then ends the Google session. */
-export async function linkGoogle(code: string): Promise<boolean> {
-  const sb = auth()
-  if (!sb) return false
-  try {
-    const { error } = await sb.rpc('api_google_link', { p_code: code })
-    return !error
-  } catch {
-    return false
-  } finally {
-    await sb.auth.signOut({ scope: 'local' }).catch(() => undefined)
-  }
-}
-
+export const linkGoogle = linkAccount
 /** Ends the Google session without linking (she signed in to an existing profile). */
-export async function endGoogle(): Promise<void> {
-  await auth()?.auth.signOut({ scope: 'local' }).catch(() => undefined)
-}
+export const endGoogle = endAccount
 
 /** Keeps the Google photo as her profile photo (only when she has none yet). */
 export async function googlePhotoFile(url: string | null): Promise<File | null> {

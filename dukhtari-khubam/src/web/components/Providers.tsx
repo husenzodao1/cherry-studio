@@ -17,6 +17,7 @@ import { Dock } from './Dock'
 import { NotifyBridge } from './NotifyBridge'
 import { SupportWatch } from './SupportWatch'
 import { showToast, Toaster } from './Toast'
+import { WidgetBridge } from './WidgetBridge'
 
 /** Pages a visitor may open before choosing a name or entering a code. */
 const OPEN = /^\/(start|admin|page|support)(\/|$)/
@@ -30,7 +31,7 @@ function Gate({ children }: { children: ReactNode }) {
   // and not for one who signed in with Google); or one signed in with a temporary password
   const online = typeof navigator === 'undefined' || navigator.onLine !== false
   const needsStart = ready && !OPEN.test(path)
-    && (!learner || progress.born === undefined || !!learner.mustChange || (!learner.username && !learner.google && online && !pendingLogin))
+    && (!learner || progress.born === undefined || !!learner.mustChange || (online && (!!learner.emailPending || (!learner.username && !learner.google && !learner.email && !pendingLogin))))
   useEffect(() => {
     if (needsStart) router.replace('/start')
   }, [needsStart, router])
@@ -111,6 +112,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <AppLock />
               <OfflineNote />
               <BackButton />
+              <WidgetBridge />
               <Toaster />
             </ForAge>
           </LearnerProvider>

@@ -24,7 +24,12 @@ export interface Learner {
   mustChange?: boolean
   /** the Google account her profile is tied to (signing in with it gives the code back) */
   google?: string
+  /** her e-mail, confirmed with a 6-digit code: signing in with it gives the code back */
+  email?: string
+  /** an e-mail given without a connection, confirmed once online */
+  emailPending?: string
 }
+export interface AccountLink { google?: string; email?: string; emailPending?: string }
 export type LoginResult = 'ok' | 'invalid' | 'locked' | 'taken' | 'offline' | 'error'
 type SyncState = 'idle' | 'syncing' | 'synced' | 'offline' | 'error'
 
@@ -33,9 +38,11 @@ interface LearnerApi {
   learner: Learner | null
   progress: ProgressData
   sync: SyncState
-  register: (name: string, age: number, google?: string) => Learner
+  register: (name: string, age: number, account?: AccountLink) => Learner
+  /** marks her e-mail as confirmed and tied to the profile */
+  confirmEmail: (email: string) => void
   setAge: (age: number) => void
-  restore: (code: string, google?: string) => Promise<'ok' | 'not_found' | 'offline'>
+  restore: (code: string, account?: AccountLink) => Promise<'ok' | 'not_found' | 'offline'>
   /** backs the profile up now (it must exist on the server before a login or Google is tied to it) */
   backupNow: () => Promise<void>
   /** whether a login can be taken */
@@ -205,8 +212,8 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     learner,
     progress,
     sync,
-    register: (name, age, google) => {
-      const l: Learner = { name: name.trim().slice(0, 80), code: newCode((n) => crypto.getRandomValues(new Uint8Array(n))), ...(google ? { google } : {}) }
+    register: (name, age, account) => {
+      const l: Learner = { name: name.trim().slice(0, 80), code: newCode((n) => crypto.getRandomValues(new Uint8Array(n))), ...account }
       writeJson(LEARNER_KEY, l)
       setLearner(l)
       // the login is usually set right after; it must see the new learner before React re-renders
@@ -216,7 +223,16 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     },
     setAge: (age) => update((p) => ({ ...p, born: new Date().getFullYear() - age })),
     backupNow: pushNow,
-    restore: async (raw, google) => {
+    confirmEmail: (email) => {
+      const cur = latest.current.learner
+      if (!cur) return
+      const { emailPending: _, ...rest } = cur
+      const next = { ...rest, email }
+      writeJson(LEARNER_KEY, next)
+      setLearner(next)
+      latest.current = { ...latest.current, learner: next }
+    },
+    restore: async (raw, account) => {
       const code = raw.replace(/\D/g, '')
       if (!isCode(code)) return 'not_found'
       if (navigator.onLine === false) return 'offline'
@@ -228,7 +244,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
         if (!res.ok) return 'offline'
         const body = (await res.json()) as { name: string; data: unknown }
         const server = ProgressData.safeParse(body.data)
-        const l: Learner = { name: body.name, code, ...(google ? { google } : {}) }
+        const l: Learner = { name: body.name, code, ...account }
         writeJson(LEARNER_KEY, l)
         setLearner(l)
         setProgress((cur) => {

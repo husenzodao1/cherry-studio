@@ -7,6 +7,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { formatCode } from '@/lib/progress'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
+import { AppIconPicker } from '@/web/components/AppIconPicker'
 import { PinSettings } from '@/web/components/PinSettings'
 import { RateShare } from '@/web/components/RateShare'
 import { CodeImageButton } from '@/web/components/Keepsakes'
@@ -173,6 +174,7 @@ export default function Settings() {
             ))}
           </div>
         </div>
+        <AppIconPicker />
         <label className="glass card-pad stack" style={{ gap: 10 }}>
           <span className="eyebrow">{t('settings.text_size')}</span>
           <input type="range" min={MIN_TEXT_SCALE} max={1.3} step={0.05} value={prefs.textScale}

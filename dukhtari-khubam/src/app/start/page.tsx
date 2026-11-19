@@ -9,6 +9,8 @@ import { ART } from '@/web/art'
 import { Icon } from '@/web/components/Icon'
 import { CodeImageButton, saveCodeToGallery } from '@/web/components/Keepsakes'
 import { isPassword, isUsername } from '@/web/offline/account'
+import { endAccount, linkAccount } from '@/web/offline/accountAuth'
+import { isEmail, normalizeEmail, sendEmailCode, verifyEmailCode } from '@/web/offline/email'
 import { endGoogle, googlePhotoFile, linkGoogle, signInWithGoogle, type GoogleAccount } from '@/web/offline/google'
 import { savePhoto } from '@/web/offline/photo'
 import { useLearner, type Learner, type LoginResult } from '@/web/offline/learner'
@@ -17,10 +19,12 @@ import type { UiKey } from '@/web/i18n'
 
 /**
  * First launch and sign-in.
- * Register: name, age, login, password → personal 15-digit code (made on the phone); the picture of the
- * code is saved to the gallery by itself. Or with Google: the phone's account sheet, name and age filled
+ * Register: name, age and e-mail, confirmed with a 6-digit code sent to it → personal 15-digit code
+ * (made on the phone); the picture of the code is saved to the gallery by itself. Without a connection
+ * the profile is made at once and the e-mail is confirmed once online. Or with Google: the phone's account sheet, name and age filled
  * in from the account (both can be changed), and the Google account keeps the code.
- * Sign in: the code; if it is lost, login and password, or Google; if all are lost, the support chat.
+ * Sign in: e-mail and its 6-digit code, Google, or the 15-digit code; older profiles also with login and
+ * password; if all are lost, the support chat.
  * Learners registered earlier are asked once for what is missing (age, login), and a learner signed in
  * with a temporary password from support chooses her own.
  */
@@ -79,12 +83,18 @@ function GoogleButton({ onClick, busy }: { onClick: () => void; busy: boolean })
 export default function StartPage() {
   const { t } = usePrefs()
   const router = useRouter()
-  const { learner, progress, register, restore, backupNow, setAge, setLogin, loginWithPassword, checkUsername, queueLogin, pendingLogin, loginProblem } = useLearner()
+  const { learner, progress, register, restore, backupNow, confirmEmail, setAge, setLogin, loginWithPassword, pendingLogin, loginProblem } = useLearner()
+  const [email, setEmail] = useState('')
+  // the 6-digit code step: what it is for, and when another code may be asked
+  const [verify, setVerify] = useState<{ email: string; purpose: 'register' | 'login' | 'confirm' } | null>(null)
+  const [otp, setOtp] = useState('')
+  const [resendAt, setResendAt] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
   const [google, setGoogle] = useState<GoogleAccount | null>(null)
   const [gBusy, setGBusy] = useState(false)
   const [gallery, setGallery] = useState<'saving' | 'saved' | 'failed' | null>(null)
   const [mode, setMode] = useState<'register' | 'login'>('register')
-  const [by, setBy] = useState<'code' | 'password'>('code')
+  const [by, setBy] = useState<'email' | 'code' | 'password'>('email')
   const [name, setName] = useState('')
   const [age, setAgeText] = useState('')
   const [username, setUsername] = useState('')
@@ -101,7 +111,9 @@ export default function StartPage() {
   const online = typeof navigator === 'undefined' || navigator.onLine !== false
   const needsAge = !!learner && progress.born === undefined
   const mustChange = !!learner?.mustChange
-  const needsAccount = !!learner && !learner.username && !learner.google && online && !pendingLogin
+  // an e-mail given offline waits for its code; a learner with no way back in (no login, Google or
+  // e-mail) is asked for her e-mail once online
+  const needsAccount = !!learner && online && (!!learner.emailPending || (!learner.username && !learner.google && !learner.email && !pendingLogin))
   // already set up on this phone
   useEffect(() => {
     if (learner && !needsAge && !mustChange && !needsAccount && !created) router.replace('/')
@@ -109,6 +121,14 @@ export default function StartPage() {
   useEffect(() => {
     if (learner?.username) setUsername(learner.username)
   }, [learner?.username])
+  useEffect(() => {
+    if (learner?.emailPending) setEmail(learner.emailPending)
+  }, [learner?.emailPending])
+  useEffect(() => {
+    if (!verify) return
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [verify])
 
   const say = (r: LoginResult) => setMessage(RESULT[r] ? t(RESULT[r]!) : null)
 
@@ -136,7 +156,7 @@ export default function StartPage() {
     }
     if (r.profile) {
       // this Google account already keeps a profile: bring it back
-      const ok = await restore(r.profile.code, r.email ?? 'google')
+      const ok = await restore(r.profile.code, { google: r.email ?? 'google' })
       await endGoogle()
       setGBusy(false)
       if (ok === 'ok') router.replace('/')
@@ -153,7 +173,7 @@ export default function StartPage() {
     if (!google || !name.trim() || !ageOk) return
     setBusy(true)
     setMessage(null)
-    const l = register(name, ageNum, google.email ?? 'google')
+    const l = register(name, ageNum, { google: google.email ?? 'google' })
     await backupNow()
     const linked = await linkGoogle(l.code)
     const photo = await googlePhotoFile(google.photo)
@@ -167,30 +187,82 @@ export default function StartPage() {
     router.replace('/')
   }
 
+  /** Sends the 6-digit code and opens the code step. */
+  const askCode = async (address: string, purpose: 'register' | 'login' | 'confirm'): Promise<boolean> => {
+    const r = await sendEmailCode(address)
+    if (r === 'sent') {
+      setVerify({ email: normalizeEmail(address), purpose })
+      setOtp('')
+      setResendAt(Date.now() + 60_000)
+      setNow(Date.now())
+      setMessage(null)
+      return true
+    }
+    setMessage(t(r === 'wait' ? 'email.wait' : r === 'invalid' ? 'email.invalid' : r === 'offline' ? 'start.need_online' : 'email.send_failed'))
+    return false
+  }
   const onRegister = async (e: FormEvent) => {
     e.preventDefault()
-    if (!name.trim() || !ageOk || !accountOk) return
+    if (!name.trim() || !ageOk || !isEmail(email)) return
     setBusy(true)
     setMessage(null)
-    // the login must be free; without a connection it is set later, the code works offline
-    const free = await checkUsername(username)
-    if (free === 'taken' || free === 'invalid') {
+    if (!online) {
+      // no connection: the profile is made now, the e-mail is confirmed with its code once online
+      const l = register(name, ageNum, { emailPending: normalizeEmail(email) })
+      setCreated(l)
+      setMessage(t('email.later_offline'))
+    } else await askCode(email, 'register')
+    setBusy(false)
+  }
+  const onVerify = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!verify || otp.length !== 6) return
+    setBusy(true)
+    setMessage(null)
+    const r = await verifyEmailCode(verify.email, otp)
+    if (typeof r === 'string') {
       setBusy(false)
-      setMessage(t(free === 'taken' ? 'start.taken' : 'start.username_hint'))
+      setMessage(t(r === 'wrong' ? 'email.wrong_code' : r === 'offline' ? 'start.need_online' : 'state.error'))
       return
     }
-    const l = register(name, ageNum)
-    setCreated(l)
-    if (free === 'free') {
-      const r = await setLogin(username, password)
-      if (r === 'offline' || r === 'error') queueLogin(username, password)
-      else if (r !== 'ok') say(r)
-    } else {
-      // no connection: the login waits on the phone and is saved on its own once online
-      queueLogin(username, password)
-      setMessage(t('start.later_offline'))
+    const account = { email: verify.email }
+    if (verify.purpose === 'confirm' && learner) {
+      if (r.profile && r.profile.code !== learner.code) {
+        await endAccount()
+        setBusy(false)
+        setMessage(t('email.taken'))
+        return
+      }
+      await backupNow()
+      const linked = await linkAccount(learner.code)
+      setBusy(false)
+      if (!linked) return setMessage(t('state.error'))
+      confirmEmail(verify.email)
+      router.replace('/')
+      return
     }
+    if (r.profile) {
+      // this address already keeps a profile: bring it back
+      const ok = await restore(r.profile.code, account)
+      await endAccount()
+      setBusy(false)
+      if (ok === 'ok') router.replace('/')
+      else setMessage(t(ok === 'offline' ? 'start.need_online' : 'state.error'))
+      return
+    }
+    if (verify.purpose === 'login') {
+      await endAccount()
+      setBusy(false)
+      setMessage(t('email.no_profile'))
+      return
+    }
+    const l = register(name, ageNum, account)
+    await backupNow()
+    const linked = await linkAccount(l.code)
     setBusy(false)
+    setVerify(null)
+    setCreated(l)
+    if (!linked) setMessage(t('google.link_later'))
   }
   const onCode = async (e: FormEvent) => {
     e.preventDefault()
@@ -260,6 +332,43 @@ export default function StartPage() {
     </div>
   )
 
+  const emailField = (
+    <Field label={t('email.label')} hint={t('email.hint')}>
+      <input className="input" type="email" inputMode="email" value={email} maxLength={120} autoComplete="email" autoCapitalize="none" spellCheck={false}
+        onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))} />
+    </Field>
+  )
+
+  if (verify) {
+    const left = Math.max(0, Math.ceil((resendAt - now) / 1000))
+    return (
+      <div className="start">
+        {flower}
+        <form className="glass google-card stack otp-card" onSubmit={onVerify}>
+          <div style={{ textAlign: 'center' }}>
+            <h1 className="h-page">{t('email.code_title')}</h1>
+            <p className="muted" style={{ margin: '6px 0 0', fontSize: '0.9em' }}>{t('email.code_sent').replace('{email}', verify.email)}</p>
+          </div>
+          <label className="otp-field">
+            <span className="otp-boxes" aria-hidden="true">
+              {Array.from({ length: 6 }, (_, i) => <span key={i} className={i < otp.length ? 'is-on' : i === otp.length ? 'is-now' : ''}>{otp[i] ?? ''}</span>)}
+            </span>
+            <input className="otp-input" inputMode="numeric" autoComplete="one-time-code" autoFocus value={otp} maxLength={6}
+              aria-label={t('email.code_title')} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+          </label>
+          {note}
+          <button className="btn btn-block btn-lg" disabled={busy || otp.length !== 6}>{t('email.confirm')} <Icon name="check" size={18} /></button>
+          <div className="row" style={{ justifyContent: 'space-between' }}>
+            <button type="button" className="link-btn" onClick={() => { setVerify(null); setMessage(null) }}>{t('action.back')}</button>
+            <button type="button" className="link-btn" disabled={left > 0 || busy} onClick={() => askCode(verify.email, verify.purpose)}>
+              {left > 0 ? t('email.resend_in').replace('{n}', String(left)) : t('email.resend')}
+            </button>
+          </div>
+        </form>
+      </div>
+    )
+  }
+
   if (created) {
     return (
       <div className="start">
@@ -307,13 +416,18 @@ export default function StartPage() {
       <div className="start">
         {flower}
         <div>
-          <h1 className="h-page">{t('start.account_title')}</h1>
-          <p className="muted" style={{ margin: '4px 0 0' }}>{loginProblem && RESULT[loginProblem] ? t(RESULT[loginProblem]!) : t('start.account_hint')}</p>
+          <h1 className="h-page">{t('email.confirm_title')}</h1>
+          <p className="muted" style={{ margin: '4px 0 0' }}>{loginProblem && RESULT[loginProblem] ? t(RESULT[loginProblem]!) : t('email.confirm_hint')}</p>
         </div>
-        <form className="stack" style={{ width: '100%', maxWidth: 420 }} onSubmit={onAccount}>
-          {accountFields()}
+        <form className="stack" style={{ width: '100%', maxWidth: 420 }} onSubmit={async (e) => {
+          e.preventDefault()
+          setBusy(true)
+          await askCode(email, 'confirm')
+          setBusy(false)
+        }}>
+          {emailField}
           {note}
-          <button className="btn btn-block btn-lg" disabled={busy || !accountOk}>{t('start.save')} <Icon name="check" size={18} /></button>
+          <button className="btn btn-block btn-lg" disabled={busy || !isEmail(email)}>{t('email.send_code')} <Icon name="arrow" size={18} /></button>
         </form>
       </div>
     )
@@ -364,9 +478,17 @@ export default function StartPage() {
             <input className="input" value={name} maxLength={80} autoComplete="given-name" onChange={(e) => setName(e.target.value)} />
           </Field>
           {ageField}
-          {accountFields()}
+          {emailField}
           {note}
-          <button className="btn btn-block btn-lg" disabled={busy || !name.trim() || !ageOk || !accountOk}>{t('start.create')} <Icon name="arrow" size={18} /></button>
+          <button className="btn btn-block btn-lg" disabled={busy || !name.trim() || !ageOk || !isEmail(email)}>{t('start.create')} <Icon name="arrow" size={18} /></button>
+        </form>
+      ) : by === 'email' ? (
+        <form onSubmit={async (e) => { e.preventDefault(); setBusy(true); await askCode(email, 'login'); setBusy(false) }}
+          className="stack" style={{ width: '100%', maxWidth: 420 }} key="e">
+          {emailField}
+          {note}
+          <button className="btn btn-block btn-lg" disabled={busy || !isEmail(email)}>{t('email.send_code')} <Icon name="arrow" size={18} /></button>
+          <button type="button" className="link-btn" onClick={() => { setBy('code'); setMessage(null) }}>{t('email.by_code')}</button>
         </form>
       ) : by === 'code' ? (
         <form onSubmit={onCode} className="stack" style={{ width: '100%', maxWidth: 420 }} key="c">
@@ -377,6 +499,7 @@ export default function StartPage() {
           </Field>
           {note}
           <button className="btn btn-block btn-lg" disabled={busy || code.length !== 15}>{t('start.restore')} <Icon name="check" size={18} /></button>
+          <button type="button" className="link-btn" onClick={() => { setBy('email'); setMessage(null) }}>{t('email.by_email')}</button>
           <button type="button" className="link-btn" onClick={() => { setBy('password'); setMessage(null) }}>{t('start.forgot_code')}</button>
         </form>
       ) : (
