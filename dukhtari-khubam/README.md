@@ -78,8 +78,10 @@ npm run apk     # static export (out/) → content bundle embedded → cap sync 
 
 Needs JDK 21 and the Android SDK (platform 36). The APK holds every page, font and image, so it
 opens and works without a connection; content updates arrive by themselves when online. A new app
-version (new code) is announced in the app from `/app-version.json`: raise `versionCode` there and
-in `android/app/build.gradle`, build, and publish the APK at `public/download/`. The current APK is a
+version (new code) is announced in the app from `/app-version.json`: raise `versionCode` there, build,
+and publish the APK at `public/download/` twice — as `dukhtari-khubam.apk` (the stable link) and as
+`dukhtari-khubam-<version>.apk`, which `/app-version.json` points to (a new name per version, so a
+phone never opens an older download of the same name); remove the previous versioned file. The current APK is a
 debug build for direct installation; Google Play needs a release build signed with your own key.
 
 ### Supabase project
