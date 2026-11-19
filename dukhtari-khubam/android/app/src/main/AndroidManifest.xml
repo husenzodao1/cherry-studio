@@ -24,6 +24,10 @@
                 <data android:scheme="@string/custom_url_scheme" android:host="open" />
             </intent-filter>
         </activity>
+        <!-- "last chance" for the day streak (StreakAlarm.java): the daily alarm and its return after a restart -->
+        <receiver android:name=".StreakAlarm$Receiver" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
+        </receiver>
         <!-- home-screen widgets (DkWidgets.java) -->
         <receiver android:name=".DkWidgets$StreakWidget" android:exported="false" android:label="@string/widget_streak">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
@@ -386,6 +390,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- a soft vibration when the PIN is wrong or right -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- the streak alarm comes back after the phone restarts -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- saving the code picture to the gallery on Android 9 and older (newer phones need no permission) -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 </manifest>

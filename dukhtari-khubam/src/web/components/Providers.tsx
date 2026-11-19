@@ -32,10 +32,13 @@ function Gate({ children }: { children: ReactNode }) {
   const online = typeof navigator === 'undefined' || navigator.onLine !== false
   const needsStart = ready && !OPEN.test(path)
     && (!learner || progress.born === undefined || !!learner.mustChange || (online && (!!learner.emailPending || (!learner.username && !learner.google && !learner.email && !pendingLogin))))
+  // after signing in, the welcome questions once (her answers shape the start; skipping counts too)
+  const needsWelcome = ready && !needsStart && !!learner && !progress.about && !OPEN.test(path) && !/^\/welcome(\/|$)/.test(path)
   useEffect(() => {
     if (needsStart) router.replace('/start')
-  }, [needsStart, router])
-  if (!ready || needsStart) return null
+    else if (needsWelcome) router.replace('/welcome')
+  }, [needsStart, needsWelcome, router])
+  if (!ready || needsStart || needsWelcome) return null
   return <>{children}</>
 }
 

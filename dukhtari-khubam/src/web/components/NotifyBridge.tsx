@@ -5,10 +5,12 @@ import { useEffect, useState } from 'react'
 
 import { useContent } from '../offline/content'
 import { useLearner } from '../offline/learner'
-import { canNotify, onNotificationTap, readNotify, scheduleDaily } from '../offline/notify'
+import { streak } from '@/lib/progress'
+
+import { canNotify, lines, onNotificationTap, readNotify, scheduleDaily } from '../offline/notify'
 import { usePrefs } from '../prefs'
 
-/** Keeps the daily notifications' texts current and routes taps to the right screen (Android app only). */
+/** Keeps the planned notifications' texts current (panel texts, her name, lesson and streak) and routes taps (Android app only). */
 export function NotifyBridge() {
   const router = useRouter()
   const { t } = usePrefs()
@@ -31,20 +33,24 @@ export function NotifyBridge() {
   const lastId = progress.last?.lesson
   const last = lastId && !progress.lessons[lastId]?.done ? bundle?.lessons[lastId] : undefined
   const inspiration = bundle?.inspiration?.body ?? t('home.quote')
+  const days = progress.days
   useEffect(() => {
     if (!canNotify() || !learner) return
     const timer = setTimeout(() => {
+      // a lesson to continue gets the lines that name it; otherwise the general ones
+      const bodies = lines(t(last ? 'notify.lesson.bodies_named' : 'notify.lesson.bodies'))
       scheduleDaily(readNotify(), {
-        lesson: {
-          title: t('notify.lesson_title'),
-          body: last ? t('notify.lesson_named').replace('{title}', last.title) : t('notify.lesson_body'),
-          href: last ? `/lesson?id=${last.id}` : '/schools'
-        },
-        inspiration: { title: t('notify.inspiration_title'), body: inspiration }
+        lessonTitles: lines(t('notify.lesson.titles')),
+        lessonBodies: bodies,
+        lessonHref: last ? `/lesson?id=${last.id}` : '/schools',
+        inspiration: { title: t('notify.inspiration_title'), body: inspiration },
+        streak: { titles: lines(t('notify.streak.titles')), bodies: lines(t('notify.streak.bodies')), leftLabel: t('notify.streak.left'), channel: t('notify.streak.channel') },
+        vars: { name: learner.name.split(/\s+/)[0] ?? '', lesson: last?.title ?? '', streak: streak(days) },
+        lastDay: [...days].sort().at(-1) ?? ''
       }).catch(() => undefined)
     }, 1500)
     return () => clearTimeout(timer)
-  }, [learner, last, inspiration, t, prefsVersion])
+  }, [learner, last, inspiration, days, t, prefsVersion])
 
   return null
 }

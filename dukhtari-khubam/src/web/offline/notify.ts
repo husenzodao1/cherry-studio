@@ -1,26 +1,43 @@
 'use client'
 
-import { Capacitor } from '@capacitor/core'
+import { Capacitor, registerPlugin } from '@capacitor/core'
 
 /**
- * Daily local notifications in the Android app: a lesson reminder and the inspiration of the day.
- * They are scheduled on the phone (no server, no account) and rescheduled whenever the content or
- * the learner's progress changes, so the texts stay current.
+ * Local notifications in the Android app, scheduled on the phone (no server, no account) and rescheduled
+ * whenever the content or the learner's progress changes:
+ * - the lesson reminder: a different, personal line each day (variants edited in the panel, with {name},
+ *   {lesson} and {streak}), planned a week ahead;
+ * - the inspiration of the day;
+ * - "last chance" for the day streak: when today is still empty, a red clock counts down to midnight
+ *   (native, StreakAlarm.java).
  */
 
 export interface Reminder { on: boolean; time: string }
-export interface NotifyPrefs { lesson: Reminder; inspiration: Reminder }
+export interface NotifyPrefs { lesson: Reminder; inspiration: Reminder; streak: Reminder }
 
 const KEY = 'dk.notify'
 const IDS = { lesson: 101, inspiration: 102 } as const
-export const DEFAULT_NOTIFY: NotifyPrefs = { lesson: { on: false, time: '19:00' }, inspiration: { on: false, time: '08:00' } }
+/** the lesson reminder of each of the next seven days has its own id (and its own words) */
+const LESSON_DAYS = Array.from({ length: 7 }, (_, i) => 110 + i)
+export const DEFAULT_NOTIFY: NotifyPrefs = {
+  lesson: { on: false, time: '19:00' }, inspiration: { on: false, time: '08:00' }, streak: { on: false, time: '20:00' }
+}
+
+interface StreakApi {
+  configure(o: { on: boolean; hour: number; minute: number; lastDay: string; streak: number; name: string; leftLabel: string; channel: string; titles: string[]; bodies: string[] }): Promise<void>
+}
+const StreakAlarm = registerPlugin<StreakApi>('StreakAlarm')
 
 export const canNotify = () => Capacitor.isNativePlatform()
 
 export function readNotify(): NotifyPrefs {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Partial<NotifyPrefs> | null
-    return { lesson: { ...DEFAULT_NOTIFY.lesson, ...v?.lesson }, inspiration: { ...DEFAULT_NOTIFY.inspiration, ...v?.inspiration } }
+    return {
+      lesson: { ...DEFAULT_NOTIFY.lesson, ...v?.lesson },
+      inspiration: { ...DEFAULT_NOTIFY.inspiration, ...v?.inspiration },
+      streak: { ...DEFAULT_NOTIFY.streak, ...v?.streak }
+    }
   } catch {
     return DEFAULT_NOTIFY
   }
@@ -45,8 +62,16 @@ export async function allowNotifications(): Promise<boolean> {
 }
 
 export interface NotifyTexts {
-  lesson: { title: string; body: string; href: string }
+  /** one line per variant; {name}, {lesson} and {streak} are filled in */
+  lessonTitles: string[]
+  lessonBodies: string[]
+  lessonHref: string
   inspiration: { title: string; body: string }
+  streak: { titles: string[]; bodies: string[]; leftLabel: string; channel: string }
+  /** filled into the variants */
+  vars: { name: string; lesson: string; streak: number }
+  /** the last day she studied (YYYY-MM-DD) */
+  lastDay: string
 }
 
 const at = (time: string) => {
@@ -54,16 +79,42 @@ const at = (time: string) => {
   return { hour: Number.isFinite(h) ? Math.min(23, Math.max(0, h)) : 19, minute: Number.isFinite(m) ? Math.min(59, Math.max(0, m)) : 0 }
 }
 
-/** Replaces both daily notifications with the current texts (or removes the ones turned off). */
-export async function scheduleDaily(prefs: NotifyPrefs, texts: NotifyTexts): Promise<void> {
+/** Lines of a panel text (one variant per line). */
+export const lines = (text: string) => text.split('\n').map((l) => l.trim()).filter(Boolean)
+
+/** A variant for the given day, with its placeholders filled. */
+export function variant(list: string[], dayIndex: number, vars: NotifyTexts['vars']): string {
+  if (!list.length) return ''
+  const v = list[((dayIndex % list.length) + list.length) % list.length]
+  return v.replace(/\{name\}/g, vars.name).replace(/\{lesson\}/g, vars.lesson).replace(/\{streak\}/g, String(vars.streak))
+    .replace(/\s+([,.!?…])/g, '$1').replace(/,\s*([!.?])/g, '$1').trim()
+}
+
+const dayNumber = (d: Date) => Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86_400_000)
+
+/** Replaces the planned notifications with the current texts (or removes the ones turned off). */
+export async function scheduleDaily(prefs: NotifyPrefs, texts: NotifyTexts, now = new Date()): Promise<void> {
   if (!canNotify()) return
   const { LocalNotifications } = await import('@capacitor/local-notifications')
-  await LocalNotifications.cancel({ notifications: [{ id: IDS.lesson }, { id: IDS.inspiration }] }).catch(() => undefined)
+  await LocalNotifications.cancel({ notifications: [{ id: IDS.lesson }, { id: IDS.inspiration }, ...LESSON_DAYS.map((id) => ({ id }))] }).catch(() => undefined)
   const perm = await LocalNotifications.checkPermissions()
-  if (perm.display !== 'granted') return
+  const allowed = perm.display === 'granted'
+  const st = at(prefs.streak.time)
+  await StreakAlarm.configure({
+    on: allowed && prefs.streak.on, hour: st.hour, minute: st.minute, lastDay: texts.lastDay, streak: texts.vars.streak, name: texts.vars.name,
+    leftLabel: texts.streak.leftLabel, channel: texts.streak.channel, titles: texts.streak.titles, bodies: texts.streak.bodies
+  }).catch(() => undefined)
+  if (!allowed) return
   const list = []
   if (prefs.lesson.on) {
-    list.push({ id: IDS.lesson, title: texts.lesson.title, body: texts.lesson.body, schedule: { on: at(prefs.lesson.time), allowWhileIdle: true }, extra: { href: texts.lesson.href } })
+    const t = at(prefs.lesson.time)
+    for (let i = 0; i < LESSON_DAYS.length; i++) {
+      const when = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, t.hour, t.minute)
+      if (when.getTime() <= now.getTime() + 30_000) continue
+      const n = dayNumber(when)
+      const body = variant(texts.lessonBodies, n, texts.vars)
+      list.push({ id: LESSON_DAYS[i], title: variant(texts.lessonTitles, n, texts.vars), body, largeBody: body, schedule: { at: when, allowWhileIdle: true }, extra: { href: texts.lessonHref } })
+    }
   }
   if (prefs.inspiration.on) {
     list.push({ id: IDS.inspiration, title: texts.inspiration.title, body: texts.inspiration.body, largeBody: texts.inspiration.body, schedule: { on: at(prefs.inspiration.time), allowWhileIdle: true }, extra: { href: '/' } })

@@ -32,7 +32,7 @@ export function Backdrop() {
   // documents are plain paper: no glass pieces around them
   if (/^\/page(\/|$)/.test(path)) return <div className="backdrop backdrop-paper" aria-hidden="true" />
   const set = /^\/admin(\/|$)/.test(path) ? [] : /^\/(lesson|garden|support)(\/|$)/.test(path) ? CALM : /^\/(quiz|review)(\/|$)/.test(path) ? QUIZ
-    : /^\/start(\/|$)/.test(path) ? START : FULL
+    : /^\/(start|welcome)(\/|$)/.test(path) ? START : FULL
   return (
     <div className="backdrop" aria-hidden="true">
       {set.map(([art, cls]) => (

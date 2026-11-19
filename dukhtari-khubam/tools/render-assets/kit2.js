@@ -529,6 +529,120 @@ export function words3() {
   return g
 }
 
+// ---------------------------------------------------------------- welcome questions (onboarding)
+/** "How much time a day?": a soft peach alarm clock with golden bells, hands at ten past ten, sparkles. */
+export function clock3() {
+  const g = new THREE.Group()
+  const body = new THREE.Group()
+  // the case: a thick rounded disc, peach to coral, with a golden bezel and a pearly face
+  body.add(mesh(shaded(new THREE.CylinderGeometry(0.92, 0.92, 0.42, 128, 1).rotateX(Math.PI / 2), '#ffc7ad', '#ef7a8c'), candy({ irid: 0.3 })))
+  body.add(mesh(new THREE.TorusGeometry(0.9, 0.075, 32, 160), gold(), [0, 0, 0.21]))
+  body.add(mesh(new THREE.CircleGeometry(0.82, 128), glossy('#fff8f4', { roughness: 0.18, sheen: 0.6 }), [0, 0, 0.212]))
+  // twelve hour marks, the four main ones larger
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2, big = i % 3 === 0
+    body.add(mesh(new THREE.SphereGeometry(big ? 0.05 : 0.028, 20, 14), big ? gold() : glossy('#e7a3a8', { roughness: 0.2 }),
+      [Math.sin(a) * 0.68, Math.cos(a) * 0.68, 0.23]))
+  }
+  // hands: ten past ten
+  const hand = (len, w, a, z, mat) => { const m = mesh(new RoundedBoxGeometry(w, len, 0.03, 3, w / 2.2), mat, [0, 0, z]); m.geometry.translate(0, len / 2 - 0.06, 0); m.rotation.z = -a; return m }
+  body.add(hand(0.42, 0.075, (10 / 12) * Math.PI * 2 + 0.09, 0.245, glossy('#7a3f5e', { roughness: 0.2 })))
+  body.add(hand(0.6, 0.055, (2 / 12) * Math.PI * 2, 0.27, glossy('#7a3f5e', { roughness: 0.2 })))
+  body.add(mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 32).rotateX(Math.PI / 2), gold(), [0, 0, 0.29]))
+  // glass over the face
+  body.add(mesh(new THREE.SphereGeometry(0.84, 96, 48, 0, Math.PI * 2, 0, 0.42).rotateX(Math.PI / 2).scale(1, 1, 0.35).translate(0, 0, 0.2), glass2({ attenuation: '#ffe3d8', attDist: 6, thickness: 0.04, irid: 0.5 })))
+  // two bells and the hammer
+  for (const sx of [-1, 1]) {
+    const bell = mesh(new THREE.SphereGeometry(0.3, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2), gold({ color: '#f0c46d' }), [sx * 0.58, 0.86, 0], [0, 0, -sx * 0.62])
+    body.add(bell)
+    body.add(mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.16, 16), gold(), [sx * 0.46, 0.74, 0], [0, 0, -sx * 0.62]))
+  }
+  body.add(mesh(new THREE.TorusGeometry(0.16, 0.035, 16, 64, Math.PI), gold(), [0, 1.0, 0]))
+  // feet
+  for (const sx of [-1, 1]) body.add(mesh(new THREE.SphereGeometry(0.11, 24, 16), gold(), [sx * 0.52, -0.86, 0], [0, 0, 0], [1, 0.8, 1]))
+  body.position.y = 0.98; body.rotation.set(0.05, -0.32, 0.04)
+  g.add(body)
+  for (const [x, y, z, s] of [[-1.15, 1.9, 0.2, 0.09], [1.2, 1.55, 0.3, 0.07], [1.05, 2.25, -0.1, 0.05]]) g.add(mesh(new THREE.OctahedronGeometry(s), gold(), [x, y, z], [0.3, 0.6, 0]))
+  return g
+}
+
+/** "Which mirrors of a girl?": a girl made of soft shapes (dress, scarf, face) and, floating around her,
+ *  small symbols of the schools: a book, a heart, a crescent, a star, a flower, a pearl. */
+export function girl3() {
+  const { heartGeo } = D()
+  const g = new THREE.Group()
+  // dress: a lathe bell, lilac to rose
+  const dress = [[0.001, 0], [0.62, 0], [0.66, 0.05], [0.6, 0.3], [0.42, 0.9], [0.3, 1.2], [0.24, 1.3], [0.001, 1.32]]
+  g.add(mesh(shaded(lathe(dress, 128), '#e2b3f7', '#8f5fe0'), candy({ irid: 0.35 })))
+  // shawl over the shoulders, then the scarf: a rounded hood that frames the face
+  const shawl = [[0.001, 1.22], [0.42, 1.22], [0.46, 1.27], [0.36, 1.42], [0.2, 1.5], [0.001, 1.52]]
+  g.add(mesh(shaded(lathe(shawl, 96), '#f9a9bd', '#d9628c'), candy({ irid: 0.3 })))
+  g.add(mesh(shaded(new THREE.SphereGeometry(0.4, 96, 64), '#f7a5bb', '#d65d8b'), candy({ irid: 0.3 }), [0, 1.66, -0.06], [0, 0, 0], [1, 1.1, 0.92]))
+  g.add(mesh(shaded(new THREE.TorusGeometry(0.255, 0.075, 32, 128), '#fbb6c6', '#e0739a'), candy({ irid: 0.3 }), [0, 1.63, 0.2], [0, 0, 0], [1, 1.12, 1]))
+  // face, set into the scarf
+  g.add(mesh(new THREE.SphereGeometry(0.25, 96, 64), glossy('#ffe8dc', { roughness: 0.34, sheen: 0.8, sheenColor: '#fff3ee' }), [0, 1.62, 0.17], [0, 0, 0], [0.98, 1.08, 0.72]))
+  for (const sx of [-1, 1]) {
+    g.add(mesh(new THREE.SphereGeometry(0.026, 16, 12), glossy('#5a3550', { roughness: 0.15 }), [sx * 0.085, 1.65, 0.345]))
+    g.add(mesh(new THREE.SphereGeometry(0.042, 16, 12), glossy('#ffb2bf', { roughness: 0.5 }), [sx * 0.145, 1.56, 0.33], [0, 0, 0], [1, 0.6, 0.4]))
+  }
+  g.add(mesh(new THREE.TorusGeometry(0.045, 0.011, 8, 32, Math.PI), glossy('#d26a86', { roughness: 0.3 }), [0, 1.55, 0.35], [0, 0, Math.PI]))
+  // floating symbols
+  const book = new THREE.Group()
+  book.add(mesh(new RoundedBoxGeometry(0.42, 0.04, 0.3, 3, 0.015), glossy('#ffffff', { roughness: 0.25 }), [-0.11, 0.02, 0], [0, 0, 0.14]))
+  book.add(mesh(new RoundedBoxGeometry(0.42, 0.04, 0.3, 3, 0.015), glossy('#ffffff', { roughness: 0.25 }), [0.11, 0.02, 0], [0, 0, -0.14]))
+  book.add(mesh(new RoundedBoxGeometry(0.46, 0.03, 0.34, 3, 0.012), glossy('#8c5ce0', { roughness: 0.2 }), [-0.12, -0.02, 0], [0, 0, 0.14]))
+  book.add(mesh(new RoundedBoxGeometry(0.46, 0.03, 0.34, 3, 0.012), glossy('#8c5ce0', { roughness: 0.2 }), [0.12, -0.02, 0], [0, 0, -0.14]))
+  book.position.set(-1.05, 1.55, 0.2); book.rotation.set(0.6, 0.4, 0.1); g.add(book)
+  g.add(mesh(shaded(heartGeo(), '#ffc4ec', '#e2559f'), candy({ irid: 0.35 }), [1.0, 1.95, 0.1], [0, -0.3, 0.2], 0.22))
+  const moon = new THREE.Shape(); moon.absarc(0, 0, 1, 0, Math.PI * 2, false)
+  const hole = new THREE.Path(); hole.absarc(0.42, 0.18, 0.86, 0, Math.PI * 2, true); moon.holes.push(hole)
+  g.add(mesh(new THREE.ExtrudeGeometry(moon, { depth: 0.25, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.06, bevelSegments: 6, curveSegments: 64 }).center(), gold({ color: '#f2c35a' }), [-0.85, 2.25, -0.2], [0.1, 0.4, -0.4], 0.17))
+  g.add(mesh(star5(0.46, 0.3), gold({ color: '#f2c35a', roughness: 0.16 }), [0.95, 0.95, 0.35], [0.1, -0.4, 0.2], 0.2))
+  const c = crocus2({ palette: ['#e48fc6', '#fbe0f1', '#ffffff'], attenuation: '#f2b5dc' }); c.scale.setScalar(0.32); c.position.set(-1.0, 0.6, 0.35); c.rotation.set(0.4, 0, 0.3); g.add(c)
+  for (const [x, y, z, r] of [[0.55, 2.35, 0.1, 0.07], [-0.5, 0.25, 0.6, 0.05], [1.25, 1.45, -0.2, 0.05], [-1.3, 1.05, -0.1, 0.04]]) {
+    g.add(mesh(new THREE.SphereGeometry(r, 24, 18), glossy('#fbf3ff', { roughness: 0.08, irid: 0.9, sheen: 1 }), [x, y, z]))
+  }
+  g.traverse((m) => { if (m.isMesh && m.position.y > 0.4 && Math.abs(m.position.x) > 0.7) m.castShadow = false })
+  return g
+}
+
+/** "Where did you find us?": a glossy location pin, a speech bubble with a heart and a glass magnifier. */
+export function track3() {
+  const { heartGeo } = D()
+  const g = new THREE.Group()
+  // the pin: a teardrop lathe with a pearl in its eye
+  const pin = []
+  for (let i = 0; i <= 48; i++) { const t = i / 48, a = Math.PI * t; pin.push([Math.sin(a) * 0.5 * (1 - 0.65 * Math.pow(1 - t, 3)), 0.5 - Math.cos(a) * 0.5 * (t < 0.5 ? 1.9 : 1)]) }
+  pin[0] = [0.001, pin[0][1]]; pin[48] = [0.001, pin[48][1]]
+  const p = mesh(shaded(lathe(pin, 128), '#ffb59e', '#e0577e'), candy({ irid: 0.3 }), [0, 0.47, 0], [0, 0, 0], [1, 1, 0.8])
+  p.geometry.translate(0, 0, 0)
+  g.add(p)
+  g.add(mesh(new THREE.SphereGeometry(0.18, 48, 32), glossy('#fff6f2', { roughness: 0.1, irid: 0.8 }), [0, 0.82, 0.34]))
+  g.add(mesh(new THREE.TorusGeometry(0.42, 0.03, 16, 96), glossy('#f6a6a6', { roughness: 0.3 }), [0, 0.03, 0], [Math.PI / 2, 0, 0]))
+  // the speech bubble with a heart
+  const b = new THREE.Shape()
+  b.moveTo(-0.5, -0.25); b.quadraticCurveTo(-0.5, -0.45, -0.3, -0.45); b.lineTo(-0.15, -0.45); b.lineTo(-0.28, -0.68); b.lineTo(0.05, -0.45)
+  b.lineTo(0.3, -0.45); b.quadraticCurveTo(0.5, -0.45, 0.5, -0.25); b.lineTo(0.5, 0.25); b.quadraticCurveTo(0.5, 0.45, 0.3, 0.45)
+  b.lineTo(-0.3, 0.45); b.quadraticCurveTo(-0.5, 0.45, -0.5, 0.25); b.closePath()
+  const bubble = new THREE.Group()
+  bubble.add(mesh(new THREE.ExtrudeGeometry(b, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.07, bevelSize: 0.07, bevelSegments: 8, curveSegments: 32 }).translate(0, 0, -0.06), shaded(new THREE.BoxGeometry(1, 1, 1), '#d9c8ff', '#9f7deb') && candy({ irid: 0.3 })))
+  bubble.children[0].material = glossy('#c8b1f8', { roughness: 0.14, irid: 0.35, sheen: 0.6 })
+  bubble.add(mesh(shaded(heartGeo(), '#ffd3f1', '#e2559f'), candy({ irid: 0.35 }), [0, 0.0, 0.16], [0, 0, 0], 0.22))
+  bubble.position.set(0.95, 1.3, -0.1); bubble.rotation.set(0, -0.35, 0.08); bubble.scale.setScalar(0.85)
+  bubble.traverse((m) => { m.castShadow = false })
+  g.add(bubble)
+  // the magnifier
+  const lens = new THREE.Group()
+  lens.add(mesh(new THREE.TorusGeometry(0.32, 0.06, 24, 128), gold()))
+  lens.add(mesh(new THREE.CylinderGeometry(0.31, 0.31, 0.05, 96).rotateX(Math.PI / 2), glass2({ attenuation: '#e6dcff', attDist: 5, thickness: 0.1, irid: 0.8 })))
+  lens.add(mesh(new RoundedBoxGeometry(0.12, 0.5, 0.12, 4, 0.05), glossy('#7a4fd8', { roughness: 0.2 }), [0, -0.6, 0]))
+  lens.position.set(-0.95, 0.75, 0.25); lens.rotation.set(0.2, 0.5, 0.65)
+  lens.traverse((m) => { m.castShadow = false })
+  g.add(lens)
+  for (const [x, y, z, s] of [[-0.6, 1.6, 0.1, 0.07], [1.45, 0.6, 0.2, 0.05]]) g.add(mesh(new THREE.OctahedronGeometry(s), gold(), [x, y, z], [0.3, 0.6, 0]))
+  return g
+}
+
 export function buildKind2(job) {
   const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
   switch (job.kind) {
@@ -549,6 +663,9 @@ export function buildKind2(job) {
     case 'health3': return health3()
     case 'growth3': return growth3()
     case 'words3': return words3()
+    case 'clock3': return clock3()
+    case 'girl3': return girl3()
+    case 'track3': return track3()
     default: return null
   }
 }

@@ -452,11 +452,16 @@ export const adminRoutes: AnyRoute[] = [
   }),
   route({
     method: 'PUT', path: '/admin/ui-strings/:key/:locale', access: 'staff', tag: 'Admin · texts', summary: 'Set a UI string (keep it short)',
-    body: z.strictObject({ value: z.string().min(1).max(300) }),
+    body: z.strictObject({ value: z.string().min(1).max(2000) }),
     handler: async ({ sb, params, body }) =>
       unwrap(sb().from('ui_strings').upsert({
         key: z.string().regex(/^[a-z0-9_.-]+$/).max(80).parse(params.key), locale: Locale.parse(params.locale), value: body.value
       }).select('*').single())
+  }),
+
+  route({
+    method: 'GET', path: '/admin/welcome-stats', access: 'staff', tag: 'Admin · texts', summary: 'How learners answered the welcome questions',
+    handler: async ({ sb }) => call(sb(), 'admin_welcome_stats', {})
   }),
 
   // ------------------------------------------------------------------ notifications

@@ -186,6 +186,24 @@
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
    "source": "tools/render-assets/butterfly/species.html?s=sky"
+  },
+  "welcome-clock.webp": {
+   "model": "Alarm clock (welcome question: time a day), procedural",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/kit2.js#clock3 (jobs-welcome.json, RoomEnvironment lighting)"
+  },
+  "welcome-girl.webp": {
+   "model": "A girl made of soft shapes with floating school symbols (welcome question: mirrors), procedural",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/kit2.js#girl3 (jobs-welcome.json, RoomEnvironment lighting)"
+  },
+  "welcome-track.webp": {
+   "model": "Location pin, speech bubble with a heart and a magnifier (welcome question: where from), procedural",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/kit2.js#track3 (jobs-welcome.json, RoomEnvironment lighting)"
   }
  }
 }

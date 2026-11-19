@@ -6,8 +6,8 @@
 const MS = 3400
 let played = false
 
-export function playIntro() {
-  if (played || typeof document === 'undefined') return
+export function playIntro(again = false) {
+  if ((played && !again) || typeof document === 'undefined') return
   played = true
   const root = document.documentElement
   root.classList.add('intro')

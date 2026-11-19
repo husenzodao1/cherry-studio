@@ -1910,6 +1910,36 @@
                           ],
                           "additionalProperties": false
                         }
+                      },
+                      "about": {
+                        "type": "object",
+                        "properties": {
+                          "time": {
+                            "type": "string",
+                            "maxLength": 80
+                          },
+                          "schools": {
+                            "maxItems": 20,
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            }
+                          },
+                          "source": {
+                            "type": "string",
+                            "maxLength": 80
+                          },
+                          "at": {
+                            "type": "string",
+                            "maxLength": 40
+                          }
+                        },
+                        "required": [
+                          "at"
+                        ],
+                        "additionalProperties": false
                       }
                     },
                     "required": [
@@ -13160,7 +13190,7 @@
                   "value": {
                     "type": "string",
                     "minLength": 1,
-                    "maxLength": 300
+                    "maxLength": 2000
                   }
                 },
                 "required": [
@@ -13171,6 +13201,37 @@
             }
           }
         }
+      }
+    },
+    "/admin/welcome-stats": {
+      "get": {
+        "tags": [
+          "Admin · texts"
+        ],
+        "summary": "How learners answered the welcome questions",
+        "operationId": "getAdminWelcomeStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database."
       }
     },
     "/admin/notifications/{id}/schedule": {

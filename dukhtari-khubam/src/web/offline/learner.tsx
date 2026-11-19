@@ -62,6 +62,8 @@ interface LearnerApi {
   completeLesson: (lessonId: string) => void
   toggleBookmark: (lessonId: string) => void
   recordQuiz: (quizId: string, percent: number, passed: boolean) => void
+  /** answers to the welcome questions (an empty object when skipped) */
+  answerWelcome: (about: { time?: string; schools?: string[]; source?: string }) => void
   /** daily review answer: moves the question between Leitner boxes */
   recordReview: (questionId: string, correct: boolean) => void
 }
@@ -355,6 +357,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       })
     })
     ,
+    answerWelcome: (about) => update((p) => ({ ...p, about: { ...about, at: now() } })),
     recordReview: (qid, correct) => update((p) => {
       const today = localDay()
       return withDay({ ...p, review: { ...p.review, [qid]: { ...nextReview(p.review[qid]?.box, correct, today), at: now() } } })

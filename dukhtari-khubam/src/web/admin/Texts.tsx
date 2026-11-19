@@ -9,15 +9,16 @@ import { Field, LocaleTabs, NEXT_STATUS, Note, send, StatusBadge, titleOf, useAc
 
 /** Texts managed without a release: interface strings, Daily Inspiration and the “!” help texts. */
 export function Texts() {
-  const [tab, setTab] = useState<'inspiration' | 'ui' | 'help'>('inspiration')
+  const [tab, setTab] = useState<'inspiration' | 'ui' | 'help' | 'welcome'>('inspiration')
   return (
     <div className="stack">
       <div className="segmented" role="tablist">
         <button type="button" role="tab" aria-selected={tab === 'inspiration'} onClick={() => setTab('inspiration')}>Илҳоми рӯз</button>
         <button type="button" role="tab" aria-selected={tab === 'ui'} onClick={() => setTab('ui')}>Матнҳои интерфейс</button>
         <button type="button" role="tab" aria-selected={tab === 'help'} onClick={() => setTab('help')}>Кӯмак «!»</button>
+        <button type="button" role="tab" aria-selected={tab === 'welcome'} onClick={() => setTab('welcome')}>Саволнома</button>
       </div>
-      {tab === 'inspiration' ? <Inspirations /> : tab === 'ui' ? <UiStrings /> : <HelpTexts />}
+      {tab === 'inspiration' ? <Inspirations /> : tab === 'ui' ? <UiStrings /> : tab === 'help' ? <HelpTexts /> : <Welcome />}
     </div>
   )
 }
@@ -65,13 +66,50 @@ function Inspirations() {
   )
 }
 
-function UiStrings() {
+/** Welcome questions and notifications: their texts (filtered list below) and how learners answered. */
+function Welcome() {
+  const stats = useApi<{ answered: number; profiles: number; time: Record<string, number>; source: Record<string, number>; schools: Record<string, number> }>('/admin/welcome-stats')
+  const block = (title: string, data?: Record<string, number>) => {
+    const rows = Object.entries(data ?? {}).sort((a, b) => b[1] - a[1])
+    const max = Math.max(1, ...rows.map((r) => r[1]))
+    return (
+      <div className="card card-pad stack" style={{ gap: 8 }}>
+        <div className="eyebrow">{title}</div>
+        {rows.length ? rows.map(([k, n]) => (
+          <div key={k} className="stack" style={{ gap: 4 }}>
+            <div className="row" style={{ fontSize: '0.9em' }}><span style={{ flex: 1 }}>{k}</span><b>{n}</b></div>
+            <div className="progress"><span style={{ width: `${(n * 100) / max}%` }} /></div>
+          </div>
+        )) : <span className="muted">—</span>}
+      </div>
+    )
+  }
+  return (
+    <div className="stack" style={{ gap: 10 }}>
+      {stats.error ? <ErrorState error={stats.error} onRetry={stats.reload} /> : null}
+      {stats.data ? (
+        <>
+          <p className="muted" style={{ margin: 0 }}>Ҷавоб доданд: <b>{stats.data.answered}</b> аз {stats.data.profiles}</p>
+          {block('Вақт дар як рӯз', stats.data.time)}
+          {block('Мактабҳо', stats.data.schools)}
+          {block('Аз куҷо пайдо карданд', stats.data.source)}
+        </>
+      ) : <Loading rows={2} />}
+      <p className="muted" style={{ margin: 0, fontSize: '0.86em' }}>
+        Саволҳо, ҷавобҳо ва огоҳиҳо: ҳар сатр — як вариант. Дар огоҳиҳо {'{name}'}, {'{lesson}'} ва {'{streak}'} худ ба худ пур мешаванд.
+      </p>
+      <UiStrings only={/^(welcome|notify)\./} />
+    </div>
+  )
+}
+
+function UiStrings({ only }: { only?: RegExp } = {}) {
   const rows = useApi<{ key: string; locale: Loc; value: string }[]>('/admin/ui-strings')
   const [loc, setLoc] = useState<Loc>('tg')
   const [filter, setFilter] = useState('')
   if (rows.error) return <ErrorState error={rows.error} onRetry={rows.reload} />
   if (!rows.data) return <Loading />
-  const keys = Object.keys(DEFAULT_STRINGS.tg).filter((k) => !filter || k.includes(filter) || (DEFAULT_STRINGS.tg[k as keyof typeof DEFAULT_STRINGS.tg] ?? '').toLowerCase().includes(filter.toLowerCase()))
+  const keys = Object.keys(DEFAULT_STRINGS.tg).filter((k) => !only || only.test(k)).filter((k) => !filter || k.includes(filter) || (DEFAULT_STRINGS.tg[k as keyof typeof DEFAULT_STRINGS.tg] ?? '').toLowerCase().includes(filter.toLowerCase()))
   const value = (k: string) => rows.data!.find((r) => r.key === k && r.locale === loc)?.value
   return (
     <div className="stack" style={{ gap: 10 }}>
@@ -94,7 +132,14 @@ function UiStringRow({ k, loc, current, fallback, onSaved }: { k: string; loc: L
   }
   return (
     <div className="row" style={{ gap: 8, alignItems: 'flex-end' }}>
-      <Field label={k}><input className="input" dir={loc === 'ar' ? 'rtl' : 'ltr'} value={v} maxLength={300} onChange={(e) => setV(e.target.value)} /></Field>
+      <Field label={k}>
+        {fallback.includes('\n') || v.includes('\n') ? (
+          <textarea className="input" dir={loc === 'ar' ? 'rtl' : 'ltr'} value={v} maxLength={2000} rows={Math.min(8, v.split('\n').length + 1)}
+            onChange={(e) => setV(e.target.value)} style={{ minHeight: 0 }} />
+        ) : (
+          <input className="input" dir={loc === 'ar' ? 'rtl' : 'ltr'} value={v} maxLength={2000} onChange={(e) => setV(e.target.value)} />
+        )}
+      </Field>
       <button type="button" className="btn btn-soft" onClick={save} disabled={act.busy || !dirty || !v.trim()} style={{ minWidth: 90 }}>{act.message?.ok ? '✓' : 'Захира'}</button>
     </div>
   )

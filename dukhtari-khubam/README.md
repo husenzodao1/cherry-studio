@@ -246,6 +246,17 @@ The free built-in mailer sends only a few letters an hour and cannot change the 
    the Tajik letters through the Management API once SMTP is on.
 4. Authentication → Rate Limits: raise "emails per hour" as needed.
 
+### Welcome questions and notifications
+
+- After signing in, once (`/welcome`): time a day, the mirrors (schools) she wants, where she heard of the
+  app — each with its own 3D picture (`welcome-*.webp`, `kit2.js` clock3/girl3/track3) — then everything
+  circles a filling percentage while the lessons are "prepared". Answers go with the progress backup
+  (`about`); staff see the counts in the panel (Матнҳо → Саволнома, `admin_welcome_stats`).
+- Notifications: the lesson reminder takes a different, personal line each day ({name}, {lesson},
+  {streak}); "last chance" for the day streak shows a red clock counting down to midnight and goes away
+  by itself (`StreakAlarm.java`). Finishing the welcome questions offers the reminders.
+- Every question, option and notification line is a panel text (Матнҳо → Саволнома; one variant per line).
+
 ### Launcher icons and widgets (Android)
 
 - 24 alternative icons (`src/web/app-icons.json` → `node tools/android/app-icons.mjs` writes the drawables

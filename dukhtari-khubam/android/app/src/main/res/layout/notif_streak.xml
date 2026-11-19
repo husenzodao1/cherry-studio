@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "last chance" notification: the words and a red countdown to midnight -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+    <TextView android:id="@+id/n_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Compat.Notification.Title" android:maxLines="1" android:ellipsize="end" />
+    <TextView android:id="@+id/n_body" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Compat.Notification" android:maxLines="3" android:ellipsize="end" />
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+        android:gravity="center_vertical" android:orientation="horizontal">
+        <TextView android:id="@+id/n_left" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Compat.Notification" android:textColor="#FFD9344F" />
+        <Chronometer android:id="@+id/n_clock" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp"
+            android:textColor="#FFD9344F" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
+    </LinearLayout>
+</LinearLayout>

@@ -28,7 +28,14 @@ export const ProgressData = z.strictObject({
   born: z.number().int().min(1900).max(2100).optional(),
   /** local dates (YYYY-MM-DD) on which the learner studied, for the day streak */
   days: z.array(Day).max(MAX_DAYS).default([]),
-  review: z.record(Id, ReviewCard).default({})
+  review: z.record(Id, ReviewCard).default({}),
+  /** answers to the welcome questions: time a day, chosen schools (slugs), where she heard of the app */
+  about: z.strictObject({
+    time: z.string().max(80).optional(),
+    schools: z.array(Id).max(20).optional(),
+    source: z.string().max(80).optional(),
+    at: Iso
+  }).optional()
 })
 export type ProgressData = z.infer<typeof ProgressData>
 
@@ -100,6 +107,8 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   }
   const born = a.born ?? b.born
   if (born !== undefined) out.born = born
+  const about = !a.about ? b.about : !b.about ? a.about : a.about.at >= b.about.at ? a.about : b.about
+  if (about) out.about = about
   return out
 }
 

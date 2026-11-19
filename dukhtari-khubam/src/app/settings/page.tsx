@@ -116,7 +116,7 @@ function Notifications() {
   }
   const row = (key: keyof NotifyPrefs, label: string) => (
     <div className="menu-row" key={key}>
-      <Icon name={key === 'lesson' ? 'book' : 'sparkle'} />
+      <Icon name={key === 'lesson' ? 'book' : key === 'streak' ? 'flame' : 'sparkle'} />
       <span className="grow">{label}</span>
       {prefs[key].on ? (
         <input type="time" className="time-plain" aria-label={t('notify.time')}
@@ -131,6 +131,7 @@ function Notifications() {
       <div className="glass menu">
         {row('lesson', t('notify.lesson_title').replace(' 💜', ''))}
         {row('inspiration', t('notify.inspiration_title'))}
+        {row('streak', t('notify.streak_title'))}
       </div>
       {denied ? <span className="muted" role="status" style={{ fontSize: '0.84em', paddingInline: 6 }}>{t('notify.denied')}</span> : null}
     </div>

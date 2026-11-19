@@ -6,6 +6,7 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { buildKind } from './kit.js'
@@ -374,10 +375,11 @@ window.renderJob = async (job) => {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
   document.body.appendChild(renderer.domElement)
   const scene = new THREE.Scene()
-  const hdr = await new HDRLoader().loadAsync(job.hdri)
-  hdr.mapping = THREE.EquirectangularReflectionMapping
+  // "room": three.js's procedural studio room, for machines without the HDRI files (diamond kinds need an HDRI)
   const pmrem = new THREE.PMREMGenerator(renderer)
-  scene.environment = pmrem.fromEquirectangular(hdr).texture
+  const hdr = job.hdri === 'room' ? null : await new HDRLoader().loadAsync(job.hdri)
+  if (hdr) hdr.mapping = THREE.EquirectangularReflectionMapping
+  scene.environment = hdr ? pmrem.fromEquirectangular(hdr).texture : pmrem.fromScene(new RoomEnvironment(), 0.04).texture
   scene.environmentIntensity = job.envIntensity ?? 1
   scene.environmentRotation = new THREE.Euler(0, job.envRotation ?? 0, 0)
 

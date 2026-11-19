@@ -50,3 +50,20 @@ describe('Google sign-in', () => {
     await expectError(as(db, g, (tx) => tx.query('select * from public.google_learners')), /permission denied/)
   })
 })
+
+describe('welcome answers', () => {
+  it('are counted for staff only', async () => {
+    const h = createHash('sha256').update('612345678901234').digest('hex')
+    await as(db, null, (tx) => rpc(tx, 'api_profile_save', { p_code_hash: h, p_name: 'Зарина', p_data: { v: 1, about: { time: '1 соат', schools: ['odob-va-akhloq', 'ilm-va-salomati'], source: 'Аз дӯстон', at: '2026-11-21T00:00:00Z' } } }))
+    const s = await as(db, w.admin, (tx) => rpc(tx, 'admin_welcome_stats'))
+    expect(s.answered).toBeGreaterThanOrEqual(1)
+    expect(s.time['1 соат']).toBe(1)
+    expect(s.schools['ilm-va-salomati']).toBe(1)
+    expect(s.source['Аз дӯстон']).toBe(1)
+    await expectError(as(db, null, (tx) => rpc(tx, 'admin_welcome_stats')), /permission denied|forbidden/)
+  })
+
+  it('panel texts may be long, with several lines', async () => {
+    await as(db, w.admin, (tx) => tx.query("insert into public.ui_strings (key, locale, value) values ('notify.lesson.bodies', 'tg', $1)", ['а\n'.repeat(400)]))
+  })
+})
