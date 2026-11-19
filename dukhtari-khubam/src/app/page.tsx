@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 
 import { ART } from '@/web/art'
-import { Butterfly } from '@/web/components/Butterfly'
 import { Avatar } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { SchoolGrid } from '@/web/components/SchoolTile'
@@ -96,7 +95,6 @@ export default function Home() {
         ) : null}
       </section>
 
-      <Butterfly anchor=".bf-anchor" />
     </>
   )
 }

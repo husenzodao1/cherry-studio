@@ -156,9 +156,13 @@ Revision History; every staff change is in the audit log.
   (`src/web/offline/cards.ts`) and saved or shared through the system share sheet.
 - A course can be kept on the phone with its pictures and audio ("Боргирӣ барои бе интернет"), with a
   warning on mobile data; audio plays from the phone's copy.
-- A butterfly lives on the home screen (`src/web/components/Butterfly.tsx`): painted wings
-  (`tools/render-assets/butterfly`) rotating in 3D, flap-and-glide flight, landings on tiles and cards
-  (it scrolls with what it sits on), and it flies off when a finger comes near.
+- Butterflies of four kinds (`src/web/components/Butterfly.tsx`; wings painted in
+  `tools/render-assets/butterfly`: violet, blue morpho, pink kite swallowtail, pearl white) rotate their
+  wings in 3D and fly each in its own way (beat rate, glides, flutter). Two live on the home screen and
+  land on tiles and cards; on the list pages (schools, a school, a course, the garden, the profile,
+  saved) three sit on the boxes as the page opens and scatter, one of them staying. Scrolling makes a
+  perched butterfly take off and find another place; a finger nearby startles it. Off when the system
+  asks for reduced motion.
 - Android app: daily local notifications (lesson reminder, inspiration of the day) at times chosen in
   Settings (`src/web/offline/notify.ts`).
 

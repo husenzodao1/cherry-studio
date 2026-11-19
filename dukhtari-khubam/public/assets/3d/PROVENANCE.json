@@ -133,6 +133,78 @@
    "author": "Dukhtari Khubam project",
    "license": "project-owned",
    "source": "tools/render-assets (jobs-v2b.json: v2-petals)"
+  },
+  "butterfly-wing-l.webp": {
+   "model": "Violet butterfly, left wing (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/paint.html"
+  },
+  "butterfly-morpho-wing-l.webp": {
+   "model": "Blue morpho butterfly, left wing (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/species.html?s=morpho"
+  },
+  "butterfly-rose-wing-l.webp": {
+   "model": "Pink kite swallowtail butterfly, left wing (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/species.html?s=rose"
+  },
+  "butterfly-pearl-wing-l.webp": {
+   "model": "Pearl white butterfly, left wing (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/species.html?s=pearl"
+  },
+  "butterfly-wing-r.webp": {
+   "model": "Violet butterfly, right wing (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/paint.html"
+  },
+  "butterfly-morpho-wing-r.webp": {
+   "model": "Blue morpho butterfly, right wing (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/species.html?s=morpho"
+  },
+  "butterfly-rose-wing-r.webp": {
+   "model": "Pink kite swallowtail butterfly, right wing (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/species.html?s=rose"
+  },
+  "butterfly-pearl-wing-r.webp": {
+   "model": "Pearl white butterfly, right wing (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/species.html?s=pearl"
+  },
+  "butterfly-body.webp": {
+   "model": "Violet butterfly, body (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/paint.html"
+  },
+  "butterfly-morpho-body.webp": {
+   "model": "Blue morpho butterfly, body (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/species.html?s=morpho"
+  },
+  "butterfly-rose-body.webp": {
+   "model": "Pink kite swallowtail butterfly, body (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/species.html?s=rose"
+  },
+  "butterfly-pearl-body.webp": {
+   "model": "Pearl white butterfly, body (painted on a 2D canvas)",
+   "author": "Dukhtari Khubam project",
+   "license": "project-owned",
+   "source": "tools/render-assets/butterfly/species.html?s=pearl"
   }
  }
 }

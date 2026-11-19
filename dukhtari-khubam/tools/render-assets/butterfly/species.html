@@ -1,0 +1,265 @@
+<!doctype html><html><body style="margin:0;background:#e9e0fa">
+<canvas id="w" width="700" height="760"></canvas><canvas id="b" width="160" height="380"></canvas>
+<script>
+// More butterflies for the app, painted like paint.html (right half; hinge at x = 0, head up).
+// ?s=morpho — iridescent blue with a black, white-spotted margin
+// ?s=rose   — pink kite swallowtail: dark bands, long tails, a red and blue spot by the tail
+// ?s=pearl  — pearly white with lavender at the base and charcoal forewing tips (a small "white")
+const SPECIES = new URLSearchParams(location.search).get('s') || 'morpho'
+function rnd(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647 }
+const r = rnd({ morpho: 23, rose: 37, pearl: 51 }[SPECIES])
+const TAU = Math.PI * 2
+const cub = (p0, c1, c2, p1, t) => { const u = 1 - t; return [u*u*u*p0[0] + 3*u*u*t*c1[0] + 3*u*t*t*c2[0] + t*t*t*p1[0], u*u*u*p0[1] + 3*u*u*t*c1[1] + 3*u*t*t*c2[1] + t*t*t*p1[1]] }
+
+const SHAPES = {
+  morpho: {
+    fore: { start: [0, 300], seg: [
+      [[30, 180], [150, 70], [330, 40]], [[470, 18], [612, 26], [656, 70]], [[664, 150], [610, 250], [566, 330]],
+      [[522, 402], [420, 414], [300, 400]], [[180, 386], [70, 352], [0, 330]]], outer: [0, 1, 2, 3], center: [210, 230] },
+    hind: { start: [0, 336], seg: [
+      [[120, 328], [310, 352], [452, 436]], [[560, 500], [582, 600], [520, 660]], [[490, 690], [470, 690], [446, 704]],
+      [[410, 724], [370, 722], [330, 712]], [[200, 684], [64, 590], [20, 452]], [[8, 410], [0, 380], [0, 336]]],
+      outer: [1, 2, 3, 4], center: [210, 480] }
+  },
+  rose: {
+    fore: { start: [0, 300], seg: [
+      [[40, 170], [200, 58], [420, 20]], [[520, 6], [612, 12], [654, 38]], [[622, 140], [544, 280], [484, 372]],
+      [[444, 410], [332, 414], [252, 402]], [[160, 388], [70, 352], [0, 330]]], outer: [1, 2, 3], center: [210, 220] },
+    hind: { start: [0, 336], seg: [
+      [[110, 326], [270, 340], [392, 396]], [[468, 430], [512, 498], [488, 556]], [[474, 592], [444, 602], [422, 622]],
+      [[408, 660], [398, 716], [374, 748]], [[358, 760], [330, 756], [324, 730]], [[318, 700], [310, 672], [280, 664]],
+      [[190, 640], [70, 560], [20, 450]], [[8, 410], [0, 380], [0, 336]]],
+      outer: [1, 2, 3, 4, 5, 6], center: [200, 470], tail: [[372, 650], [346, 748]] }
+  },
+  pearl: {
+    fore: { start: [0, 300], seg: [
+      [[30, 170], [150, 60], [320, 40]], [[450, 24], [584, 40], [622, 102]], [[652, 172], [602, 272], [540, 342]],
+      [[480, 402], [380, 412], [280, 398]], [[170, 382], [70, 350], [0, 330]]], outer: [1, 2, 3], center: [200, 220] },
+    hind: { start: [0, 336], seg: [
+      [[120, 330], [300, 350], [432, 422]], [[542, 482], [562, 582], [502, 642]], [[452, 692], [372, 702], [302, 692]],
+      [[182, 672], [60, 582], [20, 452]], [[8, 410], [0, 380], [0, 336]]], outer: [1, 2, 3], center: [200, 480] }
+  }
+}
+const { fore: FORE, hind: HIND } = SHAPES[SPECIES]
+
+function path(g, w) { g.beginPath(); g.moveTo(...w.start); for (const s of w.seg) g.bezierCurveTo(...s[0], ...s[1], ...s[2]); g.closePath() }
+function points(w, idx, n) {
+  const out = []; let p = w.start
+  w.seg.forEach((s, i) => { if (idx.includes(i)) for (let k = 0; k < n; k++) out.push(cub(p, s[0], s[1], s[2], k / n)); p = s[2] })
+  return out
+}
+function marginPath(g, w, idx = w.outer) {
+  let p = w.start; let started = false
+  g.beginPath()
+  w.seg.forEach((s, i) => { if (idx.includes(i)) { if (!started) { g.moveTo(...p); started = true } g.bezierCurveTo(...s[0], ...s[1], ...s[2]) } else started = false; p = s[2] })
+}
+const inward = (w, x, y, by) => { const dx = w.center[0] - x, dy = w.center[1] - y, d = Math.hypot(dx, dy); return [x + (dx / d) * by, y + (dy / d) * by, Math.atan2(dy, dx)] }
+
+function ground(g, w, stops) {
+  const base = g.createRadialGradient(0, w.start[1] + 20, 10, 0, w.start[1] + 20, 720)
+  stops.forEach(([at, c]) => base.addColorStop(at, c))
+  g.fillStyle = base; g.fillRect(0, 0, 700, 760)
+}
+function veins(g, w, rgb, alpha, width) {
+  for (let k = 0; k < 9; k++) {
+    const a0 = w === FORE ? -0.95 + k * 0.17 : -0.05 + k * 0.17
+    const len = 560 + r() * 120
+    const ex = Math.cos(a0) * len, ey = w.start[1] + 15 + Math.sin(a0) * len
+    const mx = ex * 0.45 + (r() - 0.5) * 50, my = (w.start[1] + 15 + ey) / 2 + (r() - 0.5) * 60
+    const grad = g.createLinearGradient(0, w.start[1], ex, ey)
+    grad.addColorStop(0, `rgba(${rgb},${alpha})`); grad.addColorStop(0.7, `rgba(${rgb},${alpha * 0.6})`); grad.addColorStop(1, `rgba(${rgb},${alpha * 0.2})`)
+    g.strokeStyle = grad; g.lineWidth = width - k * 0.15; g.lineCap = 'round'
+    g.beginPath(); g.moveTo(4, w.start[1] + 14); g.quadraticCurveTo(mx, my, ex, ey); g.stroke()
+    g.strokeStyle = 'rgba(255,255,255,0.12)'; g.lineWidth = 1.1
+    g.beginPath(); g.moveTo(6, w.start[1] + 12); g.quadraticCurveTo(mx + 2, my - 2, ex + 2, ey - 2); g.stroke()
+  }
+  g.strokeStyle = `rgba(${rgb},${alpha * 0.5})`; g.lineWidth = width * 0.7
+  g.beginPath(); g.moveTo(w.center[0] - 40, w.center[1] - 60); g.quadraticCurveTo(w.center[0] + 10, w.center[1], w.center[0] - 10, w.center[1] + 50); g.stroke()
+}
+function margin(g, w, rgb, strokes, idx) {
+  for (const [lw, a, blur] of strokes) {
+    g.save(); g.filter = `blur(${blur}px)`; marginPath(g, w, idx); g.strokeStyle = `rgba(${rgb},${a})`; g.lineWidth = lw; g.lineCap = 'round'; g.stroke(); g.restore()
+  }
+}
+function spot(g, x, y, rx, ry, rot, inner, outer, blur = 0.8) {
+  g.save(); g.filter = `blur(${blur}px)`
+  const s = g.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry))
+  s.addColorStop(0, inner); s.addColorStop(0.6, inner); s.addColorStop(1, outer)
+  g.fillStyle = s; g.beginPath(); g.ellipse(x, y, rx, ry, rot, 0, TAU); g.fill(); g.restore()
+}
+function fur(g, w, rgb, light) {
+  const f = g.createRadialGradient(0, w.start[1] + 15, 0, 0, w.start[1] + 15, 150)
+  f.addColorStop(0, `rgba(${rgb},0.95)`); f.addColorStop(1, `rgba(${rgb},0)`)
+  g.fillStyle = f; g.fillRect(0, 0, 230, 760)
+  for (let i = 0; i < 520; i++) {
+    const a = (r() - 0.5) * 2.2, rr = r() * 115, x = Math.cos(a) * rr, y = w.start[1] + 15 + Math.sin(a) * rr
+    g.strokeStyle = `rgba(${r() < 0.4 ? light : rgb},${0.18 + r() * 0.25})`; g.lineWidth = 1
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * (6 + r() * 8), y + Math.sin(a) * (6 + r() * 8)); g.stroke()
+  }
+}
+function scales(g, dark) {
+  for (let i = 0; i < 12000; i++) {
+    const x = r() * 700, y = r() * 760, a = r() * 0.08
+    g.fillStyle = r() < 0.55 ? `rgba(255,255,255,${a})` : `rgba(${dark},${a})`; g.fillRect(x, y, 1.5, 1.5)
+  }
+}
+function gloss(g, w, a) {
+  const hl = g.createLinearGradient(80, w.start[1] - 260, 380, w.start[1] + 40)
+  hl.addColorStop(0, 'rgba(255,255,255,0)'); hl.addColorStop(0.5, `rgba(255,255,255,${a})`); hl.addColorStop(0.62, 'rgba(255,255,255,0)')
+  g.fillStyle = hl; g.fillRect(0, 0, 700, 760)
+}
+function fringe(g, w, color, dash, width) {
+  g.save(); marginPath(g, w, w.outer.filter((i) => i > 0)); g.strokeStyle = color; g.lineWidth = width; g.setLineDash(dash); g.stroke(); g.restore()
+}
+
+// ---------------------------------------------------------------- morpho
+function morpho(g, w) {
+  g.save(); path(g, w); g.clip()
+  ground(g, w, [[0, '#0a0d33'], [0.14, '#162a9a'], [0.38, '#2b63ea'], [0.62, '#4f9dff'], [0.85, '#86c6ff'], [1, '#bfe2ff']])
+  // structural colour: a cyan sheen across the middle and violet towards the body
+  g.globalCompositeOperation = 'screen'
+  const band = g.createLinearGradient(40, 80, 640, 640)
+  band.addColorStop(0.2, 'rgba(60,200,255,0)'); band.addColorStop(0.45, 'rgba(110,230,255,0.42)'); band.addColorStop(0.7, 'rgba(60,200,255,0)')
+  g.fillStyle = band; g.fillRect(0, 0, 700, 760)
+  g.globalCompositeOperation = 'soft-light'
+  const vio = g.createRadialGradient(0, w.start[1], 20, 0, w.start[1], 420)
+  vio.addColorStop(0, 'rgba(190,120,255,0.95)'); vio.addColorStop(1, 'rgba(190,120,255,0)')
+  g.fillStyle = vio; g.fillRect(0, 0, 700, 760)
+  g.globalCompositeOperation = 'source-over'
+  veins(g, w, '6,10,48', 0.6, 2.6)
+  // the broad black border, widest at the forewing tip
+  margin(g, w, '7,6,26', w === FORE ? [[150, 0.2, 26], [100, 0.5, 14], [64, 0.92, 4], [28, 1, 1.5]] : [[110, 0.18, 22], [70, 0.45, 12], [44, 0.92, 4], [20, 1, 1.5]])
+  if (w === FORE) { g.save(); g.filter = 'blur(14px)'; g.fillStyle = 'rgba(7,6,26,0.9)'; g.beginPath(); g.ellipse(610, 76, 100, 58, 0.5, 0, TAU); g.fill(); g.restore() }
+  // white spots in the border: a bold row at the tip, small ones along the edge
+  const big = w === FORE ? points(w, [1, 2], 5).slice(1, 7) : []
+  big.forEach(([x, y], i) => { const [sx, sy, a] = inward(w, x, y, 40 + (i % 2) * 10); spot(g, sx, sy, 19 - i * 1.4, 14 - i * 1.1, a, 'rgba(255,255,255,0.97)', 'rgba(255,255,255,0)', 1) })
+  points(w, w.outer.filter((i) => i > 0), 6).forEach(([x, y], i) => {
+    if (i % 2) return
+    const [sx, sy, a] = inward(w, x, y, 18); spot(g, sx, sy, 5.5, 4, a, 'rgba(235,245,255,0.9)', 'rgba(235,245,255,0)', 0.5)
+  })
+  fur(g, w, '18,14,40', '120,130,200')
+  scales(g, '6,10,48')
+  gloss(g, w, 0.3)
+  g.restore()
+  fringe(g, w, 'rgba(255,255,255,0.8)', [5, 7], 3)
+}
+
+// ---------------------------------------------------------------- rose kite swallowtail
+function rose(g, w) {
+  g.save(); path(g, w); g.clip()
+  ground(g, w, [[0, '#4a0f33'], [0.1, '#c2498a'], [0.24, '#ff8fc4'], [0.5, '#ffc3df'], [0.8, '#ffe3f0'], [1, '#fff3f9']])
+  g.globalCompositeOperation = 'soft-light'
+  const sheen = g.createLinearGradient(60, 0, 620, 700)
+  sheen.addColorStop(0, 'rgba(255,170,220,0.9)'); sheen.addColorStop(0.5, 'rgba(200,150,255,0.6)'); sheen.addColorStop(1, 'rgba(255,190,230,0.9)')
+  g.fillStyle = sheen; g.fillRect(0, 0, 700, 760)
+  g.globalCompositeOperation = 'source-over'
+  // the kite's dark bands across the forewing, from the leading edge backwards
+  if (w === FORE) {
+    const costa = points(w, [0, 1], 10)
+    ;[[0.32, 30], [0.46, 20], [0.6, 26], [0.74, 16], [0.86, 34]].forEach(([at, width], i) => {
+      const [x, y] = costa[Math.floor(at * costa.length)]
+      const len = 330 - i * 40
+      g.save(); g.filter = 'blur(2px)'
+      const bd = g.createLinearGradient(x, y, x - len * 0.35, y + len)
+      bd.addColorStop(0, 'rgba(58,13,46,0.92)'); bd.addColorStop(0.8, 'rgba(58,13,46,0.75)'); bd.addColorStop(1, 'rgba(58,13,46,0)')
+      g.strokeStyle = bd; g.lineWidth = width; g.lineCap = 'round'
+      g.beginPath(); g.moveTo(x, y - 10); g.quadraticCurveTo(x - len * 0.1, y + len * 0.5, x - len * 0.35, y + len); g.stroke(); g.restore()
+    })
+  } else {
+    // a dark band down the hind wing into the tail
+    g.save(); g.filter = 'blur(3px)'; g.strokeStyle = 'rgba(58,13,46,0.8)'; g.lineWidth = 24; g.lineCap = 'round'
+    g.beginPath(); g.moveTo(120, 380); g.quadraticCurveTo(250, 520, 340, 690); g.stroke(); g.restore()
+  }
+  veins(g, w, '58,13,46', 0.75, 3)
+  margin(g, w, '50,10,40', [[110, 0.2, 26], [70, 0.45, 14], [40, 0.85, 4], [18, 1, 1.5]])
+  // pink-white crescents inside the border
+  points(w, w.outer.filter((i) => i > 0 && i < (w === HIND ? 3 : 9)), 4).forEach(([x, y], i) => {
+    if (i % 2) return
+    const [sx, sy, a] = inward(w, x, y, 26)
+    g.save(); g.filter = 'blur(1px)'; g.strokeStyle = 'rgba(255,225,240,0.95)'; g.lineWidth = 5; g.lineCap = 'round'
+    g.beginPath(); g.arc(sx, sy, 11, a + Math.PI - 1, a + Math.PI + 1); g.stroke(); g.restore()
+  })
+  if (w === HIND) {
+    // the tail: dark with a pale edge, and a red spot over a blue crescent where it starts
+    const [[tx, ty], [ex, ey]] = w.tail
+    g.save(); g.filter = 'blur(1.5px)'; g.strokeStyle = 'rgba(50,10,40,0.92)'; g.lineWidth = 34; g.lineCap = 'round'
+    g.beginPath(); g.moveTo(tx, ty); g.lineTo(ex, ey); g.stroke(); g.restore()
+    g.save(); g.strokeStyle = 'rgba(255,230,242,0.8)'; g.lineWidth = 4; g.beginPath(); g.moveTo(ex - 14, ey - 30); g.lineTo(ex + 4, ey + 4); g.stroke(); g.restore()
+    spot(g, 300, 640, 40, 30, -0.4, 'rgba(58,13,46,0.95)', 'rgba(58,13,46,0)', 1)
+    spot(g, 300, 640, 28, 20, -0.4, '#ff3d64', 'rgba(255,61,100,0)', 0.8)
+    g.save(); g.filter = 'blur(1px)'; g.strokeStyle = '#7fb2ff'; g.lineWidth = 7; g.lineCap = 'round'
+    g.beginPath(); g.arc(300, 606, 34, 0.4, 2.6); g.stroke(); g.restore()
+    spot(g, 214, 596, 18, 13, -0.4, 'rgba(255,61,100,0.9)', 'rgba(255,61,100,0)', 0.8)
+  }
+  fur(g, w, '46,10,36', '255,190,225')
+  scales(g, '58,13,46')
+  gloss(g, w, 0.32)
+  g.restore()
+  fringe(g, w, 'rgba(255,236,246,0.75)', [2, 3], 2)
+}
+
+// ---------------------------------------------------------------- pearl white
+function pearl(g, w) {
+  g.save(); path(g, w); g.clip()
+  ground(g, w, [[0, '#4b3f6e'], [0.08, '#9f88dc'], [0.26, '#d6c8f6'], [0.5, '#f4eeff'], [0.82, '#fffcff'], [1, '#ffffff']])
+  // a mother-of-pearl sheen
+  g.globalCompositeOperation = 'soft-light'
+  const sheen = g.createLinearGradient(60, 40, 640, 720)
+  sheen.addColorStop(0, 'rgba(190,220,255,0.8)'); sheen.addColorStop(0.45, 'rgba(255,200,240,0.7)'); sheen.addColorStop(1, 'rgba(200,180,255,0.8)')
+  g.fillStyle = sheen; g.fillRect(0, 0, 700, 760)
+  g.globalCompositeOperation = 'source-over'
+  veins(g, w, '96,84,140', 0.32, 2.2)
+  if (w === FORE) {
+    // charcoal wing tip, soft towards the inside, and two round spots
+    g.save(); path(g, w); g.clip()
+    for (const [blur, a, rx, ry] of [[30, 0.35, 190, 130], [14, 0.8, 140, 95], [4, 0.95, 100, 66]]) {
+      g.save(); g.filter = `blur(${blur}px)`; g.fillStyle = `rgba(44,36,64,${a})`; g.beginPath(); g.ellipse(640, 70, rx, ry, 0.62, 0, TAU); g.fill(); g.restore()
+    }
+    g.restore()
+    margin(g, w, '44,36,64', [[40, 0.25, 10], [16, 0.6, 3]], [2])
+    spot(g, 392, 230, 26, 24, 0, 'rgba(44,36,64,0.95)', 'rgba(44,36,64,0)', 1.2)
+    spot(g, 360, 344, 20, 18, 0, 'rgba(44,36,64,0.9)', 'rgba(44,36,64,0)', 1.2)
+  } else {
+    spot(g, 250, 372, 18, 14, 0.3, 'rgba(44,36,64,0.85)', 'rgba(44,36,64,0)', 1.2)
+    margin(g, w, '150,130,200', [[36, 0.25, 12]])
+  }
+  fur(g, w, '70,60,100', '255,255,255')
+  scales(g, '96,84,140')
+  gloss(g, w, 0.4)
+  g.restore()
+  fringe(g, w, 'rgba(200,185,240,0.7)', [2, 3], 2)
+}
+
+const w = document.getElementById('w').getContext('2d')
+const paint = { morpho, rose, pearl }[SPECIES]
+paint(w, HIND)
+paint(w, FORE)
+
+// body: head up, furry thorax, segmented abdomen
+const BODY = {
+  morpho: { ant: '#0c0a1e', head: ['#5e5680', '#0e0b1e'], thorax: ['#6c6496', '#221a40', '#0c0a1e'], belly: ['#0c0a1e', '#4c4272'], fur: ['150,150,220', '12,10,30'], ring: 'rgba(170,190,255,0.3)' },
+  rose: { ant: '#2a0a20', head: ['#b0708e', '#2a0a20'], thorax: ['#e3a0c4', '#5a1a44', '#2a0a20'], belly: ['#2a0a20', '#d070a6'], fur: ['255,200,230', '42,10,32'], ring: 'rgba(255,220,238,0.45)' },
+  pearl: { ant: '#3b3050', head: ['#dcd3f2', '#4a4060'], thorax: ['#ffffff', '#a69bc8', '#4a4060'], belly: ['#3e3456', '#ded6f4'], fur: ['255,255,255', '70,60,100'], ring: 'rgba(255,255,255,0.5)' }
+}[SPECIES]
+const b = document.getElementById('b').getContext('2d'), cx = 80
+b.strokeStyle = BODY.ant; b.lineWidth = 2.6; b.lineCap = 'round'
+for (const s of [-1, 1]) {
+  b.beginPath(); b.moveTo(cx + s * 4, 58); b.bezierCurveTo(cx + s * 12, 34, cx + s * 26, 14, cx + s * 40, 4); b.stroke()
+  b.fillStyle = BODY.ant; b.beginPath(); b.ellipse(cx + s * 41, 5, 4.5, 6.5, s * 0.6, 0, TAU); b.fill()
+}
+let gr = b.createRadialGradient(cx - 4, 64, 2, cx, 70, 14); gr.addColorStop(0, BODY.head[0]); gr.addColorStop(1, BODY.head[1])
+b.fillStyle = gr; b.beginPath(); b.ellipse(cx, 70, 12, 11, 0, 0, TAU); b.fill()
+gr = b.createRadialGradient(cx - 7, 104, 4, cx, 118, 36); gr.addColorStop(0, BODY.thorax[0]); gr.addColorStop(0.55, BODY.thorax[1]); gr.addColorStop(1, BODY.thorax[2])
+b.fillStyle = gr; b.beginPath(); b.ellipse(cx, 118, 24, 40, 0, 0, TAU); b.fill()
+for (let i = 0; i < 420; i++) {
+  const a = r() * TAU, rr = Math.sqrt(r()), x = cx + Math.cos(a) * 24 * rr, y = 118 + Math.sin(a) * 40 * rr
+  b.strokeStyle = `rgba(${r() < 0.5 ? BODY.fur[0] : BODY.fur[1]},${0.15 + r() * 0.25})`; b.lineWidth = 1
+  b.beginPath(); b.moveTo(x, y); b.lineTo(x + (r() - 0.5) * 7, y + (r() - 0.5) * 7); b.stroke()
+}
+gr = b.createLinearGradient(cx - 14, 0, cx + 14, 0); gr.addColorStop(0, BODY.belly[0]); gr.addColorStop(0.45, BODY.belly[1]); gr.addColorStop(1, BODY.belly[0])
+b.fillStyle = gr; b.beginPath(); b.moveTo(cx - 15, 156); b.bezierCurveTo(cx - 17, 240, cx - 9, 320, cx, 360); b.bezierCurveTo(cx + 9, 320, cx + 17, 240, cx + 15, 156); b.closePath(); b.fill()
+b.strokeStyle = BODY.ring; b.lineWidth = 1.8
+for (let y = 176; y < 345; y += 21) { const half = 15.5 * (1 - (y - 156) / 230); b.beginPath(); b.moveTo(cx - half, y); b.quadraticCurveTo(cx, y + 5, cx + half, y); b.stroke() }
+b.fillStyle = 'rgba(255,255,255,0.3)'; b.beginPath(); b.ellipse(cx - 6, 108, 5, 17, 0, 0, TAU); b.fill()
+window.done = true
+</script></body></html>

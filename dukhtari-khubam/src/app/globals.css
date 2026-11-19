@@ -533,7 +533,6 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 /* ---------------------------------------------------------------- butterfly (Butterfly.tsx) */
 .bf-anchor { display: inline-block; width: 40px; height: 0.8em; vertical-align: -0.05em; }
 .bf-layer { position: fixed; inset: 0; z-index: 35; pointer-events: none; overflow: hidden; }
-.app > .bf-layer { position: fixed; animation: none; }
 .bf { position: absolute; left: 0; top: 0; width: 64px; height: 44px; transform-origin: 32px 14.6px; perspective: 220px; will-change: transform; }
 .bf-wing { position: absolute; top: 0; width: 32px; height: auto; backface-visibility: visible; will-change: transform;
   filter: drop-shadow(0 0 0.5px rgba(40, 12, 90, 0.4)); }

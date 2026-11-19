@@ -10,6 +10,7 @@ import { AgeFilter, ContentProvider, useContent } from '../offline/content'
 import { LearnerProvider, useLearner } from '../offline/learner'
 import { PrefsProvider, usePrefs } from '../prefs'
 import { AppUpdate } from './AppUpdate'
+import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
 import { NotifyBridge } from './NotifyBridge'
 import { SupportWatch } from './SupportWatch'
@@ -66,6 +67,12 @@ function AppFeel() {
   return null
 }
 
+/** Butterflies for the page being shown (a new set on every page). */
+function PageButterflies() {
+  const path = usePathname() ?? '/'
+  return <Butterflies key={path} path={path} />
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
@@ -76,6 +83,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <LearnerProvider>
             <ForAge>
               <Gate>{children}</Gate>
+              <PageButterflies />
               <Dock />
               <AppUpdate />
               <NotifyBridge />
