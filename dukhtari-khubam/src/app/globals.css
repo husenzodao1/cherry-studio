@@ -991,6 +991,8 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
 
 /* ---------------------------------------------------------------- Google sign-in (start) */
 .brand-wrap { margin: 0; line-height: 1; }
+/* sign-in screen: the name in the same fine calligraphy as the opening screen, at the top */
+.start .brand-wrap .brand { font-family: var(--font-script), cursive; font-size: clamp(3rem, 14vw, 3.8rem); line-height: 1.25; }
 .google-box { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .google-btn { width: 100%; min-height: 50px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 0 20px;
   border-radius: 999px; border: 1px solid rgba(60, 64, 67, 0.16); background: rgba(255, 255, 255, 0.92); color: #2b2a33; font: inherit; font-weight: 500;
@@ -1334,6 +1336,7 @@ html.gated .app > *, html.gated .dock-wrap, html.gated .bf-layer, html.gated .up
     linear-gradient(170deg, var(--sky-1), var(--sky-2) 50%, var(--sky-3));
   transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); }
 .splash.is-done { opacity: 0; transform: scale(1.05); pointer-events: none; }
+.splash.is-done .sp-name, .splash.is-done .sp-moon, .splash.is-done .sp-bar { opacity: 0; transition: opacity 0.18s; animation: none; }
 .sp-moon { width: min(42vw, 170px); height: auto; margin-bottom: -14px; filter: drop-shadow(0 18px 26px rgba(214, 150, 40, 0.28));
   animation: sp-moon-in 0.9s cubic-bezier(0.2, 0.8, 0.25, 1.1) both, sp-float 4s ease-in-out 0.9s infinite alternate; }
 @keyframes sp-moon-in { from { opacity: 0; transform: scale(0.6) rotate(-18deg); } to { opacity: 1; transform: none; } }
