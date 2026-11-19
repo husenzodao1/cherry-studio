@@ -8,6 +8,7 @@ import { Avatar } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { InstallButton } from '@/web/components/InstallButton'
 import { RainDrop } from '@/web/components/RainDrop'
+import { StreakBadge } from '@/web/components/StreakBadge'
 import { SchoolRow } from '@/web/components/SchoolTile'
 import { Empty, Skeleton } from '@/web/components/States'
 import { WordsOfDay } from '@/web/components/WordsOfDay'
@@ -70,6 +71,7 @@ export default function Home() {
       <RainDrop flower={flower} />
       <header className="home-top">
         <Link href="/profile" className="home-avatar" aria-label={t('nav.profile')}><Avatar name={name} /></Link>
+        <StreakBadge />
         <span style={{ flex: 1 }} />
         <InstallButton />
         <Link href="/search" className="icon-btn search-btn" aria-label={t('action.search')}><SearchGlyph /></Link>

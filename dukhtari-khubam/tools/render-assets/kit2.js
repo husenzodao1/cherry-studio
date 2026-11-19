@@ -643,6 +643,208 @@ export function track3() {
   return g
 }
 
+// ---------------------------------------------------------------- welcome questions, second take: product-style
+const roseGold = (o = {}) => new THREE.MeshPhysicalMaterial({ color: C(o.color ?? '#f2b49a'), metalness: 1, roughness: o.roughness ?? 0.16, clearcoat: 0.7, clearcoatRoughness: 0.06, envMapIntensity: 1.6 })
+const enamel = (color, o = {}) => new THREE.MeshPhysicalMaterial({ color: C(color), roughness: o.roughness ?? 0.14, clearcoat: 1, clearcoatRoughness: 0.14,
+  sheen: o.sheenAmt ?? 0.25, sheenColor: C(o.sheen ?? '#ffffff'), sheenRoughness: 0.5, iridescence: o.irid ?? 0.12, envMapIntensity: o.env ?? 0.95, vertexColors: !!o.vc })
+/** Satin fabric: soft, velvety highlights instead of glossy reflections (the girl's scarf). */
+const satin = () => new THREE.MeshPhysicalMaterial({ color: C('#ffffff'), vertexColors: true, roughness: 0.55, sheen: 1, sheenColor: C('#ffd0e2'), sheenRoughness: 0.35, clearcoat: 0, envMapIntensity: 0.8 })
+const pearl = () => new THREE.MeshPhysicalMaterial({ color: C('#fff8f4'), roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.05, iridescence: 1, iridescenceIOR: 1.6,
+  iridescenceThicknessMinimum: 280, iridescenceThicknessMaximum: 520, sheen: 1, sheenColor: C('#ffe6f2'), envMapIntensity: 1.4 })
+
+/** A soft round podium with a rounded edge and a thin rose-gold ring: the stage of each picture. */
+function podium(top = '#ffd9cc', side = '#f3a597', r = 1.3) {
+  const g = new THREE.Group()
+  const prof = [[0.001, 0], [r - 0.08, 0], [r, 0.06], [r, 0.2], [r - 0.06, 0.26], [0.001, 0.26]]
+  g.add(mesh(shaded(lathe(prof, 160), top, side), enamel('#ffffff', { vc: true, roughness: 0.2 })))
+  g.add(mesh(new THREE.TorusGeometry(r - 0.005, 0.022, 16, 200), roseGold(), [0, 0.2, 0], [Math.PI / 2, 0, 0]))
+  return g
+}
+/** A small four-point sparkle. */
+function sparkle(s = 0.12) {
+  const sh = new THREE.Shape()
+  for (let i = 0; i < 8; i++) { const r = i % 2 ? 0.22 : 1, a = (i * Math.PI) / 4; i ? sh.lineTo(Math.sin(a) * r, Math.cos(a) * r) : sh.moveTo(Math.sin(a) * r, Math.cos(a) * r) }
+  sh.closePath()
+  return mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.18, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.06, bevelSegments: 4 }).center(), gold({ color: '#f6cf7a', roughness: 0.12 }), [0, 0, 0], [0, 0, 0], s)
+}
+function floaters(g, list) {
+  const { heartGeo } = D()
+  for (const f of list) {
+    let m
+    if (f.k === 'heart') m = mesh(shaded(heartGeo(), f.a ?? '#ffc4ec', f.b ?? '#e2559f'), candy({ irid: 0.35 }), [0, 0, 0], [0, 0, 0], f.s)
+    else if (f.k === 'pearl') m = mesh(new THREE.SphereGeometry(f.s, 32, 24), pearl())
+    else if (f.k === 'star') m = mesh(star5(0.46, 0.3), gold({ color: '#f4c766', roughness: 0.14 }), [0, 0, 0], [0, 0, 0], f.s)
+    else m = sparkle(f.s)
+    m.position.fromArray(f.p); m.rotation.fromArray(f.r ?? [0.2, -0.3, 0.15]); m.castShadow = false
+    g.add(m)
+  }
+}
+
+/** Time a day: a luxurious enamel alarm clock with rose-gold bells on a peach podium, sparkles around. */
+export function clock4() {
+  const g = new THREE.Group()
+  g.add(podium('#ffd2c0', '#ee8e78'))
+  const body = new THREE.Group()
+  body.add(mesh(shaded(new THREE.CylinderGeometry(0.95, 0.95, 0.5, 160, 1).rotateX(Math.PI / 2), '#ff9fa0', '#d9467a'), enamel('#ffffff', { vc: true, irid: 0.25 })))
+  // fluted rose-gold bezel
+  const bez = []
+  for (let i = 0; i <= 64; i++) { const t = i / 64, a = t * Math.PI * 2; bez.push(new THREE.Vector2(0.9 + 0.035 * Math.cos(a * 1), 0)) }
+  body.add(mesh(new THREE.TorusGeometry(0.93, 0.085, 48, 240), roseGold(), [0, 0, 0.25]))
+  for (let i = 0; i < 48; i++) {
+    const a = (i / 48) * Math.PI * 2
+    body.add(mesh(new THREE.SphereGeometry(0.03, 12, 10), roseGold({ roughness: 0.1 }), [Math.sin(a) * 1.0, Math.cos(a) * 1.0, 0.2]))
+  }
+  body.add(mesh(new THREE.CircleGeometry(0.86, 160), pearl(), [0, 0, 0.252]))
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2, big = i % 3 === 0
+    const m = big ? mesh(new RoundedBoxGeometry(0.05, 0.16, 0.03, 2, 0.02), roseGold(), [Math.sin(a) * 0.68, Math.cos(a) * 0.68, 0.27], [0, 0, -a])
+      : mesh(new THREE.SphereGeometry(0.03, 16, 12), roseGold(), [Math.sin(a) * 0.7, Math.cos(a) * 0.7, 0.27])
+    body.add(m)
+  }
+  const hand = (len, w, a, z) => { const geo = new RoundedBoxGeometry(w, len, 0.03, 3, w / 2.2); geo.translate(0, len / 2 - 0.08, 0); return mesh(geo, glossy('#6a2f52', { roughness: 0.18 }), [0, 0, z], [0, 0, -a]) }
+  body.add(hand(0.46, 0.08, (10 / 12) * Math.PI * 2 + 0.09, 0.29))
+  body.add(hand(0.64, 0.055, (2 / 12) * Math.PI * 2, 0.31))
+  body.add(mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.07, 32).rotateX(Math.PI / 2), roseGold(), [0, 0, 0.33]))
+  body.add(mesh(new THREE.SphereGeometry(0.88, 128, 64, 0, Math.PI * 2, 0, 0.5).rotateX(Math.PI / 2).scale(1, 1, 0.32).translate(0, 0, 0.24), glass2({ attenuation: '#ffe7de', attDist: 8, thickness: 0.03, irid: 0.6 })))
+  for (const sx of [-1, 1]) {
+    body.add(mesh(new THREE.SphereGeometry(0.34, 96, 48, 0, Math.PI * 2, 0, Math.PI / 2), roseGold({ color: '#f5b39a' }), [sx * 0.6, 0.92, 0], [0, 0, -sx * 0.6]))
+    body.add(mesh(new THREE.SphereGeometry(0.06, 24, 16), pearl(), [sx * 0.86, 1.18, 0]))
+  }
+  body.add(mesh(new THREE.TorusGeometry(0.2, 0.045, 20, 80, Math.PI), roseGold(), [0, 1.08, 0]))
+  body.add(mesh(new THREE.SphereGeometry(0.05, 20, 14), pearl(), [0, 1.3, 0]))
+  for (const sx of [-1, 1]) body.add(mesh(new THREE.ConeGeometry(0.1, 0.24, 32), roseGold(), [sx * 0.55, -0.95, 0], [0, 0, sx * 0.35]))
+  body.position.set(0, 1.32, 0); body.rotation.set(0.04, -0.62, 0.07)
+  g.add(body)
+  floaters(g, [{ k: 'sparkle', p: [-1.25, 2.3, 0.3], s: 0.13 }, { k: 'sparkle', p: [1.3, 1.85, 0.4], s: 0.09 }, { k: 'pearl', p: [1.15, 2.55, -0.2], s: 0.08 },
+    { k: 'heart', p: [-1.25, 1.1, 0.6], s: 0.2, r: [0.1, 0.5, 0.3] }, { k: 'star', p: [1.35, 0.85, 0.55], s: 0.17 }])
+  return g
+}
+
+/** The mirrors: a chibi girl in a scarf holding a glowing book on a rose podium, the schools' symbols around. */
+export function girl4() {
+  const { heartGeo } = D()
+  const g = new THREE.Group()
+  g.add(podium('#f7c6dd', '#d77aae'))
+  const ch = new THREE.Group()
+  // dress: a soft bell with a rose-gold hem
+  const dress = [[0.001, 0], [0.7, 0], [0.74, 0.06], [0.66, 0.36], [0.46, 0.86], [0.32, 1.1], [0.001, 1.14]]
+  ch.add(mesh(shaded(lathe(dress, 160), '#c99af7', '#6f3fd1'), enamel('#ffffff', { vc: true, irid: 0.3 })))
+  ch.add(mesh(new THREE.TorusGeometry(0.71, 0.03, 16, 200), roseGold(), [0, 0.07, 0], [Math.PI / 2, 0, 0]))
+  // the scarf: a rounded hood with a soft drape over the shoulders and a pearl pin
+  ch.add(mesh(shaded(new THREE.SphereGeometry(0.66, 128, 96), '#f585ac', '#c23a73'), satin(), [0, 1.62, -0.04], [0, 0, 0], [1, 1.02, 0.94]))
+  const drape = [[0.001, 1.0], [0.62, 1.0], [0.66, 1.06], [0.56, 1.24], [0.34, 1.36], [0.001, 1.38]]
+  ch.add(mesh(shaded(lathe(drape, 128), '#f792b5', '#cc4a80'), satin()))
+  // the face, set in the scarf's opening
+  ch.add(mesh(new THREE.SphereGeometry(0.47, 128, 96), new THREE.MeshPhysicalMaterial({ color: C('#ffd9c4'), roughness: 0.45, sheen: 0.6, sheenColor: C('#ffc4b0'), sheenRoughness: 0.5, clearcoat: 0.2, envMapIntensity: 0.9 }),
+    [0, 1.6, 0.2], [0, 0, 0], [1, 1.02, 0.86]))
+  ch.add(mesh(shaded(new THREE.TorusGeometry(0.47, 0.06, 32, 160), '#f78db3', '#d9578c'), satin(), [0, 1.6, 0.25], [0, 0, 0], [1, 1.04, 1]))
+  for (const sx of [-1, 1]) {
+    const eye = new THREE.Group()
+    eye.add(mesh(new THREE.SphereGeometry(0.085, 48, 32), glossy('#3b1d33', { roughness: 0.05, cc: 0.01 }), [0, 0, 0], [0, 0, 0], [0.86, 1.15, 0.5]))
+    eye.add(mesh(new THREE.SphereGeometry(0.026, 20, 14), new THREE.MeshBasicMaterial({ color: '#ffffff' }), [0.025, 0.04, 0.04]))
+    eye.add(mesh(new THREE.SphereGeometry(0.012, 12, 10), new THREE.MeshBasicMaterial({ color: '#ffffff' }), [-0.02, -0.035, 0.04]))
+    eye.position.set(sx * 0.16, 1.62, 0.6); eye.rotation.y = sx * 0.18; ch.add(eye)
+    ch.add(mesh(new THREE.SphereGeometry(0.075, 24, 16), new THREE.MeshPhysicalMaterial({ color: C('#ff9fb3'), roughness: 0.6, transparent: true, opacity: 0.75 }), [sx * 0.27, 1.5, 0.55], [0, 0, 0], [1, 0.62, 0.3]))
+  }
+  ch.add(mesh(new THREE.TorusGeometry(0.06, 0.016, 12, 48, Math.PI), glossy('#c9506f', { roughness: 0.3 }), [0, 1.47, 0.62], [0, 0, Math.PI]))
+  ch.add(mesh(new THREE.SphereGeometry(0.06, 24, 16), pearl(), [0.36, 1.2, 0.45]))
+  // the open book, glowing, held before her
+  const book = new THREE.Group()
+  const page = (sx) => mesh(new THREE.BoxGeometry(0.36, 0.025, 0.46).translate(sx * 0.18, 0, 0), new THREE.MeshPhysicalMaterial({ color: C('#fffaf2'), roughness: 0.5, emissive: C('#fff1d6'), emissiveIntensity: 0.35 }), [0, 0, 0], [0, 0, sx * -0.18])
+  book.add(page(-1), page(1))
+  book.add(mesh(new RoundedBoxGeometry(0.78, 0.035, 0.5, 3, 0.015), enamel('#8f5ce0'), [0, -0.03, 0]))
+  book.add(mesh(shaded(heartGeo(), '#ffd4ef', '#ec6aa8'), candy(), [0, 0.12, 0], [-Math.PI / 2 + 0.4, 0, 0], 0.08))
+  book.position.set(0, 0.82, 0.62); book.rotation.set(-0.75, 0, 0); ch.add(book)
+  for (const sx of [-1, 1]) ch.add(mesh(new THREE.SphereGeometry(0.1, 32, 24), new THREE.MeshPhysicalMaterial({ color: C('#ffe4d6'), roughness: 0.42, sheen: 1, sheenColor: C('#ffd2c4') }), [sx * 0.33, 0.82, 0.62]))
+  ch.position.y = 0.26; ch.rotation.y = -0.18
+  g.add(ch)
+  // the schools' symbols floating around her
+  const moon = new THREE.Shape(); moon.absarc(0, 0, 1, 0, Math.PI * 2, false)
+  const hole = new THREE.Path(); hole.absarc(0.42, 0.2, 0.84, 0, Math.PI * 2, true); moon.holes.push(hole)
+  g.add(mesh(new THREE.ExtrudeGeometry(moon, { depth: 0.3, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.08, bevelSegments: 8, curveSegments: 96 }).center(), gold({ color: '#f4c766', roughness: 0.12 }), [-1.2, 2.55, -0.1], [0.1, 0.5, -0.5], 0.2))
+  const c = crocus2({ palette: ['#e48fc6', '#fbe0f1', '#ffffff'], attenuation: '#f2b5dc' }); c.scale.setScalar(0.34); c.position.set(-1.35, 1.25, 0.45); c.rotation.set(0.5, 0, 0.35); g.add(c)
+  floaters(g, [{ k: 'heart', p: [1.3, 2.35, 0.15], s: 0.24, r: [0, -0.35, 0.25] }, { k: 'star', p: [1.4, 1.2, 0.5], s: 0.2 }, { k: 'sparkle', p: [0.55, 2.95, 0.2], s: 0.11 },
+    { k: 'pearl', p: [-0.65, 2.95, 0.3], s: 0.07 }, { k: 'sparkle', p: [-1.45, 1.95, 0.4], s: 0.08 }, { k: 'pearl', p: [1.05, 0.6, 0.85], s: 0.06 }])
+  return g
+}
+
+/** Where from: a candy map pin on a folded pastel map with a dotted route, a heart bubble and a lens. */
+export function track4() {
+  const { heartGeo } = D()
+  const g = new THREE.Group()
+  g.add(podium('#ffd2c0', '#ee8e78'))
+  // the folded map: three panels at small angles, with a dotted route
+  const map = new THREE.Group()
+  const cols = [['#9fe0cf', '#5fbfa5'], ['#ffc4d8', '#f08bb0'], ['#cdbdfd', '#9a7ff0']]
+  cols.forEach(([a, b], i) => {
+    const p = mesh(shaded(new RoundedBoxGeometry(0.62, 0.03, 1.2, 3, 0.012), a, b, 'z'), enamel('#ffffff', { vc: true, roughness: 0.3 }), [(i - 1) * 0.6, 0.32 + (i === 1 ? 0.05 : 0), 0], [0, 0, (i - 1) * -0.09])
+    map.add(p)
+  })
+  for (let i = 0; i < 9; i++) {
+    const t = i / 8
+    map.add(mesh(new THREE.SphereGeometry(0.028, 12, 10), glossy('#e0577e', { roughness: 0.3 }), [-0.8 + t * 1.25, 0.37 + Math.sin(t * Math.PI) * 0.03, 0.35 - Math.sin(t * Math.PI * 1.3) * 0.45]))
+  }
+  map.rotation.y = -0.35; g.add(map)
+  // the pin
+  const pin = []
+  for (let i = 0; i <= 64; i++) { const t = i / 64, a = Math.PI * t; pin.push([Math.sin(a) * 0.5 * (1 - 0.7 * Math.pow(1 - t, 3)), 0.5 - Math.cos(a) * 0.5 * (t < 0.5 ? 1.95 : 1)]) }
+  pin[0] = [0.001, pin[0][1]]; pin[64] = [0.001, pin[64][1]]
+  const pg = new THREE.Group()
+  pg.add(mesh(shaded(lathe(pin, 160), '#ffb19b', '#e04a79'), enamel('#ffffff', { vc: true, irid: 0.3 })))
+  pg.add(mesh(new THREE.TorusGeometry(0.2, 0.05, 24, 96), roseGold(), [0, 0.52, 0.38]))
+  pg.add(mesh(new THREE.SphereGeometry(0.17, 48, 32), pearl(), [0, 0.52, 0.37]))
+  pg.position.set(0.15, 0.93, 0.1); pg.scale.set(1, 1, 0.82); pg.rotation.y = -0.2
+  g.add(pg)
+  g.add(mesh(new THREE.TorusGeometry(0.3, 0.03, 16, 96), roseGold(), [0.15, 0.4, 0.1], [Math.PI / 2, 0, 0]))
+  // speech bubble with a heart
+  const b = new THREE.Shape()
+  b.moveTo(-0.5, -0.25); b.quadraticCurveTo(-0.5, -0.45, -0.3, -0.45); b.lineTo(-0.15, -0.45); b.lineTo(-0.3, -0.7); b.lineTo(0.05, -0.45)
+  b.lineTo(0.3, -0.45); b.quadraticCurveTo(0.5, -0.45, 0.5, -0.25); b.lineTo(0.5, 0.25); b.quadraticCurveTo(0.5, 0.45, 0.3, 0.45)
+  b.lineTo(-0.3, 0.45); b.quadraticCurveTo(-0.5, 0.45, -0.5, 0.25); b.closePath()
+  const bubble = new THREE.Group()
+  bubble.add(mesh(new THREE.ExtrudeGeometry(b, { depth: 0.14, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.08, bevelSegments: 10, curveSegments: 40 }).translate(0, 0, -0.07),
+    glass2({ attenuation: '#d9c8ff', attDist: 1.2, thickness: 0.4, irid: 0.7 })))
+  bubble.add(mesh(shaded(heartGeo(), '#ffd3f1', '#e2559f'), candy({ irid: 0.35 }), [0, 0.02, 0.04], [0, 0, 0], 0.2))
+  bubble.position.set(1.15, 2.25, -0.1); bubble.rotation.set(0, -0.4, 0.1); bubble.scale.setScalar(0.85)
+  bubble.traverse((m) => { m.castShadow = false }); g.add(bubble)
+  const lens = new THREE.Group()
+  lens.add(mesh(new THREE.TorusGeometry(0.3, 0.07, 32, 160), roseGold()))
+  lens.add(mesh(new THREE.CylinderGeometry(0.29, 0.29, 0.05, 96).rotateX(Math.PI / 2), glass2({ attenuation: '#ffe6dc', attDist: 5, thickness: 0.1, irid: 0.8 })))
+  lens.add(mesh(new RoundedBoxGeometry(0.13, 0.52, 0.13, 4, 0.06), enamel('#8f5ce0'), [0, -0.6, 0]))
+  lens.position.set(-1.15, 1.75, 0.3); lens.rotation.set(0.15, 0.5, 0.6)
+  lens.traverse((m) => { m.castShadow = false }); g.add(lens)
+  floaters(g, [{ k: 'sparkle', p: [-0.5, 2.55, 0.2], s: 0.11 }, { k: 'pearl', p: [1.45, 1.3, 0.4], s: 0.07 }, { k: 'star', p: [-1.35, 0.85, 0.5], s: 0.16 }, { k: 'sparkle', p: [0.75, 2.9, -0.1], s: 0.08 }])
+  return g
+}
+
+/** The night launcher icon: a real-looking moon (craters, maria) lit from the side into a crescent. */
+export function moon4() {
+  const size = 1024
+  const cv = document.createElement('canvas'); cv.width = size; cv.height = size / 2
+  const ctx = cv.getContext('2d')
+  ctx.fillStyle = '#d9d2c4'; ctx.fillRect(0, 0, cv.width, cv.height)
+  let sd = 11
+  const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647
+  for (let i = 0; i < 26; i++) { // maria: large soft dark patches
+    const x = r() * cv.width, y = cv.height * (0.15 + r() * 0.7), rad = 30 + r() * 150
+    const gr = ctx.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, `rgba(118,110,102,${0.35 + r() * 0.3})`); gr.addColorStop(1, 'rgba(118,110,102,0)')
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.ellipse(x, y, rad, rad * (0.6 + r() * 0.5), r() * 3, 0, Math.PI * 2); ctx.fill()
+  }
+  for (let i = 0; i < 900; i++) { // craters of every size: soft dark floor, a faint bright rim on one side
+    const x = r() * cv.width, y = r() * cv.height, rad = 0.8 + Math.pow(r(), 4) * 30
+    const gr = ctx.createRadialGradient(x, y, rad * 0.2, x, y, rad); gr.addColorStop(0, `rgba(92,86,78,${0.18 + r() * 0.25})`); gr.addColorStop(1, 'rgba(92,86,78,0)')
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill()
+    if (rad > 4) { ctx.strokeStyle = `rgba(248,242,230,${0.1 + r() * 0.2})`; ctx.lineWidth = rad * 0.12; ctx.beginPath(); ctx.arc(x, y, rad * 0.9, Math.PI * 1.0, Math.PI * 1.7); ctx.stroke() }
+  }
+  for (let i = 0; i < 4000; i++) { ctx.fillStyle = `rgba(${r() > 0.5 ? '255,250,240' : '80,74,68'},0.08)`; ctx.fillRect(r() * cv.width, r() * cv.height, 2, 2) } // grain
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = THREE.RepeatWrapping
+  const g = new THREE.Group()
+  const m = mesh(new THREE.SphereGeometry(1, 192, 128), new THREE.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 3.2, roughness: 0.96, metalness: 0, color: C('#fff0d4') }))
+  m.rotation.set(0.15, Math.PI * 1.5, 0.05); m.castShadow = false; m.receiveShadow = false
+  g.add(m)
+  return g
+}
+
 export function buildKind2(job) {
   const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
   switch (job.kind) {
@@ -666,6 +868,10 @@ export function buildKind2(job) {
     case 'clock3': return clock3()
     case 'girl3': return girl3()
     case 'track3': return track3()
+    case 'clock4': return clock4()
+    case 'girl4': return girl4()
+    case 'track4': return track4()
+    case 'moon4': return moon4()
     default: return null
   }
 }

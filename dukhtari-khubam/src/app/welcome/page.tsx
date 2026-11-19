@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { ART, SCHOOL_ART } from '@/web/art'
 import { Icon } from '@/web/components/Icon'
+import { Orbit } from '@/web/components/Orbit'
 import { playIntro } from '@/web/intro'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
@@ -90,7 +91,7 @@ export default function Welcome() {
     const timer = setTimeout(async () => {
       if (canNotify() && (await allowNotifications().catch(() => false))) {
         const p = readNotify()
-        writeNotify({ ...p, lesson: { ...p.lesson, on: true }, streak: { ...p.streak, on: true } })
+        writeNotify({ ...p, lesson: { ...p.lesson, on: true } })
       }
       playIntro(true)
       router.replace('/')
@@ -109,21 +110,14 @@ export default function Welcome() {
   if (!learner) return null
 
   if (step === 3) {
-    const r = 108
+    const r = 104
     const len = 2 * Math.PI * r
     return (
       <div className="wl wl-prepare">
-        <div className="wl-orbit-wrap">
-          <div className="wl-orbit" aria-hidden="true">
-            {orbit.map((src, i) => (
-              <span key={src + i} className="wl-orbiter" style={{ ['--a' as string]: `${(360 / orbit.length) * i}deg`, ['--d' as string]: `${i * 0.08}s` }}>
-                <img src={src} alt="" />
-              </span>
-            ))}
-          </div>
+        <Orbit items={orbit}>
           <svg className="wl-ring" viewBox="0 0 260 260" aria-hidden="true">
             <defs>
-              <linearGradient id="wl-ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffab8a" /><stop offset="0.55" stopColor="#f07a6f" /><stop offset="1" stopColor="#e0577e" /></linearGradient>
+              <linearGradient id="wl-ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffb08f" /><stop offset="0.55" stopColor="#f2737a" /><stop offset="1" stopColor="#d9487f" /></linearGradient>
             </defs>
             <circle cx="130" cy="130" r={r} className="wl-ring-track" />
             <circle cx="130" cy="130" r={r} className="wl-ring-fill" strokeDasharray={len} strokeDashoffset={len * (1 - pct / 100)} />
@@ -131,7 +125,7 @@ export default function Welcome() {
           <div className="wl-pct" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
             <span className="wl-num">{pct}</span><span className="wl-sign">%</span>
           </div>
-        </div>
+        </Orbit>
         <p className="wl-preparing" role="status">
           {pct < 100 ? <>{t('welcome.preparing')}<span className="wl-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></> : <b className="wl-ready">{t('welcome.ready')} ✨</b>}
         </p>
@@ -171,15 +165,21 @@ export default function Welcome() {
                   </button>
                 )
               })}
+              {/* "next" fills the last place of the grid, so the boxes stay even */}
+              <button type="button" className={`btn wl-school-next${schoolList.length % 2 === 0 ? ' is-wide' : ''}`} disabled={!ok} onClick={() => setStep(2)}>
+                {t('welcome.next')} <Icon name="arrow" size={18} />
+              </button>
             </div>
           </>
         ) : (
           <Choice options={lines(t('welcome.source.options'))} value={source} onChange={setSource} custom={sourceOwn} onCustom={setSourceOwn} />
         )}
       </div>
-      <button type="button" className="btn btn-block btn-lg wl-next" disabled={!ok} onClick={() => (step < 2 ? setStep(step + 1) : finish())}>
-        {t('welcome.next')} <Icon name="arrow" size={18} />
-      </button>
+      {step === 1 ? null : (
+        <button type="button" className="btn btn-block btn-lg wl-next" disabled={!ok} onClick={() => (step < 2 ? setStep(step + 1) : finish())}>
+          {t('welcome.next')} <Icon name="arrow" size={18} />
+        </button>
+      )}
     </div>
   )
 }

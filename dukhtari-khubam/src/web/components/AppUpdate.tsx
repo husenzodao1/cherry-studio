@@ -1,39 +1,95 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { useEffect, useRef, useState } from 'react'
 
 import { API_BASE } from '../offline/base'
+import type { UiKey } from '../i18n'
 import { usePrefs } from '../prefs'
+import { Icon } from './Icon'
+import { showToast } from './Toast'
 
 /**
  * Inside the Android app: content updates arrive by themselves, but new app code needs a new APK.
- * When online, compare the built-in version with /app-version.json on the site and offer the download.
+ * When online, the built-in version is compared with /app-version.json on the site. The note can be
+ * closed with its × or swiped away to either side; it stays closed for that version.
  */
 const BUILT_IN = Number(process.env.NEXT_PUBLIC_APP_VERSION_CODE ?? 1)
+const DISMISSED = 'dk.update_dismissed'
+
+export interface LatestVersion { versionCode: number; versionName: string; url: string }
+
+/** The newest published app version (null when it cannot be read). */
+export async function latestVersion(): Promise<LatestVersion | null> {
+  const base = API_BASE || window.location.origin
+  try {
+    const r = await fetch(`${base}/app-version.json`, { cache: 'no-cache' })
+    if (!r.ok) return null
+    const v = (await r.json()) as LatestVersion
+    return { ...v, url: new URL(v.url, base).href }
+  } catch {
+    return null
+  }
+}
+
+/** Settings → app version: installs the new APK, or says this one is the newest. */
+export async function checkForUpdate(say: (k: UiKey) => string): Promise<void> {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return showToast(say('install.need_online'), 'wifiOff')
+  const v = await latestVersion()
+  if (!v) return showToast(say('state.error'), 'info')
+  if (Capacitor.isNativePlatform() && v.versionCode > BUILT_IN) {
+    window.location.href = v.url
+    return
+  }
+  showToast(say('app.latest').replace('{v}', v.versionName), 'check')
+}
 
 export function AppUpdate() {
   const { t } = usePrefs()
-  const [url, setUrl] = useState<string | null>(null)
+  const [v, setV] = useState<LatestVersion | null>(null)
+  const [dx, setDx] = useState(0)
+  const start = useRef<number | null>(null)
   useEffect(() => {
-    const native = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()
-    if (!native || !API_BASE) return
-    const check = () =>
-      fetch(`${API_BASE}/app-version.json`, { cache: 'no-cache' })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((v: { versionCode: number; url: string } | null) => {
-          if (v && v.versionCode > BUILT_IN) setUrl(new URL(v.url, API_BASE).href)
-        })
-        .catch(() => undefined)
+    if (!Capacitor.isNativePlatform() || !API_BASE) return
+    const check = () => latestVersion().then((n) => {
+      let closed = 0
+      try {
+        closed = Number(localStorage.getItem(DISMISSED) ?? 0)
+      } catch {
+        /* storage blocked */
+      }
+      if (n && n.versionCode > BUILT_IN && n.versionCode !== closed) setV(n)
+    })
     check()
     window.addEventListener('online', check)
     return () => window.removeEventListener('online', check)
   }, [])
-  if (!url) return null
+  if (!v) return null
+  const close = () => {
+    try {
+      localStorage.setItem(DISMISSED, String(v.versionCode))
+    } catch {
+      /* storage blocked: closed for this session */
+    }
+    setV(null)
+  }
   return (
-    <a href={url} className="card card-pad row" role="status"
-      style={{ position: 'fixed', left: 16, right: 16, top: 'max(12px, env(safe-area-inset-top))', zIndex: 60, textDecoration: 'none', background: 'var(--lilac)' }}>
-      <span style={{ flex: 1 }}>{t('app.update')}</span>
-      <span className="btn" style={{ minHeight: 36 }}>{t('app.update_action')}</span>
-    </a>
+    <div className="update-note glass" role="status"
+      style={{ transform: `translateX(${dx}px)`, opacity: 1 - Math.min(0.8, Math.abs(dx) / 260), transition: start.current === null ? 'transform 0.3s var(--ease), opacity 0.3s' : 'none' }}
+      onPointerDown={(e) => { start.current = e.clientX }}
+      onPointerMove={(e) => { if (start.current !== null) setDx(e.clientX - start.current) }}
+      onPointerUp={() => {
+        start.current = null
+        if (Math.abs(dx) > 90) close()
+        else setDx(0)
+      }}
+      onPointerCancel={() => { start.current = null; setDx(0) }}>
+      <span className="update-icon" aria-hidden="true"><Icon name="install" size={18} /></span>
+      <span className="update-text">{t('app.update')} <b>{v.versionName}</b></span>
+      <a href={v.url} className="btn update-go" onPointerDown={(e) => e.stopPropagation()}>{t('app.update_action')}</a>
+      <button type="button" className="update-x" aria-label={t('action.close')} onPointerDown={(e) => e.stopPropagation()} onClick={close}>
+        <Icon name="x" size={16} />
+      </button>
+    </div>
   )
 }

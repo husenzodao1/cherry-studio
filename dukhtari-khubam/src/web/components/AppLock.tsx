@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useLayoutEffect, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
@@ -9,16 +8,19 @@ import { playIntro } from '../intro'
 import { useLearner } from '../offline/learner'
 import { checkPin, clearPin, hasPin, setPin, waitLeft } from '../offline/pin'
 import { checkAnswer, hasRecovery, recoveryQuestions, recoveryWait } from '../offline/recovery'
+import { endAccount } from '../offline/accountAuth'
+import { sendEmailCode, verifyEmailCode } from '../offline/email'
 import { checkPassword, unlockWithPhone } from '../offline/unlock'
 import { usePrefs } from '../prefs'
 import type { UiKey } from '../i18n'
 import { Icon } from './Icon'
 import { onBack } from './BackButton'
+import { OtpField } from './OtpField'
 import { buzz, PinPad } from './PinPad'
 
 const AWAY_MS = 60_000
 
-type Stage = 'pin' | 'questions' | 'choose' | 'new' | 'repeat'
+type Stage = 'pin' | 'email' | 'questions' | 'choose' | 'new' | 'repeat'
 
 /** Three life questions, one after another; each right answer is ticked before the next comes in. */
 function Questions({ onPassed }: { onPassed: () => void }) {
@@ -68,12 +70,65 @@ function Questions({ onPassed }: { onPassed: () => void }) {
   )
 }
 
+/** Forgot PIN: a 6-digit code is sent to her e-mail; the right code opens the choices. */
+function EmailCode({ email, onPassed, onCancel }: { email: string; onPassed: () => void; onCancel: () => void }) {
+  const { t } = usePrefs()
+  const [otp, setOtp] = useState('')
+  const [note, setNote] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [resendAt, setResendAt] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
+  const send = async () => {
+    setNote(null)
+    const r = await sendEmailCode(email)
+    if (r === 'sent') setResendAt(Date.now() + 30_000)
+    else setNote(t(r === 'wait' ? 'email.wait' : r === 'offline' ? 'start.need_online' : 'email.send_failed'))
+  }
+  useEffect(() => {
+    send()
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (otp.length !== 6 || busy) return
+    ;(async () => {
+      setBusy(true)
+      const r = await verifyEmailCode(email, otp)
+      await endAccount()
+      setBusy(false)
+      if (typeof r === 'string') {
+        setNote(t(r === 'wrong' ? 'email.wrong_code' : r === 'offline' ? 'start.need_online' : 'state.error'))
+        buzz([24, 50, 24])
+        setOtp('')
+      } else {
+        buzz(12)
+        onPassed()
+      }
+    })()
+  }, [otp]) // eslint-disable-line react-hooks/exhaustive-deps
+  const left = Math.max(0, Math.ceil((resendAt - now) / 1000))
+  return (
+    <div className="recovery">
+      <span className="eyebrow">{t('email.code_title')}</span>
+      <OtpField value={otp} onChange={setOtp} label={t('email.code_title')} />
+      <p className="muted" style={{ margin: 0, fontSize: '0.82em' }}>{t('email.code_sent').replace('{email}', email)}</p>
+      <p className="pin-hint" role="status">{note ?? ' '}</p>
+      <div className="row" style={{ justifyContent: 'space-between', width: '100%' }}>
+        <button type="button" className="link-btn" onClick={onCancel}>{t('pin.cancel')}</button>
+        <button type="button" className="link-btn" disabled={left > 0} onClick={send}>
+          {left > 0 ? t('email.resend_in').replace('{n}', String(left)) : t('email.resend')}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /**
  * With a PIN set, the app opens behind the PIN pad, and again when it comes back after more than a
  * minute away. Until the PIN is right nothing of the app is drawn (the boot script in layout.tsx marks
- * <html> as locked before the first paint). "Forgot PIN" asks the three life questions chosen with the
- * PIN, then offers to turn the PIN off or to set a new one; without questions it asks the phone's own
- * lock or the login password. When all of that is forgotten too, the support chat stays open.
+ * <html> as locked before the first paint). "Forgot PIN" sends a 6-digit code to her e-mail; the right
+ * code offers to turn the PIN off or to set a new one. Without an e-mail it asks the three life questions
+ * chosen with the PIN, or the phone's own lock, or the login password.
  */
 export function AppLock() {
   const { t } = usePrefs()
@@ -127,6 +182,7 @@ export function AppLock() {
   }
   const forgot = async () => {
     setHint(null)
+    if (learner?.email) return setStage('email')
     if (hasRecovery()) return setStage('questions')
     const r = await unlockWithPhone(t('settings.unlock_title'), t('pin.forgot'))
     if (r === 'ok') setStage('choose')
@@ -143,7 +199,6 @@ export function AppLock() {
       setStage('choose')
     } else setHint(t(r === 'invalid' ? 'start.invalid_login' : r === 'locked' ? 'start.locked' : 'start.need_online'))
   }
-  const support = <Link href="/support" className="link-btn">{t('recovery.support')}</Link>
 
   if (stage === 'new' || stage === 'repeat') {
     return (
@@ -167,7 +222,7 @@ export function AppLock() {
     )
   }
 
-  if (stage === 'questions' || stage === 'choose') {
+  if (stage === 'questions' || stage === 'choose' || stage === 'email') {
     return createPortal(
       <div className="pin-screen" role="dialog" aria-modal="true" aria-label={t('recovery.title')}>
         <div className="pin-head">
@@ -175,9 +230,11 @@ export function AppLock() {
             <Icon name="key" size={34} strokeWidth={1.4} className="pin-lock-shape" />
             <svg className="pin-tick" width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" /><path d="M12.5 20.5l5.2 5.2L28 15" /></svg>
           </span>
-          <h1 className="pin-title">{t(stage === 'choose' ? 'recovery.passed' : 'recovery.title')}</h1>
+          <h1 className="pin-title">{t(stage === 'choose' ? 'recovery.passed' : stage === 'email' ? 'pin.forgot' : 'recovery.title')}</h1>
         </div>
-        {stage === 'questions' ? (
+        {stage === 'email' && learner?.email ? (
+          <EmailCode email={learner.email} onPassed={() => setStage('choose')} onCancel={() => setStage('pin')} />
+        ) : stage === 'questions' ? (
           <Questions onPassed={() => setStage('choose')} />
         ) : (
           <div className="recovery-choose stagger">
@@ -191,7 +248,6 @@ export function AppLock() {
         )}
         <div className="pin-foot recovery-foot">
           {stage === 'questions' ? <button type="button" className="link-btn" onClick={() => setStage('pin')}>{t('pin.cancel')}</button> : null}
-          {stage === 'questions' ? support : null}
         </div>
       </div>,
       document.body
@@ -217,7 +273,6 @@ export function AppLock() {
       ) : (
         <div className="recovery-foot">
           <button type="button" className="link-btn" onClick={forgot}>{t('pin.forgot')}</button>
-          {hint === t('pin.reinstall') ? support : null}
         </div>
       )}
     </PinPad>

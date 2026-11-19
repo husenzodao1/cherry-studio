@@ -7,7 +7,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { formatCode } from '@/lib/progress'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
-import { AppIconPicker } from '@/web/components/AppIconPicker'
+import { checkForUpdate } from '@/web/components/AppUpdate'
 import { PinSettings } from '@/web/components/PinSettings'
 import { RateShare } from '@/web/components/RateShare'
 import { CodeImageButton } from '@/web/components/Keepsakes'
@@ -116,7 +116,7 @@ function Notifications() {
   }
   const row = (key: keyof NotifyPrefs, label: string) => (
     <div className="menu-row" key={key}>
-      <Icon name={key === 'lesson' ? 'book' : key === 'streak' ? 'flame' : 'sparkle'} />
+      <Icon name={key === 'lesson' ? 'book' : 'sparkle'} />
       <span className="grow">{label}</span>
       {prefs[key].on ? (
         <input type="time" className="time-plain" aria-label={t('notify.time')}
@@ -131,9 +131,35 @@ function Notifications() {
       <div className="glass menu">
         {row('lesson', t('notify.lesson_title').replace(' 💜', ''))}
         {row('inspiration', t('notify.inspiration_title'))}
-        {row('streak', t('notify.streak_title'))}
       </div>
       {denied ? <span className="muted" role="status" style={{ fontSize: '0.84em', paddingInline: 6 }}>{t('notify.denied')}</span> : null}
+    </div>
+  )
+}
+
+/** The theme: one row with the current one; a tap opens the choices below it. */
+function ThemePicker() {
+  const prefs = usePrefs()
+  const { t } = prefs
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`glass theme-box${open ? ' is-open' : ''}`}>
+      <button type="button" className="theme-head" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span className={`theme-swatch theme-swatch-sm swatch-${prefs.theme}`} aria-hidden="true" />
+        <span className="grow"><span className="eyebrow" style={{ display: 'block' }}>{t('settings.theme')}</span>{t(`theme.${prefs.theme}`)}</span>
+        <Icon name="down" size={18} className="theme-chevron" />
+      </button>
+      <div className="theme-drawer">
+        <div className="themes" role="radiogroup" aria-label={t('settings.theme')}>
+          {THEMES.map((m, i) => (
+            <button key={m} type="button" role="radio" aria-checked={prefs.theme === m} className="theme-pick" style={{ ['--i' as string]: i }}
+              onClick={() => { prefs.set({ theme: m }); setTimeout(() => setOpen(false), 260) }}>
+              <span className={`theme-swatch swatch-${m}`} aria-hidden="true" />
+              <span>{t(`theme.${m}`)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
@@ -164,18 +190,7 @@ export default function Settings() {
             ))}
           </div>
         </div>
-        <div className="glass card-pad stack" style={{ gap: 12 }}>
-          <span className="eyebrow">{t('settings.theme')}</span>
-          <div className="themes" role="radiogroup" aria-label={t('settings.theme')}>
-            {THEMES.map((m) => (
-              <button key={m} type="button" role="radio" aria-checked={prefs.theme === m} className="theme-pick" onClick={() => prefs.set({ theme: m })}>
-                <span className={`theme-swatch swatch-${m}`} aria-hidden="true" />
-                <span>{t(`theme.${m}`)}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <AppIconPicker />
+        <ThemePicker />
         <label className="glass card-pad stack" style={{ gap: 10 }}>
           <span className="eyebrow">{t('settings.text_size')}</span>
           <input type="range" min={MIN_TEXT_SCALE} max={1.3} step={0.05} value={prefs.textScale}
@@ -190,7 +205,9 @@ export default function Settings() {
         <RateShare />
         <PinSettings />
         <CodeCard />
-        <p className="muted" style={{ textAlign: 'center', fontSize: '0.8em', margin: 0 }}>{t('settings.version')} {process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}</p>
+        <button type="button" className="version-row" onClick={() => checkForUpdate(t)}>
+          <Icon name="install" size={14} /> {t('settings.version')} {process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}
+        </button>
       </div>
     </>
   )

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- night launcher icon: a deep violet sky with a few small stars (AppIconPlugin.java) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="radial" android:centerX="70" android:centerY="38" android:gradientRadius="95">
+                <item android:offset="0" android:color="#FF3E2C7E" />
+                <item android:offset="0.6" android:color="#FF22174C" />
+                <item android:offset="1" android:color="#FF120B2B" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#E6FFF4D6" android:pathData="M30,31m-1.2,0a1.2,1.2 0,1 1,2.4 0a1.2,1.2 0,1 1,-2.4 0" />
+    <path android:fillColor="#B3FFF4D6" android:pathData="M78,74m-0.9,0a0.9,0.9 0,1 1,1.8 0a0.9,0.9 0,1 1,-1.8 0" />
+    <path android:fillColor="#99FFF4D6" android:pathData="M36,78m-0.8,0a0.8,0.8 0,1 1,1.6 0a0.8,0.8 0,1 1,-1.6 0" />
+    <path android:fillColor="#FFF6CF7A" android:pathData="M75,27l1,2.6 2.6,1 -2.6,1 -1,2.6 -1,-2.6 -2.6,-1 2.6,-1z" />
+    <path android:fillColor="#CCF6CF7A" android:pathData="M27,62l0.7,1.8 1.8,0.7 -1.8,0.7 -0.7,1.8 -0.7,-1.8 -1.8,-0.7 1.8,-0.7z" />
+</vector>

@@ -252,16 +252,17 @@ The free built-in mailer sends only a few letters an hour and cannot change the 
   app — each with its own 3D picture (`welcome-*.webp`, `kit2.js` clock3/girl3/track3) — then everything
   circles a filling percentage while the lessons are "prepared". Answers go with the progress backup
   (`about`); staff see the counts in the panel (Матнҳо → Саволнома, `admin_welcome_stats`).
-- Notifications: the lesson reminder takes a different, personal line each day ({name}, {lesson},
-  {streak}); "last chance" for the day streak shows a red clock counting down to midnight and goes away
-  by itself (`StreakAlarm.java`). Finishing the welcome questions offers the reminders.
+- Notifications: a short greeting each morning (07:30); the lesson reminder takes a different, personal
+  line each day ({name}, {lesson}, {streak}); the day streak is reminded by itself at 18:00, 21:00 and
+  23:00 when today is still empty, each a step stronger, with a red clock counting down to midnight
+  (`StreakAlarm.java`). Finishing the welcome questions offers the reminders.
+- Forgot PIN: a 6-digit code to her e-mail, then a new PIN or none. Signing out removes the PIN.
 - Every question, option and notification line is a panel text (Матнҳо → Саволнома; one variant per line).
 
 ### Launcher icons and widgets (Android)
 
-- 24 alternative icons (`src/web/app-icons.json` → `node tools/android/app-icons.mjs` writes the drawables
-  and the `<activity-alias>` entries); chosen in Settings, optionally changing by themselves each time the
-  app is closed (`AppIconPlugin.java`).
+- The launcher icon follows the time of day: the glass flower by day, a real-looking crescent moon
+  (`kit2.js` moon4) from 18:00 to 06:00 (`AppIconPlugin.java`, aliases `IconDefault` / `IconMoon`).
 - Home-screen widgets (`DkWidgets.java`, `WidgetsPlugin.java`, `src/web/offline/widgets.ts`): days in a
   row (2×1), today's progress with "continue" (2×2), words of the day (4×2), the week (4×1). A tap opens
   the matching screen (`tj.dukhtarikhubam.app://open/<path>`).

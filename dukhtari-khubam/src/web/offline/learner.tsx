@@ -5,6 +5,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { emptyProgress, isCode, localDay, mergeProgress, newCode, ProgressData, withDay } from '@/lib/progress'
 
 import { decryptCode, encryptCode, isPassword, isUsername, normalizeUsername } from './account'
+import { clearPin } from './pin'
+import { clearRecovery } from './recovery'
 import { apiUrl } from './base'
 import { useContent, type Bundle } from './content'
 import { schedule as nextReview } from './review'
@@ -330,6 +332,9 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     pendingLogin,
     loginProblem,
     signOut: () => {
+      // the PIN and its questions belong to the profile that left: the next one starts without them
+      clearPin()
+      clearRecovery()
       writeJson(LEARNER_KEY, null)
       writeJson(PROGRESS_KEY, null)
       writeJson(PENDING_KEY, null)

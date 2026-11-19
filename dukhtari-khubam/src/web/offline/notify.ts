@@ -19,12 +19,17 @@ const KEY = 'dk.notify'
 const IDS = { lesson: 101, inspiration: 102 } as const
 /** the lesson reminder of each of the next seven days has its own id (and its own words) */
 const LESSON_DAYS = Array.from({ length: 7 }, (_, i) => 110 + i)
+/** the morning greeting of each of the next seven days */
+const MORNING_DAYS = Array.from({ length: 7 }, (_, i) => 120 + i)
+const MORNING = { hour: 7, minute: 30 }
+/** the streak reminders of an evening, in minutes after midnight: 18:00, 21:00, 23:00 */
+const STREAK_TIMES = [18 * 60, 21 * 60, 23 * 60]
 export const DEFAULT_NOTIFY: NotifyPrefs = {
-  lesson: { on: false, time: '19:00' }, inspiration: { on: false, time: '08:00' }, streak: { on: false, time: '20:00' }
+  lesson: { on: false, time: '19:00' }, inspiration: { on: false, time: '08:00' }, streak: { on: true, time: '18:00' }
 }
 
 interface StreakApi {
-  configure(o: { on: boolean; hour: number; minute: number; lastDay: string; streak: number; name: string; leftLabel: string; channel: string; titles: string[]; bodies: string[] }): Promise<void>
+  configure(o: { on: boolean; times: number[]; lastDay: string; streak: number; name: string; leftLabel: string; channel: string; titles: string[]; bodies: string[] }): Promise<void>
 }
 const StreakAlarm = registerPlugin<StreakApi>('StreakAlarm')
 
@@ -68,6 +73,8 @@ export interface NotifyTexts {
   lessonHref: string
   inspiration: { title: string; body: string }
   streak: { titles: string[]; bodies: string[]; leftLabel: string; channel: string }
+  /** short greetings for the morning, one a day */
+  morning: string[]
   /** filled into the variants */
   vars: { name: string; lesson: string; streak: number }
   /** the last day she studied (YYYY-MM-DD) */
@@ -96,12 +103,12 @@ const dayNumber = (d: Date) => Math.floor(new Date(d.getFullYear(), d.getMonth()
 export async function scheduleDaily(prefs: NotifyPrefs, texts: NotifyTexts, now = new Date()): Promise<void> {
   if (!canNotify()) return
   const { LocalNotifications } = await import('@capacitor/local-notifications')
-  await LocalNotifications.cancel({ notifications: [{ id: IDS.lesson }, { id: IDS.inspiration }, ...LESSON_DAYS.map((id) => ({ id }))] }).catch(() => undefined)
+  await LocalNotifications.cancel({ notifications: [{ id: IDS.lesson }, { id: IDS.inspiration }, ...LESSON_DAYS.map((id) => ({ id })), ...MORNING_DAYS.map((id) => ({ id }))] }).catch(() => undefined)
   const perm = await LocalNotifications.checkPermissions()
   const allowed = perm.display === 'granted'
-  const st = at(prefs.streak.time)
+  // the streak reminders are not a setting: they come by themselves whenever notifications are allowed
   await StreakAlarm.configure({
-    on: allowed && prefs.streak.on, hour: st.hour, minute: st.minute, lastDay: texts.lastDay, streak: texts.vars.streak, name: texts.vars.name,
+    on: allowed, times: STREAK_TIMES, lastDay: texts.lastDay, streak: texts.vars.streak, name: texts.vars.name,
     leftLabel: texts.streak.leftLabel, channel: texts.streak.channel, titles: texts.streak.titles, bodies: texts.streak.bodies
   }).catch(() => undefined)
   if (!allowed) return
@@ -115,6 +122,14 @@ export async function scheduleDaily(prefs: NotifyPrefs, texts: NotifyTexts, now 
       const body = variant(texts.lessonBodies, n, texts.vars)
       list.push({ id: LESSON_DAYS[i], title: variant(texts.lessonTitles, n, texts.vars), body, largeBody: body, schedule: { at: when, allowWhileIdle: true }, extra: { href: texts.lessonHref } })
     }
+  }
+  // a short greeting each morning (by itself, like the streak reminders)
+  for (let i = 0; i < MORNING_DAYS.length && texts.morning.length; i++) {
+    const when = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, MORNING.hour, MORNING.minute)
+    if (when.getTime() <= now.getTime() + 30_000) continue
+    const line = variant(texts.morning, dayNumber(when), texts.vars)
+    const [title, ...rest] = line.split(/(?<=[!.?])\s+/)
+    list.push({ id: MORNING_DAYS[i], title, body: rest.join(' ') || ' ', schedule: { at: when, allowWhileIdle: true }, extra: { href: '/' } })
   }
   if (prefs.inspiration.on) {
     list.push({ id: IDS.inspiration, title: texts.inspiration.title, body: texts.inspiration.body, largeBody: texts.inspiration.body, schedule: { on: at(prefs.inspiration.time), allowWhileIdle: true }, extra: { href: '/' } })

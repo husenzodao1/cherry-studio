@@ -30,9 +30,10 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * "Last chance" for the day streak: once a day at the chosen time, when the streak is alive (studied
- * yesterday) but today is still empty, a notification shows the words and a red clock counting down to
- * midnight; it disappears by itself when the day — and the streak — is over. The web layer keeps the
+ * "Last chance" for the day streak: a few times each evening (18:00, 21:00, 23:00 by default), when the
+ * streak is alive (studied yesterday) but today is still empty, a notification — each one a step
+ * stronger — shows the words and a red clock counting down to midnight; it disappears by itself when the
+ * day — and the streak — is over. The web layer keeps the
  * last study day, the streak and the texts (edited in the panel) here; the alarm survives a restart.
  */
 public final class StreakAlarm {
@@ -47,15 +48,46 @@ public final class StreakAlarm {
         return new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(c.getTime());
     }
 
-    /** The next moment at hour:minute (today if still ahead, otherwise tomorrow). */
-    static long next(int hour, int minute) {
+    /** The reminder times of a day, in minutes after midnight (e.g. 18:00, 21:00, 23:00). */
+    static int[] times(SharedPreferences p) {
+        try {
+            JSONArray a = new JSONArray(p.getString("times", "[1080,1260,1380]"));
+            int[] out = new int[a.length()];
+            for (int i = 0; i < a.length(); i++) out[i] = a.getInt(i);
+            java.util.Arrays.sort(out);
+            return out.length == 0 ? new int[] { 1080 } : out;
+        } catch (Exception e) {
+            return new int[] { 1080, 1260, 1380 };
+        }
+    }
+
+    /** The next reminder moment (later today, otherwise the first one tomorrow). */
+    static long next(int[] times) {
+        Calendar now = Calendar.getInstance();
+        for (int t : times) {
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.HOUR_OF_DAY, t / 60);
+            c.set(Calendar.MINUTE, t % 60);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            if (c.getTimeInMillis() > now.getTimeInMillis() + 1000) return c.getTimeInMillis();
+        }
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, hour);
-        c.set(Calendar.MINUTE, minute);
+        c.add(Calendar.DAY_OF_MONTH, 1);
+        c.set(Calendar.HOUR_OF_DAY, times[0] / 60);
+        c.set(Calendar.MINUTE, times[0] % 60);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
-        if (c.getTimeInMillis() <= System.currentTimeMillis() + 1000) c.add(Calendar.DAY_OF_MONTH, 1);
         return c.getTimeInMillis();
+    }
+
+    /** Which reminder of the day this is (0 = the first, gentlest; the last is the "last chance"). */
+    static int stage(int[] times) {
+        Calendar now = Calendar.getInstance();
+        int m = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE);
+        int stage = 0;
+        for (int i = 0; i < times.length; i++) if (m >= times[i] - 2) stage = i;
+        return stage;
     }
 
     static PendingIntent alarmIntent(Context ctx) {
@@ -69,7 +101,7 @@ public final class StreakAlarm {
         if (am == null) return;
         am.cancel(alarmIntent(ctx));
         if (!p.getBoolean("on", false)) return;
-        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next(p.getInt("hour", 20), p.getInt("minute", 0)), alarmIntent(ctx));
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next(times(p)), alarmIntent(ctx));
     }
 
     private static String pick(String json, int salt) {
@@ -100,7 +132,8 @@ public final class StreakAlarm {
         long left = midnight.getTimeInMillis() - now.getTimeInMillis();
         if (left < 60_000) return;
 
-        int salt = now.get(Calendar.DAY_OF_YEAR);
+        // each reminder of the evening is a step stronger: the lines are kept in that order in the panel
+        int salt = stage(times(p));
         String name = p.getString("name", "");
         String title = pick(p.getString("titles", "[]"), salt).replace("{streak}", String.valueOf(streak)).replace("{name}", name);
         String body = pick(p.getString("bodies", "[]"), salt).replace("{streak}", String.valueOf(streak)).replace("{name}", name);
@@ -167,8 +200,7 @@ public final class StreakAlarm {
             String lastDay = call.getString("lastDay", "");
             SharedPreferences.Editor e = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
                 .putBoolean("on", Boolean.TRUE.equals(call.getBoolean("on", false)))
-                .putInt("hour", call.getInt("hour", 20))
-                .putInt("minute", call.getInt("minute", 0))
+                .putString("times", call.getArray("times", new JSArray()).toString())
                 .putString("lastDay", lastDay)
                 .putInt("streak", call.getInt("streak", 0))
                 .putString("name", call.getString("name", ""))

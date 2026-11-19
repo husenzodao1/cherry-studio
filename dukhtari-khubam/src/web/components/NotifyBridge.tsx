@@ -45,6 +45,7 @@ export function NotifyBridge() {
         lessonHref: last ? `/lesson?id=${last.id}` : '/schools',
         inspiration: { title: t('notify.inspiration_title'), body: inspiration },
         streak: { titles: lines(t('notify.streak.titles')), bodies: lines(t('notify.streak.bodies')), leftLabel: t('notify.streak.left'), channel: t('notify.streak.channel') },
+        morning: lines(t('notify.morning')),
         vars: { name: learner.name.split(/\s+/)[0] ?? '', lesson: last?.title ?? '', streak: streak(days) },
         lastDay: [...days].sort().at(-1) ?? ''
       }).catch(() => undefined)

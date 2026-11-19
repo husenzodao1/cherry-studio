@@ -377,9 +377,10 @@ window.renderJob = async (job) => {
   const scene = new THREE.Scene()
   // "room": three.js's procedural studio room, for machines without the HDRI files (diamond kinds need an HDRI)
   const pmrem = new THREE.PMREMGenerator(renderer)
-  const hdr = job.hdri === 'room' ? null : await new HDRLoader().loadAsync(job.hdri)
+  // "none": no surrounding light at all, only the key light (the night moon's crescent)
+  const hdr = job.hdri === 'room' || job.hdri === 'none' ? null : await new HDRLoader().loadAsync(job.hdri)
   if (hdr) hdr.mapping = THREE.EquirectangularReflectionMapping
-  scene.environment = hdr ? pmrem.fromEquirectangular(hdr).texture : pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+  scene.environment = job.hdri === 'none' ? null : hdr ? pmrem.fromEquirectangular(hdr).texture : pmrem.fromScene(new RoomEnvironment(), 0.04).texture
   scene.environmentIntensity = job.envIntensity ?? 1
   scene.environmentRotation = new THREE.Euler(0, job.envRotation ?? 0, 0)
 
@@ -481,11 +482,12 @@ window.renderJob = async (job) => {
 
   // soft key light for contact shadows, and palette rim lights
   const key = new THREE.DirectionalLight('#ffffff', job.keyIntensity ?? 1.2)
-  key.position.copy(center).add(new THREE.Vector3(-radius * 2, radius * 4, radius * 2.5))
+  key.position.copy(center).add(job.keyDir ? new THREE.Vector3(...job.keyDir).multiplyScalar(radius * 4) : new THREE.Vector3(-radius * 2, radius * 4, radius * 2.5))
   key.target.position.copy(center); key.castShadow = !job.noShadow
   key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 8; key.shadow.blurSamples = 16; key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02
   const sc = key.shadow.camera; sc.left = sc.bottom = -radius * 1.5; sc.right = sc.top = radius * 1.5; sc.near = 0.01; sc.far = radius * 12
   scene.add(key, key.target)
+  if (job.ambient) scene.add(new THREE.AmbientLight(job.ambient.color ?? '#ffffff', job.ambient.intensity ?? 0.05))
   for (const r of job.rims ?? []) {
     const l = new THREE.PointLight(r.color, r.intensity * radius * radius * 4, 0, 2)
     l.position.copy(center).add(new THREE.Vector3(...r.dir).multiplyScalar(radius * 2.2)); scene.add(l)

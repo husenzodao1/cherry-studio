@@ -7,6 +7,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { formatCode } from '@/lib/progress'
 import { ART } from '@/web/art'
 import { Icon } from '@/web/components/Icon'
+import { OtpField } from '@/web/components/OtpField'
 import { CodeImageButton, saveCodeToGallery } from '@/web/components/Keepsakes'
 import { isPassword, isUsername } from '@/web/offline/account'
 import { endAccount, linkAccount } from '@/web/offline/accountAuth'
@@ -55,6 +56,19 @@ function PasswordInput({ value, onChange, autoComplete }: { value: string; onCha
         <Icon name={show ? 'eyeOff' : 'eye'} size={18} />
       </button>
     </div>
+  )
+}
+
+/** "By continuing you agree to the [terms] and the [privacy policy]": the bracketed words become links. */
+function Agree() {
+  const { t } = usePrefs()
+  const parts = t('start.agree').split(/\[([^\]]+)\]/)
+  const links = ['/page?slug=terms', '/page?slug=privacy']
+  let n = 0
+  return (
+    <p className="agree">
+      {parts.map((p, i) => (i % 2 ? <Link key={i} href={links[n++] ?? '/page?slug=terms'}>{p}</Link> : <span key={i}>{p}</span>))}
+    </p>
   )
 }
 
@@ -333,7 +347,7 @@ export default function StartPage() {
   )
 
   const emailField = (
-    <Field label={t('email.label')} hint={t('email.hint')}>
+    <Field label={t('email.label')}>
       <input className="input" type="email" inputMode="email" value={email} maxLength={120} autoComplete="email" autoCapitalize="none" spellCheck={false}
         onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))} />
     </Field>
@@ -349,13 +363,7 @@ export default function StartPage() {
             <h1 className="h-page">{t('email.code_title')}</h1>
             <p className="muted" style={{ margin: '6px 0 0', fontSize: '0.9em' }}>{t('email.code_sent').replace('{email}', verify.email)}</p>
           </div>
-          <label className="otp-field">
-            <span className="otp-boxes" aria-hidden="true">
-              {Array.from({ length: 6 }, (_, i) => <span key={i} className={i < otp.length ? 'is-on' : i === otp.length ? 'is-now' : ''}>{otp[i] ?? ''}</span>)}
-            </span>
-            <input className="otp-input" inputMode="numeric" autoComplete="one-time-code" autoFocus value={otp} maxLength={6}
-              aria-label={t('email.code_title')} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} />
-          </label>
+          <OtpField value={otp} onChange={setOtp} label={t('email.code_title')} />
           {note}
           <button className="btn btn-block btn-lg" disabled={busy || otp.length !== 6}>{t('email.confirm')} <Icon name="check" size={18} /></button>
           <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -452,6 +460,7 @@ export default function StartPage() {
           {note}
           <button className="btn btn-block btn-lg" disabled={busy || !name.trim() || !ageOk}>{t('google.finish')} <Icon name="check" size={18} /></button>
           <button type="button" className="link-btn" onClick={() => { setGoogle(null); endGoogle() }}>{t('pin.cancel')}</button>
+          <Agree />
         </form>
       </div>
     )
@@ -517,6 +526,7 @@ export default function StartPage() {
           <Link href="/support" className="link-btn">{t('start.forgot_all')}</Link>
         </form>
       )}
+      <Agree />
     </div>
   )
 }

@@ -12,6 +12,7 @@ import { PrefsProvider, usePrefs } from '../prefs'
 import { AppLock } from './AppLock'
 import { AppUpdate } from './AppUpdate'
 import { BackButton } from './BackButton'
+import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
 import { NotifyBridge } from './NotifyBridge'
@@ -115,6 +116,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <AppLock />
               <OfflineNote />
               <BackButton />
+              <ScreenFit />
               <WidgetBridge />
               <Toaster />
             </ForAge>
