@@ -427,6 +427,83 @@ export function bulb2() {
   return g
 }
 
+// ---------------------------------------------------------------- school icons, third set: fewer parts, one clear idea each
+const shaded = (geo, top, bottom, axis = 'y') => {
+  const pos = geo.attributes.position, col = []; geo.computeBoundingBox(); const { min, max } = geo.boundingBox
+  for (let i = 0; i < pos.count; i++) {
+    const t = axis === 'y' ? (pos.getY(i) - min.y) / (max.y - min.y) : (pos.getX(i) - min.x) / (max.x - min.x)
+    const c = C(bottom).lerp(C(top), Math.pow(t, 0.85)); col.push(c.r, c.g, c.b)
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); return geo
+}
+const candy = (o = {}) => glossy('#ffffff', { vertexColors: true, roughness: 0.14, cc: 0.02, irid: o.irid ?? 0.25, sheen: 0.5, sheenColor: o.sheen ?? '#ffeefb' })
+function star5(rIn = 0.46, depth = 0.34) {
+  const pts = [], front = new THREE.Vector3(0, 0, depth), back = new THREE.Vector3(0, 0, -depth)
+  const rim = Array.from({ length: 10 }, (_, i) => { const r = i % 2 ? rIn : 1.05, a = Math.PI / 2 + (i * Math.PI) / 5; return new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, 0) })
+  for (let i = 0; i < 10; i++) { const a = rim[i], b = rim[(i + 1) % 10]; pts.push(front, a, b, back, b, a) }
+  const geo = new THREE.BufferGeometry().setFromPoints(pts); geo.computeVertexNormals(); return geo
+}
+
+/** Family and relationships: a soft little house with a heart on its front; two tiny hearts rise from the chimney. */
+export function family3() {
+  const { heartGeo } = D()
+  const g = new THREE.Group()
+  const roofMat = glossy('#6d43d2', { roughness: 0.16, irid: 0.3 })
+  g.add(mesh(new RoundedBoxGeometry(2.0, 0.08, 1.5, 4, 0.035), glossy('#e9e0fb', { roughness: 0.3 }), [0, 0.04, 0]))
+  g.add(mesh(shaded(new RoundedBoxGeometry(1.46, 1.02, 1.0, 8, 0.12), '#d2c0fb', '#9f7deb'), candy(), [0, 0.59, 0]))
+  // roof: a bevelled gable with a small overhang
+  const tri = new THREE.Shape(); tri.moveTo(-0.98, 0); tri.lineTo(0, 0.74); tri.lineTo(0.98, 0); tri.closePath()
+  g.add(mesh(new THREE.ExtrudeGeometry(tri, { depth: 1.08, bevelEnabled: true, bevelThickness: 0.07, bevelSize: 0.07, bevelSegments: 6, curveSegments: 8 }).translate(0, 0, -0.54), roofMat, [0, 1.06, 0]))
+  g.add(mesh(new RoundedBoxGeometry(0.22, 0.46, 0.22, 4, 0.05), roofMat, [0.5, 1.42, -0.18]))
+  // round window in the gable and the heart on the wall
+  g.add(mesh(new THREE.TorusGeometry(0.115, 0.022, 12, 48), gold(), [0, 1.36, 0.635]))
+  g.add(mesh(new THREE.CircleGeometry(0.11, 48), glossy('#fff1fb', { roughness: 0.2, emissive: '#ffd9f2', emissiveIntensity: 0.35 }), [0, 1.36, 0.628]))
+  g.add(mesh(shaded(heartGeo(), '#ffc4ec', '#e2559f'), candy({ irid: 0.35 }), [0, 0.58, 0.56], [0, 0, 0], 0.27))
+  for (const [x, y, z, s, r] of [[0.62, 1.92, -0.14, 0.085, 0.3], [0.78, 2.16, -0.1, 0.065, -0.25]]) {
+    g.add(mesh(shaded(heartGeo(), '#ffd3f1', '#ef7fc4'), candy(), [x, y, z], [0, 0.2, r], s))
+  }
+  return g
+}
+
+/** Science and health: a glass flask with violet liquid and bubbles; a pink heart with a white cross beside it. */
+export function health3() {
+  const { heartGeo } = D()
+  const g = new THREE.Group()
+  const outer = [[0.001, 0], [0.5, 0], [0.6, 0.06], [0.64, 0.16], [0.6, 0.3], [0.2, 1.02], [0.17, 1.12], [0.17, 1.44], [0.2, 1.47], [0.2, 1.52]]
+  g.add(mesh(lathe(outer, 128), glass2({ attenuation: '#e6dcff', attDist: 8, thickness: 0.05, irid: 0.7 })))
+  // liquid (opaque, so it shows through the glass) with a meniscus
+  const liquid = [[0.001, 0.03], [0.48, 0.03], [0.56, 0.08], [0.6, 0.16], [0.565, 0.29], [0.38, 0.62], [0.001, 0.62]]
+  g.add(mesh(shaded(lathe(liquid, 96), '#c49cff', '#6a3ad4'), candy({ irid: 0.4 })))
+  g.add(mesh(new THREE.TorusGeometry(0.205, 0.018, 10, 64), gold(), [0, 1.5, 0], [Math.PI / 2, 0, 0]))
+  for (const [x, y, z, r] of [[-0.14, 0.72, 0.05, 0.05], [0.06, 0.86, 0.02, 0.035], [-0.02, 1.0, 0.0, 0.028], [0.2, 0.48, 0.28, 0.045], [-0.26, 0.34, 0.3, 0.035]]) {
+    g.add(mesh(new THREE.SphereGeometry(r, 24, 16), glossy('#f6efff', { roughness: 0.08, irid: 0.8, sheen: 1, sheenColor: '#ffffff' }), [x, y, z]))
+  }
+  // the heart with a cross, floating at the shoulder of the flask
+  const h = new THREE.Group()
+  h.add(mesh(shaded(heartGeo(), '#ffc2e6', '#e04e95'), candy({ irid: 0.3 }), [0, 0, 0], [0, 0, 0], 1))
+  const bar = (w, hh) => new RoundedBoxGeometry(w, hh, 0.2, 4, 0.06)
+  h.add(mesh(bar(0.86, 0.28), glossy('#ffffff', { roughness: 0.15 }), [0, 0.04, 0.46]))
+  h.add(mesh(bar(0.28, 0.86), glossy('#ffffff', { roughness: 0.15 }), [0, 0.04, 0.46]))
+  h.position.set(0.6, 1.28, 0.22); h.rotation.set(0, -0.28, 0.12); h.scale.setScalar(0.3)
+  h.traverse((m) => { m.castShadow = false }) // a floating badge: no shadow on the ground
+  g.add(h)
+  return g
+}
+
+/** Personal growth: three rising steps and a golden star above the highest one. */
+export function growth3() {
+  const g = new THREE.Group()
+  const steps = [[-0.66, 0.42, '#e3d6fd', '#c3abf6'], [0, 0.82, '#c8b1f8', '#9d7aec'], [0.66, 1.22, '#a989f2', '#7149dc']]
+  g.add(mesh(new RoundedBoxGeometry(2.24, 0.06, 1.0, 4, 0.03), glossy('#ece4fb', { roughness: 0.3 }), [0, 0.03, 0]))
+  for (const [x, h, top, bottom] of steps) {
+    g.add(mesh(shaded(new RoundedBoxGeometry(0.6, h, 0.74, 6, 0.08), top, bottom), candy(), [x, 0.06 + h / 2, 0]))
+    g.add(mesh(new RoundedBoxGeometry(0.46, 0.02, 0.6, 2, 0.01), gold(), [x, 0.06 + h + 0.003, 0]))
+  }
+  g.add(mesh(star5(0.46, 0.3), gold({ color: '#f2c35a', roughness: 0.16 }), [0.66, 1.8, 0.02], [0, -0.35, 0.06], 0.44))
+  for (const [x, y, z, s] of [[0.16, 1.74, 0.2, 0.05], [1.14, 2.08, 0.1, 0.045], [1.08, 1.5, 0.3, 0.035]]) g.add(mesh(new THREE.OctahedronGeometry(s), gold(), [x, y, z], [0.3, 0.6, 0]))
+  return g
+}
+
 export function buildKind2(job) {
   const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
   switch (job.kind) {
@@ -443,6 +520,9 @@ export function buildKind2(job) {
     case 'plant2': return plant2()
     case 'star2': return star2()
     case 'bulb2': return bulb2()
+    case 'family3': return family3()
+    case 'health3': return health3()
+    case 'growth3': return growth3()
     default: return null
   }
 }

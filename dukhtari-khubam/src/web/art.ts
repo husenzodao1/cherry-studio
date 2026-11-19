@@ -7,9 +7,9 @@ export const SCHOOL_ART: Record<string, Art> = {
   'marifati-dini': a('school-religion', 380, 369),
   'odob-va-akhloq': a('school-ethics', 360, 293),
   'farhangi-tojik': a('school-culture', 360, 343),
-  'oila-va-munosibatho': a('school-family', 380, 342),
-  'ilm-va-salomati': a('school-health', 340, 349),
-  'rushdi-shakhsiyat': a('school-growth', 360, 350),
+  'oila-va-munosibatho': a('school-family', 360, 360),
+  'ilm-va-salomati': a('school-health', 360, 360),
+  'rushdi-shakhsiyat': a('school-growth', 360, 360),
   'zindagii-muosir': a('school-modern', 360, 274)
 }
 
