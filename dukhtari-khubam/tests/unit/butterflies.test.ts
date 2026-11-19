@@ -3,15 +3,15 @@ import { describe, expect, it } from 'vitest'
 import { planFor } from '@/web/components/Butterfly'
 
 describe('butterflies per page', () => {
-  it('home: the violet one on the motto and a swallowtail flying in', () => {
+  it('home: a lilac one on the motto and a pink one flying in', () => {
     const plan = planFor('/')
     expect(plan.map((p) => [p.species, p.role, p.start])).toEqual([
-      ['violet', 'stay', { at: '.bf-anchor' }],
+      ['lilac', 'stay', { at: '.bf-anchor' }],
       ['rose', 'stay', 'arrive']
     ])
   })
 
-  it('lists: three different kinds on the boxes, taking off in turn; the last one stays', () => {
+  it('lists: three different colours on the boxes, taking off in turn; the last one stays', () => {
     for (const path of ['/schools', '/school', '/course/', '/garden', '/profile', '/saved']) {
       const plan = planFor(path)
       expect(plan).toHaveLength(3)

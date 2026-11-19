@@ -6,8 +6,8 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, '..', '..', '..', 'public', 'assets', '3d')
 preview = sys.argv[1] if len(sys.argv) > 1 else None
-sheet = Image.new('RGBA', (3 * 460, 420), (233, 224, 250, 255))
-for i, s in enumerate(['morpho', 'rose', 'pearl']):
+sheet = Image.new('RGBA', (4 * 460, 340), (233, 224, 250, 255))
+for i, s in enumerate(['pearl', 'lilac', 'rose', 'sky']):
     wing = Image.open(os.path.join(HERE, f'{s}-wing.png')).convert('RGBA')
     body = Image.open(os.path.join(HERE, f'{s}-body.png')).convert('RGBA')
     r = wing.resize((192, 208), Image.LANCZOS)
