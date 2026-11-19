@@ -100,7 +100,9 @@ update `KEY_PREFIX` in `src/app/search/page.tsx`.
 
 ### Learner sign-in and support
 
-- Registration asks name, age, login and password; the 15-digit code is made on the phone.
+- Registration asks name, age, login and password; the 15-digit code is made on the phone. Without a
+  connection the login and password wait on the phone (`dk.pending_login`) and are saved on their own
+  once it is online; if the login was taken meanwhile, the learner is asked for another one.
 - Sign in with the code; if it is lost, with login and password; if both are lost, through the
   support chat (`/support`, no account needed — a thread belongs to a random token kept on the phone).
 - The phone encrypts the code with a key derived from the password (PBKDF2 → AES-GCM,

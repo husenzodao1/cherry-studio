@@ -19,14 +19,14 @@ const OPEN = /^\/(start|admin|page|support)(\/|$)/
 
 /** Sends a first-time visitor to /start (name → code, or code → restore). */
 function Gate({ children }: { children: ReactNode }) {
-  const { ready, learner, progress } = useLearner()
+  const { ready, learner, progress, pendingLogin } = useLearner()
   const path = usePathname() ?? '/'
   const router = useRouter()
   // a new learner; one registered before the age or login questions existed (login only when online);
   // or one signed in with a temporary password, who must choose her own
   const online = typeof navigator === 'undefined' || navigator.onLine !== false
   const needsStart = ready && !OPEN.test(path)
-    && (!learner || progress.born === undefined || !!learner.mustChange || (!learner.username && online))
+    && (!learner || progress.born === undefined || !!learner.mustChange || (!learner.username && online && !pendingLogin))
   useEffect(() => {
     if (needsStart) router.replace('/start')
   }, [needsStart, router])

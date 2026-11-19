@@ -40,6 +40,12 @@ interface LearnerApi {
   setLogin: (username: string, password: string) => Promise<LoginResult>
   /** signs in with login and password when the code is lost */
   loginWithPassword: (username: string, password: string) => Promise<LoginResult>
+  /** keeps a login chosen without a connection on the phone; it is saved on its own once online */
+  queueLogin: (username: string, password: string) => void
+  /** a login waits on the phone for the connection */
+  pendingLogin: boolean
+  /** why a waiting login could not be saved (e.g. the name was taken meanwhile) */
+  loginProblem: LoginResult | null
   signOut: () => void
   readLesson: (lessonId: string, percent: number) => void
   completeLesson: (lessonId: string) => void
@@ -50,6 +56,9 @@ interface LearnerApi {
 }
 
 const LEARNER_KEY = 'dk.learner'
+// a login chosen offline; kept only on this phone until the server has it
+const PENDING_KEY = 'dk.pending_login'
+const PROBLEM_KEY = 'dk.login_problem'
 const PROGRESS_KEY = 'dk.progress'
 const LearnerContext = createContext<LearnerApi | null>(null)
 
@@ -113,12 +122,16 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
   const [learner, setLearner] = useState<Learner | null>(null)
   const [progress, setProgress] = useState<ProgressData>(emptyProgress)
   const [sync, setSync] = useState<SyncState>('idle')
+  const [pendingLogin, setPendingLogin] = useState(false)
+  const [loginProblem, setLoginProblem] = useState<LoginResult | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latest = useRef({ learner, progress })
   latest.current = { learner, progress }
 
   useEffect(() => {
     setLearner(readJson<Learner>(LEARNER_KEY))
+    setPendingLogin(!!readJson(PENDING_KEY))
+    setLoginProblem(readJson<LoginResult>(PROBLEM_KEY))
     const stored = ProgressData.safeParse(readJson(PROGRESS_KEY))
     setProgress(stored.success ? stored.data : emptyProgress())
     setReady(true)
@@ -251,6 +264,8 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
         const next = { ...l, username, mustChange: false }
         writeJson(LEARNER_KEY, next)
         setLearner(next)
+        writeJson(PROBLEM_KEY, null)
+        setLoginProblem(null)
         return 'ok'
       } catch {
         return isOffline() ? 'offline' : 'error'
@@ -285,9 +300,17 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
         return isOffline() ? 'offline' : 'error'
       }
     },
+    queueLogin: (username, password) => {
+      writeJson(PENDING_KEY, { username: normalizeUsername(username), password })
+      setPendingLogin(true)
+    },
+    pendingLogin,
+    loginProblem,
     signOut: () => {
       writeJson(LEARNER_KEY, null)
       writeJson(PROGRESS_KEY, null)
+      writeJson(PENDING_KEY, null)
+      setPendingLogin(false)
       setLearner(null)
       setProgress(emptyProgress())
     },
@@ -315,7 +338,34 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       const today = localDay()
       return withDay({ ...p, review: { ...p.review, [qid]: { ...nextReview(p.review[qid]?.box, correct, today), at: now() } } })
     })
-  }), [ready, learner, progress, sync, update, pushNow])
+  }), [ready, learner, progress, sync, update, pushNow, pendingLogin, loginProblem])
+
+  // a login chosen offline is saved as soon as the phone is online
+  const apiRef = useRef(api)
+  apiRef.current = api
+  useEffect(() => {
+    if (!ready || !learner || learner.username || !pendingLogin) return
+    let busy = false
+    const trySave = async () => {
+      const pending = readJson<{ username: string; password: string }>(PENDING_KEY)
+      if (busy || !pending || navigator.onLine === false) return
+      busy = true
+      const r = await apiRef.current.setLogin(pending.username, pending.password)
+      busy = false
+      if (r === 'offline' || r === 'error') return // try again later
+      writeJson(PENDING_KEY, null)
+      setPendingLogin(false)
+      writeJson(PROBLEM_KEY, r === 'ok' ? null : r)
+      setLoginProblem(r === 'ok' ? null : r)
+    }
+    trySave()
+    window.addEventListener('online', trySave)
+    const every = setInterval(trySave, 60_000)
+    return () => {
+      window.removeEventListener('online', trySave)
+      clearInterval(every)
+    }
+  }, [ready, learner, pendingLogin])
 
   return <LearnerContext.Provider value={api}>{children}</LearnerContext.Provider>
 }

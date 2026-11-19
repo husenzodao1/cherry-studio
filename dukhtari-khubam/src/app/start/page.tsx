@@ -53,7 +53,7 @@ function PasswordInput({ value, onChange, autoComplete }: { value: string; onCha
 export default function StartPage() {
   const { t } = usePrefs()
   const router = useRouter()
-  const { learner, progress, register, restore, setAge, setLogin, loginWithPassword, checkUsername } = useLearner()
+  const { learner, progress, register, restore, setAge, setLogin, loginWithPassword, checkUsername, queueLogin, pendingLogin, loginProblem } = useLearner()
   const [mode, setMode] = useState<'register' | 'login'>('register')
   const [by, setBy] = useState<'code' | 'password'>('code')
   const [name, setName] = useState('')
@@ -72,7 +72,7 @@ export default function StartPage() {
   const online = typeof navigator === 'undefined' || navigator.onLine !== false
   const needsAge = !!learner && progress.born === undefined
   const mustChange = !!learner?.mustChange
-  const needsAccount = !!learner && !learner.username && online
+  const needsAccount = !!learner && !learner.username && online && !pendingLogin
   // already set up on this phone
   useEffect(() => {
     if (learner && !needsAge && !mustChange && !needsAccount && !created) router.replace('/')
@@ -99,8 +99,13 @@ export default function StartPage() {
     setCreated(l)
     if (free === 'free') {
       const r = await setLogin(username, password)
-      if (r !== 'ok') say(r)
-    } else setMessage(t('start.later_offline'))
+      if (r === 'offline' || r === 'error') queueLogin(username, password)
+      else if (r !== 'ok') say(r)
+    } else {
+      // no connection: the login waits on the phone and is saved on its own once online
+      queueLogin(username, password)
+      setMessage(t('start.later_offline'))
+    }
     setBusy(false)
   }
   const onCode = async (e: FormEvent) => {
@@ -216,7 +221,7 @@ export default function StartPage() {
         {flower}
         <div>
           <h1 className="h-page">{t('start.account_title')}</h1>
-          <p className="muted" style={{ margin: '4px 0 0' }}>{t('start.account_hint')}</p>
+          <p className="muted" style={{ margin: '4px 0 0' }}>{loginProblem && RESULT[loginProblem] ? t(RESULT[loginProblem]!) : t('start.account_hint')}</p>
         </div>
         <form className="stack" style={{ width: '100%', maxWidth: 420 }} onSubmit={onAccount}>
           {accountFields()}
