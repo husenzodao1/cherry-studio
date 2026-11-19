@@ -15,6 +15,7 @@ import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
 import { NotifyBridge } from './NotifyBridge'
 import { SupportWatch } from './SupportWatch'
+import { showToast, Toaster } from './Toast'
 
 /** Pages a visitor may open before choosing a name or entering a code. */
 const OPEN = /^\/(start|admin|page|support)(\/|$)/
@@ -24,11 +25,11 @@ function Gate({ children }: { children: ReactNode }) {
   const { ready, learner, progress, pendingLogin } = useLearner()
   const path = usePathname() ?? '/'
   const router = useRouter()
-  // a new learner; one registered before the age or login questions existed (login only when online);
-  // or one signed in with a temporary password, who must choose her own
+  // a new learner; one registered before the age or login questions existed (login only when online,
+  // and not for one who signed in with Google); or one signed in with a temporary password
   const online = typeof navigator === 'undefined' || navigator.onLine !== false
   const needsStart = ready && !OPEN.test(path)
-    && (!learner || progress.born === undefined || !!learner.mustChange || (!learner.username && online && !pendingLogin))
+    && (!learner || progress.born === undefined || !!learner.mustChange || (!learner.username && !learner.google && online && !pendingLogin))
   useEffect(() => {
     if (needsStart) router.replace('/start')
   }, [needsStart, router])
@@ -68,6 +69,23 @@ function AppFeel() {
   return null
 }
 
+/** Without a connection: one quiet note on opening and whenever the connection drops. */
+function OfflineNote() {
+  const { t } = usePrefs()
+  useEffect(() => {
+    const say = () => showToast(t('offline.note'), 'wifiOff', 4200)
+    const first = setTimeout(() => {
+      if (navigator.onLine === false) say()
+    }, 1200)
+    window.addEventListener('offline', say)
+    return () => {
+      clearTimeout(first)
+      window.removeEventListener('offline', say)
+    }
+  }, [t])
+  return null
+}
+
 /** Butterflies for the page being shown (a new set on every page). */
 function PageButterflies() {
   const path = usePathname() ?? '/'
@@ -90,6 +108,8 @@ export function Providers({ children }: { children: ReactNode }) {
               <NotifyBridge />
               <SupportWatch />
               <AppLock />
+              <OfflineNote />
+              <Toaster />
             </ForAge>
           </LearnerProvider>
         </ContentProvider>

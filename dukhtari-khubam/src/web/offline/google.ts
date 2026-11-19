@@ -1,0 +1,139 @@
+'use client'
+
+import { Capacitor } from '@capacitor/core'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+
+/**
+ * Sign-in with Google. In the Android app the phone's own Google account sheet opens (Credential
+ * Manager) — nothing goes to a web page; on the website Google's account chooser opens in a popup.
+ * Google's ID token signs the learner in to Supabase Auth, where her Google account is tied to her
+ * profile (api_google_link), so on a new phone Google gives her code back (api_google_profile).
+ *
+ * Name and photo come from the Google account. The age comes from the birthday in the Google account
+ * when she allows it (People API, scope user.birthday.read; Android app only); otherwise she types it.
+ * Setup: NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID and the Google provider in Supabase (see README).
+ */
+
+export const GOOGLE_WEB_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? ''
+const BIRTHDAY_SCOPE = 'https://www.googleapis.com/auth/user.birthday.read'
+// ask for the birthday unless turned off (an unverified Google app shows a warning for this scope)
+const ASK_BIRTHDAY = process.env.NEXT_PUBLIC_GOOGLE_BIRTHDAY !== '0'
+
+export interface GoogleProfile { code: string; name: string }
+export interface GoogleAccount {
+  email: string | null
+  name: string
+  photo: string | null
+  /** whole years from the Google birthday, when Google gave it */
+  age: number | null
+  /** her profile, when this Google account is already tied to one */
+  profile: GoogleProfile | null
+}
+export type GoogleResult = GoogleAccount | 'cancelled' | 'not_configured' | 'offline' | 'error'
+
+// a separate, in-memory Auth client: the learner's Google session never mixes with a staff session
+let client: SupabaseClient | null = null
+function auth(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  client ??= createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'dk-google' } })
+  return client
+}
+
+let ready: Promise<void> | null = null
+async function plugin() {
+  const { SocialLogin } = await import('@capgo/capacitor-social-login')
+  ready ??= SocialLogin.initialize({ google: { webClientId: GOOGLE_WEB_CLIENT_ID, mode: 'online' } })
+  await ready
+  return SocialLogin
+}
+
+const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('')
+
+/** Whole years between a birthday and today. */
+export function ageFrom(b: { year?: number; month?: number; day?: number }, today = new Date()): number | null {
+  if (!b.year || !b.month || !b.day) return null
+  let age = today.getFullYear() - b.year
+  if (today.getMonth() + 1 < b.month || (today.getMonth() + 1 === b.month && today.getDate() < b.day)) age--
+  return age >= 5 && age <= 99 ? age : null
+}
+
+async function birthdayAge(accessToken: string): Promise<number | null> {
+  try {
+    const res = await fetch('https://people.googleapis.com/v1/people/me?personFields=birthdays', { headers: { authorization: `Bearer ${accessToken}` } })
+    if (!res.ok) return null
+    const body = (await res.json()) as { birthdays?: { date?: { year?: number; month?: number; day?: number }; metadata?: { primary?: boolean } }[] }
+    const list = body.birthdays ?? []
+    const best = list.find((b) => b.metadata?.primary && b.date?.year) ?? list.find((b) => b.date?.year)
+    return best?.date ? ageFrom(best.date) : null
+  } catch {
+    return null
+  }
+}
+
+export async function signInWithGoogle(): Promise<GoogleResult> {
+  if (!GOOGLE_WEB_CLIENT_ID) return 'not_configured'
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'offline'
+  const sb = auth()
+  if (!sb) return 'not_configured'
+  try {
+    const SocialLogin = await plugin()
+    // Supabase checks that the token carries sha256(nonce); Google receives the hash, Supabase the nonce
+    const nonce = hex(crypto.getRandomValues(new Uint8Array(16)).buffer)
+    const hashed = hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(nonce)))
+    const native = Capacitor.isNativePlatform()
+    const { result } = await SocialLogin.login({
+      provider: 'google',
+      options: { nonce: hashed, ...(native && ASK_BIRTHDAY ? { scopes: [BIRTHDAY_SCOPE] } : {}) }
+    })
+    if (result.responseType !== 'online' || !result.idToken) return 'error'
+    const { error } = await sb.auth.signInWithIdToken({ provider: 'google', token: result.idToken, nonce })
+    if (error) return 'error'
+    const { data: profile, error: pErr } = await sb.rpc('api_google_profile')
+    if (pErr) return 'error'
+    const p = result.profile
+    return {
+      email: p.email,
+      name: (p.givenName || p.name || '').trim().slice(0, 80),
+      photo: p.imageUrl,
+      age: result.accessToken?.token ? await birthdayAge(result.accessToken.token) : null,
+      profile: profile && typeof profile === 'object' ? { code: String((profile as GoogleProfile).code), name: String((profile as GoogleProfile).name) } : null
+    }
+  } catch (e) {
+    const text = String((e as Error)?.message ?? e).toLowerCase()
+    return /cancel|closed|dismiss|16:|abort/.test(text) ? 'cancelled' : 'error'
+  }
+}
+
+/** Ties the Google account signed in above to this phone's profile, then ends the Google session. */
+export async function linkGoogle(code: string): Promise<boolean> {
+  const sb = auth()
+  if (!sb) return false
+  try {
+    const { error } = await sb.rpc('api_google_link', { p_code: code })
+    return !error
+  } catch {
+    return false
+  } finally {
+    await sb.auth.signOut({ scope: 'local' }).catch(() => undefined)
+  }
+}
+
+/** Ends the Google session without linking (she signed in to an existing profile). */
+export async function endGoogle(): Promise<void> {
+  await auth()?.auth.signOut({ scope: 'local' }).catch(() => undefined)
+}
+
+/** Keeps the Google photo as her profile photo (only when she has none yet). */
+export async function googlePhotoFile(url: string | null): Promise<File | null> {
+  if (!url) return null
+  try {
+    const res = await fetch(url.replace(/=s\d+-c$/, '=s512-c'), { mode: 'cors' })
+    if (!res.ok) return null
+    const blob = await res.blob()
+    return new File([blob], 'google.jpg', { type: blob.type || 'image/jpeg' })
+  } catch {
+    return null
+  }
+}

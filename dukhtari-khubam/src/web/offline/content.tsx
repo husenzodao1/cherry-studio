@@ -7,6 +7,7 @@ import type { Asset, Block } from '../components/Blocks'
 import { usePrefs } from '../prefs'
 import { filterBundleForAge } from './age'
 import { apiUrl } from './base'
+import { readStamp, watchStamp } from './live'
 import { bundleImageUrls, prefetchMedia } from './media'
 
 /** After a content update, save its images on the phone without blocking the screen. */
@@ -16,8 +17,8 @@ function keepImages(bundle: Bundle) {
 
 /**
  * The published catalogue lives on the phone (IndexedDB), so every screen works offline.
- * On start the stored copy is shown at once; when online the app asks the server for a newer one
- * (ETag) and swaps it in. The APK also ships a copy (public/offline/bundle-<locale>.json) so the very
+ * On start the stored copy is shown at once; when online the app compares the live content stamp
+ * (live.ts) and fetches a newer copy as soon as staff change anything, then swaps it in. The APK also ships a copy (public/offline/bundle-<locale>.json) so the very
  * first launch works without a connection.
  */
 
@@ -87,7 +88,26 @@ interface ContentState {
 
 const ContentContext = createContext<ContentState>({ bundle: null, loading: true, offlineEmpty: false, refresh: () => undefined })
 const key = (locale: string) => `bundle:${locale}`
-const REFRESH_MS = 30 * 60 * 1000
+const stampKey = (locale: string) => `dk.stamp:${locale}`
+// a cheap look at the live stamp while the screen is shown (Realtime normally answers first)
+const STAMP_MS = 20 * 1000
+// without the stamp (older database): ask for the content itself, answered from a 20-second cache
+const FALLBACK_MS = 60 * 1000
+
+function readLocal(k: string): string | null {
+  try {
+    return localStorage.getItem(k)
+  } catch {
+    return null
+  }
+}
+function writeLocal(k: string, v: string) {
+  try {
+    localStorage.setItem(k, v)
+  } catch {
+    /* storage blocked: the stamp is asked again next time */
+  }
+}
 
 export function ContentProvider({ children }: { children: ReactNode }) {
   const { locale } = usePrefs()
@@ -95,18 +115,19 @@ export function ContentProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [offlineEmpty, setOfflineEmpty] = useState(false)
   const current = useRef<Bundle | null>(null)
+  const busy = useRef(false)
+  const live = useRef(true)
 
-  const refresh = useCallback(async () => {
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-      if (!current.current) setOfflineEmpty(true)
-      return
-    }
+  /** Fetches the catalogue; with a stamp, from that stamp's own cache entry (never an older copy). */
+  const fetchBundle = useCallback(async (stamp: string | null) => {
     try {
       const headers: Record<string, string> = current.current ? { 'if-none-match': `"${current.current.version}"` } : {}
-      const res = await fetch(apiUrl(`/bundle?locale=${locale}`), { headers, cache: 'no-cache' })
-      if (res.status === 304 || !res.ok) {
-        if (!res.ok && res.status !== 304 && !current.current) setOfflineEmpty(true)
-        return
+      const url = `/bundle?locale=${locale}${stamp ? `&v=${encodeURIComponent(stamp)}` : ''}`
+      const res = await fetch(apiUrl(url), { headers, cache: 'no-cache' })
+      if (res.status === 304) return true
+      if (!res.ok) {
+        if (!current.current) setOfflineEmpty(true)
+        return false
       }
       const next = (await res.json()) as Bundle
       if (next.version !== current.current?.version) {
@@ -116,10 +137,32 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         await set(key(locale), next).catch(() => undefined)
         keepImages(next)
       }
+      return true
     } catch {
       if (!current.current) setOfflineEmpty(true)
+      return false
     }
   }, [locale])
+
+  /** Compares the live stamp with the one this copy was made at and fetches only when it moved. */
+  const refresh = useCallback(async () => {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      if (!current.current) setOfflineEmpty(true)
+      return
+    }
+    if (busy.current) return
+    busy.current = true
+    try {
+      const stamp = await readStamp()
+      live.current = stamp !== null
+      if (stamp && stamp === readLocal(stampKey(locale)) && current.current) return
+      if (await fetchBundle(stamp)) {
+        if (stamp) writeLocal(stampKey(locale), stamp)
+      }
+    } finally {
+      busy.current = false
+    }
+  }, [locale, fetchBundle])
 
   useEffect(() => {
     let alive = true
@@ -137,16 +180,32 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       refresh()
     })()
     const onOnline = () => refresh()
+    const onVisible = () => {
+      if (!document.hidden) refresh()
+    }
     window.addEventListener('online', onOnline)
-    const timer = setInterval(refresh, REFRESH_MS)
+    window.addEventListener('focus', onVisible)
+    document.addEventListener('visibilitychange', onVisible)
+    const stop = watchStamp(() => refresh())
+    let last = Date.now()
+    const timer = setInterval(() => {
+      if (document.hidden) return
+      if (live.current || Date.now() - last >= FALLBACK_MS) {
+        last = Date.now()
+        refresh()
+      }
+    }, STAMP_MS)
     return () => {
       alive = false
       window.removeEventListener('online', onOnline)
+      window.removeEventListener('focus', onVisible)
+      document.removeEventListener('visibilitychange', onVisible)
+      stop()
       clearInterval(timer)
     }
   }, [locale, refresh])
 
-  const value = useMemo(() => ({ bundle, loading, offlineEmpty, refresh }), [bundle, loading, offlineEmpty, refresh])
+  const value = useMemo(() => ({ bundle, loading, offlineEmpty, refresh: () => void refresh() }), [bundle, loading, offlineEmpty, refresh])
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>
 }
 

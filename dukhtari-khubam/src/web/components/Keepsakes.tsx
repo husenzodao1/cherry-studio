@@ -4,8 +4,9 @@ import { useState } from 'react'
 
 import { formatDay } from '@/lib/progress'
 
-import { drawCertificate, drawCodeCard, savePicture } from '../offline/cards'
-import { useLearner } from '../offline/learner'
+import { drawCertificate, drawCodeCard, savePicture, savePictureToGallery } from '../offline/cards'
+import { useLearner, type Learner } from '../offline/learner'
+import type { UiKey } from '../i18n'
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
 
@@ -56,4 +57,14 @@ export function CodeImageButton({ className = 'btn btn-soft btn-block' }: { clas
       <Icon name="down" size={18} /> {busy ? t('cert.saving') : t('code.save_image')}
     </button>
   )
+}
+
+/** Draws the picture of the personal code and puts it in the gallery by itself (right after registering). */
+export async function saveCodeToGallery(learner: Learner, t: (k: UiKey) => string): Promise<boolean> {
+  try {
+    const png = await drawCodeCard({ title: t('code.card_title'), hint: t('code.card_hint'), brand: t('app.name'), name: learner.name, code: learner.code })
+    return await savePictureToGallery(png, `dukhtari-khubam-code-${learner.code.slice(-4)}.png`)
+  } catch {
+    return false
+  }
 }

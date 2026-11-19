@@ -96,15 +96,18 @@ export const offlineRoutes: AnyRoute[] = [
   route({
     method: 'GET', path: '/bundle', access: 'public', tag: 'Offline app',
     summary: 'Whole published catalogue for offline use (lessons, quizzes with answer keys, texts); send If-None-Match',
-    query: LocaleQuery, cache: 300,
+    // `v` is the live content stamp the app saw (GET /rest/v1/rpc/api_content_stamp): every stamp is its
+    // own cache entry, so a change made in the panel is never answered from an older cached copy.
+    query: LocaleQuery.extend({ v: z.string().regex(/^[0-9T.]{1,40}$/).optional() }), cache: 20,
     handler: async ({ sb, query, req }) => {
       const bundle = await buildBundle(sb(), query.locale)
       const etag = `"${bundle.version}"`
+      const cache = query.v ? 'public, s-maxage=86400' : 'public, s-maxage=20, stale-while-revalidate=40'
       if (req.headers.get('if-none-match') === etag) {
-        return new Response(null, { status: 304, headers: { etag, 'cache-control': 'public, s-maxage=300, stale-while-revalidate=1500' } })
+        return new Response(null, { status: 304, headers: { etag, 'cache-control': cache } })
       }
       return new Response(JSON.stringify(bundle), {
-        headers: { 'content-type': 'application/json; charset=utf-8', etag, 'cache-control': 'public, s-maxage=300, stale-while-revalidate=1500' }
+        headers: { 'content-type': 'application/json; charset=utf-8', etag, 'cache-control': cache }
       })
     }
   }),

@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { ART } from '@/web/art'
 import { Avatar } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
+import { InstallButton } from '@/web/components/InstallButton'
+import { RainDrop } from '@/web/components/RainDrop'
 import { SchoolRow } from '@/web/components/SchoolTile'
 import { Empty, Skeleton } from '@/web/components/States'
 import { WordsOfDay } from '@/web/components/WordsOfDay'
@@ -18,6 +20,27 @@ import type { UiKey } from '@/web/i18n'
 /** Greeting by the phone's clock: morning, day, evening, night. */
 function greetingKey(h: number): UiKey {
   return h >= 5 && h < 11 ? 'greet.morning' : h >= 11 && h < 17 ? 'greet.day' : h >= 17 && h < 22 ? 'greet.evening' : 'greet.night'
+}
+
+/** Search: a lens and its handle, drawn separately so the entrance can draw the ring, then the handle. */
+function SearchGlyph() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" aria-hidden="true" focusable="false">
+      <circle className="g-lens" cx="11" cy="11" r="7" pathLength={1} />
+      <path className="g-handle" d="M16.2 16.2 20 20" pathLength={1} />
+    </svg>
+  )
+}
+
+/** The menu's three dots, each its own shape so they can pop in one after another. */
+function MoreGlyph() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+      <circle className="g-dot" cx="5.5" cy="12" r="1.7" />
+      <circle className="g-dot" cx="12" cy="12" r="1.7" />
+      <circle className="g-dot" cx="18.5" cy="12" r="1.7" />
+    </svg>
+  )
 }
 
 export default function Home() {
@@ -36,6 +59,7 @@ export default function Home() {
     return () => document.documentElement.classList.remove('still')
   }, [])
 
+  const flower = useRef<HTMLImageElement>(null)
   const name = learner?.name
   const review = useMemo(() => (bundle ? reviewStats(bundle, progress) : { total: 0, today: 0 }), [bundle, progress])
   const lastLesson = progress.last ? bundle?.lessons[progress.last.lesson] : undefined
@@ -43,19 +67,21 @@ export default function Home() {
 
   return (
     <div className="home">
+      <RainDrop flower={flower} />
       <header className="home-top">
-        <Link href="/profile" aria-label={t('nav.profile')}><Avatar name={name} /></Link>
+        <Link href="/profile" className="home-avatar" aria-label={t('nav.profile')}><Avatar name={name} /></Link>
         <span style={{ flex: 1 }} />
-        <Link href="/search" className="icon-btn" aria-label={t('action.search')}><Icon name="search" /></Link>
-        <Link href="/settings" className="icon-btn" aria-label={t('settings.title')}><Icon name="more" /></Link>
+        <InstallButton />
+        <Link href="/search" className="icon-btn search-btn" aria-label={t('action.search')}><SearchGlyph /></Link>
+        <Link href="/settings" className="icon-btn more-btn" aria-label={t('settings.title')}><MoreGlyph /></Link>
       </header>
 
       <section className="hello">
         <div className="hello-text">
           <p className="greet">{hour === null ? ' ' : `${t(greetingKey(hour))}${name ? `, ${name}` : ''}!`}</p>
-          <h1 className="h-hero">{t('home.motto')}{'\u00a0'}<span className="bf-anchor" aria-hidden="true" /></h1>
+          <h1 className="h-hero motto">{t('home.motto')}{'\u00a0'}<span className="bf-anchor" aria-hidden="true" /></h1>
         </div>
-        <img className="hello-flower bloom-in" src={ART.flower.src} alt="" aria-hidden="true" decoding="async" />
+        <img ref={flower} className="hello-flower bloom-in" src={ART.flower.src} alt="" aria-hidden="true" decoding="async" />
       </section>
 
       {cont ? (
@@ -65,7 +91,7 @@ export default function Home() {
             <b>{t('home.continue_course')}</b>
             <span className="sub">{cont.context.course.title} · {cont.title}</span>
           </span>
-          <span className="play-btn" aria-hidden="true"><Icon name="play" size={20} fill="currentColor" /></span>
+          <span className="play-btn play-nudge" aria-hidden="true"><Icon name="play" size={20} fill="currentColor" /></span>
         </Link>
       ) : (
         <Link href="/schools" className="glass pill-card">
@@ -74,7 +100,7 @@ export default function Home() {
             <b>{t('home.start_learning')}</b>
             <span className="sub">{t('home.choose_school')}</span>
           </span>
-          <span className="play-btn" aria-hidden="true"><Icon name="play" size={20} fill="currentColor" /></span>
+          <span className="play-btn play-nudge" aria-hidden="true"><Icon name="play" size={20} fill="currentColor" /></span>
         </Link>
       )}
 

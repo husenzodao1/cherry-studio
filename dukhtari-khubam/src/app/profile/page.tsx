@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRef } from 'react'
+import { useState } from 'react'
 
 import { streak } from '@/lib/progress'
 import { Avatar } from '@/web/components/Header'
@@ -10,7 +10,8 @@ import { Icon } from '@/web/components/Icon'
 import { LOCALE_LABELS } from '@/web/i18n'
 import { useContent } from '@/web/offline/content'
 import { courseProgress, useLearner } from '@/web/offline/learner'
-import { clearPhoto, savePhoto, usePhoto } from '@/web/offline/photo'
+import { usePhoto } from '@/web/offline/photo'
+import { PhotoSheet } from '@/web/components/PhotoEditor'
 import { isDarkTheme, usePrefs } from '@/web/prefs'
 
 /** Small filled glyphs for the three numbers, drawn white on a coloured orb. */
@@ -38,25 +39,18 @@ function StatGlyph({ kind }: { kind: 'courses' | 'achievements' | 'streak' }) {
   )
 }
 
-/** The avatar with a camera button: the photo is cut square and kept on this phone only. */
+/** The avatar with a camera badge; a tap opens the choices: change, take a new one, or remove it. */
 function ProfilePhoto({ name }: { name: string }) {
   const { t } = usePrefs()
   const photo = usePhoto()
-  const input = useRef<HTMLInputElement>(null)
+  const [open, setOpen] = useState(false)
   return (
     <span className="profile-photo bloom-in">
-      <button type="button" className="photo-btn" onClick={() => input.current?.click()} aria-label={t('profile.photo')}>
+      <button type="button" className="photo-btn" onClick={() => setOpen(true)} aria-label={t('profile.photo')} aria-haspopup="dialog">
         <Avatar name={name} size={96} />
         <span className="photo-badge" aria-hidden="true"><Icon name="camera" size={15} /></span>
       </button>
-      {photo ? (
-        <button type="button" className="photo-remove" onClick={clearPhoto} aria-label={t('profile.photo_remove')}><Icon name="x" size={13} /></button>
-      ) : null}
-      <input ref={input} type="file" accept="image/*" hidden onChange={async (e) => {
-        const file = e.target.files?.[0]
-        e.target.value = ''
-        if (file) await savePhoto(file)
-      }} />
+      {open ? <PhotoSheet hasPhoto={!!photo} onClose={() => setOpen(false)} /> : null}
     </span>
   )
 }
@@ -127,7 +121,7 @@ export default function Profile() {
         <div className="menu-row">
           <Icon name="moon" /><span className="grow">{t('profile.night')}</span>
           <button type="button" role="switch" className="switch" aria-checked={dark} aria-label={t('profile.night')}
-            onClick={() => prefs.set({ theme: dark ? 'light' : 'dark' })} />
+            onClick={() => prefs.set({ theme: dark ? 'peach' : 'dark' })} />
         </div>
         <Link href="/page?slug=about" className="menu-row"><Icon name="info" /><span className="grow">{t('settings.about')}</span><Icon name="forward" size={18} /></Link>
       </div>

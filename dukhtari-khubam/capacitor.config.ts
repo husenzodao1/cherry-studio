@@ -9,10 +9,12 @@ const config: CapacitorConfig = {
   appName: 'Духтари хубам',
   webDir: 'out',
   server: { androidScheme: 'https' },
-  android: { backgroundColor: '#ebe3fa' },
+  android: { backgroundColor: '#fff1ea' },
   plugins: {
     // daily lesson reminder and inspiration (src/web/offline/notify.ts)
-    LocalNotifications: { smallIcon: 'ic_stat_notify', iconColor: '#7A4FD8' }
+    LocalNotifications: { smallIcon: 'ic_stat_notify', iconColor: '#7A4FD8' },
+    // Google sign-in only (src/web/offline/google.ts): other providers' SDKs stay out of the APK
+    SocialLogin: { providers: { google: true, facebook: false, apple: false, twitter: false }, logLevel: 1 }
   }
 }
 

@@ -1,8 +1,8 @@
 import { useSyncExternalStore } from 'react'
 
 /**
- * The learner's profile photo. It stays on this phone only (never sent to the server): a square,
- * 256-pixel JPEG cut from the middle of the chosen picture, kept in local storage.
+ * The learner's profile photo. It stays on this phone only (never sent to the server): a square JPEG
+ * cut in the photo editor (PhotoEditor.tsx), or from the middle of a Google photo, kept in local storage.
  */
 const KEY = 'dk.photo'
 const EVENT = 'dk-photo'
@@ -14,6 +14,9 @@ function read(): string | null {
     return null
   }
 }
+
+/** Keeps a ready picture (a data URL cut in the photo editor). */
+export const writePhoto = (value: string) => write(value)
 
 function write(value: string | null) {
   try {

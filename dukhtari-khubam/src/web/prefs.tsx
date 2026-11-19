@@ -4,8 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { DEFAULT_STRINGS, type Locale, type UiKey } from './i18n'
 
-/** White (the default), dark, and four colour themes; "dusk" is a dark one. */
-export const THEMES = ['light', 'dark', 'sakura', 'peach', 'mint', 'dusk'] as const
+/** Peach (the default), white, dark and three more colour themes; "dusk" is a dark one. */
+export const THEMES = ['peach', 'light', 'dark', 'sakura', 'mint', 'dusk'] as const
 export type Theme = (typeof THEMES)[number]
 export const isDarkTheme = (t: Theme) => t === 'dark' || t === 'dusk'
 
@@ -23,8 +23,10 @@ interface PrefsApi extends Prefs {
   setCms: (cms: { strings?: Record<string, string>; help?: PrefsApi['help'] }) => void
 }
 
-// the smallest text size is the standard one
-const DEFAULTS: Prefs = { locale: 'tg', theme: 'light', textScale: 0.9 }
+// standard look: the Peach theme and the smallest text size
+export const MIN_TEXT_SCALE = 0.9
+const DEFAULTS: Prefs = { locale: 'tg', theme: 'peach', textScale: MIN_TEXT_SCALE }
+const VERSION = 3
 const KEY = 'dk.prefs'
 const PrefsContext = createContext<PrefsApi | null>(null)
 
@@ -34,10 +36,10 @@ function read(): Prefs {
     const { locale, theme, textScale } = { ...DEFAULTS, ...stored }
     return {
       locale,
-      // "system" is gone: white unless a theme was chosen
-      theme: (THEMES as readonly string[]).includes(theme) ? theme : 'light',
+      // white was the standard theme before version 3: such settings move to the new standard, Peach
+      theme: (THEMES as readonly string[]).includes(theme) && !(theme === 'light' && (stored.v ?? 0) < VERSION) ? theme : DEFAULTS.theme,
       // settings saved before version 2 carried the old default size (1): move it to the new default
-      textScale: stored.v === 2 ? textScale : textScale === 1 ? DEFAULTS.textScale : textScale
+      textScale: (stored.v ?? 0) >= 2 ? textScale : textScale === 1 ? DEFAULTS.textScale : textScale
     }
   } catch {
     return DEFAULTS
@@ -72,7 +74,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     setPrefs((p) => {
       const next = { ...p, ...patch }
       try {
-        localStorage.setItem(KEY, JSON.stringify({ ...next, v: 2 }))
+        localStorage.setItem(KEY, JSON.stringify({ ...next, v: VERSION }))
       } catch {
         /* storage unavailable: keep in memory */
       }

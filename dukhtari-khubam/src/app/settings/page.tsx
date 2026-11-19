@@ -8,12 +8,13 @@ import { formatCode } from '@/lib/progress'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { PinSettings } from '@/web/components/PinSettings'
+import { RateShare } from '@/web/components/RateShare'
 import { CodeImageButton } from '@/web/components/Keepsakes'
 import { LOCALE_LABELS, type Locale } from '@/web/i18n'
 import { useLearner } from '@/web/offline/learner'
 import { allowNotifications, canNotify, DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyPrefs } from '@/web/offline/notify'
 import { checkPassword, unlockWithPhone } from '@/web/offline/unlock'
-import { THEMES, usePrefs } from '@/web/prefs'
+import { MIN_TEXT_SCALE, THEMES, usePrefs } from '@/web/prefs'
 
 /**
  * The learner's code and login, at the end of the settings and small: hidden until the phone's own lock
@@ -174,7 +175,7 @@ export default function Settings() {
         </div>
         <label className="glass card-pad stack" style={{ gap: 10 }}>
           <span className="eyebrow">{t('settings.text_size')}</span>
-          <input type="range" min={0.9} max={1.3} step={0.05} value={prefs.textScale}
+          <input type="range" min={MIN_TEXT_SCALE} max={1.3} step={0.05} value={prefs.textScale}
             onChange={(e) => prefs.set({ textScale: Number(e.target.value) })} />
         </label>
         <div className="glass menu">
@@ -183,6 +184,7 @@ export default function Settings() {
           <Link href="/page?slug=about" className="menu-row"><Icon name="info" /><span className="grow">{t('settings.about')}</span><Icon name="forward" size={18} /></Link>
           {learner ? <button type="button" className="menu-row danger" onClick={leave}><Icon name="logout" /><span className="grow">{t('profile.signout')}</span></button> : null}
         </div>
+        <RateShare />
         <PinSettings />
         <CodeCard />
         <p className="muted" style={{ textAlign: 'center', fontSize: '0.8em', margin: 0 }}>{t('settings.version')} {process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}</p>

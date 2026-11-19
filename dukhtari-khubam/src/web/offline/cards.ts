@@ -185,3 +185,31 @@ export async function savePicture(b: Blob, fileName: string, title: string): Pro
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 5000)
 }
+
+interface GalleryPlugin { savePng(o: { data: string; fileName: string }): Promise<{ uri: string }> }
+let gallery: GalleryPlugin | null = null
+
+/**
+ * Saves a picture straight into the phone's gallery without asking (Android app: Pictures/Духтари хубам,
+ * through the app's own GallerySaver plugin); in a browser it is downloaded. True when it was saved.
+ */
+export async function savePictureToGallery(b: Blob, fileName: string): Promise<boolean> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      gallery ??= Capacitor.registerPlugin<GalleryPlugin>('GallerySaver')
+      await gallery.savePng({ data: await toBase64(b), fileName })
+      return true
+    }
+    const url = URL.createObjectURL(b)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 5000)
+    return true
+  } catch {
+    return false
+  }
+}

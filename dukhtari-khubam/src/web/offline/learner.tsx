@@ -22,6 +22,8 @@ export interface Learner {
   username?: string
   /** signed in with a temporary password from support: a new password must be chosen */
   mustChange?: boolean
+  /** the Google account her profile is tied to (signing in with it gives the code back) */
+  google?: string
 }
 export type LoginResult = 'ok' | 'invalid' | 'locked' | 'taken' | 'offline' | 'error'
 type SyncState = 'idle' | 'syncing' | 'synced' | 'offline' | 'error'
@@ -31,9 +33,11 @@ interface LearnerApi {
   learner: Learner | null
   progress: ProgressData
   sync: SyncState
-  register: (name: string, age: number) => Learner
+  register: (name: string, age: number, google?: string) => Learner
   setAge: (age: number) => void
-  restore: (code: string) => Promise<'ok' | 'not_found' | 'offline'>
+  restore: (code: string, google?: string) => Promise<'ok' | 'not_found' | 'offline'>
+  /** backs the profile up now (it must exist on the server before a login or Google is tied to it) */
+  backupNow: () => Promise<void>
   /** whether a login can be taken */
   checkUsername: (username: string) => Promise<'free' | 'taken' | 'invalid' | 'offline'>
   /** sets (or changes) the login and password of this phone's learner */
@@ -201,8 +205,8 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     learner,
     progress,
     sync,
-    register: (name, age) => {
-      const l = { name: name.trim().slice(0, 80), code: newCode((n) => crypto.getRandomValues(new Uint8Array(n))) }
+    register: (name, age, google) => {
+      const l: Learner = { name: name.trim().slice(0, 80), code: newCode((n) => crypto.getRandomValues(new Uint8Array(n))), ...(google ? { google } : {}) }
       writeJson(LEARNER_KEY, l)
       setLearner(l)
       // the login is usually set right after; it must see the new learner before React re-renders
@@ -211,7 +215,8 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       return l
     },
     setAge: (age) => update((p) => ({ ...p, born: new Date().getFullYear() - age })),
-    restore: async (raw) => {
+    backupNow: pushNow,
+    restore: async (raw, google) => {
       const code = raw.replace(/\D/g, '')
       if (!isCode(code)) return 'not_found'
       if (navigator.onLine === false) return 'offline'
@@ -223,7 +228,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
         if (!res.ok) return 'offline'
         const body = (await res.json()) as { name: string; data: unknown }
         const server = ProgressData.safeParse(body.data)
-        const l = { name: body.name, code }
+        const l: Learner = { name: body.name, code, ...(google ? { google } : {}) }
         writeJson(LEARNER_KEY, l)
         setLearner(l)
         setProgress((cur) => {

@@ -17,6 +17,9 @@ const pacifico = Pacifico({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], weig
 // Arabic is only needed when that language is chosen: do not preload it for everyone.
 const naskh = Noto_Naskh_Arabic({ subsets: ['arabic'], variable: '--font-naskh', display: 'swap', preload: false })
 
+const FIRST_ART = ['glass-flower', 'glass-flower-open', 'glass-lotus', 'glass-bubble', 'glass-leaves', 'glass-tulip', 'book-open', 'words-band']
+  .map((n) => `/assets/3d/${n}.webp`)
+
 export const metadata: Metadata = {
   title: { default: 'Духтари хубам', template: '%s · Духтари хубам' },
   description: 'Платформаи таълимӣ: 7 оинаи духтар.',
@@ -25,7 +28,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f1ebfc' },
+    { media: '(prefers-color-scheme: light)', color: '#fff1ea' },
     { media: '(prefers-color-scheme: dark)', color: '#1a1333' }
   ],
   width: 'device-width',
@@ -36,14 +39,17 @@ export const viewport: Viewport = {
   viewportFit: 'cover'
 }
 
-// Applies the saved theme, text size and language before first paint (no flash).
-const boot = `try{var p=JSON.parse(localStorage.getItem('dk.prefs')||'{}'),r=document.documentElement,t=['dark','sakura','peach','mint','dusk'].indexOf(p.theme)<0?'light':p.theme;r.dataset.theme=t==='dark'||t==='dusk'?'dark':'light';if(t!=='light'&&t!=='dark')r.dataset.palette=t;var s=p.v===2?p.textScale:(p.textScale&&p.textScale!==1?p.textScale:0.9);r.style.setProperty('--text-scale',String(s||0.9));if(p.locale){r.lang=p.locale;r.dir=p.locale==='ar'?'rtl':'ltr'}}catch(e){}`
+// Before the first paint: hides the app behind the PIN screen when a PIN is set, and applies the saved
+// theme, text size and language (no flash).
+const boot = `try{if(localStorage.getItem('dk.pin'))document.documentElement.classList.add('locked')}catch(e){}try{var p=JSON.parse(localStorage.getItem('dk.prefs')||'{}'),r=document.documentElement,t=['light','dark','sakura','peach','mint','dusk'].indexOf(p.theme)<0||(p.theme==='light'&&!(p.v>=3))?'peach':p.theme;r.dataset.theme=t==='dark'||t==='dusk'?'dark':'light';if(t!=='light'&&t!=='dark')r.dataset.palette=t;else delete r.dataset.palette;var s=p.v>=2?p.textScale:(p.textScale&&p.textScale!==1?p.textScale:0.9);r.style.setProperty('--text-scale',String(s||0.9));if(p.locale){r.lang=p.locale;r.dir=p.locale==='ar'?'rtl':'ltr'}}catch(e){}`
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="tg" className={`${geologica.variable} ${lora.variable} ${pacifico.variable} ${caveat.variable} ${naskh.variable}`} suppressHydrationWarning>
+    <html lang="tg" data-theme="light" data-palette="peach" className={`${geologica.variable} ${lora.variable} ${pacifico.variable} ${caveat.variable} ${naskh.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: boot }} />
+        {/* the home screen's art is on the phone: ask for it at once, so nothing appears late */}
+        {FIRST_ART.map((src) => <link key={src} rel="preload" as="image" href={src} />)}
       </head>
       <body>
         <Providers>

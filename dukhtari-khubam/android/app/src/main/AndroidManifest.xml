@@ -38,4 +38,8 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- a soft vibration when the PIN is wrong or right -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- saving the code picture to the gallery on Android 9 and older (newer phones need no permission) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 </manifest>

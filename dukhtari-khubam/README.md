@@ -44,7 +44,7 @@ Details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ```bash
 npm install
-npm test            # 29 database tests (PGlite runs every migration) + unit tests
+npm test            # database tests (PGlite runs every migration) + unit tests
 npm run typecheck
 npm run build
 ```
@@ -174,18 +174,56 @@ Revision History; every staff change is in the audit log.
   (`words-band.webp`), handwritten (Caveat), sliding away every few seconds — and all schools in one
   row moved sideways by the finger (momentum, snapping to tiles).
 - School page: the school's icon inside a ring that fills with progress, the numbers and "Идома".
-- Themes: white (default), dark, Сакура, Шафтолу, Наъно, Шафақ (`data-palette` on top of the light or
-  dark base; the glass flowers take the theme's hue). The smallest text size is the default.
+- Themes: Шафтолу / peach (default), white, dark, Сакура, Наъно, Шафақ (`data-palette` on top of the light or
+  dark base; the glass flowers take the theme's hue). The smallest text size is the default. Settings saved
+  with the old default (white) move to peach once.
 - Document pages (about, privacy, terms): written in the panel (Саҳифаҳо) as plain text — `#` heading,
   `-` / `1.` lists, `>` quote, `---` line (`src/web/admin/docText.ts`) — and shown plainly, like a
   printed document, with no decoration.
 - App PIN (`src/web/offline/pin.ts`, `AppLock.tsx`, `PinSettings.tsx`): four digits asked when the app
   opens and after a minute away; on/off and change in Settings; a salted hash only, 30 s wait after five
-  wrong tries; "forgot" asks the phone's lock or the login password and removes the PIN.
+  wrong tries. Nothing of the app is drawn before the PIN is right (the boot script marks `<html>` as
+  `locked`). A right PIN: the dots rise one by one and the lock becomes a drawn tick; a wrong one: the
+  dots jump, turn red and shake with a soft vibration. "Forgot" asks three life questions chosen with the
+  PIN (`src/web/offline/recovery.ts`, hashed answers on the phone), then offers a new PIN or turning it
+  off; without questions it asks the phone's lock or the login password; the support chat stays open.
+- Live content (`src/web/offline/live.ts`, migration 0013): every panel edit moves `public.content_stamp`;
+  the app and the site listen to it through Supabase Realtime (and look again every 20 s while shown and
+  on returning to the app), then fetch `/bundle?v=<stamp>` — its own CDN entry, never an older copy.
+- Sign in with Google (`src/web/offline/google.ts`): the phone's own account sheet in the app (Credential
+  Manager, `@capgo/capacitor-social-login`), Google's chooser popup on the site. Name, photo and — when
+  allowed — the age (birthday, People API) fill the form; the Google account keeps the code
+  (`api_google_link` / `api_google_profile`), so Google brings the profile back on a new phone.
+  Setup below.
+- After registering without Google the picture of the code is saved to the gallery by itself
+  (`GallerySaverPlugin.java`, Pictures/Духтари хубам; a download on the website).
+- Profile photo: a tap opens change / take a new one / remove; the cropper moves and zooms the picture
+  under a round frame (`PhotoEditor.tsx`).
+- Home: an "install for offline" button keeps every lesson file on the phone (`src/web/offline/install.ts`,
+  persistent storage; later updates are fetched by themselves); a note when opened without a connection;
+  a drop of rain gathers on the flower and falls behind the glass boxes; the school row tours once on
+  opening; everything enters in stages after the PIN (`src/web/intro.ts`). Settings end with rating and
+  sharing boxes.
 - Speed: the backdrop stays still and only the tab bar bends the content behind it (school tiles use
   frosted glass), so scrolling does not redraw refracting glass on every frame.
 - Android app: daily local notifications (lesson reminder, inspiration of the day) at times chosen in
   Settings (`src/web/offline/notify.ts`).
+
+### Setting up Google sign-in
+
+1. Google Cloud Console → APIs & Services: OAuth consent screen (External; add test users while it is in
+   Testing). Enable the **People API** (for the age).
+2. Credentials → OAuth client ID → **Web application**: authorised JavaScript origins
+   `https://dukhtari-khubam.vercel.app`; authorised redirect URIs `https://dukhtari-khubam.vercel.app/start/`
+   and `https://kqaifxethiofrefisvcv.supabase.co/auth/v1/callback`. Copy its client ID and secret.
+3. Credentials → OAuth client ID → **Android**: package `tj.dukhtarikhubam.app` and the SHA-1 of the key
+   that signs the APK (`cd android && ./gradlew signingReport`; one client per signing key).
+4. Supabase → Authentication → Sign In / Providers → **Google**: enable, paste the Web client ID and secret.
+   Under "Authorized Client IDs" put the Web client ID (the Android one may be added too).
+5. Vercel → project → Environment Variables: `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID=<web client id>`; for the
+   APK build set the same variable before `npm run apk`. `NEXT_PUBLIC_GOOGLE_BIRTHDAY=0` stops asking for
+   the birthday (Google shows an "unverified app" warning for it until the app is verified).
+6. Apply `supabase/migrations/20261120000100_live_content_and_google.sql`.
 
 ## Known limitations
 
