@@ -1622,7 +1622,7 @@
         "tags": [
           "Offline app"
         ],
-        "summary": "Public settings the installed app reads at run time (Google sign-in client ID)",
+        "summary": "Public settings the installed app reads at run time (Google sign-in client ID, whether to ask for the birthday)",
         "operationId": "getAppConfig",
         "parameters": [],
         "responses": {

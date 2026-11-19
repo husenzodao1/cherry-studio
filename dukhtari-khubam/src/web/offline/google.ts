@@ -24,27 +24,27 @@ const CONFIG_KEY = 'dk.google_client'
  * GOOGLE_WEB_CLIENT_ID), so an installed app starts offering Google as soon as it is set there.
  * The last answer is kept on the phone.
  */
-async function clientId(): Promise<string> {
-  if (BUILT_IN_CLIENT_ID) return BUILT_IN_CLIENT_ID
+async function config(): Promise<{ id: string; birthday: boolean }> {
   try {
     const res = await fetch(apiUrl('/app-config'), { cache: 'no-cache' })
     if (res.ok) {
-      const id = ((await res.json()) as { google_web_client_id?: string | null }).google_web_client_id ?? ''
-      localStorage.setItem(CONFIG_KEY, id)
-      return id
+      const c = (await res.json()) as { google_web_client_id?: string | null; google_birthday?: boolean }
+      const out = { id: BUILT_IN_CLIENT_ID || (c.google_web_client_id ?? ''), birthday: c.google_birthday === true }
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(out))
+      return out
     }
   } catch {
     /* offline: use the kept one */
   }
   try {
-    return localStorage.getItem(CONFIG_KEY) ?? ''
+    const kept = JSON.parse(localStorage.getItem(CONFIG_KEY) ?? 'null') as { id?: string; birthday?: boolean } | string | null
+    if (typeof kept === 'string') return { id: BUILT_IN_CLIENT_ID || kept, birthday: false }
+    return { id: BUILT_IN_CLIENT_ID || (kept?.id ?? ''), birthday: kept?.birthday === true }
   } catch {
-    return ''
+    return { id: BUILT_IN_CLIENT_ID, birthday: false }
   }
 }
 const BIRTHDAY_SCOPE = 'https://www.googleapis.com/auth/user.birthday.read'
-// ask for the birthday unless turned off (an unverified Google app shows a warning for this scope)
-const ASK_BIRTHDAY = process.env.NEXT_PUBLIC_GOOGLE_BIRTHDAY !== '0'
 
 export interface GoogleProfile { code: string; name: string }
 export interface GoogleAccount {
@@ -93,7 +93,7 @@ async function birthdayAge(accessToken: string): Promise<number | null> {
 
 export async function signInWithGoogle(): Promise<GoogleResult> {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'offline'
-  const id = await clientId()
+  const { id, birthday } = await config()
   if (!id) return 'not_configured'
   const sb = accountAuth()
   if (!sb) return 'not_configured'
@@ -105,7 +105,7 @@ export async function signInWithGoogle(): Promise<GoogleResult> {
     const native = Capacitor.isNativePlatform()
     const { result } = await SocialLogin.login({
       provider: 'google',
-      options: { nonce: hashed, ...(native && ASK_BIRTHDAY ? { scopes: [BIRTHDAY_SCOPE] } : {}) }
+      options: { nonce: hashed, ...(native && birthday ? { scopes: [BIRTHDAY_SCOPE] } : {}) }
     })
     if (result.responseType !== 'online' || !result.idToken) return 'error'
     const { error } = await sb.auth.signInWithIdToken({ provider: 'google', token: result.idToken, nonce })

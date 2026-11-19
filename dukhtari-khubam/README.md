@@ -283,8 +283,8 @@ The free built-in mailer sends only a few letters an hour and cannot change the 
 4. Supabase → Authentication → Sign In / Providers → **Google**: enable, paste the Web client ID and secret.
    Under "Authorized Client IDs" put the Web client ID (the Android one may be added too).
 5. Vercel → project → Environment Variables: `GOOGLE_WEB_CLIENT_ID=<web client id>`, then redeploy. The app
-   and the site read it from `GET /api/v1/app-config`, so installed APKs need no rebuild. `NEXT_PUBLIC_GOOGLE_BIRTHDAY=0` stops asking for
-   the birthday (Google shows an "unverified app" warning for it until the app is verified).
+   and the site read it from `GET /api/v1/app-config`, so installed APKs need no rebuild. The birthday (age) is asked only with `GOOGLE_ASK_BIRTHDAY=1` — turn it on after Google has verified
+   the app; before that the sensitive scope shows an "unverified app" screen.
 6. Apply `supabase/migrations/20261120000100_live_content_and_google.sql`.
 
 ## Known limitations
