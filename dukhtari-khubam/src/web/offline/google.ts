@@ -61,7 +61,9 @@ export type GoogleResult = GoogleAccount | 'cancelled' | 'not_configured' | 'off
 let ready: Promise<void> | null = null
 async function plugin(webClientId: string) {
   const { SocialLogin } = await import('@capgo/capacitor-social-login')
-  ready ??= SocialLogin.initialize({ google: { webClientId, mode: 'online' } })
+  // on the website Google's chooser opens in a popup and comes back to /start (an authorised redirect URI)
+  const redirectUrl = Capacitor.isNativePlatform() ? undefined : `${window.location.origin}/start`
+  ready ??= SocialLogin.initialize({ google: { webClientId, mode: 'online', ...(redirectUrl ? { redirectUrl } : {}) } })
   await ready
   return SocialLogin
 }

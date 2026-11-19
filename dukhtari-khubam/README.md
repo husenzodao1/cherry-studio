@@ -276,7 +276,7 @@ The free built-in mailer sends only a few letters an hour and cannot change the 
    prove the site in Google Search Console first). Audience: External; add test users while in Testing.
    Enable the **People API** (for the age).
 2. Credentials → OAuth client ID → **Web application**: authorised JavaScript origins
-   `https://dukhtari-khubam.vercel.app`; authorised redirect URIs `https://dukhtari-khubam.vercel.app/start/`
+   `https://dukhtari-khubam.vercel.app`; authorised redirect URIs `https://dukhtari-khubam.vercel.app/start`
    and `https://dqavtyrdipwwgeckxxhr.supabase.co/auth/v1/callback`. Copy its client ID and secret.
 3. Credentials → OAuth client ID → **Android**: package `tj.dukhtarikhubam.app` and the SHA-1 of the key
    that signs the APK (`cd android && ./gradlew signingReport`; one client per signing key).
