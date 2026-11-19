@@ -12,7 +12,7 @@ import { CodeImageButton, saveCodeToGallery } from '@/web/components/Keepsakes'
 import { isPassword, isUsername } from '@/web/offline/account'
 import { endAccount, linkAccount } from '@/web/offline/accountAuth'
 import { isEmail, normalizeEmail, sendEmailCode, verifyEmailCode } from '@/web/offline/email'
-import { endGoogle, googlePhotoFile, linkGoogle, signInWithGoogle, type GoogleAccount } from '@/web/offline/google'
+import { endGoogle, googlePhotoFile, lastGoogleStep, linkGoogle, signInWithGoogle, type GoogleAccount } from '@/web/offline/google'
 import { savePhoto } from '@/web/offline/photo'
 import { useLearner, type Learner, type LoginResult } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
@@ -165,7 +165,7 @@ export default function StartPage() {
     const r = await signInWithGoogle()
     if (typeof r === 'string') {
       setGBusy(false)
-      if (r !== 'cancelled') setMessage(t(r === 'offline' ? 'start.need_online' : r === 'not_configured' ? 'google.not_configured' : 'google.failed'))
+      if (r !== 'cancelled') setMessage(`${t(r === 'offline' ? 'start.need_online' : r === 'not_configured' ? 'google.not_configured' : 'google.failed')}${r === 'error' && lastGoogleStep ? ` (${lastGoogleStep})` : ''}`)
       return
     }
     if (r.profile) {
@@ -174,7 +174,7 @@ export default function StartPage() {
       await endGoogle()
       setGBusy(false)
       if (ok === 'ok') router.replace('/')
-      else setMessage(t(ok === 'offline' ? 'start.need_online' : 'google.failed'))
+      else setMessage(`${t(ok === 'offline' ? 'start.need_online' : 'google.failed')} (restore: ${ok})`)
       return
     }
     setGBusy(false)

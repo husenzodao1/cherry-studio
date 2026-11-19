@@ -1190,3 +1190,6 @@ html.intro .streak-badge { animation: intro-pop 0.6s 1.65s cubic-bezier(0.3, 0.7
 
 /* ---------------------------------------------------------------- screens that fit do not scroll (ScreenFit.tsx) */
 html.fits, html.fits body { overflow: hidden; overscroll-behavior: none; }
+
+/* a first visit on its way to /start: nothing of the home screen is drawn meanwhile */
+html.gated .app > *, html.gated .dock-wrap, html.gated .bf-layer, html.gated .update-note { visibility: hidden !important; }

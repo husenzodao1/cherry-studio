@@ -845,6 +845,48 @@ export function moon4() {
   return g
 }
 
+/** The night launcher icon, stylised: a slim crescent of clear glass with a soft yellow gradient inside,
+ *  pillowy bevels, opening to the upper left (the lit side at the bottom right). */
+export function moon5() {
+  // the crescent outline: the outer circle's arc away from the cut, then the cutting circle's arc back
+  const cx = -0.4, cy = 0.33, r2 = 0.9
+  const d = Math.hypot(cx, cy), ux = cx / d, uy = cy / d
+  const along = (1 - r2 * r2 + d * d) / (2 * d), h = Math.sqrt(1 - along * along)
+  const P1 = [ux * along - uy * h, uy * along + ux * h], P2 = [ux * along + uy * h, uy * along - ux * h]
+  const arc = (ox, oy, r, from, to, through, n) => {
+    const ang = (p) => Math.atan2(p[1] - oy, p[0] - ox)
+    let a0 = ang(from), a1 = ang(to); const t = Math.atan2(through[1] - oy, through[0] - ox)
+    const norm = (x) => ((x % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)
+    const ccw = norm(t - a0) < norm(a1 - a0) // does the counter-clockwise way pass through the target?
+    const span = ccw ? norm(a1 - a0) : -norm(a0 - a1)
+    return Array.from({ length: n + 1 }, (_, i) => { const x = a0 + (span * i) / n; return [ox + Math.cos(x) * r, oy + Math.sin(x) * r] })
+  }
+  const outer = arc(0, 0, 1, P1, P2, [-ux, -uy], 160)
+  const inner = arc(cx, cy, r2, P2, P1, [cx - ux * r2, cy - uy * r2], 160)
+  const sh = new THREE.Shape()
+  ;[...outer, ...inner.slice(1, -1)].forEach(([x, y], i) => (i ? sh.lineTo(x, y) : sh.moveTo(x, y)))
+  sh.closePath()
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: 0.2, bevelEnabled: true, bevelThickness: 0.16, bevelSize: 0.08, bevelSegments: 20, curveSegments: 12 }).center()
+  geo.computeVertexNormals()
+  // gradient: pale cream at the thin tips, warm yellow at the full bottom-right
+  const pos = geo.attributes.position, col = new Float32Array(pos.count * 3)
+  const a = new THREE.Color('#fff8dc'), b = new THREE.Color('#ffc93d'), c = new THREE.Color()
+  for (let i = 0; i < pos.count; i++) {
+    const k = THREE.MathUtils.clamp((pos.getX(i) - pos.getY(i) + 0.4) / 1.9, 0, 1)
+    c.copy(a).lerp(b, k); col.set([c.r, c.g, c.b], i * 3)
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3))
+  const mat = new THREE.MeshPhysicalMaterial({
+    color: C('#ffffff'), vertexColors: true, transmission: 0.72, thickness: 0.9, ior: 1.45, roughness: 0.06,
+    attenuationColor: C('#ffd45e'), attenuationDistance: 1.6, clearcoat: 1, clearcoatRoughness: 0.03,
+    iridescence: 0.35, iridescenceIOR: 1.3, sheen: 0.5, sheenColor: C('#fff1b8'), envMapIntensity: 1.5, specularIntensity: 1
+  })
+  const m = mesh(geo, mat, [0, 0, 0], [0.12, -0.28, 0.08])
+  m.castShadow = false
+  const g = new THREE.Group(); g.add(m)
+  return g
+}
+
 export function buildKind2(job) {
   const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
   switch (job.kind) {
@@ -872,6 +914,7 @@ export function buildKind2(job) {
     case 'girl4': return girl4()
     case 'track4': return track4()
     case 'moon4': return moon4()
+    case 'moon5': return moon5()
     default: return null
   }
 }

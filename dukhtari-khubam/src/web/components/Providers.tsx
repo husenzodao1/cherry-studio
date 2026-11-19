@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, type ReactNode } from 'react'
 
 import { AuthProvider } from '../auth'
 import { ageOf } from '@/lib/progress'
@@ -39,7 +39,12 @@ function Gate({ children }: { children: ReactNode }) {
     if (needsStart) router.replace('/start')
     else if (needsWelcome) router.replace('/welcome')
   }, [needsStart, needsWelcome, router])
-  if (!ready || needsStart || needsWelcome) return null
+  const waiting = !ready || needsStart || needsWelcome
+  // the boot script hid everything for a first visit; show it again once a real page is drawn
+  useLayoutEffect(() => {
+    document.documentElement.classList.toggle('gated', waiting)
+  }, [waiting])
+  if (waiting) return null
   return <>{children}</>
 }
 

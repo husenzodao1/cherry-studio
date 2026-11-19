@@ -41,9 +41,10 @@ export const viewport: Viewport = {
   viewportFit: 'cover'
 }
 
-// Before the first paint: hides the app behind the PIN screen when a PIN is set, and applies the saved
+// Before the first paint: hides the app behind the PIN screen when a PIN is set, hides it entirely for
+// a first visit on its way to /start (no flash of the home screen), and applies the saved
 // theme, text size and language (no flash).
-const boot = `try{if(localStorage.getItem('dk.pin'))document.documentElement.classList.add('locked')}catch(e){}try{var p=JSON.parse(localStorage.getItem('dk.prefs')||'{}'),r=document.documentElement,t=['light','dark','sakura','peach','mint','dusk'].indexOf(p.theme)<0||(p.theme==='light'&&!(p.v>=3))?'peach':p.theme;r.dataset.theme=t==='dark'||t==='dusk'?'dark':'light';if(t!=='light'&&t!=='dark')r.dataset.palette=t;else delete r.dataset.palette;var s=p.v>=2?p.textScale:(p.textScale&&p.textScale!==1?p.textScale:0.9);r.style.setProperty('--text-scale',String(s||0.9));if(p.locale){r.lang=p.locale;r.dir=p.locale==='ar'?'rtl':'ltr'}}catch(e){}`
+const boot = `try{if(localStorage.getItem('dk.pin'))document.documentElement.classList.add('locked');if(!localStorage.getItem('dk.learner')&&!/^\\/(start|admin|page|support)(\\/|$)/.test(location.pathname))document.documentElement.classList.add('gated')}catch(e){}try{var p=JSON.parse(localStorage.getItem('dk.prefs')||'{}'),r=document.documentElement,t=['light','dark','sakura','peach','mint','dusk'].indexOf(p.theme)<0||(p.theme==='light'&&!(p.v>=3))?'peach':p.theme;r.dataset.theme=t==='dark'||t==='dusk'?'dark':'light';if(t!=='light'&&t!=='dark')r.dataset.palette=t;else delete r.dataset.palette;var s=p.v>=2?p.textScale:(p.textScale&&p.textScale!==1?p.textScale:0.9);r.style.setProperty('--text-scale',String(s||0.9));if(p.locale){r.lang=p.locale;r.dir=p.locale==='ar'?'rtl':'ltr'}}catch(e){}`
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

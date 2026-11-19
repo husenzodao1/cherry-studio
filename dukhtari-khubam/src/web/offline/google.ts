@@ -59,11 +59,15 @@ export interface GoogleAccount {
 export type GoogleResult = GoogleAccount | 'cancelled' | 'not_configured' | 'offline' | 'error'
 
 let ready: Promise<void> | null = null
-async function plugin(webClientId: string) {
+async function plugin(webClientId: string, birthday: boolean) {
   const { SocialLogin } = await import('@capgo/capacitor-social-login')
   // on the website Google's chooser opens in a popup and comes back to /start (an authorised redirect URI)
   const redirectUrl = Capacitor.isNativePlatform() ? undefined : `${window.location.origin}/start`
-  ready ??= SocialLogin.initialize({ google: { webClientId, mode: 'online', ...(redirectUrl ? { redirectUrl } : {}) } })
+  // Android: without extra scopes, skip the second "authorize" step after the account is chosen — it is
+  // not needed for signing in and can hang on some phones (the plugin's documented workaround)
+  ready ??= SocialLogin.initialize({
+    google: { webClientId, mode: 'online', ...(redirectUrl ? { redirectUrl } : {}), ...(birthday ? {} : { skipAuthOnlyAuthorizationAfterSignIn: true }) }
+  })
   await ready
   return SocialLogin
 }
@@ -91,38 +95,71 @@ async function birthdayAge(accessToken: string): Promise<number | null> {
   }
 }
 
+/** The claims of a Google ID token (name, e-mail, picture): read from the token itself, not the plugin's profile. */
+export function idTokenClaims(token: string): { email?: string; name?: string; given_name?: string; picture?: string } {
+  try {
+    const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const json = decodeURIComponent([...atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), '='))]
+      .map((c) => `%${c.charCodeAt(0).toString(16).padStart(2, '0')}`).join(''))
+    return JSON.parse(json)
+  } catch {
+    return {}
+  }
+}
+
+/** Fails after `ms` instead of waiting for ever. */
+function within<T>(p: Promise<T>, ms: number, step: string): Promise<T> {
+  return Promise.race([p, new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`timeout:${step}`)), ms))])
+}
+
+/** Which step failed last time (shown small under the message, so a problem can be told apart). */
+export let lastGoogleStep = ''
+
 export async function signInWithGoogle(): Promise<GoogleResult> {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'offline'
   const { id, birthday } = await config()
   if (!id) return 'not_configured'
   const sb = accountAuth()
   if (!sb) return 'not_configured'
+  let step = 'start'
+  lastGoogleStep = ''
   try {
-    const SocialLogin = await plugin(id)
+    step = 'plugin'
+    const SocialLogin = await within(plugin(id, birthday), 20_000, step)
     // Supabase checks that the token carries sha256(nonce); Google receives the hash, Supabase the nonce
     const nonce = hex(crypto.getRandomValues(new Uint8Array(16)).buffer)
     const hashed = hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(nonce)))
     const native = Capacitor.isNativePlatform()
+    step = 'google'
     const { result } = await SocialLogin.login({
       provider: 'google',
       options: { nonce: hashed, ...(native && birthday ? { scopes: [BIRTHDAY_SCOPE] } : {}) }
     })
-    if (result.responseType !== 'online' || !result.idToken) return 'error'
-    const { error } = await sb.auth.signInWithIdToken({ provider: 'google', token: result.idToken, nonce })
-    if (error) return 'error'
-    const profile = await accountProfile()
-    if (profile === 'error') return 'error'
-    const p = result.profile
+    if (result.responseType !== 'online' || !result.idToken) throw new Error('no_id_token')
+    step = 'supabase'
+    const { error } = await within(sb.auth.signInWithIdToken({ provider: 'google', token: result.idToken, nonce }), 20_000, step)
+    if (error) throw new Error(error.message)
+    step = 'profile'
+    const profile = await within(accountProfile(), 20_000, step)
+    if (profile === 'error') throw new Error('profile')
+    // name, e-mail and photo from the token itself (the plugin's profile can come back empty)
+    const c = idTokenClaims(result.idToken)
+    const p = result.profile ?? ({} as Partial<NonNullable<typeof result.profile>>)
+    step = 'age'
+    const age = birthday && result.accessToken?.token ? await within(birthdayAge(result.accessToken.token), 8000, step).catch(() => null) : null
     return {
-      email: p.email,
-      name: (p.givenName || p.name || '').trim().slice(0, 80),
-      photo: p.imageUrl,
-      age: result.accessToken?.token ? await birthdayAge(result.accessToken.token) : null,
+      email: p.email ?? c.email ?? null,
+      name: (p.givenName || c.given_name || p.name || c.name || '').trim().slice(0, 80),
+      photo: p.imageUrl ?? c.picture ?? null,
+      age,
       profile
     }
   } catch (e) {
-    const text = String((e as Error)?.message ?? e).toLowerCase()
-    return /cancel|closed|dismiss|16:|abort/.test(text) ? 'cancelled' : 'error'
+    const text = String((e as Error)?.message ?? e)
+    if (step === 'google' && /cancel|closed|dismiss|abort/i.test(text)) return 'cancelled'
+    lastGoogleStep = `${step}: ${text}`.slice(0, 120)
+    await endAccount()
+    return 'error'
   }
 }
 
