@@ -204,9 +204,9 @@ img, video, canvas { display: block; max-width: 100%; }
 .backdrop {
   position: fixed; inset: 0 0 auto 0; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; overflow: hidden; contain: strict;
   background:
-    radial-gradient(60% 40% at 85% 6%, rgba(255, 255, 255, 0.85), transparent 70%),
-    radial-gradient(50% 35% at 0% 55%, rgba(246, 222, 250, 0.7), transparent 70%),
-    radial-gradient(70% 50% at 100% 100%, rgba(205, 184, 246, 0.8), transparent 70%),
+    radial-gradient(60% 40% at 85% 6%, rgba(255, 255, 255, 0.45), transparent 70%),
+    radial-gradient(50% 35% at 0% 55%, rgba(246, 222, 250, 0.45), transparent 70%),
+    radial-gradient(70% 50% at 100% 100%, rgba(205, 184, 246, 0.5), transparent 70%),
     linear-gradient(170deg, var(--sky-1) 0%, var(--sky-2) 48%, var(--sky-3) 100%);
 }
 .bd { position: absolute; height: auto; animation: fade-in 0.6s var(--ease) both, bd-sway var(--sway, 7s) ease-in-out 0.6s infinite alternate; transform-origin: 50% 100%; }
@@ -216,8 +216,11 @@ img, video, canvas { display: block; max-width: 100%; }
 .bd:nth-child(5n) { --sway: 9.4s; }
 @keyframes bd-sway { from { rotate: calc(var(--sway-r, 1.8deg) * -1); translate: 0 0; } to { rotate: var(--sway-r, 1.8deg); translate: var(--sway-x, 3px) -3px; } }
 html.scrolling .bd { animation-play-state: paused; }
-.backdrop::after { content: ''; position: absolute; inset: 0; background: var(--veil, rgba(244, 239, 253, 0.2)); }
-:root[data-theme='dark'] .backdrop::after { background: var(--veil, rgba(10, 6, 24, 0.28)); }
+/* over the sky and its pieces: a wash of the sky's own colour (less contrast) and a slight dim, so text
+   and cards above read clearly */
+.backdrop::after { content: ''; position: absolute; inset: 0;
+  background: linear-gradient(rgba(70, 40, 95, 0.09), rgba(70, 40, 95, 0.09)), color-mix(in srgb, var(--sky-2) 30%, transparent); }
+:root[data-theme='dark'] .backdrop::after { background: linear-gradient(rgba(4, 2, 10, 0.4), rgba(4, 2, 10, 0.4)), color-mix(in srgb, var(--sky-2) 25%, transparent); }
 /* Backdrop pieces: rendered glass flowers, leaves, crystals and lenses resting at the screen edges. */
 .bd-crocus { left: -30vw; bottom: -5vh; width: min(72vw, 380px); transform: rotate(-12deg); }
 .bd-lotus { right: -24vw; bottom: 13vh; width: min(52vw, 260px); transform: rotate(-8deg); opacity: 0.95; }
@@ -236,7 +239,7 @@ html.scrolling .bd { animation-play-state: paused; }
   .bd-leaves { left: 10vw; }
   .bd-bubble { right: 6vw; width: 190px; }
 }
-:root[data-theme='dark'] .bd { opacity: 0.92; filter: brightness(1.22) saturate(1.12) drop-shadow(0 0 22px rgba(170, 130, 255, 0.28)); }
+:root[data-theme='dark'] .bd { opacity: 0.85; filter: brightness(1.05) saturate(1.05) drop-shadow(0 0 18px rgba(170, 130, 255, 0.2)); }
 :root[data-theme='dark'] .backdrop {
   background:
     radial-gradient(60% 40% at 85% 6%, rgba(130, 90, 230, 0.2), transparent 70%),
@@ -402,10 +405,10 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 /* a soft, neutral shadow cast upward from the bar's top edge: it lifts the bar off whatever passes under it */
 .dock.lg {
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -10px 18px -12px rgba(122, 79, 216, 0.22),
-    0 -7px 16px -9px rgba(22, 14, 34, 0.2), 0 -1px 3px -1px rgba(22, 14, 34, 0.1), 0 16px 30px -18px rgba(22, 14, 34, 0.32);
+    0 -16px 34px -14px rgba(22, 14, 34, 0.24), 0 -5px 12px -8px rgba(22, 14, 34, 0.12), 0 16px 30px -18px rgba(22, 14, 34, 0.32);
 }
 :root[data-theme='dark'] .dock.lg {
-  box-shadow: inset 0 1px 1px rgba(216, 200, 234, 0.35), 0 -8px 18px -9px rgba(0, 0, 0, 0.5), 0 -1px 3px -1px rgba(0, 0, 0, 0.35), 0 18px 34px -16px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 1px 1px rgba(216, 200, 234, 0.35), 0 -18px 38px -14px rgba(0, 0, 0, 0.6), 0 -5px 12px -8px rgba(0, 0, 0, 0.35), 0 18px 34px -16px rgba(0, 0, 0, 0.7);
 }
 /* each tab is exactly its circle, so the pressed state never shows a box of another size */
 .dock a {
@@ -1326,22 +1329,17 @@ html.fits, html.fits body { overflow: hidden; overscroll-behavior: none; }
 html.gated .app > *, html.gated .dock-wrap, html.gated .bf-layer, html.gated .update-note { visibility: hidden !important; }
 
 /* ---------------------------------------------------------------- opening screen (layout.tsx, Splash.tsx) */
-.splash { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 34px;
+.splash { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
   background: radial-gradient(60% 40% at 85% 8%, rgba(255, 255, 255, 0.9), transparent 70%), radial-gradient(70% 50% at 0% 90%, color-mix(in srgb, var(--rose-strong) 60%, transparent), transparent 70%),
     linear-gradient(170deg, var(--sky-1), var(--sky-2) 50%, var(--sky-3));
   transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); }
 .splash.is-done { opacity: 0; transform: scale(1.05); pointer-events: none; }
-.sp-stage { position: relative; width: min(80vw, 320px); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; perspective: 900px; }
-/* a tilted ring seen in perspective: the pieces pass in front of the name and behind it */
-.sp-ring { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(70deg); }
-.sp-item { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d;
-  animation: sp-orbit 7s linear infinite; animation-delay: calc(var(--i) / var(--n) * -7s); }
-.sp-item img { position: absolute; max-width: none; width: min(18vw, 74px); height: auto; left: 0; top: 0; translate: -50% -80%;
-  transform: rotateX(-70deg); filter: drop-shadow(0 10px 12px rgba(86, 56, 160, 0.28)); animation: sp-bob 2.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -0.4s); }
-@keyframes sp-orbit { from { transform: rotateZ(0deg) translateX(min(36vw, 140px)) rotateZ(0deg); } to { transform: rotateZ(360deg) translateX(min(36vw, 140px)) rotateZ(-360deg); } }
-@keyframes sp-bob { from { margin-top: -4px; } to { margin-top: 5px; } }
-.sp-name { position: relative; font-family: var(--font-pacifico), cursive; font-size: clamp(1.7rem, 8vw, 2.2rem); color: var(--plum); transform: translateZ(0);
-  text-shadow: 0 2px 14px rgba(255, 255, 255, 0.8); animation: rise 0.8s var(--ease) both; }
+.sp-moon { width: min(42vw, 170px); height: auto; margin-bottom: -14px; filter: drop-shadow(0 18px 26px rgba(214, 150, 40, 0.28));
+  animation: sp-moon-in 0.9s cubic-bezier(0.2, 0.8, 0.25, 1.1) both, sp-float 4s ease-in-out 0.9s infinite alternate; }
+@keyframes sp-moon-in { from { opacity: 0; transform: scale(0.6) rotate(-18deg); } to { opacity: 1; transform: none; } }
+@keyframes sp-float { from { translate: 0 0; rotate: 0deg; } to { translate: 0 -8px; rotate: 4deg; } }
+.sp-name { font-family: var(--font-script), cursive; font-size: clamp(2.6rem, 13vw, 3.4rem); line-height: 1.3; color: var(--plum); padding-inline: 0.2em;
+  text-shadow: 0 2px 18px rgba(255, 255, 255, 0.85); animation: rise 0.8s 0.25s var(--ease) both; }
 .sp-bar { width: min(56vw, 220px); height: 6px; border-radius: 3px; overflow: hidden; background: color-mix(in srgb, var(--primary) 14%, rgba(255, 255, 255, 0.6));
   box-shadow: inset 0 1px 2px rgba(86, 56, 160, 0.15); }
 .sp-bar i { display: block; height: 100%; width: 92%; border-radius: inherit; background: var(--pill); transform-origin: left; animation: sp-fill 3.2s cubic-bezier(0.2, 0.7, 0.3, 1) both; }

@@ -847,9 +847,10 @@ export function moon4() {
 
 /** The night launcher icon, stylised: a slim crescent of clear glass with a soft yellow gradient inside,
  *  pillowy bevels, opening to the upper left (the lit side at the bottom right). */
-export function moon5() {
+export function moon5(o = {}) {
   // the crescent outline: the outer circle's arc away from the cut, then the cutting circle's arc back
-  const cx = -0.4, cy = 0.33, r2 = 0.9
+  // (o.cut moves the cutting circle further out for a fuller, thicker crescent)
+  const cx = o.cut?.[0] ?? -0.4, cy = o.cut?.[1] ?? 0.33, r2 = o.cut?.[2] ?? 0.9
   const d = Math.hypot(cx, cy), ux = cx / d, uy = cy / d
   const along = (1 - r2 * r2 + d * d) / (2 * d), h = Math.sqrt(1 - along * along)
   const P1 = [ux * along - uy * h, uy * along + ux * h], P2 = [ux * along + uy * h, uy * along - ux * h]
@@ -955,7 +956,7 @@ export function buildKind2(job) {
     case 'girl4': return girl4()
     case 'track4': return track4()
     case 'moon4': return moon4()
-    case 'moon5': return moon5()
+    case 'moon5': return moon5(job)
     case 'flower5': return flower5()
     default: return null
   }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Caveat, Cormorant, Geologica, Lora, Monsieur_La_Doulaise, Noto_Naskh_Arabic, Pacifico } from 'next/font/google'
+import { Caveat, Cormorant, Great_Vibes, Geologica, Lora, Monsieur_La_Doulaise, Noto_Naskh_Arabic, Pacifico } from 'next/font/google'
 import type { ReactNode } from 'react'
 
 import { Backdrop } from '@/web/components/Backdrop'
@@ -16,6 +16,8 @@ const caveat = Caveat({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], weight: 
 const pacifico = Pacifico({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], weight: '400', variable: '--font-pacifico', display: 'swap' })
 // the studio's signature over the profile photo: a fine, hard-to-read copperplate (Latin only)
 const studio = Monsieur_La_Doulaise({ subsets: ['latin'], weight: '400', variable: '--font-studio', display: 'swap', preload: false })
+// the name on the opening screen: a fine, flowing calligraphy
+const script = Great_Vibes({ subsets: ['cyrillic', 'latin'], weight: '400', variable: '--font-script', display: 'block' })
 // poems in the "Garden of verse" tile: a literary italic with the Tajik letters
 const verse = Cormorant({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], style: ['italic'], weight: ['500', '600'], variable: '--font-verse', display: 'swap', preload: false })
 // Persian and Dari script is only needed when those languages are chosen: do not preload it for everyone.
@@ -24,7 +26,6 @@ const naskh = Noto_Naskh_Arabic({ subsets: ['arabic'], variable: '--font-naskh',
 const FIRST_ART = ['glass-flower', 'glass-flower-open', 'glass-lotus', 'glass-bubble', 'glass-leaves', 'glass-tulip', 'book-open', 'words-band']
   .map((n) => `/assets/3d/${n}.webp`)
 
-const SPLASH_ART = ['glass-flower', 'book-open', 'glass-bubble', 'glass-lotus', 'glass-tulip', 'glass-crystals']
 
 export const metadata: Metadata = {
   title: { default: 'Духтари хубам', template: '%s · Духтари хубам' },
@@ -54,26 +55,21 @@ const boot = `try{if(localStorage.getItem('dk.pin'))document.documentElement.cla
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="tg" data-theme="light" data-palette="peach" className={`${geologica.variable} ${lora.variable} ${pacifico.variable} ${caveat.variable} ${naskh.variable} ${studio.variable} ${verse.variable}`} suppressHydrationWarning>
+    <html lang="tg" data-theme="light" data-palette="peach" className={`${geologica.variable} ${lora.variable} ${pacifico.variable} ${caveat.variable} ${naskh.variable} ${studio.variable} ${verse.variable} ${script.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: boot }} />
         {/* the home screen's art is on the phone: ask for it at once, so nothing appears late */}
+        <link rel="preload" as="image" href="/assets/3d/splash-moon.webp" />
         {FIRST_ART.map((src) => <link key={src} rel="preload" as="image" href={src} />)}
       </head>
       <body>
         {/* from the first paint until the screen is ready: 3D glass pieces circling the name, a filling
             bar below (CSS only, so it shows before any script); Splash.tsx takes it away */}
+        {/* from the first paint until the screen is ready: a glass moon over the name and a filling bar
+            (CSS only, so it shows before any script); Splash.tsx takes it away */}
         <div id="splash" className="splash" aria-hidden="true">
-          <div className="sp-stage">
-            <div className="sp-ring">
-              {SPLASH_ART.map((n, i) => (
-                <span key={n} className="sp-item" style={{ ['--i' as string]: i, ['--n' as string]: SPLASH_ART.length }}>
-                  <img src={`/assets/3d/${n}.webp`} alt="" />
-                </span>
-              ))}
-            </div>
-            <span className="sp-name">Духтари хубам</span>
-          </div>
+          <img className="sp-moon" src="/assets/3d/splash-moon.webp" alt="" />
+          <span className="sp-name">Духтари хубам</span>
           <span className="sp-bar"><i /></span>
         </div>
         <Providers>

@@ -21,7 +21,7 @@ export function Dock() {
   if (/^\/(lesson|quiz|review|start|welcome|admin|support)(\/|$)/.test(path)) return null
   return (
     <div className="dock-wrap">
-      <LiquidGlass as="nav" label={t('nav.home')} radius={36} bezel={20} className="dock">
+      <LiquidGlass as="nav" label={t('nav.home')} radius={36} bezel={20} blur={40} className="dock">
         {ITEMS.map((item) => {
           const on = item.match.test(path)
           return (

@@ -100,9 +100,11 @@ interface Props {
   label?: string
   /** bend the content behind (costly: redrawn whenever that content moves); false keeps clear frosted glass */
   refract?: boolean
+  /** blur radius of the frosting in px (default 22 when bending, 30 otherwise) */
+  blur?: number
 }
 
-export function LiquidGlass({ radius, bezel = 16, className, style, children, as = 'div', label, refract: bend = true }: Props) {
+export function LiquidGlass({ radius, bezel = 16, className, style, children, as = 'div', label, refract: bend = true, blur }: Props) {
   const ref = useRef<HTMLElement | null>(null)
   const rawId = useId()
   const filterId = `lg${rawId.replace(/[^a-zA-Z0-9]/g, '')}`
@@ -143,8 +145,8 @@ export function LiquidGlass({ radius, bezel = 16, className, style, children, as
         borderRadius: radius,
         // Chromium aliases -webkit-backdrop-filter to backdrop-filter, so set only one of them
         ...(refract
-          ? { backdropFilter: `url(#${filterId}) blur(22px) saturate(1.45) brightness(1.06)` }
-          : { backdropFilter: 'blur(30px) saturate(1.5)', WebkitBackdropFilter: 'blur(30px) saturate(1.5)' })
+          ? { backdropFilter: `url(#${filterId}) blur(${blur ?? 22}px) saturate(1.45) brightness(1.06)` }
+          : { backdropFilter: `blur(${blur ?? 30}px) saturate(1.5)`, WebkitBackdropFilter: `blur(${blur ?? 30}px) saturate(1.5)` })
       }}
     >
       {refract ? (
