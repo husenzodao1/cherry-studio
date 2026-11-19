@@ -23,7 +23,9 @@ const FIRST_ART = ['glass-flower', 'glass-flower-open', 'glass-lotus', 'glass-bu
 export const metadata: Metadata = {
   title: { default: 'Духтари хубам', template: '%s · Духтари хубам' },
   description: 'Платформаи таълимӣ: 7 оинаи духтар.',
-  applicationName: 'Духтари хубам'
+  applicationName: 'Духтари хубам',
+  // Google Search Console: proves the site belongs to the app's Google Cloud project (sign-in branding)
+  verification: { google: 'GCrXzaS2lJNx1EPFUQtASSA8FMKHMsISwpLLApPDYf8' }
 }
 
 export const viewport: Viewport = {
