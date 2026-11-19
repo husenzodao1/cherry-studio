@@ -82,6 +82,18 @@ version (new code) is announced in the app from `/app-version.json`: raise `vers
 in `android/app/build.gradle`, build, and publish the APK at `public/download/`. The current APK is a
 debug build for direct installation; Google Play needs a release build signed with your own key.
 
+### Signing the APK
+
+Every published APK must be signed with the same key, or phones refuse to install it over the previous
+one. The key (`dukhtari-release.jks`, alias `dukhtari`) is kept outside the repository by the owner:
+
+```bash
+DK_KEYSTORE=/path/dukhtari-release.jks DK_KEYSTORE_PASSWORD=... JAVA_HOME=... ANDROID_HOME=... npm run apk
+```
+
+Releases up to 1.8.0 were signed with a different debug key that was not kept: 1.9.0 installs only after
+the old app is removed (progress returns with the code, login or Google).
+
 ### First owner account
 
 1. Create the owner account in Supabase → Authentication → Users (e-mail and password).
@@ -220,8 +232,8 @@ Revision History; every staff change is in the audit log.
    that signs the APK (`cd android && ./gradlew signingReport`; one client per signing key).
 4. Supabase → Authentication → Sign In / Providers → **Google**: enable, paste the Web client ID and secret.
    Under "Authorized Client IDs" put the Web client ID (the Android one may be added too).
-5. Vercel → project → Environment Variables: `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID=<web client id>`; for the
-   APK build set the same variable before `npm run apk`. `NEXT_PUBLIC_GOOGLE_BIRTHDAY=0` stops asking for
+5. Vercel → project → Environment Variables: `GOOGLE_WEB_CLIENT_ID=<web client id>`, then redeploy. The app
+   and the site read it from `GET /api/v1/app-config`, so installed APKs need no rebuild. `NEXT_PUBLIC_GOOGLE_BIRTHDAY=0` stops asking for
    the birthday (Google shows an "unverified app" warning for it until the app is verified).
 6. Apply `supabase/migrations/20261120000100_live_content_and_google.sql`.
 

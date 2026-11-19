@@ -116,7 +116,8 @@ const tg = {
   'share.title': "Мубодила бо дугонаҳо",
   'share.sub': "Барномаро ба дигарон фиристед",
   'share.text': "«Духтари хубам» — барномаи омӯзишӣ барои духтарон. Зебоӣ дар дониш аст:",
-  'share.copied': "Пайванд нусха гирифта шуд"
+  'share.copied': "Пайванд нусха гирифта шуд",
+  'app.exit_again': "Барои баромад бори дигар пахш кунед"
 }
 
 export type UiKey = keyof typeof tg
@@ -220,7 +221,8 @@ const ru: Partial<Record<UiKey, string>> = {
   'share.title': "Поделиться с подругами",
   'share.sub': "Отправьте приложение другим",
   'share.text': "«Духтари хубам» — обучающее приложение для девушек. Красота — в знании:",
-  'share.copied': "Ссылка скопирована"
+  'share.copied': "Ссылка скопирована",
+  'app.exit_again': "Нажмите ещё раз, чтобы выйти"
 }
 
 const ar: Partial<Record<UiKey, string>> = {

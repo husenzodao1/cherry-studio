@@ -94,6 +94,11 @@ interface Stored { name: string; data: unknown; updated_at: string }
 
 export const offlineRoutes: AnyRoute[] = [
   route({
+    method: 'GET', path: '/app-config', access: 'public', tag: 'Offline app',
+    summary: 'Public settings the installed app reads at run time (Google sign-in client ID)', cache: 60,
+    handler: async () => ({ google_web_client_id: process.env.GOOGLE_WEB_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID || null })
+  }),
+  route({
     method: 'GET', path: '/bundle', access: 'public', tag: 'Offline app',
     summary: 'Whole published catalogue for offline use (lessons, quizzes with answer keys, texts); send If-None-Match',
     // `v` is the live content stamp the app saw (GET /rest/v1/rpc/api_content_stamp): every stamp is its

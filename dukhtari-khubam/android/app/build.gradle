@@ -18,8 +18,26 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // The app's own signing key, kept outside the repository: DK_KEYSTORE (path to the .jks file) and
+    // DK_KEYSTORE_PASSWORD (store and key password, alias "dukhtari"). Every published APK must be signed
+    // with the same key, or phones refuse to install it over the previous version.
+    def ks = System.getenv('DK_KEYSTORE')
+    signingConfigs {
+        if (ks) {
+            dukhtari {
+                storeFile file(ks)
+                storePassword System.getenv('DK_KEYSTORE_PASSWORD')
+                keyAlias 'dukhtari'
+                keyPassword System.getenv('DK_KEYSTORE_PASSWORD')
+            }
+        }
+    }
     buildTypes {
+        debug {
+            if (ks) signingConfig signingConfigs.dukhtari
+        }
         release {
+            if (ks) signingConfig signingConfigs.dukhtari
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

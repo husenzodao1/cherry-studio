@@ -3,6 +3,8 @@
 import { Capacitor } from '@capacitor/core'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
+import { apiUrl } from './base'
+
 /**
  * Sign-in with Google. In the Android app the phone's own Google account sheet opens (Credential
  * Manager) — nothing goes to a web page; on the website Google's account chooser opens in a popup.
@@ -11,10 +13,35 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
  *
  * Name and photo come from the Google account. The age comes from the birthday in the Google account
  * when she allows it (People API, scope user.birthday.read; Android app only); otherwise she types it.
- * Setup: NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID and the Google provider in Supabase (see README).
+ * Setup: GOOGLE_WEB_CLIENT_ID in Vercel and the Google provider in Supabase (see README).
  */
 
-export const GOOGLE_WEB_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? ''
+const BUILT_IN_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? ''
+const CONFIG_KEY = 'dk.google_client'
+
+/**
+ * The Web client ID: built in, or read from the server (GET /app-config, Vercel variable
+ * GOOGLE_WEB_CLIENT_ID), so an installed app starts offering Google as soon as it is set there.
+ * The last answer is kept on the phone.
+ */
+async function clientId(): Promise<string> {
+  if (BUILT_IN_CLIENT_ID) return BUILT_IN_CLIENT_ID
+  try {
+    const res = await fetch(apiUrl('/app-config'), { cache: 'no-cache' })
+    if (res.ok) {
+      const id = ((await res.json()) as { google_web_client_id?: string | null }).google_web_client_id ?? ''
+      localStorage.setItem(CONFIG_KEY, id)
+      return id
+    }
+  } catch {
+    /* offline: use the kept one */
+  }
+  try {
+    return localStorage.getItem(CONFIG_KEY) ?? ''
+  } catch {
+    return ''
+  }
+}
 const BIRTHDAY_SCOPE = 'https://www.googleapis.com/auth/user.birthday.read'
 // ask for the birthday unless turned off (an unverified Google app shows a warning for this scope)
 const ASK_BIRTHDAY = process.env.NEXT_PUBLIC_GOOGLE_BIRTHDAY !== '0'
@@ -42,9 +69,9 @@ function auth(): SupabaseClient | null {
 }
 
 let ready: Promise<void> | null = null
-async function plugin() {
+async function plugin(webClientId: string) {
   const { SocialLogin } = await import('@capgo/capacitor-social-login')
-  ready ??= SocialLogin.initialize({ google: { webClientId: GOOGLE_WEB_CLIENT_ID, mode: 'online' } })
+  ready ??= SocialLogin.initialize({ google: { webClientId, mode: 'online' } })
   await ready
   return SocialLogin
 }
@@ -73,12 +100,13 @@ async function birthdayAge(accessToken: string): Promise<number | null> {
 }
 
 export async function signInWithGoogle(): Promise<GoogleResult> {
-  if (!GOOGLE_WEB_CLIENT_ID) return 'not_configured'
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'offline'
+  const id = await clientId()
+  if (!id) return 'not_configured'
   const sb = auth()
   if (!sb) return 'not_configured'
   try {
-    const SocialLogin = await plugin()
+    const SocialLogin = await plugin(id)
     // Supabase checks that the token carries sha256(nonce); Google receives the hash, Supabase the nonce
     const nonce = hex(crypto.getRandomValues(new Uint8Array(16)).buffer)
     const hashed = hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(nonce)))

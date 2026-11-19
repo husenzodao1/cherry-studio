@@ -8,6 +8,7 @@ import { clearRecovery, hasRecovery, normalizeAnswer, RECOVERY_COUNT, RECOVERY_Q
 import { usePrefs } from '../prefs'
 import type { UiKey } from '../i18n'
 import { Icon } from './Icon'
+import { onBack } from './BackButton'
 import { PinPad } from './PinPad'
 
 /**
@@ -20,6 +21,7 @@ export function RecoverySetup({ onDone, onCancel }: { onDone: () => void; onCanc
   const [rows, setRows] = useState<{ q: RecoveryQuestion; answer: string }[]>(() =>
     Array.from({ length: RECOVERY_COUNT }, (_, i) => ({ q: start[i] ?? RECOVERY_QUESTIONS[i], answer: '' })))
   const [busy, setBusy] = useState(false)
+  useEffect(() => (onCancel ? onBack(onCancel) : onBack(() => undefined)), [onCancel])
   const ok = new Set(rows.map((r) => r.q)).size === RECOVERY_COUNT && rows.every((r) => normalizeAnswer(r.answer).length >= 2)
   const save = async (e: FormEvent) => {
     e.preventDefault()
@@ -74,6 +76,7 @@ export function PinSettings() {
   // a new PIN is followed by its three life questions
   const [questions, setQuestions] = useState<'required' | 'change' | null>(null)
   useEffect(() => setOn(hasPin()), [])
+  useEffect(() => (flow ? onBack(() => { setFlow(null); setFirst(''); setOn(hasPin()) }) : undefined), [flow])
 
   const start = (f: Flow) => {
     setFlow(f)

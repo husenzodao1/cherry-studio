@@ -11,6 +11,7 @@ import { LearnerProvider, useLearner } from '../offline/learner'
 import { PrefsProvider, usePrefs } from '../prefs'
 import { AppLock } from './AppLock'
 import { AppUpdate } from './AppUpdate'
+import { BackButton } from './BackButton'
 import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
 import { NotifyBridge } from './NotifyBridge'
@@ -109,6 +110,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <SupportWatch />
               <AppLock />
               <OfflineNote />
+              <BackButton />
               <Toaster />
             </ForAge>
           </LearnerProvider>

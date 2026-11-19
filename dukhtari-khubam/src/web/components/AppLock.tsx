@@ -13,6 +13,7 @@ import { checkPassword, unlockWithPhone } from '../offline/unlock'
 import { usePrefs } from '../prefs'
 import type { UiKey } from '../i18n'
 import { Icon } from './Icon'
+import { onBack } from './BackButton'
 import { buzz, PinPad } from './PinPad'
 
 const AWAY_MS = 60_000
@@ -110,6 +111,9 @@ export function AppLock() {
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
+
+  // the phone's back button steps back inside the recovery screens (on the PIN pad it leaves the app)
+  useEffect(() => (locked && stage !== 'pin' ? onBack(() => { setHint(null); setStage(stage === 'repeat' ? 'new' : stage === 'new' ? 'choose' : 'pin') }) : undefined), [locked, stage])
 
   if (!locked || onSupport) return null
   const open = () => {

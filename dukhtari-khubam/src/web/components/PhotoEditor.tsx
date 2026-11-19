@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 
 import { clearPhoto, writePhoto } from '../offline/photo'
 import { usePrefs } from '../prefs'
+import { onBack } from './BackButton'
 import { Icon } from './Icon'
 
 const OUT = 512
@@ -25,6 +26,7 @@ export function PhotoCropper({ file, onClose }: { file: File; onClose: () => voi
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const gesture = useRef<{ dist: number; zoom: number } | null>(null)
 
+  useEffect(() => onBack(onClose), [onClose])
   useEffect(() => {
     const i = new Image()
     i.onload = () => setImg(i)
@@ -125,6 +127,7 @@ export function PhotoSheet({ hasPhoto, onClose }: { hasPhoto: boolean; onClose: 
   const pick = useRef<HTMLInputElement>(null)
   const shoot = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
+  useEffect(() => (file ? undefined : onBack(onClose)), [file, onClose])
   const onFile = (f?: File | null) => {
     if (f) setFile(f)
   }

@@ -1617,6 +1617,31 @@
         ]
       }
     },
+    "/app-config": {
+      "get": {
+        "tags": [
+          "Offline app"
+        ],
+        "summary": "Public settings the installed app reads at run time (Google sign-in client ID)",
+        "operationId": "getAppConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/bundle": {
       "get": {
         "tags": [
