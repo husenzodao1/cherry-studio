@@ -24,8 +24,10 @@ export function Splash() {
   useEffect(() => {
     const el = document.getElementById('splash')
     if (!el) return
+    // the element belongs to React (layout.tsx): it is hidden, never removed, or React's later
+    // updates of <body> fail ("insertBefore … not a child") and the page breaks
     if (hasPin()) {
-      el.remove()
+      el.hidden = true
       return
     }
     let gone = false
@@ -34,7 +36,7 @@ export function Splash() {
       gone = true
       el.classList.add('is-done')
       setTimeout(() => {
-        el.remove()
+        el.hidden = true
         playIntro()
       }, 520)
     }
