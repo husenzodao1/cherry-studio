@@ -512,6 +512,32 @@ export const adminRoutes: AnyRoute[] = [
     }
   }),
 
+  // ------------------------------------------------------------------ support chat and learner logins
+  route({
+    method: 'GET', path: '/admin/support', access: 'staff', tag: 'Admin · support', summary: 'Support threads, open and newest first',
+    handler: async ({ sb }) => call(sb(), 'admin_support_threads')
+  }),
+  route({
+    method: 'GET', path: '/admin/support/:id', access: 'staff', tag: 'Admin · support', summary: 'One support thread (marks it read)',
+    handler: async ({ sb, params }) => call(sb(), 'admin_support_thread', { p_thread: id(params.id) })
+  }),
+  route({
+    method: 'POST', path: '/admin/support/:id/reply', access: 'staff', tag: 'Admin · support', summary: 'Answer a support thread',
+    body: z.strictObject({ body: z.string().trim().min(1).max(2000) }),
+    handler: async ({ sb, params, body }) => call(sb(), 'admin_support_reply', { p_thread: id(params.id), p_body: body.body })
+  }),
+  route({
+    method: 'POST', path: '/admin/support/:id/status', access: 'staff', tag: 'Admin · support', summary: 'Close or reopen a support thread',
+    body: z.strictObject({ status: z.enum(['open', 'closed']) }),
+    handler: async ({ sb, params, body }) => call(sb(), 'admin_support_status', { p_thread: id(params.id), p_status: body.status })
+  }),
+  route({
+    method: 'POST', path: '/admin/learners/reset', access: 'staff', tag: 'Admin · support',
+    summary: 'Temporary password and a new code for a learner who lost both (super admin)',
+    body: z.strictObject({ username: z.string().trim().min(3).max(32) }),
+    handler: async ({ sb, body }) => call(sb(), 'admin_profile_reset', { p_username: body.username })
+  }),
+
   // ------------------------------------------------------------------ dashboard, search, audit
   route({
     method: 'GET', path: '/admin/dashboard', access: 'staff', tag: 'Admin · system', summary: 'Counts, statuses, storage and recent activity',

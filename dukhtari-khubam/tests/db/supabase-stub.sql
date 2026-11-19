@@ -3,6 +3,9 @@ create role anon nologin noinherit;
 create role authenticated nologin noinherit;
 create role service_role nologin noinherit bypassrls;
 
+create schema extensions;
+grant usage on schema extensions to anon, authenticated, service_role;
+
 create schema auth;
 create table auth.users (
   id uuid primary key default gen_random_uuid(),

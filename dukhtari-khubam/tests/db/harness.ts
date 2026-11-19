@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import { PGlite, type Transaction } from '@electric-sql/pglite'
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm'
+import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const root = join(here, '..', '..')
@@ -13,7 +14,7 @@ export type Tx = Transaction
 
 /** Fresh database with Supabase stubs and every production migration applied in order. */
 export async function createDb(): Promise<Db> {
-  const db = await PGlite.create({ extensions: { pg_trgm } })
+  const db = await PGlite.create({ extensions: { pg_trgm, pgcrypto } })
   await db.exec(readFileSync(join(here, 'supabase-stub.sql'), 'utf8'))
   const dir = join(root, 'supabase', 'migrations')
   for (const file of readdirSync(dir).filter((f) => f.endsWith('.sql')).sort()) {

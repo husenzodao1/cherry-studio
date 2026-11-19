@@ -30,7 +30,8 @@ const DOMAIN_STATUS: Record<string, number> = {
   review_required: 409,
   last_super_admin: 409,
   not_allowed: 409,
-  rate_limited: 429
+  rate_limited: 429,
+  username_taken: 409
 }
 
 const MESSAGES: Record<string, string> = {
@@ -41,7 +42,8 @@ const MESSAGES: Record<string, string> = {
   validation_failed: 'Маълумот нодуруст аст.',
   version_conflict: 'Версияи навтар ҳаст. Саҳифаро нав кунед.',
   asset_in_use: 'Файл истифода мешавад.',
-  rate_limited: 'Каме дертар такрор кунед.'
+  rate_limited: 'Каме дертар такрор кунед.',
+  username_taken: 'Ин логин банд аст.'
 }
 
 interface PgError {
