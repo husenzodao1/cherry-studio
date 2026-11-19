@@ -97,7 +97,7 @@ function QuestionCard({ index, question, loc, onChanged }: { index: number; ques
     if (await act.run(() => send(`/admin/questions/${question.id}`, 'DELETE'), 'Нест шуд')) onChanged()
   }
   return (
-    <div className="card card-pad stack" style={{ gap: 8 }} dir={loc === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="card card-pad stack" style={{ gap: 8 }}>
       <div className="row" style={{ gap: 6 }}>
         <span className="eyebrow" style={{ flex: 1 }}>{index + 1}. {TYPE_LABEL[question.type] ?? question.type} · {question.points} хол</span>
         <button type="button" className="icon-btn" aria-label="Нест кардан" onClick={remove}>×</button>
@@ -136,8 +136,8 @@ function NewQuestion({ quizId, loc, position, onAdded }: { quizId: string; loc: 
     } else if (type === 'true_false') {
       const isTrue = options[0]?.correct ?? true
       body.options = [
-        { ref: 'true', translations: { [loc]: { text: loc === 'ru' ? 'Верно' : loc === 'ar' ? 'صحيح' : 'Дуруст' } } },
-        { ref: 'false', translations: { [loc]: { text: loc === 'ru' ? 'Неверно' : loc === 'ar' ? 'خطأ' : 'Нодуруст' } } }
+        { ref: 'true', translations: { [loc]: { text: loc === 'ru' ? 'Верно' : 'Дуруст' } } },
+        { ref: 'false', translations: { [loc]: { text: loc === 'ru' ? 'Неверно' : 'Нодуруст' } } }
       ]
       body.answer_key = { correct: [isTrue ? 'true' : 'false'] }
     } else if (type === 'short_answer') {
@@ -153,7 +153,7 @@ function NewQuestion({ quizId, loc, position, onAdded }: { quizId: string; loc: 
   }
 
   return (
-    <div className="card card-pad stack" style={{ gap: 10 }} dir={loc === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="card card-pad stack" style={{ gap: 10 }}>
       <div className="eyebrow">Саволи нав</div>
       <div className="row" style={{ gap: 8 }}>
         <select className="input" value={type} onChange={(e) => setType(e.target.value)} style={{ flex: 1 }}>

@@ -27,3 +27,29 @@ describe('welcome answers in the progress backup', () => {
     expect(ProgressData.safeParse({ ...b, about: { ...b.about, extra: 1 } }).success).toBe(false)
   })
 })
+
+describe('birthday', () => {
+  it('reads dd.mm.yyyy, puts the dots in and rejects impossible dates', async () => {
+    const { birthdayMask, parseBirthday } = await import('@/lib/progress')
+    const today = new Date(2026, 10, 19)
+    expect(birthdayMask('01032008')).toBe('01.03.2008')
+    expect(birthdayMask('0103')).toBe('01.03')
+    expect(birthdayMask('01.0')).toBe('01.0')
+    expect(parseBirthday('01.03.2008', today)).toBe('2008-03-01')
+    expect(parseBirthday('31.02.2008', today)).toBeNull()
+    expect(parseBirthday('01.03.2024', today)).toBeNull()
+    expect(parseBirthday('1.3.2008', today)).toBeNull()
+  })
+  it('greets at 00:01 on the next birthday', async () => {
+    const { nextBirthday } = await import('@/web/offline/notify')
+    const now = new Date(2026, 10, 19, 12, 0)
+    expect(nextBirthday('2008-11-20', now)).toEqual(new Date(2026, 10, 20, 0, 1))
+    expect(nextBirthday('2008-03-01', now)).toEqual(new Date(2027, 2, 1, 0, 1))
+    expect(nextBirthday('2008-11-19', new Date(2026, 10, 19, 0, 0, 30))).toEqual(new Date(2026, 10, 19, 0, 1))
+  })
+  it('is kept in the backup', () => {
+    const a = { ...emptyProgress(), birthday: '2008-03-01', born: 2008 }
+    expect(mergeProgress(emptyProgress(), a).birthday).toBe('2008-03-01')
+    expect(ProgressData.safeParse({ ...a, birthday: '1.3.2008' }).success).toBe(false)
+  })
+})

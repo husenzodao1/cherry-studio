@@ -6,9 +6,9 @@ import { api, ApiFailure } from '../api'
 
 /** Shared building blocks of the staff panel. Staff labels are Tajik; content is edited per language. */
 
-export const LOCALES = ['tg', 'ru', 'ar'] as const
+export const LOCALES = ['tg', 'ru'] as const
 export type Loc = (typeof LOCALES)[number]
-export const LOCALE_NAME: Record<Loc, string> = { tg: 'Тоҷикӣ', ru: 'Русский', ar: 'العربية' }
+export const LOCALE_NAME: Record<Loc, string> = { tg: 'Тоҷикӣ', ru: 'Русский' }
 
 export const STATUS_LABEL: Record<string, string> = {
   draft: 'Сиёҳнавис', in_review: 'Дар баррасӣ', changes_requested: 'Ислоҳ лозим', approved: 'Тасдиқшуда',

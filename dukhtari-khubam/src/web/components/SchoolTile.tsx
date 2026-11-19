@@ -8,6 +8,7 @@ import { introPlayed } from '../intro'
 import { LiquidGlass } from '../glass/LiquidGlass'
 import type { SchoolSummary } from '../offline/content'
 import { usePrefs } from '../prefs'
+import { PoemTile } from './PoemTile'
 
 /**
  * School tile in clear, refracting glass with its 3D icon. `count` adds the number of courses
@@ -18,7 +19,8 @@ export function SchoolTile({ school, count = false, long = false }: { school: Sc
   const art = school.icon?.url ? { src: school.icon.url } : SCHOOL_ART[school.slug]
   return (
     <Link href={`/school?key=${encodeURIComponent(school.slug)}`} className={`tile-link${long ? ' tile-long' : ''}`}>
-      <LiquidGlass radius={24} bezel={14} refract={false} className={`tile${count ? ' tile-wide' : ''}`}>
+      {/* the schools screen: thick, clear glass that bends the backdrop at its rim and corners */}
+      <LiquidGlass radius={24} bezel={count ? 22 : 14} refract={count} className={`tile${count ? ' tile-wide tile-clear' : ''}`}>
         {art ? <img className="tile-art" src={art.src} alt="" aria-hidden="true" decoding="async" /> : <span className="tile-art" />}
         <span className="tile-text">
           <span className="tile-title">{school.title}</span>
@@ -29,12 +31,17 @@ export function SchoolTile({ school, count = false, long = false }: { school: Sc
   )
 }
 
-/** Grid of school tiles; a lone tile in the last row spans two columns. */
-export function SchoolGrid({ schools, cols, count = false }: { schools: SchoolSummary[]; cols: 2 | 3; count?: boolean }) {
-  const lone = schools.length % cols === 1
+/**
+ * Grid of school tiles; a lone tile in the last row spans two columns. With `poem` (the schools screen)
+ * the "Garden of verse" tile follows the schools, so every tile keeps the same size.
+ */
+export function SchoolGrid({ schools, cols, count = false, poem = false }: { schools: SchoolSummary[]; cols: 2 | 3; count?: boolean; poem?: boolean }) {
+  const total = schools.length + (poem ? 1 : 0)
+  const lone = total % cols === 1
   return (
     <div className={`tile-grid tile-grid-${cols} stagger`}>
-      {schools.map((s, i) => <SchoolTile key={s.id} school={s} count={count} long={lone && i === schools.length - 1} />)}
+      {schools.map((s, i) => <SchoolTile key={s.id} school={s} count={count} long={!poem && lone && i === schools.length - 1} />)}
+      {poem ? <PoemTile long={lone} /> : null}
     </div>
   )
 }

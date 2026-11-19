@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { useContent } from '../offline/content'
 import { usePrefs } from '../prefs'
+import { Hanger } from './Hanger'
 
 /** How long short words stay before the next ones come in. */
 const STAY_MS = 4200
@@ -73,8 +74,8 @@ function Quote({ body, author, active, onTime }: { body: string; author: string 
 }
 
 /**
- * "Words of the day" on the home screen: the newest inspirations from the panel, one at a time on a soft
- * gradient with small 3D shapes, handwritten; the words slide away to the side and the next ones come
+ * "Words of the day" on the home screen: the newest inspirations from the panel, one at a time on a pane
+ * of glass hung on the wall by a ribbon bow (it swings when the phone is shaken), handwritten; the words slide away to the side and the next ones come
  * in. Long words never hide under the author: they get smaller, and very long ones move sideways in one
  * line until the end has been read. With none published yet, the app's own line is shown.
  */
@@ -100,9 +101,8 @@ export function WordsOfDay() {
 
   const prev = (at - 1 + count) % count
   return (
+    <Hanger className="words-hanger">
     <section className="words" aria-roledescription="carousel" aria-label={t('home.words')}>
-      <img className="words-art" src="/assets/3d/words-band.webp" alt="" aria-hidden="true" decoding="async" />
-      <span className="words-label">{t('home.words')}</span>
       <div className="words-track" aria-live="polite">
         {items.map((q, n) => (
           <figure key={n} className={`words-item${n === at ? ' is-in' : count > 1 && n === prev ? ' is-out' : ''}`} aria-hidden={n !== at}>
@@ -113,5 +113,6 @@ export function WordsOfDay() {
       </div>
       {count > 1 ? <div className="words-dots" aria-hidden="true">{items.map((_, n) => <span key={n} className={n === at ? 'is-on' : ''} />)}</div> : null}
     </section>
+    </Hanger>
   )
 }

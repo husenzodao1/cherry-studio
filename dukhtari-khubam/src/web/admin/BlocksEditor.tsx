@@ -106,7 +106,7 @@ function BlockFields({ block, loc, onChange }: { block: Block; loc: Loc; onChang
   const c = (block.content[loc] ?? {}) as Record<string, unknown>
   const setContent = (v: unknown) => onChange({ ...block, content: { ...block.content, [loc]: v } })
   const setProps = (p: Record<string, unknown>) => onChange({ ...block, props: { ...block.props, ...p } })
-  const dir = loc === 'ar' ? 'rtl' : 'ltr'
+  const dir = 'ltr'
 
   if (block.type === 'divider') return <hr style={{ border: 0, borderTop: '1px solid var(--line)', width: '100%' }} />
   if (RICH.has(block.type)) {

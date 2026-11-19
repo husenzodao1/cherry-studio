@@ -44,6 +44,23 @@ function MoreGlyph() {
   )
 }
 
+/**
+ * The big line of the home screen: its letters hop one after another, softly, then it rests for a few
+ * seconds and the wave runs again. Words never break inside.
+ */
+function WaveText({ text }: { text: string }) {
+  let n = 0
+  return (
+    <span className="wave" aria-label={text}>
+      {text.split(/(\s+)/).map((word, w) => (/^\s+$/.test(word) ? ' ' : (
+        <span key={w} className="wave-word" aria-hidden="true">
+          {[...word].map((ch, i) => <span key={i} className="wave-ch" style={{ ['--i' as string]: n++ }}>{ch}</span>)}
+        </span>
+      )))}
+    </span>
+  )
+}
+
 export default function Home() {
   const { t } = usePrefs()
   const { bundle, loading, offlineEmpty } = useContent()
@@ -81,7 +98,7 @@ export default function Home() {
       <section className="hello">
         <div className="hello-text">
           <p className="greet">{hour === null ? ' ' : `${t(greetingKey(hour))}${name ? `, ${name}` : ''}!`}</p>
-          <h1 className="h-hero motto">{t('home.motto')}{'\u00a0'}<span className="bf-anchor" aria-hidden="true" /></h1>
+          <h1 className="h-hero motto"><WaveText text={t('home.motto')} />{'\u00a0'}<span className="bf-anchor" aria-hidden="true" /></h1>
         </div>
         <img ref={flower} className="hello-flower bloom-in" src={ART.flower.src} alt="" aria-hidden="true" decoding="async" />
       </section>

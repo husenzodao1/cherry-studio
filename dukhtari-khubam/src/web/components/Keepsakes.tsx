@@ -4,10 +4,11 @@ import { useState } from 'react'
 
 import { formatDay } from '@/lib/progress'
 
-import { drawCertificate, drawCodeCard, savePicture, savePictureToGallery } from '../offline/cards'
+import { drawCertificate, savePicture } from '../offline/cards'
 import { useLearner, type Learner } from '../offline/learner'
 import type { UiKey } from '../i18n'
 import { usePrefs } from '../prefs'
+import { Dots } from './Busy'
 import { Icon } from './Icon'
 
 const slug = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 40) || 'dukhtari-khubam'
@@ -31,40 +32,8 @@ export function CertificateButton({ course, school, date, className = 'btn btn-b
     }
   }
   return (
-    <button type="button" className={className} onClick={make} disabled={busy}>
-      <Icon name="trophy" size={18} /> {busy ? t('cert.saving') : t('cert.title')}
+    <button type="button" className={className} onClick={make} disabled={busy} aria-busy={busy}>
+      <Icon name="trophy" size={18} /> {busy ? <>{t('cert.saving')}<Dots /></> : t('cert.title')}
     </button>
   )
-}
-
-/** Saves the personal code as a picture, so it is kept in the phone's gallery. */
-export function CodeImageButton({ className = 'btn btn-soft btn-block' }: { className?: string }) {
-  const { t } = usePrefs()
-  const { learner } = useLearner()
-  const [busy, setBusy] = useState(false)
-  if (!learner) return null
-  const make = async () => {
-    setBusy(true)
-    try {
-      const png = await drawCodeCard({ title: t('code.card_title'), hint: t('code.card_hint'), brand: t('app.name'), name: learner.name, code: learner.code })
-      await savePicture(png, 'dukhtari-khubam-code.png', t('code.card_title'))
-    } finally {
-      setBusy(false)
-    }
-  }
-  return (
-    <button type="button" className={className} onClick={make} disabled={busy}>
-      <Icon name="down" size={18} /> {busy ? t('cert.saving') : t('code.save_image')}
-    </button>
-  )
-}
-
-/** Draws the picture of the personal code and puts it in the gallery by itself (right after registering). */
-export async function saveCodeToGallery(learner: Learner, t: (k: UiKey) => string): Promise<boolean> {
-  try {
-    const png = await drawCodeCard({ title: t('code.card_title'), hint: t('code.card_hint'), brand: t('app.name'), name: learner.name, code: learner.code })
-    return await savePictureToGallery(png, `dukhtari-khubam-code-${learner.code.slice(-4)}.png`)
-  } catch {
-    return false
-  }
 }

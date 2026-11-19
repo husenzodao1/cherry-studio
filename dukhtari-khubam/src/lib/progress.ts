@@ -26,6 +26,8 @@ export const ProgressData = z.strictObject({
   last: z.strictObject({ lesson: Id, at: Iso }).optional(),
   /** year of birth, from the age given at registration (so the age stays current over the years) */
   born: z.number().int().min(1900).max(2100).optional(),
+  /** birthday (YYYY-MM-DD), asked at registration: a greeting comes on the day */
+  birthday: Day.optional(),
   /** local dates (YYYY-MM-DD) on which the learner studied, for the day streak */
   days: z.array(Day).max(MAX_DAYS).default([]),
   review: z.record(Id, ReviewCard).default({}),
@@ -49,6 +51,27 @@ const keepDays = (days: Iterable<string>) => [...new Set(days)].sort().slice(-MA
 
 /** Age in whole years from the stored year of birth (null when not given yet). */
 export const ageOf = (p: ProgressData, today = new Date()) => (p.born === undefined ? null : today.getFullYear() - p.born)
+
+/**
+ * A birthday typed as dd.mm.yyyy (the dots come by themselves): 'YYYY-MM-DD' when it is a real date
+ * and the age is 5–99, otherwise null.
+ */
+export function parseBirthday(text: string, today = new Date()): string | null {
+  const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(text)
+  if (!m) return null
+  const [d, mo, y] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  const date = new Date(y, mo - 1, d)
+  if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) return null
+  let age = today.getFullYear() - y
+  if (today.getMonth() < mo - 1 || (today.getMonth() === mo - 1 && today.getDate() < d)) age--
+  return age >= 5 && age <= 99 ? `${m[3]}-${m[2]}-${m[1]}` : null
+}
+
+/** Digits typed into the birthday field, with the dots put in: "0103" → "01.03". */
+export function birthdayMask(raw: string): string {
+  const d = raw.replace(/\D/g, '').slice(0, 8)
+  return [d.slice(0, 2), d.slice(2, 4), d.slice(4)].filter(Boolean).join('.')
+}
 
 /** Records a day of study (no change if it is already there). */
 export function withDay(p: ProgressData, day = localDay()): ProgressData {
@@ -107,6 +130,8 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   }
   const born = a.born ?? b.born
   if (born !== undefined) out.born = born
+  const birthday = a.birthday ?? b.birthday
+  if (birthday) out.birthday = birthday
   const about = !a.about ? b.about : !b.about ? a.about : a.about.at >= b.about.at ? a.about : b.about
   if (about) out.about = about
   return out

@@ -74,7 +74,7 @@ function PageText({ page, locale, onSaved }: { page: Entity; locale: Loc; onSave
     if (await act.run(() => send(`/admin/pages/${page.id}/translations/${locale}`, 'PUT', { title, body: textToBlocks(text), ready }), 'Захира шуд')) onSaved()
   }
   return (
-    <div className="card card-pad stack" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="card card-pad stack">
       <Field label="Сарлавҳа"><input className="input" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} /></Field>
       <Field label="Матн">
         <textarea className="input" value={text} onChange={(e) => setText(e.target.value)} style={{ minHeight: 320, fontFamily: 'ui-monospace, monospace', fontSize: '0.9em' }} />

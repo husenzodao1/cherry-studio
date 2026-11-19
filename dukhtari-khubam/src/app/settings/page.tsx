@@ -2,102 +2,18 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 
-import { formatCode } from '@/lib/progress'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { checkForUpdate } from '@/web/components/AppUpdate'
 import { PinSettings } from '@/web/components/PinSettings'
 import { RateShare } from '@/web/components/RateShare'
-import { CodeImageButton } from '@/web/components/Keepsakes'
-import { LOCALE_LABELS, type Locale } from '@/web/i18n'
+import { showToast } from '@/web/components/Toast'
+import { LOCALE_LABELS, LOCALES } from '@/web/i18n'
 import { useLearner } from '@/web/offline/learner'
 import { allowNotifications, canNotify, DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyPrefs } from '@/web/offline/notify'
-import { checkPassword, unlockWithPhone } from '@/web/offline/unlock'
 import { MIN_TEXT_SCALE, THEMES, usePrefs } from '@/web/prefs'
-
-/**
- * The learner's code and login, at the end of the settings and small: hidden until the phone's own lock
- * (fingerprint, face or screen PIN) — or, on the website, the login password — confirms it is her.
- * It hides itself again after a minute.
- */
-function CodeCard() {
-  const { t } = usePrefs()
-  const { learner } = useLearner()
-  const [open, setOpen] = useState(false)
-  const [asking, setAsking] = useState(false)
-  const [password, setPassword] = useState('')
-  const [message, setMessage] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [copied, setCopied] = useState(false)
-  useEffect(() => {
-    if (!open) return
-    const timer = setTimeout(() => setOpen(false), 60_000)
-    return () => clearTimeout(timer)
-  }, [open])
-  if (!learner) return null
-  const reveal = async () => {
-    setMessage(null)
-    if (open) return setOpen(false)
-    const r = await unlockWithPhone(t('settings.unlock_title'), t('settings.unlock_reason'))
-    if (r === 'ok') setOpen(true)
-    // no lock to ask for: check the login password; without a login there is nothing to check against
-    else if (r === 'password') learner.username ? setAsking(true) : setOpen(true)
-  }
-  const submit = async (e: FormEvent) => {
-    e.preventDefault()
-    setBusy(true)
-    const r = await checkPassword(learner.username!, password)
-    setBusy(false)
-    if (r === 'ok') {
-      setOpen(true)
-      setAsking(false)
-      setPassword('')
-    } else setMessage(t(r === 'invalid' ? 'start.invalid_login' : r === 'locked' ? 'start.locked' : 'start.need_online'))
-  }
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(learner.code)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1800)
-    } catch {
-      /* the code stays on screen to copy by hand */
-    }
-  }
-  return (
-    <div className="glass code-card">
-      <div className="row" style={{ gap: 10 }}>
-        <span className="code-card-icon" aria-hidden="true"><Icon name="lock" size={16} /></span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <b>{t('profile.code')}</b>
-          {learner.username ? <span className="row-sub">{t('start.username')}: {learner.username}</span> : null}
-        </span>
-        <button type="button" className="chip" onClick={reveal} aria-expanded={open}>
-          <Icon name={open ? 'eyeOff' : 'eye'} size={16} /> {t(open ? 'profile.hide_code' : 'profile.show_code')}
-        </button>
-      </div>
-      {asking && !open ? (
-        <form className="row" style={{ gap: 8 }} onSubmit={submit}>
-          <input className="input" type="password" autoComplete="current-password" placeholder={t('settings.unlock_password')}
-            aria-label={t('settings.unlock_password')} value={password} onChange={(e) => setPassword(e.target.value)} style={{ minHeight: 44 }} />
-          <button className="btn btn-soft" disabled={busy || !password} aria-label={t('profile.show_code')}><Icon name="arrow" size={18} /></button>
-        </form>
-      ) : null}
-      {message ? <span className="muted" role="status" style={{ fontSize: '0.84em' }}>{message}</span> : null}
-      {open ? (
-        <>
-          <div className="code-box code-box-sm" aria-live="polite">{formatCode(learner.code)}</div>
-          <span className="muted" style={{ fontSize: '0.8em' }}>{t('settings.code_hint')}</span>
-          <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
-            <button type="button" className="chip" onClick={copy}><Icon name={copied ? 'check' : 'copy'} size={16} /> {t('start.copy')}</button>
-            <CodeImageButton className="chip" />
-          </div>
-        </>
-      ) : null}
-    </div>
-  )
-}
 
 function Notifications() {
   const { t } = usePrefs()
@@ -164,6 +80,32 @@ function ThemePicker() {
   )
 }
 
+/** The language: one row with the current one; a tap opens the short list below it. */
+function LanguagePicker() {
+  const prefs = usePrefs()
+  const { t } = prefs
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`glass theme-box${open ? ' is-open' : ''}`}>
+      <button type="button" className="theme-head" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span className="lang-badge" aria-hidden="true"><Icon name="globe" size={18} /></span>
+        <span className="grow"><span className="eyebrow" style={{ display: 'block' }}>{t('settings.language')}</span><span lang={prefs.locale}>{LOCALE_LABELS[prefs.locale]}</span></span>
+        <Icon name="down" size={18} className="theme-chevron" />
+      </button>
+      <div className="theme-drawer">
+        <div className="lang-list" role="radiogroup" aria-label={t('settings.language')}>
+          {LOCALES.map((l, i) => (
+            <button key={l} type="button" role="radio" aria-checked={prefs.locale === l} lang={l} className="lang-pick" style={{ ['--i' as string]: i }}
+              onClick={() => { prefs.set({ locale: l }); setTimeout(() => setOpen(false), 260) }}>
+              {LOCALE_LABELS[l]}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Settings() {
   const prefs = usePrefs()
   const { t } = prefs
@@ -179,17 +121,9 @@ export default function Settings() {
   return (
     <>
       <Header back="/profile" title={t('settings.title')} />
-      <div className="section stagger">
+      <div className="section stagger solid-glass">
         {native ? <Notifications /> : null}
-        <div className="glass card-pad stack" style={{ gap: 10 }}>
-          <span className="eyebrow">{t('settings.language')}</span>
-          <div className="segmented" role="radiogroup" aria-label={t('settings.language')}>
-            {(Object.keys(LOCALE_LABELS) as Locale[]).map((l) => (
-              <button key={l} role="radio" aria-checked={prefs.locale === l} aria-pressed={prefs.locale === l} lang={l}
-                onClick={() => prefs.set({ locale: l })}>{LOCALE_LABELS[l]}</button>
-            ))}
-          </div>
-        </div>
+        <LanguagePicker />
         <ThemePicker />
         <label className="glass card-pad stack" style={{ gap: 10 }}>
           <span className="eyebrow">{t('settings.text_size')}</span>
@@ -200,14 +134,21 @@ export default function Settings() {
           <Link href="/support" className="menu-row"><Icon name="bell" /><span className="grow">{t('support.title')}</span><Icon name="forward" size={18} /></Link>
           <Link href="/page?slug=privacy" className="menu-row"><Icon name="lock" /><span className="grow">{t('settings.privacy')}</span><Icon name="forward" size={18} /></Link>
           <Link href="/page?slug=about" className="menu-row"><Icon name="info" /><span className="grow">{t('settings.about')}</span><Icon name="forward" size={18} /></Link>
+          {/* the other apps of the studio: the list comes later */}
+          <button type="button" className="menu-row" onClick={() => showToast(t('settings.other_apps_soon'), 'sparkle')}>
+            <Icon name="grid" /><span className="grow">{t('settings.other_apps')}</span><span className="chip chip-soon">{t('settings.other_apps_soon')}</span>
+          </button>
+          {/* the app's version (tap: look for a newer one) — only in the app; the website is always the newest */}
+          {native ? (
+            <button type="button" className="menu-row" onClick={() => checkForUpdate(t)}>
+              <Icon name="install" /><span className="grow">{t('settings.version')}</span><span className="muted version-num">{process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}</span>
+            </button>
+          ) : null}
           {learner ? <button type="button" className="menu-row danger" onClick={leave}><Icon name="logout" /><span className="grow">{t('profile.signout')}</span></button> : null}
         </div>
         <RateShare />
-        <PinSettings />
-        <CodeCard />
-        <button type="button" className="version-row" onClick={() => checkForUpdate(t)}>
-          <Icon name="install" size={14} /> {t('settings.version')} {process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}
-        </button>
+        {/* the PIN lock guards the phone app; the website has none */}
+        {native ? <PinSettings /> : null}
       </div>
     </>
   )

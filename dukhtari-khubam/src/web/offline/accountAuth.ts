@@ -17,7 +17,7 @@ export function accountAuth(): SupabaseClient | null {
   return client
 }
 
-export interface AccountProfile { code: string; name: string }
+export interface AccountProfile { code: string; name: string; data?: unknown }
 
 /** The profile tied to the signed-in account, null when there is none, or 'error'. */
 export async function accountProfile(): Promise<AccountProfile | null | 'error'> {
@@ -25,7 +25,9 @@ export async function accountProfile(): Promise<AccountProfile | null | 'error'>
   if (!sb) return 'error'
   const { data, error } = await sb.rpc('api_google_profile')
   if (error) return 'error'
-  return data && typeof data === 'object' ? { code: String((data as AccountProfile).code), name: String((data as AccountProfile).name) } : null
+  // the profile comes whole (name and progress), so signing in needs no second request
+  const p = data as AccountProfile | null
+  return p && typeof p === 'object' ? { code: String(p.code), name: String(p.name), data: p.data } : null
 }
 
 /** Ties the signed-in account to this phone's profile, then ends the session. */

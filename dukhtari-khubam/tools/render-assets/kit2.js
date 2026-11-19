@@ -887,6 +887,47 @@ export function moon5() {
   return g
 }
 
+/** Launcher flower: five plump, rounded glass petals (rose at the tips, cream at the heart) and a glossy golden centre. */
+export function flower5() {
+  const g = new THREE.Group()
+  const petal = new THREE.Shape()
+  petal.moveTo(0, 0.12)
+  petal.bezierCurveTo(0.42, 0.28, 0.52, 0.9, 0, 1.08)
+  petal.bezierCurveTo(-0.52, 0.9, -0.42, 0.28, 0, 0.12)
+  const geo = new THREE.ExtrudeGeometry(petal, { depth: 0.1, bevelEnabled: true, bevelThickness: 0.13, bevelSize: 0.1, bevelSegments: 18, curveSegments: 40 })
+  geo.computeVertexNormals()
+  const pos = geo.attributes.position, col = new Float32Array(pos.count * 3)
+  const a = new THREE.Color('#fff4e6'), b = new THREE.Color('#ff8fb4'), c = new THREE.Color()
+  for (let i = 0; i < pos.count; i++) {
+    const k = THREE.MathUtils.clamp((pos.getY(i) - 0.15) / 0.95, 0, 1)
+    c.copy(a).lerp(b, Math.pow(k, 0.8)); col.set([c.r, c.g, c.b], i * 3)
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3))
+  const mat = new THREE.MeshPhysicalMaterial({
+    color: C('#ffffff'), vertexColors: true, transmission: 0.68, thickness: 0.8, ior: 1.45, roughness: 0.05,
+    attenuationColor: C('#ff9ec0'), attenuationDistance: 1.8, clearcoat: 1, clearcoatRoughness: 0.03,
+    iridescence: 0.3, iridescenceIOR: 1.3, sheen: 0.5, sheenColor: C('#ffe0ec'), envMapIntensity: 1.5, specularIntensity: 1
+  })
+  for (let i = 0; i < 5; i++) {
+    const holder = new THREE.Group()
+    holder.rotation.z = (i / 5) * Math.PI * 2
+    const p = new THREE.Mesh(geo, mat)
+    p.rotation.x = 0.22 // the petals cup a little toward the viewer
+    p.position.z = -0.05 * (i % 2)
+    p.castShadow = false
+    holder.add(p)
+    g.add(holder)
+  }
+  const heart = new THREE.Mesh(new THREE.SphereGeometry(0.27, 64, 48), new THREE.MeshPhysicalMaterial({
+    color: C('#ffc93d'), roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.04, sheen: 0.6, sheenColor: C('#fff2b0'), envMapIntensity: 1.4
+  }))
+  heart.scale.z = 0.7
+  heart.position.z = 0.22
+  g.add(heart)
+  g.rotation.set(0.18, -0.2, 0.12)
+  return g
+}
+
 export function buildKind2(job) {
   const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
   switch (job.kind) {
@@ -915,6 +956,7 @@ export function buildKind2(job) {
     case 'track4': return track4()
     case 'moon4': return moon4()
     case 'moon5': return moon5()
+    case 'flower5': return flower5()
     default: return null
   }
 }

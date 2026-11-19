@@ -2,7 +2,7 @@
 
 import { Capacitor } from '@capacitor/core'
 
-import { accountAuth, accountProfile, endAccount, linkAccount } from './accountAuth'
+import { accountAuth, accountProfile, endAccount, linkAccount, type AccountProfile } from './accountAuth'
 import { apiUrl } from './base'
 
 /**
@@ -11,8 +11,10 @@ import { apiUrl } from './base'
  * Google's ID token signs the learner in to Supabase Auth, where her Google account is tied to her
  * profile (api_google_link), so on a new phone Google gives her code back (api_google_profile).
  *
- * Name and photo come from the Google account. The age comes from the birthday in the Google account
- * when she allows it (People API, scope user.birthday.read; Android app only); otherwise she types it.
+ * Name and photo come from the Google account. The birthday comes from the Google account when she
+ * allows it (People API, scope user.birthday.read; Android app only); otherwise she types it.
+ * The profile comes back whole with the sign-in (api_google_profile), so a returning learner is home
+ * right after Google's sheet closes.
  * Setup: GOOGLE_WEB_CLIENT_ID in Vercel and the Google provider in Supabase (see README).
  */
 
@@ -25,17 +27,25 @@ const CONFIG_KEY = 'dk.google_client'
  * The last answer is kept on the phone.
  */
 async function config(): Promise<{ id: string; birthday: boolean }> {
-  try {
-    const res = await fetch(apiUrl('/app-config'), { cache: 'no-cache' })
-    if (res.ok) {
-      const c = (await res.json()) as { google_web_client_id?: string | null; google_birthday?: boolean }
-      const out = { id: BUILT_IN_CLIENT_ID || (c.google_web_client_id ?? ''), birthday: c.google_birthday === true }
-      localStorage.setItem(CONFIG_KEY, JSON.stringify(out))
-      return out
-    }
-  } catch {
-    /* offline: use the kept one */
+  // the kept answer is used at once (and refreshed for next time), so the button never waits for the server
+  const kept = keptConfig()
+  if (kept.id) {
+    fetchConfig().catch(() => undefined)
+    return kept
   }
+  return (await fetchConfig().catch(() => null)) ?? kept
+}
+
+async function fetchConfig(): Promise<{ id: string; birthday: boolean } | null> {
+  const res = await fetch(apiUrl('/app-config'), { cache: 'no-cache' })
+  if (!res.ok) return null
+  const c = (await res.json()) as { google_web_client_id?: string | null; google_birthday?: boolean }
+  const out = { id: BUILT_IN_CLIENT_ID || (c.google_web_client_id ?? ''), birthday: c.google_birthday === true }
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(out))
+  return out
+}
+
+function keptConfig(): { id: string; birthday: boolean } {
   try {
     const kept = JSON.parse(localStorage.getItem(CONFIG_KEY) ?? 'null') as { id?: string; birthday?: boolean } | string | null
     if (typeof kept === 'string') return { id: BUILT_IN_CLIENT_ID || kept, birthday: false }
@@ -46,15 +56,14 @@ async function config(): Promise<{ id: string; birthday: boolean }> {
 }
 const BIRTHDAY_SCOPE = 'https://www.googleapis.com/auth/user.birthday.read'
 
-export interface GoogleProfile { code: string; name: string }
 export interface GoogleAccount {
   email: string | null
   name: string
   photo: string | null
-  /** whole years from the Google birthday, when Google gave it */
-  age: number | null
-  /** her profile, when this Google account is already tied to one */
-  profile: GoogleProfile | null
+  /** the birthday in the Google account as dd.mm.yyyy, when Google gave it */
+  birthday: string | null
+  /** her profile (name and progress), when this Google account is already tied to one */
+  profile: AccountProfile | null
 }
 export type GoogleResult = GoogleAccount | 'cancelled' | 'not_configured' | 'offline' | 'error'
 
@@ -74,25 +83,24 @@ async function plugin(webClientId: string, birthday: boolean) {
 
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('')
 
-/** Whole years between a birthday and today. */
-export function ageFrom(b: { year?: number; month?: number; day?: number }, today = new Date()): number | null {
-  if (!b.year || !b.month || !b.day) return null
-  let age = today.getFullYear() - b.year
-  if (today.getMonth() + 1 < b.month || (today.getMonth() + 1 === b.month && today.getDate() < b.day)) age--
-  return age >= 5 && age <= 99 ? age : null
-}
-
-async function birthdayAge(accessToken: string): Promise<number | null> {
+async function googleBirthday(accessToken: string): Promise<string | null> {
   try {
     const res = await fetch('https://people.googleapis.com/v1/people/me?personFields=birthdays', { headers: { authorization: `Bearer ${accessToken}` } })
     if (!res.ok) return null
     const body = (await res.json()) as { birthdays?: { date?: { year?: number; month?: number; day?: number }; metadata?: { primary?: boolean } }[] }
     const list = body.birthdays ?? []
-    const best = list.find((b) => b.metadata?.primary && b.date?.year) ?? list.find((b) => b.date?.year)
-    return best?.date ? ageFrom(best.date) : null
+    const d = (list.find((b) => b.metadata?.primary && b.date?.year) ?? list.find((b) => b.date?.year))?.date
+    if (!d?.year || !d.month || !d.day) return null
+    return `${String(d.day).padStart(2, '0')}.${String(d.month).padStart(2, '0')}.${d.year}`
   } catch {
     return null
   }
+}
+
+/** Starts loading the Google sign-in early (the start screen calls it), so the button answers at once. */
+export function warmGoogle(): void {
+  const { id, birthday } = keptConfig()
+  if (id) plugin(id, birthday).catch(() => { ready = null })
 }
 
 /** The claims of a Google ID token (name, e-mail, picture): read from the token itself, not the plugin's profile. */
@@ -145,13 +153,13 @@ export async function signInWithGoogle(): Promise<GoogleResult> {
     // name, e-mail and photo from the token itself (the plugin's profile can come back empty)
     const c = idTokenClaims(result.idToken)
     const p = result.profile ?? ({} as Partial<NonNullable<typeof result.profile>>)
-    step = 'age'
-    const age = birthday && result.accessToken?.token ? await within(birthdayAge(result.accessToken.token), 8000, step).catch(() => null) : null
+    step = 'birthday'
+    const born = birthday && !profile && result.accessToken?.token ? await within(googleBirthday(result.accessToken.token), 6000, step).catch(() => null) : null
     return {
       email: p.email ?? c.email ?? null,
       name: (p.givenName || c.given_name || p.name || c.name || '').trim().slice(0, 80),
       photo: p.imageUrl ?? c.picture ?? null,
-      age,
+      birthday: born,
       profile
     }
   } catch (e) {

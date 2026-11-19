@@ -40,12 +40,14 @@ const optional = async <T>(p: Promise<T>): Promise<T | null> => p.catch(() => nu
 
 export async function buildBundle(sb: SupabaseClient, locale: string) {
   const L = { p_locale: locale }
-  const [schools, ui, inspiration, inspirations, achievements] = await Promise.all([
+  const [schools, ui, inspiration, inspirations, achievements, poems] = await Promise.all([
     call<Json[]>(sb, 'api_schools', L),
     call<Json>(sb, 'api_ui_bundle', L),
     optional(call<Json | null>(sb, 'api_inspiration', L)),
     optional(call<Json[]>(sb, 'api_inspirations', L)),
-    optional(call<Json[]>(sb, 'api_achievements', L))
+    optional(call<Json[]>(sb, 'api_achievements', L)),
+    // poems for the "Garden of verse" tile (inspirations placed as 'poem')
+    optional(call<Json[]>(sb, 'api_inspirations', { ...L, p_placement: 'poem', p_limit: 10 }))
   ])
   const schoolDetails = (await pool(schools, 6, (s) => optional(call<Json>(sb, 'api_school', { p_key: s.slug, ...L })))).filter(Boolean) as Json[]
   const courseIds = schoolDetails.flatMap((s) => (s.courses ?? []).map((c: Json) => c.id as string))
@@ -78,6 +80,7 @@ export async function buildBundle(sb: SupabaseClient, locale: string) {
     ui,
     inspiration,
     inspirations: inspirations ?? [],
+    poems: poems ?? [],
     achievements: achievements ?? []
   })
   const version = createHash('sha256').update(JSON.stringify(content)).digest('hex').slice(0, 16)

@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
-import { DEFAULT_STRINGS, type Locale, type UiKey } from './i18n'
+import { DEFAULT_STRINGS, isRtl, LOCALES, type Locale, type UiKey } from './i18n'
 
 /** Peach (the default), white, dark and three more colour themes; "dusk" is a dark one. */
 export const THEMES = ['peach', 'light', 'dark', 'sakura', 'mint', 'dusk'] as const
@@ -35,7 +35,8 @@ function read(): Prefs {
     const stored = JSON.parse(localStorage.getItem(KEY) ?? '{}')
     const { locale, theme, textScale } = { ...DEFAULTS, ...stored }
     return {
-      locale,
+      // Arabic was removed: such settings (and any unknown one) return to Tajik
+      locale: LOCALES.includes(locale) ? locale : DEFAULTS.locale,
       // white was the standard theme before version 3: such settings move to the new standard, Peach
       theme: (THEMES as readonly string[]).includes(theme) && !(theme === 'light' && (stored.v ?? 0) < VERSION) ? theme : DEFAULTS.theme,
       // settings saved before version 2 carried the old default size (1): move it to the new default
@@ -62,7 +63,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     if (prefs.theme === 'light' || prefs.theme === 'dark') delete root.dataset.palette
     else root.dataset.palette = prefs.theme
     root.lang = prefs.locale
-    root.dir = prefs.locale === 'ar' ? 'rtl' : 'ltr'
+    root.dir = isRtl(prefs.locale) ? 'rtl' : 'ltr'
     root.style.setProperty('--text-scale', String(prefs.textScale))
   }, [prefs])
 
@@ -86,7 +87,9 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     const local = DEFAULT_STRINGS[prefs.locale]
     const t = (key: UiKey) => {
       if (prefs.locale === 'tg' && cms.strings[key]) return cms.strings[key]
-      return local[key] ?? cms.strings[key] ?? DEFAULT_STRINGS.tg[key] ?? key
+      // Uzbek, Turkish, Persian and Dari cover the main screens; the rest comes in English
+      const wide = prefs.locale !== 'tg' && prefs.locale !== 'ru' ? DEFAULT_STRINGS.en[key] : undefined
+      return local[key] ?? wide ?? cms.strings[key] ?? DEFAULT_STRINGS.tg[key] ?? key
     }
     return { ...prefs, set, t, help: cms.help, setCms: applyCms }
   }, [prefs, set, cms, applyCms])

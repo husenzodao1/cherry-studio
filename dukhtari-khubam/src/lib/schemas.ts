@@ -104,7 +104,7 @@ export const EntityFields = {
   }),
   inspirations: z.strictObject({
     image_asset_id: AssetRef,
-    placement: z.enum(['home', 'lesson', 'notification']).optional()
+    placement: z.enum(['home', 'lesson', 'notification', 'poem']).optional()
   }),
   banners: z.strictObject({
     placement: z.enum(['home_top', 'home_card', 'school']),

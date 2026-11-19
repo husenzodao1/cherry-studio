@@ -4,6 +4,7 @@ import { get, set } from 'idb-keyval'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import type { Asset, Block } from '../components/Blocks'
+import { contentLocale } from '../i18n'
 import { usePrefs } from '../prefs'
 import { filterBundleForAge } from './age'
 import { apiUrl } from './base'
@@ -74,6 +75,8 @@ export interface Bundle {
   inspiration: { body: string; author_name?: string | null; source_title?: string | null } | null
   /** the newest inspirations, for the words of the day on the home screen (older bundles lack it) */
   inspirations?: { id: string; body: string; author_name?: string | null; source_title?: string | null }[]
+  /** poems for the "Garden of verse" tile: lines, the poet (author_name) and the title (source_title) */
+  poems?: { id: string; body: string; author_name?: string | null; source_title?: string | null }[]
   achievements: Achievement[]
 }
 
@@ -110,7 +113,8 @@ function writeLocal(k: string, v: string) {
 }
 
 export function ContentProvider({ children }: { children: ReactNode }) {
-  const { locale } = usePrefs()
+  // lessons exist in Tajik and Russian; other interface languages read the Tajik ones
+  const locale = contentLocale(usePrefs().locale)
   const [bundle, setBundle] = useState<Bundle | null>(null)
   const [loading, setLoading] = useState(true)
   const [offlineEmpty, setOfflineEmpty] = useState(false)

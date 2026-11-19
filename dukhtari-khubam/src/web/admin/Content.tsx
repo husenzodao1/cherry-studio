@@ -158,7 +158,7 @@ function TranslationForm({ level, entity, locale, onSaved }: { level: Level; ent
     if (await act.run(() => send(`/admin/${level}/${entity.id}/translations/${locale}`, 'PUT', body))) onSaved()
   }
   return (
-    <div className="card card-pad stack" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="card card-pad stack">
       <Field label="Сарлавҳа"><input className="input" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} /></Field>
       <Field label={textField === 'summary' ? 'Муқаддима (Lead)' : 'Тавсиф'}>
         <textarea className="input" value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} />

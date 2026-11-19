@@ -20,7 +20,7 @@ export default function Schools() {
       </Link>
       <section className="section">
         {bundle ? (
-          <SchoolGrid schools={bundle.schools} cols={2} count />
+          <SchoolGrid schools={bundle.schools} cols={2} count poem />
         ) : offlineEmpty ? <Empty icon="info" title={t('state.offline_empty')} /> : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
             {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} height={170} radius={22} />)}

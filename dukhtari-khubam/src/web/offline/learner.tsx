@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 
 import { emptyProgress, isCode, localDay, mergeProgress, newCode, ProgressData, withDay } from '@/lib/progress'
 
-import { decryptCode, encryptCode, isPassword, isUsername, normalizeUsername } from './account'
+import { encryptCode, isPassword, isUsername, normalizeUsername } from './account'
 import { clearPin } from './pin'
 import { clearRecovery } from './recovery'
 import { apiUrl } from './base'
@@ -40,19 +40,19 @@ interface LearnerApi {
   learner: Learner | null
   progress: ProgressData
   sync: SyncState
-  register: (name: string, age: number, account?: AccountLink) => Learner
+  /** a new profile; birthday as 'YYYY-MM-DD' */
+  register: (name: string, birthday: string, account?: AccountLink) => Learner
   /** marks her e-mail as confirmed and tied to the profile */
   confirmEmail: (email: string) => void
-  setAge: (age: number) => void
-  restore: (code: string, account?: AccountLink) => Promise<'ok' | 'not_found' | 'offline'>
+  setBirthday: (birthday: string) => void
+  /** takes over the profile an account (Google or e-mail) already keeps, as the server gave it */
+  adopt: (profile: { code: string; name: string; data?: unknown }, account?: AccountLink) => void
   /** backs the profile up now (it must exist on the server before a login or Google is tied to it) */
   backupNow: () => Promise<void>
   /** whether a login can be taken */
   checkUsername: (username: string) => Promise<'free' | 'taken' | 'invalid' | 'offline'>
   /** sets (or changes) the login and password of this phone's learner */
   setLogin: (username: string, password: string) => Promise<LoginResult>
-  /** signs in with login and password when the code is lost */
-  loginWithPassword: (username: string, password: string) => Promise<LoginResult>
   /** keeps a login chosen without a connection on the phone; it is saved on its own once online */
   queueLogin: (username: string, password: string) => void
   /** a login waits on the phone for the connection */
@@ -216,16 +216,16 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     learner,
     progress,
     sync,
-    register: (name, age, account) => {
+    register: (name, birthday, account) => {
       const l: Learner = { name: name.trim().slice(0, 80), code: newCode((n) => crypto.getRandomValues(new Uint8Array(n))), ...account }
       writeJson(LEARNER_KEY, l)
       setLearner(l)
       // the login is usually set right after; it must see the new learner before React re-renders
       latest.current = { ...latest.current, learner: l }
-      update((p) => ({ ...p, born: new Date().getFullYear() - age }))
+      update((p) => ({ ...p, birthday, born: Number(birthday.slice(0, 4)) }))
       return l
     },
-    setAge: (age) => update((p) => ({ ...p, born: new Date().getFullYear() - age })),
+    setBirthday: (birthday) => update((p) => ({ ...p, birthday, born: Number(birthday.slice(0, 4)) })),
     backupNow: pushNow,
     confirmEmail: (email) => {
       const cur = latest.current.learner
@@ -236,30 +236,17 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       setLearner(next)
       latest.current = { ...latest.current, learner: next }
     },
-    restore: async (raw, account) => {
-      const code = raw.replace(/\D/g, '')
-      if (!isCode(code)) return 'not_found'
-      if (navigator.onLine === false) return 'offline'
-      try {
-        const res = await fetch(apiUrl('/profile/restore'), {
-          method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code })
-        })
-        if (res.status === 404 || res.status === 422) return 'not_found'
-        if (!res.ok) return 'offline'
-        const body = (await res.json()) as { name: string; data: unknown }
-        const server = ProgressData.safeParse(body.data)
-        const l: Learner = { name: body.name, code, ...account }
-        writeJson(LEARNER_KEY, l)
-        setLearner(l)
-        setProgress((cur) => {
-          const merged = server.success ? mergeProgress(cur, server.data) : cur
-          writeJson(PROGRESS_KEY, merged)
-          return merged
-        })
-        return 'ok'
-      } catch {
-        return 'offline'
-      }
+    adopt: (profile, account) => {
+      const l: Learner = { name: profile.name, code: profile.code, ...account }
+      writeJson(LEARNER_KEY, l)
+      setLearner(l)
+      latest.current = { ...latest.current, learner: l }
+      const server = ProgressData.safeParse(profile.data)
+      setProgress((cur) => {
+        const merged = server.success ? mergeProgress(cur, server.data) : cur
+        writeJson(PROGRESS_KEY, merged)
+        return merged
+      })
     },
     checkUsername: async (raw) => {
       const u = normalizeUsername(raw)
@@ -291,35 +278,6 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
         setLearner(next)
         writeJson(PROBLEM_KEY, null)
         setLoginProblem(null)
-        return 'ok'
-      } catch {
-        return isOffline() ? 'offline' : 'error'
-      }
-    },
-    loginWithPassword: async (raw, password) => {
-      const username = normalizeUsername(raw)
-      if (!isUsername(username) || !password) return 'invalid'
-      if (isOffline()) return 'offline'
-      try {
-        const res = await fetch(apiUrl('/profile/login'), {
-          method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username, password })
-        })
-        if (res.status === 401) return 'invalid'
-        if (res.status === 429) return 'locked'
-        if (!res.ok) return 'error'
-        const body = (await res.json()) as { name: string; data: unknown; code_enc: string | null; code: string | null; must_change: boolean }
-        // a new code issued by staff comes as is; otherwise the password opens the stored one
-        const code = body.code ?? (body.code_enc ? await decryptCode(body.code_enc, password) : null)
-        if (!code || !isCode(code)) return 'error'
-        const l: Learner = { name: body.name, code, username, mustChange: body.must_change || !!body.code }
-        writeJson(LEARNER_KEY, l)
-        setLearner(l)
-        const server = ProgressData.safeParse(body.data)
-        setProgress((cur) => {
-          const merged = server.success ? mergeProgress(cur, server.data) : cur
-          writeJson(PROGRESS_KEY, merged)
-          return merged
-        })
         return 'ok'
       } catch {
         return isOffline() ? 'offline' : 'error'

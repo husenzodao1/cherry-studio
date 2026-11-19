@@ -6,6 +6,11 @@
 const ref = process.argv[2]
 const SITE = 'https://dukhtari-khubam.vercel.app'
 
+// each digit on its own small glass tile, in an elegant serif (mail clients keep only common fonts)
+const DIGIT = "width:42px;height:56px;background:#ffffff;background-image:linear-gradient(170deg,#ffffff 0%,#fff3ec 60%,#ffe2d6 100%);border:1px solid #ffcfc2;border-radius:14px;"
+  + "box-shadow:inset 0 1px 0 #ffffff,0 6px 14px -8px rgba(196,79,79,0.45);font-family:'Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;font-size:32px;font-weight:700;"
+  + "font-style:italic;color:#b2405f;text-align:center;vertical-align:middle;line-height:56px;"
+
 const letter = (lead) => `<!doctype html>
 <html lang="tg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">
@@ -18,11 +23,11 @@ const letter = (lead) => `<!doctype html>
     <tr><td align="center" style="padding:0 0 4px;">
       <img src="${SITE}/email/flower.png" width="220" alt="" style="display:block;width:220px;max-width:60%;height:auto;border:0;">
     </td></tr>
-    <tr><td align="center" style="padding:0 0 18px;font-family:'Pacifico','Brush Script MT',cursive;font-size:34px;line-height:1.5;color:#c44f4f;">Духтари хубам</td></tr>
+    <tr><td align="center" style="padding:0 0 18px;"><img src="${SITE}/email/brand.png" width="250" alt="Духтари хубам" style="display:block;width:250px;max-width:72%;height:auto;border:0;font-family:Georgia,serif;font-size:30px;font-style:italic;color:#c44f4f;"></td></tr>
     <tr><td style="background:#ffffff;background:rgba(255,255,255,0.88);border:1px solid #ffffff;border-radius:28px;padding:28px 24px 26px;box-shadow:0 14px 30px -16px rgba(170,80,60,0.36);font-family:'Geologica','Segoe UI',Roboto,Arial,sans-serif;color:#3f1f1a;">
       <p style="margin:0 0 6px;font-size:15px;line-height:1.5;color:#6e3b30;text-align:center;">${lead}</p>
-      <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:18px auto 16px;">
-        <tr><td style="background:#fff1ea;border:1px solid #ffd2c8;border-radius:20px;padding:16px 22px;font-family:'Geologica','Segoe UI',Roboto,Arial,sans-serif;font-size:38px;font-weight:600;letter-spacing:12px;color:#3f1f1a;text-align:center;">{{ .Token }}</td></tr>
+      <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:18px auto 16px;border-collapse:separate;border-spacing:6px 0;">
+        <tr>${[0, 1, 2, 3, 4, 5].map((i) => `<td style="${DIGIT}">{{ slice .Token ${i} ${i + 1} }}</td>`).join('')}</tr>
       </table>
       <p style="margin:0;font-size:13px;line-height:1.5;color:#a8766a;text-align:center;">Код 10 дақиқа амал мекунад.<br>Агар шумо ин корро накарда бошед, мактубро нодида гиред.</p>
     </td></tr>

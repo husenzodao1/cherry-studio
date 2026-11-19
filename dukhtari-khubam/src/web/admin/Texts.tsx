@@ -9,29 +9,33 @@ import { Field, LocaleTabs, NEXT_STATUS, Note, send, StatusBadge, titleOf, useAc
 
 /** Texts managed without a release: interface strings, Daily Inspiration and the “!” help texts. */
 export function Texts() {
-  const [tab, setTab] = useState<'inspiration' | 'ui' | 'help' | 'welcome'>('inspiration')
+  const [tab, setTab] = useState<'inspiration' | 'poem' | 'ui' | 'help' | 'welcome'>('inspiration')
   return (
     <div className="stack">
       <div className="segmented" role="tablist">
         <button type="button" role="tab" aria-selected={tab === 'inspiration'} onClick={() => setTab('inspiration')}>Илҳоми рӯз</button>
+        <button type="button" role="tab" aria-selected={tab === 'poem'} onClick={() => setTab('poem')}>Шеърҳо</button>
         <button type="button" role="tab" aria-selected={tab === 'ui'} onClick={() => setTab('ui')}>Матнҳои интерфейс</button>
         <button type="button" role="tab" aria-selected={tab === 'help'} onClick={() => setTab('help')}>Кӯмак «!»</button>
         <button type="button" role="tab" aria-selected={tab === 'welcome'} onClick={() => setTab('welcome')}>Саволнома</button>
       </div>
-      {tab === 'inspiration' ? <Inspirations /> : tab === 'ui' ? <UiStrings /> : tab === 'help' ? <HelpTexts /> : <Welcome />}
+      {tab === 'inspiration' ? <Inspirations key="i" /> : tab === 'poem' ? <Inspirations key="p" poem /> : tab === 'ui' ? <UiStrings /> : tab === 'help' ? <HelpTexts /> : <Welcome />}
     </div>
   )
 }
 
-function Inspirations() {
-  const list = useApi<{ items: Entity[] }>('/admin/inspirations?limit=100')
+/** Inspirations for the home screen, or (poem) poems for the "Гулбоғи эҷод" tile of the schools screen. */
+function Inspirations({ poem = false }: { poem?: boolean }) {
+  const all = useApi<{ items: Entity[] }>('/admin/inspirations?limit=100')
+  const placement = poem ? 'poem' : 'home'
+  const list = { ...all, data: all.data ? { items: all.data.items.filter((e) => ((e as { placement?: string }).placement === 'poem') === poem) } : all.data }
   const [body, setBody] = useState('')
   const [author, setAuthor] = useState('')
   const [source, setSource] = useState('')
   const act = useAction()
   const create = async () => {
     const tr = { body, author_name: author || null, source_title: source || null, ready: true }
-    if (await act.run(() => send('/admin/inspirations', 'POST', { placement: 'home', translations: { tg: tr } }), 'Илова шуд')) {
+    if (await act.run(() => send('/admin/inspirations', 'POST', { placement, translations: { tg: tr } }), 'Илова шуд')) {
       setBody(''); setAuthor(''); setSource('')
       list.reload()
     }
@@ -53,11 +57,11 @@ function Inspirations() {
         </div>
       ))}
       <div className="card card-pad stack" style={{ gap: 10 }}>
-        <div className="eyebrow">Илҳоми нав</div>
-        <textarea className="input" placeholder="Матн (ояти, ҳадис, ҳикмат, иқтибос…)" value={body} onChange={(e) => setBody(e.target.value)} />
+        <div className="eyebrow">{poem ? 'Шеъри нав' : 'Илҳоми нав'}</div>
+        <textarea className="input" rows={poem ? 6 : 3} placeholder={poem ? 'Мисраъҳо — ҳар мисраъ дар сатри алоҳида' : 'Матн (ояти, ҳадис, ҳикмат, иқтибос…)'} value={body} onChange={(e) => setBody(e.target.value)} />
         <div className="row" style={{ gap: 8 }}>
-          <input className="input" placeholder="Муаллиф" value={author} onChange={(e) => setAuthor(e.target.value)} />
-          <input className="input" placeholder="Манбаъ (ҳатмӣ агар муаллиф бошад)" value={source} onChange={(e) => setSource(e.target.value)} />
+          <input className="input" placeholder={poem ? 'Шоир' : 'Муаллиф'} value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <input className="input" placeholder={poem ? 'Номи шеър (ҳатмӣ агар шоир бошад)' : 'Манбаъ (ҳатмӣ агар муаллиф бошад)'} value={source} onChange={(e) => setSource(e.target.value)} />
         </div>
         <button type="button" className="btn" onClick={create} disabled={act.busy || !body.trim() || (!!author.trim() && !source.trim())}>Илова</button>
         <Note message={act.message} />
@@ -134,10 +138,10 @@ function UiStringRow({ k, loc, current, fallback, onSaved }: { k: string; loc: L
     <div className="row" style={{ gap: 8, alignItems: 'flex-end' }}>
       <Field label={k}>
         {fallback.includes('\n') || v.includes('\n') ? (
-          <textarea className="input" dir={loc === 'ar' ? 'rtl' : 'ltr'} value={v} maxLength={2000} rows={Math.min(8, v.split('\n').length + 1)}
+          <textarea className="input" value={v} maxLength={2000} rows={Math.min(8, v.split('\n').length + 1)}
             onChange={(e) => setV(e.target.value)} style={{ minHeight: 0 }} />
         ) : (
-          <input className="input" dir={loc === 'ar' ? 'rtl' : 'ltr'} value={v} maxLength={2000} onChange={(e) => setV(e.target.value)} />
+          <input className="input" value={v} maxLength={2000} onChange={(e) => setV(e.target.value)} />
         )}
       </Field>
       <button type="button" className="btn btn-soft" onClick={save} disabled={act.busy || !dirty || !v.trim()} style={{ minWidth: 90 }}>{act.message?.ok ? '✓' : 'Захира'}</button>
@@ -172,7 +176,7 @@ function HelpRow({ k, loc, enabled, icon, tr, onSaved }: { k: string; loc: Loc; 
     if (await act.run(() => send(`/admin/help-texts/${encodeURIComponent(k)}`, 'PUT', { enabled: on, icon, translations: { [loc]: { title: title || null, body, ready: true } } }))) onSaved()
   }
   return (
-    <div className="card card-pad stack" style={{ gap: 8 }} dir={loc === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="card card-pad stack" style={{ gap: 8 }}>
       <div className="row"><b style={{ flex: 1, fontWeight: 500 }}>{k}</b>
         <label className="row" style={{ gap: 6 }}><input type="checkbox" checked={on} onChange={(e) => setOn(e.target.checked)} /> фаъол</label></div>
       <input className="input" placeholder="Сарлавҳа" value={title} onChange={(e) => setTitle(e.target.value)} />

@@ -136,25 +136,6 @@ export async function drawCertificate(t: CertificateText): Promise<Blob> {
   return blob(c)
 }
 
-export interface CodeCardText { title: string; hint: string; brand: string; name: string; code: string }
-
-export async function drawCodeCard(t: CodeCardText): Promise<Blob> {
-  const [brand, ui] = await Promise.all([font('--font-pacifico', 'cursive', t.brand + t.name), font('--font-geologica', 'sans-serif', t.title + t.hint)])
-  const [flower, bubble, petals] = await Promise.all([image(ART.flower.src), image(ART.bubble.src), image(ART.petals.src)])
-  const { c, ctx } = await canvas()
-  ctx.drawImage(bubble, W - 230, 120, 200, 200)
-  ctx.drawImage(petals, 60, 1080, 320, 177)
-  frame(ctx)
-  ctx.drawImage(flower, W / 2 - 300, 110, 600, 386)
-  centred(ctx, t.brand, 590, 84, brand, '#6a3fc9', W - 300, 1)
-  centred(ctx, t.name, 680, 44, ui, '#4a3c74', W - 300, 1, '500')
-  glassPanel(ctx, 140, 740, W - 280, 260)
-  centred(ctx, t.title, 820, 36, ui, '#7a6d9e')
-  centred(ctx, formatCode(t.code), 920, 84, ui, '#2a1d4f', W - 340, 1, '700')
-  centred(ctx, t.hint, 1080, 32, ui, '#4a3c74', W - 300, 3)
-  return blob(c)
-}
-
 const toBase64 = (b: Blob) => new Promise<string>((resolve, reject) => {
   const r = new FileReader()
   r.onload = () => resolve(String(r.result).split(',')[1] ?? '')
@@ -184,32 +165,4 @@ export async function savePicture(b: Blob, fileName: string, title: string): Pro
   a.download = fileName
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 5000)
-}
-
-interface GalleryPlugin { savePng(o: { data: string; fileName: string }): Promise<{ uri: string }> }
-let gallery: GalleryPlugin | null = null
-
-/**
- * Saves a picture straight into the phone's gallery without asking (Android app: Pictures/Духтари хубам,
- * through the app's own GallerySaver plugin); in a browser it is downloaded. True when it was saved.
- */
-export async function savePictureToGallery(b: Blob, fileName: string): Promise<boolean> {
-  try {
-    if (Capacitor.isNativePlatform()) {
-      gallery ??= Capacitor.registerPlugin<GalleryPlugin>('GallerySaver')
-      await gallery.savePng({ data: await toBase64(b), fileName })
-      return true
-    }
-    const url = URL.createObjectURL(b)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = fileName
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 5000)
-    return true
-  } catch {
-    return false
-  }
 }

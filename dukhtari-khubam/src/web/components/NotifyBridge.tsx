@@ -34,6 +34,7 @@ export function NotifyBridge() {
   const last = lastId && !progress.lessons[lastId]?.done ? bundle?.lessons[lastId] : undefined
   const inspiration = bundle?.inspiration?.body ?? t('home.quote')
   const days = progress.days
+  const birthday = progress.birthday
   useEffect(() => {
     if (!canNotify() || !learner) return
     const timer = setTimeout(() => {
@@ -47,11 +48,12 @@ export function NotifyBridge() {
         streak: { titles: lines(t('notify.streak.titles')), bodies: lines(t('notify.streak.bodies')), leftLabel: t('notify.streak.left'), channel: t('notify.streak.channel') },
         morning: lines(t('notify.morning')),
         vars: { name: learner.name.split(/\s+/)[0] ?? '', lesson: last?.title ?? '', streak: streak(days) },
-        lastDay: [...days].sort().at(-1) ?? ''
+        lastDay: [...days].sort().at(-1) ?? '',
+        birthday: birthday ? { date: birthday, lines: lines(t('notify.birthday')) } : undefined
       }).catch(() => undefined)
     }, 1500)
     return () => clearTimeout(timer)
-  }, [learner, last, inspiration, days, t, prefsVersion])
+  }, [learner, last, inspiration, days, birthday, t, prefsVersion])
 
   return null
 }

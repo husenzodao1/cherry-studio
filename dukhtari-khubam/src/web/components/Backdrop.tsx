@@ -1,14 +1,15 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 
 import { ART, type Art } from '../art'
 
 /**
  * Fixed page backdrop: a lavender sky with rendered glass pieces resting at the screen edges — a crocus,
  * a water lily, a tulip, a leafy spray, a crystal cluster, loose petals and glass lenses. It never moves
- * with scrolling (sized to the large viewport) and stays still, so the glass above it is not redrawn
- * every frame; cards above it blur and bend it. Reading screens keep a
+ * with scrolling (sized to the large viewport); the pieces sway softly as if in a breeze, and stand
+ * still while the page scrolls so the glass above is not redrawn twice over. Reading screens keep a
  * calmer set so nothing sits behind running text.
  */
 type Piece = [Art, string]
@@ -29,6 +30,21 @@ const START: Piece[] = [[ART.bubble, 'bd-bubble'], [ART.leaves, 'bd-leaves'], [A
 
 export function Backdrop() {
   const path = usePathname() ?? '/'
+  // <html class="scrolling"> while the page moves: the swaying stops for that time
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const root = document.documentElement
+    const onScroll = () => {
+      if (!timer) root.classList.add('scrolling')
+      clearTimeout(timer)
+      timer = setTimeout(() => { root.classList.remove('scrolling'); timer = undefined }, 180)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      clearTimeout(timer)
+    }
+  }, [])
   // documents are plain paper: no glass pieces around them
   if (/^\/page(\/|$)/.test(path)) return <div className="backdrop backdrop-paper" aria-hidden="true" />
   const set = /^\/admin(\/|$)/.test(path) ? [] : /^\/(lesson|garden|support)(\/|$)/.test(path) ? CALM : /^\/(quiz|review)(\/|$)/.test(path) ? QUIZ

@@ -15,7 +15,8 @@ import { usePrefs } from '../prefs'
 import type { UiKey } from '../i18n'
 import { Icon } from './Icon'
 import { onBack } from './BackButton'
-import { OtpField } from './OtpField'
+import { Dots } from './Busy'
+import { OtpField, type OtpState } from './OtpField'
 import { buzz, PinPad } from './PinPad'
 
 const AWAY_MS = 60_000
@@ -76,6 +77,7 @@ function EmailCode({ email, onPassed, onCancel }: { email: string; onPassed: () 
   const [otp, setOtp] = useState('')
   const [note, setNote] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [state, setState] = useState<OtpState>('idle')
   const [resendAt, setResendAt] = useState(0)
   const [now, setNow] = useState(() => Date.now())
   const send = async () => {
@@ -90,7 +92,7 @@ function EmailCode({ email, onPassed, onCancel }: { email: string; onPassed: () 
     return () => clearInterval(timer)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (otp.length !== 6 || busy) return
+    if (otp.length !== 6 || busy || state !== 'idle') return
     ;(async () => {
       setBusy(true)
       const r = await verifyEmailCode(email, otp)
@@ -99,10 +101,12 @@ function EmailCode({ email, onPassed, onCancel }: { email: string; onPassed: () 
       if (typeof r === 'string') {
         setNote(t(r === 'wrong' ? 'email.wrong_code' : r === 'offline' ? 'start.need_online' : 'state.error'))
         buzz([24, 50, 24])
-        setOtp('')
+        setState('bad')
+        setTimeout(() => { setState('idle'); setOtp('') }, 650)
       } else {
         buzz(12)
-        onPassed()
+        setState('ok')
+        setTimeout(onPassed, 750)
       }
     })()
   }, [otp]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -110,7 +114,8 @@ function EmailCode({ email, onPassed, onCancel }: { email: string; onPassed: () 
   return (
     <div className="recovery">
       <span className="eyebrow">{t('email.code_title')}</span>
-      <OtpField value={otp} onChange={setOtp} label={t('email.code_title')} />
+      <OtpField value={otp} onChange={setOtp} state={state} label={t('email.code_title')} />
+      {busy ? <p className="muted" style={{ margin: 0 }} aria-hidden="true"><Dots /></p> : null}
       <p className="muted" style={{ margin: 0, fontSize: '0.82em' }}>{t('email.code_sent').replace('{email}', email)}</p>
       <p className="pin-hint" role="status">{note ?? ' '}</p>
       <div className="row" style={{ justifyContent: 'space-between', width: '100%' }}>
@@ -144,11 +149,9 @@ export function AppLock() {
 
   // before the first paint, so nothing behind the lock flashes
   useLayoutEffect(() => {
+    // without a PIN the opening screen (Splash.tsx) plays the entrance when it goes
     if (hasPin()) setLocked(true)
-    else {
-      document.documentElement.classList.remove('locked')
-      playIntro()
-    }
+    else document.documentElement.classList.remove('locked')
   }, [])
   useLayoutEffect(() => {
     document.documentElement.classList.toggle('locked', locked && !onSupport)

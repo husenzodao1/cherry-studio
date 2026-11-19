@@ -7,6 +7,7 @@ import { checkPin, clearPin, hasPin, setPin, waitLeft } from '../offline/pin'
 import { clearRecovery, hasRecovery, normalizeAnswer, RECOVERY_COUNT, RECOVERY_QUESTIONS, recoveryQuestions, setRecovery, type RecoveryQuestion } from '../offline/recovery'
 import { usePrefs } from '../prefs'
 import type { UiKey } from '../i18n'
+import { GoIcon } from './Busy'
 import { Icon } from './Icon'
 import { onBack } from './BackButton'
 import { PinPad } from './PinPad'
@@ -54,7 +55,7 @@ export function RecoverySetup({ onDone, onCancel }: { onDone: () => void; onCanc
               aria-label={t('recovery.answer')} onChange={(e) => change(i, { answer: e.target.value })} />
           </div>
         ))}
-        <button className="btn btn-block btn-lg" disabled={busy || !ok}>{t('start.save')} <Icon name="check" size={18} /></button>
+        <button className="btn btn-block btn-lg" disabled={busy || !ok} aria-busy={busy}>{t('start.save')} <GoIcon busy={busy} name="check" /></button>
         {onCancel ? <button type="button" className="link-btn" onClick={onCancel}>{t('pin.cancel')}</button> : null}
       </form>
     </div>,

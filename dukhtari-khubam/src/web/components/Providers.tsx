@@ -12,6 +12,7 @@ import { PrefsProvider, usePrefs } from '../prefs'
 import { AppLock } from './AppLock'
 import { AppUpdate } from './AppUpdate'
 import { BackButton } from './BackButton'
+import { Splash } from './Splash'
 import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
@@ -32,7 +33,7 @@ function Gate({ children }: { children: ReactNode }) {
   // and not for one who signed in with Google); or one signed in with a temporary password
   const online = typeof navigator === 'undefined' || navigator.onLine !== false
   const needsStart = ready && !OPEN.test(path)
-    && (!learner || progress.born === undefined || !!learner.mustChange || (online && (!!learner.emailPending || (!learner.username && !learner.google && !learner.email && !pendingLogin))))
+    && (!learner || progress.born === undefined || (online && (!!learner.emailPending || (!learner.username && !learner.google && !learner.email && !pendingLogin))))
   // after signing in, the welcome questions once (her answers shape the start; skipping counts too)
   const needsWelcome = ready && !needsStart && !!learner && !progress.about && !OPEN.test(path) && !/^\/welcome(\/|$)/.test(path)
   useEffect(() => {
@@ -119,6 +120,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <NotifyBridge />
               <SupportWatch />
               <AppLock />
+              <Splash />
               <OfflineNote />
               <BackButton />
               <ScreenFit />

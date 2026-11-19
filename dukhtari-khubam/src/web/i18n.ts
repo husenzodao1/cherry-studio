@@ -1,5 +1,13 @@
 /** Built-in UI texts (short, precise — spec Part II §4). The CMS (ui_strings) overrides any key. */
-export type Locale = 'tg' | 'ru' | 'ar'
+import { en } from './locales/en'
+import { fa, prs, tr, uz } from './locales/more'
+
+export type Locale = 'tg' | 'ru' | 'en' | 'uz' | 'tr' | 'fa' | 'prs'
+export const LOCALES: Locale[] = ['tg', 'ru', 'en', 'uz', 'tr', 'fa', 'prs']
+/** right-to-left scripts */
+export const isRtl = (l: Locale) => l === 'fa' || l === 'prs'
+/** Lessons exist in Tajik and Russian: every other interface language reads the Tajik ones. */
+export const contentLocale = (l: Locale): 'tg' | 'ru' => (l === 'ru' ? 'ru' : 'tg')
 
 const tg = {
   'app.name': 'Духтари хубам',
@@ -55,7 +63,7 @@ const tg = {
   'review.empty': 'Саволи такрорӣ нест', 'review.result': '{ok} аз {n} дуруст', 'review.keep': 'Ҷавобҳои нодуруст пагоҳ такрор мешаванд.',
   'review.how': 'Ҷавоби дуруст: такрор пас аз 1, 2, 4, 8 ё 16 рӯз. Нодуруст: пагоҳ.', 'review.boxes': 'Қуттиҳо',
   'cert.title': 'Шаҳодатнома', 'cert.awarded': 'Дода мешавад ба', 'cert.for': 'барои анҷом додани курси',
-  'cert.congrats': 'Курс анҷом ёфт', 'cert.section': 'Шаҳодатномаҳо', 'cert.saving': 'Тайёр мешавад…',
+  'cert.congrats': 'Курс анҷом ёфт', 'cert.section': 'Шаҳодатномаҳо', 'cert.saving': 'Тайёр мешавад',
   'code.card_title': 'Коди шахсии ман', 'code.card_hint': 'Коди тасдиқӣ барои воридшавӣ дар телефони дигар. Ба дигарон надиҳед.',
   'code.save_image': 'Сабт ҳамчун сурат',
   'download.course': 'Боргирии курс', 'download.files': '{n} файл', 'download.progress': 'Боргирӣ {done}/{total}',
@@ -85,7 +93,7 @@ const tg = {
   'recovery.q.dream': "Орзуи кӯдакии шумо?",
   'recovery.q.school': "Рақами мактаби аввалинатон?",
   'google.continue': "Ворид бо Google",
-  'google.wait': "Интизор шавед…",
+  'google.wait': "Интизор шавед",
   'google.or': "ё",
   'google.signed_in': "Бо Google ворид шудед",
   'google.finish': "Анҷоми бақайдгирӣ",
@@ -158,8 +166,18 @@ const tg = {
   'welcome.preparing': "Дарсҳои шуморо омода мекунем",
   'welcome.ready': "Тайёр!",
   'app.latest': "Шумо версияи охиринро доред ({v})",
-  'start.agree': "Бо пахши «Давом» ё «Ворид» шумо бо [Шартҳои истифода] ва [Сиёсати махфият] розӣ мешавед.",
-  'notify.morning': "Субҳ ба хайр, {name}! Субҳатон бо шодӣ оғоз ёбад 🌸\nСубҳ ба хайр! Имрӯз рӯзи нави дониш аст ✨\nСалом, {name}! Як дарси хурд — рӯзи зебо.\nСубҳ ба хайр! Дили шумо пур аз нур бод 💜\nРӯз ба хайр оғоз ёбад, {name}! Мо шуморо интизорем."
+  'start.agree': "Бо пахши «Давом» ё «Ворид бо Google» шумо бо [Шартҳои истифода] ва [Сиёсати махфият] розӣ мешавед.",
+  'notify.morning': "Субҳ ба хайр, {name}! Субҳатон бо шодӣ оғоз ёбад 🌸\nСубҳ ба хайр! Имрӯз рӯзи нави дониш аст ✨\nСалом, {name}! Як дарси хурд — рӯзи зебо.\nСубҳ ба хайр! Дили шумо пур аз нур бод 💜\nРӯз ба хайр оғоз ёбад, {name}! Мо шуморо интизорем.",
+  'start.birthday': "Санаи таваллуд",
+  'start.birthday_ph': "рр.мм.сссс",
+  'start.birthday_wrong': "Санаро дуруст нависед: рӯз.моҳ.сол",
+  'start.about_title': "Шинос шавем",
+  'start.about_hint': "Номатон ва рӯзи таваллудатонро нависед",
+  'notify.birthday': "Зодрӯзатон муборак, {name}! 🎂 Бигзор ин сол пур аз нур, дониш ва орзуҳои амалишуда бошад 💐\nЗодрӯз муборак, {name}! 🌸 Шумо бемисл ҳастед — бигзор ҳар рӯзи соли нав табассум орад ✨",
+  'settings.other_apps': "Барномаҳои дигар",
+  'settings.other_apps_soon': "Ба наздикӣ",
+  'poem.title': "Гулбоғи эҷод",
+  'splash.loading': "Бор мешавад"
 }
 
 export type UiKey = keyof typeof tg
@@ -202,7 +220,7 @@ const ru: Partial<Record<UiKey, string>> = {
   'review.empty': 'Вопросов для повторения нет', 'review.result': 'Верно {ok} из {n}', 'review.keep': 'Ошибочные ответы повторяются завтра.',
   'review.how': 'Верный ответ: повтор через 1, 2, 4, 8 или 16 дней. Неверный: завтра.', 'review.boxes': 'Коробки',
   'cert.title': 'Сертификат', 'cert.awarded': 'Выдан', 'cert.for': 'за прохождение курса',
-  'cert.congrats': 'Курс пройден', 'cert.section': 'Сертификаты', 'cert.saving': 'Готовим…',
+  'cert.congrats': 'Курс пройден', 'cert.section': 'Сертификаты', 'cert.saving': 'Готовим',
   'code.card_title': 'Мой личный код', 'code.card_hint': 'Код подтверждения для входа на другом телефоне. Не передавайте другим.',
   'code.save_image': 'Сохранить как изображение',
   'download.course': 'Скачать курс', 'download.files': 'Файлов: {n}', 'download.progress': 'Загрузка {done}/{total}',
@@ -232,7 +250,7 @@ const ru: Partial<Record<UiKey, string>> = {
   'recovery.q.dream': "Ваша детская мечта?",
   'recovery.q.school': "Номер вашей первой школы?",
   'google.continue': "Войти через Google",
-  'google.wait': "Подождите…",
+  'google.wait': "Подождите",
   'google.or': "или",
   'google.signed_in': "Вход через Google выполнен",
   'google.finish': "Завершить регистрацию",
@@ -305,55 +323,19 @@ const ru: Partial<Record<UiKey, string>> = {
   'welcome.preparing': "Готовим ваши уроки",
   'welcome.ready': "Готово!",
   'app.latest': "У вас последняя версия ({v})",
-  'start.agree': "Нажимая «Далее» или «Войти», вы соглашаетесь с [Условиями использования] и [Политикой конфиденциальности].",
-  'notify.morning': "Доброе утро, {name}! Пусть утро начнётся с радости 🌸\nДоброе утро! Сегодня новый день знаний ✨\nПривет, {name}! Один короткий урок — и день прекрасен."
+  'start.agree': "Нажимая «Далее» или «Войти через Google», вы соглашаетесь с [Условиями использования] и [Политикой конфиденциальности].",
+  'notify.morning': "Доброе утро, {name}! Пусть утро начнётся с радости 🌸\nДоброе утро! Сегодня новый день знаний ✨\nПривет, {name}! Один короткий урок — и день прекрасен.",
+  'start.birthday': "Дата рождения",
+  'start.birthday_ph': "дд.мм.гггг",
+  'start.birthday_wrong': "Введите дату верно: день.месяц.год",
+  'start.about_title': "Давайте познакомимся",
+  'start.about_hint': "Напишите ваше имя и дату рождения",
+  'notify.birthday': "С днём рождения, {name}! 🎂 Пусть этот год будет полон света, знаний и сбывшихся желаний 💐\nС днём рождения, {name}! 🌸 Вы особенная — пусть каждый день нового года дарит улыбку ✨",
+  'settings.other_apps': "Другие приложения",
+  'settings.other_apps_soon': "Скоро",
+  'poem.title': "Сад творчества",
+  'splash.loading': "Загрузка"
 }
 
-const ar: Partial<Record<UiKey, string>> = {
-  'nav.home': 'الرئيسية', 'nav.schools': 'المدارس', 'nav.saved': 'المحفوظات', 'nav.profile': 'الملف الشخصي',
-  'home.greeting': 'مرحبًا', 'home.continue_learning': 'متابعة التعلّم', 'home.all_schools': 'كل المدارس',
-  'app.update': 'إصدار جديد متاح', 'app.update_action': 'تحديث',
-  'start.welcome': 'أهلًا بكِ', 'start.subtitle': 'الجمال في المعرفة', 'start.age': 'عمركِ',
-  'start.register': 'تسجيل', 'start.login': 'دخول', 'start.name': 'اسمكِ', 'start.create': 'متابعة',
-  'start.your_code': 'رمزكِ الشخصي', 'start.keep_code': 'رمز التحقق للدخول من هاتف آخر.',
-  'start.copy': 'نسخ', 'start.saved_it': 'حفظتُ الرمز',
-  'start.enter_code': 'رمز من 15 رقمًا', 'start.restore': 'دخول', 'start.not_found': 'الرمز غير موجود',
-  'start.need_online': 'يلزم الإنترنت للدخول',
-  'pin.title': 'قفل التطبيق', 'pin.change': 'تغيير الرمز', 'pin.enter': 'أدخلي الرمز', 'pin.current': 'الرمز الحالي', 'pin.new': 'رمز جديد', 'pin.repeat': 'أعيدي الرمز', 'pin.wrong': 'رمز غير صحيح', 'pin.mismatch': 'الرمزان غير متطابقين', 'pin.wait': 'بعد {n} ثانية', 'pin.forgot': 'نسيتِ الرمز؟', 'pin.cancel': 'إلغاء', 'pin.delete': 'حذف', 'pin.reinstall': 'أعيدي تثبيت التطبيق وادخلي بالرمز', 'pin.hint': 'يُطلب عند فتح التطبيق', 'profile.code': 'رمز الدخول', 'profile.photo': 'صورة الملف الشخصي', 'profile.photo_remove': 'حذف الصورة', 'profile.show_code': 'إظهار', 'profile.hide_code': 'إخفاء',
-  'profile.signout_confirm': 'الخروج؟ دون الرمز لا يُستعاد التقدّم.', 'profile.signout': 'خروج',
-  'state.offline_empty': 'لم يُحمّل المحتوى. اتصلي بالإنترنت.',
-  'action.continue': 'متابعة', 'action.back': 'رجوع', 'action.next': 'التالي', 'action.prev': 'السابق', 'action.search': 'بحث',
-  'settings.title': 'الإعدادات', 'settings.language': 'اللغة', 'settings.theme': 'المظهر', 'settings.notifications': 'الإشعارات',
-  'settings.text_size': 'حجم النص', 'settings.privacy': 'الخصوصية',
-  'theme.light': 'أبيض', 'theme.sakura': 'ساكورا', 'theme.peach': 'خوخي', 'theme.mint': 'نعناع', 'theme.dusk': 'غسق', 'theme.dark': 'داكن', 'state.error': 'حدث خطأ',
-  'greet.morning': 'صباح الخير', 'greet.day': 'نهارك سعيد', 'greet.evening': 'مساء الخير', 'greet.night': 'تصبحين على خير',
-  'home.motto': 'الجمال في المعرفة.', 'home.continue_course': 'متابعة الدورة', 'home.start_learning': 'ابدئي التعلّم',
-  'home.choose_school': 'اختيار مدرسة', 'home.all': 'الكل', 'home.quote': 'العلم نورٌ يضيء الطريق.', 'home.words': 'كلمات اليوم', 'school.courses_n': '{n} دورات', 'course.modules_n': '{n} وحدات', 'course.lessons_n': '{n} دروس',
-  'lesson.next_page': 'الصفحة التالية', 'lesson.prev_page': 'السابقة',
-  'profile.streak': 'أيام متتالية', 'profile.achievements': 'إنجازات', 'profile.night': 'الوضع الليلي',
-  'profile.my_saved': 'محفوظاتي', 'profile.my_progress': 'التقدّم',
-  'settings.code_hint': 'رمز التحقق للدخول من هاتف آخر.', 'settings.unlock_title': 'تأكيد الهوية', 'settings.unlock_reason': 'افتحي قفل الهاتف لرؤية الرمز', 'settings.unlock_password': 'أدخلي كلمة مرور اسم المستخدم',
-  'settings.version': 'الإصدار', 'notify.daily': 'تذكير بالدرس وإلهام اليوم', 'notify.time': 'الوقت',
-  'notify.lesson_title': 'وقت الدرس', 'notify.lesson_body': 'الدرس التالي', 'notify.lesson_named': 'الدرس التالي: {title}',
-  'notify.inspiration_title': 'إلهام اليوم', 'notify.denied': 'الإشعارات ممنوعة في إعدادات الهاتف.',
-  'video.play': 'مشاهدة', 'video.pause': 'إيقاف مؤقت', 'video.offline': 'الفيديو يتطلب الإنترنت', 'video.mute': 'الصوت',
-  'search.placeholder': 'بحث…',
-  'garden.title': 'الروضة', 'garden.flowers': '{n} زهرة', 'garden.courses': '{n} دورات',
-  'garden.empty': 'لا توجد زهور',
-  'garden.hint': 'درس واحد — زهرة، دورة — زهرة كبيرة',
-  'review.title': 'مراجعة اليوم', 'review.count': '{n} أسئلة', 'review.done_today': 'اكتملت مراجعة اليوم',
-  'review.empty': 'لا أسئلة للمراجعة', 'review.result': '{ok} من {n} صحيحة', 'review.keep': 'الإجابات الخاطئة تُراجع غدًا.',
-  'review.how': 'الإجابة الصحيحة: مراجعة بعد 1 أو 2 أو 4 أو 8 أو 16 يومًا. الخاطئة: غدًا.', 'review.boxes': 'الصناديق',
-  'cert.title': 'شهادة', 'cert.awarded': 'تُمنح إلى', 'cert.for': 'لإتمام دورة',
-  'cert.congrats': 'اكتملت الدورة', 'cert.section': 'الشهادات', 'cert.saving': 'جارٍ التحضير…',
-  'code.card_title': 'رمزي الشخصي', 'code.card_hint': 'رمز التحقق للدخول من هاتف آخر. لا تعطيه لأحد.',
-  'code.save_image': 'حفظ كصورة',
-  'download.course': 'تنزيل الدورة', 'download.files': '{n} ملفات', 'download.progress': 'تنزيل {done}/{total}',
-  'download.ready': 'تم تنزيل الدورة', 'download.offline': 'يلزم الإنترنت',
-  'download.mobile': 'بيانات الجوال: سيُستهلك الرصيد. متابعة؟',
-  'start.username': 'اسم المستخدم', 'start.password': 'كلمة المرور', 'start.new_password': 'كلمة مرور جديدة', 'start.username_hint': 'حروف لاتينية وأرقام و _ و . (3–32)', 'start.password_hint': '6 أحرف على الأقل', 'start.show_password': 'إظهار كلمة المرور', 'start.by_code': 'الدخول بالرمز', 'start.forgot_code': 'نسيتِ الرمز؟ الدخول باسم المستخدم', 'start.forgot_all': 'نسيتِ اسم المستخدم أيضًا؟ راسلي الدعم', 'start.invalid_login': 'اسم المستخدم أو كلمة المرور غير صحيحة', 'start.locked': 'الحساب مقفل 15 دقيقة', 'start.taken': 'اسم المستخدم محجوز', 'start.account_title': 'اسم المستخدم وكلمة المرور', 'start.account_hint': 'للدخول دون رمز', 'start.new_code': 'رمزكِ الجديد', 'start.save': 'حفظ', 'start.later_offline': 'يُحفظ اسم المستخدم وكلمة المرور عند الاتصال', 'support.title': 'الدعم', 'support.hint': 'اكتبي المشكلة. يصل الرد هنا.', 'support.placeholder': 'رسالة…', 'support.send': 'إرسال', 'support.staff': 'الدعم', 'support.name': 'الاسم', 'support.username': 'اسم المستخدم', 'support.offline': 'يلزم الإنترنت', 'support.new_reply': 'رد جديد من الدعم', 'support.closed': 'أُغلق الطلب',
-  'home.seven_schools': '7 مرايا للفتاة'
-}
-
-export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, ar }
-export const LOCALE_LABELS: Record<Locale, string> = { tg: 'Тоҷикӣ', ru: 'Русский', ar: 'العربية' }
+export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, en, uz, tr, fa, prs }
+export const LOCALE_LABELS: Record<Locale, string> = { tg: 'Тоҷикӣ', ru: 'Русский', en: 'English', uz: 'Oʻzbekcha', tr: 'Türkçe', fa: 'فارسی', prs: 'دری' }

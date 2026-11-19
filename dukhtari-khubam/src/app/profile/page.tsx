@@ -96,7 +96,15 @@ export default function Profile() {
         <Link href="/settings" className="icon-btn" aria-label={t('settings.title')}><Icon name="settings" /></Link>
       </header>
       <div className="profile-head">
-        <ProfilePhoto name={learner.name} />
+        {/* the studio's signature: large and faint in the background, and arched over the photo */}
+        <span className="studio-ghost" aria-hidden="true">Gratorslab</span>
+        <span className="studio-wrap">
+          <svg className="studio-arc" viewBox="0 0 200 120" aria-hidden="true" focusable="false">
+            <path id="studio-arc" d="M30 90 A70 70 0 0 1 170 90" fill="none" />
+            <text textAnchor="middle"><textPath href="#studio-arc" startOffset="50%">Gratorslab</textPath></text>
+          </svg>
+          <ProfilePhoto name={learner.name} />
+        </span>
         <h1 className="h-page" style={{ marginTop: 10 }}>{learner.name}</h1>
         <span className="tag">{t('profile.tagline')}</span>
       </div>
