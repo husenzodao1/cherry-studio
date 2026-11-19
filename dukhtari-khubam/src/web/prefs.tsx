@@ -4,9 +4,14 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { DEFAULT_STRINGS, type Locale, type UiKey } from './i18n'
 
+/** White (the default), dark, and four colour themes; "dusk" is a dark one. */
+export const THEMES = ['light', 'dark', 'sakura', 'peach', 'mint', 'dusk'] as const
+export type Theme = (typeof THEMES)[number]
+export const isDarkTheme = (t: Theme) => t === 'dark' || t === 'dusk'
+
 export interface Prefs {
   locale: Locale
-  theme: 'light' | 'dark' | 'system'
+  theme: Theme
   textScale: number
 }
 
@@ -18,14 +23,22 @@ interface PrefsApi extends Prefs {
   setCms: (cms: { strings?: Record<string, string>; help?: PrefsApi['help'] }) => void
 }
 
-const DEFAULTS: Prefs = { locale: 'tg', theme: 'system', textScale: 1 }
+// the smallest text size is the standard one
+const DEFAULTS: Prefs = { locale: 'tg', theme: 'light', textScale: 0.9 }
 const KEY = 'dk.prefs'
 const PrefsContext = createContext<PrefsApi | null>(null)
 
 function read(): Prefs {
   try {
-    const { locale, theme, textScale } = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') }
-    return { locale, theme, textScale }
+    const stored = JSON.parse(localStorage.getItem(KEY) ?? '{}')
+    const { locale, theme, textScale } = { ...DEFAULTS, ...stored }
+    return {
+      locale,
+      // "system" is gone: white unless a theme was chosen
+      theme: (THEMES as readonly string[]).includes(theme) ? theme : 'light',
+      // settings saved before version 2 carried the old default size (1): move it to the new default
+      textScale: stored.v === 2 ? textScale : textScale === 1 ? DEFAULTS.textScale : textScale
+    }
   } catch {
     return DEFAULTS
   }
@@ -34,25 +47,22 @@ function read(): Prefs {
 /** Theme, language and text size; applied to <html> and stored on this device. Animations always play in full. */
 export function PrefsProvider({ children }: { children: ReactNode }) {
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS)
-  const [systemDark, setSystemDark] = useState(false)
   const [cms, setCms] = useState<{ strings: Record<string, string>; help: PrefsApi['help'] }>({ strings: {}, help: {} })
 
   useEffect(() => {
     setPrefs(read())
-    const dark = matchMedia('(prefers-color-scheme: dark)')
-    setSystemDark(dark.matches)
-    const onDark = (e: MediaQueryListEvent) => setSystemDark(e.matches)
-    dark.addEventListener('change', onDark)
-    return () => dark.removeEventListener('change', onDark)
   }, [])
 
   useEffect(() => {
     const root = document.documentElement
-    root.dataset.theme = prefs.theme === 'system' ? (systemDark ? 'dark' : 'light') : prefs.theme
+    // data-theme is the light or dark base; data-palette recolours it
+    root.dataset.theme = isDarkTheme(prefs.theme) ? 'dark' : 'light'
+    if (prefs.theme === 'light' || prefs.theme === 'dark') delete root.dataset.palette
+    else root.dataset.palette = prefs.theme
     root.lang = prefs.locale
     root.dir = prefs.locale === 'ar' ? 'rtl' : 'ltr'
     root.style.setProperty('--text-scale', String(prefs.textScale))
-  }, [prefs, systemDark])
+  }, [prefs])
 
   const applyCms = useCallback((c: { strings?: Record<string, string>; help?: PrefsApi['help'] }) => {
     setCms({ strings: c.strings ?? {}, help: c.help ?? {} })
@@ -62,7 +72,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     setPrefs((p) => {
       const next = { ...p, ...patch }
       try {
-        localStorage.setItem(KEY, JSON.stringify(next))
+        localStorage.setItem(KEY, JSON.stringify({ ...next, v: 2 }))
       } catch {
         /* storage unavailable: keep in memory */
       }

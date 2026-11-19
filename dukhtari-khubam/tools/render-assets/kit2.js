@@ -504,6 +504,31 @@ export function growth3() {
   return g
 }
 
+/** Background for the "words of the day" card: a wide band of small pastel shapes, glass and flowers at the
+ *  two ends, the middle left calm for the text. */
+export function words3() {
+  const g = new THREE.Group()
+  const pastel = (c, o = {}) => glossy(c, { roughness: 0.16, cc: 0.03, sheen: 0.6, sheenColor: '#ffffff', irid: o.irid ?? 0.25 })
+  const clear = glass2({ attenuation: '#e2d4ff', attDist: 3, thickness: 0.5, irid: 0.8, dispersion: 0.6 })
+  // left end
+  g.add(mesh(new THREE.SphereGeometry(0.46, 64, 48), clear, [-2.09, 0.19, 0]))
+  g.add(mesh(new THREE.TorusGeometry(0.27, 0.095, 32, 96), pastel('#f6b3d6'), [-1.53, -0.62, 0.35], [0.82, 0.46, 0.4]))
+  g.add(mesh(new RoundedBoxGeometry(0.42, 0.42, 0.42, 5, 0.09), pastel('#c9b4fb'), [-2.5, -0.65, 0.3], [0.41, 1.08, 0.2]))
+  const c1 = crocus2({ palette: ['#e48fc6', '#fbe0f1', '#ffffff'], attenuation: '#f2b5dc' }); c1.scale.setScalar(0.42); c1.position.set(-1.31, 0.34, -0.3); c1.rotation.set(0.5, 0, -0.35); g.add(c1)
+  g.add(mesh(new THREE.SphereGeometry(0.09, 32, 24), pastel('#fff3fb', { irid: 0.9 }), [-1.72, 0.93, 0.3]))
+  // right end
+  g.add(mesh(new THREE.ConeGeometry(0.34, 0.62, 48), pastel('#ffd3bf'), [1.68, -0.46, 0.2], [0.2, 0.0, -0.35]))
+  g.add(mesh(new THREE.TorusGeometry(0.36, 0.06, 24, 96), clear, [2.25, 0.28, -0.1], [0.25, -0.93, 0]))
+  g.add(mesh(new THREE.SphereGeometry(0.24, 48, 32), pastel('#bfeee2'), [2.13, -0.78, 0.45]))
+  const c2 = crocus2({ palette: ['#9d6be6', '#e7dafc', '#ffffff'] }); c2.scale.setScalar(0.36); c2.position.set(2.54, -0.08, 0.1); c2.rotation.set(0.4, 0, 0.45); g.add(c2)
+  g.add(mesh(new THREE.OctahedronGeometry(0.1), gold(), [1.35, 0.7, 0.2], [0.25, 0.93, 0]))
+  // a few small pearls drifting towards the middle
+  for (const [x, y, z, r] of [[-0.94, 0.85, 0.1, 0.06], [0.98, -0.85, 0.1, 0.05], [0.74, 0.96, -0.2, 0.04], [-0.78, -0.93, 0.2, 0.045]]) {
+    g.add(mesh(new THREE.SphereGeometry(r, 24, 18), pastel('#fbf3ff', { irid: 0.9 }), [x, y, z]))
+  }
+  return g
+}
+
 export function buildKind2(job) {
   const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
   switch (job.kind) {
@@ -523,6 +548,7 @@ export function buildKind2(job) {
     case 'family3': return family3()
     case 'health3': return health3()
     case 'growth3': return growth3()
+    case 'words3': return words3()
     default: return null
   }
 }

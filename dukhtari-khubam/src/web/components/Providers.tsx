@@ -9,6 +9,7 @@ import { ageOf } from '@/lib/progress'
 import { AgeFilter, ContentProvider, useContent } from '../offline/content'
 import { LearnerProvider, useLearner } from '../offline/learner'
 import { PrefsProvider, usePrefs } from '../prefs'
+import { AppLock } from './AppLock'
 import { AppUpdate } from './AppUpdate'
 import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
@@ -88,6 +89,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <AppUpdate />
               <NotifyBridge />
               <SupportWatch />
+              <AppLock />
             </ForAge>
           </LearnerProvider>
         </ContentProvider>

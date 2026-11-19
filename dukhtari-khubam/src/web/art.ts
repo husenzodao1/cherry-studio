@@ -13,11 +13,6 @@ export const SCHOOL_ART: Record<string, Art> = {
   'zindagii-muosir': a('school-modern', 360, 274)
 }
 
-/** Large scenes shown at the top of a school page (others show their icon on glass). */
-export const SCHOOL_HERO: Record<string, Art> = {
-  'marifati-dini': a('hero-religion', 720, 832)
-}
-
 export const ART = {
   flower: a('glass-flower', 760, 489),
   flowerSide: a('glass-flower-side', 560, 300),

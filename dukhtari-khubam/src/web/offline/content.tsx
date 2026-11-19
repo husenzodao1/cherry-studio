@@ -71,6 +71,8 @@ export interface Bundle {
   pages: Record<string, { slug: string; title: string; body: Block[] | unknown[] }>
   ui: { strings?: Record<string, string>; help?: Record<string, { title?: string | null; body: string; icon: string }> }
   inspiration: { body: string; author_name?: string | null; source_title?: string | null } | null
+  /** the newest inspirations, for the words of the day on the home screen (older bundles lack it) */
+  inspirations?: { id: string; body: string; author_name?: string | null; source_title?: string | null }[]
   achievements: Achievement[]
 }
 

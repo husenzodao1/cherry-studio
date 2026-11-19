@@ -36,3 +36,12 @@ export function SchoolGrid({ schools, cols, count = false }: { schools: SchoolSu
     </div>
   )
 }
+
+/** All schools in one row that the finger moves sideways; a fling carries it as far as the swipe was fast. */
+export function SchoolRow({ schools }: { schools: SchoolSummary[] }) {
+  return (
+    <div className="school-row" role="list">
+      {schools.map((s) => <div key={s.id} role="listitem" className="school-row-item"><SchoolTile school={s} /></div>)}
+    </div>
+  )
+}

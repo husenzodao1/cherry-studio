@@ -169,6 +169,16 @@ Revision History; every staff change is in the audit log.
 - The code and login in Settings are shown only after the phone's own lock (fingerprint, face or screen
   PIN; `@capgo/capacitor-native-biometric`); on the website, or a phone without a lock, after the login
   password is checked online (`src/web/offline/unlock.ts`).
+- Home stands still (no vertical scrolling): "Суханҳои рӯз" — the newest inspirations from the panel
+  (`api_inspirations`), one at a time on a soft gradient over a band of small 3D shapes
+  (`words-band.webp`), handwritten (Caveat), sliding away every few seconds — and all schools in one
+  row moved sideways by the finger (momentum, snapping to tiles).
+- School page: the school's icon inside a ring that fills with progress, the numbers and "Идома".
+- Themes: white (default), dark, Сакура, Шафтолу, Наъно, Шафақ (`data-palette` on top of the light or
+  dark base; the glass flowers take the theme's hue). The smallest text size is the default.
+- App PIN (`src/web/offline/pin.ts`, `AppLock.tsx`, `PinSettings.tsx`): four digits asked when the app
+  opens and after a minute away; on/off and change in Settings; a salted hash only, 30 s wait after five
+  wrong tries; "forgot" asks the phone's lock or the login password and removes the PIN.
 - Speed: the backdrop stays still and only the tab bar bends the content behind it (school tiles use
   frosted glass), so scrolling does not redraw refracting glass on every frame.
 - Android app: daily local notifications (lesson reminder, inspiration of the day) at times chosen in

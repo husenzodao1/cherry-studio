@@ -11,7 +11,7 @@ import { LOCALE_LABELS } from '@/web/i18n'
 import { useContent } from '@/web/offline/content'
 import { courseProgress, useLearner } from '@/web/offline/learner'
 import { clearPhoto, savePhoto, usePhoto } from '@/web/offline/photo'
-import { usePrefs } from '@/web/prefs'
+import { isDarkTheme, usePrefs } from '@/web/prefs'
 
 /** Small filled glyphs for the three numbers, drawn white on a coloured orb. */
 function StatGlyph({ kind }: { kind: 'courses' | 'achievements' | 'streak' }) {
@@ -86,7 +86,7 @@ export default function Profile() {
     if (!ids.length || !ids.every((id) => progress.lessons[id]?.done)) return []
     return [{ id: c.id, title: c.title, school: c.school?.title ?? '', date: ids.map((id) => progress.lessons[id].done!).sort().at(-1)! }]
   }).sort((a, b) => b.date.localeCompare(a.date))
-  const dark = prefs.theme === 'dark' || (prefs.theme === 'system' && typeof window !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches)
+  const dark = isDarkTheme(prefs.theme)
 
   const stats: ['courses' | 'achievements' | 'streak', number, string][] = [
     ['courses', coursesStarted, t('profile.courses')],

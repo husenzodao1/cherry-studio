@@ -6,8 +6,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { ART } from '@/web/art'
 import { Avatar } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
-import { SchoolGrid } from '@/web/components/SchoolTile'
+import { SchoolRow } from '@/web/components/SchoolTile'
 import { Empty, Skeleton } from '@/web/components/States'
+import { WordsOfDay } from '@/web/components/WordsOfDay'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
 import { reviewStats } from '@/web/offline/review'
@@ -29,6 +30,11 @@ export default function Home() {
     const timer = setInterval(() => setHour(new Date().getHours()), 60_000)
     return () => clearInterval(timer)
   }, [])
+  // the home screen stands still: only the row of schools moves, sideways
+  useEffect(() => {
+    document.documentElement.classList.add('still')
+    return () => document.documentElement.classList.remove('still')
+  }, [])
 
   const name = learner?.name
   const review = useMemo(() => (bundle ? reviewStats(bundle, progress) : { total: 0, today: 0 }), [bundle, progress])
@@ -36,7 +42,7 @@ export default function Home() {
   const cont = lastLesson && !progress.lessons[lastLesson.id]?.done ? lastLesson : null
 
   return (
-    <>
+    <div className="home">
       <header className="home-top">
         <Link href="/profile" aria-label={t('nav.profile')}><Avatar name={name} /></Link>
         <span style={{ flex: 1 }} />
@@ -83,18 +89,19 @@ export default function Home() {
         </Link>
       ) : null}
 
-      <section className="section">
+      <WordsOfDay />
+
+      <section className="home-schools">
         <div className="section-head">
           <h2 className="h-section">{t('home.seven_schools')}</h2>
           <Link href="/schools">{t('home.all')} <Icon name="arrow" size={14} /></Link>
         </div>
         {bundle ? (
-          <SchoolGrid schools={bundle.schools} cols={3} />
+          <SchoolRow schools={bundle.schools} />
         ) : offlineEmpty ? <Empty icon="info" title={t('state.offline_empty')} /> : loading ? (
-          <div className="tile-grid tile-grid-3">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} height={104} radius={22} />)}</div>
+          <div className="school-row">{Array.from({ length: 3 }, (_, i) => <div key={i} className="school-row-item"><Skeleton height={112} radius={22} /></div>)}</div>
         ) : null}
       </section>
-
-    </>
+    </div>
   )
 }

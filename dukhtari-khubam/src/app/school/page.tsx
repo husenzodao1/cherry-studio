@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { Suspense, useState } from 'react'
+import { Suspense, useState, type CSSProperties } from 'react'
 
-import { ART, SCHOOL_ART, SCHOOL_HERO } from '@/web/art'
+import { SCHOOL_ART } from '@/web/art'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { Empty, Loading } from '@/web/components/States'
@@ -28,7 +28,6 @@ function School() {
   const courses = s.courses.map((c) => ({ ...c, progress: courseProgress(bundle, progress, c.id) }))
   const totals = courses.reduce((acc, c) => ({ completed: acc.completed + c.progress.completed, total: acc.total + c.progress.total }), { completed: 0, total: 0 })
   const pct = totals.total ? Math.round((totals.completed * 100) / totals.total) : 0
-  const hero = SCHOOL_HERO[s.slug]
   const icon = s.icon?.url ? { src: s.icon.url } : SCHOOL_ART[s.slug]
   // where "continue" leads: the first unfinished lesson of the first unfinished course
   const next = courses.flatMap((c) => courseLessonIds(bundle, c.id)).find((id) => !progress.lessons[id]?.done)
@@ -36,26 +35,34 @@ function School() {
   return (
     <>
       <Header back="/schools" title={s.title} />
-      <div className="hero-art" aria-hidden="true">
-        {hero ? <img className="scene bloom-in" src={hero.src} alt="" decoding="async" /> : (
-          <div className="hero-plinth glass bloom-in">
-            {icon ? <img src={icon.src} alt="" decoding="async" /> : null}
-            <img className="orbit float" src={ART.bubble.src} alt="" decoding="async" />
-          </div>
-        )}
-      </div>
-
-      <div className="glass progress-card">
-        <div style={{ flex: 1 }}>
-          <b style={{ display: 'block', fontWeight: 500, marginBottom: 8 }}>{t('section.progress')}</b>
-          <div className="progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={t('section.progress')}>
-            <span style={{ width: `${pct}%` }} />
-          </div>
+      {/* the school at a glance: its icon inside a ring that fills with progress, the numbers, the way on */}
+      <section className="school-hero" style={s.theme_color ? ({ '--school': s.theme_color } as CSSProperties) : undefined}>
+        <div className="school-ring bloom-in" role="img" aria-label={`${t('section.progress')}: ${pct}%`}>
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+              <linearGradient id="school-ring" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" style={{ stopColor: 'var(--primary-soft)' }} />
+                <stop offset="100%" style={{ stopColor: 'var(--primary)' }} />
+              </linearGradient>
+            </defs>
+            <circle className="ring-track" cx="100" cy="100" r="93" />
+            <circle className="ring-fill" cx="100" cy="100" r="93" pathLength={100} strokeDasharray={`${pct} 100`} />
+          </svg>
+          <span className="school-ring-glow" aria-hidden="true" />
+          {icon ? <img src={icon.src} alt="" decoding="async" /> : null}
+          <span className="school-ring-pct">{pct}%</span>
         </div>
-        <span className="pct-circle glass">{pct}%</span>
-      </div>
+        <p className="school-hero-meta">
+          {t('school.courses_n').replace('{n}', String(courses.length))} · {t('course.lessons_n').replace('{n}', `${totals.completed}/${totals.total}`)}
+        </p>
+        {next ? (
+          <Link href={`/lesson?id=${next}`} className="btn school-hero-go">
+            <Icon name="play" size={16} fill="currentColor" /> {pct ? t('action.continue') : t('home.start_learning')}
+          </Link>
+        ) : null}
+      </section>
 
-      <div className="tabs" role="tablist" style={{ marginTop: 16 }}>
+      <div className="tabs" role="tablist" style={{ marginTop: 18 }}>
         {(['courses', 'about', 'results'] as const).map((k) => (
           <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
             {t(k === 'courses' ? 'section.courses' : k === 'about' ? 'section.about' : 'section.results')}
@@ -90,10 +97,6 @@ function School() {
           )
         )}
       </div>
-
-      {next ? (
-        <Link href={`/lesson?id=${next}`} className="btn btn-block btn-lg" style={{ marginTop: 20 }}>{t('action.continue')} <Icon name="arrow" size={18} /></Link>
-      ) : null}
 
     </>
   )

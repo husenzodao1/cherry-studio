@@ -143,8 +143,8 @@ export function LiquidGlass({ radius, bezel = 16, className, style, children, as
         borderRadius: radius,
         // Chromium aliases -webkit-backdrop-filter to backdrop-filter, so set only one of them
         ...(refract
-          ? { backdropFilter: `url(#${filterId}) saturate(1.45) brightness(1.05)` }
-          : { backdropFilter: 'blur(10px) saturate(1.5)', WebkitBackdropFilter: 'blur(10px) saturate(1.5)' })
+          ? { backdropFilter: `url(#${filterId}) blur(16px) saturate(1.45) brightness(1.05)` }
+          : { backdropFilter: 'blur(20px) saturate(1.5)', WebkitBackdropFilter: 'blur(20px) saturate(1.5)' })
       }}
     >
       {refract ? (

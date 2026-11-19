@@ -30,7 +30,7 @@ const WING_W = 32 // px, one wing (the painted canvas is a little wider than the
 const WING_H = WING_W * (208 / 192)
 const HINGE_Y = WING_H * (320 / 760)
 // boxes a butterfly sits on (lists, cards, tiles) and, on the home screen, the flower; never on text
-const SPOTS = '.tile-link, .pill-card, .list-row, .shelf, .module, .progress-card, .hero-plinth, .cert-card, .glass.card-pad, .stat'
+const SPOTS = '.tile-link, .pill-card, .list-row, .shelf, .module, .progress-card, .school-ring, .cert-card, .glass.card-pad, .stat'
 const LANDING = `${SPOTS}, .hello-flower, .home-top .icon-btn`
 const NOT_HERE = '.dock-wrap, .support-banner, .chat-form, .reader-nav, .bf-layer'
 const TAU = Math.PI * 2

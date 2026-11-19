@@ -40,10 +40,11 @@ const optional = async <T>(p: Promise<T>): Promise<T | null> => p.catch(() => nu
 
 export async function buildBundle(sb: SupabaseClient, locale: string) {
   const L = { p_locale: locale }
-  const [schools, ui, inspiration, achievements] = await Promise.all([
+  const [schools, ui, inspiration, inspirations, achievements] = await Promise.all([
     call<Json[]>(sb, 'api_schools', L),
     call<Json>(sb, 'api_ui_bundle', L),
     optional(call<Json | null>(sb, 'api_inspiration', L)),
+    optional(call<Json[]>(sb, 'api_inspirations', L)),
     optional(call<Json[]>(sb, 'api_achievements', L))
   ])
   const schoolDetails = (await pool(schools, 6, (s) => optional(call<Json>(sb, 'api_school', { p_key: s.slug, ...L })))).filter(Boolean) as Json[]
@@ -76,6 +77,7 @@ export async function buildBundle(sb: SupabaseClient, locale: string) {
     pages: Object.fromEntries(pages.map((p) => [p.slug, p])),
     ui,
     inspiration,
+    inspirations: inspirations ?? [],
     achievements: achievements ?? []
   })
   const version = createHash('sha256').update(JSON.stringify(content)).digest('hex').slice(0, 16)

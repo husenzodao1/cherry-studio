@@ -7,12 +7,13 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { formatCode } from '@/lib/progress'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
+import { PinSettings } from '@/web/components/PinSettings'
 import { CodeImageButton } from '@/web/components/Keepsakes'
 import { LOCALE_LABELS, type Locale } from '@/web/i18n'
 import { useLearner } from '@/web/offline/learner'
 import { allowNotifications, canNotify, DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyPrefs } from '@/web/offline/notify'
 import { checkPassword, unlockWithPhone } from '@/web/offline/unlock'
-import { usePrefs } from '@/web/prefs'
+import { THEMES, usePrefs } from '@/web/prefs'
 
 /**
  * The learner's code and login, at the end of the settings and small: hidden until the phone's own lock
@@ -160,12 +161,14 @@ export default function Settings() {
             ))}
           </div>
         </div>
-        <div className="glass card-pad stack" style={{ gap: 10 }}>
+        <div className="glass card-pad stack" style={{ gap: 12 }}>
           <span className="eyebrow">{t('settings.theme')}</span>
-          <div className="segmented" role="radiogroup" aria-label={t('settings.theme')}>
-            {(['light', 'dark', 'system'] as const).map((m) => (
-              <button key={m} role="radio" aria-checked={prefs.theme === m} aria-pressed={prefs.theme === m}
-                onClick={() => prefs.set({ theme: m })}>{t(`theme.${m}`)}</button>
+          <div className="themes" role="radiogroup" aria-label={t('settings.theme')}>
+            {THEMES.map((m) => (
+              <button key={m} type="button" role="radio" aria-checked={prefs.theme === m} className="theme-pick" onClick={() => prefs.set({ theme: m })}>
+                <span className={`theme-swatch swatch-${m}`} aria-hidden="true" />
+                <span>{t(`theme.${m}`)}</span>
+              </button>
             ))}
           </div>
         </div>
@@ -180,6 +183,7 @@ export default function Settings() {
           <Link href="/page?slug=about" className="menu-row"><Icon name="info" /><span className="grow">{t('settings.about')}</span><Icon name="forward" size={18} /></Link>
           {learner ? <button type="button" className="menu-row danger" onClick={leave}><Icon name="logout" /><span className="grow">{t('profile.signout')}</span></button> : null}
         </div>
+        <PinSettings />
         <CodeCard />
         <p className="muted" style={{ textAlign: 'center', fontSize: '0.8em', margin: 0 }}>{t('settings.version')} {process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}</p>
       </div>

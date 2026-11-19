@@ -85,25 +85,6 @@
    "license": "project-owned",
    "source": "tools/render-assets (jobs-shrine.json: book-open)"
   },
-  "hero-religion.webp": {
-   "model": "Open book on a rehal under a glass arch, with a hanging lantern and petals",
-   "sources": [
-    {
-     "title": "Book, rehal, glass arch, petals",
-     "author": "Dukhtari Khubam project",
-     "license": "project-owned",
-     "source": "tools/render-assets (jobs-shrine.json: shrine)"
-    },
-    {
-     "title": "Brass Diya Lantern",
-     "author": "Bhargav Kubal",
-     "license": "CC0 1.0",
-     "source": "https://polyhaven.com/a/brass_diya_lantern",
-     "note": "glass panes given a warm glow at render time"
-    }
-   ],
-   "license": "project-owned (lantern model CC0)"
-  },
   "glass-lotus.webp": {
    "model": "Glass water lily (four rings of solid glass petals)",
    "author": "Dukhtari Khubam project",

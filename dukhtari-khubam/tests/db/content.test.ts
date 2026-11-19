@@ -255,6 +255,8 @@ describe('learner features', () => {
     })
     const today = await as(db, null, (tx) => rpc(tx, 'api_inspiration', { p_locale: 'tg' }))
     expect(today).toMatchObject({ body: 'Матни иқтибос', source_title: 'Китоб, саҳ. 12' })
+    const words = await as(db, null, (tx) => rpc(tx, 'api_inspirations', { p_locale: 'ru' }))
+    expect(words).toEqual([expect.objectContaining({ body: 'Матни иқтибос', author_name: 'Муаллиф' })])
   })
 
   it('serves CMS-managed UI strings and help texts', async () => {
