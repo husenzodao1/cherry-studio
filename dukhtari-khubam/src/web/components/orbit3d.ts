@@ -219,7 +219,7 @@ export function mountOrbit(canvas: HTMLCanvasElement, opts: { light: boolean; st
     const obj = make()
     const box = new THREE.Box3().setFromObject(obj)
     const size = box.getSize(new THREE.Vector3())
-    obj.scale.setScalar(1.1 / Math.max(size.x, size.y, size.z))
+    obj.scale.setScalar(0.86 / Math.max(size.x, size.y, size.z))
     orbit.add(obj)
     const trail = new Float32Array(TRAIL * 3)
     const age = new Float32Array(TRAIL).map((_, n) => n / (TRAIL - 1))
@@ -249,7 +249,7 @@ export function mountOrbit(canvas: HTMLCanvasElement, opts: { light: boolean; st
     camera.updateProjectionMatrix()
     // the visible half-width at the centre; the orbit keeps clear of the sides (and of the girls)
     const half = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z * camera.aspect
-    rx = Math.min(half * 0.6, 3.6)
+    rx = Math.min(half * 0.42, 2.6)
     const px = renderer.getPixelRatio() * h * 0.2
     scene.traverse((o) => { if (o instanceof THREE.Points) (o.material as THREE.ShaderMaterial).uniforms.uSize.value = px })
   }

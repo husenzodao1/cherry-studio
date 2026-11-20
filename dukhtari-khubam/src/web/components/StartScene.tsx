@@ -7,15 +7,16 @@ import { Icon } from './Icon'
 import { LOCALE_LABELS, LOCALES } from '../i18n'
 import { usePrefs } from '../prefs'
 
-/** The two girls standing at the scene's sides (cut-out photos); none yet: only the orbit is shown. */
+/** The two girls standing at the scene's sides, looking towards each other (cut-out photos). */
 export interface SceneGirls { left: string; right: string }
+const GIRLS: SceneGirls = { left: '/assets/mascot/start-left.webp', right: '/assets/mascot/start-right.webp' }
 
 /**
  * The top of the sign-in screen: a soft many-coloured gradient that drifts slowly, with the live 3D
- * orbit of glass objects in it (orbit3d.ts, loaded only here) and, when given, a girl at each side
- * whose lower half melts into the page before the Google button.
+ * orbit of glass objects between two girls (orbit3d.ts, loaded only here); their lower half melts
+ * into the page before the Google button.
  */
-export function StartScene({ girls }: { girls?: SceneGirls }) {
+export function StartScene({ girls = GIRLS }: { girls?: SceneGirls | null }) {
   const canvas = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     const el = canvas.current

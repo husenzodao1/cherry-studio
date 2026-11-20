@@ -100,7 +100,11 @@ export function Mascot() {
     <div key={card.id} className={`mascot is-${card.moment}${noGirl ? ' no-girl' : ''}${leaving ? ' is-leaving' : ''}`}
       style={{ ['--mascot-bottom' as string]: noDock(path) ? '0px' : '86px' }}
       role="status" aria-live="polite" onClick={() => setLeaving(true)}>
-      {noGirl ? null : <img className="mascot-girl" src={`/assets/mascot/${card.pose}.webp`} alt="" aria-hidden="true" onError={() => setNoGirl(true)} />}
+      {noGirl ? null : (
+        <span className="mascot-girl" aria-hidden="true">
+          <img src={`/assets/mascot/${card.pose}.webp`} alt="" onError={() => setNoGirl(true)} />
+        </span>
+      )}
       <p className="mascot-text">{card.text}</p>
       <button type="button" className="mascot-close" aria-label={t('action.close')}><Icon name="x" size={16} /></button>
     </div>

@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs'
-
 import { BUNDLE, expect, signedIn, test } from './fixtures'
 
 const opt = (id: string, text: string) => ({ id, text })
@@ -12,18 +10,17 @@ const QUIZ = {
   settings: { shuffle_questions: false, shuffle_options: false, allow_retry: true },
   grading: Object.fromEntries(['1', '2', '3'].map((id) => [id, grading(id)]))
 }
-// her pictures are added separately; a stand-in shows how the card holds one
-const GIRL = readFileSync('public/assets/3d/welcome-girl.webp')
 
 test('she greets once a day, says "stop" after two wrong answers in a row and reacts to the result', async ({ page, server: _, errors }) => {
   await page.route('**/api/v1/bundle**', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...BUNDLE, quizzes: { qz: QUIZ } }) }))
-  await page.route('**/assets/mascot/*.webp', (r) => r.fulfill({ contentType: 'image/webp', body: GIRL }))
   await signedIn(page)
   await page.goto('/')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   const card = page.locator('.mascot')
   await expect(card).toBeVisible({ timeout: 8000 })
-  await expect(card.locator('.mascot-girl')).toBeVisible()
+  // her picture for this moment is there and drawn
+  await expect(card.locator('.mascot-girl img')).toHaveAttribute('src', '/assets/mascot/01-ok.webp')
+  await expect.poll(() => card.locator('.mascot-girl img').evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth)).toBeGreaterThan(300)
   await page.waitForTimeout(800)
   await page.screenshot({ path: 'test-results/mascot-home.png' })
   // a tap closes it, and the same day it does not come back
@@ -43,6 +40,7 @@ test('she greets once a day, says "stop" after two wrong answers in a row and re
     if (n === 1) await page.getByRole('button', { name: /Навбатӣ/ }).click()
   }
   await expect(card).toHaveClass(/is-stop/)
+  await expect(card.locator('.mascot-girl img')).toHaveAttribute('src', '/assets/mascot/03-stop.webp')
   await expect(card.locator('.mascot-text')).toHaveText(/./)
   await page.screenshot({ path: 'test-results/mascot-stop.png' })
   await page.getByRole('button', { name: /Навбатӣ/ }).click()
