@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 
 import { Content } from '@/web/admin/Content'
 import { MediaLibrary } from '@/web/admin/Media'
@@ -14,6 +14,7 @@ import { useAuth } from '@/web/auth'
 import { Icon } from '@/web/components/Icon'
 import { ErrorState, Loading } from '@/web/components/States'
 import { browserSupabase } from '@/web/supabase-browser'
+import { useOutbox } from '@/web/admin/outbox'
 import { useApi } from '@/web/useApi'
 
 /**
@@ -52,12 +53,38 @@ export default function AdminPage() {
         <h1 className="h-page" style={{ flex: 1 }}>Идора</h1>
         <span className="muted" style={{ fontSize: '0.8em' }}>{me.data.roles.join(', ')}</span>
       </header>
+      <OutboxNote />
       <nav className="scroller" role="tablist" style={{ gap: 6 }}>
         {TABS.map((t) => (
           <button key={t.id} type="button" role="tab" className="chip" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </nav>
       {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'content' ? <Content /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
+    </div>
+  )
+}
+
+/** Changes made without a connection: how many wait, and any the server refused. */
+function OutboxNote() {
+  const box = useOutbox()
+  const [online, setOnline] = useState(true)
+  useEffect(() => {
+    const set = () => setOnline(navigator.onLine !== false)
+    set()
+    window.addEventListener('online', set)
+    window.addEventListener('offline', set)
+    return () => { window.removeEventListener('online', set); window.removeEventListener('offline', set) }
+  }, [])
+  if (online && !box.waiting && !box.failed) return null
+  return (
+    <div className="card card-pad row" role="status" style={{ gap: 10, flexWrap: 'wrap', fontSize: '0.9em' }}>
+      <Icon name={online ? 'install' : 'wifiOff'} size={18} />
+      <span style={{ flex: 1 }}>
+        {!online ? 'Интернет нест — охирин маълумоти нигоҳдошта нишон дода мешавад. ' : ''}
+        {box.waiting ? `Дар навбат: ${box.waiting} тағйирот — ҳангоми пайваст худ фиристода мешавад.` : ''}
+        {box.failed ? ` ${box.failed} тағйиротро сервер қабул накард.` : ''}
+      </span>
+      {box.failed ? <button type="button" className="chip" onClick={box.clearFailed}>Пок кардан</button> : null}
     </div>
   )
 }

@@ -5,7 +5,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Icon } from '../components/Icon'
 import { ErrorState, Loading } from '../components/States'
 import { useApi } from '../useApi'
-import { errorText, send } from './ui'
+import { errorText, send, sendNow } from './ui'
 
 /**
  * Support chat for staff: threads written from phones (newest and open first), the conversation, a reply
@@ -86,7 +86,7 @@ function ThreadView({ id, onBack }: { id: string; onBack: () => void }) {
   const reset = async () => {
     if (!username.trim() || !confirm(`«${username}»: пароли муваққатӣ ва коди нав дода шавад? Коди пешина кор намекунад.`)) return
     try {
-      const r = await send<{ username: string; password: string }>('/admin/learners/reset', 'POST', { username: username.trim() })
+      const r = await sendNow<{ username: string; password: string }>('/admin/learners/reset', 'POST', { username: username.trim() })
       setText(`Логин: ${r.username}\nПароли муваққатӣ: ${r.password}\nБо онҳо ворид шавед ва пароли нав интихоб кунед.`)
       setNote('Пароли муваққатӣ дар майдони ҷавоб гузошта шуд — фиристед.')
     } catch (err) {

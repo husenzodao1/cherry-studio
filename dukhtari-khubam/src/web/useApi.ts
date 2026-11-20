@@ -17,6 +17,31 @@ export interface ApiState<T> {
  * response while a fresh copy loads; identical requests in flight are shared.
  */
 const cache = new Map<string, unknown>()
+// the panel's own data is also kept on the device, so the panel opens without a connection
+const KEEP = /^\/(admin\/|me$)/
+const stored = (key: string): unknown => {
+  try {
+    const raw = localStorage.getItem(`dk.api:${key}`)
+    return raw ? JSON.parse(raw) : undefined
+  } catch {
+    return undefined
+  }
+}
+const keep = (key: string, path: string, data: unknown) => {
+  if (!KEEP.test(path)) return
+  try {
+    localStorage.setItem(`dk.api:${key}`, JSON.stringify(data))
+  } catch {
+    /* storage full: memory only */
+  }
+}
+const remembered = (key: string, path: string | null) => {
+  if (cache.has(key)) return cache.get(key)
+  if (!path || !KEEP.test(path) || typeof window === 'undefined') return undefined
+  const v = stored(key)
+  if (v !== undefined) cache.set(key, v)
+  return v
+}
 const inflight = new Map<string, Promise<unknown>>()
 
 function load<T>(key: string, path: string): Promise<T> {
@@ -33,8 +58,10 @@ export function useApi<T>(path: string | null): ApiState<T> {
   const { session } = useAuth()
   const userKey = session?.user.id ?? 'anon'
   const key = path ? `${userKey}|${path}` : ''
-  const [state, setState] = useState<{ data?: T; error?: ApiFailure; loading: boolean }>(() =>
-    key && cache.has(key) ? { data: cache.get(key) as T, loading: false } : { loading: !!path })
+  const [state, setState] = useState<{ data?: T; error?: ApiFailure; loading: boolean }>(() => {
+    const kept = key ? remembered(key, path) : undefined
+    return kept !== undefined ? { data: kept as T, loading: false } : { loading: !!path }
+  })
   const [nonce, setNonce] = useState(0)
   const reload = useCallback(() => setNonce((n) => n + 1), [])
 
@@ -44,11 +71,12 @@ export function useApi<T>(path: string | null): ApiState<T> {
       return
     }
     let alive = true
-    const cached = cache.get(key) as T | undefined
+    const cached = remembered(key, path) as T | undefined
     setState(cached !== undefined ? { data: cached, loading: false } : (s) => ({ ...s, loading: true, error: undefined }))
     load<T>(key, path)
       .then((data) => {
         cache.set(key, data)
+        keep(key, path, data)
         if (alive) setState({ data, loading: false })
       })
       .catch((error: unknown) => {

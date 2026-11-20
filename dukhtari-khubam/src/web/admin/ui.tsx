@@ -52,7 +52,8 @@ export function useAction() {
     setMessage(null)
     try {
       const r = await fn()
-      setMessage({ ok: true, text: okText })
+      const queued = !!r && typeof r === 'object' && (r as { queued?: boolean }).queued === true
+      setMessage({ ok: true, text: queued ? 'Дар навбат — ҳангоми пайдо шудани интернет худ фиристода мешавад' : okText })
       return r
     } catch (e) {
       setMessage({ ok: false, text: errorText(e) })
@@ -64,7 +65,8 @@ export function useAction() {
   return { busy, message, run, setMessage }
 }
 
-export const send = <T,>(path: string, method: string, body?: unknown) => api<T>(path, { method, body })
+// panel changes go through the offline queue (outbox.ts): sent now, or later by themselves
+export { send, sendNow } from './outbox'
 
 export function Note({ message }: { message: { ok: boolean; text: string } | null }) {
   if (!message) return null

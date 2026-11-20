@@ -6,7 +6,7 @@ import { ErrorState, Loading } from '../components/States'
 import { youtubeId } from '../components/YouTube'
 import { useApi } from '../useApi'
 import { MediaPicker } from './Media'
-import { Field, fromRich, LocaleTabs, Note, send, toRich, useAction, type Loc } from './ui'
+import { Field, fromRich, LocaleTabs, Note, send, toRich, useAction, type Loc, sendNow } from './ui'
 
 /**
  * Full Text Editor for a lesson: an ordered list of schema-v1 blocks. Layout props are shared by every
@@ -61,7 +61,7 @@ export function BlocksEditor({ lessonId }: { lessonId: string }) {
     setBlocks(next)
   }
   const save = async () => {
-    const r = await act.run(() => send<{ version: number }>(`/admin/lessons/${lessonId}/blocks`, 'PUT', {
+    const r = await act.run(() => sendNow<{ version: number }>(`/admin/lessons/${lessonId}/blocks`, 'PUT', {
       expected_version: version,
       blocks: blocks.map((b) => ({ ...(b.id ? { id: b.id } : {}), type: b.type, schema_version: 1, props: b.props, content: b.content }))
     }))

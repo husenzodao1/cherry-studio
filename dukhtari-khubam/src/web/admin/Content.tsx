@@ -8,8 +8,7 @@ import { useApi } from '../useApi'
 import { BlocksEditor } from './BlocksEditor'
 import { QuizBuilder } from './QuizBuilder'
 import {
-  Field, LocaleTabs, NEXT_STATUS, Note, send, StatusBadge, titleOf, useAction, type Entity, type Loc
-} from './ui'
+  Field, LocaleTabs, NEXT_STATUS, Note, send, StatusBadge, titleOf, useAction, type Entity, type Loc, sendNow } from './ui'
 
 /** Content tree: schools → courses → modules → topics → lessons, each with translations and workflow. */
 
@@ -71,7 +70,7 @@ function Level({ level, parentId, onOpen, onEdit }: { level: Level; parentId: st
     const body: Record<string, unknown> = { translations: { tg: { title: title.trim(), ready: true } }, position: items.length }
     if (key && parentId) body[key] = parentId
     if (level === 'schools' || level === 'courses') body.slug = slugify(title)
-    const r = await act.run(() => send(`/admin/${level}`, 'POST', body), 'Илова шуд')
+    const r = await act.run(() => sendNow(`/admin/${level}`, 'POST', body), 'Илова шуд')
     if (r) {
       setTitle('')
       list.reload()
@@ -210,7 +209,7 @@ function Workflow({ level, entity, onDone, onDeleted }: { level: Level; entity: 
     if (await act.run(() => send(`/admin/${level}/${entity.id}/transition`, 'POST', { to }), 'Ҳолат иваз шуд')) onDone()
   }
   const check = async () => {
-    const r = await act.run(() => send<{ errors: { message?: string; code?: string }[] | null }>(`/admin/${level}/${entity.id}/validate`, 'GET'), 'Санҷида шуд')
+    const r = await act.run(() => sendNow<{ errors: { message?: string; code?: string }[] | null }>(`/admin/${level}/${entity.id}/validate`, 'GET'), 'Санҷида шуд')
     if (r) setIssues((r.errors ?? []).map((x) => x.message ?? x.code ?? JSON.stringify(x)))
   }
   const remove = async () => {

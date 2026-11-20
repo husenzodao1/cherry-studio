@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { ErrorState, Loading } from '../components/States'
 import { browserSupabase } from '../supabase-browser'
 import { useApi } from '../useApi'
-import { Field, Note, send, useAction } from './ui'
+import { Field, Note, send, useAction, sendNow } from './ui'
 
 /**
  * Media library. Every file is registered with its origin, author and licence (spec §9); lessons with
@@ -41,7 +41,7 @@ export function Upload({ kind, onUploaded }: { kind: Kind; onUploaded: (a: Asset
   const upload = async () => {
     if (!file) return
     const asset = await act.run(async () => {
-      const slot = await send<{ bucket: 'media'; path: string; token: string }>('/admin/media/upload-url', 'POST', { bucket: 'media', kind, filename: file.name })
+      const slot = await sendNow<{ bucket: 'media'; path: string; token: string }>('/admin/media/upload-url', 'POST', { bucket: 'media', kind, filename: file.name })
       const sb = browserSupabase()!
       const { error } = await sb.storage.from(slot.bucket).uploadToSignedUrl(slot.path, slot.token, file, { contentType: file.type })
       if (error) throw error

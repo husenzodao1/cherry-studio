@@ -30,6 +30,7 @@ export const test = base.extend<{ server: Server; errors: string[] }>({
     // errors the app caught and repaired by itself (web/heal.ts) are failures for a test all the same
     await page.route('**/api/v1/client-error', (r) => {
       server.reports.push(String((r.request().postDataJSON() as { message?: string }).message))
+      if (process.env.E2E_DEBUG) console.log('REPORT', JSON.stringify(r.request().postDataJSON()).slice(0, 900))
       return r.fulfill(json({ ok: true }))
     })
     await page.route('**/api/v1/app-config', (r) => r.fulfill(json({ google_web_client_id: null })))

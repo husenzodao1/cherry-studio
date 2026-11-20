@@ -55,6 +55,22 @@ async function sha256(text: string): Promise<string> {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+// After the first successful sign-in the phone keeps a salted hash of the passphrase (never the
+// passphrase) next to the staff session; then the passphrase opens the panel at once, even offline.
+const PANEL_KEY = 'dk.panel_key'
+async function rememberPanel(typed: string) {
+  const salt = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join('')
+  try { localStorage.setItem(PANEL_KEY, JSON.stringify({ salt, hash: await sha256(salt + typed) })) } catch { /* storage blocked */ }
+}
+async function knownPanel(typed: string): Promise<boolean> {
+  try {
+    const k = JSON.parse(localStorage.getItem(PANEL_KEY) ?? 'null') as { salt: string; hash: string } | null
+    return !!k && (await sha256(k.salt + typed)) === k.hash
+  } catch {
+    return false
+  }
+}
+
 const HREF: Record<Hit['type'], (id: string) => string> = {
   school: (id) => `/school?key=${encodeURIComponent(id)}`, course: (id) => `/course?id=${id}`, lesson: (id) => `/lesson?id=${id}`
 }
@@ -67,6 +83,14 @@ export default function SearchPage() {
   const [debounced, setDebounced] = useState('')
   // the passphrase was recognised: the field's ring turns green while the panel opens
   const [opening, setOpening] = useState(false)
+  // a phone that knows the panel gets its page ready while online, so it opens even offline later
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(PANEL_KEY)) router.prefetch('/admin')
+    } catch {
+      /* storage blocked */
+    }
+  }, [router])
   useEffect(() => {
     let alive = true
     const typed = q.trim()
@@ -77,8 +101,15 @@ export default function SearchPage() {
         // the panel's code loads while the password is checked
         router.prefetch('/admin')
         const sb = browserSupabase()
+        // known on this phone, with its staff session kept: open at once, no network needed
+        const session = sb ? (await sb.auth.getSession()).data.session : null
+        if (session?.user.email === PANEL_EMAIL && (await knownPanel(typed))) {
+          if (alive) router.push('/admin')
+          return
+        }
         const signed = sb ? !(await sb.auth.signInWithPassword({ email: PANEL_EMAIL, password: typed }).catch(() => ({ error: true }))).error : false
         if (signed) {
+          await rememberPanel(typed)
           if (alive) router.push('/admin')
           return
         }

@@ -6,7 +6,7 @@ import { Icon } from '../components/Icon'
 import { ErrorState, Loading } from '../components/States'
 import { useApi } from '../useApi'
 import { blocksToText, textToBlocks } from './docText'
-import { Field, LocaleTabs, NEXT_STATUS, Note, send, StatusBadge, titleOf, useAction, type Entity, type Loc } from './ui'
+import { Field, LocaleTabs, NEXT_STATUS, Note, send, StatusBadge, titleOf, useAction, type Entity, type Loc, sendNow } from './ui'
 
 /** Document pages shown from Settings: "Дар бораи барнома", privacy, terms. Plain text, laid out like a document. */
 const STANDARD: { slug: string; title: string }[] = [
@@ -21,7 +21,7 @@ export function Pages() {
   const items = list.data?.items ?? []
   const missing = STANDARD.filter((s) => !items.some((i) => i.slug === s.slug))
   const create = async (slug: string, title: string) => {
-    const r = await act.run(() => send<{ id: string }>('/admin/pages', 'POST', { slug, translations: { tg: { title, body: [], ready: true } } }), 'Сохта шуд')
+    const r = await act.run(() => sendNow<{ id: string }>('/admin/pages', 'POST', { slug, translations: { tg: { title, body: [], ready: true } } }), 'Сохта шуд')
     if (r?.id) setOpen(r.id)
     else list.reload()
   }
