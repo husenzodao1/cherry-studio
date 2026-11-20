@@ -136,15 +136,29 @@ function UiStrings({ only }: { only?: RegExp } = {}) {
   const [filter, setFilter] = useState('')
   if (rows.error) return <ErrorState error={rows.error} onRetry={rows.reload} />
   if (!rows.data) return <Loading />
-  const keys = Object.keys(DEFAULT_STRINGS.tg).filter((k) => !only || only.test(k)).filter((k) => !filter || k.includes(filter) || (DEFAULT_STRINGS.tg[k as keyof typeof DEFAULT_STRINGS.tg] ?? '').toLowerCase().includes(filter.toLowerCase()))
+  const builtIn = (k: string) => (DEFAULT_STRINGS[loc] as Record<string, string>)[k] ?? (DEFAULT_STRINGS.tg as Record<string, string>)[k] ?? ''
   const value = (k: string) => rows.data!.find((r) => r.key === k && r.locale === loc)?.value
+  const needle = filter.toLowerCase()
+  // every text of the interface, grouped by screen (the part of the key before the dot)
+  const keys = Object.keys(DEFAULT_STRINGS.tg).filter((k) => !only || only.test(k))
+    .filter((k) => !needle || k.includes(needle) || builtIn(k).toLowerCase().includes(needle) || (value(k) ?? '').toLowerCase().includes(needle))
+  const groups = new Map<string, string[]>()
+  for (const k of keys) groups.set(k.split('.')[0], [...(groups.get(k.split('.')[0]) ?? []), k])
+  const changed = rows.data.filter((r) => r.locale === loc).length
   return (
     <div className="stack" style={{ gap: 10 }}>
       <LocaleTabs value={loc} onChange={setLoc} />
-      <input className="input" type="search" placeholder="Ҷустуҷӯ" value={filter} onChange={(e) => setFilter(e.target.value)} />
-      {keys.map((k) => (
-        <UiStringRow key={`${loc}-${k}`} k={k} loc={loc} current={value(k)}
-          fallback={(DEFAULT_STRINGS[loc] as Record<string, string>)[k] ?? (DEFAULT_STRINGS.tg as Record<string, string>)[k] ?? ''} onSaved={rows.reload} />
+      <input className="input" type="search" placeholder="Ҷустуҷӯ (калид ё матн)" value={filter} onChange={(e) => setFilter(e.target.value)} />
+      <span className="muted" style={{ fontSize: '0.85em' }}>Матнҳо: {keys.length} · ивазшуда: {changed}. Тағйирот дар барнома дар чанд сония пайдо мешавад.</span>
+      {[...groups].map(([g, ks]) => (
+        <details key={`${loc}-${g}`} className="card card-pad" open={!!needle || groups.size <= 3}>
+          <summary style={{ cursor: 'pointer', fontWeight: 600 }}>{g} <span className="muted">({ks.length})</span></summary>
+          <div className="stack" style={{ gap: 10, marginTop: 10 }}>
+            {ks.map((k) => (
+              <UiStringRow key={`${loc}-${k}-${value(k) ?? ''}`} k={k} loc={loc} current={value(k)} fallback={builtIn(k)} onSaved={rows.reload} />
+            ))}
+          </div>
+        </details>
       ))}
     </div>
   )
@@ -155,9 +169,15 @@ function UiStringRow({ k, loc, current, fallback, onSaved }: { k: string; loc: L
   const act = useAction()
   const dirty = v !== (current ?? fallback)
   const save = async () => {
-    if (await act.run(() => send(`/admin/ui-strings/${encodeURIComponent(k)}/${loc}`, 'PUT', { value: v }))) onSaved()
+    const clean = v.replace(/\r/g, '').trim()
+    if (!clean) return
+    if (await act.run(() => send(`/admin/ui-strings/${encodeURIComponent(k)}/${loc}`, 'PUT', { value: clean }), 'Захира шуд')) onSaved()
+  }
+  const restore = async () => {
+    if (await act.run(() => send(`/admin/ui-strings/${encodeURIComponent(k)}/${loc}`, 'DELETE'), 'Ба аслӣ баргашт')) onSaved()
   }
   return (
+    <>
     <div className="row" style={{ gap: 8, alignItems: 'flex-end' }}>
       <Field label={k}>
         {fallback.includes('\n') || v.includes('\n') ? (
@@ -167,8 +187,13 @@ function UiStringRow({ k, loc, current, fallback, onSaved }: { k: string; loc: L
           <input className="input" value={v} maxLength={2000} onChange={(e) => setV(e.target.value)} />
         )}
       </Field>
-      <button type="button" className="btn btn-soft" onClick={save} disabled={act.busy || !dirty || !v.trim()} style={{ minWidth: 90 }}>{act.message?.ok ? '✓' : 'Захира'}</button>
+      <div className="stack" style={{ gap: 4 }}>
+        <button type="button" className="btn btn-soft" onClick={save} disabled={act.busy || !dirty || !v.trim()} style={{ minWidth: 90 }}>{act.message?.ok ? '✓' : 'Захира'}</button>
+        {current !== undefined ? <button type="button" className="link-btn" onClick={restore} disabled={act.busy} title={fallback}>Аслӣ</button> : null}
+      </div>
     </div>
+    {act.message && !act.message.ok ? <Note message={act.message} /> : null}
+    </>
   )
 }
 

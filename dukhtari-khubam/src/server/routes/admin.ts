@@ -460,6 +460,14 @@ export const adminRoutes: AnyRoute[] = [
   }),
 
   route({
+    method: 'DELETE', path: '/admin/ui-strings/:key/:locale', access: 'staff', tag: 'Admin · texts', summary: 'Return a UI string to the built-in text',
+    handler: async ({ sb, params }) => {
+      await unwrap(sb().from('ui_strings').delete()
+        .eq('key', z.string().regex(/^[a-z0-9_.-]+$/).max(80).parse(params.key)).eq('locale', Locale.parse(params.locale)).select('key'))
+      return { ok: true }
+    }
+  }),
+  route({
     method: 'GET', path: '/admin/welcome-stats', access: 'staff', tag: 'Admin · texts', summary: 'How learners answered the welcome questions',
     handler: async ({ sb }) => call(sb(), 'admin_welcome_stats', {})
   }),

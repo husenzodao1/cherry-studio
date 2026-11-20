@@ -29,6 +29,8 @@ export function ScreenFit() {
     let y0 = 0
     let x0 = 0
     let pulling = false
+    // whether this rubber moved the page at all (a pull downwards belongs to PullSignature)
+    let moved = false
     const scrollableAbove = (el: EventTarget | null) => {
       for (let n = el as HTMLElement | null; n && n !== app; n = n.parentElement) {
         if (n.matches('input, textarea, select, [contenteditable="true"]')) return true
@@ -41,7 +43,7 @@ export function ScreenFit() {
       pulling = root.classList.contains('fits') && !root.classList.contains('locked') && !scrollableAbove(e.target)
       y0 = e.touches[0].clientY
       x0 = e.touches[0].clientX
-      app.style.transition = 'none'
+      moved = false
     }
     const move = (e: TouchEvent) => {
       if (!pulling) return
@@ -50,11 +52,14 @@ export function ScreenFit() {
       // a pull downwards opens the signature space instead (PullSignature)
       if (Math.abs(dx) > Math.abs(dy) || dy > 0) return
       const d = Math.sign(dy) * Math.min(MAX, Math.abs(dy) * PULL)
+      moved = true
+      app.style.transition = 'none'
       app.style.transform = `translateY(${d}px)`
     }
     const end = () => {
       if (!pulling) return
       pulling = false
+      if (!moved) return
       app.style.transition = 'transform 0.45s cubic-bezier(0.2, 1.4, 0.4, 1)'
       app.style.transform = ''
     }

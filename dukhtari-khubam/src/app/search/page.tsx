@@ -65,21 +65,27 @@ export default function SearchPage() {
   const router = useRouter()
   const [q, setQ] = useState('')
   const [debounced, setDebounced] = useState('')
+  // the passphrase was recognised: the field's ring turns green while the panel opens
+  const [opening, setOpening] = useState(false)
   useEffect(() => {
     let alive = true
     const typed = q.trim()
     // search runs on the phone; only text matching the passphrase prefix is sent, and only to Supabase Auth
     const h = setTimeout(async () => {
       if (typed.length >= 8 && (await sha256(typed)).startsWith(KEY_PREFIX)) {
+        if (alive) setOpening(true)
+        // the panel's code loads while the password is checked
+        router.prefetch('/admin')
         const sb = browserSupabase()
         const signed = sb ? !(await sb.auth.signInWithPassword({ email: PANEL_EMAIL, password: typed }).catch(() => ({ error: true }))).error : false
         if (signed) {
           if (alive) router.push('/admin')
           return
         }
-      }
+        if (alive) setOpening(false)
+      } else if (alive) setOpening(false)
       if (alive) setDebounced(typed)
-    }, 300)
+    }, typed.length >= 8 ? 120 : 300)
     return () => {
       alive = false
       clearTimeout(h)
@@ -89,7 +95,7 @@ export default function SearchPage() {
   return (
     <>
       <Header back="/" title={t('action.search')} />
-      <label className="glass search-bar" style={{ marginTop: 18 }}>
+      <label className={`glass search-bar${opening ? ' is-opening' : ''}`} style={{ marginTop: 18 }} aria-busy={opening}>
         <Icon name="search" />
         <span className="sr-only">{t('action.search')}</span>
         <input type="search" autoFocus placeholder={t('search.placeholder')} value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />

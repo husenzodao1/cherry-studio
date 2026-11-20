@@ -13280,6 +13280,52 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Admin · texts"
+        ],
+        "summary": "Return a UI string to the built-in text",
+        "operationId": "deleteAdminUiStrings/Key/Locale",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database."
       }
     },
     "/admin/welcome-stats": {

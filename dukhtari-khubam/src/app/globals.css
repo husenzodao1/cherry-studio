@@ -1441,7 +1441,6 @@ html.lite .tile-art, html.lite .hello-flower, html.lite .start-art { filter: non
 /* ---------------------------------------------------------------- pull down at the top (PullSignature.tsx) */
 html, body { overscroll-behavior-y: none; }
 .pull-sign { position: fixed; left: 0; right: 0; top: 0; height: 0; z-index: 30; pointer-events: none; overflow: hidden; opacity: 0;
-  padding-top: env(safe-area-inset-top); display: flex; align-items: center; justify-content: center;
   /* the opened space is a shade deeper than the page, so the page's scalloped edge shows */
   background: color-mix(in srgb, var(--primary) 9%, var(--sky-1)); }
 /* the page's top edge seen from the space: half circles cut out of the space's lower edge, so the page
@@ -1452,6 +1451,7 @@ html, body { overscroll-behavior-y: none; }
   mask: linear-gradient(#000 0 0) top / 100% calc(100% - var(--lace) + 0.5px) no-repeat,
     radial-gradient(circle at 50% 100%, transparent 0 calc(var(--lace) - 1px), #000 var(--lace)) bottom / calc(var(--lace) * 2) var(--lace) repeat-x; }
 :root[data-theme='dark'] .pull-sign { background: color-mix(in srgb, var(--primary) 14%, var(--sky-1)); }
+.ps-stage { position: absolute; left: 0; right: 0; bottom: 0; height: 88px; display: flex; align-items: center; justify-content: center; }
 .ps-word { position: relative; margin-bottom: 6px; will-change: transform; }
 .ps-ink { display: block; font-family: var(--font-studio), cursive; font-size: clamp(2rem, 9.5vw, 2.7rem); line-height: 1.2; padding: 0 0.3em; white-space: nowrap;
   color: var(--plum); text-shadow: 0 2px 12px color-mix(in srgb, var(--primary) 18%, transparent); clip-path: inset(-20% 100% -20% 0); }
@@ -1459,3 +1459,31 @@ html, body { overscroll-behavior-y: none; }
   filter: drop-shadow(0 4px 6px rgba(160, 60, 110, 0.3)); will-change: transform, opacity; }
 html.lite .ps-heart { filter: none; }
 html.lite .ps-ink { text-shadow: none; }
+
+/* search: the staff passphrase was recognised — a green ring breathes while the panel opens */
+.search-bar.is-opening { border-color: #2fb67c !important; box-shadow: 0 0 0 3px rgba(47, 182, 124, 0.28), var(--glass-shadow); animation: open-ring 1.1s ease-in-out infinite; }
+.search-bar.is-opening svg { color: #2fb67c; }
+@keyframes open-ring { 50% { box-shadow: 0 0 0 6px rgba(47, 182, 124, 0.14), var(--glass-shadow); } }
+
+/* ---------------------------------------------------------------- empty states: a lens searching the words (Lens.tsx) */
+.note-empty { padding-top: 30px; padding-bottom: 26px; background: none !important; border: 0 !important; box-shadow: none !important; }
+.note-empty .note-title { display: none; }
+.lens-text { position: relative; width: 100%; display: flex; justify-content: center; padding: 26px 8px; }
+.lens-line { display: inline-block; font-family: var(--font-hand), cursive; font-weight: 500; font-size: clamp(1.7rem, 7.6vw, 2.2rem); line-height: 1.2;
+  color: var(--ink-2); text-align: center; white-space: nowrap; letter-spacing: 0.01em; }
+/* the words under the glass are cut away; the glass shows them magnified */
+.lens-text > .lens-line { -webkit-mask: radial-gradient(circle var(--r) at var(--lx, -99px) var(--ly, -99px), transparent calc(var(--r) - 0.5px), #000 var(--r));
+  mask: radial-gradient(circle var(--r) at var(--lx, -99px) var(--ly, -99px), transparent calc(var(--r) - 0.5px), #000 var(--r)); }
+.lens-glass { position: absolute; left: 0; top: 0; width: calc(var(--r) * 2); height: calc(var(--r) * 2); z-index: 2; will-change: transform; }
+.lens-clip { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; clip-path: circle(50%);
+  /* clear glass: a faint tint, a soft highlight and a darker edge where the glass thickens */
+  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 45%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.04) 60%, rgba(120, 70, 110, 0.18) 100%); }
+.lens-view { position: absolute; inset: 0; }
+.lens-zoom { position: absolute; left: 0; top: 0; display: flex; justify-content: center; padding: 26px 8px; }
+.lens-copy { color: var(--ink); }
+.lens-frame { position: absolute; max-width: none; height: auto; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(60, 30, 50, 0.25)); }
+/* its shadow on the page, a little below and to the right, following the hand */
+.lens-shadow { position: absolute; left: 0; top: 0; width: calc(var(--r) * 2); height: calc(var(--r) * 2); border-radius: 50%; pointer-events: none; z-index: 1;
+  box-shadow: 0 0 0 5px rgba(60, 25, 55, 0.14); filter: blur(4px); }
+html.lite .lens-shadow { filter: none; box-shadow: 0 0 0 4px rgba(60, 25, 55, 0.1); }

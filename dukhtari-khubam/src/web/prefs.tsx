@@ -90,7 +90,9 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   const value = useMemo<PrefsApi>(() => {
     const local = DEFAULT_STRINGS[prefs.locale]
     const t = (key: UiKey) => {
-      if (prefs.locale === 'tg' && cms.strings[key]) return cms.strings[key]
+      // texts edited in the panel come with the catalogue of the content language (Tajik or Russian)
+      // and win over the built-in ones in that language
+      if ((prefs.locale === 'tg' || prefs.locale === 'ru') && cms.strings[key]) return cms.strings[key]
       // Uzbek, Turkish, Persian and Dari cover the main screens; the rest comes in English
       const wide = prefs.locale !== 'tg' && prefs.locale !== 'ru' ? DEFAULT_STRINGS.en[key] : undefined
       return local[key] ?? wide ?? cms.strings[key] ?? DEFAULT_STRINGS.tg[key] ?? key

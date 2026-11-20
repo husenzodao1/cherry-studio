@@ -980,6 +980,26 @@ export function verse2() {
   return g
 }
 
+/** A magnifying glass without its glass (the page draws the lens): rose-gold rim, plum handle. */
+export function magnifier() {
+  const g = new THREE.Group()
+  const rose = new THREE.MeshPhysicalMaterial({ color: C('#e8b4a0'), metalness: 1, roughness: 0.16, clearcoat: 0.8, clearcoatRoughness: 0.08, envMapIntensity: 1.6 })
+  const plum = glossy('#6a3a66', { roughness: 0.22, irid: 0.15 })
+  // the rim: a rounded ring with a thin inner bevel
+  g.add(mesh(new THREE.TorusGeometry(1.0, 0.085, 48, 160), rose))
+  g.add(mesh(new THREE.TorusGeometry(0.93, 0.025, 24, 160), rose, [0, 0, 0.02]))
+  // the neck and the handle, down to the right
+  const arm = new THREE.Group()
+  arm.add(mesh(new THREE.CylinderGeometry(0.075, 0.09, 0.32, 32), rose, [0, -1.2, 0]))
+  arm.add(mesh(new THREE.TorusGeometry(0.1, 0.03, 16, 48), rose, [0, -1.37, 0], [Math.PI / 2, 0, 0]))
+  arm.add(mesh(new THREE.CapsuleGeometry(0.115, 1.05, 12, 32), plum, [0, -2.0, 0]))
+  arm.add(mesh(new THREE.TorusGeometry(0.118, 0.022, 16, 48), rose, [0, -2.42, 0], [Math.PI / 2, 0, 0]))
+  arm.rotation.z = Math.PI / 4
+  g.add(arm)
+  g.rotation.set(0.12, -0.18, 0)
+  return g
+}
+
 export function buildKind2(job) {
   const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
   switch (job.kind) {
@@ -1010,6 +1030,7 @@ export function buildKind2(job) {
     case 'moon5': return moon5(job)
     case 'flower5': return flower5()
     case 'verse2': return verse2()
+    case 'magnifier': return magnifier()
     default: return null
   }
 }

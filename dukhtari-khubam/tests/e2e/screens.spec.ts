@@ -110,4 +110,17 @@ test.describe('main screens of a signed-in learner', () => {
     await expect(link).toHaveAttribute('download', 'dukhtari-khubam.apk')
     expect(errors).toEqual([])
   })
+
+  test('nothing found: the words under a moving magnifying glass', async ({ page, server: _, errors }) => {
+    await signedIn(page)
+    await page.goto('/search')
+    await page.locator('input[type=search]').fill('ззззззз')
+    const glass = page.locator('.lens-glass')
+    await expect(glass).toBeVisible()
+    const a = await glass.evaluate((el) => el.style.transform)
+    await page.waitForTimeout(600)
+    expect(await glass.evaluate((el) => el.style.transform)).not.toBe(a)
+    await expect(page.locator('.lens-copy')).toHaveText(await page.locator('.lens-line').first().innerText())
+    expect(errors).toEqual([])
+  })
 })

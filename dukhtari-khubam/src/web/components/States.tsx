@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import { ApiFailure } from '../api'
 import { usePrefs } from '../prefs'
+import { LensText } from './Lens'
 import { Icon, type IconName } from './Icon'
 
 export function Skeleton({ height = 120, radius }: { height?: number; radius?: number }) {
@@ -47,6 +48,12 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
   )
 }
 
-export function Empty({ title, icon = 'sparkle', children }: { title: string; icon?: IconName; children?: ReactNode }) {
-  return <Note icon={icon} title={title}>{children}</Note>
+/** Nothing to show (no results, nothing saved…): the words under a magnifying glass that searches them. */
+export function Empty({ title, children }: { title: string; icon?: IconName; children?: ReactNode }) {
+  return (
+    <div className="note note-empty" role="status">
+      <LensText text={title} />
+      {children}
+    </div>
+  )
 }

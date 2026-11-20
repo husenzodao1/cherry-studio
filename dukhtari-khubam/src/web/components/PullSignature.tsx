@@ -46,6 +46,11 @@ export function PullSignature() {
     let d = 0
     let pulling = false
     let playing = false
+    // the status bar's height: the space opens below it, so the page's edge and the scallops meet
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position:fixed;top:0;height:env(safe-area-inset-top);visibility:hidden;pointer-events:none'
+    document.body.appendChild(probe)
+    const inset = () => probe.getBoundingClientRect().height
     let fullSince = 0
 
     const blocked = (el: EventTarget | null) => {
@@ -59,7 +64,8 @@ export function PullSignature() {
     const draw = () => {
       const p = Math.min(1, d / MAX)
       app.style.transform = d ? `translateY(${d}px)` : ''
-      box.style.height = `${d}px`
+      // the space ends exactly where the page's top edge now is
+      box.style.height = d ? `${d + inset()}px` : '0px'
       box.style.opacity = d ? '1' : '0'
       // the hand writes from the left, the word glides in from the top left
       ink.style.clipPath = `inset(-20% ${Math.max(0, 100 - p * 112)}% -20% 0)`
@@ -160,11 +166,14 @@ export function PullSignature() {
       document.removeEventListener('touchmove', move)
       document.removeEventListener('touchend', end)
       document.removeEventListener('touchcancel', end)
+      probe.remove()
     }
   }, [])
 
   return (
     <div ref={layer} className="pull-sign" aria-hidden="true">
+      {/* the stage sits on the page's edge, below the status bar: word and hearts are never under it */}
+      <div className="ps-stage">
       <div className="ps-word"><span className="ps-ink">Gratorslab</span></div>
       {HEARTS.map((h, i) => (
         <svg key={i} className="ps-heart" viewBox="0 0 32 30" style={{ ['--i' as string]: i }}>
@@ -175,6 +184,7 @@ export function PullSignature() {
           <ellipse cx="10" cy="9" rx="3.4" ry="2.2" fill="#fff" opacity="0.55" transform="rotate(-30 10 9)" />
         </svg>
       ))}
+      </div>
     </div>
   )
 }
