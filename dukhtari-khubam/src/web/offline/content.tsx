@@ -47,6 +47,8 @@ export interface Lesson {
   blocks: Block[]; assets: Record<string, Asset>
   position: { index: number | null; total: number }
   prev_lesson_id?: string | null; next_lesson_id?: string | null
+  /** the lesson's own tests, taken at its end (older bundles lack it) */
+  quizzes?: QuizCard[]
 }
 export interface OfflineOption { id: string; text?: string | null; side?: 'left' | 'right' | null; media?: Asset | null }
 export interface OfflineQuestion { id: string; type: string; points: number; prompt: string; hint?: string | null; section?: string | null; media?: Asset | null; options: OfflineOption[] }

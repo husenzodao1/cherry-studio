@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
-import { greeting, type Memory, type Moment, nextSaying, POSES, sayingsFor, withName } from '@/lib/mascot'
+import { ALL_POSES, greeting, type Memory, type Moment, nextSaying, POSES, sayingsFor, withName } from '@/lib/mascot'
 import { useLearner } from '../offline/learner'
 import { usePrefs } from '../prefs'
 import { noDock } from './Dock'
@@ -11,10 +11,28 @@ import { Icon } from './Icon'
 
 /**
  * The girl who speaks at the right moments: a card at the bottom with her standing on it, a little
- * taller than the card, and one short saying (lib/mascot.ts). Shown once a day on opening the app,
+ * taller than the card, and one short saying (lib/mascot.ts). Shown on every opening of the app, on
+ * opening a course, at the end of a stage,
  * before and during tests (two wrong answers in a row: "stop"; three right ones: praise), after a test
  * and after a lesson. A tap closes it; it also leaves by itself once read.
  */
+
+const poseUrl = (pose: string) => `/assets/mascot/${pose}.webp`
+const loaded = new Map<string, Promise<void>>()
+/** Loads (and decodes) one of her pictures once; later calls get the same promise. */
+function loadPose(pose: string): Promise<void> {
+  let p = loaded.get(pose)
+  if (!p) {
+    const img = new Image()
+    img.src = poseUrl(pose)
+    p = img.decode().catch(() => undefined)
+    loaded.set(pose, p)
+  }
+  return p
+}
+/** All her pictures, loaded while the opening screen is up (Splash waits for them, briefly). */
+export const preloadMascot = () => Promise.all([...ALL_POSES.map(loadPose), loadPose('start-left'), loadPose('start-right')]).then(() => undefined)
+const within = (p: Promise<void>, ms: number) => Promise.race([p, new Promise<void>((r) => setTimeout(r, ms))])
 
 const listeners = new Set<(m: Moment) => void>()
 /** Lets her say something for this moment. */
@@ -54,9 +72,15 @@ export function Mascot() {
       const { index, memory } = nextSaying(moment, sayings.length, saved)
       store({ ...saved, ...memory })
       const poses = POSES[moment]
-      setNoGirl(false)
-      setLeaving(false)
-      setCard({ id: ++n, moment, text: withName(sayings[index], name.current), pose: poses[Math.floor(Math.random() * poses.length)] })
+      const pose = poses[Math.floor(Math.random() * poses.length)]
+      const id = ++n
+      // she appears with her picture already drawn, never as an empty card
+      void within(loadPose(pose), 1500).then(() => {
+        if (id !== n) return
+        setNoGirl(false)
+        setLeaving(false)
+        setCard({ id, moment, text: withName(sayings[index], name.current), pose })
+      })
     }
     listeners.add(on)
     return () => { listeners.delete(on) }
@@ -75,18 +99,19 @@ export function Mascot() {
     return () => clearTimeout(gone)
   }, [leaving])
 
-  // once a day on the home screen, after the opening screen and the PIN
+  // on every opening of the app, on the home screen, after the opening screen and the PIN
   useEffect(() => {
     if (path !== '/' || !learner) return
+    try { if (sessionStorage.getItem('dk.greeted')) return } catch { /* storage blocked: greet */ }
     const saved = load()
     const today = localDay()
     const moment = greeting(today, saved.day ?? null)
-    if (!moment) return
     let timer: ReturnType<typeof setTimeout>
     const wait = () => {
       const splash = document.getElementById('splash')
       if ((splash && !splash.hidden) || document.documentElement.classList.contains('locked')) return void (timer = setTimeout(wait, 400))
       timer = setTimeout(() => {
+        try { sessionStorage.setItem('dk.greeted', '1') } catch { /* storage blocked */ }
         store({ ...load(), day: today })
         say(moment)
       }, 1200)
@@ -102,7 +127,7 @@ export function Mascot() {
       role="status" aria-live="polite" onClick={() => setLeaving(true)}>
       {noGirl ? null : (
         <span className="mascot-girl" aria-hidden="true">
-          <img src={`/assets/mascot/${card.pose}.webp`} alt="" onError={() => setNoGirl(true)} />
+          <img src={poseUrl(card.pose)} alt="" decoding="sync" onError={() => setNoGirl(true)} />
         </span>
       )}
       <p className="mascot-text">{card.text}</p>

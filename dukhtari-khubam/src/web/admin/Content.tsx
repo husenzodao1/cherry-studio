@@ -6,6 +6,7 @@ import { Icon } from '../components/Icon'
 import { ErrorState, Loading } from '../components/States'
 import { useApi } from '../useApi'
 import { BlocksEditor } from './BlocksEditor'
+import { CodeHub } from './CodeHub'
 import { QuizBuilder } from './QuizBuilder'
 import {
   Field, LocaleTabs, NEXT_STATUS, Note, send, StatusBadge, titleOf, useAction, type Entity, type Loc, sendNow } from './ui'
@@ -115,7 +116,7 @@ function Level({ level, parentId, onOpen, onEdit }: { level: Level; parentId: st
 function EntityEditor({ level, id, onClose }: { level: Level; id: string; onClose: () => void }) {
   const item = useApi<Entity>(`/admin/${level}/${id}`)
   const [loc, setLoc] = useState<Loc>('tg')
-  const [mode, setMode] = useState<'info' | 'blocks' | 'quizzes'>('info')
+  const [mode, setMode] = useState<'info' | 'blocks' | 'code' | 'quizzes'>('info')
   if (item.error) return <ErrorState error={item.error} onRetry={item.reload} />
   if (!item.data) return <Loading />
   const e = item.data
@@ -130,10 +131,11 @@ function EntityEditor({ level, id, onClose }: { level: Level; id: string; onClos
         <div className="segmented" role="tablist">
           <button type="button" role="tab" aria-selected={mode === 'info'} onClick={() => setMode('info')}>Маълумот</button>
           <button type="button" role="tab" aria-selected={mode === 'blocks'} onClick={() => setMode('blocks')}>Матни дарс</button>
+          <button type="button" role="tab" aria-selected={mode === 'code'} onClick={() => setMode('code')}>CodeHub</button>
           <button type="button" role="tab" aria-selected={mode === 'quizzes'} onClick={() => setMode('quizzes')}>Тестҳо</button>
         </div>
       ) : null}
-      {mode === 'blocks' ? <BlocksEditor lessonId={id} /> : mode === 'quizzes' ? <LessonQuizzes lessonId={id} /> : (
+      {mode === 'blocks' ? <BlocksEditor lessonId={id} /> : mode === 'code' ? <CodeHub lessonId={id} /> : mode === 'quizzes' ? <LessonQuizzes lessonId={id} /> : (
         <>
           <LocaleTabs value={loc} onChange={setLoc} />
           <TranslationForm key={`${loc}-${e.id}`} level={level} entity={e} locale={loc} onSaved={item.reload} />

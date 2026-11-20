@@ -80,19 +80,21 @@ export function filterBundleForAge(bundle: Bundle, age: number | null): Bundle {
     const gated = gateBlocks(lt, age)
     lessons[id] = {
       ...gated,
+      quizzes: gated.quizzes ? titles(gated.quizzes, age) : gated.quizzes,
       prev_lesson_id: gated.prev_lesson_id && visibleLessons.has(gated.prev_lesson_id) ? gated.prev_lesson_id : null,
       next_lesson_id: gated.next_lesson_id && visibleLessons.has(gated.next_lesson_id) ? gated.next_lesson_id : null
     }
   }
   const schoolDetails: Bundle['schoolDetails'] = {}
   for (const [key, s] of Object.entries(bundle.schoolDetails)) {
-    schoolDetails[key] = { ...s, courses: titles(s.courses, age).filter((c) => courses[c.id] || !bundle.courses[c.id]), quizzes: titles(s.quizzes, age) }
+    // only courses this learner can open (an older bundle may list one whose data is missing)
+    schoolDetails[key] = { ...s, courses: titles(s.courses, age).filter((c) => courses[c.id]), quizzes: titles(s.quizzes, age) }
   }
   const quizzes: Bundle['quizzes'] = {}
   for (const [id, q] of Object.entries(bundle.quizzes)) {
     const { max, text } = readAgeTag(q.quiz.title)
     if (ageAllows(max, age)) quizzes[id] = max === null ? q : { ...q, quiz: { ...q.quiz, title: text } }
   }
-  const schools = bundle.schools.map((s) => ({ ...s, course_count: schoolDetails[s.slug]?.courses.length ?? s.course_count }))
+  const schools = bundle.schools.map((s) => ({ ...s, course_count: schoolDetails[s.slug]?.courses.length ?? 0 }))
   return { ...bundle, schools, schoolDetails, courses, lessons, quizzes }
 }

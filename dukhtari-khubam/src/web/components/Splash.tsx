@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 
 import { playIntro } from '../intro'
+import { preloadMascot } from './Mascot'
 import { useContent } from '../offline/content'
 import { useLearner } from '../offline/learner'
 import { hasPin } from '../offline/pin'
@@ -12,7 +13,7 @@ const MAX_MS = 6000
 
 /**
  * Takes away the opening screen (drawn in layout.tsx) once the first screen is ready: the catalogue
- * and the learner read from the phone and the fonts loaded — at least a moment, at most six seconds.
+ * and the learner read from the phone, the fonts and the girl's pictures loaded — at least a moment, at most six seconds.
  * The bar fills to the end, the screen fades, and the home screen's entrance plays. With a PIN the lock
  * comes first and the opening screen is simply removed.
  */
@@ -48,7 +49,9 @@ export function Splash() {
   useEffect(() => {
     if (!ready) return
     let cancelled = false
-    ;(document.fonts?.ready ?? Promise.resolve()).catch(() => undefined).then(() => {
+    // the fonts and the girl's pictures (she must never appear without them), each for a short while at most
+    const pictures = Promise.race([preloadMascot(), new Promise<void>((r) => setTimeout(r, 2500))])
+    Promise.all([(document.fonts?.ready ?? Promise.resolve()).catch(() => undefined), pictures]).then(() => {
       // performance.now() counts from the page's start: the opening screen stays at least MIN_MS
       setTimeout(() => { if (!cancelled) (window as { __dkSplash?: () => void }).__dkSplash?.() }, Math.max(0, MIN_MS - performance.now()))
     })

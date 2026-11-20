@@ -1,11 +1,14 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useRef, useState } from 'react'
 
+import { lessonTest, stageState } from '@/lib/stage'
 import { BlockView } from '@/web/components/Blocks'
 import { Icon } from '@/web/components/Icon'
 import { say } from '@/web/components/Mascot'
+import { StageDone } from '@/web/components/StageDone'
 import { Empty, Loading } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
@@ -28,6 +31,8 @@ function Lesson() {
   const saved = !!progress.bookmarks[id]?.on
   const done = !!progress.lessons[id]?.done
   const [read, setRead] = useState(0)
+  const [stageDone, setStageDone] = useState(false)
+  const router = useRouter()
   const maxRead = useRef(0)
   const readRef = useRef(readLesson)
   readRef.current = readLesson
@@ -59,7 +64,18 @@ function Lesson() {
   }, [l, id])
 
   if (!bundle) return loading ? <Loading /> : <p className="muted">{t('state.offline_empty')}</p>
-  if (!l) return <Empty title={t('state.empty_courses')} />
+  if (!l) return <Empty title={t('state.not_found')} />
+  const test = lessonTest(bundle, id)
+  /** A lesson without a test is finished by the button; the last one may finish the stage. */
+  const finish = () => {
+    const course = l.context.course.id
+    const before = stageState(bundle, progress, course)
+    completeLesson(id)
+    say('lessonDone')
+    const after = stageState(bundle, { ...progress, lessons: { ...progress.lessons, [id]: { ...progress.lessons[id], done: new Date().toISOString() } } }, course)
+    if (after.read && after.hasFinal && !after.finalPassed) router.push(`/quiz?final=${course}`)
+    else if (after.complete && !before.complete) setStageDone(true)
+  }
 
   return (
     <article className="reader" lang={l.locale} dir={l.locale === 'ar' ? 'rtl' : 'ltr'}>
@@ -94,10 +110,21 @@ function Lesson() {
       )}
 
       {!l.locked ? (
-        <button type="button" className="btn btn-soft" style={{ marginTop: 28 }} onClick={() => { completeLesson(id); say('lessonDone') }} disabled={done}>
-          <Icon name="check" size={18} /> {done ? t('lesson.completed') : t('lesson.mark_done')}
-        </button>
+        test ? (
+          // the lesson ends with its test: finishing the test finishes the lesson
+          <div className="lesson-end">
+            <Link href={`/quiz?id=${test}&lesson=${id}`} className="btn btn-lg btn-block">
+              <Icon name="check" size={18} /> {done ? t('lesson.retake_test') : t('lesson.mark_done')}
+            </Link>
+            {done ? null : <p className="muted lesson-end-hint">{t('lesson.test_hint')}</p>}
+          </div>
+        ) : (
+          <button type="button" className="btn btn-soft" style={{ marginTop: 28 }} onClick={finish} disabled={done}>
+            <Icon name="check" size={18} /> {done ? t('lesson.completed') : t('lesson.mark_done')}
+          </button>
+        )
       ) : null}
+      {stageDone ? <StageDone course={l.context.course.title} school={l.context.school.title} onClose={() => setStageDone(false)} /> : null}
 
       <nav className="reader-nav" aria-label={t('section.lessons')}>
         {l.prev_lesson_id ? (

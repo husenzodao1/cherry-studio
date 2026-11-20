@@ -309,7 +309,27 @@ export const uz: Partial<Record<UiKey, string>> = {
   'block.warning': "Diqqat",
   'block.audio': "Audio",
   'block.video': "Video",
-  'block.task': "Amaliy topshiriq"
+  'block.task': "Amaliy topshiriq",
+  'state.course_soon': "Bu kurs darslari tez orada qo‘shiladi",
+  'state.school_soon': "Kurslar tez orada qo‘shiladi",
+  'state.not_found': "Bu material hozircha mavjud emas",
+  'lesson.test_hint': "Darsdan so‘ng — qisqa test",
+  'lesson.retake_test': "Dars testini qayta topshirish",
+  'quiz.next_lesson': "Keyingi dars",
+  'quiz.to_course': "Kursga",
+  'final.title': "Bosqichning yakuniy testi",
+  'final.hint': "Har darsdan {n} tadan savol. Bosqichni tugatish uchun {p}% kerak",
+  'final.start': "Bosqich testini topshirish",
+  'final.retake': "Bosqich testini qayta topshirish",
+  'final.failed': "Bosqichni tugatish uchun {p}% kerak. Darslarni takrorlab, yana urinib ko‘ring",
+  'done.title': "Tabriklaymiz! Bosqich tugadi",
+  'done.sub': "Bu sertifikat sizniki",
+  'done.save': "Saqlash",
+  'done.share': "Dugonalar bilan ulashish",
+  'done.saved': "Galereyaga saqlandi",
+  'course.repeat': "Bosqichni takrorlash",
+  'image.open': "Rasmni to‘liq ko‘rish",
+  'source.label': "Manba"
 }
 
 export const tr: Partial<Record<UiKey, string>> = {
@@ -619,7 +639,27 @@ export const tr: Partial<Record<UiKey, string>> = {
   'block.warning': "Dikkat",
   'block.audio': "Ses",
   'block.video': "Video",
-  'block.task': "Uygulama görevi"
+  'block.task': "Uygulama görevi",
+  'state.course_soon': "Bu kursun dersleri yakında eklenecek",
+  'state.school_soon': "Kurslar yakında eklenecek",
+  'state.not_found': "Bu içerik şu anda mevcut değil",
+  'lesson.test_hint': "Dersten sonra — kısa bir test",
+  'lesson.retake_test': "Ders testini yeniden çöz",
+  'quiz.next_lesson': "Sonraki ders",
+  'quiz.to_course': "Kursa dön",
+  'final.title': "Aşamanın final testi",
+  'final.hint': "Her dersten {n} soru. Aşamayı bitirmek için %{p} gerekir",
+  'final.start': "Aşama testini çöz",
+  'final.retake': "Aşama testini yeniden çöz",
+  'final.failed': "Aşamayı bitirmek için %{p} gerekir. Dersleri tekrar edip yeniden deneyin",
+  'done.title': "Tebrikler! Aşama tamamlandı",
+  'done.sub': "Bu sertifika senin",
+  'done.save': "Kaydet",
+  'done.share': "Arkadaşlarla paylaş",
+  'done.saved': "Galeriye kaydedildi",
+  'course.repeat': "Aşamayı tekrarla",
+  'image.open': "Resmin tamamını aç",
+  'source.label': "Kaynak"
 }
 
 export const fa: Partial<Record<UiKey, string>> = {
@@ -928,7 +968,27 @@ export const fa: Partial<Record<UiKey, string>> = {
   'block.warning': "توجه",
   'block.audio': "صوت",
   'block.video': "ویدیو",
-  'block.task': "تمرین عملی"
+  'block.task': "تمرین عملی",
+  'state.course_soon': "درس‌های این دوره به‌زودی افزوده می‌شوند",
+  'state.school_soon': "دوره‌ها به‌زودی افزوده می‌شوند",
+  'state.not_found': "این مطلب اکنون در دسترس نیست",
+  'lesson.test_hint': "پس از درس — یک آزمون کوتاه",
+  'lesson.retake_test': "دوباره دادن آزمون درس",
+  'quiz.next_lesson': "درس بعدی",
+  'quiz.to_course': "بازگشت به دوره",
+  'final.title': "آزمون پایانی مرحله",
+  'final.hint': "از هر درس {n} پرسش. برای پایان مرحله {p}% لازم است",
+  'final.start': "دادن آزمون مرحله",
+  'final.retake': "دوباره دادن آزمون مرحله",
+  'final.failed': "برای پایان مرحله {p}% لازم است. درس‌ها را مرور کنید و دوباره بکوشید",
+  'done.title': "شادباش! مرحله به پایان رسید",
+  'done.sub': "این گواهی‌نامه از آن شماست",
+  'done.save': "ذخیره",
+  'done.share': "اشتراک با دوستان",
+  'done.saved': "در گالری ذخیره شد",
+  'course.repeat': "تکرار مرحله",
+  'image.open': "دیدن کامل تصویر",
+  'source.label': "منبع"
 }
 
 /** Dari (Afghanistan): close to Persian, with its own everyday words. */

@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 
+import { FINAL_PASS, PER_LESSON, stageState } from '@/lib/stage'
 import { ART } from '@/web/art'
 import { Header } from '@/web/components/Header'
-import { CourseDownload } from '@/web/components/CourseDownload'
 import { Icon } from '@/web/components/Icon'
-import { CertificateButton } from '@/web/components/Keepsakes'
+import { say } from '@/web/components/Mascot'
 import { Empty, Loading } from '@/web/components/States'
 import { useContent, type QuizCard } from '@/web/offline/content'
 import { courseLessonIds, courseProgress, useLearner } from '@/web/offline/learner'
@@ -36,13 +36,25 @@ function Course() {
   const { t } = usePrefs()
   const { bundle, loading } = useContent()
   const { progress: learnerProgress } = useLearner()
+  const known = !!bundle?.courses[id]
+  // the girl welcomes her to a course, once per course while the app is open
+  useEffect(() => {
+    if (!known) return
+    try {
+      if (sessionStorage.getItem(`dk.course:${id}`)) return
+      sessionStorage.setItem(`dk.course:${id}`, '1')
+    } catch { /* storage blocked: she may say it again */ }
+    const timer = setTimeout(() => say('courseStart'), 900)
+    return () => clearTimeout(timer)
+  }, [id, known])
   if (!bundle) return <><Header back="/schools" />{loading ? <Loading /> : <Empty icon="info" title={t('state.offline_empty')} />}</>
   const c = bundle.courses[id]
-  if (!c) return <><Header back="/schools" /><Empty title={t('state.empty_courses')} /></>
+  if (!c) return <><Header back="/schools" /><Empty title={t('state.not_found')} /></>
   const progress = courseProgress(bundle, learnerProgress, c.id)
   const ids = courseLessonIds(bundle, c.id)
   const resume = ids.find((lid) => learnerProgress.lessons[lid] && !learnerProgress.lessons[lid].done)
   const start = resume ?? ids.find((lid) => !learnerProgress.lessons[lid]?.done) ?? ids[0]
+  const stage = stageState(bundle, learnerProgress, c.id)
   return (
     <>
       <Header back={c.school ? `/school?key=${encodeURIComponent(c.school.slug)}` : '/schools'} title={c.school?.title} />
@@ -66,15 +78,24 @@ function Course() {
         </div>
         <span className="pct-circle glass">{progress.percent}%</span>
       </div>
-      {progress.total > 0 && progress.percent === 100 ? (
-        <div className="glass card-pad stack cert-card" style={{ marginTop: 14, alignItems: 'center', textAlign: 'center', gap: 10 }}>
-          <img src="/assets/3d/glass-lotus.webp" alt="" aria-hidden="true" className="bloom-in" style={{ width: 120 }} />
-          <b>{t('cert.congrats')}</b>
-          <CertificateButton course={c.title} school={c.school?.title ?? ''} date={ids.map((lid) => learnerProgress.lessons[lid]?.done ?? '').sort().at(-1) ?? new Date().toISOString()} />
+      {/* every lesson read: the stage's final test (two questions from every lesson test) */}
+      {stage.read && stage.hasFinal ? (
+        <div className={`glass card-pad stack final-card${stage.finalPassed ? ' is-passed' : ''}`} style={{ marginTop: 14, alignItems: 'center', textAlign: 'center', gap: 10 }}>
+          <img src="/assets/3d/glass-lotus.webp" alt="" aria-hidden="true" className="bloom-in" style={{ width: 96 }} />
+          <b>{t('final.title')}</b>
+          <span className="muted" style={{ fontSize: '0.88em' }}>{t('final.hint').replace('{n}', String(PER_LESSON)).replace('{p}', String(FINAL_PASS))}</span>
+          {learnerProgress.quizzes[`final:${c.id}`] ? <span className="chip">{Math.round(learnerProgress.quizzes[`final:${c.id}`].best)}%</span> : null}
+          <Link href={`/quiz?final=${c.id}`} className={stage.finalPassed ? 'btn btn-soft btn-block' : 'btn btn-block'}>
+            {stage.finalPassed ? t('final.retake') : t('final.start')} <Icon name="arrow" size={18} />
+          </Link>
         </div>
       ) : null}
-      <CourseDownload lessons={ids.map((lid) => bundle.lessons[lid]).filter((l) => !!l)} />
-      {start ? (
+      {stage.complete && ids[0] ? (
+        // the stage is finished: it can be gone through again, lessons and tests
+        <Link href={`/lesson?id=${ids[0]}`} className="btn btn-block btn-lg" style={{ marginTop: 14 }}>
+          <Icon name="refresh" size={18} /> {t('course.repeat')}
+        </Link>
+      ) : start && !stage.read ? (
         <Link href={`/lesson?id=${start}`} className="btn btn-block btn-lg" style={{ marginTop: 14 }}>
           {resume || progress.completed ? t('action.continue') : t('action.start_course')} <Icon name="arrow" size={18} />
         </Link>
@@ -97,7 +118,7 @@ function Course() {
       ) : null}
 
       <div className="section stagger">
-        {c.modules.length === 0 ? <Empty title={t('state.empty_courses')} /> : c.modules.map((m, mi) => (
+        {c.modules.length === 0 ? <Empty title={t('state.course_soon')} /> : c.modules.map((m, mi) => (
           <section key={m.id} className="glass module" aria-labelledby={`m-${m.id}`}>
             <div className="module-head">
               <span className="module-num">{String(mi + 1).padStart(2, '0')}</span>

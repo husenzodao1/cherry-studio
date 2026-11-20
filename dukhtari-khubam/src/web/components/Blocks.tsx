@@ -2,12 +2,16 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+
+import { frameOf } from '@/lib/sources'
 
 import { api } from '../api'
 import { useOfflineSrc } from '../offline/media'
 import type { UiKey } from '../i18n'
 import { usePrefs } from '../prefs'
 import { Icon, type IconName } from './Icon'
+import { SourceChip } from './SourceChip'
 import { YouTube } from './YouTube'
 
 /** Renderer for CMS content blocks (schema v1) — the same structure Android renders natively. */
@@ -81,18 +85,44 @@ function useAssetUrl(asset?: Asset | null): string | null {
   return asset?.protected ? signed : asset?.url ?? null
 }
 
-function Picture({ asset, caption, full }: { asset?: Asset; caption?: string; full?: boolean }) {
+/**
+ * A picture in its frame (16:9 or 1:1, filled edge to edge); a tap shows it whole. Where it comes from
+ * sits on it as a small chip.
+ */
+function Picture({ asset, caption, full, source }: { asset?: Asset; caption?: string; full?: boolean; source?: { title?: string; url?: string } }) {
+  const { t } = usePrefs()
   const url = useOfflineSrc(useAssetUrl(asset))
+  const [natural, setNatural] = useState<number | null>(null)
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
   if (!asset) return null
+  const known = asset.width && asset.height ? asset.width / asset.height : null
+  const frame = frameOf(known ?? natural)
   return (
     <figure style={full ? { marginInline: 'calc(50% - 50vw + 8px)' } : undefined}>
-      {url ? (
-        <img src={url} alt={asset.alt ?? ''} loading="lazy" decoding="async" width={asset.width ?? undefined}
-          height={asset.height ?? undefined} style={{ height: 'auto' }} className="fade"
-          ref={(el) => { if (el?.complete && el.naturalWidth) el.classList.add('is-ready') }}
-          onLoad={(e) => e.currentTarget.classList.add('is-ready')} />
-      ) : <div className="skeleton" style={{ aspectRatio: '16 / 10' }} />}
+      <div className="pic" style={{ aspectRatio: frame }} data-frame={frame === '1 / 1' ? 'square' : 'wide'}>
+        {url ? (
+          <button type="button" className="pic-open" aria-label={t('image.open')} onClick={() => setOpen(true)}>
+            <img src={url} alt={asset.alt ?? ''} loading="lazy" decoding="async" className="fade"
+              ref={(el) => { if (el?.complete && el.naturalWidth) el.classList.add('is-ready') }}
+              onLoad={(e) => { e.currentTarget.classList.add('is-ready'); setNatural(e.currentTarget.naturalWidth / Math.max(1, e.currentTarget.naturalHeight)) }} />
+          </button>
+        ) : <div className="skeleton" style={{ height: '100%' }} />}
+        {source?.title || source?.url ? <SourceChip title={source.title} url={source.url} className="on-media" /> : null}
+      </div>
       {caption || asset.caption ? <figcaption>{caption ?? asset.caption}</figcaption> : null}
+      {open && url ? createPortal(
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label={asset.alt ?? t('image.open')} onClick={() => setOpen(false)}>
+          <img src={url} alt={asset.alt ?? ''} />
+          <button type="button" className="lightbox-x" aria-label={t('action.close')}><Icon name="x" size={20} /></button>
+        </div>,
+        document.body
+      ) : null}
     </figure>
   )
 }
@@ -165,6 +195,9 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
   const p = block.props ?? {}
   const c = block.content ?? {}
   const a = (id?: string) => (id ? assets[id] : undefined)
+  // where a picture, video or audio comes from (content.source: a name or a link; props.source_url)
+  const src = c.source || p.source_url ? { title: c.source, url: p.source_url } : undefined
+  const chip = src ? <SourceChip title={src.title} url={src.url} /> : null
   switch (block.type) {
     case 'heading':
       return <RichText value={c as Rich} as={p.level === 3 ? 'h3' : 'h2'} />
@@ -186,9 +219,9 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return <ol start={p.start}>{(c.items ?? []).map((r: Rich, i: number) => <li key={i}><RichText value={r} as="span" /></li>)}</ol>
     case 'image':
     case 'illustration':
-      return <Picture asset={a(p.asset_id)} caption={c.caption} />
+      return <Picture asset={a(p.asset_id)} caption={c.caption} source={src} />
     case 'full_width_media':
-      return <Picture asset={a(p.asset_id)} caption={c.caption} full />
+      return <Picture asset={a(p.asset_id)} caption={c.caption} full source={src} />
     case 'gallery':
       return (
         <div className="scroller" role="group" aria-label="Галерея">
@@ -199,20 +232,21 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, alignItems: 'center' }}>
           {p.media_side === 'end' ? <RichText value={c.text} /> : null}
-          <Picture asset={a(p.asset_id)} caption={c.caption} />
+          <Picture asset={a(p.asset_id)} caption={c.caption} source={src} />
           {p.media_side !== 'end' ? <RichText value={c.text} /> : null}
         </div>
       )
     case 'video':
-      return <Video asset={a(p.asset_id)} poster={a(p.poster_asset_id)} title={c.title} caption={c.caption} />
+      return <>{<Video asset={a(p.asset_id)} poster={a(p.poster_asset_id)} title={c.title} caption={c.caption} />}{chip}</>
     case 'audio':
-      return <Audio asset={a(p.asset_id)} title={c.title} speaker={c.speaker} />
+      return <>{<Audio asset={a(p.asset_id)} title={c.title} speaker={c.speaker} />}{chip}</>
     case 'youtube':
       return typeof p.video_id === 'string' ? (
         <div className="media-block stack" style={{ gap: 8 }}>
           <BlockLabel icon="play" kind="video" />
           <YouTube id={p.video_id} start={p.start} title={c.title} />
           {c.caption ? <p className="muted" style={{ fontSize: '0.88em' }}>{c.caption}</p> : null}
+          {chip}
         </div>
       ) : null
     case 'quote':
@@ -220,7 +254,12 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
         <blockquote className="quote" style={{ margin: 0 }}>
           <span aria-hidden="true" style={{ fontSize: '2em', lineHeight: 0.5 }}>“</span>
           <RichText value={c.text} as="span" />
-          {c.author || c.source ? <cite>{[c.author, c.source].filter(Boolean).join(' · ')}</cite> : null}
+          {c.author || c.source ? (
+            <cite className="quote-cite">
+              {c.author ? <span>{c.author}</span> : null}
+              {c.source ? <SourceChip title={c.source} /> : null}
+            </cite>
+          ) : null}
         </blockquote>
       )
     case 'callout':
@@ -245,14 +284,17 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
           </table>
         </div>
       )
-    case 'source':
+    case 'source': {
+      // the source as a chip (its icon and name); author, publisher, year and pages quietly after it
+      // a site's chip shows the site's name, so the source's own title follows it
+      const more = [p.url && c.title !== p.url ? c.title : null, c.author, c.publisher, c.year, c.pages].filter(Boolean).join(', ')
       return (
-        <p className="muted" style={{ fontSize: '0.9em' }}>
-          <b>{t('lesson.source')}: </b>
-          {p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer">{c.title}</a> : c.title}
-          {[c.author, c.publisher, c.year, c.pages].filter(Boolean).length ? `, ${[c.author, c.publisher, c.year, c.pages].filter(Boolean).join(', ')}` : ''}
+        <p className="src-line" aria-label={t('source.label')}>
+          <SourceChip title={c.title} url={p.url} />
+          {more ? <span className="muted">{more}</span> : null}
         </p>
       )
+    }
     case 'file': {
       const f = a(p.asset_id)
       return f?.url ? <a className="chip" href={f.url} download><Icon name="down" size={16} />{c.label ?? f.title ?? f.path.split('/').pop()}</a> : null

@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { Suspense, useMemo, useRef, useState } from 'react'
 
 import { afterQuiz, duringQuiz } from '@/lib/mascot'
+import { courseOfLesson, FINAL_PASS, finalQuiz, PER_LESSON, stageState } from '@/lib/stage'
 
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { say } from '@/web/components/Mascot'
+import { StageDone } from '@/web/components/StageDone'
 import { Empty, Loading } from '@/web/components/States'
 import { useContent, type OfflineOption as Option, type OfflineQuiz } from '@/web/offline/content'
 import { gradeQuestion, gradeQuiz, shuffled, type Answer, type QuestionResult } from '@/web/offline/grade'
@@ -25,14 +27,23 @@ export default function QuizPage() {
   return <Suspense fallback={<Loading />}><Quiz /></Suspense>
 }
 
+/**
+ * A test: a lesson's own test (?id=…&lesson=…: finishing it finishes the lesson) or the final test of a
+ * stage (?final=<course>: two random questions from every lesson test, drawn when it opens).
+ */
 function Quiz() {
   const id = useQueryParam('id')
+  const lesson = useQueryParam('lesson')
+  const final = useQueryParam('final')
   const { t } = usePrefs()
   const { bundle, loading } = useContent()
-  const quiz = bundle?.quizzes[id]
+  const quiz = useMemo(() => (bundle ? (final ? finalQuiz(bundle, final, t('final.title')) : bundle.quizzes[id]) ?? null : null),
+    // drawn once per opening: answering does not change the questions
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [bundle, final, id])
   if (!bundle) return <><Header back="/" />{loading ? <Loading /> : <Empty icon="info" title={t('state.offline_empty')} />}</>
-  if (!quiz) return <><Header back="/" /><Empty title={t('state.empty_courses')} /></>
-  return <Player key={id} quiz={quiz} />
+  if (!quiz) return <><Header back="/" /><Empty title={t('state.not_found')} /></>
+  return <Player key={final || id} quiz={quiz} lessonId={lesson || null} finalOf={final || null} />
 }
 
 function revealOf(quiz: OfflineQuiz, qid: string, r: QuestionResult, show: Show): Reveal {
@@ -46,9 +57,13 @@ function revealOf(quiz: OfflineQuiz, qid: string, r: QuestionResult, show: Show)
   }
 }
 
-function Player({ quiz }: { quiz: OfflineQuiz }) {
+function Player({ quiz, lessonId, finalOf }: { quiz: OfflineQuiz; lessonId: string | null; finalOf: string | null }) {
   const { t } = usePrefs()
-  const { recordQuiz } = useLearner()
+  const { bundle } = useContent()
+  const { recordQuiz, completeLesson } = useLearner()
+  const [stageDone, setStageDone] = useState(false)
+  // back to where the test was opened from: the lesson, or the stage's course
+  const back = lessonId ? `/lesson?id=${lessonId}` : finalOf ? `/course?id=${finalOf}` : '/'
   const [round, setRound] = useState(0)
   const questions = useMemo(() => {
     const ordered = quiz.settings.shuffle_questions ? shuffled(quiz.questions) : quiz.questions
@@ -84,7 +99,7 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
   if (result) {
     return (
       <section className="stack stagger" style={{ maxWidth: 680, margin: '0 auto' }} aria-live="polite">
-        <Header back="/" title={policy.title} />
+        <Header back={back} title={policy.title} />
         <div className="glass card-pad stack" style={{ alignItems: 'center', textAlign: 'center' }}>
           <div className="eyebrow">{t('quiz.score')}</div>
           <div className="pct-circle glass" style={{ width: 110, height: 110, fontSize: '1.8rem' }}>{Math.round(result.percent)}%</div>
@@ -103,8 +118,12 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
             {q.explanation ? <p className="muted" style={{ margin: 0 }}><b>{t('quiz.explanation')}: </b>{q.explanation}</p> : null}
           </div>
         ))}
-        {quiz.settings.allow_retry ? <button className="btn btn-lg" onClick={start}>{t('action.retry_quiz')}</button> : null}
-        <Link href="/" className="btn btn-soft">{t('nav.home')}</Link>
+        {finalOf && !result.passed ? <p className="muted" style={{ margin: 0, textAlign: 'center' }}>{t('final.failed').replace('{p}', String(FINAL_PASS))}</p> : null}
+        <NextSteps lessonId={lessonId} finalOf={finalOf} passed={result.passed} />
+        {quiz.settings.allow_retry ? <button className="btn btn-soft btn-lg" onClick={start}>{t('action.retry_quiz')}</button> : null}
+        {stageDone && finalOf && bundle?.courses[finalOf] ? (
+          <StageDone course={bundle.courses[finalOf].title} school={bundle.courses[finalOf].school?.title ?? ''} onClose={() => setStageDone(false)} />
+        ) : null}
       </section>
     )
   }
@@ -112,11 +131,12 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
   if (!started) {
     return (
       <div className="stack" style={{ maxWidth: 680, margin: '0 auto' }}>
-        <Header back="/" />
+        <Header back={back} />
         <div className="glass card-pad stack question" style={{ textAlign: 'center', alignItems: 'center', marginTop: 24 }}>
           <span className="note-icon"><Icon name="check" size={26} /></span>
           <h1 className="h-page" style={{ margin: 0 }}>{policy.title}</h1>
           {policy.instructions ? <p className="muted" style={{ margin: 0 }}>{policy.instructions}</p> : null}
+          {finalOf ? <p className="muted" style={{ margin: 0 }}>{t('final.hint').replace('{n}', String(PER_LESSON)).replace('{p}', String(FINAL_PASS))}</p> : null}
           <span className="muted">{questions.length} {t('quiz.question').toLowerCase()}</span>
         </div>
         <button className="btn btn-lg btn-block" onClick={start} disabled={!questions.length}>{t('action.start')} <Icon name="forward" size={18} /></button>
@@ -150,7 +170,11 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
     const g = gradeQuiz(questions, quiz.grading, answers, quiz.locale)
     const passed = g.percent >= policy.pass_score_percent
     recordQuiz(quiz.quiz.id, g.percent, passed)
+    // the lesson's test taken: the lesson is done
+    if (lessonId) completeLesson(lessonId)
     say(afterQuiz(g.percent, passed))
+    // the stage's final test passed: the stage is finished
+    if (finalOf && passed) setStageDone(true)
     const end = mode('after_submit')
     setResult({
       score: g.score, max_score: g.max_score, percent: g.percent, passed, completion_text: quiz.settings.completion_text,
@@ -174,7 +198,7 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
       <header className="topbar">
         {index > 0
           ? <button type="button" className="icon-btn" aria-label={t('action.prev')} onClick={() => setIndex((i) => Math.max(0, i - 1))}><Icon name="back" /></button>
-          : <Link href="/" className="icon-btn" aria-label={t('action.close')}><Icon name="back" /></Link>}
+          : <Link href={back} className="icon-btn" aria-label={t('action.close')}><Icon name="back" /></Link>}
         <div className="quiz-bar">
           <div className="progress" role="progressbar" aria-valuenow={index + 1} aria-valuemin={1} aria-valuemax={total} aria-label={`${t('quiz.question')} ${index + 1} ${t('quiz.of')} ${total}`}>
             <span style={{ width: `${((index + 1) / total) * 100}%` }} />
@@ -260,4 +284,24 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
       </div>
     </section>
   )
+}
+
+/**
+ * Where to go after a test: after a lesson's test, the next lesson — or, when every lesson of the stage
+ * is done, the stage's final test; after the final test, back to the course.
+ */
+function NextSteps({ lessonId, finalOf, passed }: { lessonId: string | null; finalOf: string | null; passed: boolean }) {
+  const { t } = usePrefs()
+  const { bundle } = useContent()
+  const { progress } = useLearner()
+  if (!bundle) return null
+  const course = finalOf ?? (lessonId ? courseOfLesson(bundle, lessonId) : null)
+  if (!course) return <Link href="/" className="btn btn-lg">{t('nav.home')}</Link>
+  const stage = stageState(bundle, progress, course)
+  const next = lessonId ? bundle.lessons[lessonId]?.next_lesson_id : null
+  if (lessonId && stage.read && stage.hasFinal && !stage.finalPassed) {
+    return <Link href={`/quiz?final=${course}`} className="btn btn-lg">{t('final.start')} <Icon name="arrow" size={18} /></Link>
+  }
+  if (lessonId && next) return <Link href={`/lesson?id=${next}`} className="btn btn-lg">{t('quiz.next_lesson')} <Icon name="arrow" size={18} /></Link>
+  return <Link href={`/course?id=${course}`} className={finalOf && passed ? 'btn btn-soft btn-lg' : 'btn btn-lg'}>{t('quiz.to_course')}</Link>
 }

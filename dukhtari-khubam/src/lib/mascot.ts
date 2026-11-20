@@ -6,6 +6,7 @@
 
 export type Moment =
   | 'entry' | 'comeback' | 'praise' | 'stop' | 'perfect' | 'passed' | 'failed' | 'beforeQuiz' | 'lessonDone' | 'review'
+  | 'courseStart' | 'stageDone'
 
 /** Her pictures (public/assets/mascot/<pose>.webp), one per emotion. */
 export const POSES: Record<Moment, string[]> = {
@@ -18,7 +19,9 @@ export const POSES: Record<Moment, string[]> = {
   failed: ['10-heart'],
   beforeQuiz: ['12-cheer'],
   lessonDone: ['08-yes', '09-book', '06-point'],
-  review: ['05-think']
+  review: ['05-think'],
+  courseStart: ['06-point', '01-ok'],
+  stageDone: ['08-yes', '11-clap']
 }
 
 type Sayings = Record<Moment, string[]>
@@ -80,6 +83,15 @@ const tg: Sayings = {
   review: [
     'Биёед такрор кунем — такрор модари илм аст.',
     'Ин мавзӯъҳоро дар хотир доред? Санҷем!'
+  ],
+  courseStart: [
+    'Интихоби олӣ! Биёед ин этапро якҷоя оғоз кунем.',
+    'Курси нав — қадами нав. Ман бо шумо ҳастам!',
+    'Аз дарси аввал оғоз мекунем — оҳиста ва бо диққат.'
+  ],
+  stageDone: [
+    'Табрик! Шумо тамоми этапро анҷом додед!',
+    'Офарин! Ин этап бо муваффақият тамом шуд — шаҳодатнома аз они шумост.'
   ]
 }
 
@@ -140,6 +152,15 @@ const ru: Sayings = {
   review: [
     'Давайте повторим — повторение мать учения.',
     'Помните эти темы? Проверим!'
+  ],
+  courseStart: [
+    'Отличный выбор! Давайте начнём этот этап вместе.',
+    'Новый курс — новый шаг. Я рядом!',
+    'Начнём с первого урока — спокойно и внимательно.'
+  ],
+  stageDone: [
+    'Поздравляю! Вы прошли весь этап!',
+    'Браво! Этап успешно завершён — сертификат ваш.'
   ]
 }
 
@@ -200,6 +221,15 @@ const en: Sayings = {
   review: [
     'Let’s review — repetition is the mother of learning.',
     'Do you remember these topics? Let’s check!'
+  ],
+  courseStart: [
+    'Great choice! Let’s start this stage together.',
+    'A new course is a new step. I’m with you!',
+    'We begin with the first lesson — calmly and carefully.'
+  ],
+  stageDone: [
+    'Congratulations! You finished the whole stage!',
+    'Bravo! The stage is complete — the certificate is yours.'
   ]
 }
 
@@ -260,6 +290,15 @@ const uz: Sayings = {
   review: [
     'Keling, takrorlaymiz — takror bilimning onasi.',
     'Bu mavzular esingizdami? Tekshiramiz!'
+  ],
+  courseStart: [
+    'Ajoyib tanlov! Keling, bu bosqichni birga boshlaymiz.',
+    'Yangi kurs — yangi qadam. Men siz bilanman!',
+    'Birinchi darsdan boshlaymiz — xotirjam va diqqat bilan.'
+  ],
+  stageDone: [
+    'Tabriklayman! Siz butun bosqichni tugatdingiz!',
+    'Barakalla! Bosqich muvaffaqiyatli tugadi — sertifikat sizniki.'
   ]
 }
 
@@ -320,6 +359,15 @@ const tr: Sayings = {
   review: [
     'Haydi tekrar edelim — tekrar, öğrenmenin anasıdır.',
     'Bu konuları hatırlıyor musun? Bir bakalım!'
+  ],
+  courseStart: [
+    'Harika bir seçim! Bu aşamaya birlikte başlayalım.',
+    'Yeni bir kurs, yeni bir adım. Yanındayım!',
+    'İlk dersle başlıyoruz — sakin ve dikkatle.'
+  ],
+  stageDone: [
+    'Tebrikler! Bütün aşamayı bitirdin!',
+    'Bravo! Aşama başarıyla tamamlandı — sertifika senin.'
   ]
 }
 
@@ -380,6 +428,15 @@ const fa: Sayings = {
   review: [
     'بیایید مرور کنیم — تکرار مادر دانش است.',
     'این موضوع‌ها را به یاد دارید؟ بیایید ببینیم!'
+  ],
+  courseStart: [
+    'انتخاب عالی! بیایید این مرحله را با هم آغاز کنیم.',
+    'دوره‌ای تازه، گامی تازه. من کنار شما هستم!',
+    'از درس نخست آغاز می‌کنیم — آرام و با دقت.'
+  ],
+  stageDone: [
+    'شادباش! شما کل مرحله را به پایان رساندید!',
+    'آفرین! مرحله با موفقیت به پایان رسید — گواهی‌نامه از آن شماست.'
   ]
 }
 
@@ -417,13 +474,15 @@ export function withName(text: string, name: string | null | undefined): string 
   return text.replace(/^\{name\},\s*/, '').replace(/,\s*\{name\}/g, '').replaceAll('{name}', '').replace(/^\p{Ll}/u, (c) => c.toUpperCase())
 }
 
-/** The moment to greet with on opening the app: once a day; after three days or more away, "welcome back". */
-export function greeting(today: string, lastDay: string | null): Moment | null {
-  if (lastDay === today) return null
+/** The moment to greet with on opening the app: after three days or more away "welcome back", else hello. */
+export function greeting(today: string, lastDay: string | null): Moment {
   if (!lastDay) return 'entry'
   const days = (Date.parse(today) - Date.parse(lastDay)) / 86_400_000
   return days >= 3 ? 'comeback' : 'entry'
 }
+
+/** Every picture of hers, to load before she first appears. */
+export const ALL_POSES = [...new Set(Object.values(POSES).flat())]
 
 /** The moment after a finished test. */
 export function afterQuiz(percent: number, passed: boolean): Moment {

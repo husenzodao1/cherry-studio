@@ -11,7 +11,7 @@ const QUIZ = {
   grading: Object.fromEntries(['1', '2', '3'].map((id) => [id, grading(id)]))
 }
 
-test('she greets once a day, says "stop" after two wrong answers in a row and reacts to the result', async ({ page, server: _, errors }) => {
+test('she greets on opening the app (once per opening), says "stop" after two wrong answers in a row and reacts to the result', async ({ page, server: _, errors }) => {
   await page.route('**/api/v1/bundle**', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...BUNDLE, quizzes: { qz: QUIZ } }) }))
   await signedIn(page)
   await page.goto('/')

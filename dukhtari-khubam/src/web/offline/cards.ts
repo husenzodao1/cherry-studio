@@ -1,6 +1,6 @@
 'use client'
 
-import { Capacitor } from '@capacitor/core'
+import { Capacitor, registerPlugin } from '@capacitor/core'
 
 import { formatCode } from '@/lib/progress'
 
@@ -157,6 +157,23 @@ export async function savePicture(b: Blob, fileName: string, title: string): Pro
   const file = new File([b], fileName, { type: 'image/png' })
   if (navigator.canShare?.({ files: [file] })) {
     await navigator.share({ title, files: [file] }).catch(() => undefined)
+    return
+  }
+  const url = URL.createObjectURL(b)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName
+  a.click()
+  setTimeout(() => URL.revokeObjectURL(url), 5000)
+}
+
+/** The Android app's own saver (GallerySaverPlugin.java): writes the PNG to Pictures/Духтари хубам. */
+const GallerySaver = registerPlugin<{ savePng(o: { data: string; fileName: string }): Promise<void> }>('GallerySaver')
+
+/** Saves a picture to the phone's gallery (in a browser: downloads it). */
+export async function saveToGallery(b: Blob, fileName: string): Promise<void> {
+  if (Capacitor.isNativePlatform()) {
+    await GallerySaver.savePng({ data: await toBase64(b), fileName })
     return
   }
   const url = URL.createObjectURL(b)

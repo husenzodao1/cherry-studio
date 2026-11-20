@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 import { streak } from '@/lib/progress'
+import { finalId, stageState } from '@/lib/stage'
 import { Avatar } from '@/web/components/Header'
 import { CertificateButton } from '@/web/components/Keepsakes'
 import { Icon } from '@/web/components/Icon'
@@ -75,10 +76,12 @@ export default function Profile() {
   }).filter((s) => s.percent > 0)
   const achievements = bundle?.achievements ?? []
   // finished courses, newest first, with the day their last lesson was done
+  // a certificate for every finished stage: lessons read and, when it has one, the final test passed
   const finished = Object.values(bundle?.courses ?? {}).flatMap((c) => {
+    if (!bundle || !stageState(bundle, progress, c.id).complete) return []
     const ids = c.modules.flatMap((m) => m.topics.flatMap((tp) => tp.lessons.filter((l) => !l.locked).map((l) => l.id)))
-    if (!ids.length || !ids.every((id) => progress.lessons[id]?.done)) return []
-    return [{ id: c.id, title: c.title, school: c.school?.title ?? '', date: ids.map((id) => progress.lessons[id].done!).sort().at(-1)! }]
+    const dates = [...ids.map((id) => progress.lessons[id]?.done ?? ''), progress.quizzes[finalId(c.id)]?.at ?? '']
+    return [{ id: c.id, title: c.title, school: c.school?.title ?? '', date: dates.sort().at(-1)! }]
   }).sort((a, b) => b.date.localeCompare(a.date))
   const dark = isDarkTheme(prefs.theme)
 

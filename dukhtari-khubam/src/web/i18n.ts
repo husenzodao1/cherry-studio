@@ -221,7 +221,27 @@ const tg = {
   'block.warning': "Диққат",
   'block.audio': "Аудио",
   'block.video': "Видео",
-  'block.task': "Вазифаи амалӣ"
+  'block.task': "Вазифаи амалӣ",
+  'state.course_soon': "Дарсҳои ин курс ба наздикӣ илова мешаванд",
+  'state.school_soon': "Курсҳо ба наздикӣ илова мешаванд",
+  'state.not_found': "Ин мавод ҳоло дастрас нест",
+  'lesson.test_hint': "Пас аз анҷом — тести кӯтоҳи дарс",
+  'lesson.retake_test': "Тести дарсро аз нав супоридан",
+  'quiz.next_lesson': "Дарси навбатӣ",
+  'quiz.to_course': "Ба курс",
+  'final.title': "Тести пурраи этап",
+  'final.hint': "Аз ҳар дарс {n} савол. Барои анҷоми этап {p}% лозим аст",
+  'final.start': "Супоридани тести этап",
+  'final.retake': "Тести этапро аз нав супоридан",
+  'final.failed': "Барои анҷоми этап {p}% лозим аст. Дарсҳоро такрор карда, боз кӯшиш кунед",
+  'done.title': "Табрик! Этап анҷом ёфт",
+  'done.sub': "Ин шаҳодатнома аз они шумост",
+  'done.save': "Сабт",
+  'done.share': "Мубодила ба дӯстон",
+  'done.saved': "Ба галерея сабт шуд",
+  'course.repeat': "Такрори этап",
+  'image.open': "Расмро пурра дидан",
+  'source.label': "Манбаъ"
 }
 
 export type UiKey = keyof typeof tg
@@ -475,7 +495,27 @@ const ru: Partial<Record<UiKey, string>> = {
   'profile.courses': "Курсы",
   'profile.quizzes': "Тесты",
   'profile.badges': "Значки",
-  'profile.tagline': "Духтари хубам"
+  'profile.tagline': "Духтари хубам",
+  'state.course_soon': "Уроки этого курса скоро появятся",
+  'state.school_soon': "Курсы скоро появятся",
+  'state.not_found': "Этот материал сейчас недоступен",
+  'lesson.test_hint': "После урока — короткий тест",
+  'lesson.retake_test': "Пройти тест урока заново",
+  'quiz.next_lesson': "Следующий урок",
+  'quiz.to_course': "К курсу",
+  'final.title': "Итоговый тест этапа",
+  'final.hint': "По {n} вопроса из каждого урока. Для завершения этапа нужно {p}%",
+  'final.start': "Пройти тест этапа",
+  'final.retake': "Пройти тест этапа заново",
+  'final.failed': "Для завершения этапа нужно {p}%. Повторите уроки и попробуйте ещё раз",
+  'done.title': "Поздравляем! Этап пройден",
+  'done.sub': "Этот сертификат — ваш",
+  'done.save': "Сохранить",
+  'done.share': "Поделиться с подругами",
+  'done.saved': "Сохранено в галерею",
+  'course.repeat': "Повторить этап",
+  'image.open': "Открыть изображение целиком",
+  'source.label': "Источник"
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, en, uz, tr, fa, prs }

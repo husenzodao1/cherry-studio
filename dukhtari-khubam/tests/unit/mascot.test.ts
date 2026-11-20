@@ -32,8 +32,8 @@ describe('mascot sayings', () => {
     expect(withName('Салом, {name}! Шуморо пазмон шудем.', null)).toBe('Салом! Шуморо пазмон шудем.')
   })
 
-  it('greets once a day, and welcomes back after three days away', () => {
-    expect(greeting('2026-11-20', '2026-11-20')).toBeNull()
+  it('greets on every opening, and welcomes back after three days away', () => {
+    expect(greeting('2026-11-20', '2026-11-20')).toBe('entry')
     expect(greeting('2026-11-20', null)).toBe('entry')
     expect(greeting('2026-11-20', '2026-11-19')).toBe('entry')
     expect(greeting('2026-11-20', '2026-11-17')).toBe('comeback')

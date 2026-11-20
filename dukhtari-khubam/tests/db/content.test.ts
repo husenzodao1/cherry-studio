@@ -32,7 +32,8 @@ describe('catalog & RBAC', () => {
       'Маърифати динӣ', 'Одоб ва ахлоқ', 'Фарҳанги тоҷик', 'Оила ва муносибатҳо',
       'Илм ва саломатӣ', 'Рушди шахсият', 'Зиндагии муосир'
     ])
-    expect(schools[0].course_count).toBe(1)
+    // the published test course has no lesson yet: it is not counted (catalogue.test.ts)
+    expect(schools[0].course_count).toBe(0)
   })
 
   it('hides drafts from readers and lets staff see them', async () => {

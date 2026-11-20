@@ -38,6 +38,11 @@ async function pool<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>
 }
 
 const optional = async <T>(p: Promise<T>): Promise<T | null> => p.catch(() => null)
+/** Like optional, but a part that fails is written to the server log (what was dropped, and why). */
+const logged = <T>(what: string) => async (p: Promise<T>): Promise<T | null> => p.catch((e: unknown) => {
+  console.error('[bundle] dropped', what, e instanceof Error ? e.message : String(e))
+  return null
+})
 
 export async function buildBundle(sb: SupabaseClient, locale: string) {
   const L = { p_locale: locale }
@@ -54,10 +59,17 @@ export async function buildBundle(sb: SupabaseClient, locale: string) {
   ])
   const schoolDetails = (await pool(schools, 6, (s) => optional(call<Json>(sb, 'api_school', { p_key: s.slug, ...L })))).filter(Boolean) as Json[]
   const courseIds = schoolDetails.flatMap((s) => (s.courses ?? []).map((c: Json) => c.id as string))
-  const courses = (await pool(courseIds, 6, (id) => optional(call<Json>(sb, 'api_course', { p_course: id, ...L })))).filter(Boolean) as Json[]
+  const courses = (await pool(courseIds, 6, (id) => logged<Json>(`course ${id}`)(call<Json>(sb, 'api_course', { p_course: id, ...L })))).filter(Boolean) as Json[]
+  // a course whose own data could not be read is taken off its school too: never a course that opens on nothing
+  const fetched = new Set(courses.map((c) => c.id as string))
+  for (const s of schoolDetails) s.courses = (s.courses ?? []).filter((c: Json) => fetched.has(c.id as string))
+  for (const s of schools) {
+    const d = schoolDetails.find((x) => x.slug === s.slug)
+    s.course_count = d ? d.courses.length : 0
+  }
   const lessonIds = courses.flatMap((c) => (c.modules ?? []).flatMap((m: Json) => (m.topics ?? []).flatMap((t: Json) =>
     (t.lessons ?? []).filter((l: Json) => !l.locked).map((l: Json) => l.id as string))))
-  const lessons = (await pool(lessonIds, 8, (id) => optional(call<Json>(sb, 'api_lesson', { p_lesson: id, ...L })))).filter(Boolean) as Json[]
+  const lessons = (await pool(lessonIds, 8, (id) => logged<Json>(`lesson ${id}`)(call<Json>(sb, 'api_lesson', { p_lesson: id, ...L })))).filter(Boolean) as Json[]
 
   const quizIds = new Set<string>()
   const addQuizzes = (list?: Json[]) => list?.forEach((q) => q?.id && quizIds.add(q.id))
@@ -66,8 +78,15 @@ export async function buildBundle(sb: SupabaseClient, locale: string) {
     addQuizzes(c.quizzes)
     c.modules?.forEach((m: Json) => { addQuizzes(m.quizzes); m.topics?.forEach((t: Json) => addQuizzes(t.quizzes)) })
   })
-  lessons.forEach((l) => l.blocks?.forEach((b: Json) => b.type === 'quiz' && b.ref?.id && quizIds.add(b.ref.id)))
-  const quizzes = (await pool([...quizIds], 6, (id) => optional(call<Json | null>(sb, 'api_offline_quiz', { p_quiz: id, ...L })))).filter(Boolean) as Json[]
+  lessons.forEach((l) => {
+    // the lesson's own tests (admin: the lesson's "Тестҳо" tab) and tests placed as blocks in it
+    addQuizzes(l.quizzes)
+    l.blocks?.forEach((b: Json) => b.type === 'quiz' && b.ref?.id && quizIds.add(b.ref.id))
+  })
+  const quizzes = (await pool([...quizIds], 6, (id) => logged<Json | null>(`quiz ${id}`)(call<Json | null>(sb, 'api_offline_quiz', { p_quiz: id, ...L })))).filter(Boolean) as Json[]
+  // a lesson lists only the tests that can be opened offline
+  const openable = new Set(quizzes.map((q) => q.quiz?.id as string))
+  lessons.forEach((l) => { l.quizzes = (l.quizzes ?? []).filter((q: Json) => openable.has(q.id as string)) })
   const pages = (await pool(['about', 'privacy', 'terms'], 3, async (slug) => {
     const page = await optional(call<Json>(sb, 'api_page', { p_slug: slug, ...L }))
     return page ? { ...page, slug } : null

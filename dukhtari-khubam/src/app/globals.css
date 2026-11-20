@@ -1557,3 +1557,65 @@ html, body { overscroll-behavior-y: none; }
 @keyframes mascot-in { from { opacity: 0; transform: translate(-50%, 28px) scale(0.96); } to { opacity: 1; transform: translate(-50%, 0); } }
 @keyframes mascot-out { to { opacity: 0; transform: translate(-50%, 22px) scale(0.97); } }
 @keyframes mascot-girl { from { opacity: 0; transform: translateY(26px) scale(0.9); } to { opacity: 1; transform: none; } }
+
+/* ---------------------------------------------------------------- the end of a lesson and of a stage */
+.lesson-end { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.lesson-end-hint { margin: 0; font-size: 0.82em; }
+.final-card.is-passed { opacity: 0.92; }
+/* the stage is finished: over the whole screen, the certificate with "Save" and "Share with friends" */
+.stage-done { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: max(24px, env(safe-area-inset-top)) 22px max(24px, env(safe-area-inset-bottom)); text-align: center; overflow-y: auto;
+  background: radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--rose-strong) 70%, var(--bg)), var(--bg) 70%); animation: fade-in 0.4s both; }
+.stage-done-x { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 14px; width: 42px; height: 42px; border-radius: 50%; border: 0;
+  display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink-2); cursor: pointer; }
+.stage-done-art { width: 120px; animation: bloom-in 0.9s 0.1s var(--ease) both; }
+.stage-done-title { margin: 0; font-size: 1.45rem; color: var(--ink); animation: rise 0.5s 0.25s var(--ease) both; }
+.stage-done-sub { margin: 0 0 6px; animation: rise 0.5s 0.35s var(--ease) both; }
+.stage-done-cert { width: min(100%, 420px); min-height: 160px; display: grid; place-items: center; animation: rise 0.6s 0.45s var(--ease) both; }
+.stage-done-cert img { width: 100%; height: auto; border-radius: 16px; box-shadow: 0 18px 40px rgba(80, 45, 150, 0.22); }
+.stage-done-actions { width: min(100%, 420px); display: grid; gap: 10px; margin-top: 10px; animation: rise 0.6s 0.55s var(--ease) both; }
+
+/* ---------------------------------------------------------------- where a resource comes from (SourceChip.tsx) */
+.src-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-height: 28px; padding: 3px 10px 3px 4px; border-radius: 999px;
+  font-size: 0.78rem; font-style: normal; line-height: 1.2; color: var(--ink-2); text-decoration: none; vertical-align: middle;
+  background: color-mix(in srgb, var(--ink) 5%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); }
+a.src-chip:active { transform: scale(0.97); }
+.src-mark { width: 20px; height: 20px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #fff; color: var(--primary); overflow: hidden; }
+.src-mark svg { width: 16px; height: 16px; display: block; }
+.src-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52vw; font-weight: 500; }
+.src-chip.on-media { position: absolute; left: 10px; bottom: 10px; z-index: 1; background: rgba(255, 255, 255, 0.86); color: #3a2c4f; border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(30, 20, 60, 0.18); }
+html.lite .src-chip.on-media { background: #fff; }
+.src-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.86em; }
+.media-block + .src-chip, .media-block ~ .src-chip { margin-top: 6px; }
+.quote-cite { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+/* pictures: a 16:9 or a 1:1 frame, filled; a tap shows the whole picture */
+.pic { position: relative; width: 100%; overflow: hidden; border-radius: 20px; background: color-mix(in srgb, var(--primary-soft) 18%, transparent); }
+.pic-open { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.pic-open img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 0; }
+.pic[data-frame='square'] { max-width: 520px; margin-inline: auto; }
+/* a tall picture in a square frame keeps its upper part (faces, titles) */
+.pic[data-frame='square'] .pic-open img { object-position: 50% 22%; }
+.lightbox { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top)) 12px max(16px, env(safe-area-inset-bottom));
+  background: rgba(12, 8, 24, 0.92); animation: fade-in 0.2s both; cursor: zoom-out; }
+.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; }
+.lightbox-x { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 14px; width: 42px; height: 42px; border-radius: 50%; border: 0;
+  display: grid; place-items: center; background: rgba(255, 255, 255, 0.14); color: #fff; }
+
+/* ---------------------------------------------------------------- CodeHub (admin: a lesson written as tags) */
+.codehub-tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.codehub-tools .chip { cursor: pointer; border: 1px solid var(--line); background: var(--glass-flat); font: inherit; font-size: 0.82em; }
+.codehub-editor { display: flex; min-height: 360px; max-height: 70vh; border-radius: 16px; border: 1px solid var(--line); overflow: hidden; background: #fbfaff; }
+:root[data-theme='dark'] .codehub-editor { background: #1a1430; }
+.codehub-lines { flex: none; width: 40px; padding: 12px 0; overflow: hidden; text-align: end; user-select: none;
+  font: 13px/22px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); background: color-mix(in srgb, var(--primary) 6%, transparent); }
+.codehub-lines span { display: block; padding-inline-end: 8px; }
+.codehub-lines span.is-bad { color: #fff; background: #d9534f; }
+.codehub-code { flex: 1; min-width: 0; border: 0; resize: none; padding: 12px; font: 13px/22px ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre;
+  overflow: auto; background: transparent; color: var(--ink); outline: none; tab-size: 2; }
+.codehub-errors { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.codehub-errors button { width: 100%; text-align: start; border: 1px solid color-mix(in srgb, #d9534f 35%, transparent); background: color-mix(in srgb, #d9534f 8%, transparent);
+  color: #a3302c; border-radius: 12px; padding: 8px 12px; font: inherit; font-size: 0.86em; cursor: pointer; }
+:root[data-theme='dark'] .codehub-errors button { color: #ffb4b1; }
+.codehub-ok { margin: 0; color: #2f9e6e; font-size: 0.88em; }
+.codehub-help code { font-size: 0.86em; }

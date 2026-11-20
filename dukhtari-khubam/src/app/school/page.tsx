@@ -24,7 +24,7 @@ function School() {
   const [tab, setTab] = useState<'courses' | 'about' | 'results'>('courses')
   if (!bundle) return <><Header back="/schools" />{loading ? <Loading /> : <Empty icon="info" title={t('state.offline_empty')} />}</>
   const s = bundle.schoolDetails[key]
-  if (!s) return <><Header back="/schools" /><Empty title={t('state.empty_courses')} /></>
+  if (!s) return <><Header back="/schools" /><Empty title={t('state.not_found')} /></>
   const courses = s.courses.map((c) => ({ ...c, progress: courseProgress(bundle, progress, c.id) }))
   const totals = courses.reduce((acc, c) => ({ completed: acc.completed + c.progress.completed, total: acc.total + c.progress.total }), { completed: 0, total: 0 })
   const pct = totals.total ? Math.round((totals.completed * 100) / totals.total) : 0
@@ -72,7 +72,7 @@ function School() {
 
       <div className="section stagger" role="tabpanel" key={tab} style={{ marginTop: 14 }}>
         {tab === 'courses' ? (
-          courses.length === 0 ? <Empty title={t('state.empty_courses')} /> : courses.map((c) => (
+          courses.length === 0 ? <Empty title={t('state.school_soon')} /> : courses.map((c) => (
             <Link key={c.id} href={`/course?id=${c.id}`} className="glass list-row">
               <span className="row-icon">
                 {c.progress.percent === 100 ? <Icon name="check" /> : <Icon name="play" size={20} />}
