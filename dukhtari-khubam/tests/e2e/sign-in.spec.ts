@@ -29,6 +29,7 @@ test.describe('sign-in with e-mail', () => {
     await page.locator('.wl-custom').fill('5')
     await expect(page.locator('.wl-next')).toBeEnabled()
     expect(server.codes).toEqual(['111111', '222222'])
+    expect(server.pushes, 'the new profile was backed up to Supabase').toBeGreaterThan(0)
     expect(errors).toEqual([])
   })
 

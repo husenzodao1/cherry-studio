@@ -12,7 +12,7 @@ export const BUNDLE = {
 export const PROGRESS = { v: 1, born: 2008, birthday: '2008-03-01', about: { at: '2026-11-18T00:00:00Z' }, lessons: {}, quizzes: {}, bookmarks: {}, achievements: {}, days: [], review: {} }
 const USER = { id: '00000000-0000-0000-0000-000000000001', aud: 'authenticated', role: 'authenticated', email: 'e2e@gmail.com', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' }
 
-export interface Server { profile: unknown; codes: string[]; reports: string[]; ratings: unknown[] }
+export interface Server { profile: unknown; codes: string[]; reports: string[]; ratings: unknown[]; pushes: number }
 
 /**
  * Every test fails on any page error — uncaught (the kind that shows "This page couldn't load") or caught
@@ -22,11 +22,11 @@ export interface Server { profile: unknown; codes: string[]; reports: string[]; 
  */
 export const test = base.extend<{ server: Server; errors: string[] }>({
   server: async ({ page }, use) => {
-    const server: Server = { profile: null, codes: [], reports: [], ratings: [] }
+    const server: Server = { profile: null, codes: [], reports: [], ratings: [], pushes: 0 }
     const json = (body: unknown, status = 200) => ({ status, contentType: 'application/json', body: JSON.stringify(body) })
     await page.route('**/api/v1/bundle**', (r) => r.fulfill(json(BUNDLE)))
-    // the backup answers with what it was sent (a new learner stays new)
-    await page.route('**/api/v1/profile/sync', (r) => r.fulfill(json({ data: (r.request().postDataJSON() as { data: unknown }).data })))
+    // progress backup straight to Supabase: saved, no other phone wrote meanwhile
+    await page.route('**/rest/v1/rpc/api_profile_push**', (r) => { server.pushes++; return r.fulfill(json({ updated_at: new Date().toISOString() })) })
     // errors the app caught and repaired by itself (web/heal.ts) are failures for a test all the same
     await page.route('**/api/v1/client-error', (r) => {
       server.reports.push(String((r.request().postDataJSON() as { message?: string }).message))

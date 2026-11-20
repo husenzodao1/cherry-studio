@@ -7,6 +7,7 @@ import { emptyProgress, isCode, localDay, mergeProgress, newCode, ProgressData, 
 import { encryptCode, isPassword, isUsername, normalizeUsername } from './account'
 import { clearPin } from './pin'
 import { clearRecovery } from './recovery'
+import { accountAuth } from './accountAuth'
 import { apiUrl } from './base'
 import { useContent, type Bundle } from './content'
 import { schedule as nextReview } from './review'
@@ -75,6 +76,8 @@ const LEARNER_KEY = 'dk.learner'
 const PENDING_KEY = 'dk.pending_login'
 const PROBLEM_KEY = 'dk.login_problem'
 const PROGRESS_KEY = 'dk.progress'
+// time of the last backup this phone saw, per learner code (dk.synced:<code>)
+const SYNCED_KEY = 'dk.synced'
 const LearnerContext = createContext<LearnerApi | null>(null)
 
 function readJson<T>(key: string): T | null {
@@ -152,29 +155,44 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
     setReady(true)
   }, [])
 
+  /**
+   * Backs the progress up straight to Supabase (api_profile_push; no Vercel function on the way). Sent
+   * with the time of the last backup this phone saw: saved at once when nobody wrote since, otherwise the
+   * stored progress comes back, is merged here (mergeProgress) and sent again.
+   */
   const pushNow = useCallback(async () => {
-    const { learner: l, progress: p } = latest.current
+    const { learner: l } = latest.current
     if (!l) return
     if (navigator.onLine === false) {
       setSync('offline')
       return
     }
+    const sb = accountAuth()
+    if (!sb) return setSync('error')
     setSync('syncing')
     try {
-      const res = await fetch(apiUrl('/profile/sync'), {
-        method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code: l.code, name: l.name, data: p })
-      })
-      if (!res.ok) throw new Error(String(res.status))
-      const body = (await res.json()) as { data: unknown }
-      const server = ProgressData.safeParse(body.data)
-      if (server.success) {
-        setProgress((cur) => {
-          const merged = mergeProgress(cur, server.data)
-          writeJson(PROGRESS_KEY, merged)
-          return merged
-        })
+      let data = latest.current.progress
+      let base = readJson<string>(`${SYNCED_KEY}:${l.code}`)
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data: r, error } = await sb.rpc('api_profile_push', { p_code: l.code, p_name: l.name, p_data: data, p_base: base })
+        if (error) throw error
+        const res = r as { conflict?: boolean; data?: unknown; updated_at: string }
+        if (!res.conflict) {
+          writeJson(`${SYNCED_KEY}:${l.code}`, res.updated_at)
+          setSync('synced')
+          return
+        }
+        // another phone (or an older backup) wrote meanwhile: take both, then send the merge
+        const server = ProgressData.safeParse(res.data)
+        if (server.success) {
+          data = mergeProgress(latest.current.progress, server.data)
+          setProgress(data)
+          writeJson(PROGRESS_KEY, data)
+          latest.current = { ...latest.current, progress: data }
+        }
+        base = res.updated_at
       }
-      setSync('synced')
+      setSync('error')
     } catch {
       setSync(isOffline() ? 'offline' : 'error')
     }
