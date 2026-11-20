@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { api } from '../api'
 import { useOfflineSrc } from '../offline/media'
+import type { UiKey } from '../i18n'
 import { usePrefs } from '../prefs'
 import { Icon, type IconName } from './Icon'
 import { YouTube } from './YouTube'
@@ -101,8 +102,8 @@ function Video({ asset, poster, title, caption }: { asset?: Asset; poster?: Asse
   const posterUrl = useAssetUrl(poster) ?? asset?.poster?.url ?? undefined
   if (!asset) return null
   return (
-    <figure>
-      {title ? <b style={{ display: 'block', marginBottom: 8 }}>{title}</b> : null}
+    <figure className="media-block">
+      <BlockLabel icon="play" text={title} kind="video" />
       {url ? (
         <video controls preload="metadata" playsInline poster={posterUrl} style={{ width: '100%', borderRadius: 20, background: '#000' }}>
           <source src={url} type={asset.mime_type} />
@@ -126,9 +127,9 @@ function Audio({ asset, title, speaker }: { asset?: Asset; title?: string; speak
   if (!asset) return null
   const name = title ?? asset.title ?? ''
   return (
-    <div className="stack" style={{ gap: 8 }}>
-      {name ? <div className="row" style={{ gap: 8 }}><b style={{ fontWeight: 500 }}>{name}</b>{speaker ? <span className="muted">· {speaker}</span> : null}</div> : null}
-      <div className="player glass">
+    <div className="media-block stack" style={{ gap: 8 }}>
+      <BlockLabel icon="volume" text={[name, speaker].filter(Boolean).join(' · ')} kind="audio" />
+      <div className="player">
         <button type="button" className="play-btn" style={{ width: 42, height: 42 }} disabled={!url} aria-label={name || 'audio'}
           onClick={() => (el.current?.paused ? el.current.play() : el.current?.pause())}>
           <Icon name={playing ? 'pause' : 'play'} size={18} fill="currentColor" />
@@ -145,6 +146,19 @@ function Audio({ asset, title, speaker }: { asset?: Asset; title?: string; speak
 }
 
 const CALLOUT_ICON: Record<string, IconName> = { important: 'star', warning: 'alert', note: 'book', tip: 'check', info: 'info' }
+const CALLOUTS = ['important', 'warning', 'note', 'tip', 'info']
+
+/** A small line above a lesson block: its kind (Video, Audio, Note…) with an icon, then its title. */
+function BlockLabel({ icon, kind, text }: { icon: IconName; kind: string; text?: string | null }) {
+  const { t } = usePrefs()
+  return (
+    <span className={`block-label block-label-${kind}`}>
+      <Icon name={icon} size={15} strokeWidth={2} />
+      <span className="block-kind">{t(`block.${kind}` as UiKey)}</span>
+      {text ? <span className="block-title">{text}</span> : null}
+    </span>
+  )
+}
 
 export function BlockView({ block, assets }: { block: Block; assets: Record<string, Asset> }) {
   const { t } = usePrefs()
@@ -195,7 +209,8 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return <Audio asset={a(p.asset_id)} title={c.title} speaker={c.speaker} />
     case 'youtube':
       return typeof p.video_id === 'string' ? (
-        <div className="stack" style={{ gap: 8 }}>
+        <div className="media-block stack" style={{ gap: 8 }}>
+          <BlockLabel icon="play" kind="video" />
           <YouTube id={p.video_id} start={p.start} title={c.title} />
           {c.caption ? <p className="muted" style={{ fontSize: '0.88em' }}>{c.caption}</p> : null}
         </div>
@@ -210,8 +225,8 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       )
     case 'callout':
       return (
-        <aside className={`callout callout-${p.variant ?? 'note'}`}>
-          <Icon name={CALLOUT_ICON[p.variant] ?? 'info'} size={20} />
+        <aside className={`callout callout-${CALLOUTS.includes(p.variant) ? p.variant : 'note'}`}>
+          <BlockLabel icon={CALLOUT_ICON[p.variant] ?? 'book'} kind={CALLOUTS.includes(p.variant) ? p.variant : 'note'} />
           <div>{c.title ? <b>{c.title}</b> : null}<RichText value={c.body} as="div" /></div>
         </aside>
       )
@@ -243,7 +258,12 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return f?.url ? <a className="chip" href={f.url} download><Icon name="down" size={16} />{c.label ?? f.title ?? f.path.split('/').pop()}</a> : null
     }
     case 'practical_task':
-      return <div className="card card-pad card-lilac"><b>{c.title}</b><RichText value={c.body} as="div" /></div>
+      return (
+        <div className="callout callout-task">
+          <BlockLabel icon="check" kind="task" />
+          <div>{c.title ? <b>{c.title}</b> : null}<RichText value={c.body} as="div" /></div>
+        </div>
+      )
     case 'quiz':
       return block.ref ? (
         <Link href={`/quiz?id=${block.ref.id}`} className="glass list-row">

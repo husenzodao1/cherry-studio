@@ -213,7 +213,15 @@ const tg = {
   'pin.too_many_sub': "5 бор нодуруст ворид шуд. PIN-ро тавассути почта аз нав гузоред.",
   'pin.reset': "Аз нав гузоштан",
   'install.app': "Насби барнома ба телефон",
-  'install.app_started': "Барнома бор мешавад — баъд онро кушоед ва насб кунед"
+  'install.app_started': "Барнома бор мешавад — баъд онро кушоед ва насб кунед",
+  'block.note': "Эзоҳ",
+  'block.info': "Маълумот",
+  'block.tip': "Маслиҳат",
+  'block.important': "Муҳим",
+  'block.warning': "Диққат",
+  'block.audio': "Аудио",
+  'block.video': "Видео",
+  'block.task': "Вазифаи амалӣ"
 }
 
 export type UiKey = keyof typeof tg
@@ -406,7 +414,15 @@ const ru: Partial<Record<UiKey, string>> = {
   'pin.too_many_sub': "5 неверных попыток. Задайте PIN заново через почту.",
   'pin.reset': "Сбросить",
   'install.app': "Установить приложение",
-  'install.app_started': "Приложение загружается — затем откройте файл и установите"
+  'install.app_started': "Приложение загружается — затем откройте файл и установите",
+  'block.note': "Примечание",
+  'block.info': "Справка",
+  'block.tip': "Совет",
+  'block.important': "Важно",
+  'block.warning': "Внимание",
+  'block.audio': "Аудио",
+  'block.video': "Видео",
+  'block.task': "Практическое задание"
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, en, uz, tr, fa, prs }

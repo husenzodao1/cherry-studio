@@ -519,6 +519,14 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 
 /* ---------------------------------------------------------------- lesson reader */
 .reader { max-width: 680px; margin: 0 auto; }
+/* inside the topics (course and lesson pages): a soft white page, the backdrop pieces and glass left out */
+:root { --paper: #fffdfb; }
+:root[data-theme='dark'] { --paper: #211a30; }
+.backdrop.backdrop-lesson, :root[data-palette][data-theme] .backdrop.backdrop-lesson { background: linear-gradient(180deg, #fffdfb, #fbf7f4); }
+:root[data-theme='dark'] .backdrop.backdrop-lesson { background: linear-gradient(180deg, #1d1729, #191424); }
+.backdrop.backdrop-lesson::after { display: none; }
+.reader figure img { box-shadow: none !important; border: 1px solid var(--line); }
+.reader .quote { border-inline-start: 3px solid var(--line); padding: 4px 0 4px 14px; }
 .reader h1 { font-weight: 600; font-size: clamp(1.5rem, 6.4vw, 1.9rem); line-height: 1.22; color: var(--ink); margin: 10px 0 4px; letter-spacing: -0.02em; }
 .reader .blocks { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; }
 .reader p, .reader li { font-size: 1.06em; line-height: 1.72; margin: 0; color: var(--ink); }
@@ -528,13 +536,25 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .reader figure { margin: 0; }
 .reader figure img { width: 100%; border-radius: 22px; background: var(--lavender); box-shadow: var(--glass-shadow); }
 .reader figcaption { margin-top: 8px; font-size: 0.85em; color: var(--muted); }
-.callout { padding: 16px 18px; border-radius: 22px; display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
-.callout > svg { flex: none; width: 32px; height: 32px; padding: 6px; border-radius: 50%; background: var(--pill); color: #fff; }
-.callout b { display: block; margin-bottom: 4px; }
-.callout-important { background: var(--gold-bg); color: var(--gold-ink); }
-.callout-warning { background: var(--warn-bg); color: var(--warn-ink); }
-.callout-note, .callout-info { background: var(--note-bg); color: var(--note-ink); }
-.callout-tip { background: var(--tip-bg); color: var(--tip-ink); }
+/* lesson blocks: calm and clear, like a good textbook — a thin coloured edge, a small label with its
+   icon (Note, Attention, Important, Tip, Info, Task, Audio, Video), a soft tint; no glass, no shadow */
+.callout { position: relative; padding: 12px 14px 13px 16px; border-radius: 12px; display: flex; flex-direction: column; gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--c) 22%, transparent); border-inline-start: 3px solid var(--c);
+  background: color-mix(in srgb, var(--c) 6%, var(--paper)); color: var(--ink); }
+.callout b { display: block; margin-bottom: 2px; font-weight: 600; }
+.callout p { font-size: 1em !important; }
+.callout-note { --c: #5b6bd6; }
+.callout-info { --c: #2b8fb3; }
+.callout-tip { --c: #2e9a5e; }
+.callout-important { --c: #c9821b; }
+.callout-warning { --c: #d24a4a; }
+.callout-task { --c: #8a5bd6; }
+.block-label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--c, var(--ink-2)); }
+.block-label svg { flex: none; }
+.block-label .block-title { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 0.95rem; color: var(--ink); margin-inline-start: 4px; }
+.block-label-audio, .block-label-video { --c: #6d5bd0; margin-bottom: 8px; }
+.media-block .player { border: 1px solid var(--line); background: var(--paper); border-radius: 14px; box-shadow: none; }
+.media-block video { border-radius: 12px !important; }
 .quote { font-family: var(--font-serif); font-style: italic; font-size: 1.18em; color: var(--plum); padding: 4px 0; }
 .quote cite { display: block; margin-top: 8px; font-size: 0.75em; font-style: normal; color: var(--muted); font-family: var(--font-ui); }
 .t-plum { color: var(--plum); } .t-lavender { color: var(--note-ink); } .t-rose { color: var(--bad); }

@@ -65,5 +65,6 @@ export const en: Partial<Record<UiKey, string>> = {
   'welcome.hours_wrong': 'Write 1 to {n} hours a day', 'sanity.meaningless': 'Please write in real, polite words',
   'pin.too_many': 'Forgot your PIN?', 'pin.too_many_sub': '5 wrong tries. Set a new PIN through your e-mail.', 'pin.reset': 'Reset',
   'install.app': 'Install the app', 'install.app_started': 'The app is downloading — then open the file and install it',
+  'block.note': 'Note', 'block.info': 'Info', 'block.tip': 'Tip', 'block.important': 'Important', 'block.warning': 'Attention', 'block.audio': 'Audio', 'block.video': 'Video', 'block.task': 'Practical task',
   'poem.title': 'Garden of verse', 'splash.loading': 'Loading'
 }

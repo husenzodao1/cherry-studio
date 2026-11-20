@@ -47,6 +47,8 @@ export function Backdrop() {
   }, [])
   // documents are plain paper: no glass pieces around them
   if (/^\/page(\/|$)/.test(path)) return <div className="backdrop backdrop-paper" aria-hidden="true" />
+  // inside the topics (courses and lessons): a soft white page to read on
+  if (/^\/(lesson|course)(\/|$)/.test(path)) return <div className="backdrop backdrop-lesson" aria-hidden="true" />
   const set = /^\/admin(\/|$)/.test(path) ? [] : /^\/(lesson|garden|support)(\/|$)/.test(path) ? CALM : /^\/(quiz|review)(\/|$)/.test(path) ? QUIZ
     : /^\/(start|welcome)(\/|$)/.test(path) ? START : FULL
   return (

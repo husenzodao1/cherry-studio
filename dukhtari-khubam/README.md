@@ -313,6 +313,14 @@ a minute, so it can never loop. Code replaced by a new release (lost chunks) rel
 error is sent without personal data to `POST /api/v1/client-error` and appears in the Vercel runtime
 logs as `[client-error]`.
 
+## Backups
+
+`.github/workflows/dukhtari-backup.yml` dumps the Supabase database every Monday (and on "Run workflow"),
+gzips it and encrypts it with AES-256 before it leaves the runner; the file is kept 90 days as a workflow
+artifact. It needs two repository secrets: `DUKHTARI_DB_URL` (Supabase → Project Settings → Database →
+connection string, session pooler) and `DUKHTARI_BACKUP_KEY` (a long passphrase — without it the backup
+cannot be opened). Restore: `gpg -d dukhtari-….sql.gz.gpg | gunzip | psql "$DB_URL"`.
+
 ## Known limitations
 
 - **The Android app is not built yet**; it uses the same API.
