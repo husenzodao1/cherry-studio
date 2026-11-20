@@ -28,6 +28,10 @@
         <receiver android:name=".StreakAlarm$Receiver" android:exported="true">
             <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
         </receiver>
+        <!-- the launcher icon switches by itself at 06:00 and 18:00 and after a restart (AppIconPlugin.java) -->
+        <receiver android:name=".AppIconPlugin$Switch" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
+        </receiver>
         <!-- home-screen widgets (DkWidgets.java) -->
         <receiver android:name=".DkWidgets$StreakWidget" android:exported="false" android:label="@string/widget_streak">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
