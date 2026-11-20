@@ -55,5 +55,8 @@ export const en: Partial<Record<UiKey, string>> = {
   'rate.title': 'Rate the app', 'rate.sub': 'Your opinion makes the app better', 'share.title': 'Share with friends', 'share.sub': 'Send the app to others', 'share.copied': 'Link copied',
   'welcome.custom': 'My own answer', 'welcome.custom_ph': 'Write it yourself…', 'welcome.schools.hint': 'You can choose several', 'welcome.next': 'Next', 'welcome.skip': 'Skip',
   'welcome.step': '{n} of {total}', 'welcome.preparing': 'Preparing your lessons', 'welcome.ready': 'Ready!',
+  'heal.title': 'Just a moment', 'heal.body': 'Something went wrong on this page. The app tried to repair itself — try again or go home.',
+  'rate.ask': 'How much do you like the app?', 'rate.1': 'Bad', 'rate.2': 'Meh', 'rate.3': 'Okay', 'rate.4': 'Good', 'rate.5': 'Great',
+  'rate.comment': 'Your thoughts (optional)', 'rate.send': 'Send', 'rate.thanks': 'Thank you for rating!', 'rate.thanks_sub': 'Your opinion makes the app better 💜',
   'poem.title': 'Garden of verse', 'splash.loading': 'Loading'
 }

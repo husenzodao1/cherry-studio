@@ -177,7 +177,19 @@ const tg = {
   'settings.other_apps': "Барномаҳои дигар",
   'settings.other_apps_soon': "Ба наздикӣ",
   'poem.title': "Гулбоғи эҷод",
-  'splash.loading': "Бор мешавад"
+  'splash.loading': "Бор мешавад",
+  'heal.title': "Каме сабр кунед",
+  'heal.body': "Дар ин саҳифа чизе нодуруст шуд. Барнома кӯшиш кард худро барқарор кунад — аз нав кӯшиш кунед ё ба саҳифаи асосӣ равед.",
+  'rate.ask': "Барнома ба шумо чӣ қадар писанд аст?",
+  'rate.1': "Бад",
+  'rate.2': "Камтар",
+  'rate.3': "Миёна",
+  'rate.4': "Хуб",
+  'rate.5': "Олӣ",
+  'rate.comment': "Фикри худро нависед (ихтиёрӣ)",
+  'rate.send': "Фиристодан",
+  'rate.thanks': "Ташаккур барои баҳодиҳӣ!",
+  'rate.thanks_sub': "Фикри шумо барномаро беҳтар мекунад 💜"
 }
 
 export type UiKey = keyof typeof tg
@@ -334,7 +346,19 @@ const ru: Partial<Record<UiKey, string>> = {
   'settings.other_apps': "Другие приложения",
   'settings.other_apps_soon': "Скоро",
   'poem.title': "Сад творчества",
-  'splash.loading': "Загрузка"
+  'splash.loading': "Загрузка",
+  'heal.title': "Минутку",
+  'heal.body': "На этой странице что-то пошло не так. Приложение попробовало восстановиться — попробуйте ещё раз или вернитесь на главную.",
+  'rate.ask': "Насколько вам нравится приложение?",
+  'rate.1': "Плохо",
+  'rate.2': "Так себе",
+  'rate.3': "Нормально",
+  'rate.4': "Хорошо",
+  'rate.5': "Отлично",
+  'rate.comment': "Напишите ваше мнение (необязательно)",
+  'rate.send': "Отправить",
+  'rate.thanks': "Спасибо за оценку!",
+  'rate.thanks_sub': "Ваше мнение делает приложение лучше 💜"
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, en, uz, tr, fa, prs }

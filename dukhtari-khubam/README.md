@@ -290,6 +290,29 @@ The free built-in mailer sends only a few letters an hour and cannot change the 
    the app; before that the sensitive scope shows an "unverified app" screen.
 6. Apply `supabase/migrations/20261120000100_live_content_and_google.sql`.
 
+## Releasing and self-healing
+
+**Checks before every release.** `npx tsc --noEmit`, `npm test` (unit) and `npm run e2e` (Playwright:
+sign-in with e-mail — wrong and right code, new and returning learner —, every main screen, client
+navigation, all seven languages). The e2e tests mock Supabase and the API at the network level, so they
+need no accounts and change nothing. A test fails on any page error, also one the app caught and
+repaired by itself. GitHub Actions (`.github/workflows/dukhtari-app.yml`) runs them on every push.
+
+**Release order.**
+1. Push; wait for `dukhtari-app` to pass.
+2. Deploy a **preview** (not production) of that commit and run the e2e tests against it:
+   `E2E_BASE_URL=https://<preview>.vercel.app npm run e2e` (or the workflow's "Run workflow" with `base_url`).
+3. Only then deploy production (or promote the preview). If something still slips through, Vercel's
+   *Instant Rollback* puts the previous production back in seconds.
+
+**Self-healing on the phone** (`src/web/heal.ts`, `src/app/error.tsx`, `src/app/global-error.tsx`).
+A screen that breaks is not shown as an error page at once: the app redraws it; if it breaks again it
+reloads the page (new release code, a DOM disturbed by a translator or extension); then it goes home;
+only after that a calm card with "try again" / "home". The steps are counted per tab and forgotten after
+a minute, so it can never loop. Code replaced by a new release (lost chunks) reloads itself. Every
+error is sent without personal data to `POST /api/v1/client-error` and appears in the Vercel runtime
+logs as `[client-error]`.
+
 ## Known limitations
 
 - **The Android app is not built yet**; it uses the same API.

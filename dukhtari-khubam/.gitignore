@@ -7,3 +7,7 @@ next-env.d.ts
 .vercel
 out
 tools/render-assets/three
+
+# end-to-end test output
+/test-results/
+/playwright-report/

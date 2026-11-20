@@ -1692,6 +1692,75 @@
         }
       }
     },
+    "/client-error": {
+      "post": {
+        "tags": [
+          "Offline app"
+        ],
+        "summary": "An error caught on a phone or in a browser (web/heal.ts), written to the server log; no personal data",
+        "operationId": "postClientError",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "where": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "path": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "stack": {
+                    "default": "",
+                    "type": "string",
+                    "maxLength": 1500
+                  },
+                  "version": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "agent": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "message",
+                  "where",
+                  "path",
+                  "version",
+                  "agent"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/profile/sync": {
       "post": {
         "tags": [

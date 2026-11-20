@@ -75,7 +75,8 @@ export function PinSettings() {
   const [first, setFirst] = useState('')
   const [hint, setHint] = useState<string | null>(null)
   // a new PIN is followed by its three life questions
-  const [questions, setQuestions] = useState<'required' | 'change' | null>(null)
+  // (asked by itself after a new PIN; there is no separate entry for them in the settings)
+  const [questions, setQuestions] = useState<'required' | null>(null)
   useEffect(() => setOn(hasPin()), [])
   useEffect(() => (flow ? onBack(() => { setFlow(null); setFirst(''); setOn(hasPin()) }) : undefined), [flow])
 
@@ -138,14 +139,8 @@ export function PinSettings() {
             <Icon name="key" /><span className="grow">{t('pin.change')}</span><Icon name="forward" size={18} />
           </button>
         ) : null}
-        {on ? (
-          <button type="button" className="menu-row" onClick={() => setQuestions('change')}>
-            <Icon name="info" /><span className="grow">{t('recovery.setup_title')}<span className="row-sub">{t(hasRecovery() ? 'recovery.set' : 'recovery.not_set')}</span></span>
-            <Icon name="forward" size={18} />
-          </button>
-        ) : null}
       </div>
-      {questions ? <RecoverySetup onDone={() => setQuestions(null)} onCancel={questions === 'change' ? () => setQuestions(null) : undefined} /> : null}
+      {questions ? <RecoverySetup onDone={() => setQuestions(null)} /> : null}
       {flow ? (
         <PinPad key={step} title={t(step === 'current' ? 'pin.current' : step === 'new' ? 'pin.new' : 'pin.repeat')} hint={hint} onDone={done} onCancel={close} />
       ) : null}

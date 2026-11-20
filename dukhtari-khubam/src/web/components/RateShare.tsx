@@ -1,10 +1,12 @@
 'use client'
 
 import { Capacitor } from '@capacitor/core'
+import { useState } from 'react'
 
 import { API_BASE } from '../offline/base'
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
+import { RateSheet } from './RateSheet'
 import { showToast } from './Toast'
 
 const SITE = 'https://dukhtari-khubam.vercel.app'
@@ -16,12 +18,13 @@ function appLink(): string {
 }
 
 /**
- * Two boxes under "About the app": rating the app (the in-app rating form arrives with the Google Play
- * release; for now the box is in place) and sharing it — the system share sheet lists every way to send
+ * Two boxes under "About the app": rating the app (a sheet with five 3D faces and a comment, RateSheet)
+ * and sharing it — the system share sheet lists every way to send
  * it (messengers, SMS, e-mail, Bluetooth, copy…).
  */
 export function RateShare() {
   const { t } = usePrefs()
+  const [rating, setRating] = useState(false)
   const share = async () => {
     const text = t('share.text')
     const url = appLink()
@@ -43,7 +46,7 @@ export function RateShare() {
   }
   return (
     <div className="rate-share">
-      <button type="button" className="glass rate-box" onClick={() => showToast(t('rate.soon'), 'star')}>
+      <button type="button" className="glass rate-box" onClick={() => setRating(true)}>
         <span className="rate-stars" aria-hidden="true">{[0, 1, 2, 3, 4].map((i) => <Icon key={i} name="star" size={18} fill="currentColor" style={{ ['--i' as string]: i }} />)}</span>
         <b>{t('rate.title')}</b>
         <span className="row-sub">{t('rate.sub')}</span>
@@ -53,6 +56,7 @@ export function RateShare() {
         <b>{t('share.title')}</b>
         <span className="row-sub">{t('share.sub')}</span>
       </button>
+      {rating ? <RateSheet onClose={() => setRating(false)} /> : null}
     </div>
   )
 }

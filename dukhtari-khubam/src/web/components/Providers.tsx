@@ -12,6 +12,7 @@ import { PrefsProvider, usePrefs } from '../prefs'
 import { AppLock } from './AppLock'
 import { AppUpdate } from './AppUpdate'
 import { BackButton } from './BackButton'
+import { installGlobalHealing } from '../heal'
 import { Splash } from './Splash'
 import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
@@ -67,6 +68,8 @@ function ForAge({ children }: { children: ReactNode }) {
 
 /** Long presses and right clicks open no browser menu (text fields keep theirs). */
 function AppFeel() {
+  // errors outside the screens: stale release code reloads itself, everything is reported (heal.ts)
+  useEffect(() => installGlobalHealing(), [])
   useEffect(() => {
     const block = (e: Event) => {
       if (!(e.target as Element | null)?.closest?.('input, textarea, select, [contenteditable="true"]')) e.preventDefault()

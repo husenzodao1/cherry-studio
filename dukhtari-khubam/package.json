@@ -11,7 +11,8 @@
     "test": "vitest run",
     "openapi": "vitest run tests/unit/openapi.test.ts",
     "build:app": "BUILD_TARGET=app NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE:-https://dukhtari-khubam.vercel.app} NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-https://dqavtyrdipwwgeckxxhr.supabase.co} NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-sb_publishable_FFDrHXKCQncViKg7LyfxGQ_P3546UYZ} next build && node tools/android/prepare-app.mjs && cap sync android",
-    "apk": "npm run build:app && cd android && ./gradlew clean assembleDebug"
+    "apk": "npm run build:app && cd android && ./gradlew clean assembleDebug",
+    "e2e": "playwright test"
   },
   "engines": {
     "node": ">=20.9"
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@capacitor/cli": "^8.6.2",
     "@electric-sql/pglite": "^0.5.16",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.19.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

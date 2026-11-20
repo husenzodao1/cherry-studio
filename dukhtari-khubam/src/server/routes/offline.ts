@@ -124,6 +124,18 @@ export const offlineRoutes: AnyRoute[] = [
     }
   }),
   route({
+    method: 'POST', path: '/client-error', access: 'public', tag: 'Offline app',
+    summary: 'An error caught on a phone or in a browser (web/heal.ts), written to the server log; no personal data',
+    body: z.object({
+      message: z.string().max(500), where: z.string().max(40), path: z.string().max(200), stack: z.string().max(1500).default(''),
+      version: z.string().max(40), agent: z.string().max(200)
+    }),
+    handler: async ({ body }) => {
+      console.error('[client-error]', JSON.stringify(body))
+      return { ok: true }
+    }
+  }),
+  route({
     method: 'POST', path: '/profile/sync', access: 'public', tag: 'Offline app',
     summary: 'Back up progress under the learner code; returns the merged progress (phone and backup combined)',
     body: z.strictObject({ code: Code, name: z.string().trim().min(1).max(80), data: ProgressData }),

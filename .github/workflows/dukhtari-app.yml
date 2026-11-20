@@ -1,0 +1,51 @@
+# Духтари хубам (dukhtari-khubam/): types, unit tests and end-to-end tests of the learner's main paths in
+# a real browser, on every push that touches the app. A production deploy is made only from a commit that
+# passed here (see dukhtari-khubam/README.md → Releasing).
+name: dukhtari-app
+
+on:
+  push:
+    paths: ['dukhtari-khubam/**', '.github/workflows/dukhtari-app.yml']
+  pull_request:
+    paths: ['dukhtari-khubam/**', '.github/workflows/dukhtari-app.yml']
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Test a deployed preview instead of a local build (e.g. https://dukhtari-khubam-xyz.vercel.app)'
+        required: false
+
+concurrency:
+  group: dukhtari-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: dukhtari-khubam
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dukhtari-khubam/package-lock.json
+      - run: npm ci
+      - name: Types
+        run: npx tsc --noEmit
+      - name: Unit tests
+        run: npx vitest run
+      - name: Browser
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end tests
+        run: npx playwright test
+        env:
+          E2E_BASE_URL: ${{ github.event.inputs.base_url }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-results
+          path: dukhtari-khubam/test-results
+          retention-days: 7
