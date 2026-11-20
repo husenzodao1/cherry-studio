@@ -1437,3 +1437,25 @@ html.lite .tile-art, html.lite .hello-flower, html.lite .start-art { filter: non
   text-align: center; animation: rise 0.4s var(--ease) both; }
 .pin-forgot-card b { color: var(--ink); }
 .pin-forgot-card .btn { margin-top: 6px; min-height: 46px; }
+
+/* ---------------------------------------------------------------- pull down at the top (PullSignature.tsx) */
+html, body { overscroll-behavior-y: none; }
+.pull-sign { position: fixed; left: 0; right: 0; top: 0; height: 0; z-index: 30; pointer-events: none; overflow: visible; opacity: 0;
+  padding-top: env(safe-area-inset-top); display: flex; align-items: flex-start; justify-content: center;
+  /* the opened space is a shade deeper than the page, so the page's scalloped edge shows */
+  background: color-mix(in srgb, var(--primary) 9%, var(--sky-1)); }
+/* the page's top edge seen from the space: half circles cut out of the space's lower edge, so the page
+   itself (its exact colour, whatever the theme) shows through them like lace */
+.pull-sign { --lace: 12px;
+  -webkit-mask: linear-gradient(#000 0 0) top / 100% calc(100% - var(--lace) + 0.5px) no-repeat,
+    radial-gradient(circle at 50% 100%, transparent 0 calc(var(--lace) - 1px), #000 var(--lace)) bottom / calc(var(--lace) * 2) var(--lace) repeat-x;
+  mask: linear-gradient(#000 0 0) top / 100% calc(100% - var(--lace) + 0.5px) no-repeat,
+    radial-gradient(circle at 50% 100%, transparent 0 calc(var(--lace) - 1px), #000 var(--lace)) bottom / calc(var(--lace) * 2) var(--lace) repeat-x; }
+:root[data-theme='dark'] .pull-sign { background: color-mix(in srgb, var(--primary) 14%, var(--sky-1)); }
+.ps-word { position: relative; margin-top: max(10px, calc(env(safe-area-inset-top) * 0.2)); will-change: transform; }
+.ps-ink { display: block; font-family: var(--font-studio), cursive; font-size: clamp(2.2rem, 10.5vw, 3.1rem); line-height: 1.25; padding: 0 0.3em; white-space: nowrap;
+  color: var(--plum); text-shadow: 0 2px 12px color-mix(in srgb, var(--primary) 18%, transparent); clip-path: inset(-20% 100% -20% 0); }
+.ps-heart { position: absolute; left: 50%; top: 42%; width: 26px; height: 24px; opacity: 0; transform: translate(-50%, -50%) scale(0.1);
+  filter: drop-shadow(0 4px 6px rgba(160, 60, 110, 0.3)); will-change: transform, opacity; }
+html.lite .ps-heart { filter: none; }
+html.lite .ps-ink { text-shadow: none; }

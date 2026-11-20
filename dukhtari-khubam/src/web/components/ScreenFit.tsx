@@ -7,8 +7,8 @@ const PULL = 0.28
 const MAX = 64
 
 /**
- * A screen whose content fits the phone does not scroll at all: the page stays put, and a vertical drag
- * only stretches it a little, like rubber, and lets it spring back. Longer screens scroll as usual. The
+ * A screen whose content fits the phone does not scroll at all: the page stays put, and a drag upwards
+ * only stretches it a little, like rubber, and lets it spring back (a pull downwards: PullSignature). Longer screens scroll as usual. The
  * check is made on every page and whenever the content or the window changes size (the keyboard).
  */
 export function ScreenFit() {
@@ -47,7 +47,8 @@ export function ScreenFit() {
       if (!pulling) return
       const dy = e.touches[0].clientY - y0
       const dx = e.touches[0].clientX - x0
-      if (Math.abs(dx) > Math.abs(dy)) return
+      // a pull downwards opens the signature space instead (PullSignature)
+      if (Math.abs(dx) > Math.abs(dy) || dy > 0) return
       const d = Math.sign(dy) * Math.min(MAX, Math.abs(dy) * PULL)
       app.style.transform = `translateY(${d}px)`
     }

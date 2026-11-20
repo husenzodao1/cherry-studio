@@ -15,6 +15,7 @@ import { BackButton } from './BackButton'
 import { installGlobalHealing } from '../heal'
 import { PerfProbe } from './PerfProbe'
 import { Splash } from './Splash'
+import { PullSignature } from './PullSignature'
 import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
@@ -129,6 +130,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <OfflineNote />
               <BackButton />
               <ScreenFit />
+              <PullSignature />
               <WidgetBridge />
               <Toaster />
             </ForAge>
