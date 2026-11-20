@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react'
 
+import { STILL_PATHS } from './ScreenFit'
+
 /**
  * Pulling a screen of the app down at its top opens a small space above it; the page's edge below it becomes a
  * row of soft scallops in the page's own colour. In that space the studio's
@@ -9,8 +11,8 @@ import { useEffect, useRef } from 'react'
  * finger has pulled. Let go after a full pull and the scene plays out: the word gathers into its
  * middle and is gone, five little hearts in the app's colours fly out of that point, all of them come
  * forward at once, and the space closes. A short pull just springs back.
- * Transforms and opacity only (cheap enough for light mode too). The sign-in and welcome screens stay
- * perfectly still: nothing opens there.
+ * Transforms and opacity only (cheap enough for light mode too). Not on the sign-in and welcome screens:
+ * there a pull downwards is plain rubber (ScreenFit).
  */
 const MAX = 88 // px of open space at most: just the room the word and the hearts need
 // Real touch physics: the first stretch of finger travel does nothing (a casual swipe never opens it),
@@ -30,8 +32,6 @@ const HEARTS = [
 ]
 // returning to place: a soft ease-out with no overshoot, so the page settles without a pause
 const SETTLE = 'cubic-bezier(0.22, 1, 0.36, 1)'
-// screens that never move: signing in (Google, email, the code) and the first questions
-const STILL_PATHS = /^\/(start|welcome)(\/|$)/
 
 export function PullSignature() {
   const layer = useRef<HTMLDivElement>(null)

@@ -16,7 +16,7 @@ describe('mascot sayings', () => {
   })
 
   it('every moment has sayings in every language and a picture', () => {
-    for (const locale of ['tg', 'ru', 'en', 'uz']) {
+    for (const locale of ['tg', 'ru', 'en', 'uz', 'tr', 'fa', 'prs']) {
       const s = sayingsFor(locale)
       for (const m of Object.keys(POSES) as (keyof typeof POSES)[]) {
         expect(s[m].length, `${locale} ${m}`).toBeGreaterThan(1)

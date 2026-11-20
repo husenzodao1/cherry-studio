@@ -147,7 +147,59 @@ test('words of the day: a long poem keeps its lines, shows four and scrolls upwa
   // the window holds four lines
   const lines = await text.evaluate((el) => el.clientHeight / parseFloat(getComputedStyle(el.querySelector('blockquote')!).lineHeight))
   expect(Math.round(lines)).toBe(4)
-  await expect(quote).toHaveAttribute('data-moving', '')
-  await expect.poll(() => quote.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42), { timeout: 15_000 }).toBeLessThan(-10)
+  // first the beginning is read, unshaded; then it scrolls up slowly and the top line is shaded
+  await expect(text).toHaveClass(/at-top/)
+  await expect.poll(() => text.evaluate((el) => el.scrollTop), { timeout: 15_000 }).toBeGreaterThan(8)
+  await expect(text).not.toHaveClass(/at-top/)
+  await page.waitForTimeout(2500)
+  await page.locator('.words').screenshot({ path: 'test-results/words-rise.png' })
+  const t0 = await text.evaluate((el) => el.scrollTop)
+  await page.waitForTimeout(1000)
+  const t1 = await text.evaluate((el) => el.scrollTop)
+  // slowly: about 9 px a second
+  expect(t1 - t0).toBeGreaterThan(3)
+  expect(t1 - t0).toBeLessThan(20)
+  // a finger takes over: while it holds, nothing moves by itself and the quote stays
+  await text.dispatchEvent('pointerdown')
+  const h0 = await text.evaluate((el) => el.scrollTop)
+  await page.waitForTimeout(1200)
+  expect(await text.evaluate((el) => el.scrollTop)).toBe(h0)
+  // the finger scrolls back to the beginning: no shade at the top again
+  await text.evaluate((el) => { el.scrollTop = 0; el.dispatchEvent(new Event('scroll')) })
+  await expect(text).toHaveClass(/at-top/)
+  expect(errors).toEqual([])
+})
+
+test('the "new version" note stays inside the screen, centred (it used to slide half off to the left)', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  // the note itself shows only in the Android app: the same element with the same styles is placed here
+  await page.evaluate(() => {
+    const el = document.createElement('div')
+    el.className = 'update-note glass'
+    el.innerHTML = '<span class="update-icon"></span><span class="update-text">Версияи нав дастрас аст <b>1.14.7</b></span><a class="btn update-go">Навсозӣ</a>'
+    document.body.appendChild(el)
+  })
+  await page.waitForTimeout(700)
+  const box = (await page.locator('.update-note').boundingBox())!
+  const vw = page.viewportSize()!.width
+  expect(box.x).toBeGreaterThanOrEqual(0)
+  expect(box.x + box.width).toBeLessThanOrEqual(vw)
+  expect(Math.abs(box.x + box.width / 2 - vw / 2)).toBeLessThan(2)
+  expect(errors).toEqual([])
+})
+
+test('every profile picture wears the little gold crown, tilted to one side', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  for (const path of ['/', '/profile']) {
+    await page.goto(path)
+    await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+    const crown = page.locator('.avatar-crown').first()
+    await expect(crown).toBeVisible()
+    await expect.poll(() => crown.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth)).toBeGreaterThan(300)
+    // slipped to the left of the head and tilted, not straight on top
+    await expect.poll(() => crown.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).b)).toBeLessThan(-0.3)
+  }
   expect(errors).toEqual([])
 })

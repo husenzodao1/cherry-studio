@@ -634,6 +634,11 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 :root[data-theme='dark'] .studio-ghost { opacity: 0.13; }
 /* profile photo */
 .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+/* the crown: resting on the top of the picture, slipped to the left and tilted, as if just put on */
+.avatar-crowned { position: relative; display: inline-flex; flex: none; }
+.avatar-crown { position: absolute; width: calc(var(--avatar) * 0.7); height: auto; max-width: none; left: calc(var(--avatar) * -0.12); top: calc(var(--avatar) * -0.3);
+  transform: rotate(-24deg); transform-origin: 70% 90%; pointer-events: none; animation: crown-in 0.8s 0.3s cubic-bezier(0.3, 1.4, 0.45, 1) both; }
+@keyframes crown-in { from { opacity: 0; transform: translateY(-10px) rotate(-40deg) scale(0.8); } to { opacity: 1; transform: rotate(-24deg); } }
 .profile-photo { position: relative; display: inline-flex; }
 .photo-btn { position: relative; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
 .photo-badge { position: absolute; right: -2px; bottom: 2px; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
@@ -666,13 +671,16 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 /* ---------------------------------------------------------------- start */
 .start { min-height: 92dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 20px 0 40px; text-align: center; }
 /* sign-in: the scene fills the top edge to edge, the title sits where the scene melts into the page */
-.start.has-scene { justify-content: flex-start; gap: 14px; padding-top: 0; min-height: 0; }
-/* the sign-in screen has no menu below it: no room kept for one, so it fits the phone and stays still */
-.app:has(> .start) { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
-.start.has-scene { padding-bottom: 8px; }
-.start-scene { position: relative; width: 100vw; max-width: 560px; height: clamp(210px, 36dvh, 330px); flex: none;
-  margin-top: calc(-1 * max(14px, env(safe-area-inset-top))); margin-bottom: -46px; overflow: hidden; pointer-events: none;
-  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent); mask-image: linear-gradient(180deg, #000 62%, transparent); }
+.start.has-scene { justify-content: flex-start; gap: 14px; padding: 0 0 8px;
+  min-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))); }
+/* screens without the tab bar keep no room for it (Dock.tsx sets html.no-dock), so a short one fits */
+html.no-dock .app, .app:has(> .start) { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+/* the scene takes the height the phone has left, so the form sits low, within thumb's reach */
+.start-scene { position: relative; width: 100vw; max-width: 560px; flex: 1 1 auto; min-height: 250px; max-height: 54dvh;
+  margin-top: calc(-1 * max(14px, env(safe-area-inset-top))); margin-bottom: -40px; overflow: hidden; pointer-events: none; }
+/* only the sky and the orbit fade at the bottom; the girls carry their own soft fade and shadow */
+.ss-bg { position: absolute; inset: 0; overflow: hidden; }
+.ss-bg, .ss-orbit { -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); mask-image: linear-gradient(180deg, #000 60%, transparent); }
 .ss-sky { position: absolute; inset: -20%; animation: ss-drift 22s ease-in-out infinite alternate;
   background:
     radial-gradient(42% 46% at 16% 28%, color-mix(in srgb, var(--rose-strong) 85%, transparent), transparent 70%),
@@ -684,10 +692,10 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 :root[data-theme='dark'] .ss-sky { opacity: 0.55; }
 @keyframes ss-drift { from { transform: translate3d(-4%, -2%, 0) rotate(-4deg) scale(1); } to { transform: translate3d(4%, 3%, 0) rotate(5deg) scale(1.08); } }
 .ss-orbit { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* the girls stand at the sides; their lower half fades softly into the page before the Google button */
-.ss-girl { position: absolute; bottom: 0; height: 84%; width: 34%; max-width: none; object-fit: contain; object-position: 50% 0;
-  -webkit-mask-image: linear-gradient(180deg, #000 46%, transparent 92%); mask-image: linear-gradient(180deg, #000 46%, transparent 92%);
-  filter: drop-shadow(0 10px 18px rgba(90, 50, 160, 0.2)); animation: ss-girl 1.1s var(--ease) both; }
+/* the girls stand at the sides below the language icon, looking at each other; shadow and the soft
+   fade of their lower half are in the pictures themselves (no filter or mask: crisp on every phone) */
+.ss-girl { position: absolute; bottom: 0; top: calc(max(14px, env(safe-area-inset-top)) + 50px); height: calc(100% - max(14px, env(safe-area-inset-top)) - 50px);
+  width: 40%; object-fit: contain; object-position: 50% 100%; animation: ss-girl 1.1s var(--ease) both; }
 .ss-girl.is-left { left: -3%; }
 .ss-girl.is-right { right: -3%; animation-delay: 0.15s; }
 @keyframes ss-girl { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -998,11 +1006,15 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
 .words-text { flex: 0 1 auto; min-height: 0; max-height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .words-item blockquote { margin: 0; font-family: var(--font-hand), var(--font-brand); font-weight: 600; font-size: 1.45rem; line-height: 1.18; color: var(--ink);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); overflow-wrap: anywhere; white-space: pre-line; text-wrap: balance; padding-block: 0.08em; }
-/* longer than four lines: four lines show, the rest scrolls upward, softly faded at the top and bottom */
-.words-text.is-rising { flex: none; align-items: flex-start; -webkit-mask-image: linear-gradient(180deg, transparent, #000 7%, #000 93%, transparent);
-  mask-image: linear-gradient(180deg, transparent, #000 7%, #000 93%, transparent); }
-.words-item blockquote[data-moving] { animation: words-rise var(--travel) linear 1.6s both; will-change: transform; }
-@keyframes words-rise { from { transform: translateY(0); } to { transform: translateY(var(--rise)); } }
+/* longer than four lines: four lines show and the rest scrolls up — by itself, slowly, or by finger.
+   Once the beginning has moved up, the top line is shaded (and the bottom one while more is below) */
+.words-text.is-rising { flex: none; display: block; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none;
+  --fade-top: 26%; --fade-end: 18%;
+  -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35) calc(var(--fade-top) * 0.45), #000 var(--fade-top), #000 calc(100% - var(--fade-end)), transparent);
+  mask-image: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35) calc(var(--fade-top) * 0.45), #000 var(--fade-top), #000 calc(100% - var(--fade-end)), transparent); }
+.words-text.is-rising::-webkit-scrollbar { display: none; }
+.words-text.is-rising.at-top { --fade-top: 0%; }
+.words-text.is-rising.at-end { --fade-end: 0%; }
 :root[data-theme='dark'] .words-item blockquote { text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); }
 .words-item figcaption { flex: none; font-family: var(--font-hand), var(--font-brand); font-size: 1rem; line-height: 1.2; color: var(--ink-2); opacity: 0.85;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1291,7 +1303,7 @@ html.intro .words-label { animation: intro-wipe 0.8s 1.4s ease-out both; }
 .icon-pick[aria-checked='true'] { box-shadow: 0 0 0 2px var(--surface, #fff), 0 0 0 4px var(--primary); transform: scale(1.04); }
 
 /* ---------------------------------------------------------------- welcome questions (/welcome) */
-.wl { min-height: calc(100dvh - 40px); display: flex; flex-direction: column; gap: 14px; padding: 4px 0 28px; }
+.wl { min-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))); display: flex; flex-direction: column; gap: 14px; padding: 4px 0 6px; }
 .wl-top { display: flex; align-items: center; gap: 12px; }
 .wl-steps { flex: 1; display: flex; gap: 6px; }
 .wl-steps span { flex: 1; height: 5px; border-radius: 3px; background: var(--track); transition: background 0.4s var(--ease); }
@@ -1299,7 +1311,8 @@ html.intro .words-label { animation: intro-wipe 0.8s 1.4s ease-out both; }
 .wl-steps span.is-done { background: var(--pill); }
 .wl-step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; animation: wl-in 0.55s var(--ease) both; }
 @keyframes wl-in { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
-.wl-art { position: relative; width: min(62vw, 250px); aspect-ratio: 1.15; display: flex; align-items: center; justify-content: center; margin: 4px 0 2px; }
+/* the picture takes only the height left over (none counted up front), so every step fits the phone */
+.wl-art { position: relative; width: min(62vw, 250px); flex: 1 1 0; min-height: 96px; max-height: 218px; display: flex; align-items: center; justify-content: center; margin: 4px 0 2px; }
 .wl-art img { position: relative; width: 100%; height: 100%; object-fit: contain; animation: wl-pop 0.9s cubic-bezier(0.3, 0.7, 0.35, 1.3) both, wl-float 4.2s 0.9s ease-in-out infinite;
   filter: drop-shadow(0 18px 24px color-mix(in srgb, var(--primary) 22%, transparent)); }
 .wl-glow { position: absolute; inset: 12% 10%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--primary-soft) 55%, transparent), transparent 70%);
@@ -1361,7 +1374,10 @@ html.intro .words-label { animation: intro-wipe 0.8s 1.4s ease-out both; }
 
 /* ---------------------------------------------------------------- "new version" note: × or swipe it away */
 .update-note { position: fixed; left: 12px; right: 12px; top: max(10px, env(safe-area-inset-top)); z-index: 60; max-width: 520px; margin: 0 auto;
-  display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border-radius: 22px; touch-action: pan-y; animation: toast-in 0.45s var(--ease) both; }
+  display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border-radius: 22px; touch-action: pan-y; animation: update-in 0.45s var(--ease) backwards; }
+/* its own entrance: the toast's keyframes are for a box centred by translate(-50%), which pushed this one
+   half off the screen to the left (and, filled forwards, overrode the swipe) */
+@keyframes update-in { from { opacity: 0; transform: translateY(-14px) scale(0.96); } to { opacity: 1; transform: none; } }
 .update-icon { width: 32px; height: 32px; border-radius: 50%; flex: none; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: var(--pill); }
 .update-text { flex: 1; min-width: 0; font-size: 0.88rem; color: var(--ink); }
 .update-go { min-height: 34px; padding: 0 14px; font-size: 0.82rem; }
@@ -1530,14 +1546,11 @@ html, body { overscroll-behavior-y: none; }
 .mascot.is-leaving { animation: mascot-out 0.32s ease-in both; }
 .mascot.no-girl { padding-left: 20px; }
 .mascot.is-stop { border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
-/* she stands on the card, a head taller than it; her lower edge melts into the card, a soft shadow
-   lifts her off it (the wrapper's side room keeps the shadow from being cut) */
-.mascot-girl { position: absolute; left: -2px; bottom: 0; padding: 0 14px; pointer-events: none;
-  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 18px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 18px), transparent);
-  transform-origin: 50% 100%; animation: mascot-girl 0.7s 0.08s cubic-bezier(0.3, 1.4, 0.4, 1) both; }
-.mascot-girl img { display: block; height: 188px; width: 146px; max-width: none; object-fit: contain; object-position: 50% 100%;
-  filter: drop-shadow(0 8px 12px rgba(70, 40, 140, 0.26)) drop-shadow(0 1px 2px rgba(70, 40, 140, 0.18)); }
-:root[data-theme='dark'] .mascot-girl img { filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.25)); }
+/* she stands on the card, a head taller than it; her soft shadow and the fade of her lower edge are in
+   the picture itself (no filter or mask: crisp on every phone) */
+.mascot-girl { position: absolute; left: -4px; bottom: 0; pointer-events: none; transform-origin: 50% 100%;
+  animation: mascot-girl 0.7s 0.08s cubic-bezier(0.3, 1.4, 0.4, 1) both; }
+.mascot-girl img { display: block; height: 196px; width: 164px; max-width: none; object-fit: contain; object-position: 50% 100%; }
 .mascot-text { margin: 0; font-size: 0.98rem; line-height: 1.35; font-weight: 600; color: var(--ink); text-wrap: pretty; }
 .mascot-close { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; padding: 0;
   border-radius: 50%; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink-2); cursor: pointer; }

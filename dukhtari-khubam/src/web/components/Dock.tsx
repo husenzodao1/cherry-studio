@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 
 import { LiquidGlass } from '../glass/LiquidGlass'
 import { usePrefs } from '../prefs'
@@ -21,7 +22,10 @@ export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|ad
 export function Dock() {
   const path = usePathname() ?? '/'
   const { t } = usePrefs()
-  if (noDock(path)) return null
+  const hidden = noDock(path)
+  // a screen without the tab bar keeps no room for it at the bottom (so a short one fits the phone)
+  useEffect(() => { document.documentElement.classList.toggle('no-dock', hidden) }, [hidden])
+  if (hidden) return null
   return (
     <div className="dock-wrap">
       <LiquidGlass as="nav" label={t('nav.home')} radius={36} bezel={20} blur={40} className="dock">

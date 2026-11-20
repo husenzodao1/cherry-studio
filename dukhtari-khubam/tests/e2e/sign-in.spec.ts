@@ -51,3 +51,25 @@ test.describe('sign-in with e-mail', () => {
     expect(errors).toEqual([])
   })
 })
+
+test('a new phone starts in Russian; the language icon opens a centred list and switches at once', async ({ page, server: _, errors }) => {
+  // a phone that never chose a language (the fixture's Tajik is taken away before the first page)
+  await page.addInitScript(() => { if (!sessionStorage.getItem('fresh')) { sessionStorage.setItem('fresh', '1'); localStorage.removeItem('dk.prefs') } })
+  await page.goto('/start')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ru')
+  await expect(page.locator('.google-btn')).toContainText('Google')
+  await expect(page.locator('form .btn-lg')).toHaveText(/Далее/)
+  await page.locator('.start-lang').click()
+  const box = page.getByRole('dialog')
+  await expect(box).toBeVisible()
+  // centred on the screen, over the whole page
+  const r = await box.boundingBox()
+  const vw = page.viewportSize()!.width
+  expect(Math.abs(r!.x + r!.width / 2 - vw / 2)).toBeLessThan(2)
+  await box.getByRole('radio', { name: 'Тоҷикӣ' }).click()
+  await expect(box).toBeHidden()
+  await expect(page.locator('form .btn-lg')).toHaveText(/Давом/)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'tg')
+  expect(errors).toEqual([])
+})

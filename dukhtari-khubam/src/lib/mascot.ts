@@ -203,8 +203,188 @@ const en: Sayings = {
   ]
 }
 
-/** Lessons and texts exist in Tajik, Russian and English; the other interface languages read Tajik. */
-const SAYINGS: Record<string, Sayings> = { tg, ru, en }
+const uz: Sayings = {
+  entry: [
+    'Bugun o‘qishni boshlashga tayyormisiz?',
+    '{name}, yangi kun — yangi bilim. Boshlaymizmi?',
+    'Salom, {name}! Bugun qisqa bir dars sizga go‘zal narsa o‘rgatadi.',
+    'Bugun yangi mavzu uchun ajoyib vaqt. Qani!',
+    'Qaytib keldingiz — bu allaqachon g‘alaba. Davom etamizmi?',
+    'Har kuni kichik qadam — va bilim o‘zi keladi. Tayyormisiz?'
+  ],
+  comeback: [
+    'Salom, {name}! Sizni sog‘indik.',
+    'Qaytganingiz qanday yaxshi! To‘xtagan joydan davom etamizmi?',
+    'Yana xush kelibsiz! Bugun bitta kichik dars ham yetarli.'
+  ],
+  praise: [
+    'Juda yaxshi, harakatingiz a’lo!',
+    'Barakalla! Ketma-ket uchta to‘g‘ri javob!',
+    'Voy! Bugun juda diqqatlisiz.',
+    'Ajoyib! Shunday davom eting.',
+    'Zo‘r! Bilimingiz ko‘rinib turibdi.'
+  ],
+  stop: [
+    'To‘xtang, ketma-ket xato qilyapsiz. Biroz xotirjamroq o‘qing.',
+    'Bir lahza nafas oling va savolni diqqat bilan o‘qing.',
+    'Shoshilmang — to‘g‘ri javob yaqin.',
+    'Keling, sekinlashamiz: har bir variantni diqqat bilan ko‘ring.',
+    'Ketma-ket ikki xato. Balki darsni yana bir bor o‘qish kerakdir?'
+  ],
+  perfect: [
+    'Birorta ham xato yo‘q! Siz ajoyibsiz!',
+    'Yuzdan yuz! Bu haqiqiy mehnat natijasi.',
+    'Hammasi to‘g‘ri! Siz bilan faxrlanaman.'
+  ],
+  passed: [
+    'Test topshirildi! Barakalla.',
+    'Yaxshi natija! Yana ozgina — va mukammal bo‘ladi.',
+    'O‘tdingiz! Bilim qadam-baqadam o‘sadi.'
+  ],
+  failed: [
+    'Hechqisi yo‘q — xato ham o‘rgatadi. Yana urinib ko‘ring.',
+    'Bu safar bo‘lmadi, lekin siz allaqachon yangi narsa o‘rgandingiz.',
+    'Darsni yana bir ko‘rib chiqing va qayting — siz uddalaysiz.'
+  ],
+  beforeQuiz: [
+    'Siz uddalaysiz! Diqqat bilan o‘qing va o‘zingizga ishoning.',
+    'Xotirjam bo‘ling — siz bu darsni o‘qigansiz.',
+    'Har bir savol — yangi imkoniyat. Omad!'
+  ],
+  lessonDone: [
+    'Dars tugadi! Maqsadga bir qadam yaqinroq.',
+    'Barakalla! Bugun yangi narsa o‘rgandingiz.',
+    'Yana bir dars! Bilimingiz kundan-kunga oshmoqda.',
+    'A’lo! Endi test yoki keyingi dars?'
+  ],
+  review: [
+    'Keling, takrorlaymiz — takror bilimning onasi.',
+    'Bu mavzular esingizdami? Tekshiramiz!'
+  ]
+}
+
+const tr: Sayings = {
+  entry: [
+    'Bugün okumaya başlamaya hazır mısın?',
+    '{name}, yeni bir gün — yeni bilgiler. Başlayalım mı?',
+    'Merhaba, {name}! Bugün kısa bir ders sana güzel bir şey öğretecek.',
+    'Bugün yeni bir konu için güzel bir zaman. Haydi!',
+    'Geri döndün — bu zaten bir zafer. Devam edelim mi?',
+    'Her gün küçük bir adım ve bilgi kendiliğinden gelir. Hazır mısın?'
+  ],
+  comeback: [
+    'Merhaba, {name}! Seni özledik.',
+    'Döndüğün ne güzel! Kaldığın yerden devam edelim mi?',
+    'Tekrar hoş geldin! Bugün küçük bir ders bile yeter.'
+  ],
+  praise: [
+    'Çok iyi, harika gidiyorsun!',
+    'Bravo! Üst üste üç doğru cevap!',
+    'Vay! Bugün çok dikkatlisin.',
+    'Harika! Böyle devam et.',
+    'Mükemmel! Bilgin göz önünde.'
+  ],
+  stop: [
+    'Dur, art arda hata yapıyorsun. Biraz daha sakin oku.',
+    'Bekle, bir nefes al ve soruyu dikkatle oku.',
+    'Acele etme — doğru cevap çok yakın.',
+    'Biraz yavaşlayalım: her seçeneğe dikkatle bak.',
+    'Üst üste iki hata. Belki dersi bir kez daha okumak gerekir?'
+  ],
+  perfect: [
+    'Tek bir hata bile yok! Harikasın!',
+    'Yüzde yüz! Bu gerçek bir emeğin sonucu.',
+    'Hepsi doğru! Seninle gurur duyuyorum.'
+  ],
+  passed: [
+    'Test geçildi! Bravo.',
+    'İyi bir sonuç! Biraz daha ve mükemmel olacak.',
+    'Geçtin! Bilgi adım adım büyüyor.'
+  ],
+  failed: [
+    'Önemli değil — hatalar da öğretir. Tekrar dene.',
+    'Bu sefer olmadı ama yine de yeni bir şey öğrendin.',
+    'Derse bir kez daha göz at ve geri gel — başarabilirsin.'
+  ],
+  beforeQuiz: [
+    'Başarabilirsin! Dikkatle oku ve kendine inan.',
+    'Sakin ol — bu dersi okudun.',
+    'Her soru yeni bir fırsat. Bol şans!'
+  ],
+  lessonDone: [
+    'Ders bitti! Hedefe bir adım daha yakınsın.',
+    'Bravo! Bugün yeni bir şey öğrendin.',
+    'Bir ders daha! Bilgin günden güne artıyor.',
+    'Harika! Şimdi test mi, sıradaki ders mi?'
+  ],
+  review: [
+    'Haydi tekrar edelim — tekrar, öğrenmenin anasıdır.',
+    'Bu konuları hatırlıyor musun? Bir bakalım!'
+  ]
+}
+
+const fa: Sayings = {
+  entry: [
+    'امروز آماده‌اید خواندن را شروع کنیم؟',
+    '{name}، روزی تازه — دانشی تازه. شروع کنیم؟',
+    'سلام، {name}! امروز یک درس کوتاه چیزی زیبا به شما می‌آموزد.',
+    'امروز وقت خوبی برای یک موضوع تازه است. بیایید!',
+    'برگشتید — همین خودش پیروزی است. ادامه بدهیم؟',
+    'هر روز یک گام کوچک، و دانش خودش می‌آید. آماده‌اید؟'
+  ],
+  comeback: [
+    'سلام، {name}! دلمان برایتان تنگ شده بود.',
+    'چه خوب که برگشتید! از همان جایی که ماندید ادامه بدهیم؟',
+    'دوباره خوش آمدید! امروز یک درس کوچک هم کافی است.'
+  ],
+  praise: [
+    'خیلی خوب، تلاش شما عالی است!',
+    'آفرین! سه پاسخ درست پشت سر هم!',
+    'وای! امروز خیلی دقیق هستید.',
+    'شگفت‌انگیز! همین‌طور ادامه دهید.',
+    'عالی! دانش شما پیداست.'
+  ],
+  stop: [
+    'ایست، پشت سر هم اشتباه می‌کنید. کمی آرام‌تر بخوانید.',
+    'صبر کنید، یک نفس بکشید و پرسش را با دقت بخوانید.',
+    'عجله نکنید — پاسخ درست نزدیک است.',
+    'بیایید آهسته‌تر برویم: هر گزینه را با دقت ببینید.',
+    'دو اشتباه پشت سر هم. شاید بهتر است درس را یک بار دیگر بخوانید؟'
+  ],
+  perfect: [
+    'بدون حتی یک اشتباه! شما فوق‌العاده‌اید!',
+    'صد در صد! این نتیجهٔ واقعی تلاش است.',
+    'همه درست! به شما افتخار می‌کنم.'
+  ],
+  passed: [
+    'آزمون را گذراندید! آفرین.',
+    'نتیجهٔ خوبی است! کمی دیگر و کامل می‌شود.',
+    'قبول شدید! دانش گام به گام می‌افزاید.'
+  ],
+  failed: [
+    'اشکالی ندارد — اشتباه هم یاد می‌دهد. دوباره تلاش کنید.',
+    'این بار نشد، اما شما چیزی تازه آموختید.',
+    'درس را یک بار دیگر ببینید و برگردید — شما می‌توانید.'
+  ],
+  beforeQuiz: [
+    'شما می‌توانید! با دقت بخوانید و به خودتان باور داشته باشید.',
+    'آرام باشید — شما این درس را خوانده‌اید.',
+    'هر پرسش فرصتی تازه است. موفق باشید!'
+  ],
+  lessonDone: [
+    'درس تمام شد! یک گام به هدف نزدیک‌تر.',
+    'آفرین! امروز چیزی تازه آموختید.',
+    'یک درس دیگر! دانش شما روز به روز بیشتر می‌شود.',
+    'عالی! حالا آزمون یا درس بعدی؟'
+  ],
+  review: [
+    'بیایید مرور کنیم — تکرار مادر دانش است.',
+    'این موضوع‌ها را به یاد دارید؟ بیایید ببینیم!'
+  ]
+}
+
+/** Every interface language has her sayings; Dari reads the Persian ones. */
+const SAYINGS: Record<string, Sayings> = { tg, ru, en, uz, tr, fa, prs: fa }
 
 export const sayingsFor = (locale: string): Sayings => SAYINGS[locale] ?? tg
 

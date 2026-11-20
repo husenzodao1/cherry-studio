@@ -28,7 +28,8 @@ export const MIN_TEXT_SCALE = 0.9
 /** The two text sizes offered: small (the standard) and medium. */
 export const TEXT_SIZES = [{ key: 'small', scale: 0.9 }, { key: 'medium', scale: 1 }] as const
 const snapScale = (x: number) => (Number(x) >= 0.95 ? 1 : 0.9)
-const DEFAULTS: Prefs = { locale: 'tg', theme: 'peach', textScale: MIN_TEXT_SCALE }
+// a new phone starts in Russian; Tajik and the other languages are one tap away (sign-in screen, settings)
+const DEFAULTS: Prefs = { locale: 'ru', theme: 'peach', textScale: MIN_TEXT_SCALE }
 const VERSION = 3
 const KEY = 'dk.prefs'
 const PrefsContext = createContext<PrefsApi | null>(null)
@@ -38,7 +39,7 @@ function read(): Prefs {
     const stored = JSON.parse(localStorage.getItem(KEY) ?? '{}')
     const { locale, theme, textScale } = { ...DEFAULTS, ...stored }
     return {
-      // Arabic was removed: such settings (and any unknown one) return to Tajik
+      // Arabic was removed: such settings (and any unknown one) return to the default language
       locale: LOCALES.includes(locale) ? locale : DEFAULTS.locale,
       // white was the standard theme before version 3: such settings move to the new standard, Peach
       theme: (THEMES as readonly string[]).includes(theme) && !(theme === 'light' && (stored.v ?? 0) < VERSION) ? theme : DEFAULTS.theme,

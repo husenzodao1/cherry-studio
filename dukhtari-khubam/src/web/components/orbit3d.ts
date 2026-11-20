@@ -189,7 +189,11 @@ const trailFragment = /* glsl */ `
 interface Body { obj: THREE.Object3D; axis: THREE.Vector3; spin: number; phase: number; trail: Float32Array; geo: THREE.BufferGeometry; filled: number }
 
 /** Mounts the scene on the canvas; returns the clean-up. `light` draws fewer pixels (weaker phones). */
-export function mountOrbit(canvas: HTMLCanvasElement, opts: { light: boolean; still: boolean }): () => void {
+/**
+ * `focus` gives the height (0 top … 1 bottom) the orbit circles at — the girls' eye line; `refocus()`
+ * places it again (once their pictures are in).
+ */
+export function mountOrbit(canvas: HTMLCanvasElement, opts: { light: boolean; still: boolean; focus?: () => number }): { stop: () => void; refocus: () => void } {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !opts.light, powerPreference: 'low-power' })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, opts.light ? 1.5 : 2))
   renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -219,7 +223,7 @@ export function mountOrbit(canvas: HTMLCanvasElement, opts: { light: boolean; st
     const obj = make()
     const box = new THREE.Box3().setFromObject(obj)
     const size = box.getSize(new THREE.Vector3())
-    obj.scale.setScalar(0.86 / Math.max(size.x, size.y, size.z))
+    obj.scale.setScalar(0.62 / Math.max(size.x, size.y, size.z))
     orbit.add(obj)
     const trail = new Float32Array(TRAIL * 3)
     const age = new Float32Array(TRAIL).map((_, n) => n / (TRAIL - 1))
@@ -238,8 +242,8 @@ export function mountOrbit(canvas: HTMLCanvasElement, opts: { light: boolean; st
     return { obj, axis, spin: 0.45 + Math.random() * 0.55, phase: (i / MAKERS.length) * Math.PI * 2, trail, geo, filled: 0 }
   })
 
-  let rx = 3
-  const rz = 2.4
+  let rx = 2
+  const rz = 1.7
   const resize = () => {
     const w = canvas.clientWidth
     const h = canvas.clientHeight
@@ -247,10 +251,14 @@ export function mountOrbit(canvas: HTMLCanvasElement, opts: { light: boolean; st
     renderer.setSize(w, h, false)
     camera.aspect = w / h
     camera.updateProjectionMatrix()
-    // the visible half-width at the centre; the orbit keeps clear of the sides (and of the girls)
-    const half = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z * camera.aspect
-    rx = Math.min(half * 0.42, 2.6)
-    const px = renderer.getPixelRatio() * h * 0.2
+    // the visible half-height and half-width at the centre: the orbit circles at the girls' eye line,
+    // narrow enough to stay between their faces
+    const halfH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z
+    const half = halfH * camera.aspect
+    rx = Math.min(half * 0.3, 1.8)
+    const f = Math.min(0.75, Math.max(0.25, opts.focus?.() ?? 0.5))
+    orbit.position.y = halfH * (1 - 2 * f)
+    const px = renderer.getPixelRatio() * Math.min(h, 330) * 0.2
     scene.traverse((o) => { if (o instanceof THREE.Points) (o.material as THREE.ShaderMaterial).uniforms.uSize.value = px })
   }
   resize()
@@ -301,7 +309,7 @@ export function mountOrbit(canvas: HTMLCanvasElement, opts: { light: boolean; st
   document.addEventListener('visibilitychange', play)
   play()
 
-  return () => {
+  const stop = () => {
     cancelAnimationFrame(raf)
     io.disconnect()
     ro.disconnect()
@@ -316,4 +324,5 @@ export function mountOrbit(canvas: HTMLCanvasElement, opts: { light: boolean; st
     pmrem.dispose()
     renderer.dispose()
   }
+  return { stop, refocus: resize }
 }

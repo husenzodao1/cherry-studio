@@ -19,13 +19,19 @@ export function Header({ back, title, end }: { back?: string; title?: ReactNode;
   )
 }
 
-/** The learner's photo (kept on this phone only), or her initial on a soft glass disc. */
+/**
+ * The learner's photo (kept on this phone only), or her initial on a soft glass disc, with a small
+ * gold crown resting on it, slipped a little to one side.
+ */
 export function Avatar({ name, size = 52 }: { name?: string | null; size?: number }) {
   const photo = usePhoto()
   const letter = (name ?? '').trim().charAt(0).toUpperCase() || '✿'
   return (
-    <span className="avatar" style={{ width: size, height: size, fontSize: size * 0.42 }} aria-hidden="true">
-      {photo ? <img src={photo} alt="" /> : letter}
+    <span className="avatar-crowned" style={{ ['--avatar' as string]: `${size}px` }} aria-hidden="true">
+      <span className="avatar" style={{ width: size, height: size, fontSize: size * 0.42 }}>
+        {photo ? <img src={photo} alt="" /> : letter}
+      </span>
+      <img className="avatar-crown" src="/assets/3d/crown.webp" alt="" />
     </span>
   )
 }

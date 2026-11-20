@@ -1,209 +1,215 @@
 {
- "note": "Pre-rendered 3D assets. Rendered offline with tools/render-assets (three.js, physically based materials with real transmission for glass, HDRI lighting); glass is shot on black and on white and matte.py recovers true transparency. No AI-generated imagery.",
- "lighting": {
-  "hdri": "Studio Small 09",
-  "author": "Sergej Majboroda",
-  "source": "https://polyhaven.com/a/studio_small_09",
-  "license": "CC0 1.0"
- },
- "assets": {
-  "glass-flower.webp": {
-   "model": "Glass crocus with solid, bevelled glass petals and golden anthers",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-v2.json: v2-crocus)"
+  "note": "Pre-rendered 3D assets. Rendered offline with tools/render-assets (three.js, physically based materials with real transmission for glass, HDRI lighting); glass is shot on black and on white and matte.py recovers true transparency. No AI-generated imagery.",
+  "lighting": {
+    "hdri": "Studio Small 09",
+    "author": "Sergej Majboroda",
+    "source": "https://polyhaven.com/a/studio_small_09",
+    "license": "CC0 1.0"
   },
-  "glass-flower-side.webp": {
-   "model": "Glass crocus, side view",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-v2b.json: v2-crocus-side)"
-  },
-  "glass-flower-open.webp": {
-   "model": "Glass crocus, open, seen from above",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-v2b.json: v2-crocus-open)"
-  },
-  "glass-lens.webp": {
-   "model": "Glass lens (flattened sphere, transmissive glass)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-glass.json: lens-a)"
-  },
-  "glass-bubble.webp": {
-   "model": "Glass sphere",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-glass.json: lens-b)"
-  },
-  "school-religion.webp": {
-   "model": "Mosque with four minarets, ribbed gold-trimmed dome and arcade",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons2.json: i2-mosque)"
-  },
-  "school-ethics.webp": {
-   "model": "Glossy heart with a gold band, small hearts and pearls",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons2.json: i2-heart)"
-  },
-  "school-culture.webp": {
-   "model": "Gold-banded vase with three flowers",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons2.json: i2-culture)"
-  },
-  "school-family.webp": {
-   "model": "Family and relationships: a soft house with a heart on its front, hearts rising from the chimney",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons3.json: i3-family)"
-  },
-  "school-health.webp": {
-   "model": "Science and health: a glass flask with violet liquid and a pink heart with a white cross",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons3.json: i3-health)"
-  },
-  "school-growth.webp": {
-   "model": "Personal growth: three rising steps with a golden star",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons3.json: i3-growth)"
-  },
-  "school-modern.webp": {
-   "model": "Light bulb with glowing filament and a glass halo",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-icons2.json: i2-bulb)"
-  },
-  "book-open.webp": {
-   "model": "Open book on a rehal stand (procedural; abstract text lines, no real script)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-shrine.json: book-open)"
-  },
-  "glass-lotus.webp": {
-   "model": "Glass water lily (four rings of solid glass petals)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-v2.json: v2-lotus)"
-  },
-  "glass-tulip.webp": {
-   "model": "Glass tulip with stem and leaves",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-v2b.json: v2-tulip)"
-  },
-  "glass-leaves.webp": {
-   "model": "Spray of glass leaves",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-v2b.json: v2-leaves)"
-  },
-  "glass-crystals.webp": {
-   "model": "Cluster of hexagonal glass crystals",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-v2b.json: v2-crystals)"
-  },
-  "glass-petals.webp": {
-   "model": "Loose glass petals",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets (jobs-v2b.json: v2-petals)"
-  },
-  "butterfly-pearl-wing-l.webp": {
-   "model": "Butterfly (\"white\"), white, left wing (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=pearl"
-  },
-  "butterfly-lilac-wing-l.webp": {
-   "model": "Butterfly (\"white\"), lilac, left wing (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=lilac"
-  },
-  "butterfly-rose-wing-l.webp": {
-   "model": "Butterfly (\"white\"), pink, left wing (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=rose"
-  },
-  "butterfly-sky-wing-l.webp": {
-   "model": "Butterfly (\"white\"), blue, left wing (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=sky"
-  },
-  "butterfly-pearl-wing-r.webp": {
-   "model": "Butterfly (\"white\"), white, right wing (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=pearl"
-  },
-  "butterfly-lilac-wing-r.webp": {
-   "model": "Butterfly (\"white\"), lilac, right wing (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=lilac"
-  },
-  "butterfly-rose-wing-r.webp": {
-   "model": "Butterfly (\"white\"), pink, right wing (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=rose"
-  },
-  "butterfly-sky-wing-r.webp": {
-   "model": "Butterfly (\"white\"), blue, right wing (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=sky"
-  },
-  "butterfly-pearl-body.webp": {
-   "model": "Butterfly (\"white\"), white, body (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=pearl"
-  },
-  "butterfly-lilac-body.webp": {
-   "model": "Butterfly (\"white\"), lilac, body (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=lilac"
-  },
-  "butterfly-rose-body.webp": {
-   "model": "Butterfly (\"white\"), pink, body (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=rose"
-  },
-  "butterfly-sky-body.webp": {
-   "model": "Butterfly (\"white\"), blue, body (painted on a 2D canvas)",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/butterfly/species.html?s=sky"
-  },
-  "welcome-clock.webp": {
-   "model": "Alarm clock (welcome question: time a day), procedural",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/kit2.js#clock3 (jobs-welcome.json, RoomEnvironment lighting)"
-  },
-  "welcome-girl.webp": {
-   "model": "A girl made of soft shapes with floating school symbols (welcome question: mirrors), procedural",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/kit2.js#girl3 (jobs-welcome.json, RoomEnvironment lighting)"
-  },
-  "welcome-track.webp": {
-   "model": "Location pin, speech bubble with a heart and a magnifier (welcome question: where from), procedural",
-   "author": "Dukhtari Khubam project",
-   "license": "project-owned",
-   "source": "tools/render-assets/kit2.js#track3 (jobs-welcome.json, RoomEnvironment lighting)"
+  "assets": {
+    "glass-flower.webp": {
+      "model": "Glass crocus with solid, bevelled glass petals and golden anthers",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-v2.json: v2-crocus)"
+    },
+    "glass-flower-side.webp": {
+      "model": "Glass crocus, side view",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-v2b.json: v2-crocus-side)"
+    },
+    "glass-flower-open.webp": {
+      "model": "Glass crocus, open, seen from above",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-v2b.json: v2-crocus-open)"
+    },
+    "glass-lens.webp": {
+      "model": "Glass lens (flattened sphere, transmissive glass)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-glass.json: lens-a)"
+    },
+    "glass-bubble.webp": {
+      "model": "Glass sphere",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-glass.json: lens-b)"
+    },
+    "school-religion.webp": {
+      "model": "Mosque with four minarets, ribbed gold-trimmed dome and arcade",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-icons2.json: i2-mosque)"
+    },
+    "school-ethics.webp": {
+      "model": "Glossy heart with a gold band, small hearts and pearls",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-icons2.json: i2-heart)"
+    },
+    "school-culture.webp": {
+      "model": "Gold-banded vase with three flowers",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-icons2.json: i2-culture)"
+    },
+    "school-family.webp": {
+      "model": "Family and relationships: a soft house with a heart on its front, hearts rising from the chimney",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-icons3.json: i3-family)"
+    },
+    "school-health.webp": {
+      "model": "Science and health: a glass flask with violet liquid and a pink heart with a white cross",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-icons3.json: i3-health)"
+    },
+    "school-growth.webp": {
+      "model": "Personal growth: three rising steps with a golden star",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-icons3.json: i3-growth)"
+    },
+    "school-modern.webp": {
+      "model": "Light bulb with glowing filament and a glass halo",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-icons2.json: i2-bulb)"
+    },
+    "book-open.webp": {
+      "model": "Open book on a rehal stand (procedural; abstract text lines, no real script)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-shrine.json: book-open)"
+    },
+    "glass-lotus.webp": {
+      "model": "Glass water lily (four rings of solid glass petals)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-v2.json: v2-lotus)"
+    },
+    "glass-tulip.webp": {
+      "model": "Glass tulip with stem and leaves",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-v2b.json: v2-tulip)"
+    },
+    "glass-leaves.webp": {
+      "model": "Spray of glass leaves",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-v2b.json: v2-leaves)"
+    },
+    "glass-crystals.webp": {
+      "model": "Cluster of hexagonal glass crystals",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-v2b.json: v2-crystals)"
+    },
+    "glass-petals.webp": {
+      "model": "Loose glass petals",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-v2b.json: v2-petals)"
+    },
+    "butterfly-pearl-wing-l.webp": {
+      "model": "Butterfly (\"white\"), white, left wing (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=pearl"
+    },
+    "butterfly-lilac-wing-l.webp": {
+      "model": "Butterfly (\"white\"), lilac, left wing (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=lilac"
+    },
+    "butterfly-rose-wing-l.webp": {
+      "model": "Butterfly (\"white\"), pink, left wing (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=rose"
+    },
+    "butterfly-sky-wing-l.webp": {
+      "model": "Butterfly (\"white\"), blue, left wing (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=sky"
+    },
+    "butterfly-pearl-wing-r.webp": {
+      "model": "Butterfly (\"white\"), white, right wing (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=pearl"
+    },
+    "butterfly-lilac-wing-r.webp": {
+      "model": "Butterfly (\"white\"), lilac, right wing (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=lilac"
+    },
+    "butterfly-rose-wing-r.webp": {
+      "model": "Butterfly (\"white\"), pink, right wing (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=rose"
+    },
+    "butterfly-sky-wing-r.webp": {
+      "model": "Butterfly (\"white\"), blue, right wing (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=sky"
+    },
+    "butterfly-pearl-body.webp": {
+      "model": "Butterfly (\"white\"), white, body (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=pearl"
+    },
+    "butterfly-lilac-body.webp": {
+      "model": "Butterfly (\"white\"), lilac, body (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=lilac"
+    },
+    "butterfly-rose-body.webp": {
+      "model": "Butterfly (\"white\"), pink, body (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=rose"
+    },
+    "butterfly-sky-body.webp": {
+      "model": "Butterfly (\"white\"), blue, body (painted on a 2D canvas)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/butterfly/species.html?s=sky"
+    },
+    "welcome-clock.webp": {
+      "model": "Alarm clock (welcome question: time a day), procedural",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/kit2.js#clock3 (jobs-welcome.json, RoomEnvironment lighting)"
+    },
+    "welcome-girl.webp": {
+      "model": "A girl made of soft shapes with floating school symbols (welcome question: mirrors), procedural",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/kit2.js#girl3 (jobs-welcome.json, RoomEnvironment lighting)"
+    },
+    "welcome-track.webp": {
+      "model": "Location pin, speech bubble with a heart and a magnifier (welcome question: where from), procedural",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets/kit2.js#track3 (jobs-welcome.json, RoomEnvironment lighting)"
+    },
+    "crown.webp": {
+      "model": "Small crown in polished yellow gold: six points with pearls, violet and pink jewels",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (kit2.js crown; matte.py)"
+    }
   }
- }
 }

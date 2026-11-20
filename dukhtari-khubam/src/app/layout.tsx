@@ -57,7 +57,7 @@ const boot = `try{var dm=navigator.deviceMemory,hc=navigator.hardwareConcurrency
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="tg" data-theme="light" data-palette="peach" className={`${geologica.variable} ${lora.variable} ${pacifico.variable} ${caveat.variable} ${naskh.variable} ${studio.variable} ${verse.variable} ${script.variable}`} suppressHydrationWarning>
+    <html lang="ru" data-theme="light" data-palette="peach" className={`${geologica.variable} ${lora.variable} ${pacifico.variable} ${caveat.variable} ${naskh.variable} ${studio.variable} ${verse.variable} ${script.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: boot }} />
         {/* the home screen's art is on the phone: ask for it at once, so nothing appears late */}

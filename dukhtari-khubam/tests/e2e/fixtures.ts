@@ -23,6 +23,8 @@ export interface Server { profile: unknown; codes: string[]; reports: string[]; 
 export const test = base.extend<{ server: Server; errors: string[] }>({
   server: async ({ page }, use) => {
     const server: Server = { profile: null, codes: [], reports: [], ratings: [], pushes: 0 }
+    // the tests read the Tajik interface (a new phone starts in Russian: tested in sign-in.spec)
+    await page.addInitScript(() => { if (!localStorage.getItem('dk.prefs')) localStorage.setItem('dk.prefs', JSON.stringify({ locale: 'tg' })) })
     const json = (body: unknown, status = 200) => ({ status, contentType: 'application/json', body: JSON.stringify(body) })
     await page.route('**/api/v1/bundle**', (r) => r.fulfill(json(BUNDLE)))
     // progress backup straight to Supabase: saved, no other phone wrote meanwhile

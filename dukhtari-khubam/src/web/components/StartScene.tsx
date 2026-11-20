@@ -10,6 +10,8 @@ import { usePrefs } from '../prefs'
 /** The two girls standing at the scene's sides, looking towards each other (cut-out photos). */
 export interface SceneGirls { left: string; right: string }
 const GIRLS: SceneGirls = { left: '/assets/mascot/start-left.webp', right: '/assets/mascot/start-right.webp' }
+/** where their eyes are, as a share of the pictures' height */
+const EYES = 0.17
 
 /**
  * The top of the sign-in screen: a soft many-coloured gradient that drifts slowly, with the live 3D
@@ -18,18 +20,33 @@ const GIRLS: SceneGirls = { left: '/assets/mascot/start-left.webp', right: '/ass
  */
 export function StartScene({ girls = GIRLS }: { girls?: SceneGirls | null }) {
   const canvas = useRef<HTMLCanvasElement>(null)
+  const left = useRef<HTMLImageElement>(null)
+  const refocus = useRef<() => void>(() => undefined)
   useEffect(() => {
     const el = canvas.current
     if (!el) return
     let stop: (() => void) | undefined
     let gone = false
+    // the girls' eye line, as a share of the scene's height: the orbit circles there
+    const focus = () => {
+      const img = left.current
+      if (!img?.complete || !img.naturalHeight) return 0.42
+      const box = el.getBoundingClientRect()
+      const r = img.getBoundingClientRect()
+      // the picture is drawn whole inside its box (contain), standing on the box's bottom
+      const drawn = r.height * Math.min(1, (r.width / r.height) / (img.naturalWidth / img.naturalHeight))
+      return (r.bottom - drawn + drawn * EYES - box.top) / box.height
+    }
     import('./orbit3d').then(({ mountOrbit }) => {
       if (gone) return
       try {
-        stop = mountOrbit(el, {
+        const orbit = mountOrbit(el, {
           light: document.documentElement.classList.contains('lite'),
-          still: matchMedia('(prefers-reduced-motion: reduce)').matches
+          still: matchMedia('(prefers-reduced-motion: reduce)').matches,
+          focus
         })
+        stop = orbit.stop
+        refocus.current = orbit.refocus
       } catch {
         // no WebGL on this phone: the gradient alone stays
       }
@@ -39,11 +56,12 @@ export function StartScene({ girls = GIRLS }: { girls?: SceneGirls | null }) {
 
   return (
     <div className="start-scene" aria-hidden="true">
-      <div className="ss-sky" />
+      {/* the drifting sky is larger than the scene: its frame clips it and fades it at the bottom */}
+      <div className="ss-bg"><div className="ss-sky" /></div>
       <canvas ref={canvas} className="ss-orbit" />
       {girls ? (
         <>
-          <img className="ss-girl is-left" src={girls.left} alt="" />
+          <img ref={left} className="ss-girl is-left" src={girls.left} alt="" onLoad={() => refocus.current()} />
           <img className="ss-girl is-right" src={girls.right} alt="" />
         </>
       ) : null}

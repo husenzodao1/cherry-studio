@@ -37,17 +37,46 @@ test('pulling down at the top writes "Gratorslab", then hearts fly out and the s
   expect(errors).toEqual([])
 })
 
-test('the sign-in screen fits and stays perfectly still: no bounce up or down', async ({ page, server: _, errors }) => {
+test('a screen that fits never scrolls: a drag only stretches it like rubber and it springs back', async ({ page, server: _, errors }) => {
   await page.goto('/start')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   await expect(page.locator('html')).toHaveClass(/\bfits\b/)
+  const shift = () => page.locator('main.app').evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42)
   for (const [from, to] of [[200, 900], [700, 100]]) {
     await touch(page, 'touchstart', from)
     for (let y = from; from < to ? y <= to : y >= to; y += from < to ? 40 : -40) await touch(page, 'touchmove', y)
-    expect(await page.locator('main.app').evaluate((el) => el.style.transform)).toBe('')
+    const d = await shift()
+    // it follows the finger a little, never further than the rubber allows
+    expect(Math.abs(d)).toBeGreaterThan(20)
+    expect(Math.abs(d)).toBeLessThanOrEqual(64)
+    expect(Math.sign(d)).toBe(Math.sign(to - from))
+    // no signature space on the sign-in screen
     expect(await page.locator('.pull-sign').evaluate((el) => el.getBoundingClientRect().height)).toBe(0)
     await touch(page, 'touchend', to)
+    await expect.poll(shift).toBe(0)
   }
   expect(await page.evaluate(() => window.scrollY)).toBe(0)
+  expect(errors).toEqual([])
+})
+
+test('the welcome questions fit every phone: top and button always in view, nothing scrolls', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  // a learner who has not answered them yet
+  await page.addInitScript(() => { const p = JSON.parse(localStorage.getItem('dk.progress')!); delete p.about; localStorage.setItem('dk.progress', JSON.stringify(p)) })
+  for (const [w, h] of [[411, 891], [360, 740]]) {
+    await page.setViewportSize({ width: w, height: h })
+    await page.goto('/welcome')
+    await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+    await page.locator('.wl-option').first().click()
+    await page.locator('.wl-next').click()
+    // the seven schools: the longest step
+    await expect(page.locator('.wl-school')).toHaveCount(7)
+    await page.waitForTimeout(800)
+    await expect(page.locator('html')).toHaveClass(/\bfits\b/)
+    expect(await page.evaluate(() => document.querySelector('main.app')!.scrollHeight)).toBeLessThanOrEqual(h + 2)
+    expect((await page.locator('.wl-top').boundingBox())!.y).toBeGreaterThanOrEqual(0)
+    const next = (await page.locator('.wl-school-next').boundingBox())!
+    expect(next.y + next.height).toBeLessThanOrEqual(h)
+  }
   expect(errors).toEqual([])
 })

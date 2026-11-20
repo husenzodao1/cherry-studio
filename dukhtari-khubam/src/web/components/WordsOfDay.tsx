@@ -8,14 +8,21 @@ import { usePrefs } from '../prefs'
 
 /** How long words that fit stay before the next ones come in. */
 const STAY_MS = 4200
-/** Long words scroll upward: a pause, the rise at this reading speed, a pause at the end. */
-const PAUSE_MS = 1600
-const SPEED_PX_S = 16
+/** Long words scroll upward slowly: a pause to read the first lines, the scroll, a pause at the end. */
+const START_MS = 2600
+const END_MS = 2800
+const SPEED_PX_S = 9
+/** After the finger lets go, the words wait this long before they go on by themselves. */
+const IDLE_MS = 1500
+/** Held by a finger: the quote stays (the next one waits) until it is let go. */
+const HELD_MS = 10 * 60_000
 
 /**
  * One quote. Line breaks are kept, so a poem keeps its lines. It takes the largest size at which it
- * fits in four lines above its author; a longer one shows four lines and slowly scrolls upward until
- * its last line has been read. Calls `onTime` with how long it needs on screen.
+ * fits in four lines above its author; a longer one shows four lines and slowly scrolls upward by
+ * itself — a finger can scroll it too, up or down, and it goes on from there once let go. Once the
+ * first lines have moved up, the top line is shaded, so it is clear the beginning is above.
+ * Calls `onTime` with how long it needs on screen.
  */
 function Quote({ body, author, active, onTime }: { body: string; author: string | null; active: boolean; onTime: (ms: number) => void }) {
   const box = useRef<HTMLDivElement>(null)
@@ -44,18 +51,81 @@ function Quote({ body, author, active, onTime }: { body: string; author: string 
     return () => ro.disconnect()
   }, [body, author])
 
-  const travel = fit.rise ? Math.round((fit.rise / SPEED_PX_S) * 1000) : 0
   useEffect(() => {
-    if (active) onTime(fit.rise ? PAUSE_MS + travel + PAUSE_MS : STAY_MS)
-  }, [active, fit.rise, travel, onTime])
+    if (active && !fit.rise) onTime(STAY_MS)
+  }, [active, fit.rise, onTime])
+
+  // the slow scroll upward, which a finger can take over at any moment
+  useEffect(() => {
+    const el = box.current
+    if (!el || !fit.rise) return
+    const shade = () => {
+      el.classList.toggle('at-top', el.scrollTop < 2)
+      el.classList.toggle('at-end', el.scrollTop >= el.scrollHeight - el.clientHeight - 2)
+    }
+    el.scrollTop = 0
+    shade()
+    if (!active) return
+    const end = () => el.scrollHeight - el.clientHeight
+    const left = () => Math.max(0, ((end() - el.scrollTop) / SPEED_PX_S) * 1000)
+    let raf = 0
+    let last = 0
+    let pos = 0
+    let held = false
+    const step = (now: number) => {
+      const dt = last ? Math.min(0.1, (now - last) / 1000) : 0
+      last = now
+      pos = Math.min(end(), pos + SPEED_PX_S * dt)
+      el.scrollTop = pos
+      if (pos < end()) raf = requestAnimationFrame(step)
+    }
+    const go = () => { cancelAnimationFrame(raf); last = 0; pos = el.scrollTop; raf = requestAnimationFrame(step) }
+    let wait = setTimeout(go, START_MS)
+    onTime(START_MS + left() + END_MS)
+    const hold = () => {
+      if (held) return
+      held = true
+      cancelAnimationFrame(raf)
+      clearTimeout(wait)
+      onTime(HELD_MS)
+    }
+    const letGo = () => {
+      if (!held) return
+      clearTimeout(wait)
+      wait = setTimeout(() => {
+        held = false
+        onTime(left() + END_MS + IDLE_MS)
+        go()
+      }, IDLE_MS)
+    }
+    const wheel = () => { hold(); letGo() }
+    el.addEventListener('scroll', shade, { passive: true })
+    el.addEventListener('touchstart', hold, { passive: true })
+    el.addEventListener('pointerdown', hold)
+    el.addEventListener('touchend', letGo)
+    el.addEventListener('touchcancel', letGo)
+    el.addEventListener('pointerup', letGo)
+    el.addEventListener('pointercancel', letGo)
+    el.addEventListener('wheel', wheel, { passive: true })
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(wait)
+      el.removeEventListener('scroll', shade)
+      el.removeEventListener('touchstart', hold)
+      el.removeEventListener('pointerdown', hold)
+      el.removeEventListener('touchend', letGo)
+      el.removeEventListener('touchcancel', letGo)
+      el.removeEventListener('pointerup', letGo)
+      el.removeEventListener('pointercancel', letGo)
+      el.removeEventListener('wheel', wheel)
+    }
+  }, [active, fit.rise, fit.size, onTime])
 
   return (
     <>
-      <div ref={box} className={`words-text${fit.rise ? ' is-rising' : ''}`}
+      <div ref={box} className={`words-text${fit.rise ? ' is-rising at-top' : ''}`}
         style={fit.rise ? { height: `${LINES * LINE_HEIGHT * fit.size}rem` } : undefined}>
-        <blockquote ref={text}
-          style={{ fontSize: `${fit.size}rem`, ...(fit.rise ? { ['--rise' as string]: `-${fit.rise}px`, ['--travel' as string]: `${travel}ms` } : {}) }}
-          data-moving={active && fit.rise ? '' : undefined}>
+        <blockquote ref={text} style={{ fontSize: `${fit.size}rem` }}>
           {body.trim()}
         </blockquote>
       </div>

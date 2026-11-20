@@ -1000,6 +1000,49 @@ export function magnifier() {
   return g
 }
 
+/** A small crown for the profile picture: polished yellow gold, six points with pearls, jewels in the app's colours. */
+export function crown() {
+  const g = new THREE.Group()
+  const shine = new THREE.MeshPhysicalMaterial({ color: C('#f6c443'), metalness: 1, roughness: 0.1, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.9, side: THREE.DoubleSide })
+  const inner = new THREE.MeshPhysicalMaterial({ color: C('#d79b2a'), metalness: 1, roughness: 0.3, envMapIntensity: 1.2, side: THREE.DoubleSide })
+  const pearl = glossy('#fff6ee', { roughness: 0.18, sheen: 1, sheenColor: '#ffe9f5', irid: 0.6, env: 1.4 })
+  const jewel = (color) => glossy(color, { roughness: 0.05, irid: 0.45, env: 1.8, sheen: 0.4, sheenColor: '#ffffff' })
+  // the band: flaring a little towards the top, with a rounded rim below and above
+  const band = lathe([[0.97, 0], [1.03, 0], [1.1, 0.46], [1.04, 0.46], [0.97, 0]], 160)
+  g.add(mesh(band, shine))
+  g.add(mesh(new THREE.CylinderGeometry(1.035, 0.965, 0.44, 160, 1, true), inner, [0, 0.23, 0]))
+  g.add(mesh(new THREE.TorusGeometry(1.01, 0.065, 24, 160), shine, [0, 0, 0], [Math.PI / 2, 0, 0]))
+  g.add(mesh(new THREE.TorusGeometry(1.08, 0.04, 20, 160), shine, [0, 0.46, 0], [Math.PI / 2, 0, 0]))
+  // six points with softly hollowed sides, leaning a little outward, each crowned with a pearl
+  const N = 6
+  const tip = new THREE.Shape()
+  tip.moveTo(-0.36, 0)
+  tip.bezierCurveTo(-0.14, 0.06, -0.05, 0.3, 0, 0.7)
+  tip.bezierCurveTo(0.05, 0.3, 0.14, 0.06, 0.36, 0)
+  tip.lineTo(-0.36, 0)
+  const tipGeo = new THREE.ExtrudeGeometry(tip, { depth: 0.06, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 5, curveSegments: 32 })
+  tipGeo.translate(0, 0, -0.03)
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * Math.PI * 2
+    const holder = new THREE.Group()
+    holder.rotation.y = a
+    const spike = new THREE.Group()
+    spike.position.set(0, 0.42, 1.075)
+    spike.rotation.x = 0.14
+    spike.add(mesh(tipGeo, shine))
+    spike.add(mesh(new THREE.SphereGeometry(0.09, 40, 24), pearl, [0, 0.76, 0]))
+    spike.add(mesh(new THREE.SphereGeometry(0.075, 40, 24), jewel(i % 2 ? '#ff4f8b' : '#9a63ff'), [0, 0.2, 0.07], [0, 0, 0], [1, 1.3, 0.55]))
+    spike.add(mesh(new THREE.TorusGeometry(0.085, 0.018, 12, 40), shine, [0, 0.2, 0.06], [0, 0, 0], [1, 1.28, 1]))
+    holder.add(spike)
+    const between = new THREE.Group()
+    between.rotation.y = a + Math.PI / N
+    between.add(mesh(new THREE.SphereGeometry(0.1, 40, 24), jewel(i % 2 ? '#9a63ff' : '#ff4f8b'), [0, 0.23, 1.075], [0, 0, 0], [1.25, 0.9, 0.5]))
+    between.add(mesh(new THREE.TorusGeometry(0.11, 0.022, 12, 40), shine, [0, 0.23, 1.07], [0, 0, 0], [1.25, 0.95, 1]))
+    g.add(holder, between)
+  }
+  return g
+}
+
 export function buildKind2(job) {
   const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
   switch (job.kind) {
@@ -1031,6 +1074,7 @@ export function buildKind2(job) {
     case 'flower5': return flower5()
     case 'verse2': return verse2()
     case 'magnifier': return magnifier()
+    case 'crown': return crown()
     default: return null
   }
 }
