@@ -106,6 +106,19 @@ interface Props {
   blur?: number
 }
 
+/** Displacement maps already drawn, by size, radius and bezel (tiles of one size share one). */
+const MAPS = new Map<string, MapResult>()
+type IdleWindow = Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void }
+const whenIdle = (cb: () => void): number => {
+  const w = window as IdleWindow
+  return w.requestIdleCallback ? w.requestIdleCallback(cb, { timeout: 900 }) : window.setTimeout(cb, 250)
+}
+const cancelIdle = (id: number) => {
+  const w = window as IdleWindow
+  if (w.cancelIdleCallback) w.cancelIdleCallback(id)
+  else clearTimeout(id)
+}
+
 export function LiquidGlass({ radius, bezel = 16, className, style, children, as = 'div', label, refract: bend = true, blur }: Props) {
   const ref = useRef<HTMLElement | null>(null)
   const rawId = useId()
@@ -121,18 +134,29 @@ export function LiquidGlass({ radius, bezel = 16, className, style, children, as
     const el = ref.current
     if (!el || !svgOk) return
     let last = ''
+    let idle = 0
     const update = () => {
       const w = Math.round(el.offsetWidth)
       const h = Math.round(el.offsetHeight)
       const sig = `${w}x${h}`
       if (!w || !h || sig === last) return
       last = sig
-      setMap({ ...buildDisplacementMap(w, h, radius, bezel), w, h })
+      // the map is drawn on a canvas (costly): once per size for all panes, and only after the page
+      // has been shown, so moving to a screen never waits for it (the pane is frosted meanwhile)
+      const key = `${sig}:${radius}:${bezel}`
+      const known = MAPS.get(key)
+      if (known) return setMap({ ...known, w, h })
+      cancelIdle(idle)
+      idle = whenIdle(() => {
+        const made = buildDisplacementMap(w, h, radius, bezel)
+        MAPS.set(key, made)
+        setMap({ ...made, w, h })
+      })
     }
     const ro = new ResizeObserver(update)
     ro.observe(el)
     update()
-    return () => ro.disconnect()
+    return () => { ro.disconnect(); cancelIdle(idle) }
   }, [radius, bezel, svgOk])
 
   const refract = svgOk && map

@@ -216,6 +216,8 @@ img, video, canvas { display: block; max-width: 100%; }
 .bd:nth-child(5n) { --sway: 9.4s; }
 @keyframes bd-sway { from { rotate: calc(var(--sway-r, 1.8deg) * -1); translate: 0 0; } to { rotate: var(--sway-r, 1.8deg); translate: var(--sway-x, 3px) -3px; } }
 html.scrolling .bd { animation-play-state: paused; }
+/* a moment after moving to another screen, and behind the schools' bending glass: the breeze rests (the fade-in still plays) */
+html.settling .bd, html.glassy .bd { animation-play-state: running, paused; }
 /* over the sky and its pieces: a wash of the sky's own colour (less contrast) and a slight dim, so text
    and cards above read clearly */
 .backdrop::after { content: ''; position: absolute; inset: 0;

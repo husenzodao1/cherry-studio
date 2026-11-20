@@ -42,7 +42,7 @@ public final class DkWidgets {
         JSONObject d = data(ctx);
         RemoteViews v = new RemoteViews(ctx.getPackageName(), layout);
         int streak = d.optInt("streak", 0);
-        String streakText = d.optString("streakText", "рӯз пай дар пай");
+        String streakText = d.optString("streakText", "рӯзи пайдарпай");
         v.setTextViewText(R.id.w_streak, String.valueOf(streak));
         if (layout == R.layout.widget_streak) {
             v.setTextViewText(R.id.w_streak_label, streakText);

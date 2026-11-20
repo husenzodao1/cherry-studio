@@ -60,25 +60,25 @@ test('a stage: each lesson ends with its test, then the stage test, the certific
   await page.locator('.lesson-end a').click()
   await expect(page).toHaveURL(/\/quiz\?id=qz1&lesson=/)
   await answerAll(page)
-  await expect(page.getByText('Гузашт')).toBeVisible()
+  await expect(page.getByText('Супорида шуд')).toBeVisible()
   await page.getByRole('link', { name: /Дарси навбатӣ/ }).click()
 
   // lesson 2, the last: its test leads to the stage's final test
   await expect(page).toHaveURL(new RegExp(`/lesson\\?id=${L2}`))
   await page.locator('.lesson-end a').click()
   await answerAll(page)
-  await page.getByRole('link', { name: /Супоридани тести этап/ }).click()
+  await page.getByRole('link', { name: /Супоридани тести марҳила/ }).click()
   await expect(page).toHaveURL(/\/quiz\?final=/)
   // two questions from each lesson test
   await expect(page.getByText(/4 савол/)).toBeVisible()
   await answerAll(page)
 
   // the stage is finished: the certificate over the whole screen, Save and Share with friends
-  const done = page.getByRole('dialog', { name: /Этап анҷом ёфт/ })
+  const done = page.getByRole('dialog', { name: /Марҳила анҷом ёфт/ })
   await expect(done).toBeVisible()
   await expect(done.locator('.stage-done-cert img')).toBeVisible({ timeout: 10_000 })
   await expect(done.getByRole('button', { name: /Сабт/ })).toBeEnabled()
-  await expect(done.getByRole('button', { name: /Мубодила ба дӯстон/ })).toBeEnabled()
+  await expect(done.getByRole('button', { name: /Мубодила бо дӯстон/ })).toBeEnabled()
   await page.screenshot({ path: 'test-results/stage-done.png' })
   // closing it brings the rating
   await done.getByRole('button', { name: 'Пӯшидан' }).click()
@@ -88,8 +88,8 @@ test('a stage: each lesson ends with its test, then the stage test, the certific
   // back on the course (inside the app, the progress kept): the stage can be gone through again
   await page.getByRole('link', { name: /Ба курс/ }).click()
   await expect(page).toHaveURL(/\/course\?id=/)
-  await expect(page.getByRole('link', { name: /Такрори этап/ })).toBeVisible()
-  await expect(page.getByRole('link', { name: /Тести этапро аз нав/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Такрори марҳила/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Тести марҳиларо аз нав/ })).toBeVisible()
   // and a finished lesson offers its test again
   await page.locator(`a[href="/lesson?id=${L1}"]`).first().click()
   await expect(page.locator('.lesson-end a')).toHaveText(/Тести дарсро аз нав супоридан/)

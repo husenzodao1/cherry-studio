@@ -23,7 +23,7 @@ describe('mascot sayings', () => {
         expect(POSES[m].length).toBeGreaterThan(0)
       }
     }
-    expect(sayingsFor('tg').stop[0]).toBe('Стоп, шумо пайдарпай хато мекунед. Каме оромтар хонед.')
+    expect(sayingsFor('tg').stop[0]).toBe('Истед, шумо пайдарпай хато мекунед. Каме оромтар хонед.')
   })
 
   it('puts the name in, or tidies the words when there is none', () => {

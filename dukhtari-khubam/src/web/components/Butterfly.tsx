@@ -118,8 +118,23 @@ function stroke(u: number, amp = 1): number {
   return u < DOWN ? TOP + (bottom - TOP) * ease(u / DOWN) : bottom + (TOP - bottom) * ease((u - DOWN) / (1 - DOWN))
 }
 
+/**
+ * Where things are on the screen, read at most every ~0.45 s per element (and afresh after a scroll):
+ * reading layout on every frame made the browser lay the page out again and again.
+ */
+const rects = new Map<Element, { r: DOMRect; at: number }>()
+const RECT_MS = 450
+function rectOf(el: Element): DOMRect {
+  const now = performance.now()
+  const c = rects.get(el)
+  if (c && now - c.at < RECT_MS) return c.r
+  const r = el.getBoundingClientRect()
+  rects.set(el, { r, at: now })
+  return r
+}
+
 function anchorPoint(a: Anchor): Pt & { visible: boolean } {
-  const r = a.el.getBoundingClientRect()
+  const r = rectOf(a.el)
   const x = r.left + a.rx * r.width
   const y = r.top + a.ry * r.height
   return { x, y, visible: a.el.isConnected && r.width > 0 && y > 60 && y < innerHeight - 110 && x > 10 && x < innerWidth - 10 }
@@ -129,7 +144,7 @@ function anchorPoint(a: Anchor): Pt & { visible: boolean } {
 function onScreen(selector: string, exclude: Set<Element>): Element[] {
   return [...document.querySelectorAll(selector)].filter((el) => {
     if (exclude.has(el) || el.closest(NOT_HERE)) return false
-    const r = el.getBoundingClientRect()
+    const r = rectOf(el)
     return r.width > 36 && r.top > 70 && r.top < innerHeight - 160
   })
 }
@@ -137,7 +152,7 @@ function onScreen(selector: string, exclude: Set<Element>): Element[] {
 /** A place on the top edge of an element (or among the petals of the glass flower). */
 function spotOn(el: Element): Anchor {
   if (el.classList.contains('hello-flower')) return { el, rx: rand(0.35, 0.7), ry: rand(0.3, 0.45) }
-  const r = el.getBoundingClientRect()
+  const r = rectOf(el)
   return { el, rx: rand(0.15, 0.85), ry: -6 / Math.max(1, r.height) }
 }
 
@@ -504,6 +519,7 @@ export function Butterflies({ path }: { path: string }) {
 
     // scrolling disturbs a perched butterfly: it lifts off and finds another place
     const onScroll = () => {
+      rects.clear()
       for (const f of flies) {
         if (f.mode === 'perch' && f.plan.role === 'stay' && f.calm <= 0 && f.kick < 0) f.kick = rand(0.05, 0.35)
       }

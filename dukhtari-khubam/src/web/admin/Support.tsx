@@ -28,7 +28,7 @@ export function Support() {
   if (open) return <ThreadView id={open} onBack={() => { setOpen(null); list.reload() }} />
   if (list.error) return <ErrorState error={list.error} onRetry={list.reload} />
   if (!list.data) return <Loading />
-  if (!list.data.length) return <p className="muted" style={{ textAlign: 'center' }}>Мурожиат нест</p>
+  if (!list.data.length) return <p className="muted" style={{ textAlign: 'center' }}>Муроҷиат нест</p>
   return (
     <div className="stack" style={{ gap: 8 }}>
       {list.data.map((t) => (

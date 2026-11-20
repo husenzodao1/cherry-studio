@@ -4,7 +4,7 @@
     <string name="title_activity_main">Духтари хубам</string>
     <string name="package_name">tj.dukhtarikhubam.app</string>
     <string name="custom_url_scheme">tj.dukhtarikhubam.app</string>
-    <string name="widget_streak">Рӯзҳои пай дар пай</string>
+    <string name="widget_streak">Рӯзҳои пайдарпай</string>
     <string name="widget_progress">Пешрафти имрӯз</string>
     <string name="widget_words">Суханҳои рӯз</string>
     <string name="widget_week">Ҳафтаи ман</string>

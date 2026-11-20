@@ -9,7 +9,8 @@ import { ART, type Art } from '../art'
  * Fixed page backdrop: a lavender sky with rendered glass pieces resting at the screen edges — a crocus,
  * a water lily, a tulip, a leafy spray, a crystal cluster, loose petals and glass lenses. It never moves
  * with scrolling (sized to the large viewport); the pieces sway softly as if in a breeze, and stand
- * still while the page scrolls so the glass above is not redrawn twice over. Reading screens keep a
+ * still while the page scrolls, for a moment after moving to another screen, and on the schools screen,
+ * so the glass above is not redrawn on every frame. Reading screens keep a
  * calmer set so nothing sits behind running text.
  */
 type Piece = [Art, string]
@@ -45,6 +46,15 @@ export function Backdrop() {
       clearTimeout(timer)
     }
   }, [])
+  // a new screen comes in first, then the breeze: the pieces rest for a moment after every move, and
+  // stay still on the schools screen, whose many bending glass tiles would redraw with every sway
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.add('settling')
+    root.classList.toggle('glassy', /^\/schools(\/|$)/.test(path))
+    const timer = setTimeout(() => root.classList.remove('settling'), 1500)
+    return () => clearTimeout(timer)
+  }, [path])
   // documents are plain paper: no glass pieces around them
   if (/^\/page(\/|$)/.test(path)) return <div className="backdrop backdrop-paper" aria-hidden="true" />
   // inside the topics (courses and lessons): a soft white page to read on

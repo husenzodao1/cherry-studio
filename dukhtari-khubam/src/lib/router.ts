@@ -99,7 +99,7 @@ async function handle(routes: AnyRoute[], req: Request, path: string): Promise<R
   try {
     const found = findRoute(routes, req.method, path)
     if (found === null) throw new ApiError(404, 'not_found', 'Ёфт нашуд.')
-    if (found === 'method_not_allowed') throw new ApiError(405, 'method_not_allowed', 'Метод иҷозат нест.')
+    if (found === 'method_not_allowed') throw new ApiError(405, 'method_not_allowed', 'Ин усули дархост иҷозат дода нашудааст.')
     const { route: r, params } = found
 
     const token = bearerToken(req)

@@ -142,7 +142,7 @@ public final class StreakAlarm {
 
         NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm != null && nm.getNotificationChannel(CHANNEL) == null) {
-            NotificationChannel ch = new NotificationChannel(CHANNEL, p.getString("channel", "Рӯзҳои пай дар пай"), NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel ch = new NotificationChannel(CHANNEL, p.getString("channel", "Рӯзҳои пайдарпай"), NotificationManager.IMPORTANCE_HIGH);
             nm.createNotificationChannel(ch);
         }
         RemoteViews view = new RemoteViews(ctx.getPackageName(), R.layout.notif_streak);
@@ -205,7 +205,7 @@ public final class StreakAlarm {
                 .putInt("streak", call.getInt("streak", 0))
                 .putString("name", call.getString("name", ""))
                 .putString("leftLabel", call.getString("leftLabel", "⏳"))
-                .putString("channel", call.getString("channel", "Рӯзҳои пай дар пай"))
+                .putString("channel", call.getString("channel", "Рӯзҳои пайдарпай"))
                 .putString("titles", call.getArray("titles", new JSArray()).toString())
                 .putString("bodies", call.getArray("bodies", new JSArray()).toString());
             e.apply();
