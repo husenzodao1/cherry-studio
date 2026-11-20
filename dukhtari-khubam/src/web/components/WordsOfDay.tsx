@@ -2,69 +2,61 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
+import { fitQuote, type Fit, LINE_HEIGHT, LINES, SIZES } from '@/lib/wordsFit'
 import { useContent } from '../offline/content'
 import { usePrefs } from '../prefs'
 
-/** How long short words stay before the next ones come in. */
+/** How long words that fit stay before the next ones come in. */
 const STAY_MS = 4200
-/** Long words in one moving line: a pause, the slide at this speed, a pause at the end. */
-const PAUSE_MS = 1300
-const SPEED_PX_S = 46
-/** Font sizes tried, largest first, before long words move sideways in one line. */
-const SIZES = [1.45, 1.28, 1.14, 1.02]
-
-interface Fit { size: number; slide: number }
+/** Long words scroll upward: a pause, the rise at this reading speed, a pause at the end. */
+const PAUSE_MS = 1600
+const SPEED_PX_S = 16
 
 /**
- * One quote. It takes the largest size at which it fits above its author line; if even the smallest
- * does not fit, it becomes one line that slides to the side so every word is read. Calls `onTime` with
- * how long it needs on screen.
+ * One quote. Line breaks are kept, so a poem keeps its lines. It takes the largest size at which it
+ * fits in four lines above its author; a longer one shows four lines and slowly scrolls upward until
+ * its last line has been read. Calls `onTime` with how long it needs on screen.
  */
 function Quote({ body, author, active, onTime }: { body: string; author: string | null; active: boolean; onTime: (ms: number) => void }) {
   const box = useRef<HTMLDivElement>(null)
   const text = useRef<HTMLQuoteElement>(null)
-  const [fit, setFit] = useState<Fit>({ size: SIZES[0], slide: 0 })
+  const [fit, setFit] = useState<Fit>({ size: SIZES[0], rise: 0 })
 
   useLayoutEffect(() => {
     const el = box.current
     const q = text.current
     if (!el || !q) return
     const measure = () => {
-      if (!el.clientHeight || !el.clientWidth) return
-      q.classList.remove('is-line')
-      for (const size of SIZES) {
-        q.style.fontSize = `${size}rem`
-        if (q.scrollHeight <= el.clientHeight + 1) {
-          setFit({ size, slide: 0 })
-          return
-        }
-      }
-      const size = SIZES[1]
-      q.style.fontSize = `${size}rem`
-      q.classList.add('is-line')
-      const pad = getComputedStyle(el)
-      const room = el.clientWidth - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight)
-      setFit({ size, slide: Math.max(0, Math.ceil(q.scrollWidth - room)) })
+      const item = el.parentElement
+      if (!item?.clientHeight || !el.clientWidth) return
+      const caption = item.querySelector('figcaption')
+      const room = item.clientHeight - (caption ? caption.getBoundingClientRect().height + 4 : 0)
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+      const heightAt = (size: number) => { q.style.fontSize = `${size}rem`; return q.scrollHeight }
+      const next = fitQuote(heightAt, room, rem)
+      q.style.fontSize = `${next.size}rem`
+      setFit((f) => (f.size === next.size && f.rise === next.rise ? f : next))
     }
     measure()
     const ro = new ResizeObserver(measure)
-    ro.observe(el)
+    ro.observe(el.parentElement ?? el)
     document.fonts?.ready.then(measure).catch(() => undefined)
     return () => ro.disconnect()
-  }, [body])
+  }, [body, author])
 
-  const travel = fit.slide ? Math.round((fit.slide / SPEED_PX_S) * 1000) : 0
+  const travel = fit.rise ? Math.round((fit.rise / SPEED_PX_S) * 1000) : 0
   useEffect(() => {
-    if (active) onTime(fit.slide ? PAUSE_MS + travel + PAUSE_MS : STAY_MS)
-  }, [active, fit.slide, travel, onTime])
+    if (active) onTime(fit.rise ? PAUSE_MS + travel + PAUSE_MS : STAY_MS)
+  }, [active, fit.rise, travel, onTime])
 
   return (
     <>
-      <div ref={box} className="words-text">
-        <blockquote ref={text} className={fit.slide ? 'is-line' : undefined}
-          style={{ fontSize: `${fit.size}rem`, ...(fit.slide ? { ['--slide' as string]: `-${fit.slide}px`, ['--travel' as string]: `${travel}ms` } : {}) }}
-          data-moving={active && fit.slide ? '' : undefined}>
-          {body}
+      <div ref={box} className={`words-text${fit.rise ? ' is-rising' : ''}`}
+        style={fit.rise ? { height: `${LINES * LINE_HEIGHT * fit.size}rem` } : undefined}>
+        <blockquote ref={text}
+          style={{ fontSize: `${fit.size}rem`, ...(fit.rise ? { ['--rise' as string]: `-${fit.rise}px`, ['--travel' as string]: `${travel}ms` } : {}) }}
+          data-moving={active && fit.rise ? '' : undefined}>
+          {body.trim()}
         </blockquote>
       </div>
       {author ? <figcaption>— {author}</figcaption> : null}
@@ -75,8 +67,8 @@ function Quote({ body, author, active, onTime }: { body: string; author: string 
 /**
  * "Words of the day" on the home screen: the newest inspirations from the panel, one at a time on a soft
  * gradient, handwritten; the words slide away to the side and the next ones come
- * in. Long words never hide under the author: they get smaller, and very long ones move sideways in one
- * line until the end has been read. With none published yet, the app's own line is shown.
+ * in. Up to four lines are shown; long words never hide under the author: they get smaller, and longer
+ * ones (a whole poem) scroll upward line by line until the end has been read. With none published yet, the app's own line is shown.
  */
 export function WordsOfDay() {
   const { t } = usePrefs()

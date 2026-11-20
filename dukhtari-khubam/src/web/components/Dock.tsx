@@ -14,11 +14,14 @@ const ITEMS: { href: string; key: 'nav.home' | 'nav.schools' | 'nav.saved' | 'na
   { href: '/profile', key: 'nav.profile', icon: 'user', match: /^\/(profile|settings)/ }
 ]
 
+/** Screens without the tab bar (reading, tests, signing in, the panel). */
+export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|admin|support)(\/|$)/.test(path)
+
 /** Floating tab bar in clear, refracting glass; the current tab sits in a raised glass circle. */
 export function Dock() {
   const path = usePathname() ?? '/'
   const { t } = usePrefs()
-  if (/^\/(lesson|quiz|review|start|welcome|admin|support)(\/|$)/.test(path)) return null
+  if (noDock(path)) return null
   return (
     <div className="dock-wrap">
       <LiquidGlass as="nav" label={t('nav.home')} radius={36} bezel={20} blur={40} className="dock">

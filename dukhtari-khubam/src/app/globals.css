@@ -665,6 +665,47 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 
 /* ---------------------------------------------------------------- start */
 .start { min-height: 92dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 20px 0 40px; text-align: center; }
+/* sign-in: the scene fills the top edge to edge, the title sits where the scene melts into the page */
+.start.has-scene { justify-content: flex-start; gap: 14px; padding-top: 0; min-height: 0; }
+/* the sign-in screen has no menu below it: no room kept for one, so it fits the phone and stays still */
+.app:has(> .start) { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.start.has-scene { padding-bottom: 8px; }
+.start-scene { position: relative; width: 100vw; max-width: 560px; height: clamp(210px, 36dvh, 330px); flex: none;
+  margin-top: calc(-1 * max(14px, env(safe-area-inset-top))); margin-bottom: -46px; overflow: hidden; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent); mask-image: linear-gradient(180deg, #000 62%, transparent); }
+.ss-sky { position: absolute; inset: -20%; animation: ss-drift 22s ease-in-out infinite alternate;
+  background:
+    radial-gradient(42% 46% at 16% 28%, color-mix(in srgb, var(--rose-strong) 85%, transparent), transparent 70%),
+    radial-gradient(40% 44% at 84% 22%, rgba(178, 204, 255, 0.75), transparent 70%),
+    radial-gradient(46% 40% at 72% 70%, rgba(170, 232, 212, 0.62), transparent 72%),
+    radial-gradient(44% 42% at 26% 74%, rgba(255, 210, 186, 0.7), transparent 72%),
+    radial-gradient(50% 50% at 50% 46%, color-mix(in srgb, var(--primary-soft) 55%, transparent), transparent 75%),
+    var(--lavender); }
+:root[data-theme='dark'] .ss-sky { opacity: 0.55; }
+@keyframes ss-drift { from { transform: translate3d(-4%, -2%, 0) rotate(-4deg) scale(1); } to { transform: translate3d(4%, 3%, 0) rotate(5deg) scale(1.08); } }
+.ss-orbit { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the girls stand at the sides; their lower half fades softly into the page before the Google button */
+.ss-girl { position: absolute; bottom: 0; height: 96%; width: auto; max-width: 42%; object-fit: contain; object-position: bottom;
+  -webkit-mask-image: linear-gradient(180deg, #000 58%, transparent 96%); mask-image: linear-gradient(180deg, #000 58%, transparent 96%);
+  filter: drop-shadow(0 14px 22px rgba(90, 50, 160, 0.22)); animation: rise 0.9s var(--ease) both; }
+.ss-girl.is-left { left: -2%; }
+.ss-girl.is-right { right: -2%; animation-delay: 0.12s; }
+.start-title { position: relative; z-index: 1; }
+.start-lang { position: absolute; z-index: 3; top: 0; right: 0; width: 44px; height: 44px; display: grid; place-items: center;
+  border: 0; padding: 0; background: none; color: var(--plum); cursor: pointer; border-radius: 50%; animation: fade-in 0.6s 0.3s both; }
+.start-lang:active { transform: scale(0.9); }
+.lang-scrim { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 24px;
+  background: color-mix(in srgb, var(--bg) 38%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: fade-in 0.25s both; }
+html.lite .lang-scrim { background: color-mix(in srgb, var(--bg) 72%, transparent); }
+.lang-box { width: min(78vw, 300px); padding: 16px 10px 10px; border-radius: 24px; background: #fff; border: 1px solid var(--glass-edge);
+  box-shadow: 0 24px 60px rgba(70, 40, 140, 0.22); display: flex; flex-direction: column; gap: 8px; animation: rise 0.32s var(--ease) both; }
+:root[data-theme='dark'] .lang-box { background: #241a45; }
+.lang-box .eyebrow { padding-inline: 12px; }
+.lang-box-list { display: flex; flex-direction: column; }
+.lang-row { display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 0 14px; border: 0; border-radius: 14px; background: none;
+  font: inherit; color: var(--ink); text-align: start; cursor: pointer; animation: rise 0.3s var(--ease) both; animation-delay: calc(var(--i) * 0.03s); }
+.lang-row[aria-checked='true'] { color: var(--primary); font-weight: 600; background: color-mix(in srgb, var(--primary) 9%, transparent); }
+.lang-row:active { transform: scale(0.98); }
 .start-note { margin: 0; min-height: 1.3em; text-align: center; font-size: 0.86em; }
 .birthday-input { font-variant-numeric: tabular-nums; letter-spacing: 0.08em; }
 .start-art { width: min(74vw, 300px); height: auto; filter: drop-shadow(0 20px 26px rgba(105, 57, 200, 0.25)); }
@@ -942,7 +983,7 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
 @media (max-height: 740px) { .home .hello { min-height: 118px; } .home .h-hero { font-size: 1.9rem; } .home { gap: 9px; } }
 
 /* words of the day: a soft gradient card (no shapes) */
-.words { position: relative; flex: 1 1 auto !important; min-height: 116px; max-height: 210px; overflow: hidden; border-radius: 26px;
+.words { position: relative; flex: 1 1 auto !important; min-height: calc(60px + 6.9rem); max-height: 240px; overflow: hidden; border-radius: 26px;
   border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow);
   background: linear-gradient(125deg, color-mix(in srgb, var(--rose-strong) 70%, white) 0%, color-mix(in srgb, var(--primary-soft) 45%, white) 52%, color-mix(in srgb, var(--lilac) 80%, white) 100%); }
 :root[data-theme='dark'] .words { background: linear-gradient(125deg, color-mix(in srgb, var(--rose-strong) 80%, black), color-mix(in srgb, var(--primary-soft) 55%, black) 52%, var(--lilac)); }
@@ -952,16 +993,15 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
   padding-inline: 4%; opacity: 0; transform: translateX(110%); transition: transform 0.8s var(--ease), opacity 0.6s var(--ease); }
 .words-item.is-in { opacity: 1; transform: none; }
 .words-item.is-out { opacity: 0; transform: translateX(-110%); }
-/* the quote takes the room left above its author line, never under it */
+/* the quote takes the room left above its author line, never under it; line breaks are kept (poems) */
 .words-text { flex: 0 1 auto; min-height: 0; max-height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .words-item blockquote { margin: 0; font-family: var(--font-hand), var(--font-brand); font-weight: 600; font-size: 1.45rem; line-height: 1.18; color: var(--ink);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); overflow-wrap: anywhere; padding-block: 0.08em; }
-/* too long even at the smallest size: one line that slides to its end, softly faded at the edges */
-.words-item blockquote.is-line { white-space: nowrap; overflow-wrap: normal; align-self: flex-start; }
-.words-text:has(> .is-line) { justify-content: flex-start; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); padding-inline: 4%; }
-.words-item blockquote[data-moving] { animation: words-slide var(--travel) linear 1.3s both; }
-@keyframes words-slide { from { transform: translateX(0); } to { transform: translateX(var(--slide)); } }
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); overflow-wrap: anywhere; white-space: pre-line; text-wrap: balance; padding-block: 0.08em; }
+/* longer than four lines: four lines show, the rest scrolls upward, softly faded at the top and bottom */
+.words-text.is-rising { flex: none; align-items: flex-start; -webkit-mask-image: linear-gradient(180deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 7%, #000 93%, transparent); }
+.words-item blockquote[data-moving] { animation: words-rise var(--travel) linear 1.6s both; will-change: transform; }
+@keyframes words-rise { from { transform: translateY(0); } to { transform: translateY(var(--rise)); } }
 :root[data-theme='dark'] .words-item blockquote { text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); }
 .words-item figcaption { flex: none; font-family: var(--font-hand), var(--font-brand); font-size: 1rem; line-height: 1.2; color: var(--ink-2); opacity: 0.85;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1408,18 +1448,14 @@ html.gated .app > *, html.gated .dock-wrap, html.gated .bf-layer, html.gated .up
 .rate-thanks-face .face-heart { animation: face-beat 0.7s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 
 /* ---------------------------------------------------------------- light mode (weaker phones, PerfProbe.tsx) */
-/* live blur is the heaviest thing a cheap phone draws: the panes become nearly opaque instead */
+/* live blur is the heaviest thing a cheap phone draws: the panes become nearly opaque instead.
+   Only the blur goes — butterflies, sway and the other decorative motion stay on every phone. */
 html.lite *, html.lite *::before, html.lite *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 html.lite .glass, html.lite .card, html.lite .lg, html.lite .btn-soft, html.lite .dock {
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.88)) !important; }
 :root[data-theme='dark'].lite .glass, :root[data-theme='dark'].lite .card, :root[data-theme='dark'].lite .lg,
 :root[data-theme='dark'].lite .btn-soft, :root[data-theme='dark'].lite .dock { background: linear-gradient(160deg, rgba(46, 35, 82, 0.97), rgba(34, 26, 64, 0.94)) !important; }
 html.lite .lg.tile-clear::after, html.lite .hello::before { display: none; }
-/* endless decorative motion stops; the moving parts that carry meaning (spinners, dots, the lock) stay */
-html.lite .bd { animation: fade-in 0.4s both; filter: none !important; }
-html.lite .wave-ch, html.lite .rate-stars svg, html.lite .play-nudge, html.lite .streak-flame, html.lite .sp-moon, html.lite .wl-glow { animation: none !important; }
-html.lite .bf-layer { display: none; }
-html.lite .tile-art, html.lite .hello-flower, html.lite .start-art { filter: none; }
 
 /* settings: the two text sizes, shown only as "Aa" in their own size */
 .text-sizes button { min-height: 50px; }
@@ -1457,8 +1493,6 @@ html, body { overscroll-behavior-y: none; }
   color: var(--plum); text-shadow: 0 2px 12px color-mix(in srgb, var(--primary) 18%, transparent); clip-path: inset(-20% 100% -20% 0); }
 .ps-heart { position: absolute; left: 50%; top: calc(50% - 4px); width: 26px; height: 24px; opacity: 0; transform: translate(-50%, -50%) scale(0.1);
   filter: drop-shadow(0 4px 6px rgba(160, 60, 110, 0.3)); will-change: transform, opacity; }
-html.lite .ps-heart { filter: none; }
-html.lite .ps-ink { text-shadow: none; }
 
 /* search: the staff passphrase was recognised — a green ring breathes while the panel opens */
 .search-bar.is-opening { border-color: #2fb67c !important; box-shadow: 0 0 0 3px rgba(47, 182, 124, 0.28), var(--glass-shadow); animation: open-ring 1.1s ease-in-out infinite; }
@@ -1484,3 +1518,24 @@ html.lite .ps-ink { text-shadow: none; }
 /* its shadow on the page, a little below and to the right, following the hand */
 .lens-shadow { position: absolute; left: 0; top: 0; width: calc(var(--r) * 2); height: calc(var(--r) * 2); border-radius: 50%; pointer-events: none; z-index: 1;
   background: radial-gradient(circle, rgba(60, 25, 55, 0.16) 0 45%, rgba(60, 25, 55, 0) 72%); }
+
+/* ---------------------------------------------------------------- the girl who speaks (Mascot.tsx) */
+.mascot { position: fixed; left: 50%; bottom: calc(max(14px, env(safe-area-inset-bottom)) + var(--mascot-bottom, 0px)); z-index: 70;
+  width: min(calc(100vw - 28px), 520px); min-height: 96px; display: flex; align-items: center; padding: 16px 46px 16px 140px; border-radius: 26px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.97), color-mix(in srgb, var(--lavender) 90%, white));
+  border: 1px solid var(--glass-edge); box-shadow: 0 18px 44px rgba(80, 45, 150, 0.2), 0 2px 6px rgba(80, 45, 150, 0.08);
+  transform: translateX(-50%); animation: mascot-in 0.55s var(--ease) both; cursor: pointer; }
+:root[data-theme='dark'] .mascot { background: linear-gradient(135deg, #2c2152, #241a45); }
+.mascot.is-leaving { animation: mascot-out 0.32s ease-in both; }
+.mascot.no-girl { padding-left: 20px; }
+.mascot.is-stop { border-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+/* she stands on the card, a head taller than it; her lower edge follows the card's rounded corner */
+.mascot-girl { position: absolute; left: 4px; bottom: 0; height: 176px; width: auto; max-width: 132px; object-fit: contain; object-position: bottom;
+  clip-path: inset(-60% 0 0 0 round 0 0 0 24px); filter: drop-shadow(0 10px 16px rgba(70, 40, 140, 0.3)); transform-origin: 50% 100%;
+  animation: mascot-girl 0.7s 0.08s cubic-bezier(0.3, 1.4, 0.4, 1) both; }
+.mascot-text { margin: 0; font-size: 0.98rem; line-height: 1.35; font-weight: 600; color: var(--ink); text-wrap: pretty; }
+.mascot-close { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; padding: 0;
+  border-radius: 50%; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink-2); cursor: pointer; }
+@keyframes mascot-in { from { opacity: 0; transform: translate(-50%, 28px) scale(0.96); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes mascot-out { to { opacity: 0; transform: translate(-50%, 22px) scale(0.97); } }
+@keyframes mascot-girl { from { opacity: 0; transform: translateY(26px) scale(0.9); } to { opacity: 1; transform: none; } }

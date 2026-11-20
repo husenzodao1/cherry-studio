@@ -191,8 +191,8 @@ export function Butterflies({ path }: { path: string }) {
   const layer = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // no butterflies in light mode (weaker phones) or when the phone asks for less motion
-    if (!layer.current || matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('lite')) return
+    // no butterflies only when the phone asks for less motion
+    if (!layer.current || matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const plans = planFor(path)
     if (!plans.length) return
     const box = layer.current

@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 
 import { BlockView } from '@/web/components/Blocks'
 import { Icon } from '@/web/components/Icon'
+import { say } from '@/web/components/Mascot'
 import { Empty, Loading } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
@@ -93,7 +94,7 @@ function Lesson() {
       )}
 
       {!l.locked ? (
-        <button type="button" className="btn btn-soft" style={{ marginTop: 28 }} onClick={() => completeLesson(id)} disabled={done}>
+        <button type="button" className="btn btn-soft" style={{ marginTop: 28 }} onClick={() => { completeLesson(id); say('lessonDone') }} disabled={done}>
           <Icon name="check" size={18} /> {done ? t('lesson.completed') : t('lesson.mark_done')}
         </button>
       ) : null}

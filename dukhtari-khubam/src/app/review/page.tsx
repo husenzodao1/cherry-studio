@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 
+import { say } from '@/web/components/Mascot'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { Empty } from '@/web/components/States'
@@ -22,6 +23,8 @@ export default function ReviewPage() {
   useEffect(() => {
     if (bundle && session === null) setSession(dueToday(bundle, progress).map((it) => ({ ...it, question: { ...it.question, options: shuffled(it.question.options) } })))
   }, [bundle, progress, session])
+  // the session is fixed once: she invites to the review when there is something to repeat
+  useEffect(() => { if (session?.length) say('review') }, [session])
   const [index, setIndex] = useState(0)
   const [answer, setAnswer] = useState<Answer | undefined>()
   const [checked, setChecked] = useState<boolean | null>(null)

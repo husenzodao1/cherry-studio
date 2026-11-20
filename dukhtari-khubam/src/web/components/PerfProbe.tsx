@@ -4,8 +4,8 @@ import { useEffect } from 'react'
 
 /**
  * Watches how smoothly the first seconds draw. A phone that keeps missing frames (median frame over
- * 24 ms, under ~40 fps) is switched to light mode (<html class="lite">: no live blur, no endless
- * decorative motion) and remembers it (dk.lite=1), so the next start is light from the first paint.
+ * 24 ms, under ~40 fps) is switched to light mode (<html class="lite">: no live blur,
+ * the panes turn nearly opaque) and remembers it (dk.lite=1), so the next start is light from the first paint.
  */
 const FRAMES = 90
 const SLOW_MS = 24

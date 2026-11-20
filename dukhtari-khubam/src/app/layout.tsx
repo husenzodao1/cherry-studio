@@ -52,7 +52,7 @@ export const viewport: Viewport = {
 // a first visit on its way to /start (no flash of the home screen), and applies the saved
 // theme, text size and language (no flash).
 // Light mode for weaker phones (up to 4 GB of memory or 4 cores, or found slow by PerfProbe and kept
-// as dk.lite=1): no live blur and no endless decorative motion, so scrolling stays smooth.
+// as dk.lite=1): no live blur, so scrolling stays smooth.
 const boot = `try{var dm=navigator.deviceMemory,hc=navigator.hardwareConcurrency,lt=localStorage.getItem('dk.lite');if(lt==='1'||(lt!=='0'&&((dm&&dm<=4)||(hc&&hc<=4))))document.documentElement.classList.add('lite')}catch(e){}try{if(localStorage.getItem('dk.pin'))document.documentElement.classList.add('locked');if(!localStorage.getItem('dk.learner')&&!/^\\/(start|admin|page|support)(\\/|$)/.test(location.pathname))document.documentElement.classList.add('gated')}catch(e){}try{var p=JSON.parse(localStorage.getItem('dk.prefs')||'{}'),r=document.documentElement,t=['light','dark','sakura','peach','mint','dusk'].indexOf(p.theme)<0||(p.theme==='light'&&!(p.v>=3))?'peach':p.theme;r.dataset.theme=t==='dark'||t==='dusk'?'dark':'light';if(t!=='light'&&t!=='dark')r.dataset.palette=t;else delete r.dataset.palette;var s=p.v>=2?p.textScale:(p.textScale&&p.textScale!==1?p.textScale:0.9);r.style.setProperty('--text-scale',String(s||0.9));if(p.locale){r.lang=p.locale;r.dir=p.locale==='fa'||p.locale==='prs'?'rtl':'ltr'}}catch(e){}`
 
 export default function RootLayout({ children }: { children: ReactNode }) {

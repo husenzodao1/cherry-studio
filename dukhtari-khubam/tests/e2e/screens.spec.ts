@@ -1,4 +1,4 @@
-import { expect, signedIn, test } from './fixtures'
+import { BUNDLE, expect, signedIn, test } from './fixtures'
 
 test.describe('main screens of a signed-in learner', () => {
   for (const [path, sel] of [['/', '.motto'], ['/schools', '.tile-verse'], ['/profile', '.profile-head'], ['/settings', '.theme-box'], ['/garden', 'main'], ['/review', 'main'], ['/search', 'main'], ['/saved', 'main']] as const) {
@@ -129,4 +129,25 @@ test.describe('main screens of a signed-in learner', () => {
     })).toBeGreaterThan(20)
     expect(errors).toEqual([])
   })
+})
+
+test('words of the day: a long poem keeps its lines, shows four and scrolls upward', async ({ page, server: _, errors }) => {
+  const poem = ['Бӯи ҷӯи Мӯлиён ояд ҳаме,', 'Ёди ёри меҳрубон ояд ҳаме.', 'Реги Омую дуруштиҳои ӯ', 'Зери поям парниён ояд ҳаме.',
+    'Оби Ҷайҳун аз нишоти рӯи дӯст', 'Хинги моро то миён ояд ҳаме.', 'Эй Бухоро, шод бошу дер зӣ,', 'Мир зи ту шодмон ояд ҳаме.'].join('\n')
+  await page.route('**/api/v1/bundle**', (r) => r.fulfill({ contentType: 'application/json',
+    body: JSON.stringify({ ...BUNDLE, inspirations: [{ id: 'long', body: poem, author_name: 'Рӯдакӣ', source_title: null }] }) }))
+  await signedIn(page)
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const text = page.locator('.words-item.is-in .words-text')
+  await expect(text).toHaveClass(/is-rising/)
+  const quote = text.locator('blockquote')
+  // the poem's own line breaks are kept
+  expect(await quote.evaluate((el) => getComputedStyle(el).whiteSpace)).toBe('pre-line')
+  // the window holds four lines
+  const lines = await text.evaluate((el) => el.clientHeight / parseFloat(getComputedStyle(el.querySelector('blockquote')!).lineHeight))
+  expect(Math.round(lines)).toBe(4)
+  await expect(quote).toHaveAttribute('data-moving', '')
+  await expect.poll(() => quote.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42), { timeout: 15_000 }).toBeLessThan(-10)
+  expect(errors).toEqual([])
 })

@@ -1,10 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { Suspense, useMemo, useState } from 'react'
+import { Suspense, useMemo, useRef, useState } from 'react'
+
+import { afterQuiz, duringQuiz } from '@/lib/mascot'
 
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
+import { say } from '@/web/components/Mascot'
 import { Empty, Loading } from '@/web/components/States'
 import { useContent, type OfflineOption as Option, type OfflineQuiz } from '@/web/offline/content'
 import { gradeQuestion, gradeQuiz, shuffled, type Answer, type QuestionResult } from '@/web/offline/grade'
@@ -56,6 +59,8 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
     // `round` changes on every (re)start, so each attempt gets a fresh order
   }, [quiz, round])
   const [started, setStarted] = useState(false)
+  // right (true) and wrong answers so far in this round, for her reactions
+  const runs = useRef<boolean[]>([])
   const [answers, setAnswers] = useState<Record<string, Answer>>({})
   const [checked, setChecked] = useState<Record<string, Reveal>>({})
   const [index, setIndex] = useState(0)
@@ -66,6 +71,8 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
   const mode = (when: string): Show => (showAnswers === when && showExpl === when ? 'both' : showAnswers === when ? 'answers' : 'explanations')
 
   const start = () => {
+    runs.current = []
+    if (Math.random() < 0.5) say('beforeQuiz')
     setRound((r) => r + 1)
     setAnswers({})
     setChecked({})
@@ -132,11 +139,18 @@ function Player({ quiz }: { quiz: OfflineQuiz }) {
     if (!answer) return
     const r = gradeQuestion(q, quiz.grading[q.id], answer, quiz.locale)
     setChecked((c) => ({ ...c, [q.id]: revealOf(quiz, q.id, r, mode('after_each')) }))
+    // answers in a row: the second wrong one asks her to stop and read, the third right one is praised
+    if (r.status === 'correct' || r.status === 'incorrect') {
+      runs.current = [...runs.current, r.status === 'correct']
+      const moment = duringQuiz(runs.current)
+      if (moment) say(moment)
+    }
   }
   const submit = () => {
     const g = gradeQuiz(questions, quiz.grading, answers, quiz.locale)
     const passed = g.percent >= policy.pass_score_percent
     recordQuiz(quiz.quiz.id, g.percent, passed)
+    say(afterQuiz(g.percent, passed))
     const end = mode('after_submit')
     setResult({
       score: g.score, max_score: g.max_score, percent: g.percent, passed, completion_text: quiz.settings.completion_text,

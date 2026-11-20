@@ -10,6 +10,7 @@ import { ART } from '@/web/art'
 import { Dots, GoIcon } from '@/web/components/Busy'
 import { OtpField, type OtpState } from '@/web/components/OtpField'
 import { buzz } from '@/web/components/PinPad'
+import { StartLanguage, StartScene } from '@/web/components/StartScene'
 import { endAccount, linkAccount, type AccountProfile } from '@/web/offline/accountAuth'
 import { isEmail, normalizeEmail, sendEmailCode, verifyEmailCode } from '@/web/offline/email'
 import { endGoogle, googlePhotoFile, lastGoogleStep, linkGoogle, signInWithGoogle, warmGoogle, type GoogleAccount } from '@/web/offline/google'
@@ -279,7 +280,8 @@ export default function StartPage() {
   }
 
   const note = <p role="status" className="muted start-note">{message ?? ' '}</p>
-  const flower = <img className="start-art bloom-in" style={{ width: 'min(46vw, 190px)' }} src={ART.flower.src} alt="" aria-hidden="true" />
+  // each step has its own small picture, never the same one everywhere
+  const art = (a: { src: string }) => <img className="start-art bloom-in" style={{ width: 'min(42vw, 170px)' }} src={a.src} alt="" aria-hidden="true" />
   const emailField = (
     <Field label={t('email.label')}>
       <input className="input" type="email" inputMode="email" value={email} maxLength={120} autoComplete="email" autoCapitalize="none" spellCheck={false}
@@ -290,7 +292,7 @@ export default function StartPage() {
   if (step.at === 'code') {
     return (
       <div className="start">
-        {flower}
+        {art(ART.lotus)}
         <CodeStep key={step.email} email={step.email} onBack={() => { setStep({ at: 'start' }); setMessage(null) }}
           onResend={() => askCode(step.email, step.purpose)} onVerified={onVerified(step.email, step.purpose)} />
       </div>
@@ -301,7 +303,7 @@ export default function StartPage() {
     const g = step.google
     return (
       <div className="start">
-        {g ? null : flower}
+        {g ? null : art(ART.tulip)}
         <form className="glass google-card stack" onSubmit={onAbout}>
           {g ? (
             <div className="google-who">
@@ -335,7 +337,7 @@ export default function StartPage() {
   if (needsBirthday && learner) {
     return (
       <div className="start">
-        {flower}
+        {art(ART.tulip)}
         <h1 className="h-page">{learner.name}</h1>
         <form className="stack" style={{ width: '100%', maxWidth: 420 }} onSubmit={(e) => { e.preventDefault(); if (born) setBirthday(born) }}>
           <BirthdayField value={birthday} onChange={setBirthdayText} />
@@ -348,7 +350,7 @@ export default function StartPage() {
   if (needsAccount && learner) {
     return (
       <div className="start">
-        {flower}
+        {art(ART.book)}
         <div>
           <h1 className="h-page">{t('email.confirm_title')}</h1>
           <p className="muted" style={{ margin: '4px 0 0' }}>{t('email.confirm_hint')}</p>
@@ -368,9 +370,10 @@ export default function StartPage() {
   }
 
   return (
-    <div className="start">
-      <img className="start-art bloom-in" src={ART.flower.src} alt="" aria-hidden="true" />
-      <div>
+    <div className="start has-scene">
+      <StartScene />
+      <StartLanguage />
+      <div className="start-title">
         <h1 className="brand-wrap"><span className="brand">{t('app.name')}</span></h1>
         <p className="muted" style={{ margin: '4px 0 0' }}>{t('start.subtitle')}</p>
       </div>

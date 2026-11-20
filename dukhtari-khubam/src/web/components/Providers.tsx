@@ -15,6 +15,7 @@ import { BackButton } from './BackButton'
 import { installGlobalHealing } from '../heal'
 import { PerfProbe } from './PerfProbe'
 import { Splash } from './Splash'
+import { Mascot } from './Mascot'
 import { PullSignature } from './PullSignature'
 import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
@@ -133,6 +134,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <PullSignature />
               <WidgetBridge />
               <Toaster />
+              <Mascot />
             </ForAge>
           </LearnerProvider>
         </ContentProvider>
