@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 import { ApiError } from '@/lib/http'
 import { emptyProgress, isCode, mergeProgress, ProgressData } from '@/lib/progress'
+import { unpack } from '@/lib/progressWire'
 import { route, type AnyRoute } from '@/lib/router'
 import { LocaleQuery } from '@/lib/schemas'
 
@@ -146,7 +147,8 @@ export const offlineRoutes: AnyRoute[] = [
       const client = sb()
       const hash = codeHash(body.code)
       const stored = await call<Stored | null>(client, 'api_profile_load', { p_code_hash: hash })
-      const previous = stored ? ProgressData.safeParse(stored.data) : null
+      // the backup may be compressed by newer apps (lib/progressWire)
+      const previous = stored ? ProgressData.safeParse(await unpack(stored.data)) : null
       const merged = previous?.success ? mergeProgress(previous.data, body.data) : body.data
       const updatedAt = await call<string>(client, 'api_profile_save', { p_code_hash: hash, p_name: body.name, p_data: merged })
       return { name: body.name, data: merged, updated_at: updatedAt }
@@ -159,7 +161,7 @@ export const offlineRoutes: AnyRoute[] = [
     handler: async ({ sb, body }) => {
       const stored = await call<Stored | null>(sb(), 'api_profile_load', { p_code_hash: codeHash(body.code) })
       if (!stored) throw new ApiError(404, 'not_found', 'Ин код ёфт нашуд.')
-      const data = ProgressData.safeParse(stored.data)
+      const data = ProgressData.safeParse(await unpack(stored.data))
       return { name: stored.name, data: data.success ? data.data : emptyProgress(), updated_at: stored.updated_at }
     }
   }),

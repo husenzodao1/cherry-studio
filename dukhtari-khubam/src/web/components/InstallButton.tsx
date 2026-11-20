@@ -22,11 +22,16 @@ export function InstallButton() {
   return native ? <OfflineInstall /> : <AppDownload />
 }
 
-/** Website: the app's APK is downloaded at once (the browser asks where to keep it, then to install). */
+/**
+ * Website: the app's APK is downloaded at once, straight from the GitHub repository's raw file (no GitHub
+ * page opens and no Vercel bandwidth is used); the browser then offers to install it.
+ */
+const APK_URL = process.env.NEXT_PUBLIC_APK_URL ?? '/download/dukhtari-khubam.apk'
+
 function AppDownload() {
   const { t } = usePrefs()
   return (
-    <a href="/download/dukhtari-khubam.apk" download="dukhtari-khubam.apk" className="icon-btn install-btn" aria-label={t('install.app')}
+    <a href={APK_URL} download="dukhtari-khubam.apk" className="icon-btn install-btn" aria-label={t('install.app')}
       onClick={() => showToast(t('install.app_started'), 'install', 4200)}>
       <span className="install-glyph"><Icon name="install" /></span>
       <span className="install-dot" aria-hidden="true" />

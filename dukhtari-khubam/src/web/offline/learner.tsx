@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
+import { pack, unpack } from '@/lib/progressWire'
 import { emptyProgress, isCode, localDay, mergeProgress, newCode, ProgressData, withDay } from '@/lib/progress'
 
 import { encryptCode, isPassword, isUsername, normalizeUsername } from './account'
@@ -174,7 +175,8 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       let data = latest.current.progress
       let base = readJson<string>(`${SYNCED_KEY}:${l.code}`)
       for (let attempt = 0; attempt < 3; attempt++) {
-        const { data: r, error } = await sb.rpc('api_profile_push', { p_code: l.code, p_name: l.name, p_data: data, p_base: base })
+        // trimmed and, when large, compressed (lib/progressWire): many learners fit the free database
+        const { data: r, error } = await sb.rpc('api_profile_push', { p_code: l.code, p_name: l.name, p_data: await pack(data), p_base: base })
         if (error) throw error
         const res = r as { conflict?: boolean; data?: unknown; updated_at: string }
         if (!res.conflict) {
@@ -183,7 +185,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
           return
         }
         // another phone (or an older backup) wrote meanwhile: take both, then send the merge
-        const server = ProgressData.safeParse(res.data)
+        const server = ProgressData.safeParse(await unpack(res.data))
         if (server.success) {
           data = mergeProgress(latest.current.progress, server.data)
           setProgress(data)
@@ -259,11 +261,15 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       writeJson(LEARNER_KEY, l)
       setLearner(l)
       latest.current = { ...latest.current, learner: l }
-      const server = ProgressData.safeParse(profile.data)
-      setProgress((cur) => {
-        const merged = server.success ? mergeProgress(cur, server.data) : cur
-        writeJson(PROGRESS_KEY, merged)
-        return merged
+      // the backup may be compressed (lib/progressWire): opened, then merged with this phone's
+      unpack(profile.data).catch(() => null).then((raw) => {
+        const server = ProgressData.safeParse(raw)
+        if (!server.success) return
+        setProgress((cur) => {
+          const merged = mergeProgress(cur, server.data)
+          writeJson(PROGRESS_KEY, merged)
+          return merged
+        })
       })
     },
     checkUsername: async (raw) => {

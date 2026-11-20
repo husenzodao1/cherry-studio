@@ -1,0 +1,2 @@
+# The APK files are served from the GitHub repository (see next.config.ts redirects), not by Vercel.
+public/download/*.apk
