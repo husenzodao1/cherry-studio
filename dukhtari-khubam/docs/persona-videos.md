@@ -32,13 +32,64 @@
 
 ---
 
-## Промпти расми `intro.png`
+## Ду расми аввал: промпти пурра (нусха гиред ва истифода баред)
 
-Варақи персонаж ё `girl-A.png`-ро замима кунед. Аввал **сатри reference**, сипас **ПРОМПТИ АСОСӢ** аз `persona-prompts.md` ва баъд ин сатр:
+### 1. `girl-A.png`: Маҳлиё бо китоб
+
+Ин расм дар экрани воридшавӣ гузошта мешавад ва кадри аввалу охири видеои 1 мешавад. Онро **аввал** созед.
 
 ```
-POSE & FRAMING: waist-up, body turned about 20 degrees to HER LEFT (towards the right edge of the image) while her face looks at the viewer, hands relaxed and lightly clasped in front of her waist, a friendly attentive smile with closed lips — a calm "I'm here, ready to talk to you" pose. Vertical 4:5 frame, the same camera distance and head size as the emotion series, empty space on the right side of the image.
+A single adorable 3D animated character named Mahliyo — premium animated feature-film quality, stylized realism: believable materials and lighting, slightly stylized proportions. Not a photo, not anime, not flat illustration, not a toy.
+
+CHARACTER: a sweet Tajik (Central Asian) girl of about 15–16, warm and kind, gently confident, with the calm, clever eyes of a young teacher. Soft rounded face, warm light-olive skin with subtle subsurface scattering and a natural rosy blush on the cheeks, large expressive almond-shaped dark-brown eyes with bright catch-lights and long natural lashes, softly arched dark eyebrows, small nose, small gentle closed-lip smile. Delicate, modest, elegant. No hair visible at all.
+
+HIJAB: soft matte lilac hijab (#B9A1F0) with subtle fabric folds and a faint satin sheen, wrapped neatly around the face and pinned under the chin, covering hair, ears and neck, draping over the shoulders. One tiny round gold pin (#C9A15A) at the side of the head.
+
+OUTFIT: a modest loose long-sleeve blouse in warm ivory (#FBF7FF) with thin deep-plum (#5B3A9E) trim at the cuffs and neckline, and a delicate rose (#ECC9E8) accent (a small embroidered flower on the chest). Clean, simple, no logos, no text.
+
+POSE & FRAMING: waist-up, centred, facing the viewer with the body turned very slightly to her left, head tilted a touch; she holds a closed medium-size deep-plum hardcover book (cream page edges visible, no text on it) flat against her chest with both hands and smiles warmly at the viewer. Vertical 4:5 frame; the top of the hijab about 8% below the top edge, the body cut at the waist by the bottom edge; both hands and the whole book inside the frame, nothing cropped at the sides.
+
+LOOK & LIGHT: soft cinematic studio lighting — large warm key light from the front-left, gentle lilac fill from the right, a soft rim light from behind outlining the hijab; smooth global illumination; pastel colour grade in lavender, rose and cream that matches a soft lavender app interface. Crisp, clean edges on the whole silhouette (needed for a perfect cut-out). Ultra-detailed, 4K, high dynamic range.
+
+BACKGROUND: transparent (PNG with alpha). If transparency is not possible: one perfectly flat, seamless solid colour #EBE3FA — no gradient, no texture, no floor, no props, no shadow on the background.
+
+HANDS: anatomically correct, exactly five fingers on each hand, soft rounded stylized fingers.
+
+AVOID: text, letters, logos, watermark, frame, border, extra characters, background objects, visible hair, earrings, heavy makeup, extra or fused fingers, deformed hands, harsh shadows, blur on the character, photo-realistic skin pores, anime eyes, chibi proportions, plastic toy look.
 ```
+
+### 2. `intro.png`: Маҳлиё барои шиносоӣ
+
+Ин расм кадри аввалу охири видеои 2 ва кадри аввали видеои 3 мешавад. Расми `girl-A.png`-ро **замима кунед**, то чеҳра ҳамон бошад.
+
+```
+Use the attached image as the exact character reference — identical face, eyes, skin tone, hijab, outfit, colours, proportions and rendering style. Same character, new pose only.
+
+A single adorable 3D animated character named Mahliyo — premium animated feature-film quality, stylized realism: believable materials and lighting, slightly stylized proportions. Not a photo, not anime, not flat illustration, not a toy.
+
+CHARACTER: a sweet Tajik (Central Asian) girl of about 15–16, warm and kind, gently confident, with the calm, clever eyes of a young teacher. Soft rounded face, warm light-olive skin with subtle subsurface scattering and a natural rosy blush on the cheeks, large expressive almond-shaped dark-brown eyes with bright catch-lights and long natural lashes, softly arched dark eyebrows, small nose, small gentle closed-lip smile. Delicate, modest, elegant. No hair visible at all.
+
+HIJAB: soft matte lilac hijab (#B9A1F0) with subtle fabric folds and a faint satin sheen, wrapped neatly around the face and pinned under the chin, covering hair, ears and neck, draping over the shoulders. One tiny round gold pin (#C9A15A) at the side of the head.
+
+OUTFIT: a modest loose long-sleeve blouse in warm ivory (#FBF7FF) with thin deep-plum (#5B3A9E) trim at the cuffs and neckline, and a delicate rose (#ECC9E8) accent (a small embroidered flower on the chest). Clean, simple, no logos, no text.
+
+POSE & FRAMING: waist-up, body turned about 20 degrees to HER LEFT (towards the right edge of the image) while her face looks at the viewer; hands relaxed and lightly clasped in front of her waist; a friendly, attentive closed-lip smile — a calm "I'm here, ready to talk to you" pose. Vertical 4:5 frame with exactly the same camera distance and head size as the reference image; the top of the hijab about 8% below the top edge, the body cut at the waist; she stands a little left of centre, leaving empty space on the right side of the image.
+
+LOOK & LIGHT: soft cinematic studio lighting — large warm key light from the front-left, gentle lilac fill from the right, a soft rim light from behind outlining the hijab; smooth global illumination; pastel colour grade in lavender, rose and cream that matches a soft lavender app interface. Crisp, clean edges on the whole silhouette (needed for a perfect cut-out). Ultra-detailed, 4K, high dynamic range.
+
+BACKGROUND: transparent (PNG with alpha). If transparency is not possible: one perfectly flat, seamless solid colour #EBE3FA — no gradient, no texture, no floor, no props, no shadow on the background.
+
+HANDS: anatomically correct, exactly five fingers on each hand, soft rounded stylized fingers.
+
+AVOID: text, letters, logos, watermark, frame, border, extra characters, background objects, visible hair, earrings, heavy makeup, extra or fused fingers, deformed hands, harsh shadows, blur on the character, photo-realistic skin pores, anime eyes, chibi proportions, plastic toy look.
+```
+
+**Санҷиш:**
+- Чеҳра, ҳиҷоб ва либос дар ҳарду расм як хел ҳастанд.
+- Андозаи сар дар ҳарду расм баробар аст.
+- Мӯй намоён нест.
+- Дар ҳар даст 5 ангушт аст.
+- Дар китоб матн нест.
 
 ---
 
