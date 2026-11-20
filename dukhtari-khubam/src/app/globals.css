@@ -488,8 +488,13 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 :root[data-theme='dark'] .verse-title { color: #f3e9ff; }
 .verse-body { font-family: var(--font-verse), var(--font-serif), serif; font-style: italic; font-weight: 500; font-size: 1.12rem; line-height: 1.45; }
 .verse-line { display: block; }
-.verse-card.is-story .verse-body { font-family: var(--font-serif), serif; font-style: normal; font-size: 1.04rem; line-height: 1.6; text-align: justify; hyphens: auto; }
-.verse-card.is-story .verse-body p { margin: 0 0 0.7em; text-indent: 1.4em; }
+.verse-card.is-story .verse-body { font-family: var(--font-serif), serif; font-style: normal; font-size: 1.04rem; line-height: 1.6; text-align: start; }
+.verse-card.is-story .verse-body p { margin: 0 0 0.3em; text-indent: 1em; }
+/* a story fills its page: closer lines and paragraphs, less padding, gentler corners, title centred */
+.verse-card.is-story { padding: 14px 12px 12px; border-radius: 16px; }
+.verse-card.is-story .verse-body { line-height: 1.42; }
+.verse-card.is-story .verse-title { text-align: center; margin: 4px 0 8px; }
+.verse-card.is-story .verse-kind { display: block; text-align: center; }
 .verse-card:not(.is-open) .verse-body { max-height: 11.5em; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent); mask-image: linear-gradient(180deg, #000 70%, transparent); }
 .verse-more { display: block; margin: 6px 0 0; }
 .verse-author { margin: 8px 0 0; text-align: end; font-family: var(--font-verse), var(--font-serif), serif; font-style: italic; font-size: 0.98rem; opacity: 0.85; }
