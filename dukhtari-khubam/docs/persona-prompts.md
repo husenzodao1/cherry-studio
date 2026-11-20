@@ -11,7 +11,7 @@
 | Духтари саволномаи аввал (`welcome-girl`) | Эмотсияи **25** (бо оина) |
 | Объектҳои шишагини чархзанандаи экрани воридшавӣ | **12 объекти 3D**-и мултфилмӣ, ки аз гирди духтарак мебароянд (қисми охир) |
 
-Ҳамагӣ: **1** варақи персонаж + **26** эмотсия + **12** объект. Расмҳои экрани воридшавӣ (A–E) дар файли дигар ҳастанд.
+Ҳамагӣ: **1** варақи персонаж + **26** эмотсия + **12** объекти экрани воридшавӣ + **28** объекти дигари барнома. Расмҳои экрани воридшавӣ (A–E) дар файли дигар ҳастанд.
 
 ---
 
@@ -148,6 +148,49 @@ AVOID: text, letters, numbers, calligraphy, logos, watermark, people, hands, fac
 | 10 | `o10-pomegranate.png` | Анор | Тоҷикистон, саломатӣ | `OBJECT: a ripe glossy pomegranate with a small crown, gently split open on one side showing jewel-like ruby seeds that catch the light.` |
 | 11 | `o11-teapot.png` | Чойники чинӣ | Оила, меҳмоннавозӣ | `OBJECT: a traditional Central Asian porcelain teapot (choynak), glossy ivory with a fine lilac and gold cotton-boll pattern, gold rim and lid knob, a matching small tea bowl (piyola) beside it.` |
 | 12 | `o12-crescent.png` | Ҳилол ва ситора | Шаб, орзу | `OBJECT: a soft glowing crescent moon in warm satin gold with a small five-pointed star hanging beside it, faint lilac glow around both.` |
+
+### Ҳамаи объектҳои дигари барнома (28 расм)
+
+Ҳамон **ПРОМПТИ АСОСИИ ОБЪЕКТҲО**-ро гиред ва ба ҷои сатри `OBJECT:` ин сатрро нависед:
+
+```
+Using exactly this style, make these shapes, each as a separate image (square 1:1, centred, transparent background):
+```
+
+Баъд барои ҳар расм як сатр аз ин ҷадвал илова кунед.
+
+| Файл | Дар куҷо | Сатр |
+|---|---|---|
+| `school-religion.png` | Мактаби «Маърифати динӣ» | `an elegant white mosque with a lilac dome, small gold crescent finials and four slender minarets on a cream base` |
+| `school-ethics.png` | «Одоб ва ахлоқ» | `a big glossy rose-pink heart with two small hearts floating beside it` |
+| `school-culture.png` | «Фарҳанги тоҷик» | `a deep-plum vase with gold rims and a fine pattern, holding a bouquet of pink, rose and lilac roses with mint leaves` |
+| `school-family.png` | «Оила ва муносибатҳо» | `a cosy little house with a lilac roof, a round window and a pink heart on the front wall, two tiny hearts rising from the chimney` |
+| `school-health.png` | «Илм ва саломатӣ» | `a clear glass laboratory flask filled with glowing lilac liquid, a glossy pink heart badge with a white cross beside it` |
+| `school-growth.png` | «Рушди шахсият» | `three rising glossy bars in cream, lilac and violet on a white base, a gold star on top of the tallest bar` |
+| `school-modern.png` | «Зиндагии муосир» | `a clear glass light bulb with a glowing filament and gold base, a thin lilac orbit ring around it, tiny sparkles` |
+| `book-open.png` | Хона, курс, саволнома | `an open book with blank cream pages resting on a carved plum wooden book stand (rehal) — no text` |
+| `crown.png` | Тоҷи болои аватар | `a small golden crown with five points tipped with pearls, set with lilac and rose gems` |
+| `magnifier.png` | «Ҳеҷ чиз ёфт нашуд» | `a round magnifying glass with a rose-gold frame and handle; the lens glass almost fully clear, only a soft highlight` |
+| `splash-moon.png` | Экрани кушодашавӣ | `a soft glowing pastel-yellow crescent moon with a gentle velvety glow` |
+| `verse-garden.png` | «Гулбоғи эҷод» (шеърҳо) | `an open lilac-cover book with a pink flower pressed on one blank page and a white quill pen resting on the other — no text` |
+| `welcome-clock.png` | Саволнома: «Чӣ қадар вақт?» | `a rose-gold alarm clock with a cream face and two bells on a round cream podium, a small heart and gold stars around it — no numbers on the face` |
+| `welcome-track.png` | Саволнома: «Аз куҷо моро ёфтед?» | `a glossy peach map pin standing on a small folded pastel map on a round podium, a magnifier and a speech bubble with a heart floating beside it` |
+| `glass-flower.png` | Ороиши саҳифаҳо | `an open lilac lily made of translucent candy glass with gold stamens, seen from the front` |
+| `glass-flower-side.png` | Ороиши саҳифаҳо | `the same lilac glass lily seen from the side, low and wide` |
+| `glass-flower-open.png` | Ороиши саҳифаҳо | `the same lilac glass lily fully open, seen from slightly above` |
+| `glass-lotus.png` | Ороиш, анҷоми марҳила | `a lilac-and-pink glass lotus with layered petals and a glowing gold centre` |
+| `glass-tulip.png` | Ороиш, экрани воридшавӣ | `a single plum-to-rose glass tulip on a slim mint stem with two leaves` |
+| `glass-leaves.png` | Ороиш | `a slender branch of small lilac glass leaves curving upward` |
+| `glass-crystals.png` | Ороиш, кортҳо | `a cluster of tall violet crystals rising from a small round base` |
+| `glass-petals.png` | Ороиш | `three loose lilac glass petals floating at different angles` |
+| `glass-lens.png` | Ороиш | `a clear oval glass lens standing upright with soft lilac reflections` |
+| `glass-bubble.png` | Ороиш | `a clear glass soap-bubble sphere with lilac iridescent reflections` |
+| `butterfly-lilac.png` | Шапалакҳои парвозкунанда | `a butterfly seen from directly above, wings fully open and flat, perfectly symmetric, body vertical — lilac wings with soft violet edges and two small dark dots` |
+| `butterfly-pearl.png` | Шапалакҳо | `the same butterfly, pearl-white wings with lilac edges` |
+| `butterfly-rose.png` | Шапалакҳо | `the same butterfly, rose-pink wings with plum edges` |
+| `butterfly-sky.png` | Шапалакҳо | `the same butterfly, sky-blue wings with deep-blue edges` |
+
+**Шапалакҳо:** ҳар кадомро пурра созед. Ман худам онҳоро ба бадан ва ду бол ҷудо мекунам, то болҳояшон дар барнома ҳаракат кунанд.
 
 **Санҷиши ҳар объект:** матн ва ҳарф нест; объект пурра дар кадр аст; канорҳо тозаанд; фон шаффоф ё якранг аст; рангҳо аз палитраи боло ҳастанд.
 
