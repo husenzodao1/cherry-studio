@@ -79,7 +79,8 @@ test('PIN recovery by e-mail: the six code boxes keep their size (they used to s
   // a PIN is set: the app opens behind the PIN pad
   await page.addInitScript(() => localStorage.setItem('dk.pin', JSON.stringify({ salt: '00', hash: 'x', fails: 0, until: 0 })))
   await page.goto('/')
-  await page.getByRole('button', { name: 'Тасдиқ бо почта' }).click()
+  // no life questions chosen: "Forgot it?" goes straight to the e-mail way
+  await page.getByRole('button', { name: 'Фаромӯш кардед?' }).click()
   const boxes = page.locator('.recovery .otp-boxes span')
   await expect(boxes).toHaveCount(6)
   for (let i = 0; i < 6; i++) expect((await boxes.nth(i).boundingBox())!.width).toBeGreaterThan(36)
@@ -91,5 +92,26 @@ test('PIN recovery by e-mail: the six code boxes keep their size (they used to s
   expect(new Set(widths).size).toBe(1)
   expect(widths[0]).toBeGreaterThan(36)
   await page.screenshot({ path: 'test-results/pin-email-code.png' })
+  expect(errors).toEqual([])
+})
+
+test('PIN pad: "Фаромӯш кардед?" opens the life questions, with the e-mail way small below them', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await page.addInitScript(() => {
+    localStorage.setItem('dk.pin', JSON.stringify({ salt: '00', hash: 'x', fails: 0, until: 0 }))
+    const item = (q: string) => ({ q, salt: '00', hash: 'x' })
+    localStorage.setItem('dk.pin_recovery', JSON.stringify({ items: [item('food'), item('teacher'), item('city')], fails: 0, until: 0 }))
+  })
+  await page.goto('/')
+  // the pad says "Forgot it?", not "confirm by e-mail"
+  await expect(page.getByRole('button', { name: 'Тасдиқ бо почта' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Фаромӯш кардед?' }).click()
+  await expect(page.getByRole('heading', { name: 'Саволҳои ҳаётӣ' })).toBeVisible()
+  // the e-mail way: small, below the questions
+  const small = page.locator('.recovery-foot .pin-small')
+  await expect(small).toHaveText('Тасдиқ бо почта')
+  await small.click()
+  await expect(page.getByRole('heading', { name: 'Тасдиқ бо почтаи электронӣ' })).toBeVisible()
+  await expect(page.locator('.recovery .otp-boxes span')).toHaveCount(6)
   expect(errors).toEqual([])
 })

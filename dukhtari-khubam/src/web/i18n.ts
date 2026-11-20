@@ -241,7 +241,8 @@ const tg = {
   'done.saved': "Ба галерея сабт шуд",
   'course.repeat': "Такрори марҳила",
   'image.open': "Расмро пурра дидан",
-  'source.label': "Манбаъ"
+  'source.label': "Манбаъ",
+  'pin.forgot_q': "Фаромӯш кардед?"
 }
 
 export type UiKey = keyof typeof tg
@@ -515,7 +516,8 @@ const ru: Partial<Record<UiKey, string>> = {
   'done.saved': "Сохранено в галерею",
   'course.repeat': "Повторить этап",
   'image.open': "Открыть изображение целиком",
-  'source.label': "Источник"
+  'source.label': "Источник",
+  'pin.forgot_q': "Забыли?"
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, en, uz, tr, fa, prs }

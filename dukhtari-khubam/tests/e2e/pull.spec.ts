@@ -29,8 +29,14 @@ test('pulling down at the top writes "Gratorslab", then hearts fly out and the s
   expect(open).toBeGreaterThan(70)
   await page.screenshot({ path: 'test-results/pull-1.png' })
   await touch(page, 'touchend', 900)
-  await page.waitForTimeout(820)
+  // the word gathers, the hearts come out in a row …
+  await page.waitForTimeout(950)
   await page.screenshot({ path: 'test-results/pull-2.png' })
+  // … and then come forward: they grow over the page and stay visible before they fade
+  const heart = page.locator('.ps-heart').nth(2)
+  const look = () => heart.evaluate((el) => ({ scale: new DOMMatrix(getComputedStyle(el).transform).a, opacity: Number(getComputedStyle(el).opacity) }))
+  await expect.poll(async () => { const h = await look(); return h.scale > 1.8 && h.opacity > 0.4 }, { intervals: [40], timeout: 2000 }).toBe(true)
+  await page.screenshot({ path: 'test-results/pull-3.png' })
   await page.waitForTimeout(1200)
   await expect.poll(() => page.locator('main.app').evaluate((el) => el.style.transform)).toBe('')
   await expect.poll(() => page.locator('.pull-sign').evaluate((el) => el.getBoundingClientRect().height)).toBe(0)

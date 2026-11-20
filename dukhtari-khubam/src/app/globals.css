@@ -940,6 +940,7 @@ img.fade.is-ready { opacity: 1; }
 .pin-password { display: flex; gap: 8px; width: 100%; }
 .pin-password .input { min-height: 46px; }
 .recovery-foot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.link-btn.pin-small { font-size: 0.8em; opacity: 0.85; min-height: 36px; }
 /* forgotten PIN: three life questions */
 .recovery { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; animation: rise 0.4s var(--ease) both; }
 .recovery-steps { display: flex; gap: 8px; margin-bottom: 6px; }
@@ -1502,7 +1503,7 @@ html, body { overscroll-behavior-y: none; }
   background: color-mix(in srgb, var(--primary) 9%, var(--sky-1)); }
 /* the page's top edge seen from the space: half circles cut out of the space's lower edge, so the page
    itself (its exact colour, whatever the theme) shows through them like lace */
-.pull-sign { --lace: 12px;
+.pull-sign { --lace: 22px;
   -webkit-mask: linear-gradient(#000 0 0) top / 100% calc(100% - var(--lace) + 0.5px) no-repeat,
     radial-gradient(circle at 50% 100%, transparent 0 calc(var(--lace) - 1px), #000 var(--lace)) bottom / calc(var(--lace) * 2) var(--lace) repeat-x;
   mask: linear-gradient(#000 0 0) top / 100% calc(100% - var(--lace) + 0.5px) no-repeat,
@@ -1512,7 +1513,8 @@ html, body { overscroll-behavior-y: none; }
 .ps-word { position: relative; margin-bottom: 6px; will-change: transform; }
 .ps-ink { display: block; font-family: var(--font-studio), cursive; font-size: clamp(2rem, 9.5vw, 2.7rem); line-height: 1.2; padding: 0 0.3em; white-space: nowrap;
   color: var(--plum); text-shadow: 0 2px 12px color-mix(in srgb, var(--primary) 18%, transparent); clip-path: inset(-20% 100% -20% 0); }
-.ps-heart { position: absolute; left: 50%; top: calc(50% - 4px); width: 26px; height: 24px; opacity: 0; transform: translate(-50%, -50%) scale(0.1);
+.ps-hearts { position: fixed; left: 0; right: 0; top: 0; height: 0; z-index: 31; pointer-events: none; }
+.ps-heart { position: absolute; left: 50%; top: 0; width: 26px; height: 24px; opacity: 0; transform: translate(-50%, -50%) scale(0.1);
   filter: drop-shadow(0 4px 6px rgba(160, 60, 110, 0.3)); will-change: transform, opacity; }
 
 /* search: the staff passphrase was recognised — a green ring breathes while the panel opens */

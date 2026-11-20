@@ -200,6 +200,12 @@ export function AppLock() {
     if (learner?.username) setAsking(true)
     else setHint(t('pin.reinstall'))
   }
+  /** "Forgot it?": the life questions first when she chose them; otherwise straight to the e-mail way. */
+  const forgotAsk = () => {
+    setHint(null)
+    if (hasRecovery()) return setStage('questions')
+    return forgot()
+  }
   const submitPassword = async (e: FormEvent) => {
     e.preventDefault()
     const r = await checkPassword(learner!.username!, password)
@@ -257,6 +263,8 @@ export function AppLock() {
         )}
         <div className="pin-foot recovery-foot">
           {stage === 'questions' ? <button type="button" className="link-btn" onClick={() => setStage('pin')}>{t('pin.cancel')}</button> : null}
+          {/* the other way, small, below the questions: a code sent to her e-mail */}
+          {stage === 'questions' && learner?.email ? <button type="button" className="link-btn pin-small" onClick={forgot}>{t('pin.by_email')}</button> : null}
         </div>
       </div>,
       document.body
@@ -264,7 +272,7 @@ export function AppLock() {
   }
 
   return (
-    <PinPad title={t('pin.enter')} hint={hint} celebrate onSuccess={open} extra={{ label: t('pin.by_email'), onClick: forgot }} onDone={async (pin) => {
+    <PinPad title={t('pin.enter')} hint={hint} celebrate onSuccess={open} extra={{ label: t('pin.forgot_q'), onClick: forgotAsk }} onDone={async (pin) => {
       const r = await checkPin(pin)
       if (r === 'ok') {
         setHint(null)
@@ -285,7 +293,7 @@ export function AppLock() {
         <div className="pin-forgot-card glass" role="alert">
           <b>{t('pin.too_many')}</b>
           <span className="row-sub">{t('pin.too_many_sub')}</span>
-          <button type="button" className="btn btn-block" onClick={forgot}>{t('pin.reset')}</button>
+          <button type="button" className="btn btn-block" onClick={forgotAsk}>{t('pin.reset')}</button>
         </div>
       ) : null}
     </PinPad>

@@ -213,5 +213,6 @@ export const en: Partial<Record<UiKey, string>> = {
   'done.saved': "Saved to the gallery",
   'course.repeat': "Repeat the stage",
   'image.open': "Open the whole picture",
-  'source.label': "Source"
+  'source.label': "Source",
+  'pin.forgot_q': "Forgot it?"
 }

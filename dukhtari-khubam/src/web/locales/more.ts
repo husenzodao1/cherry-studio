@@ -329,7 +329,8 @@ export const uz: Partial<Record<UiKey, string>> = {
   'done.saved': "Galereyaga saqlandi",
   'course.repeat': "Bosqichni takrorlash",
   'image.open': "Rasmni to‘liq ko‘rish",
-  'source.label': "Manba"
+  'source.label': "Manba",
+  'pin.forgot_q': "Unutdingizmi?"
 }
 
 export const tr: Partial<Record<UiKey, string>> = {
@@ -659,7 +660,8 @@ export const tr: Partial<Record<UiKey, string>> = {
   'done.saved': "Galeriye kaydedildi",
   'course.repeat': "Aşamayı tekrarla",
   'image.open': "Resmin tamamını aç",
-  'source.label': "Kaynak"
+  'source.label': "Kaynak",
+  'pin.forgot_q': "Unuttunuz mu?"
 }
 
 export const fa: Partial<Record<UiKey, string>> = {
@@ -988,7 +990,8 @@ export const fa: Partial<Record<UiKey, string>> = {
   'done.saved': "در گالری ذخیره شد",
   'course.repeat': "تکرار مرحله",
   'image.open': "دیدن کامل تصویر",
-  'source.label': "منبع"
+  'source.label': "منبع",
+  'pin.forgot_q': "فراموش کردید؟"
 }
 
 /** Dari (Afghanistan): close to Persian, with its own everyday words. */

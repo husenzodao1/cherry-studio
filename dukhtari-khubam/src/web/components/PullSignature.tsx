@@ -35,6 +35,7 @@ const SETTLE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
 export function PullSignature() {
   const layer = useRef<HTMLDivElement>(null)
+  const flight = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const root = document.documentElement
     const box = layer.current
@@ -43,7 +44,10 @@ export function PullSignature() {
     let app = document.querySelector<HTMLElement>('main.app') ?? document.body
     const word = box.querySelector<HTMLElement>('.ps-word')!
     const ink = box.querySelector<HTMLElement>('.ps-ink')!
-    const hearts = [...box.querySelectorAll<HTMLElement>('.ps-heart')]
+    // the hearts live in their own layer above the page: the space's scalloped mask never cuts them,
+    // so they can come forward over the page while the space closes behind them
+    const sky = flight.current!
+    const hearts = [...sky.querySelectorAll<HTMLElement>('.ps-heart')]
     let y0 = 0
     let x0 = 0
     let d = 0
@@ -75,10 +79,11 @@ export function PullSignature() {
       // straight, gliding in from the left
       word.style.transform = `translateX(${(1 - p) * -40}px)`
     }
+    const resetHearts = () => hearts.forEach((h) => { h.getAnimations().forEach((a) => a.cancel()); h.style.opacity = '0' })
     const reset = () => {
       d = 0
       word.getAnimations().forEach((a) => a.cancel())
-      hearts.forEach((h) => { h.getAnimations().forEach((a) => a.cancel()); h.style.opacity = '0' })
+      if (!playing) resetHearts()
       word.style.opacity = ''
       ink.style.clipPath = 'inset(-20% 100% -20% 0)'
       box.style.height = '0px'
@@ -102,9 +107,12 @@ export function PullSignature() {
       }, ms)
     }
     // the scene after a full pull: the word gathers and is gone, hearts appear in a row one after
-    // another, then all come forward together while the space closes. Whatever happens, it closes.
+    // another, then all of them come forward together — growing towards her over the page — while the
+    // space closes behind them. Whatever happens, it closes.
     const play = async () => {
       playing = true
+      // the hearts' row sits where the word was: the middle of the stage at the space's lower edge
+      sky.style.top = `${Math.round(inset() + d - 44 - 4)}px`
       const at = (i: number) => `translate(calc(-50% + ${HEARTS[i].x}px), -50%)`
       try {
         await word.animate([
@@ -116,18 +124,23 @@ export function PullSignature() {
           { transform: `${at(i)} scale(1.15)`, opacity: 1, offset: 0.6 },
           { transform: `${at(i)} scale(1)`, opacity: 1 }
         ], { duration: 340, delay: i * 70, easing: 'ease-out', fill: 'forwards' }).finished))
-        await new Promise((r) => setTimeout(r, 120))
-        hearts.forEach((h, i) => h.animate([
-          { transform: `${at(i)} scale(1)`, opacity: 1 },
-          { transform: `translate(calc(-50% + ${HEARTS[i].x * 1.5}px), -50%) scale(2.6)`, opacity: 0 }
-        ], { duration: 380, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }))
+        await new Promise((r) => setTimeout(r, 160))
         try { navigator.vibrate?.(10) } catch { /* no motor */ }
+        // forward: each heart grows towards her, drifting a little apart and down over the page,
+        // staying bright most of the way and fading only at the very end
+        const forward = Promise.all(hearts.map((h, i) => h.animate([
+          { transform: `${at(i)} scale(1)`, opacity: 1 },
+          { transform: `translate(calc(-50% + ${HEARTS[i].x * 1.35}px), calc(-50% + 26px)) scale(2.1)`, opacity: 1, offset: 0.55 },
+          { transform: `translate(calc(-50% + ${HEARTS[i].x * 1.9}px), calc(-50% + 70px)) scale(3.4)`, opacity: 0 }
+        ], { duration: 760, delay: Math.abs(i - 2) * 30, easing: 'cubic-bezier(0.3, 0, 0.6, 1)', fill: 'forwards' }).finished))
+        close()
+        await forward
       } catch {
         /* an animation was interrupted: just close */
+        close()
       }
-      close()
+      resetHearts()
     }
-
     const start = (e: TouchEvent) => {
       if (!playing) app = document.querySelector<HTMLElement>('main.app') ?? app
       pulling = !playing && window.scrollY <= 0 && !STILL_PATHS.test(location.pathname) && !root.classList.contains('locked') && !document.querySelector('.pin-screen, .sheet-scrim, .crop')
@@ -174,10 +187,15 @@ export function PullSignature() {
   }, [])
 
   return (
+    <>
     <div ref={layer} className="pull-sign" aria-hidden="true">
       {/* the stage sits on the page's edge, below the status bar: word and hearts are never under it */}
       <div className="ps-stage">
       <div className="ps-word"><span className="ps-ink">Gratorslab</span></div>
+      </div>
+    </div>
+    {/* the hearts fly in front of everything, unclipped */}
+    <div ref={flight} className="ps-hearts" aria-hidden="true">
       {HEARTS.map((h, i) => (
         <svg key={i} className="ps-heart" viewBox="0 0 32 30" style={{ ['--i' as string]: i }}>
           <defs>
@@ -187,7 +205,7 @@ export function PullSignature() {
           <ellipse cx="10" cy="9" rx="3.4" ry="2.2" fill="#fff" opacity="0.55" transform="rotate(-30 10 9)" />
         </svg>
       ))}
-      </div>
     </div>
+    </>
   )
 }
