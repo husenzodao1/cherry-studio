@@ -73,6 +73,16 @@ test('the welcome questions fit every phone: top and button always in view, noth
     await page.setViewportSize({ width: w, height: h })
     await page.goto('/welcome')
     await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+    // Mahliyo's greeting first: it fits too
+    await expect(page.locator('.mahliyo-intro')).toBeVisible()
+    await page.locator('.mi-stage').click()
+    await expect(page.getByRole('button', { name: /Бале/ })).toBeVisible()
+    await page.waitForTimeout(500)
+    expect(await page.evaluate(() => document.querySelector('main.app')!.scrollHeight)).toBeLessThanOrEqual(h + 2)
+    const yes = (await page.getByRole('button', { name: /Бале/ }).boundingBox())!
+    expect(yes.y + yes.height).toBeLessThanOrEqual(h)
+    expect((await page.locator('.mi-say').boundingBox())!.y).toBeGreaterThanOrEqual(0)
+    await page.getByRole('button', { name: /Бале/ }).click()
     await page.locator('.wl-option').first().click()
     await page.locator('.wl-next').click()
     // the seven schools: the longest step

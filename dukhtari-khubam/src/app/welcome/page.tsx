@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { hoursOk, isMeaningful, MAX_HOURS } from '@/lib/sanity'
 import { ART, SCHOOL_ART } from '@/web/art'
 import { Icon } from '@/web/components/Icon'
+import { MahliyoIntro } from '@/web/components/MahliyoIntro'
 import { Orbit } from '@/web/components/Orbit'
 import { playIntro } from '@/web/intro'
 import { useContent } from '@/web/offline/content'
@@ -66,6 +67,8 @@ export default function Welcome() {
   const router = useRouter()
   const { bundle } = useContent()
   const { learner, progress, answerWelcome } = useLearner()
+  // Mahliyo meets her first, then the questions
+  const [met, setMet] = useState(false)
   const [step, setStep] = useState(0)
   const [time, setTime] = useState<string | null>(null)
   const [timeOwn, setTimeOwn] = useState('')
@@ -149,6 +152,8 @@ export default function Welcome() {
       </div>
     )
   }
+
+  if (!met) return <MahliyoIntro name={learner.name} onDone={() => setMet(true)} />
 
   const art = ['/assets/3d/welcome-clock.webp', '/assets/3d/welcome-girl.webp', '/assets/3d/welcome-track.webp'][step]
   const question = t(step === 0 ? 'welcome.time.q' : step === 1 ? 'welcome.schools.q' : 'welcome.source.q')

@@ -1,5 +1,5 @@
 {
-  "note": "Pre-rendered 3D assets. Rendered offline with tools/render-assets (three.js, physically based materials with real transmission for glass, HDRI lighting); glass is shot on black and on white and matte.py recovers true transparency. No AI-generated imagery.",
+  "note": "Pre-rendered 3D assets. Rendered offline with tools/render-assets (three.js, physically based materials with real transmission for glass, HDRI lighting); glass is shot on black and on white and matte.py recovers true transparency. The school pictures and obj-moon are images the project owner made with an image AI (cartoon 3D style, 2026), cut out of their plain background with BiRefNet.",
   "lighting": {
     "hdri": "Studio Small 09",
     "author": "Sergej Majboroda",
@@ -38,46 +38,46 @@
       "source": "tools/render-assets (jobs-glass.json: lens-b)"
     },
     "school-religion.webp": {
-      "model": "Mosque with four minarets, ribbed gold-trimmed dome and arcade",
-      "author": "Dukhtari Khubam project",
+      "model": "Mosque with a lilac dome on a mint base",
+      "author": "Project owner (image AI)",
       "license": "project-owned",
-      "source": "tools/render-assets (jobs-icons2.json: i2-mosque)"
+      "source": "owner-supplied image, cut out with rembg BiRefNet"
     },
     "school-ethics.webp": {
-      "model": "Glossy heart with a gold band, small hearts and pearls",
-      "author": "Dukhtari Khubam project",
+      "model": "Carved book stand (rehal) with an open book",
+      "author": "Project owner (image AI)",
       "license": "project-owned",
-      "source": "tools/render-assets (jobs-icons2.json: i2-heart)"
+      "source": "owner-supplied image, cut out with rembg BiRefNet"
     },
     "school-culture.webp": {
-      "model": "Gold-banded vase with three flowers",
-      "author": "Dukhtari Khubam project",
+      "model": "Plum vase with roses",
+      "author": "Project owner (image AI)",
       "license": "project-owned",
-      "source": "tools/render-assets (jobs-icons2.json: i2-culture)"
+      "source": "owner-supplied image, cut out with rembg BiRefNet"
     },
     "school-family.webp": {
-      "model": "Family and relationships: a soft house with a heart on its front, hearts rising from the chimney",
-      "author": "Dukhtari Khubam project",
+      "model": "Glass heart",
+      "author": "Project owner (image AI)",
       "license": "project-owned",
-      "source": "tools/render-assets (jobs-icons3.json: i3-family)"
+      "source": "owner-supplied image, cut out with rembg BiRefNet"
     },
     "school-health.webp": {
-      "model": "Science and health: a glass flask with violet liquid and a pink heart with a white cross",
-      "author": "Dukhtari Khubam project",
+      "model": "Open book with a ribbon",
+      "author": "Project owner (image AI)",
       "license": "project-owned",
-      "source": "tools/render-assets (jobs-icons3.json: i3-health)"
+      "source": "owner-supplied image, cut out with rembg BiRefNet"
     },
     "school-growth.webp": {
-      "model": "Personal growth: three rising steps with a golden star",
-      "author": "Dukhtari Khubam project",
+      "model": "Sprout in a pot",
+      "author": "Project owner (image AI)",
       "license": "project-owned",
-      "source": "tools/render-assets (jobs-icons3.json: i3-growth)"
+      "source": "owner-supplied image, cut out with rembg BiRefNet"
     },
     "school-modern.webp": {
-      "model": "Light bulb with glowing filament and a glass halo",
-      "author": "Dukhtari Khubam project",
+      "model": "Light bulb with an orbit ring",
+      "author": "Project owner (image AI)",
       "license": "project-owned",
-      "source": "tools/render-assets (jobs-icons2.json: i2-bulb)"
+      "source": "owner-supplied image, cut out with rembg BiRefNet"
     },
     "book-open.webp": {
       "model": "Open book on a rehal stand (procedural; abstract text lines, no real script)",
@@ -210,6 +210,12 @@
       "author": "Dukhtari Khubam project",
       "license": "project-owned",
       "source": "tools/render-assets (kit2.js crown; matte.py)"
+    },
+    "obj-moon.webp": {
+      "model": "Crescent moon",
+      "author": "Project owner (image AI)",
+      "license": "project-owned",
+      "source": "owner-supplied image, cut out with rembg BiRefNet"
     }
   }
 }

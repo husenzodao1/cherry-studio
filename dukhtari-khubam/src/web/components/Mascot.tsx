@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { ALL_POSES, greeting, type Memory, type Moment, nextSaying, POSES, sayingsFor, withName } from '@/lib/mascot'
 import { useLearner } from '../offline/learner'
+import { CLIPS } from '../mahliyo'
 import { usePrefs } from '../prefs'
 import { noDock } from './Dock'
 import { Icon } from './Icon'
@@ -19,19 +20,20 @@ import { Icon } from './Icon'
 
 const poseUrl = (pose: string) => `/assets/mascot/${pose}.webp`
 const loaded = new Map<string, Promise<void>>()
-/** Loads (and decodes) one of her pictures once; later calls get the same promise. */
-function loadPose(pose: string): Promise<void> {
-  let p = loaded.get(pose)
+/** Loads (and decodes) one picture once; later calls get the same promise. */
+function loadImage(src: string): Promise<void> {
+  let p = loaded.get(src)
   if (!p) {
     const img = new Image()
-    img.src = poseUrl(pose)
+    img.src = src
     p = img.decode().catch(() => undefined)
-    loaded.set(pose, p)
+    loaded.set(src, p)
   }
   return p
 }
-/** All her pictures, loaded while the opening screen is up (Splash waits for them, briefly). */
-export const preloadMascot = () => Promise.all([...ALL_POSES.map(loadPose), loadPose('start-left'), loadPose('start-right')]).then(() => undefined)
+const loadPose = (pose: string) => loadImage(poseUrl(pose))
+/** All her pictures and her first look on the sign-in screen, loaded while the opening screen is up (Splash waits for them, briefly). */
+export const preloadMascot = () => Promise.all([...ALL_POSES.map(loadPose), loadImage(CLIPS.signin.still)]).then(() => undefined)
 const within = (p: Promise<void>, ms: number) => Promise.race([p, new Promise<void>((r) => setTimeout(r, ms))])
 
 const listeners = new Set<(m: Moment) => void>()

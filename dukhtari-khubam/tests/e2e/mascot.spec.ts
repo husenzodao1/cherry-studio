@@ -19,7 +19,7 @@ test('she greets on opening the app (once per opening), says "stop" after two wr
   const card = page.locator('.mascot')
   await expect(card).toBeVisible({ timeout: 8000 })
   // her picture for this moment is there and drawn
-  await expect(card.locator('.mascot-girl img')).toHaveAttribute('src', '/assets/mascot/01-ok.webp')
+  await expect(card.locator('.mascot-girl img')).toHaveAttribute('src', /^\/assets\/mascot\/(salom|calm)\.webp$/)
   await expect.poll(() => card.locator('.mascot-girl img').evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth)).toBeGreaterThan(300)
   await page.waitForTimeout(800)
   await page.screenshot({ path: 'test-results/mascot-home.png' })
@@ -40,7 +40,7 @@ test('she greets on opening the app (once per opening), says "stop" after two wr
     if (n === 1) await page.getByRole('button', { name: /Навбатӣ/ }).click()
   }
   await expect(card).toHaveClass(/is-stop/)
-  await expect(card.locator('.mascot-girl img')).toHaveAttribute('src', '/assets/mascot/03-stop.webp')
+  await expect(card.locator('.mascot-girl img')).toHaveAttribute('src', /^\/assets\/mascot\/(stop|oops)\.webp$/)
   await expect(card.locator('.mascot-text')).toHaveText(/./)
   await page.screenshot({ path: 'test-results/mascot-stop.png' })
   await page.getByRole('button', { name: /Навбатӣ/ }).click()

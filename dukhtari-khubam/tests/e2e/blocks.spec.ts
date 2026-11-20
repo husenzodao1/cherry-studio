@@ -4,7 +4,7 @@ const L = '55555555-5555-4555-8555-555555555555'
 const asset = (id: string, url: string, w: number, h: number) => ({ id, kind: 'image', bucket: 'media', path: url, url, mime_type: 'image/webp', width: w, height: h })
 test('pictures sit in 16:9 or 1:1 frames, open whole on a tap; sources show as chips with the site\'s icon', async ({ page, server: _, errors }) => {
   const lesson = { id: L, title: 'Намуна', locked: false, locale: 'tg', context: { school: { title: 'S' }, course: { id: 'c', title: 'C' } },
-    position: { index: 1, total: 1 }, assets: { tall: asset('tall', '/assets/mascot/start-left.webp', 597, 1028), wide: asset('wide', '/assets/3d/school-family.webp', 1600, 900) },
+    position: { index: 1, total: 1 }, assets: { tall: asset('tall', '/assets/3d/glass-tulip.webp', 440, 616), wide: asset('wide', '/assets/3d/school-family.webp', 1600, 900) },
     blocks: [
       { id: 'i1', type: 'image', props: { asset_id: 'tall', source_url: 'https://www.instagram.com/p/x' }, content: { caption: 'Расми дароз → 1:1' } },
       { id: 'i2', type: 'image', props: { asset_id: 'wide' }, content: { caption: 'Расми паҳн → 16:9', source: 'https://t.me/kanal/1' } },

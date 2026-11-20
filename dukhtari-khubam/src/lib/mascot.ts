@@ -8,20 +8,23 @@ export type Moment =
   | 'entry' | 'comeback' | 'praise' | 'stop' | 'perfect' | 'passed' | 'failed' | 'beforeQuiz' | 'lessonDone' | 'review'
   | 'courseStart' | 'stageDone'
 
-/** Her pictures (public/assets/mascot/<pose>.webp), one per emotion. */
+/**
+ * Her pictures (public/assets/mascot/<pose>.webp): Mahliyo, the app's teacher, in seventeen emotions; a
+ * moment with two shows either, at random.
+ */
 export const POSES: Record<Moment, string[]> = {
-  entry: ['01-ok'],
-  comeback: ['07-wave'],
-  praise: ['02-wow'],
-  stop: ['03-stop'],
-  perfect: ['11-clap'],
-  passed: ['04-thumbs'],
-  failed: ['10-heart'],
-  beforeQuiz: ['12-cheer'],
-  lessonDone: ['08-yes', '09-book', '06-point'],
-  review: ['05-think'],
-  courseStart: ['06-point', '01-ok'],
-  stageDone: ['08-yes', '11-clap']
+  entry: ['salom', 'calm'],
+  comeback: ['wave'],
+  praise: ['wow'],
+  stop: ['stop', 'oops'],
+  perfect: ['clap'],
+  passed: ['thumbs', 'star'],
+  failed: ['heart'],
+  beforeQuiz: ['cheer'],
+  lessonDone: ['ok-book', 'reading'],
+  review: ['think', 'search'],
+  courseStart: ['point'],
+  stageDone: ['certificate', 'clap']
 }
 
 type Sayings = Record<Moment, string[]>

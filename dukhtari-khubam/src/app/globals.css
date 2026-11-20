@@ -680,9 +680,9 @@ html.no-dock .app, .app:has(> .start) { padding-bottom: max(16px, env(safe-area-
 /* the scene takes the height the phone has left, so the form sits low, within thumb's reach */
 .start-scene { position: relative; width: 100vw; max-width: 560px; flex: 1 1 auto; min-height: 250px; max-height: 54dvh;
   margin-top: calc(-1 * max(14px, env(safe-area-inset-top))); margin-bottom: -40px; overflow: hidden; pointer-events: none; }
-/* only the sky and the orbit fade at the bottom; the girls carry their own soft fade and shadow */
+/* only the sky fades at the bottom; Mahliyo's clip carries its own soft fade */
 .ss-bg { position: absolute; inset: 0; overflow: hidden; }
-.ss-bg, .ss-orbit { -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); mask-image: linear-gradient(180deg, #000 60%, transparent); }
+.ss-bg { -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); mask-image: linear-gradient(180deg, #000 60%, transparent); }
 .ss-sky { position: absolute; inset: -20%; animation: ss-drift 22s ease-in-out infinite alternate;
   background:
     radial-gradient(42% 46% at 16% 28%, color-mix(in srgb, var(--rose-strong) 85%, transparent), transparent 70%),
@@ -693,14 +693,28 @@ html.no-dock .app, .app:has(> .start) { padding-bottom: max(16px, env(safe-area-
     var(--lavender); }
 :root[data-theme='dark'] .ss-sky { opacity: 0.55; }
 @keyframes ss-drift { from { transform: translate3d(-4%, -2%, 0) rotate(-4deg) scale(1); } to { transform: translate3d(4%, 3%, 0) rotate(5deg) scale(1.08); } }
-.ss-orbit { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* the girls stand at the sides below the language icon, looking at each other; shadow and the soft
-   fade of their lower half are in the pictures themselves (no filter or mask: crisp on every phone) */
-.ss-girl { position: absolute; bottom: 0; top: calc(max(14px, env(safe-area-inset-top)) + 50px); height: calc(100% - max(14px, env(safe-area-inset-top)) - 50px);
-  width: 40%; object-fit: contain; object-position: 50% 100%; animation: ss-girl 1.1s var(--ease) both; }
-.ss-girl.is-left { left: -3%; }
-.ss-girl.is-right { right: -3%; animation-delay: 0.15s; }
-@keyframes ss-girl { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+/* the status bar's height (the objects stay below it) */
+.ss-safe { position: absolute; top: 0; height: max(14px, env(safe-area-inset-top)); width: 1px; visibility: hidden; }
+/* Mahliyo in the middle, standing on the scene's bottom, below the language icon; she comes up from the
+   middle of the scene, a soft light behind her */
+.ss-mahliyo { position: absolute; bottom: 0; left: 50%; translate: -50% 0; z-index: 1; aspect-ratio: 640 / 696;
+  height: min(calc(100% - max(14px, env(safe-area-inset-top)) - 40px), calc(min(72vw, 330px) * 1.0875));
+  transform-origin: 50% 60%; animation: ss-come 1.1s var(--ease) both; }
+.ss-mahliyo::before { content: ''; position: absolute; inset: 6% 4% 18%; z-index: -1; border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, #fff 70%, transparent), transparent); }
+:root[data-theme='dark'] .ss-mahliyo::before { opacity: 0.25; }
+.ss-mahliyo > video, .ss-mahliyo > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+@keyframes ss-come { from { opacity: 0; transform: scale(0.55) translateY(8%); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+/* the objects around her, behind her: small, with a soft shadow, each always floating on its own beat */
+.ss-flight { position: absolute; inset: 0; z-index: 0; }
+.ss-obj { position: absolute; left: 0; top: 0; width: 40px; height: 40px; opacity: 0; will-change: transform; }
+.start-scene.is-moving .ss-obj { transition: transform 0.6s var(--ease); }
+.ss-obj > img { display: block; width: 100%; height: 100%; object-fit: contain;
+  filter: drop-shadow(0 7px 6px rgba(80, 40, 160, 0.3));
+  animation: ss-float calc(3.4s + var(--i) * 0.37s) ease-in-out calc(var(--i) * -0.9s) infinite alternate; }
+@keyframes ss-float { from { transform: translateY(-6px) rotate(-7deg); } to { transform: translateY(6px) rotate(7deg); } }
+html.lite .ss-obj > img { filter: drop-shadow(0 6px 4px rgba(80, 40, 160, 0.24)); }
+@media (prefers-reduced-motion: reduce) { .ss-obj > img, .ss-mahliyo { animation: none; } }
 .start-title { position: relative; z-index: 1; }
 .start-lang { position: absolute; z-index: 3; top: 0; right: 0; width: 44px; height: 44px; display: grid; place-items: center;
   border: 0; padding: 0; background: none; color: var(--plum); cursor: pointer; border-radius: 50%; animation: fade-in 0.6s 0.3s both; }
@@ -1309,6 +1323,41 @@ html.intro .words-label { animation: intro-wipe 0.8s 1.4s ease-out both; }
 
 /* ---------------------------------------------------------------- welcome questions (/welcome) */
 .wl { min-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))); display: flex; flex-direction: column; gap: 14px; padding: 4px 0 6px; }
+/* Mahliyo meets her (MahliyoIntro.tsx): her words in a bubble above and to her right, she stands a little
+   left of the middle and comes in from the left; "Бале" below */
+.mahliyo-intro { --ws: min(112vw, 600px, calc((100dvh - 320px) * 1.3)); position: relative;
+  min-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom)));
+  display: flex; flex-direction: column; padding: 4px 0 6px; }
+.mahliyo-intro.is-out { animation: mi-out 0.42s ease-in both; }
+.mi-say { position: relative; z-index: 1; margin: auto 0 4px auto; width: min(78%, 360px); padding: 14px 16px; border-radius: 24px 24px 24px 8px;
+  background: rgba(255, 255, 255, 0.9); border: 1px solid var(--glass-edge); box-shadow: 0 18px 44px rgba(80, 40, 160, 0.14);
+  font-size: 1.02rem; line-height: 1.42; color: var(--ink); text-wrap: pretty; cursor: default;
+  opacity: 0; transform: translateY(12px) scale(0.94); transform-origin: 16% 100%; transition: opacity 0.35s ease, transform 0.5s var(--ease); }
+:root[data-theme='dark'] .mi-say { background: rgba(44, 33, 82, 0.92); }
+.mi-say.is-open { opacity: 1; transform: none; }
+/* the tail points down to her head */
+.mi-say::after { content: ''; position: absolute; left: 22%; bottom: -9px; width: 18px; height: 18px; background: inherit;
+  border-right: 1px solid var(--glass-edge); border-bottom: 1px solid var(--glass-edge); border-bottom-right-radius: 4px; transform: rotate(45deg); }
+.mi-say p { margin: 0; }
+.mi-say p + p { margin-top: 6px; animation: fade-in 0.3s ease both; }
+.mi-rest { color: transparent; }
+.mi-ask { font-weight: 700; color: var(--plum); }
+.mi-stage { position: relative; width: var(--ws); aspect-ratio: 904 / 696; margin-left: calc(43% - var(--ws) * 0.47); flex: none;
+  animation: mi-in 0.95s var(--ease) both; }
+.mi-stage::before { content: ''; position: absolute; left: 22%; width: 50%; top: 4%; bottom: 20%; border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, #fff 70%, transparent), transparent); }
+:root[data-theme='dark'] .mi-stage::before { opacity: 0.25; }
+.mi-clip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: opacity 0.18s linear; }
+.mi-clip.is-yes { opacity: 0; }
+.mahliyo-intro.is-yes-on .mi-clip.is-yes { opacity: 1; }
+.mahliyo-intro.is-yes-on .mi-clip.is-talk { opacity: 0; }
+/* its place is kept while she speaks, so nothing moves when it comes */
+.mi-yes { max-width: 420px; align-self: center; margin-top: 10px; transition: opacity 0.4s ease, transform 0.45s var(--ease), visibility 0.4s; }
+.mahliyo-intro.is-talk .mi-yes { visibility: hidden; }
+.mahliyo-intro:is(.is-talk, .is-yes, .is-out) .mi-yes { opacity: 0; transform: translateY(12px); }
+@keyframes mi-in { from { opacity: 0; transform: translateX(-55%); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
+@keyframes mi-out { to { opacity: 0; transform: scale(0.98); } }
+@media (prefers-reduced-motion: reduce) { .mi-stage { animation: none; } }
 .wl-top { display: flex; align-items: center; gap: 12px; }
 .wl-steps { flex: 1; display: flex; gap: 6px; }
 .wl-steps span { flex: 1; height: 5px; border-radius: 3px; background: var(--track); transition: background 0.4s var(--ease); }

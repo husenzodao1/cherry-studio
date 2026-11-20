@@ -1,16 +1,16 @@
-/** Pre-rendered 3D art (tools/render-assets, see public/assets/3d/PROVENANCE.json). CMS icons override these. */
+/** 3D art (see public/assets/3d/PROVENANCE.json): rendered with tools/render-assets, the schools' pictures made by the owner. CMS icons override these. */
 export interface Art { src: string; w: number; h: number }
 
 const a = (name: string, w: number, h: number): Art => ({ src: `/assets/3d/${name}.webp`, w, h })
 
 export const SCHOOL_ART: Record<string, Art> = {
-  'marifati-dini': a('school-religion', 380, 369),
-  'odob-va-akhloq': a('school-ethics', 360, 293),
-  'farhangi-tojik': a('school-culture', 360, 343),
-  'oila-va-munosibatho': a('school-family', 360, 360),
-  'ilm-va-salomati': a('school-health', 360, 360),
-  'rushdi-shakhsiyat': a('school-growth', 360, 360),
-  'zindagii-muosir': a('school-modern', 360, 274)
+  'marifati-dini': a('school-religion', 413, 480),
+  'odob-va-akhloq': a('school-ethics', 458, 387),
+  'farhangi-tojik': a('school-culture', 342, 412),
+  'oila-va-munosibatho': a('school-family', 480, 472),
+  'ilm-va-salomati': a('school-health', 480, 369),
+  'rushdi-shakhsiyat': a('school-growth', 414, 480),
+  'zindagii-muosir': a('school-modern', 378, 326)
 }
 
 export const ART = {
