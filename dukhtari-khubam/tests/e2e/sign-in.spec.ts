@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures'
+import { expect, signedIn, test } from './fixtures'
 
 test.describe('sign-in with e-mail', () => {
   test('a new address: wrong code, right code, name and birthday, then the welcome questions', async ({ page, server, errors }) => {
@@ -71,5 +71,25 @@ test('a new phone starts in Russian; the language icon opens a centred list and 
   await expect(box).toBeHidden()
   await expect(page.locator('form .btn-lg')).toHaveText(/Давом/)
   await expect(page.locator('html')).toHaveAttribute('lang', 'tg')
+  expect(errors).toEqual([])
+})
+
+test('PIN recovery by e-mail: the six code boxes keep their size (they used to shrink to thin lines)', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  // a PIN is set: the app opens behind the PIN pad
+  await page.addInitScript(() => localStorage.setItem('dk.pin', JSON.stringify({ salt: '00', hash: 'x', fails: 0, until: 0 })))
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Тасдиқ бо почта' }).click()
+  const boxes = page.locator('.recovery .otp-boxes span')
+  await expect(boxes).toHaveCount(6)
+  for (let i = 0; i < 6; i++) expect((await boxes.nth(i).boundingBox())!.width).toBeGreaterThan(36)
+  // with a digit typed, all six stay the same size
+  await page.locator('.recovery .otp-input').fill('5')
+  // after the little pop of the filled box
+  await page.waitForTimeout(500)
+  const widths = await boxes.evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().width)))
+  expect(new Set(widths).size).toBe(1)
+  expect(widths[0]).toBeGreaterThan(36)
+  await page.screenshot({ path: 'test-results/pin-email-code.png' })
   expect(errors).toEqual([])
 })
