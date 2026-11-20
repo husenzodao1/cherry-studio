@@ -189,7 +189,16 @@ const tg = {
   'rate.comment': "Фикри худро нависед (ихтиёрӣ)",
   'rate.send': "Фиристодан",
   'rate.thanks': "Ташаккур барои баҳодиҳӣ!",
-  'rate.thanks_sub': "Фикри шумо барномаро беҳтар мекунад 💜"
+  'rate.thanks_sub': "Фикри шумо барномаро беҳтар мекунад 💜",
+  'verse.count': "Асарҳо: {n}",
+  'verse.poem': "Шеър",
+  'verse.story': "Ҳикоя",
+  'verse.poems': "Шеърҳо",
+  'verse.stories': "Ҳикояҳо",
+  'verse.more': "Пурра хондан",
+  'verse.less': "Кӯтоҳтар",
+  'verse.hint': "Шеърҳо ва ҳикояҳои зебо барои дил",
+  'verse.empty': "Ҳоло асаре нест — ба наздикӣ илова мешаванд"
 }
 
 export type UiKey = keyof typeof tg
@@ -358,7 +367,16 @@ const ru: Partial<Record<UiKey, string>> = {
   'rate.comment': "Напишите ваше мнение (необязательно)",
   'rate.send': "Отправить",
   'rate.thanks': "Спасибо за оценку!",
-  'rate.thanks_sub': "Ваше мнение делает приложение лучше 💜"
+  'rate.thanks_sub': "Ваше мнение делает приложение лучше 💜",
+  'verse.count': "Произведений: {n}",
+  'verse.poem': "Стихотворение",
+  'verse.story': "Рассказ",
+  'verse.poems': "Стихи",
+  'verse.stories': "Рассказы",
+  'verse.more': "Читать полностью",
+  'verse.less': "Свернуть",
+  'verse.hint': "Красивые стихи и рассказы для души",
+  'verse.empty': "Пока нет произведений — скоро появятся"
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, en, uz, tr, fa, prs }

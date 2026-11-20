@@ -6,7 +6,8 @@ export const BUNDLE = {
   schools: slugs.map((slug, i) => ({ id: `s${i}`, slug, title: `Мактаб ${i + 1}`, course_count: 1 })),
   inspiration: null, achievements: [],
   inspirations: [{ id: 'i', body: 'Дониш нур аст.', author_name: 'Ҳикмат', source_title: 'Мардумӣ' }],
-  poems: [{ id: 'p', body: 'Бӯи ҷӯи Мӯлиён ояд ҳаме,\nЁди ёри меҳрубон ояд ҳаме.', author_name: 'Рӯдакӣ', source_title: 'Бӯи ҷӯи Мӯлиён' }]
+  poems: [{ id: 'p', body: 'Бӯи ҷӯи Мӯлиён ояд ҳаме,\nЁди ёри меҳрубон ояд ҳаме.', author_name: 'Рӯдакӣ', source_title: 'Бӯи ҷӯи Мӯлиён' }],
+  stories: [{ id: 's', body: 'Як рӯз духтарак\nба боғ рафт.\n\nДар он ҷо гул шукуфта буд.', author_name: 'Нависанда', source_title: 'Боғ' }]
 }
 export const PROGRESS = { v: 1, born: 2008, birthday: '2008-03-01', about: { at: '2026-11-18T00:00:00Z' }, lessons: {}, quizzes: {}, bookmarks: {}, achievements: {}, days: [], review: {} }
 const USER = { id: '00000000-0000-0000-0000-000000000001', aud: 'authenticated', role: 'authenticated', email: 'e2e@gmail.com', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' }

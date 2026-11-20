@@ -929,6 +929,57 @@ export function flower5() {
   return g
 }
 
+/** "Гулбоғи эҷод": an open book with lines of verse, a feather quill with a gold nib and a small flower. */
+export function verse2() {
+  const { petalGeo, placePetal } = D()
+  const g = new THREE.Group()
+  const cover = glossy('#6b3fc8', { roughness: 0.18, irid: 0.25 })
+  const paper = glossy('#fff8f2', { roughness: 0.45 })
+  const ink = glossy('#b7a3e6', { roughness: 0.5 })
+  // the cover under both halves, and the two page blocks opening like a shallow V
+  g.add(mesh(new RoundedBoxGeometry(2.3, 0.08, 1.5, 4, 0.035), cover, [0, 0.04, 0]))
+  for (const side of [-1, 1]) {
+    const half = new THREE.Group()
+    half.add(mesh(new RoundedBoxGeometry(1.06, 0.14, 1.36, 4, 0.05), paper, [side * 0.55, 0, 0]))
+    for (let r = 0; r < 6; r++) {
+      const w = r % 3 === 2 ? 0.5 : 0.76
+      half.add(mesh(new RoundedBoxGeometry(w, 0.012, 0.045, 2, 0.006), ink, [side * 0.55 - side * (0.76 - w) / 2, 0.075, -0.45 + r * 0.17]))
+    }
+    half.position.y = 0.15
+    half.rotation.z = side * -0.1
+    g.add(half)
+  }
+  g.add(mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.38, 16), gold(), [0, 0.12, 0], [Math.PI / 2, 0, 0]))
+  // the feather: a curved vane in pink to lilac, its shaft ending in a gold nib touching the right page
+  const vane = new THREE.Shape()
+  vane.moveTo(0, 0)
+  vane.bezierCurveTo(0.28, 0.25, 0.3, 0.95, 0.06, 1.45)
+  vane.bezierCurveTo(-0.05, 1.2, -0.2, 0.6, 0, 0)
+  const vg = new THREE.ExtrudeGeometry(vane, { depth: 0.02, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 6, curveSegments: 40 })
+  const pos = vg.attributes.position, col = new Float32Array(pos.count * 3)
+  const ca = new THREE.Color('#ffd1e6'), cb = new THREE.Color('#a77bf0'), cc = new THREE.Color()
+  for (let i = 0; i < pos.count; i++) { cc.copy(ca).lerp(cb, THREE.MathUtils.clamp(pos.getY(i) / 1.45, 0, 1)); col.set([cc.r, cc.g, cc.b], i * 3) }
+  vg.setAttribute('color', new THREE.BufferAttribute(col, 3))
+  const quill = new THREE.Group()
+  quill.add(mesh(vg, glossy('#ffffff', { vertexColors: true, roughness: 0.3, sheen: 0.6, sheenColor: '#ffe6f4', irid: 0.2 })))
+  const shaft = new THREE.QuadraticBezierCurve3(new THREE.Vector3(0, -0.35, 0.02), new THREE.Vector3(0.04, 0.6, 0.02), new THREE.Vector3(0.06, 1.42, 0.02))
+  quill.add(mesh(new THREE.TubeGeometry(shaft, 24, 0.018, 8), glossy('#fff3e6')))
+  quill.add(mesh(new THREE.ConeGeometry(0.035, 0.16, 16), gold(), [0, -0.42, 0.02], [Math.PI, 0, 0]))
+  quill.scale.setScalar(0.78)
+  quill.position.set(0.6, 0.58, 0.05)
+  quill.rotation.set(0.1, 0.3, -0.55)
+  g.add(quill)
+  // a small flower resting on the left page
+  const petalsMat = glossy('#ffffff', { vertexColors: true, roughness: 0.28, side: THREE.DoubleSide, sheen: 0.3, sheenColor: '#ffd9fb', irid: 0.15 })
+  const f = new THREE.Group()
+  for (let i = 0; i < 8; i++) { const m = new THREE.Mesh(petalGeo({ length: 0.5, width: 0.22, cup: 0.35, curl: -0.12, colors: ['#c2185b', '#f06292', '#ffd0e4'], ruffle: 0.015 }), petalsMat); placePetal(m, (i / 8) * Math.PI * 2, 0.3); m.updateMatrix = () => {}; f.add(m) }
+  for (let i = 0; i < 6; i++) { const m = new THREE.Mesh(petalGeo({ length: 0.3, width: 0.18, cup: 0.4, curl: 0.1, colors: ['#c2185b', '#f06292', '#ffd0e4'], ruffle: 0.012 }), petalsMat); placePetal(m, (i / 6) * Math.PI * 2 + 0.3, 0.75); m.updateMatrix = () => {}; f.add(m) }
+  f.add(mesh(new THREE.SphereGeometry(0.09, 32, 20), glossy('#f2b630', { roughness: 0.4, sheen: 1, sheenColor: '#fff2b8' }), [0, 0.05, 0], [0, 0, 0], [1, 0.55, 1]))
+  f.position.set(-0.62, 0.32, 0.38); f.rotation.set(0.25, 0, 0.12); f.scale.setScalar(0.6)
+  g.add(f)
+  return g
+}
+
 export function buildKind2(job) {
   const many = (fn, list) => { const g = new THREE.Group(); for (const f of list) { const b = fn(f); b.position.fromArray(f.pos ?? [0, 0, 0]); b.rotation.fromArray(f.rot ?? [0, 0, 0]); b.scale.setScalar(f.scale ?? 1); g.add(b) } return g }
   switch (job.kind) {
@@ -958,6 +1009,7 @@ export function buildKind2(job) {
     case 'moon4': return moon4()
     case 'moon5': return moon5(job)
     case 'flower5': return flower5()
+    case 'verse2': return verse2()
     default: return null
   }
 }

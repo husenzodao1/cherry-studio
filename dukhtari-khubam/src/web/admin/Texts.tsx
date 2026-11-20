@@ -14,21 +14,30 @@ export function Texts() {
     <div className="stack">
       <div className="segmented" role="tablist">
         <button type="button" role="tab" aria-selected={tab === 'inspiration'} onClick={() => setTab('inspiration')}>Илҳоми рӯз</button>
-        <button type="button" role="tab" aria-selected={tab === 'poem'} onClick={() => setTab('poem')}>Шеърҳо</button>
+        <button type="button" role="tab" aria-selected={tab === 'poem'} onClick={() => setTab('poem')}>Гулбоғи эҷод</button>
         <button type="button" role="tab" aria-selected={tab === 'ui'} onClick={() => setTab('ui')}>Матнҳои интерфейс</button>
         <button type="button" role="tab" aria-selected={tab === 'help'} onClick={() => setTab('help')}>Кӯмак «!»</button>
         <button type="button" role="tab" aria-selected={tab === 'welcome'} onClick={() => setTab('welcome')}>Саволнома</button>
       </div>
-      {tab === 'inspiration' ? <Inspirations key="i" /> : tab === 'poem' ? <Inspirations key="p" poem /> : tab === 'ui' ? <UiStrings /> : tab === 'help' ? <HelpTexts /> : <Welcome />}
+      {tab === 'inspiration' ? <Inspirations key="i" /> : tab === 'poem' ? <Inspirations key="p" verse /> : tab === 'ui' ? <UiStrings /> : tab === 'help' ? <HelpTexts /> : <Welcome />}
     </div>
   )
 }
 
-/** Inspirations for the home screen, or (poem) poems for the "Гулбоғи эҷод" tile of the schools screen. */
-function Inspirations({ poem = false }: { poem?: boolean }) {
-  const all = useApi<{ items: Entity[] }>('/admin/inspirations?limit=100')
-  const placement = poem ? 'poem' : 'home'
-  const list = { ...all, data: all.data ? { items: all.data.items.filter((e) => ((e as { placement?: string }).placement === 'poem') === poem) } : all.data }
+const VERSE = ['poem', 'story']
+
+/**
+ * Inspirations for the home screen, or (verse) the works of "Гулбоғи эҷод": a poem keeps its lines, one
+ * per row; a story's text flows on line after line.
+ */
+function Inspirations({ verse = false }: { verse?: boolean }) {
+  const all = useApi<{ items: Entity[] }>('/admin/inspirations?limit=200')
+  const [kind, setKind] = useState<'poem' | 'story'>('poem')
+  const placement = verse ? kind : 'home'
+  const poem = verse && kind === 'poem'
+  const story = verse && kind === 'story'
+  const placeOf = (e: Entity) => (e as { placement?: string }).placement ?? 'home'
+  const list = { ...all, data: all.data ? { items: all.data.items.filter((e) => VERSE.includes(placeOf(e)) === verse) } : all.data }
   const [body, setBody] = useState('')
   const [author, setAuthor] = useState('')
   const [source, setSource] = useState('')
@@ -48,7 +57,13 @@ function Inspirations({ poem = false }: { poem?: boolean }) {
       {list.error ? <ErrorState error={list.error} onRetry={list.reload} /> : null}
       {(list.data?.items ?? []).map((e) => (
         <div key={e.id} className="card card-pad stack" style={{ gap: 8 }}>
-          <div className="row"><span className="serif" style={{ flex: 1, fontStyle: 'italic' }}>“{titleOf(e, 'body')}”</span><StatusBadge status={e.status} /></div>
+          <div className="row">
+            {verse ? <span className="chip" style={{ minHeight: 24 }}>{placeOf(e) === 'story' ? 'Ҳикоя' : 'Шеър'}</span> : null}
+            <span className="serif" style={{ flex: 1, fontStyle: 'italic', whiteSpace: 'pre-line', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {verse && titleOf(e, 'source_title') ? <b>{titleOf(e, 'source_title')}{'\n'}</b> : null}“{titleOf(e, 'body')}”
+            </span>
+            <StatusBadge status={e.status} />
+          </div>
           <div className="row" style={{ flexWrap: 'wrap', gap: 6 }}>
             {(NEXT_STATUS[e.status ?? 'draft'] ?? []).map((n) => (
               <button key={n.to} type="button" className="chip" onClick={() => go(e.id, n.to)} disabled={act.busy}>{n.label}</button>
@@ -57,11 +72,19 @@ function Inspirations({ poem = false }: { poem?: boolean }) {
         </div>
       ))}
       <div className="card card-pad stack" style={{ gap: 10 }}>
-        <div className="eyebrow">{poem ? 'Шеъри нав' : 'Илҳоми нав'}</div>
-        <textarea className="input" rows={poem ? 6 : 3} placeholder={poem ? 'Мисраъҳо — ҳар мисраъ дар сатри алоҳида' : 'Матн (ояти, ҳадис, ҳикмат, иқтибос…)'} value={body} onChange={(e) => setBody(e.target.value)} />
+        <div className="eyebrow">{verse ? 'Асари нав' : 'Илҳоми нав'}</div>
+        {verse ? (
+          <div className="segmented" role="radiogroup" aria-label="Навъ">
+            <button type="button" role="radio" aria-checked={poem} aria-pressed={poem} onClick={() => setKind('poem')}>Шеър</button>
+            <button type="button" role="radio" aria-checked={story} aria-pressed={story} onClick={() => setKind('story')}>Ҳикоя</button>
+          </div>
+        ) : null}
+        <textarea className="input" rows={verse ? 8 : 3} maxLength={verse ? 20000 : 1000}
+          placeholder={poem ? 'Мисраъҳо — ҳар мисраъ дар сатри алоҳида' : story ? 'Матни ҳикоя — сатрҳо пай дар пай идома меёбанд (сархати нав: як сатри холӣ)' : 'Матн (ояти, ҳадис, ҳикмат, иқтибос…)'}
+          value={body} onChange={(e) => setBody(e.target.value)} />
         <div className="row" style={{ gap: 8 }}>
-          <input className="input" placeholder={poem ? 'Шоир' : 'Муаллиф'} value={author} onChange={(e) => setAuthor(e.target.value)} />
-          <input className="input" placeholder={poem ? 'Номи шеър (ҳатмӣ агар шоир бошад)' : 'Манбаъ (ҳатмӣ агар муаллиф бошад)'} value={source} onChange={(e) => setSource(e.target.value)} />
+          <input className="input" placeholder={poem ? 'Шоир' : story ? 'Нависанда' : 'Муаллиф'} value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <input className="input" placeholder={poem ? 'Номи шеър (ҳатмӣ агар шоир бошад)' : story ? 'Номи ҳикоя (ҳатмӣ агар нависанда бошад)' : 'Манбаъ (ҳатмӣ агар муаллиф бошад)'} value={source} onChange={(e) => setSource(e.target.value)} />
         </div>
         <button type="button" className="btn" onClick={create} disabled={act.busy || !body.trim() || (!!author.trim() && !source.trim())}>Илова</button>
         <Note message={act.message} />

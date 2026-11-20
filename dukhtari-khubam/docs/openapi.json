@@ -386,7 +386,8 @@
                 "home",
                 "lesson",
                 "notification",
-                "poem"
+                "poem",
+                "story"
               ]
             }
           }
@@ -7034,7 +7035,8 @@
                       "home",
                       "lesson",
                       "notification",
-                      "poem"
+                      "poem",
+                      "story"
                     ]
                   },
                   "translations": {
@@ -7052,7 +7054,7 @@
                       "properties": {
                         "body": {
                           "type": "string",
-                          "maxLength": 1000
+                          "maxLength": 20000
                         },
                         "author_name": {
                           "anyOf": [
@@ -7207,7 +7209,8 @@
                       "home",
                       "lesson",
                       "notification",
-                      "poem"
+                      "poem",
+                      "story"
                     ]
                   }
                 },
@@ -7311,7 +7314,7 @@
                 "properties": {
                   "body": {
                     "type": "string",
-                    "maxLength": 1000
+                    "maxLength": 20000
                   },
                   "author_name": {
                     "anyOf": [

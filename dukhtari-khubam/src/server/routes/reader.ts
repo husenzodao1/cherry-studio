@@ -58,7 +58,7 @@ export const readerRoutes: AnyRoute[] = [
   }),
   route({
     method: 'GET', path: '/inspiration', access: 'public', tag: 'Catalog', summary: 'Current Daily Inspiration (null when none is published)',
-    query: z.object({ locale: Locale.default('tg'), placement: z.enum(['home', 'lesson', 'notification', 'poem']).default('home') }),
+    query: z.object({ locale: Locale.default('tg'), placement: z.enum(['home', 'lesson', 'notification', 'poem', 'story']).default('home') }),
     cache: 60,
     handler: async ({ sb, query }) =>
       withMediaUrls(await call(sb(), 'api_inspiration', { p_locale: query.locale, p_placement: query.placement }))

@@ -58,5 +58,7 @@ export const en: Partial<Record<UiKey, string>> = {
   'heal.title': 'Just a moment', 'heal.body': 'Something went wrong on this page. The app tried to repair itself — try again or go home.',
   'rate.ask': 'How much do you like the app?', 'rate.1': 'Bad', 'rate.2': 'Meh', 'rate.3': 'Okay', 'rate.4': 'Good', 'rate.5': 'Great',
   'rate.comment': 'Your thoughts (optional)', 'rate.send': 'Send', 'rate.thanks': 'Thank you for rating!', 'rate.thanks_sub': 'Your opinion makes the app better 💜',
+  'verse.count': 'Works: {n}', 'verse.poem': 'Poem', 'verse.story': 'Story', 'verse.poems': 'Poems', 'verse.stories': 'Stories',
+  'verse.more': 'Read in full', 'verse.less': 'Show less', 'verse.hint': 'Beautiful poems and stories for the heart', 'verse.empty': 'No works yet — coming soon',
   'poem.title': 'Garden of verse', 'splash.loading': 'Loading'
 }

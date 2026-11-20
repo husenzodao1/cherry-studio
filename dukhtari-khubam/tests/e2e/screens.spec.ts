@@ -1,7 +1,7 @@
 import { expect, signedIn, test } from './fixtures'
 
 test.describe('main screens of a signed-in learner', () => {
-  for (const [path, sel] of [['/', '.motto'], ['/schools', '.poem-tile'], ['/profile', '.profile-head'], ['/settings', '.theme-box'], ['/garden', 'main'], ['/review', 'main'], ['/search', 'main'], ['/saved', 'main']] as const) {
+  for (const [path, sel] of [['/', '.motto'], ['/schools', '.tile-verse'], ['/profile', '.profile-head'], ['/settings', '.theme-box'], ['/garden', 'main'], ['/review', 'main'], ['/search', 'main'], ['/saved', 'main']] as const) {
     test(`${path} draws without errors`, async ({ page, server: _, errors }) => {
       await signedIn(page)
       await page.goto(path)
@@ -61,6 +61,23 @@ test.describe('main screens of a signed-in learner', () => {
     await expect(page.locator('.studio-arc')).toHaveCount(0)
     await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
     await page.screenshot({ path: 'test-results/profile.png' })
+    expect(errors).toEqual([])
+  })
+
+  test('"Гулбоғи эҷод": the tile opens poems (a line per row) and stories (lines flow on)', async ({ page, server: _, errors }) => {
+    await signedIn(page)
+    await page.goto('/schools')
+    const tile = page.locator('.tile-verse')
+    await expect(tile).toContainText('2')
+    await expect(page.locator('.verse-line')).toHaveCount(0) // nothing of the works on the tile itself
+    await tile.click()
+    await expect(page).toHaveURL(/\/verse\/?$/)
+    await expect(page.locator('.verse-card')).toHaveCount(2)
+    await expect(page.locator('.verse-line')).toHaveCount(2)
+    await expect(page.locator('.verse-card.is-story .verse-body p')).toHaveText(['Як рӯз духтарак ба боғ рафт.', 'Дар он ҷо гул шукуфта буд.'])
+    await page.locator('.segmented [role=tab]').nth(2).click()
+    await expect(page.locator('.verse-card')).toHaveCount(1)
+    await page.screenshot({ path: 'test-results/verse.png' })
     expect(errors).toEqual([])
   })
 })

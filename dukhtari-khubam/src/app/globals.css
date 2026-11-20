@@ -471,25 +471,28 @@ input[type='range'] { width: 100%; accent-color: var(--primary); }
 .lg.tile-clear::after { content: ''; position: absolute; left: 10%; top: 5px; width: 55%; height: 22%; border-radius: 50%; pointer-events: none; z-index: 1;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)); filter: blur(1px); }
 :root[data-theme='dark'] .lg.tile-clear { background: linear-gradient(155deg, rgba(70, 54, 120, 0.42), rgba(34, 26, 64, 0.22) 60%, rgba(60, 46, 104, 0.35)); }
-/* "Гулбоғи эҷод": a poem on a soft gradient of the theme */
-.poem-tile { position: relative; margin: 0; display: flex; flex-direction: column; gap: 3px; padding: 12px 12px 10px; border-radius: 24px; overflow: hidden; min-height: 100%;
-  aspect-ratio: auto; color: var(--plum);
-  background: radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--rose-strong) 55%, transparent), transparent 70%),
-    radial-gradient(90% 70% at 0% 100%, color-mix(in srgb, var(--lilac) 85%, transparent), transparent 75%),
-    linear-gradient(160deg, color-mix(in srgb, var(--primary-soft) 40%, white), color-mix(in srgb, var(--rose-strong) 30%, white));
-  border: 1px solid rgba(255, 255, 255, 0.7); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 18px 32px -18px rgba(86, 56, 160, 0.45); }
-:root[data-theme='dark'] .poem-tile { color: #f3e9ff; border-color: rgba(255, 255, 255, 0.16);
-  background: radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--primary) 45%, transparent), transparent 70%), linear-gradient(160deg, #3a2b66, #2a1f4c); }
-.poem-tile::before { content: '❦'; position: absolute; right: 10px; top: 6px; font-size: 1.3rem; opacity: 0.25; font-family: var(--font-verse), serif; }
-.poem-label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; }
-.poem-title { font-family: var(--font-verse), var(--font-serif), serif; font-style: italic; font-weight: 600; font-size: 0.98rem; line-height: 1.1;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-inline-end: 18px; }
-.poem-box { flex: 1; min-height: 0; overflow: hidden; display: flex; align-items: center; }
-.poem-verse { font-family: var(--font-verse), var(--font-serif), serif; font-style: italic; font-weight: 500; line-height: 1.22; display: flex; flex-direction: column; width: max-content; max-width: none; }
-.poem-line { white-space: nowrap; animation: rise 0.6s var(--ease) both; animation-delay: calc(0.3s + var(--i) * 0.12s); }
-.poem-author { align-self: flex-end; font-family: var(--font-verse), var(--font-serif), serif; font-style: italic; font-size: 0.8rem; opacity: 0.85;
-  max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tile-grid-2 > .poem-tile.tile-long { grid-column: 1 / -1; aspect-ratio: auto; min-height: 150px; }
+/* "Гулбоғи эҷод": its screen of poems and stories (app/verse) */
+.verse-head { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px; text-align: center; }
+.verse-head img { width: min(56vw, 220px); height: auto; filter: drop-shadow(0 14px 18px rgba(105, 57, 200, 0.22)); }
+.verse-head p { margin: 0; font-size: 0.9em; }
+.verse-card { position: relative; padding: 18px 18px 14px; border-radius: 26px; color: var(--ink); overflow: hidden; animation: rise 0.45s var(--ease) both; animation-delay: calc(min(var(--i), 6) * 0.05s);
+  background: radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--rose-strong) 45%, transparent), transparent 70%),
+    radial-gradient(90% 70% at 0% 100%, color-mix(in srgb, var(--lilac) 75%, transparent), transparent 75%),
+    linear-gradient(160deg, color-mix(in srgb, var(--primary-soft) 30%, white), color-mix(in srgb, var(--rose-strong) 22%, white));
+  border: 1px solid rgba(255, 255, 255, 0.75); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 18px 32px -20px rgba(86, 56, 160, 0.45); }
+:root[data-theme='dark'] .verse-card { color: #f3e9ff; border-color: rgba(255, 255, 255, 0.14);
+  background: radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--primary) 40%, transparent), transparent 70%), linear-gradient(160deg, #3a2b66, #2a1f4c); }
+.verse-card::before { content: '❦'; position: absolute; right: 14px; top: 8px; font-size: 1.5rem; opacity: 0.22; font-family: var(--font-verse), serif; }
+.verse-kind { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; }
+.verse-title { margin: 2px 0 10px; font-family: var(--font-verse), var(--font-serif), serif; font-style: italic; font-weight: 600; font-size: 1.35rem; line-height: 1.15; color: var(--plum); }
+:root[data-theme='dark'] .verse-title { color: #f3e9ff; }
+.verse-body { font-family: var(--font-verse), var(--font-serif), serif; font-style: italic; font-weight: 500; font-size: 1.12rem; line-height: 1.45; }
+.verse-line { display: block; }
+.verse-card.is-story .verse-body { font-family: var(--font-serif), serif; font-style: normal; font-size: 1.04rem; line-height: 1.6; text-align: justify; hyphens: auto; }
+.verse-card.is-story .verse-body p { margin: 0 0 0.7em; text-indent: 1.4em; }
+.verse-card:not(.is-open) .verse-body { max-height: 11.5em; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent); mask-image: linear-gradient(180deg, #000 70%, transparent); }
+.verse-more { display: block; margin: 6px 0 0; }
+.verse-author { margin: 8px 0 0; text-align: end; font-family: var(--font-verse), var(--font-serif), serif; font-style: italic; font-size: 0.98rem; opacity: 0.85; }
 .tile-long .tile { flex-direction: row; aspect-ratio: auto; min-height: 80px; gap: 14px; padding: 8px 20px; text-align: start; justify-content: center; }
 .tile-long .tile-art { width: 62px; max-width: 62px; }
 .tile-long .tile-title { font-size: 0.92rem; }

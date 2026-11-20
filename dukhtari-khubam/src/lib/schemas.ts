@@ -39,7 +39,7 @@ export const TranslationSchemas = {
   }),
   inspirations: z
     .strictObject({
-      body: title(1000),
+      body: title(20000), // poems and stories of the "Garden of verse" are long
       author_name: optText(200),
       source_title: optText(300),
       source_url: SafeHref.nullable().optional(),
@@ -104,7 +104,7 @@ export const EntityFields = {
   }),
   inspirations: z.strictObject({
     image_asset_id: AssetRef,
-    placement: z.enum(['home', 'lesson', 'notification', 'poem']).optional()
+    placement: z.enum(['home', 'lesson', 'notification', 'poem', 'story']).optional()
   }),
   banners: z.strictObject({
     placement: z.enum(['home_top', 'home_card', 'school']),

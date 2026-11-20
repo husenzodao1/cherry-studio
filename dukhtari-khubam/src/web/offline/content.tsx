@@ -77,6 +77,8 @@ export interface Bundle {
   inspirations?: { id: string; body: string; author_name?: string | null; source_title?: string | null }[]
   /** poems for the "Garden of verse" tile: lines, the poet (author_name) and the title (source_title) */
   poems?: { id: string; body: string; author_name?: string | null; source_title?: string | null }[]
+  /** stories for the same garden: the text flows on, the writer (author_name), the title (source_title) */
+  stories?: { id: string; body: string; author_name?: string | null; source_title?: string | null }[]
   achievements: Achievement[]
 }
 
