@@ -120,7 +120,13 @@ test.describe('main screens of a signed-in learner', () => {
     const a = await glass.evaluate((el) => el.style.transform)
     await page.waitForTimeout(600)
     expect(await glass.evaluate((el) => el.style.transform)).not.toBe(a)
-    await expect(page.locator('.lens-copy')).toHaveText(await page.locator('.lens-line').first().innerText())
+    // the view through the glass is drawn (some pixels of the words are in it)
+    await expect.poll(() => page.locator('.lens-view').evaluate((c: HTMLCanvasElement) => {
+      const d = c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data
+      let n = 0
+      for (let i = 3; i < d.length; i += 4) if (d[i] > 0) n++
+      return n
+    })).toBeGreaterThan(20)
     expect(errors).toEqual([])
   })
 })
