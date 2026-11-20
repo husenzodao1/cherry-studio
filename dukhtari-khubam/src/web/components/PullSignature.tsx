@@ -11,21 +11,24 @@ import { useEffect, useRef } from 'react'
  * forward at once, and the space closes. A short pull just springs back.
  * Transforms and opacity only (cheap enough for light mode too).
  */
-const MAX = 120 // px of open space at most
+const MAX = 88 // px of open space at most: just the room the word and the hearts need
 // Real touch physics: the first stretch of finger travel does nothing (a casual swipe never opens it),
 // then the space opens like rubber — easily at first, harder and harder towards MAX — and the scene
 // plays only after a long, deliberate pull that is held for a moment.
 const DEAD = 46 // px of finger travel that is ignored
-const STRETCH = 210 // px of finger travel for the space to reach ~63 % of MAX
+const STRETCH = 170 // px of finger travel for the space to reach ~63 % of MAX
 const FULL = 0.9 // share of MAX that counts as a full pull
 const HOLD_MS = 160 // a full pull must last this long (a fast flick does not count)
+// five hearts side by side in one row, where the word was
 const HEARTS = [
-  { c1: '#ffb3c7', c2: '#f2577f', x: -86, y: -10, r: -22 },
-  { c1: '#ffd2b3', c2: '#f3895c', x: -44, y: -34, r: -10 },
-  { c1: '#e6d4ff', c2: '#9a6bf0', x: 0, y: -44, r: 0 },
-  { c1: '#ffe7a8', c2: '#f0a92a', x: 44, y: -34, r: 10 },
-  { c1: '#ffc9e4', c2: '#d955a8', x: 86, y: -10, r: 22 }
+  { c1: '#ffb3c7', c2: '#f2577f', x: -84, y: 0, r: 0 },
+  { c1: '#ffd2b3', c2: '#f3895c', x: -42, y: 0, r: 0 },
+  { c1: '#e6d4ff', c2: '#9a6bf0', x: 0, y: 0, r: 0 },
+  { c1: '#ffe7a8', c2: '#f0a92a', x: 42, y: 0, r: 0 },
+  { c1: '#ffc9e4', c2: '#d955a8', x: 84, y: 0, r: 0 }
 ]
+// returning to place: a soft ease-out with no overshoot, so the page settles without a pause
+const SETTLE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
 export function PullSignature() {
   const layer = useRef<HTMLDivElement>(null)
@@ -60,7 +63,8 @@ export function PullSignature() {
       box.style.opacity = d ? '1' : '0'
       // the hand writes from the left, the word glides in from the top left
       ink.style.clipPath = `inset(-20% ${Math.max(0, 100 - p * 112)}% -20% 0)`
-      word.style.transform = `translate(${(1 - p) * -36}px, ${(1 - p) * -22}px) rotate(${-8 + p * 4}deg)`
+      // straight, gliding in from the left
+      word.style.transform = `translateX(${(1 - p) * -40}px)`
     }
     const reset = () => {
       d = 0
@@ -71,40 +75,48 @@ export function PullSignature() {
       box.style.height = '0px'
       box.style.opacity = '0'
     }
-    const close = (ms = 450) => {
-      app.style.transition = `transform ${ms}ms cubic-bezier(0.2, 1.3, 0.4, 1)`
+    let closing: ReturnType<typeof setTimeout> | undefined
+    const close = () => {
+      // the further it was open, the longer the way back (but never slow)
+      const ms = Math.round(260 + (d / MAX) * 160)
+      app.style.transition = `transform ${ms}ms ${SETTLE}`
       app.style.transform = ''
-      box.style.transition = `height ${ms}ms cubic-bezier(0.2, 1.3, 0.4, 1)`
+      box.style.transition = `height ${ms}ms ${SETTLE}, opacity ${ms}ms ease-out`
       box.style.height = '0px'
-      setTimeout(() => {
+      box.style.opacity = '0'
+      clearTimeout(closing)
+      closing = setTimeout(() => {
         app.style.transition = ''
         box.style.transition = ''
         reset()
         playing = false
-      }, ms + 30)
+      }, ms)
     }
-    // the scene after a full pull
+    // the scene after a full pull: the word gathers and is gone, hearts appear in a row one after
+    // another, then all come forward together while the space closes. Whatever happens, it closes.
     const play = async () => {
       playing = true
-      const ease = 'cubic-bezier(0.5, 0, 0.2, 1)'
-      // 1. the word gathers into its middle and is gone
-      await word.animate([
-        { transform: word.style.transform, opacity: 1, letterSpacing: '0px' },
-        { transform: 'translate(0, 0) rotate(-4deg) scale(0.08, 0.5)', opacity: 0, letterSpacing: '-6px' }
-      ], { duration: 420, easing: ease, fill: 'forwards' }).finished
-      // 2. five hearts fly out of that point
-      await Promise.all(hearts.map((h, i) => h.animate([
-        { transform: 'translate(-50%, -50%) scale(0.1) rotate(0deg)', opacity: 0 },
-        { offset: 0.45, opacity: 1 },
-        { transform: `translate(calc(-50% + ${HEARTS[i].x}px), calc(-50% + ${HEARTS[i].y}px)) scale(1) rotate(${HEARTS[i].r}deg)`, opacity: 1 }
-      ], { duration: 520, delay: i * 45, easing: 'cubic-bezier(0.25, 1.4, 0.4, 1)', fill: 'forwards' }).finished))
-      // 3. all come forward at once while the space closes
-      hearts.forEach((h, i) => h.animate([
-        { transform: `translate(calc(-50% + ${HEARTS[i].x}px), calc(-50% + ${HEARTS[i].y}px)) scale(1) rotate(${HEARTS[i].r}deg)`, opacity: 1 },
-        { transform: `translate(calc(-50% + ${HEARTS[i].x * 1.6}px), calc(-50% + ${HEARTS[i].y * 1.6 + 30}px)) scale(3.2) rotate(${HEARTS[i].r}deg)`, opacity: 0 }
-      ], { duration: 460, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }))
-      try { navigator.vibrate?.(10) } catch { /* no motor */ }
-      close(480)
+      const at = (i: number) => `translate(calc(-50% + ${HEARTS[i].x}px), -50%)`
+      try {
+        await word.animate([
+          { transform: word.style.transform || 'none', opacity: 1, letterSpacing: '0px' },
+          { transform: 'scale(0.06, 0.6)', opacity: 0, letterSpacing: '-6px' }
+        ], { duration: 380, easing: 'cubic-bezier(0.5, 0, 0.2, 1)', fill: 'forwards' }).finished
+        await Promise.all(hearts.map((h, i) => h.animate([
+          { transform: `${at(i)} scale(0.2)`, opacity: 0 },
+          { transform: `${at(i)} scale(1.15)`, opacity: 1, offset: 0.6 },
+          { transform: `${at(i)} scale(1)`, opacity: 1 }
+        ], { duration: 340, delay: i * 70, easing: 'ease-out', fill: 'forwards' }).finished))
+        await new Promise((r) => setTimeout(r, 120))
+        hearts.forEach((h, i) => h.animate([
+          { transform: `${at(i)} scale(1)`, opacity: 1 },
+          { transform: `translate(calc(-50% + ${HEARTS[i].x * 1.5}px), -50%) scale(2.6)`, opacity: 0 }
+        ], { duration: 380, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' }))
+        try { navigator.vibrate?.(10) } catch { /* no motor */ }
+      } catch {
+        /* an animation was interrupted: just close */
+      }
+      close()
     }
 
     const start = (e: TouchEvent) => {
