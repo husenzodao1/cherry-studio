@@ -13,6 +13,7 @@ import { AppLock } from './AppLock'
 import { AppUpdate } from './AppUpdate'
 import { BackButton } from './BackButton'
 import { installGlobalHealing } from '../heal'
+import { PerfProbe } from './PerfProbe'
 import { Splash } from './Splash'
 import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
@@ -124,6 +125,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <SupportWatch />
               <AppLock />
               <Splash />
+              <PerfProbe />
               <OfflineNote />
               <BackButton />
               <ScreenFit />

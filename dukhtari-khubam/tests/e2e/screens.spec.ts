@@ -80,4 +80,20 @@ test.describe('main screens of a signed-in learner', () => {
     await page.screenshot({ path: 'test-results/verse.png' })
     expect(errors).toEqual([])
   })
+
+  test('light mode (weaker phones): no live blur anywhere, screens still draw', async ({ page, server: _, errors }) => {
+    await page.addInitScript(() => localStorage.setItem('dk.lite', '1'))
+    await signedIn(page)
+    for (const path of ['/', '/schools', '/settings']) {
+      await page.goto(path)
+      await expect(page.locator('html')).toHaveClass(/\blite\b/)
+      await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+      const blurred = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((el) => {
+        const cs = getComputedStyle(el)
+        return (cs.backdropFilter && cs.backdropFilter !== 'none') || ((cs as unknown as { webkitBackdropFilter?: string }).webkitBackdropFilter ?? 'none') !== 'none'
+      }).length)
+      expect(blurred, `blurred elements on ${path}`).toBe(0)
+    }
+    expect(errors).toEqual([])
+  })
 })

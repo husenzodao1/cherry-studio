@@ -24,7 +24,7 @@ const BAD_MS = 720
  * into a drawn tick, and only then the pad opens. A wrong PIN makes the dots jump, turn red and shake from
  * side to side with a soft vibration. The phone keyboard's digits and Backspace work too.
  */
-export function PinPad({ title, hint, onDone, onSuccess, onCancel, celebrate = false, children }: {
+export function PinPad({ title, hint, onDone, onSuccess, onCancel, extra, celebrate = false, children }: {
   title: string
   hint?: string | null
   /** called with the four digits; false (or a promise of it) refuses them */
@@ -32,6 +32,8 @@ export function PinPad({ title, hint, onDone, onSuccess, onCancel, celebrate = f
   /** called after the success animation (only with `celebrate`) */
   onSuccess?: () => void
   onCancel?: () => void
+  /** a text key in the bottom-left corner when there is no "cancel" (the lock: confirm by e-mail) */
+  extra?: { label: string; onClick: () => void }
   /** play the rising dots and the tick before `onSuccess` */
   celebrate?: boolean
   children?: ReactNode
@@ -104,7 +106,8 @@ export function PinPad({ title, hint, onDone, onSuccess, onCancel, celebrate = f
         {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((k) => (
           <button key={k} type="button" className="pin-key" style={{ ['--k' as string]: Number(k) - 1 }} onClick={() => press(k)}>{k}</button>
         ))}
-        {onCancel ? <button type="button" className="pin-key pin-key-text" onClick={onCancel}>{t('pin.cancel')}</button> : <span />}
+        {onCancel ? <button type="button" className="pin-key pin-key-text" onClick={onCancel}>{t('pin.cancel')}</button>
+          : extra ? <button type="button" className="pin-key pin-key-text pin-key-extra" onClick={extra.onClick}>{extra.label}</button> : <span />}
         <button type="button" className="pin-key" style={{ ['--k' as string]: 10 }} onClick={() => press('0')}>0</button>
         <button type="button" className="pin-key pin-key-text" onClick={() => press('del')} aria-label={t('pin.delete')} disabled={!pin}>
           <Icon name="backspace" size={24} />

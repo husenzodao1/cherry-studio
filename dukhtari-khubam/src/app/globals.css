@@ -862,6 +862,8 @@ img.fade.is-ready { opacity: 1; }
 .pin-key:active { transform: scale(0.92); background: var(--glass-flat); }
 .pin-key-text { border-color: transparent; background: transparent; box-shadow: none; font-size: 0.95rem; color: var(--ink-2); }
 .pin-key-text:disabled { opacity: 0.35; }
+/* "confirm by e-mail" in the pad's corner: two short lines of small text */
+.pin-key-extra { font-size: 0.72rem; line-height: 1.15; color: var(--primary); font-weight: 600; white-space: normal; padding: 0 2px; }
 .pin-foot { min-height: 52px; display: flex; align-items: center; justify-content: center; width: 100%; max-width: 360px; }
 .pin-password { display: flex; gap: 8px; width: 100%; }
 .pin-password .input { min-height: 46px; }
@@ -1384,3 +1386,17 @@ html.gated .app > *, html.gated .dock-wrap, html.gated .bf-layer, html.gated .up
 .rate-thanks b { font-size: 1.15rem; color: var(--ink); }
 .rate-thanks-face { width: 92px; animation: face-hop 1s cubic-bezier(0.3, 0.7, 0.35, 1.3) both; }
 .rate-thanks-face .face-heart { animation: face-beat 0.7s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
+/* ---------------------------------------------------------------- light mode (weaker phones, PerfProbe.tsx) */
+/* live blur is the heaviest thing a cheap phone draws: the panes become nearly opaque instead */
+html.lite *, html.lite *::before, html.lite *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html.lite .glass, html.lite .card, html.lite .lg, html.lite .btn-soft, html.lite .dock {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.88)) !important; }
+:root[data-theme='dark'].lite .glass, :root[data-theme='dark'].lite .card, :root[data-theme='dark'].lite .lg,
+:root[data-theme='dark'].lite .btn-soft, :root[data-theme='dark'].lite .dock { background: linear-gradient(160deg, rgba(46, 35, 82, 0.97), rgba(34, 26, 64, 0.94)) !important; }
+html.lite .lg.tile-clear::after, html.lite .hello::before { display: none; }
+/* endless decorative motion stops; the moving parts that carry meaning (spinners, dots, the lock) stay */
+html.lite .bd { animation: fade-in 0.4s both; filter: none !important; }
+html.lite .wave-ch, html.lite .rate-stars svg, html.lite .play-nudge, html.lite .streak-flame, html.lite .sp-moon, html.lite .wl-glow { animation: none !important; }
+html.lite .bf-layer { display: none; }
+html.lite .tile-art, html.lite .hello-flower, html.lite .start-art { filter: none; }

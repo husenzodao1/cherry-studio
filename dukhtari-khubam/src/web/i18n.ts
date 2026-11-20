@@ -198,7 +198,12 @@ const tg = {
   'verse.more': "Пурра хондан",
   'verse.less': "Кӯтоҳтар",
   'verse.hint': "Шеърҳо ва ҳикояҳои зебо барои дил",
-  'verse.empty': "Ҳоло асаре нест — ба наздикӣ илова мешаванд"
+  'verse.empty': "Ҳоло асаре нест — ба наздикӣ илова мешаванд",
+  'pin.by_email': "Тасдиқ бо почта",
+  'pin.by_email_title': "Тасдиқ бо почтаи электронӣ",
+  'pin.phone_title': "Тасдиқи соҳиби телефон",
+  'pin.phone_reason': "Коди телефон ё изи ангуштро ворид кунед",
+  'pin.phone_needed': "Аввал коди телефонро ворид кунед, баъд рамз ба почта меояд"
 }
 
 export type UiKey = keyof typeof tg
@@ -376,7 +381,12 @@ const ru: Partial<Record<UiKey, string>> = {
   'verse.more': "Читать полностью",
   'verse.less': "Свернуть",
   'verse.hint': "Красивые стихи и рассказы для души",
-  'verse.empty': "Пока нет произведений — скоро появятся"
+  'verse.empty': "Пока нет произведений — скоро появятся",
+  'pin.by_email': "Подтвердить почтой",
+  'pin.by_email_title': "Подтверждение по почте",
+  'pin.phone_title': "Подтверждение владельца",
+  'pin.phone_reason': "Введите код телефона или приложите палец",
+  'pin.phone_needed': "Сначала введите код телефона, затем придёт код на почту"
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, en, uz, tr, fa, prs }

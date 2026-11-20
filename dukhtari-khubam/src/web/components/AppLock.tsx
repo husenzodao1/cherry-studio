@@ -183,16 +183,20 @@ export function AppLock() {
     setFirst('')
     playIntro()
   }
+  /**
+   * Forgot PIN: first the phone's own lock (fingerprint, face or the screen code) proves it is her phone,
+   * then the 6-digit code sent to her e-mail opens the reset. Without an e-mail: her life questions; with
+   * neither, the phone's lock alone (or the login password).
+   */
   const forgot = async () => {
     setHint(null)
+    const r = await unlockWithPhone(t('pin.phone_title'), t('pin.phone_reason'))
+    if (r === 'cancelled') return setHint(t('pin.phone_needed'))
     if (learner?.email) return setStage('email')
     if (hasRecovery()) return setStage('questions')
-    const r = await unlockWithPhone(t('settings.unlock_title'), t('pin.forgot'))
-    if (r === 'ok') setStage('choose')
-    else if (r === 'password') {
-      if (learner?.username) setAsking(true)
-      else setHint(t('pin.reinstall'))
-    }
+    if (r === 'ok') return setStage('choose')
+    if (learner?.username) setAsking(true)
+    else setHint(t('pin.reinstall'))
   }
   const submitPassword = async (e: FormEvent) => {
     e.preventDefault()
@@ -233,7 +237,7 @@ export function AppLock() {
             <Icon name="key" size={34} strokeWidth={1.4} className="pin-lock-shape" />
             <svg className="pin-tick" width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" /><path d="M12.5 20.5l5.2 5.2L28 15" /></svg>
           </span>
-          <h1 className="pin-title">{t(stage === 'choose' ? 'recovery.passed' : stage === 'email' ? 'pin.forgot' : 'recovery.title')}</h1>
+          <h1 className="pin-title">{t(stage === 'choose' ? 'recovery.passed' : stage === 'email' ? 'pin.by_email_title' : 'recovery.title')}</h1>
         </div>
         {stage === 'email' && learner?.email ? (
           <EmailCode email={learner.email} onPassed={() => setStage('choose')} onCancel={() => setStage('pin')} />
@@ -258,7 +262,7 @@ export function AppLock() {
   }
 
   return (
-    <PinPad title={t('pin.enter')} hint={hint} celebrate onSuccess={open} onDone={async (pin) => {
+    <PinPad title={t('pin.enter')} hint={hint} celebrate onSuccess={open} extra={{ label: t('pin.by_email'), onClick: forgot }} onDone={async (pin) => {
       const r = await checkPin(pin)
       if (r === 'ok') {
         setHint(null)
@@ -273,11 +277,7 @@ export function AppLock() {
             aria-label={t('settings.unlock_password')} value={password} onChange={(e) => setPassword(e.target.value)} />
           <button className="btn" disabled={!password}>{t('start.save')}</button>
         </form>
-      ) : (
-        <div className="recovery-foot">
-          <button type="button" className="link-btn" onClick={forgot}>{t('pin.forgot')}</button>
-        </div>
-      )}
+      ) : null}
     </PinPad>
   )
 }
