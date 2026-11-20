@@ -1400,3 +1400,20 @@ html.lite .bd { animation: fade-in 0.4s both; filter: none !important; }
 html.lite .wave-ch, html.lite .rate-stars svg, html.lite .play-nudge, html.lite .streak-flame, html.lite .sp-moon, html.lite .wl-glow { animation: none !important; }
 html.lite .bf-layer { display: none; }
 html.lite .tile-art, html.lite .hello-flower, html.lite .start-art { filter: none; }
+
+/* settings: the two text sizes, shown only as "Aa" in their own size */
+.text-sizes button { min-height: 50px; }
+.text-aa { font-weight: 600; line-height: 1; }
+.text-aa-small { font-size: 0.95rem; }
+.text-aa-medium { font-size: 1.35rem; }
+
+/* welcome: own number of hours, and a note when an answer cannot be true */
+.wl-hours { display: flex; align-items: center; gap: 10px; }
+.wl-hours .input { width: 110px; text-align: center; font-variant-numeric: tabular-nums; }
+.wl-wrong { margin: 0; font-size: 0.82em; color: var(--bad); text-align: start; }
+
+/* lock: after five wrong PINs, the way to reset it */
+.pin-forgot-card { width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 16px; border-radius: 22px;
+  text-align: center; animation: rise 0.4s var(--ease) both; }
+.pin-forgot-card b { color: var(--ink); }
+.pin-forgot-card .btn { margin-top: 6px; min-height: 46px; }

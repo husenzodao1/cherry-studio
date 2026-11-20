@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 
 import { birthdayMask, parseBirthday } from '@/lib/progress'
+import { isMeaningful, MAX_AGE, MIN_AGE } from '@/lib/sanity'
 import { ART } from '@/web/art'
 import { Dots, GoIcon } from '@/web/components/Busy'
 import { OtpField, type OtpState } from '@/web/components/OtpField'
@@ -63,8 +64,14 @@ function GoogleMark() {
 function BirthdayField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const { t } = usePrefs()
   const wrong = value.length === 10 && !parseBirthday(value)
+  // a real date with an age no learner can have (this year, a small child, over forty)
+  const realDate = wrong && /^\d{2}\.\d{2}\.\d{4}$/.test(value) && (() => {
+    const [d, m, y] = value.split('.').map(Number)
+    const date = new Date(y, m - 1, d)
+    return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d
+  })()
   return (
-    <Field label={t('start.birthday')} hint={wrong ? t('start.birthday_wrong') : undefined}>
+    <Field label={t('start.birthday')} hint={wrong ? (realDate ? t('start.birthday_age').replace('{min}', String(MIN_AGE)).replace('{max}', String(MAX_AGE)) : t('start.birthday_wrong')) : undefined}>
       <input className="input birthday-input" inputMode="numeric" pattern="[0-9.]*" autoComplete="bday" placeholder={t('start.birthday_ph')}
         value={value} maxLength={10} aria-invalid={wrong} onChange={(e) => onChange(birthdayMask(e.target.value))} />
     </Field>
@@ -157,6 +164,8 @@ export default function StartPage() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const born = parseBirthday(birthday)
+  // a name made of real letters (not "аааа" or a keyboard row)
+  const nameOk = name.trim().length >= 2 && isMeaningful(name)
 
   const online = typeof navigator === 'undefined' || navigator.onLine !== false
   const needsBirthday = !!learner && progress.born === undefined
@@ -254,7 +263,7 @@ export default function StartPage() {
 
   const onAbout = async (e: FormEvent) => {
     e.preventDefault()
-    if (step.at !== 'about' || !name.trim() || !born || busy) return
+    if (step.at !== 'about' || !nameOk || !born || busy) return
     setBusy(true)
     setMessage(null)
     const l = register(name, born, step.account)
@@ -308,12 +317,12 @@ export default function StartPage() {
               <p className="muted" style={{ margin: '4px 0 0', fontSize: '0.9em' }}>{t('start.about_hint')}</p>
             </div>
           )}
-          <Field label={t('start.name')}>
+          <Field label={t('start.name')} hint={name.trim().length >= 2 && !nameOk ? t('start.name_wrong') : undefined}>
             <input className="input" value={name} maxLength={80} autoComplete="given-name" autoFocus={!g} onChange={(e) => setName(e.target.value)} />
           </Field>
           <BirthdayField value={birthday} onChange={setBirthdayText} />
           {note}
-          <button className="btn btn-block btn-lg" disabled={busy || !name.trim() || !born} aria-busy={busy}>
+          <button className="btn btn-block btn-lg" disabled={busy || !nameOk || !born} aria-busy={busy}>
             {t('start.create')} <GoIcon busy={busy} />
           </button>
           <button type="button" className="link-btn" onClick={() => { setStep({ at: 'start' }); setMessage(null); if (g) endGoogle(); else endAccount() }}>{t('pin.cancel')}</button>

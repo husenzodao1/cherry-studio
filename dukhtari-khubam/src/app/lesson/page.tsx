@@ -11,7 +11,8 @@ import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
 import { useQueryParam } from '@/web/useQueryParam'
 
-const SCALES = [1, 1.12, 1.25, 0.92]
+// the same two sizes as in the settings: small and medium
+const SCALES = [0.9, 1]
 
 export default function LessonPage() {
   return <Suspense fallback={<Loading />}><Lesson /></Suspense>

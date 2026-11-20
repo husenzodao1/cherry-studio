@@ -92,7 +92,7 @@ const tg = {
   'recovery.q.colour': "Ранги дӯстдоштаатон?",
   'recovery.q.dream': "Орзуи кӯдакии шумо?",
   'recovery.q.school': "Рақами мактаби аввалинатон?",
-  'google.continue': "Ворид бо Google",
+  'google.continue': "Воридшавӣ бо Google",
   'google.wait': "Интизор шавед",
   'google.or': "ё",
   'google.signed_in': "Бо Google ворид шудед",
@@ -166,7 +166,7 @@ const tg = {
   'welcome.preparing': "Дарсҳои шуморо омода мекунем",
   'welcome.ready': "Тайёр!",
   'app.latest': "Шумо версияи охиринро доред ({v})",
-  'start.agree': "Бо пахши «Давом» ё «Ворид бо Google» шумо бо [Шартҳои истифода] ва [Сиёсати махфият] розӣ мешавед.",
+  'start.agree': "Бо пахши «Давом» ё «Воридшавӣ бо Google» шумо бо [Шартҳои истифода] ва [Сиёсати махфият] розӣ мешавед.",
   'notify.morning': "Субҳ ба хайр, {name}! Субҳатон бо шодӣ оғоз ёбад 🌸\nСубҳ ба хайр! Имрӯз рӯзи нави дониш аст ✨\nСалом, {name}! Як дарси хурд — рӯзи зебо.\nСубҳ ба хайр! Дили шумо пур аз нур бод 💜\nРӯз ба хайр оғоз ёбад, {name}! Мо шуморо интизорем.",
   'start.birthday': "Санаи таваллуд",
   'start.birthday_ph': "рр.мм.сссс",
@@ -203,7 +203,15 @@ const tg = {
   'pin.by_email_title': "Тасдиқ бо почтаи электронӣ",
   'pin.phone_title': "Тасдиқи соҳиби телефон",
   'pin.phone_reason': "Коди телефон ё изи ангуштро ворид кунед",
-  'pin.phone_needed': "Аввал коди телефонро ворид кунед, баъд рамз ба почта меояд"
+  'pin.phone_needed': "Аввал коди телефонро ворид кунед, баъд рамз ба почта меояд",
+  'start.birthday_age': "Синну сол бояд аз {min} то {max} сол бошад",
+  'start.name_wrong': "Номи худро дуруст нависед",
+  'welcome.hours': "соат",
+  'welcome.hours_wrong': "Дар як рӯз аз 1 то {n} соат нависед",
+  'sanity.meaningless': "Лутфан бо калимаҳои воқеӣ ва одобона нависед",
+  'pin.too_many': "PIN-ро фаромӯш кардед?",
+  'pin.too_many_sub': "5 бор нодуруст ворид шуд. PIN-ро тавассути почта аз нав гузоред.",
+  'pin.reset': "Аз нав гузоштан"
 }
 
 export type UiKey = keyof typeof tg
@@ -386,7 +394,15 @@ const ru: Partial<Record<UiKey, string>> = {
   'pin.by_email_title': "Подтверждение по почте",
   'pin.phone_title': "Подтверждение владельца",
   'pin.phone_reason': "Введите код телефона или приложите палец",
-  'pin.phone_needed': "Сначала введите код телефона, затем придёт код на почту"
+  'pin.phone_needed': "Сначала введите код телефона, затем придёт код на почту",
+  'start.birthday_age': "Возраст должен быть от {min} до {max} лет",
+  'start.name_wrong': "Напишите имя правильно",
+  'welcome.hours': "ч",
+  'welcome.hours_wrong': "Напишите от 1 до {n} часов в день",
+  'sanity.meaningless': "Пожалуйста, напишите настоящими и вежливыми словами",
+  'pin.too_many': "Забыли PIN?",
+  'pin.too_many_sub': "5 неверных попыток. Задайте PIN заново через почту.",
+  'pin.reset': "Сбросить"
 }
 
 export const DEFAULT_STRINGS: Record<Locale, Partial<Record<UiKey, string>>> = { tg, ru, en, uz, tr, fa, prs }

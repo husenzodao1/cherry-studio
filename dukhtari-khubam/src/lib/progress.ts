@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { MAX_AGE, MIN_AGE } from './sanity'
+
 /**
  * Learner progress kept on the phone and backed up under the learner's 15-digit code.
  * Merging is commutative, so two phones (or a phone and its backup) always converge:
@@ -54,7 +56,7 @@ export const ageOf = (p: ProgressData, today = new Date()) => (p.born === undefi
 
 /**
  * A birthday typed as dd.mm.yyyy (the dots come by themselves): 'YYYY-MM-DD' when it is a real date
- * and the age is 5–99, otherwise null.
+ * and the age is one a learner can really have (MIN_AGE–MAX_AGE, lib/sanity), otherwise null.
  */
 export function parseBirthday(text: string, today = new Date()): string | null {
   const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(text)
@@ -64,7 +66,7 @@ export function parseBirthday(text: string, today = new Date()): string | null {
   if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) return null
   let age = today.getFullYear() - y
   if (today.getMonth() < mo - 1 || (today.getMonth() === mo - 1 && today.getDate() < d)) age--
-  return age >= 5 && age <= 99 ? `${m[3]}-${m[2]}-${m[1]}` : null
+  return age >= MIN_AGE && age <= MAX_AGE ? `${m[3]}-${m[2]}-${m[1]}` : null
 }
 
 /** Digits typed into the birthday field, with the dots put in: "0103" → "01.03". */

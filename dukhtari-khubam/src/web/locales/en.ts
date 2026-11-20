@@ -61,5 +61,8 @@ export const en: Partial<Record<UiKey, string>> = {
   'rate.comment': 'Your thoughts (optional)', 'rate.send': 'Send', 'rate.thanks': 'Thank you for rating!', 'rate.thanks_sub': 'Your opinion makes the app better 💜',
   'verse.count': 'Works: {n}', 'verse.poem': 'Poem', 'verse.story': 'Story', 'verse.poems': 'Poems', 'verse.stories': 'Stories',
   'verse.more': 'Read in full', 'verse.less': 'Show less', 'verse.hint': 'Beautiful poems and stories for the heart', 'verse.empty': 'No works yet — coming soon',
+  'start.birthday_age': 'The age must be from {min} to {max}', 'start.name_wrong': 'Write your name correctly', 'welcome.hours': 'h',
+  'welcome.hours_wrong': 'Write 1 to {n} hours a day', 'sanity.meaningless': 'Please write in real, polite words',
+  'pin.too_many': 'Forgot your PIN?', 'pin.too_many_sub': '5 wrong tries. Set a new PIN through your e-mail.', 'pin.reset': 'Reset',
   'poem.title': 'Garden of verse', 'splash.loading': 'Loading'
 }

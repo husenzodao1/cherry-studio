@@ -4,6 +4,8 @@ import { Capacitor } from '@capacitor/core'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { isMeaningful } from '@/lib/sanity'
+
 import { accountAuth } from '../offline/accountAuth'
 import type { UiKey } from '../i18n'
 import { usePrefs } from '../prefs'
@@ -102,6 +104,7 @@ export function RateSheet({ onClose }: { onClose: () => void }) {
 
   const send = async () => {
     if (!stars || busy) return
+    if (!isMeaningful(comment)) return setNote(t('sanity.meaningless'))
     if (navigator.onLine === false) return setNote(t('install.need_online'))
     setBusy(true)
     setNote(null)

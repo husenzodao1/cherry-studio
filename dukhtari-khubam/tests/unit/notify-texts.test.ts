@@ -39,6 +39,12 @@ describe('birthday', () => {
     expect(parseBirthday('31.02.2008', today)).toBeNull()
     expect(parseBirthday('01.03.2024', today)).toBeNull()
     expect(parseBirthday('1.3.2008', today)).toBeNull()
+    // ages a learner cannot really have: this year, a small child, over forty
+    expect(parseBirthday('01.01.2026', today)).toBeNull()
+    expect(parseBirthday('01.01.2019', today)).toBeNull()
+    expect(parseBirthday('01.01.1980', today)).toBeNull()
+    expect(parseBirthday('01.01.2017', today)).toBe('2017-01-01')
+    expect(parseBirthday('01.01.1987', today)).toBe('1987-01-01')
   })
   it('greets at 00:01 on the next birthday', async () => {
     const { nextBirthday } = await import('@/web/offline/notify')

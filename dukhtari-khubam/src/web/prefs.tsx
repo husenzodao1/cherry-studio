@@ -25,6 +25,9 @@ interface PrefsApi extends Prefs {
 
 // standard look: the Peach theme and the smallest text size
 export const MIN_TEXT_SCALE = 0.9
+/** The two text sizes offered: small (the standard) and medium. */
+export const TEXT_SIZES = [{ key: 'small', scale: 0.9 }, { key: 'medium', scale: 1 }] as const
+const snapScale = (x: number) => (Number(x) >= 0.95 ? 1 : 0.9)
 const DEFAULTS: Prefs = { locale: 'tg', theme: 'peach', textScale: MIN_TEXT_SCALE }
 const VERSION = 3
 const KEY = 'dk.prefs'
@@ -40,7 +43,8 @@ function read(): Prefs {
       // white was the standard theme before version 3: such settings move to the new standard, Peach
       theme: (THEMES as readonly string[]).includes(theme) && !(theme === 'light' && (stored.v ?? 0) < VERSION) ? theme : DEFAULTS.theme,
       // settings saved before version 2 carried the old default size (1): move it to the new default
-      textScale: (stored.v ?? 0) >= 2 ? textScale : textScale === 1 ? DEFAULTS.textScale : textScale
+      // only two sizes now: any older value goes to the nearer one
+      textScale: snapScale((stored.v ?? 0) >= 2 ? textScale : textScale === 1 ? DEFAULTS.textScale : textScale)
     }
   } catch {
     return DEFAULTS

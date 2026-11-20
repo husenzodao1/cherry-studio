@@ -145,6 +145,8 @@ export function AppLock() {
   const [asking, setAsking] = useState(false)
   const [password, setPassword] = useState('')
   const [first, setFirst] = useState('')
+  // wrong PINs in a row: after five, a clear "forgot your PIN?" with the reset by e-mail
+  const [wrongs, setWrongs] = useState(0)
   const onSupport = /^\/support(\/|$)/.test(path)
 
   // before the first paint, so nothing behind the lock flashes
@@ -266,8 +268,10 @@ export function AppLock() {
       const r = await checkPin(pin)
       if (r === 'ok') {
         setHint(null)
+        setWrongs(0)
         return true
       }
+      setWrongs((n) => n + 1)
       setHint(r === 'wait' ? t('pin.wait').replace('{n}', String(waitLeft())) : t('pin.wrong'))
       return false
     }}>
@@ -277,6 +281,12 @@ export function AppLock() {
             aria-label={t('settings.unlock_password')} value={password} onChange={(e) => setPassword(e.target.value)} />
           <button className="btn" disabled={!password}>{t('start.save')}</button>
         </form>
+      ) : wrongs >= 5 ? (
+        <div className="pin-forgot-card glass" role="alert">
+          <b>{t('pin.too_many')}</b>
+          <span className="row-sub">{t('pin.too_many_sub')}</span>
+          <button type="button" className="btn btn-block" onClick={forgot}>{t('pin.reset')}</button>
+        </div>
       ) : null}
     </PinPad>
   )

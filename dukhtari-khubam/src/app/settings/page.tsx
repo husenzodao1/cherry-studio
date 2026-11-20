@@ -13,7 +13,7 @@ import { showToast } from '@/web/components/Toast'
 import { LOCALE_LABELS, LOCALES } from '@/web/i18n'
 import { useLearner } from '@/web/offline/learner'
 import { allowNotifications, canNotify, DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyPrefs } from '@/web/offline/notify'
-import { MIN_TEXT_SCALE, THEMES, usePrefs } from '@/web/prefs'
+import { TEXT_SIZES, THEMES, usePrefs } from '@/web/prefs'
 
 function Notifications() {
   const { t } = usePrefs()
@@ -125,11 +125,18 @@ export default function Settings() {
         {native ? <Notifications /> : null}
         <LanguagePicker />
         <ThemePicker />
-        <label className="glass card-pad stack" style={{ gap: 10 }}>
+        <div className="glass card-pad stack" style={{ gap: 10 }}>
           <span className="eyebrow">{t('settings.text_size')}</span>
-          <input type="range" min={MIN_TEXT_SCALE} max={1.3} step={0.05} value={prefs.textScale}
-            onChange={(e) => prefs.set({ textScale: Number(e.target.value) })} />
-        </label>
+          <div className="segmented text-sizes" role="radiogroup" aria-label={t('settings.text_size')}>
+            {TEXT_SIZES.map((s) => (
+              <button key={s.key} type="button" role="radio" aria-checked={prefs.textScale === s.scale} aria-pressed={prefs.textScale === s.scale}
+                aria-label={`${t('settings.text_size')} ${s.scale === 1 ? '2' : '1'}`} onClick={() => prefs.set({ textScale: s.scale })}>
+                {/* only "Aa", in the size it gives */}
+                <span className={`text-aa text-aa-${s.key}`} aria-hidden="true">Aa</span>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="glass menu">
           <Link href="/support" className="menu-row"><Icon name="bell" /><span className="grow">{t('support.title')}</span><Icon name="forward" size={18} /></Link>
           <Link href="/page?slug=privacy" className="menu-row"><Icon name="lock" /><span className="grow">{t('settings.privacy')}</span><Icon name="forward" size={18} /></Link>

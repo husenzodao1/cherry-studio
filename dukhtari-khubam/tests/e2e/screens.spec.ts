@@ -45,6 +45,11 @@ test.describe('main screens of a signed-in learner', () => {
     await expect(sheet.locator('.rate-face')).toHaveCount(5)
     await sheet.locator('.rate-face').nth(4).click()
     await expect(sheet.locator('.rate-face[aria-checked="true"]')).toHaveCount(1)
+    // meaningless or rude text is not sent
+    await sheet.locator('.rate-comment').fill('фывапролд')
+    await sheet.locator('.btn-lg').click()
+    await expect(sheet.getByText(/калимаҳои воқеӣ/)).toBeVisible()
+    expect(server.ratings).toEqual([])
     await sheet.locator('.rate-comment').fill('Хеле зебо!')
     await page.screenshot({ path: 'test-results/rate-sheet.png' })
     await sheet.locator('.btn-lg').click()

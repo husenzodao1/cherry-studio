@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { hoursOk, isMeaningful, MAX_HOURS } from '@/lib/sanity'
 import { ART, SCHOOL_ART } from '@/web/art'
 import { Icon } from '@/web/components/Icon'
 import { Orbit } from '@/web/components/Orbit'
@@ -16,8 +17,10 @@ const CUSTOM = '\u0000custom'
 const PREPARE_MS = 4600
 
 /** One question: the 3D picture floating above, the question, its options and "your own answer". */
-function Choice({ options, value, onChange, custom, onCustom }: {
+function Choice({ options, value, onChange, custom, onCustom, hours = false }: {
   options: string[]; value: string | null; onChange: (v: string) => void; custom: string; onCustom: (v: string) => void
+  /** "your own answer" is a number of hours (1–MAX_HOURS) */
+  hours?: boolean
 }) {
   const { t } = usePrefs()
   const input = useRef<HTMLInputElement>(null)
@@ -35,7 +38,18 @@ function Choice({ options, value, onChange, custom, onCustom }: {
         <span className="wl-radio" aria-hidden="true" />{t('welcome.custom')}
       </button>
       {value === CUSTOM ? (
-        <input ref={input} className="input wl-custom" value={custom} maxLength={80} placeholder={t('welcome.custom_ph')} onChange={(e) => onCustom(e.target.value)} />
+        hours ? (
+          <label className="wl-hours">
+            <input ref={input} className="input wl-custom" inputMode="decimal" value={custom} maxLength={3} placeholder={`1–${MAX_HOURS}`}
+              onChange={(e) => onCustom(e.target.value.replace(/[^\d.,]/g, '').slice(0, 3))} />
+            <span>{t('welcome.hours')}</span>
+          </label>
+        ) : (
+          <input ref={input} className="input wl-custom" value={custom} maxLength={80} placeholder={t('welcome.custom_ph')} onChange={(e) => onCustom(e.target.value)} />
+        )
+      ) : null}
+      {value === CUSTOM && custom.trim() && !(hours ? hoursOk(custom) : isMeaningful(custom)) ? (
+        <p className="wl-wrong" role="status">{hours ? t('welcome.hours_wrong').replace('{n}', String(MAX_HOURS)) : t('sanity.meaningless')}</p>
       ) : null}
     </div>
   )
@@ -67,13 +81,16 @@ export default function Welcome() {
   }, [progress.about, step, router])
 
   const schoolList = bundle?.schools ?? []
-  const answer = (v: string | null, own: string) => (v === CUSTOM ? own.trim() : v ?? '')
-  const ok = step === 0 ? !!answer(time, timeOwn) : step === 1 ? schools.length > 0 : !!answer(source, sourceOwn)
+  // "your own answer" counts only when it can be true: up to MAX_HOURS hours, real words
+  const answer = (v: string | null, own: string, hours = false) => (v !== CUSTOM ? v ?? ''
+    : hours ? (hoursOk(own) ? `${own.trim().replace(',', '.')} ${t('welcome.hours')}` : '')
+    : isMeaningful(own) ? own.trim() : '')
+  const ok = step === 0 ? !!answer(time, timeOwn, true) : step === 1 ? schools.length > 0 : !!answer(source, sourceOwn)
 
   const finish = (skip = false) => {
     if (done.current) return
     done.current = true
-    answerWelcome(skip ? {} : { time: answer(time, timeOwn), schools, source: answer(source, sourceOwn) })
+    answerWelcome(skip ? {} : { time: answer(time, timeOwn, true), schools, source: answer(source, sourceOwn) })
     setStep(3)
   }
 
@@ -148,7 +165,7 @@ export default function Welcome() {
         <span className="eyebrow">{t('welcome.step').replace('{n}', String(step + 1)).replace('{total}', '3')}</span>
         <h1 className="wl-q">{question}</h1>
         {step === 0 ? (
-          <Choice options={lines(t('welcome.time.options'))} value={time} onChange={setTime} custom={timeOwn} onCustom={setTimeOwn} />
+          <Choice options={lines(t('welcome.time.options'))} value={time} onChange={setTime} custom={timeOwn} onCustom={setTimeOwn} hours />
         ) : step === 1 ? (
           <>
             <p className="muted wl-hint">{t('welcome.schools.hint')}</p>
