@@ -1,5 +1,6 @@
 'use client'
 
+import { Capacitor } from '@capacitor/core'
 import { useEffect, useState } from 'react'
 
 import { useContent } from '../offline/content'
@@ -9,11 +10,31 @@ import { Icon } from './Icon'
 import { showToast } from './Toast'
 
 /**
- * The "install" button in the home screen's top bar: keeps the newest lessons (pictures, audio, files)
- * on the phone for learning offline. It knows when everything is already there and says so instead of
+ * The "install" button in the home screen's top bar. On the website it downloads the Android app itself
+ * (the APK file, straight from this site). In the app it keeps the newest lessons (pictures, audio,
+ * files) on the phone for learning offline. It knows when everything is already there and says so instead of
  * installing again; a small dot shows when new lessons have files to fetch.
  */
 export function InstallButton() {
+  const [native, setNative] = useState<boolean | null>(null)
+  useEffect(() => setNative(Capacitor.isNativePlatform()), [])
+  if (native === null) return <span className="icon-btn install-btn" aria-hidden="true" />
+  return native ? <OfflineInstall /> : <AppDownload />
+}
+
+/** Website: the app's APK is downloaded at once (the browser asks where to keep it, then to install). */
+function AppDownload() {
+  const { t } = usePrefs()
+  return (
+    <a href="/download/dukhtari-khubam.apk" download="dukhtari-khubam.apk" className="icon-btn install-btn" aria-label={t('install.app')}
+      onClick={() => showToast(t('install.app_started'), 'install', 4200)}>
+      <span className="install-glyph"><Icon name="install" /></span>
+      <span className="install-dot" aria-hidden="true" />
+    </a>
+  )
+}
+
+function OfflineInstall() {
   const { t } = usePrefs()
   const { bundle } = useContent()
   const [state, setState] = useState<{ installed: boolean; chosen: boolean } | null>(null)

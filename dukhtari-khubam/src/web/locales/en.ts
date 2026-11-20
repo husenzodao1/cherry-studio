@@ -64,5 +64,6 @@ export const en: Partial<Record<UiKey, string>> = {
   'start.birthday_age': 'The age must be from {min} to {max}', 'start.name_wrong': 'Write your name correctly', 'welcome.hours': 'h',
   'welcome.hours_wrong': 'Write 1 to {n} hours a day', 'sanity.meaningless': 'Please write in real, polite words',
   'pin.too_many': 'Forgot your PIN?', 'pin.too_many_sub': '5 wrong tries. Set a new PIN through your e-mail.', 'pin.reset': 'Reset',
+  'install.app': 'Install the app', 'install.app_started': 'The app is downloading — then open the file and install it',
   'poem.title': 'Garden of verse', 'splash.loading': 'Loading'
 }

@@ -101,4 +101,13 @@ test.describe('main screens of a signed-in learner', () => {
     }
     expect(errors).toEqual([])
   })
+
+  test('website: the top install button downloads the Android app from this site', async ({ page, server: _, errors }) => {
+    await signedIn(page)
+    await page.goto('/')
+    const link = page.locator('a.install-btn')
+    await expect(link).toHaveAttribute('href', '/download/dukhtari-khubam.apk')
+    await expect(link).toHaveAttribute('download', 'dukhtari-khubam.apk')
+    expect(errors).toEqual([])
+  })
 })
