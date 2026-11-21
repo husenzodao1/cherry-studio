@@ -86,7 +86,7 @@ test('sign-in screen: Mahliyo with her book in the middle, eight objects come ou
   expect(errors).toEqual([])
 })
 
-test('Mahliyo meets a new learner: her words come as she says them, "Бале", she claps, then the questions', async ({ page, server: _, errors }) => {
+test('Mahliyo meets a new learner: her Tajik words rise one by one as she says them, "Бале", "Офарин!", she claps, then the questions', async ({ page, server: _, errors }) => {
   await signedIn(page, { name: 'Нигина' })
   await page.addInitScript(() => { const p = JSON.parse(localStorage.getItem('dk.progress')!); delete p.about; localStorage.setItem('dk.progress', JSON.stringify(p)) })
   await page.setViewportSize({ width: 390, height: 844 })
@@ -94,26 +94,33 @@ test('Mahliyo meets a new learner: her words come as she says them, "Бале", 
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   const talk = page.locator('video.is-talk')
   await expect(talk).toHaveAttribute('src', '/assets/mahliyo/intro.webm')
-  const typed = page.locator('.mi-typed')
-  // nothing is written before she speaks; then her greeting with the learner's name, as she says it
-  await expect(typed.first()).toHaveText('Салом, Нигина!', { timeout: 6000 })
-  const at = await talk.evaluate((v: HTMLVideoElement) => v.currentTime)
-  expect(at).toBeGreaterThan(1.2)
+  await expect(page.locator('.mi-name')).toHaveText('Маҳлиё')
+  const shown = page.locator('.mi-w.is-in')
+  // before her first word: three dots; her first word comes with her voice
+  await expect(page.locator('.mi-dots')).toBeVisible()
+  await expect(shown.first()).toHaveText('Салом,', { timeout: 6000 })
+  expect(await talk.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(0.95)
+  // while she speaks, the word she says glows and her voice wave moves
+  await expect(page.locator('.mi-w.is-now')).toHaveCount(1, { timeout: 4000 })
+  await expect(page.locator('.mi-wave.is-on')).toBeVisible()
   await expect(page.getByRole('button', { name: /Бале/ })).toBeHidden()
-  // the last sentence, then "Бале"
-  await expect(typed.last()).toHaveText('Омодаед оғоз кунем?', { timeout: 12_000 })
+  // all of it, then "Бале"
+  await expect(page.locator('.mi-ask')).toHaveText('Омодаед оғоз кунем?', { timeout: 14_000 })
+  await expect(page.locator('.mi-w:not(.is-in)')).toHaveCount(0)
   await expect(page.getByRole('button', { name: /Бале/ })).toBeVisible()
+  await expect(page.locator('.mi-lines')).toContainText('Салом, дӯсти азиз! Ман омӯзгори шумо ҳастам.')
   // her words sit above her, never over her face
   const say = (await page.locator('.mi-say').boundingBox())!
   const stage = (await page.locator('.mi-stage').boundingBox())!
   expect(say.y + say.height).toBeLessThanOrEqual(stage.y + stage.height * 0.06)
   await page.screenshot({ path: 'test-results/intro-words.png' })
   await page.getByRole('button', { name: /Бале/ }).click()
-  // she claps (her second clip takes over), then the first question
+  // her second clip takes over: "Офарин! Пас, рафтем! …" the same way, then she claps, then the first question
   await expect(page.locator('.mahliyo-intro')).toHaveClass(/is-yes-on/, { timeout: 4000 })
-  await expect.poll(() => page.locator('video.is-yes').evaluate((v: HTMLVideoElement) => v.currentTime), { timeout: 4000 }).toBeGreaterThan(0.5)
-  await page.screenshot({ path: 'test-results/intro-clap.png' })
-  await expect(page.locator('.wl-q')).toBeVisible({ timeout: 10_000 })
+  await expect(shown.first()).toHaveText('Офарин!', { timeout: 6000 })
+  await expect(page.locator('.mi-lines')).toContainText('Шуморо чизҳои нав интизоранд!', { timeout: 8000 })
+  await page.screenshot({ path: 'test-results/intro-bravo.png' })
+  await expect(page.locator('.wl-q')).toBeVisible({ timeout: 12_000 })
   expect(errors).toEqual([])
 })
 

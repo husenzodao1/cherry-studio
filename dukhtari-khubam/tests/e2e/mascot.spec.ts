@@ -21,6 +21,9 @@ test('she greets on opening the app (once per opening), says "stop" after two wr
   // her picture for this moment is there and drawn
   await expect(card.locator('.mascot-girl img')).toHaveAttribute('src', /^\/assets\/mascot\/(salom|calm)\.webp$/)
   await expect.poll(() => card.locator('.mascot-girl img').evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth)).toBeGreaterThan(300)
+  // the card floats above the page: a soft shadow under it, a faint glow round her
+  expect(await card.evaluate((e) => getComputedStyle(e).boxShadow)).toContain('rgba')
+  expect(await card.locator('.mascot-girl img').evaluate((e) => getComputedStyle(e).filter)).toContain('drop-shadow')
   await page.waitForTimeout(800)
   await page.screenshot({ path: 'test-results/mascot-home.png' })
   // a tap closes it, and the same day it does not come back

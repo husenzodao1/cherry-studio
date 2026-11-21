@@ -55,7 +55,7 @@ export const en: Partial<Record<UiKey, string>> = {
   'install.title': 'Install for offline', 'install.need_online': 'Connect to the internet to install', 'offline.note': 'Connect to the internet to learn freely',
   'rate.title': 'Rate the app', 'rate.sub': 'Your opinion makes the app better', 'share.title': 'Share with friends', 'share.sub': 'Send the app to others', 'share.copied': 'Link copied',
   'welcome.custom': 'My own answer', 'welcome.custom_ph': 'Write it yourself…', 'welcome.schools.hint': 'You can choose several', 'welcome.next': 'Next', 'welcome.skip': 'Skip',
-  'intro.hello': 'Hello, {name}!', 'intro.me': 'I am your teacher, Mahliyo.', 'intro.here': 'Here you can feel better and better and learn new things!', 'intro.ready': 'Ready to begin?', 'intro.yes': 'Yes',
+  'intro.name': 'Mahliyo', 'intro.hello': 'Hello, dear friend!', 'intro.me': 'I am your teacher.', 'intro.here': 'Here you can feel better and learn new things!', 'intro.ready': 'Ready to begin?', 'intro.yes': 'Yes', 'intro.bravo': 'Well done!', 'intro.go': 'Let’s go, then!', 'intro.awaits': 'New things are waiting for you!',
   'welcome.step': '{n} of {total}', 'welcome.preparing': 'Preparing your lessons', 'welcome.ready': 'Ready!',
   'heal.title': 'Just a moment', 'heal.body': 'Something went wrong on this page. The app tried to repair itself — try again or go home.',
   'rate.ask': 'How much do you like the app?', 'rate.1': 'Bad', 'rate.2': 'Meh', 'rate.3': 'Okay', 'rate.4': 'Good', 'rate.5': 'Great',

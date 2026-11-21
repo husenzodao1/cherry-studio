@@ -127,6 +127,18 @@ test.describe('main screens of a signed-in learner', () => {
       for (let i = 3; i < d.length; i += 4) if (d[i] > 0) n++
       return n
     })).toBeGreaterThan(20)
+    // the hand's strokes reach past the letters' boxes: the line keeps room for them, so the first and
+    // the last letter are never cut (the tail of «д» in «нашуд» used to be)
+    await page.evaluate(() => document.fonts.ready)
+    const room = await page.locator('.lens-text > .lens-line').evaluate((el) => {
+      const cs = getComputedStyle(el)
+      const ctx = document.createElement('canvas').getContext('2d')!
+      ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`
+      const m = ctx.measureText(el.textContent ?? '')
+      return { left: parseFloat(cs.paddingLeft) - m.actualBoundingBoxLeft, right: parseFloat(cs.paddingRight) - (m.actualBoundingBoxRight - m.width) }
+    })
+    expect(room.left).toBeGreaterThanOrEqual(0)
+    expect(room.right).toBeGreaterThanOrEqual(0)
     expect(errors).toEqual([])
   })
 })

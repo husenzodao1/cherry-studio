@@ -1,5 +1,5 @@
 {
-  "note": "Pre-rendered 3D assets. Rendered offline with tools/render-assets (three.js, physically based materials with real transmission for glass, HDRI lighting); glass is shot on black and on white and matte.py recovers true transparency. The school pictures and obj-moon are images the project owner made with an image AI (cartoon 3D style, 2026), cut out of their plain background with BiRefNet.",
+  "note": "Pre-rendered 3D assets. Rendered offline with tools/render-assets (three.js, physically based materials with real transmission for glass, HDRI lighting); glass is shot on black and on white and matte.py recovers true transparency. The school pictures, verse-garden and obj-moon are images the project owner made with an image AI (cartoon 3D style, 2026), cut out of their plain background with BiRefNet.",
   "lighting": {
     "hdri": "Studio Small 09",
     "author": "Sergej Majboroda",
@@ -213,6 +213,12 @@
     },
     "obj-moon.webp": {
       "model": "Crescent moon",
+      "author": "Project owner (image AI)",
+      "license": "project-owned",
+      "source": "owner-supplied image, cut out with rembg BiRefNet"
+    },
+    "verse-garden.webp": {
+      "model": "Ripe pomegranate, open on one side",
       "author": "Project owner (image AI)",
       "license": "project-owned",
       "source": "owner-supplied image, cut out with rembg BiRefNet"

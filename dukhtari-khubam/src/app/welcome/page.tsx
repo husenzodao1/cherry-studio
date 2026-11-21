@@ -153,7 +153,7 @@ export default function Welcome() {
     )
   }
 
-  if (!met) return <MahliyoIntro name={learner.name} onDone={() => setMet(true)} />
+  if (!met) return <MahliyoIntro onDone={() => setMet(true)} />
 
   const art = ['/assets/3d/welcome-clock.webp', '/assets/3d/welcome-girl.webp', '/assets/3d/welcome-track.webp'][step]
   const question = t(step === 0 ? 'welcome.time.q' : step === 1 ? 'welcome.schools.q' : 'welcome.source.q')
