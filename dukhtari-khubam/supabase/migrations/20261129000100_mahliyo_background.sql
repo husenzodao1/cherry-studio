@@ -8,9 +8,9 @@ alter table public.mahliyo_questions
   -- why there is no answer: 'stopped' by the learner, or the AI failed ('busy', 'limit', …)
   add column failed text check (char_length(failed) <= 40);
 
--- Her answer, once, and only soon after the question (not after it was stopped or failed).
-drop function public.api_mahliyo_answer(uuid, text, boolean);
-create function public.api_mahliyo_answer(p_id uuid, p_answer text, p_tajik boolean, p_blocks jsonb default null) returns void
+-- Her answer with its blocks, once, and only soon after the question (not after it was stopped or failed).
+-- Beside the earlier api_mahliyo_answer(uuid, text, boolean), which the app no longer calls; nothing removed.
+create or replace function public.api_mahliyo_answer(p_id uuid, p_answer text, p_tajik boolean, p_blocks jsonb) returns void
 language plpgsql security definer set search_path = '' as $$
 begin
   update public.mahliyo_questions
