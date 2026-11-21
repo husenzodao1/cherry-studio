@@ -14,7 +14,6 @@ import { Empty, Skeleton } from '@/web/components/States'
 import { WordsOfDay } from '@/web/components/WordsOfDay'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
-import { aiReady } from '@/web/offline/mahliyo'
 import { reviewStats } from '@/web/offline/review'
 import { usePrefs } from '@/web/prefs'
 import type { UiKey } from '@/web/i18n'
@@ -95,10 +94,6 @@ export default function Home() {
     }
   }, [])
 
-  // Mahliyo AI, once the server has her set up: her face in the top bar opens the chat
-  const [ai, setAi] = useState(false)
-  useEffect(() => { void aiReady().then(setAi) }, [])
-
   const flower = useRef<HTMLImageElement>(null)
   const name = learner?.name
   const review = useMemo(() => (bundle ? reviewStats(bundle, progress) : { total: 0, today: 0 }), [bundle, progress])
@@ -113,7 +108,6 @@ export default function Home() {
         <StreakBadge />
         <span style={{ flex: 1 }} />
         <InstallButton />
-        {ai ? <Link href="/mahliyo" className="icon-btn ai-btn" aria-label={t('ai.open')}><img src="/assets/mascot/salom.webp" alt="" aria-hidden="true" /></Link> : null}
         <Link href="/search" className="icon-btn search-btn" aria-label={t('action.search')}><SearchGlyph /></Link>
         <Link href="/settings" className="icon-btn more-btn" aria-label={t('settings.title')}><MoreGlyph /></Link>
       </header>

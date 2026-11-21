@@ -740,21 +740,155 @@ html.lite .lang-scrim { background: color-mix(in srgb, var(--bg) 72%, transparen
   display: inline-block; padding: 0.14em 0.34em 0.46em; margin: -0.14em -0.34em -0.36em; overflow: visible; }
 :root[data-theme='dark'] .brand { background: linear-gradient(180deg, #e3d4ff, #b596f5); -webkit-background-clip: text; background-clip: text; }
 
-/* ---------------------------------------------------------------- Mahliyo AI: her face opens the chat; her answers beside her face */
-.ai-btn { padding: 0; overflow: hidden; }
-.ai-btn img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 6%; transform: scale(1.35); transform-origin: 50% 20%; }
-.ai-hello { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 24px; margin-bottom: 4px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), color-mix(in srgb, var(--primary-soft) 35%, white)); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); }
-:root[data-theme='dark'] .ai-hello { background: linear-gradient(135deg, #2c2152, #241a45); }
-.ai-hello img { width: 64px; height: 76px; object-fit: cover; object-position: 50% 0; flex: none; border-radius: 18px; }
-.ai-hello p { margin: 0; font-size: 0.92rem; line-height: 1.45; color: var(--ink); }
-.ai-suggest { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.ai-suggest .chip { cursor: pointer; animation: rise 0.4s var(--ease) both; animation-delay: calc(var(--i) * 0.06s); }
-.ai-said { display: flex; align-items: flex-end; gap: 8px; align-self: flex-start; max-width: 92%; }
-.ai-said > img { width: 34px; height: 34px; flex: none; border-radius: 50%; object-fit: cover; object-position: 50% 8%;
-  background: color-mix(in srgb, var(--primary-soft) 40%, white); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 25%, transparent); }
-.ai-said .bubble { max-width: none; }
+/* ---------------------------------------------------------------- Mahliyo AI: a tab of her own (her face in a turning ring of
+   light in the dock) and a quiet scene — soft moving light, her portrait in a glowing orb, her answers as rising cards */
+.dock a.dock-ai { overflow: visible; }
+.dock a.dock-ai::after { display: none; }
+.dock-ai img { position: relative; z-index: 1; width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+  background: linear-gradient(160deg, #f3ecff, #e6d9ff); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 6px 14px -6px rgba(105, 57, 200, 0.55);
+  transition: transform 0.3s var(--ease); }
+.dock-ai-ring { position: absolute; inset: 2px; border-radius: 50%; padding: 2.5px;
+  background: conic-gradient(from 0deg, #8a5be6, #d0679a, #f2b23e, #6ec6ff, #8a5be6);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: ai-turn 6s linear infinite; opacity: 0.75; }
+.dock a.dock-ai[aria-current='page'] { background: none; box-shadow: none; }
+.dock a.dock-ai[aria-current='page'] img { transform: scale(1.08); }
+.dock a.dock-ai[aria-current='page'] .dock-ai-ring { opacity: 1; animation-duration: 3s; filter: drop-shadow(0 0 6px rgba(160, 110, 245, 0.7)); }
+@keyframes ai-turn { to { transform: rotate(360deg); } }
+
+.app > .ai-scene { animation: none; }
+.ai-scene { display: flex; flex-direction: column; min-height: calc(100dvh - 160px); }
+.ai-aurora { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.ai-aurora i { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; filter: blur(60px); opacity: 0.5; animation: ai-drift 18s ease-in-out infinite alternate; }
+.ai-aurora i:nth-child(1) { left: -30vmax; top: -25vmax; background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 55%, transparent), transparent); }
+.ai-aurora i:nth-child(2) { right: -35vmax; top: 10vh; background: radial-gradient(closest-side, rgba(236, 120, 170, 0.42), transparent); animation-duration: 22s; animation-delay: -6s; }
+.ai-aurora i:nth-child(3) { left: -10vmax; bottom: -40vmax; background: radial-gradient(closest-side, rgba(110, 190, 255, 0.36), transparent); animation-duration: 26s; animation-delay: -12s; }
+.ai-scene.is-thinking .ai-aurora i { animation-duration: 6s; opacity: 0.68; }
+@keyframes ai-drift { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(6vmax, 4vmax) scale(1.12); } 100% { transform: translate(-4vmax, 7vmax) scale(0.95); } }
+
+/* her orb: the portrait in a circle, a ring of light turning around it, a soft glow that breathes */
+.ai-orb { position: relative; display: inline-grid; place-items: center; flex: none; border-radius: 50%; }
+.ai-orb img { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: 50% 8%;
+  background: radial-gradient(circle at 50% 35%, #fbf8ff, #e4d6ff 70%); }
+.ai-orb-ring { position: absolute; inset: -4px; border-radius: 50%; padding: 3px;
+  background: conic-gradient(from 0deg, #8a5be6, #d0679a, #f2b23e, #6ec6ff, #8a5be6);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: ai-turn 8s linear infinite; }
+.ai-orb-glow { position: absolute; inset: -22%; border-radius: 50%; z-index: 0;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 45%, transparent), transparent); animation: ai-breathe 4s ease-in-out infinite; }
+.ai-scene.is-thinking .ai-orb-ring { animation-duration: 1.4s; filter: drop-shadow(0 0 8px rgba(170, 120, 255, 0.8)); }
+.ai-scene.is-thinking .ai-orb-glow { animation-duration: 1.6s; }
+@keyframes ai-breathe { 0%, 100% { transform: scale(0.92); opacity: 0.65; } 50% { transform: scale(1.06); opacity: 1; } }
+.ai-orb-sm { width: 46px; height: 46px; }
+.ai-orb-xs { width: 30px; height: 30px; }
+.ai-orb-xs .ai-orb-ring { inset: -3px; padding: 2px; }
+.ai-orb-lg { width: 150px; height: 150px; margin: 8px auto 4px; animation: rise 0.6s var(--ease) both; }
+.ai-orb-lg img { object-position: 50% 4%; box-shadow: 0 18px 40px -18px rgba(80, 40, 160, 0.6); }
+
+.ai-top { position: sticky; top: max(8px, env(safe-area-inset-top)); z-index: 5; display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 8px; border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 62%, transparent); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); animation: rise 0.4s var(--ease) both; }
+html.lite .ai-top { background: color-mix(in srgb, var(--bg) 92%, transparent); }
+.ai-name { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ai-status { display: block; font-size: 0.78rem; color: var(--ink-2); }
+.ai-status.is-busy { background: linear-gradient(90deg, var(--ink-2) 0%, var(--primary) 40%, #d0679a 55%, var(--ink-2) 80%); background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: ai-shimmer 1.6s linear infinite; }
+@keyframes ai-shimmer { from { background-position: 110% 0; } to { background-position: -110% 0; } }
+
+.ai-chat { display: flex; flex-direction: column; gap: 12px; padding: 16px 2px 170px; flex: 1; }
+.ai-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding-top: 6px; }
+.ai-greet { margin: 14px 0 0; font-size: 1.5rem; font-weight: 700; color: var(--ink); animation: rise 0.5s 0.1s var(--ease) both; }
+.ai-hello { margin: 0 0 6px; max-width: 34ch; font-size: 0.94rem; line-height: 1.5; color: var(--ink-2); animation: rise 0.5s 0.16s var(--ease) both; }
+.ai-suggest { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.ai-chip { display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; border-radius: 20px; text-align: start; font: inherit; font-size: 0.88rem; line-height: 1.35;
+  color: var(--ink); cursor: pointer; background: var(--glass); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  animation: rise 0.45s var(--ease) both; animation-delay: calc(0.22s + var(--i, 0) * 0.06s); transition: transform 0.2s var(--ease); }
+.ai-chip svg { flex: none; margin-top: 1px; color: var(--primary); }
+.ai-chip:active { transform: scale(0.97); }
+.ai-chip:disabled { opacity: 0.55; cursor: default; }
+.ai-follow { display: flex; justify-content: flex-start; padding-left: 40px; }
+.ai-follow .ai-chip { padding: 8px 12px; border-radius: 999px; font-size: 0.82rem; animation-delay: 0.5s; }
+
+.ai-said { display: flex; align-items: flex-start; gap: 8px; align-self: flex-start; width: 100%; scroll-margin-top: calc(max(8px, env(safe-area-inset-top)) + 76px); }
+.ai-said > img { width: 32px; height: 32px; flex: none; border-radius: 50%; object-fit: cover; margin-top: 2px;
+  background: color-mix(in srgb, var(--primary-soft) 40%, white); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 28%, transparent); }
+.ai-blocks { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ai-blocks > * { animation: rise 0.45s var(--ease) both; animation-delay: calc(var(--i, 0) * 0.12s); }
+.ai-card { margin: 0; padding: 12px 14px; border-radius: 6px 20px 20px 20px; color: var(--ink); font-size: 0.95rem; line-height: 1.55;
+  background: var(--glass); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+.ai-blocks > .ai-card + .ai-card, .ai-blocks > * + .ai-card { border-radius: 20px; }
+.ai-text { white-space: pre-wrap; }
+.ai-steps b { display: block; margin-bottom: 8px; font-size: 0.95rem; }
+.ai-steps ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; position: relative; }
+.ai-steps li { position: relative; display: flex; gap: 10px; align-items: flex-start; }
+.ai-steps li:not(:last-child)::before { content: ''; position: absolute; left: 12px; top: 26px; bottom: -10px; width: 2px; border-radius: 1px;
+  background: color-mix(in srgb, var(--primary) 22%, transparent); }
+.ai-step-n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; font-weight: 700; color: #fff;
+  background: var(--pill); box-shadow: 0 4px 10px -4px rgba(105, 57, 200, 0.6); }
+.ai-steps li > span:last-child { padding-top: 2px; }
+
+.ai-screen { margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.ai-screen > button { border: 0; padding: 0; background: none; cursor: zoom-in; }
+.ai-phone { position: relative; display: block; width: 190px; aspect-ratio: 390 / 844; border-radius: 26px; overflow: hidden;
+  border: 5px solid #1d1530; box-shadow: 0 16px 34px -16px rgba(40, 20, 90, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.4); background: var(--bg); }
+.ai-phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.ai-mark { position: absolute; border-radius: 12px; box-shadow: 0 0 0 2.5px #ff5a8a, 0 0 0 999px rgba(20, 10, 40, 0.28); animation: ai-mark 1.8s ease-in-out infinite; }
+@keyframes ai-mark { 0%, 100% { box-shadow: 0 0 0 2.5px #ff5a8a, 0 0 0 999px rgba(20, 10, 40, 0.28); } 50% { box-shadow: 0 0 0 4px #ff5a8a, 0 0 0 999px rgba(20, 10, 40, 0.18); } }
+.ai-pointer { position: absolute; width: 0; height: 0; }
+.ai-pointer i { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 90, 138, 0.9);
+  box-shadow: 0 0 0 3px #fff, 0 6px 14px rgba(0, 0, 0, 0.3); }
+.ai-pointer i + i { background: none; box-shadow: 0 0 0 3px #ff5a8a; animation: ai-ping 1.4s ease-out infinite; }
+@keyframes ai-ping { from { transform: scale(0.8); opacity: 1; } to { transform: scale(2.6); opacity: 0; } }
+.ai-screen figcaption { max-width: 260px; font-size: 0.84rem; line-height: 1.4; color: var(--ink-2); }
+.ai-zoom { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px;
+  background: rgba(16, 10, 34, 0.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); animation: fade-in 0.25s both; }
+.ai-zoom .ai-phone { width: min(78vw, calc((100dvh - 160px) * 390 / 844)); border-width: 7px; border-radius: 34px; animation: rise 0.35s var(--ease) both; }
+.ai-zoom p { margin: 0; max-width: 34ch; text-align: center; color: #fff; font-size: 0.95rem; line-height: 1.45; }
+.ai-zoom-x { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 14px; }
+
+.ai-link { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; padding: 11px 16px; border-radius: 999px; font-weight: 600; font-size: 0.92rem;
+  color: #fff; background: var(--pill); box-shadow: var(--pill-shadow); text-decoration: none; transition: transform 0.2s var(--ease); }
+.ai-link:active { transform: scale(0.96); }
+
+.ai-reminder { display: flex; align-items: center; gap: 12px; border-radius: 20px; }
+.ai-reminder .grow { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ai-reminder b { font-size: 0.95rem; }
+.ai-reminder .muted { font-size: 0.84rem; line-height: 1.4; }
+.ai-reminder-icon { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; color: #fff; background: linear-gradient(160deg, #f2b23e, #e5793e);
+  box-shadow: 0 8px 16px -8px rgba(229, 121, 62, 0.8); }
+.ai-reminder.is-set .ai-reminder-icon svg { animation: ai-ring 2.4s ease-in-out infinite; transform-origin: 50% 10%; }
+@keyframes ai-ring { 0%, 70%, 100% { transform: rotate(0); } 75% { transform: rotate(14deg); } 80% { transform: rotate(-12deg); } 85% { transform: rotate(8deg); } 90% { transform: rotate(-4deg); } }
+.ai-reminder-time { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+.ai-reminder-state { font-size: 0.78rem; color: var(--ink-2); }
+.ai-reminder-btn { flex: none; min-height: 36px; padding: 0 12px; font-size: 0.82rem; }
+
+.ai-thinking { display: flex; align-items: center; gap: 10px; align-self: flex-start; padding: 8px 14px 8px 8px; border-radius: 999px;
+  background: var(--glass); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); animation: rise 0.35s var(--ease) both; }
+.ai-thinking-text { font-size: 0.86rem; font-weight: 600; background: linear-gradient(90deg, var(--ink-2) 0%, var(--primary) 40%, #d0679a 55%, var(--ink-2) 80%);
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: ai-shimmer 1.6s linear infinite; }
+.ai-thinking .mi-dots { padding: 4px 0 0; }
+.ai-note { text-align: center; margin: 0; font-size: 0.88em; }
 .ai-consultant { margin-top: 6px; align-self: flex-start; min-height: 38px; font-size: 0.86rem; }
+.ai-hero .ai-consultant { align-self: center; }
+
+/* the box to write in: a floating glass pill just above the tab bar */
+.ai-composer { position: fixed; left: 0; right: 0; margin: 0 auto; z-index: 30; bottom: calc(max(14px, env(safe-area-inset-bottom)) + 82px);
+  width: min(400px, calc(100vw - 36px)); display: flex; align-items: flex-end; gap: 8px; padding: 6px 6px 6px 16px; border-radius: 28px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent); border: 1px solid var(--glass-edge); box-shadow: 0 12px 30px -14px rgba(40, 20, 90, 0.45);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4); }
+html.lite .ai-composer { background: color-mix(in srgb, var(--bg) 94%, transparent); }
+.ai-input { flex: 1; min-height: 44px; max-height: 132px; resize: none; border: 0; outline: 0; background: none; padding: 11px 0; font: inherit; font-size: 1rem; line-height: 1.4; color: var(--ink); }
+.ai-input::placeholder { color: var(--ink-2); opacity: 0.8; }
+.ai-send { flex: none; width: 44px; height: 44px; border: 0; border-radius: 50%; display: grid; place-items: center; color: #fff; cursor: pointer;
+  background: var(--pill); box-shadow: var(--pill-shadow); transition: transform 0.2s var(--ease), opacity 0.2s; }
+.ai-send:disabled { opacity: 0.4; cursor: default; }
+.ai-send:not(:disabled):active { transform: scale(0.9); }
+
+html.lite .ai-aurora i { filter: blur(30px); animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .ai-aurora i, .ai-orb-ring, .dock-ai-ring, .ai-orb-glow, .ai-mark, .ai-pointer i + i, .ai-reminder.is-set .ai-reminder-icon svg { animation: none; }
+}
 
 /* ---------------------------------------------------------------- the progress map (garden page): a soft map with contour
    lines; per begun course a winding road from a flag to a cup, its lessons as stops coloured by their tests */

@@ -22,9 +22,11 @@ async function knowledge(sb: SupabaseClient) {
   return known
 }
 
-const Turns = z.array(z.strictObject({ role: z.enum(['user', 'assistant']), content: z.string().trim().min(1).max(1000) }))
+// her own answers come back as she gave them (plain text of her blocks), so they may be longer
+const Turns = z.array(z.strictObject({ role: z.enum(['user', 'assistant']), content: z.string().trim().min(1).max(6000) }))
   .min(1).max(12)
   .refine((t) => t[0].role === 'user' && t[t.length - 1].role === 'user', 'turns must start and end with the learner')
+  .refine((t) => t[t.length - 1].content.length <= 1000, 'a question is at most 1000 characters')
 
 export const mahliyoRoutes: AnyRoute[] = [
   route({
@@ -35,7 +37,11 @@ export const mahliyoRoutes: AnyRoute[] = [
   route({
     method: 'POST', path: '/mahliyo/ask', access: 'public', tag: 'Mahliyo AI',
     summary: "A question to Mahliyo AI (the conversation so far, ending with the learner's question); returns her answer",
-    body: z.strictObject({ token: Token, code: Code.optional(), name: z.string().max(80).optional(), turns: Turns }),
+    body: z.strictObject({
+      token: Token, code: Code.optional(), name: z.string().max(80).optional(), turns: Turns,
+      // what the phone knows about the learner (her lessons, results, weak points) and her clock
+      me: z.string().max(4000).optional(), now: z.iso.datetime({ offset: true }).optional(), tz: z.string().max(64).optional()
+    }),
     handler: async ({ sb, body }) => {
       if (!configured()) throw new ApiError(503, 'not_configured', 'Маҳлиё ҳоло дастрас нест.')
       const turns = body.turns as Turn[]
@@ -46,7 +52,7 @@ export const mahliyoRoutes: AnyRoute[] = [
       const k = await knowledge(sb())
       let a
       try {
-        a = await answer(turns, k.app, k.text)
+        a = await answer(turns, k.app, k.text, { me: body.me, now: body.now, tz: body.tz })
       } catch (e) {
         console.error('[mahliyo] the AI failed', e instanceof Error ? e.message : String(e))
         throw new ApiError(502, 'ai_unavailable', 'Маҳлиё ҳоло ҷавоб дода наметавонад. Каме дертар кӯшиш кунед.')

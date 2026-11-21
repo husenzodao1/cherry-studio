@@ -1,0 +1,146 @@
+'use client'
+
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+
+import type { AiBlock } from '@/lib/aiCatalog'
+import SPOTS from '@/lib/aiSpots.json'
+
+import { cancelReminder, reminderId, setReminder } from '../offline/mahliyo'
+import { usePrefs } from '../prefs'
+import { Icon } from './Icon'
+
+/**
+ * Mahliyo's answer, drawn block by block (each rises in turn): a paragraph, numbered steps, a screenshot
+ * of the app with a pulsing pointer on the place to tap (tap it to see it large), a button to a page, and
+ * a reminder she set (it rings on the phone at that time; it can be taken back).
+ */
+
+/** where each place is on its screenshot, in % of the picture (made by tools/ai-screens) */
+const RECTS = SPOTS as Record<string, { x: number; y: number; w: number; h: number }>
+
+type Reminder = Extract<AiBlock, { type: 'reminder' }>
+type Status = 'set' | 'denied' | 'web' | 'past' | 'cancelled'
+const REM_KEY = 'dk.ai-rem'
+const readRem = (): Record<string, Status> => {
+  try { return JSON.parse(localStorage.getItem(REM_KEY) || '{}') as Record<string, Status> } catch { return {} }
+}
+const writeRem = (id: number, s: Status) => {
+  try { localStorage.setItem(REM_KEY, JSON.stringify({ ...readRem(), [id]: s })) } catch { /* not kept */ }
+}
+
+export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: boolean }) {
+  const [zoom, setZoom] = useState<Extract<AiBlock, { type: 'screen' }> | null>(null)
+  return (
+    <div className="ai-blocks">
+      {blocks.map((b, i) => {
+        const style = { ['--i' as string]: i }
+        switch (b.type) {
+          case 'text':
+            return <p key={i} className="ai-card ai-text" style={style}>{b.text}</p>
+          case 'steps':
+            return (
+              <div key={i} className="ai-card ai-steps" style={style}>
+                {b.title ? <b>{b.title}</b> : null}
+                <ol>{b.items.map((s, n) => <li key={n}><span className="ai-step-n">{n + 1}</span><span>{s}</span></li>)}</ol>
+              </div>
+            )
+          case 'screen':
+            return (
+              <figure key={i} className="ai-screen" style={style}>
+                <button type="button" onClick={() => setZoom(b)} aria-label={b.caption}><Shot spot={b.spot} /></button>
+                {b.caption ? <figcaption>{b.caption}</figcaption> : null}
+              </figure>
+            )
+          case 'link':
+            return b.to.startsWith('/') ? (
+              <Link key={i} href={b.to} className="ai-link" style={style}><span>{b.label}</span><Icon name="arrow" size={18} /></Link>
+            ) : (
+              <a key={i} href={b.to} target="_blank" rel="noopener noreferrer" className="ai-link" style={style}><span>{b.label}</span><Icon name="arrow" size={18} /></a>
+            )
+          case 'reminder':
+            return <ReminderCard key={i} block={b} fresh={fresh} style={style} />
+        }
+      })}
+      {zoom ? (
+        <div className="ai-zoom" role="dialog" aria-modal="true" aria-label={zoom.caption} onClick={() => setZoom(null)}>
+          <Shot spot={zoom.spot} />
+          {zoom.caption ? <p>{zoom.caption}</p> : null}
+          <button type="button" className="icon-btn ai-zoom-x" aria-label="×" onClick={() => setZoom(null)}><Icon name="x" /></button>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+/** A screenshot in a phone's frame, the place marked and a pointer pulsing on it. */
+function Shot({ spot }: { spot: string }) {
+  const r = RECTS[spot]
+  return (
+    <span className="ai-phone">
+      <img src={`/assets/ai-screens/${spot}.webp`} alt="" loading="lazy" />
+      {r ? (
+        <>
+          <span className="ai-mark" style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%` }} />
+          <span className="ai-pointer" style={{ left: `${r.x + r.w / 2}%`, top: `${r.y + r.h / 2}%` }}><i /><i /></span>
+        </>
+      ) : null}
+    </span>
+  )
+}
+
+/** "Today, 20:00" / "Tomorrow, 07:30" / "25.11, 18:00" on the phone's clock. */
+function when(at: string, t: (k: 'ai.today' | 'ai.tomorrow') => string) {
+  const d = new Date(at)
+  const p = (n: number) => String(n).padStart(2, '0')
+  const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  const name = day === today ? t('ai.today') : day === today + 86_400_000 ? t('ai.tomorrow') : `${p(d.getDate())}.${p(d.getMonth() + 1)}`
+  return `${name}, ${p(d.getHours())}:${p(d.getMinutes())}`
+}
+
+/** A reminder she set: set on the phone when her answer comes (once), shown with its time; can be taken back. */
+function ReminderCard({ block, fresh, style }: { block: Reminder; fresh: boolean; style: React.CSSProperties }) {
+  const { t } = usePrefs()
+  const id = reminderId(block.at)
+  const [status, setStatus] = useState<Status | null>(null)
+  const put = async () => {
+    const s = await setReminder(block).catch(() => 'denied' as const)
+    writeRem(id, s)
+    setStatus(s)
+  }
+  useEffect(() => {
+    const known = readRem()[id]
+    if (known) return setStatus(known)
+    if (fresh) void put()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, fresh])
+  const cancel = async () => {
+    await cancelReminder(block.at)
+    writeRem(id, 'cancelled')
+    setStatus('cancelled')
+  }
+  const past = new Date(block.at).getTime() <= Date.now()
+  return (
+    <div className={`ai-card ai-reminder${status === 'set' && !past ? ' is-set' : ''}`} style={style}>
+      <span className="ai-reminder-icon"><Icon name="bell" size={22} /></span>
+      <div className="grow">
+        <b>{block.title}</b>
+        <span className="ai-reminder-time">{when(block.at, t)}</span>
+        {block.text ? <span className="muted">{block.text}</span> : null}
+        <span className="ai-reminder-state" role="status">
+          {status === 'set' ? (past ? t('ai.reminder_done') : t('ai.reminder_set'))
+            : status === 'cancelled' ? t('ai.reminder_cancelled')
+            : status === 'denied' ? t('ai.reminder_denied')
+            : status === 'web' ? t('ai.reminder_web') : null}
+        </span>
+      </div>
+      {status === 'set' && !past ? (
+        <button type="button" className="btn btn-soft ai-reminder-btn" onClick={cancel}>{t('ai.reminder_cancel')}</button>
+      ) : (status === 'cancelled' || status === 'denied' || (!fresh && !status)) && !past ? (
+        <button type="button" className="btn btn-soft ai-reminder-btn" onClick={put}>{t('ai.reminder_put')}</button>
+      ) : null}
+    </div>
+  )
+}

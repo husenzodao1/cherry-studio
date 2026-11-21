@@ -8,15 +8,17 @@ import { LiquidGlass } from '../glass/LiquidGlass'
 import { usePrefs } from '../prefs'
 import { Icon, type IconName } from './Icon'
 
-const ITEMS: { href: string; key: 'nav.home' | 'nav.schools' | 'nav.saved' | 'nav.profile'; icon: IconName; match: RegExp }[] = [
+const ITEMS: { href: string; key: 'nav.home' | 'nav.schools' | 'nav.saved' | 'nav.profile' | 'ai.title'; icon: IconName | 'mahliyo'; match: RegExp }[] = [
   { href: '/', key: 'nav.home', icon: 'home', match: /^\/$/ },
   { href: '/schools', key: 'nav.schools', icon: 'cap', match: /^\/(schools|school|course)(\/|$)/ },
+  // in the middle: Mahliyo AI, her face in a slowly turning ring of light
+  { href: '/mahliyo', key: 'ai.title', icon: 'mahliyo', match: /^\/mahliyo/ },
   { href: '/saved', key: 'nav.saved', icon: 'bookmark', match: /^\/saved/ },
   { href: '/profile', key: 'nav.profile', icon: 'user', match: /^\/(profile|settings)/ }
 ]
 
 /** Screens without the tab bar (reading, tests, signing in, the panel). */
-export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|admin|support|mahliyo)(\/|$)/.test(path)
+export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|admin|support)(\/|$)/.test(path)
 
 /** Floating tab bar in clear, refracting glass; the current tab sits in a raised glass circle. */
 export function Dock() {
@@ -32,8 +34,13 @@ export function Dock() {
         {ITEMS.map((item) => {
           const on = item.match.test(path)
           return (
-            <Link key={item.href} href={item.href} aria-current={on ? 'page' : undefined} aria-label={t(item.key)}>
-              <Icon name={item.icon} size={23} fill={on && item.icon !== 'cap' ? 'currentColor' : 'none'} />
+            <Link key={item.href} href={item.href} aria-current={on ? 'page' : undefined} aria-label={t(item.key)} className={item.icon === 'mahliyo' ? 'dock-ai' : undefined}>
+              {item.icon === 'mahliyo' ? (
+                <>
+                  <span className="dock-ai-ring" aria-hidden="true" />
+                  <img src="/assets/mascot/face.webp" alt="" aria-hidden="true" />
+                </>
+              ) : <Icon name={item.icon} size={23} fill={on && item.icon !== 'cap' ? 'currentColor' : 'none'} />}
             </Link>
           )
         })}
