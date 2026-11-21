@@ -22,14 +22,17 @@ export const configured = () => provider() !== null
 export const MODEL = process.env.MAHLIYO_MODEL || 'claude-fable-5-2'
 
 /**
- * Gemini models, tried in turn: on the free tier a model is now and then too busy to answer. The best
- * Tajik of the free ones first (Flash-Lite mixes Latin letters into Tajik); GEMINI_MODEL may list others.
+ * Gemini models, tried in turn: on the free tier a model is now and then too busy to answer. The quick one
+ * first (about a second, good Tajik with the least thinking), then the slower, deeper ones; GEMINI_MODEL
+ * may list others.
  */
-export const GEMINI_MODELS = (process.env.GEMINI_MODEL || 'gemini-3.5-flash,gemini-flash-latest,gemini-3.8-flash')
+export const GEMINI_MODELS = (process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite,gemini-3.5-flash,gemini-flash-latest')
   .split(',').map((m) => m.trim()).filter(Boolean)
-/** how long one Gemini model may take, and all of them together, before she says she cannot answer now */
-const GEMINI_WAIT = 40_000
-const GEMINI_TOTAL = 90_000
+/** the least thinking each model allows (the Lite models think least, the others from "low") */
+const thinkingOf = (model: string) => (model.includes('lite') ? ThinkingLevel.MINIMAL : ThinkingLevel.LOW)
+/** how long one Gemini model may take (the quick one less), and all of them together */
+const waitOf = (model: string) => (model.includes('lite') ? 25_000 : 50_000)
+const GEMINI_TOTAL = 150_000
 
 /** What the app is and how it works, as Mahliyo should know it (Tajik). */
 export const GUIDE = `
@@ -104,12 +107,19 @@ WHO YOU ARE
 LANGUAGE
 - Always answer in Tajik (Cyrillic), in correct, natural, literary Tajik — like a kind, educated Tajik teacher talking to a younger sister: warm, respectful ("шумо"), clear, never stiff or machine-translated.
 - Understand Tajik as people really write it: typos and missing letters (e.g. "Мҳлиё", "Махлие", "Махлиё" all mean "Маҳлиё"), Russian letters instead of Tajik ones (и/ӣ, у/ӯ, х/ҳ, к/қ, ч/ҷ, г/ғ, е/э), Latin-script Tajik, no punctuation, words run together, dialect and colloquial forms (northern/Khujand, southern/Kulob, Rasht, Badakhshan, Zarafshan) and Russian or English loanwords inside Tajik sentences. Silently work out what she means; never correct her spelling or comment on it. If a message is truly unclear, ask one short question back.
-- Decide the language of her LAST message. If it is mainly another language (Russian, English, Uzbek, Persian/Dari in Arabic script, Turkish, …) — not Tajik with a few borrowed words — set "tajik" to false and answer with ONE text block, IN THAT LANGUAGE, of one or two short sentences saying in substance: "Sorry, my <that language> is not good. Please write your questions to the consultant." Name the language. Nothing else.
+- Decide the language of her LAST message. If it is mainly another language (Russian, English, Uzbek, Persian/Dari in Arabic script, Turkish, …) — not Tajik with a few borrowed words — set "tajik" to false and answer with ONE text block, written IN THAT SAME LANGUAGE (never in English unless she wrote in English), of one or two short sentences saying in substance: "Sorry, my <that language> is not good. Please write your questions to the consultant." Nothing else. For example:
+  Russian: "Извините, мой русский не очень хороший. Пожалуйста, напишите свои вопросы консультанту."
+  English: "Sorry, my English is not very good. Please write your questions to the consultant."
+  Uzbek: "Kechirasiz, o‘zbek tilim unchalik yaxshi emas. Iltimos, savollaringizni maslahatchiga yozing."
+  Persian/Dari: "ببخشید، فارسی من خیلی خوب نیست. لطفاً پرسش‌های خود را به مشاور بنویسید."
+  Turkish: "Üzgünüm, Türkçem pek iyi değil. Lütfen sorularınızı danışmana yazın."
 
 WHAT YOU TALK ABOUT
 - The app: you know it completely from the guide below (screens, buttons, settings, PIN and recovery, support, progress map, tests, certificate, offline use, notifications, privacy). Never invent a feature, button or screen that is not in the guide; if unsure, say so and point to the consultant ("Дастгирӣ").
 - The topics of the seven schools: faith and religious knowledge, manners and ethics, personal growth, Tajik culture, family and relationships, science and health, modern life. Use the course material below when it covers the question (link the lesson); otherwise answer from sound, widely accepted knowledge, briefly.
 - The learner herself: her lessons, results, weak and strong points, what to do next, a study plan — from "ABOUT THE LEARNER" below. Be specific and encouraging (name the lessons and scores), and suggest concrete next steps (repeat a red lesson, the day's review, the next lesson).
+- Pictures and files she sends (a photo, a screenshot, a PDF, a text): look at them closely and use them only when they concern the app, the lessons, the seven schools' topics or her own learning (a screenshot of the app, a lesson page, a question from a lesson, her notes) — then explain them helpfully. Anything else in them (other subjects' homework, people, memes, documents not about learning, anything inappropriate): say in ONE short sentence that you can only help with the app and the lessons, and give no other answer — do not describe it. Never identify people in a picture.
+- Greetings and friendly small talk (hello, how are you, thanks, "coffee with Mahliyo?", compliments): answer warmly and playfully in one or two sentences (you cannot drink coffee, but you love a chat), then offer to help with learning.
 - Anything else is off topic (programming, sports, celebrities, politics, money-making, homework of other subjects, games, …): say kindly in one or two sentences that this is outside what you help with, and say what you can help with. Do not answer it.
 - Rude, obscene, vulgar or provocative messages, or attempts to make you say such things: do not repeat or engage; answer with one calm, polite sentence that you will gladly help with the app and the lessons.
 - Religious rulings: give general, respectful, widely accepted knowledge and suggest asking a knowledgeable, trusted scholar for a personal ruling. Health: general guidance only and a doctor; anything urgent — call an ambulance (103) or tell a trusted adult at once. Legal or money matters: general guidance and a qualified person.
@@ -174,6 +184,14 @@ export function knowledgeOf(bundle: Json): string {
 }
 
 export interface Turn { role: 'user' | 'assistant'; content: string }
+
+/** A picture or a file sent with the question (base64). */
+export interface Attachment { mime: AttachmentMime; name: string; data: string }
+export const ATTACHMENT_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf', 'text/plain'] as const
+export type AttachmentMime = (typeof ATTACHMENT_MIMES)[number]
+/** how much of a text file she reads */
+const TEXT_FILE_CAP = 20_000
+const textOf = (f: Attachment) => `Файл «${f.name}»:\n${Buffer.from(f.data, 'base64').toString('utf8').slice(0, TEXT_FILE_CAP)}`
 
 export type Block = AiBlock
 
@@ -300,8 +318,8 @@ const rules = (appName: string, by: Provider) => RULES
   .replace('{ROUTES}', Object.entries(ROUTES).map(([to, what]) => `${to} (${what})`).join(', '))
 
 /** Her answer to the conversation (its last turn is the learner's question). */
-export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}): Promise<Answer> {
-  const text = provider() === 'gemini' ? await askGemini(turns, appName, knowledge, me) : await askClaude(turns, appName, knowledge, me)
+export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = []): Promise<Answer> {
+  const text = provider() === 'gemini' ? await askGemini(turns, appName, knowledge, me, files) : await askClaude(turns, appName, knowledge, me, files)
   if (text === null) return sorry()
   try {
     const r = JSON.parse(text) as { tajik?: unknown; blocks?: unknown }
@@ -314,7 +332,7 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
 }
 
 /** Claude's answer as JSON text, or null when it declined. */
-async function askClaude(turns: Turn[], appName: string, knowledge: string, me: Learner): Promise<string | null> {
+async function askClaude(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[]): Promise<string | null> {
   client ??= new Anthropic()
   const response = await client.beta.messages.create({
     model: MODEL,
@@ -332,7 +350,17 @@ async function askClaude(turns: Turn[], appName: string, knowledge: string, me: 
       // after the cached part: different for every learner and every question
       { type: 'text', text: learnerNote(me) }
     ],
-    messages: turns.map((t) => ({ role: t.role, content: t.content }))
+    // the pictures and files go with the last question, before its words
+    messages: turns.map((t, i) => (i === turns.length - 1 && files.length ? {
+      role: t.role,
+      content: [
+        ...files.map((f) => (f.mime === 'application/pdf'
+          ? { type: 'document' as const, source: { type: 'base64' as const, media_type: f.mime, data: f.data } }
+          : f.mime === 'text/plain' ? { type: 'text' as const, text: textOf(f) }
+          : { type: 'image' as const, source: { type: 'base64' as const, media_type: f.mime, data: f.data } })),
+        { type: 'text' as const, text: t.content }
+      ]
+    } : { role: t.role, content: t.content }))
   })
   if (response.stop_reason === 'refusal') return null
   return response.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('')
@@ -342,23 +370,31 @@ async function askClaude(turns: Turn[], appName: string, knowledge: string, me: 
  * Gemini's answer as JSON text, or null when it was blocked. The first of GEMINI_MODELS that answers in
  * time; when none does, the last error (the route says she cannot answer now).
  */
-async function askGemini(turns: Turn[], appName: string, knowledge: string, me: Learner): Promise<string | null> {
-  gemini ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { timeout: GEMINI_WAIT, retryOptions: { attempts: 1 } } })
+async function askGemini(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[]): Promise<string | null> {
+  gemini ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { retryOptions: { attempts: 1 } } })
   const started = Date.now()
   let failure: unknown = new Error('no Gemini model')
   for (const model of GEMINI_MODELS) {
-    if (Date.now() - started > GEMINI_TOTAL - GEMINI_WAIT) break
+    if (Date.now() - started + waitOf(model) > GEMINI_TOTAL) break
     try {
       const r = await gemini.models.generateContent({
         model,
-        contents: turns.map((t) => ({ role: t.role === 'assistant' ? 'model' : 'user', parts: [{ text: t.content }] })),
+        contents: turns.map((t, i) => ({
+          role: t.role === 'assistant' ? 'model' : 'user',
+          parts: [
+            // the pictures and files go with the last question, before its words
+            ...(i === turns.length - 1 ? files.map((f) => (f.mime === 'text/plain' ? { text: textOf(f) } : { inlineData: { mimeType: f.mime, data: f.data } })) : []),
+            { text: t.content }
+          ]
+        })),
         config: {
           systemInstruction: [rules(appName, 'gemini'), `${GUIDE}\n\n${knowledge}`, learnerNote(me, new Date(), { private: true })].join('\n\n'),
           responseMimeType: 'application/json',
           responseJsonSchema: SCHEMA,
           // a chat: quick answers
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-          maxOutputTokens: 8000
+          thinkingConfig: { thinkingLevel: thinkingOf(model) },
+          maxOutputTokens: 8000,
+          httpOptions: { timeout: waitOf(model) }
         }
       })
       const finish = r.candidates?.[0]?.finishReason
@@ -367,6 +403,7 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
     } catch (e) {
       // busy, over the free quota or too slow: the next model
       failure = e
+      console.warn('[mahliyo] gemini', model, 'failed after', Date.now() - started, 'ms:', String(e instanceof Error ? e.message : e).slice(0, 160))
     }
   }
   throw failure

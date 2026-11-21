@@ -147,4 +147,36 @@ describe('Mahliyo AI questions', () => {
     for (let i = 0; i < 30; i++) await as(db, null, (tx) => rpc(tx, 'api_mahliyo_ask', { p_token_hash: busy, p_code_hash: null, p_name: null, p_question: `савол ${i}` }))
     await expectError(as(db, null, (tx) => rpc(tx, 'api_mahliyo_ask', { p_token_hash: busy, p_code_hash: null, p_name: null, p_question: 'боз' })), 'rate_limited')
   })
+
+  it('in the background: pending, then her answer with its blocks for the phone that asked; stopped or failed questions say so', async () => {
+    const me = hash('bg-phone')
+    const ask = (q: string) => as(db, null, (tx) => rpc(tx, 'api_mahliyo_ask', { p_token_hash: me, p_code_hash: null, p_name: null, p_question: q }))
+    const result = (id: string, phone = me) => as(db, null, (tx) => rpc(tx, 'api_mahliyo_result', { p_id: id, p_token_hash: phone }))
+    const id = await ask('PIN-ро чӣ тавр иваз кунам?')
+    expect(await result(id)).toEqual({ status: 'pending' })
+    // another phone cannot read it
+    await expectError(result(id, hash('other-phone')), 'not_found')
+    const blocks = [{ type: 'text', text: 'Ба «Танзимот» дароед.' }, { type: 'screen', spot: 'settings.pin', caption: 'Инҷо' }]
+    await as(db, null, (tx) => rpc(tx, 'api_mahliyo_answer', { p_id: id, p_answer: 'Ба «Танзимот» дароед.', p_tajik: true, p_blocks: blocks }))
+    expect(await result(id)).toEqual({ status: 'done', tajik: true, reply: 'Ба «Танзимот» дароед.', blocks })
+    // stopped by the learner (only from her phone): her late answer is not kept
+    const stopped = await ask('Савол')
+    await as(db, null, (tx) => rpc(tx, 'api_mahliyo_stop', { p_id: stopped, p_token_hash: hash('other-phone') }))
+    expect(await result(stopped)).toEqual({ status: 'pending' })
+    await as(db, null, (tx) => rpc(tx, 'api_mahliyo_stop', { p_id: stopped, p_token_hash: me }))
+    await as(db, null, (tx) => rpc(tx, 'api_mahliyo_answer', { p_id: stopped, p_answer: 'дер', p_tajik: true, p_blocks: blocks }))
+    expect(await result(stopped)).toEqual({ status: 'failed', reason: 'stopped' })
+    // the AI failed
+    const failed = await ask('Боз савол')
+    await as(db, null, (tx) => rpc(tx, 'api_mahliyo_fail', { p_id: failed, p_reason: 'busy' }))
+    expect(await result(failed)).toEqual({ status: 'failed', reason: 'busy' })
+    // a question nobody answered in five minutes
+    const old = await ask('Кӯҳна')
+    await db.query(`update public.mahliyo_questions set created_at = now() - interval '6 minutes' where id = $1`, [old])
+    expect(await result(old)).toEqual({ status: 'failed', reason: 'timeout' })
+    // blocks that are not a list are not kept
+    const odd = await ask('Тоқ')
+    await as(db, null, (tx) => rpc(tx, 'api_mahliyo_answer', { p_id: odd, p_answer: 'ҳа', p_tajik: true, p_blocks: { a: 1 } }))
+    expect(await result(odd)).toMatchObject({ status: 'done', blocks: null })
+  })
 })

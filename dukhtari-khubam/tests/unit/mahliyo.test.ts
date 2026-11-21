@@ -8,7 +8,7 @@ import { aboutMe, localIso, reminderId } from '@/web/offline/mahliyo'
 const create = vi.fn()
 vi.mock('@anthropic-ai/sdk', () => ({ default: class { beta = { messages: { create } } } }))
 const generate = vi.fn()
-vi.mock('@google/genai', () => ({ GoogleGenAI: class { models = { generateContent: generate } }, ThinkingLevel: { LOW: 'LOW' } }))
+vi.mock('@google/genai', () => ({ GoogleGenAI: class { models = { generateContent: generate } }, ThinkingLevel: { LOW: 'LOW', MINIMAL: 'MINIMAL' } }))
 
 const { answer, cleanBlocks, configured, GEMINI_MODELS, knowledgeOf, KNOWLEDGE_CAP, learnerNote, MODEL, plainOf, provider, SORRY } = await import('@/server/mahliyo')
 
@@ -191,14 +191,14 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     const a = await answer(turns, 'Гулдухтар', 'ДОНИШ', me)
     expect(a).toMatchObject({ tajik: true, blocks: [{ type: 'text', text: 'Ба «Танзимот» дароед.' }, { type: 'screen', spot: 'settings.pin', caption: 'Инҷо' }] })
     const req = generate.mock.calls[0][0]
-    expect(GEMINI_MODELS[0]).toBe('gemini-3.5-flash')
-    expect(req.model).toBe('gemini-3.5-flash')
+    expect(GEMINI_MODELS[0]).toBe('gemini-3.1-flash-lite')
+    expect(req.model).toBe('gemini-3.1-flash-lite')
     expect(req.contents).toEqual([
       { role: 'user', parts: [{ text: 'Мҳлиё, пин кодро чи хел иваз кунам?' }] },
       { role: 'model', parts: [{ text: 'Аввал…' }] },
       { role: 'user', parts: [{ text: 'Нафаҳмидам' }] }
     ])
-    expect(req.config).toMatchObject({ responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'LOW' } })
+    expect(req.config).toMatchObject({ responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'MINIMAL' } })
     expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(5)
     const system = req.config.systemInstruction as string
     for (const s of ['«Гулдухтар»', 'Gratorslab', 'Your AI runs on Gemini by Google', 'ДОНИШ', 'Study days: 5', 'HER CURRENT TIME: 2026-11-21T14:00:00+05:00']) expect(system).toContain(s)
@@ -223,7 +223,44 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     expect((await answer(turns, 'Г', '', me)).reply).toBe(SORRY)
   })
 
-  it('without "private" the learner note keeps her name (for Claude)', () => {
+  it('pictures and files go with the last question, before its words (a text file as its text)', async () => {
+    generate.mockResolvedValue(ok([{ type: 'text', text: 'Дар расм тугмаи «Танзимот» аст.' }]))
+    const files = [
+      { mime: 'image/jpeg' as const, name: 'screen.jpg', data: 'AAAA' },
+      { mime: 'application/pdf' as const, name: 'dars.pdf', data: 'BBBB' },
+      { mime: 'text/plain' as const, name: 'notes.txt', data: Buffer.from('Ёддошти ман').toString('base64') }
+    ]
+    await answer(turns, 'Г', '', me, files)
+    const req = generate.mock.calls[0][0]
+    expect(req.contents[0].parts).toEqual([{ text: 'Мҳлиё, пин кодро чи хел иваз кунам?' }])
+    expect(req.contents[2].parts).toEqual([
+      { inlineData: { mimeType: 'image/jpeg', data: 'AAAA' } },
+      { inlineData: { mimeType: 'application/pdf', data: 'BBBB' } },
+      { text: 'Файл «notes.txt»:\nЁддошти ман' },
+      { text: 'Нафаҳмидам' }
+    ])
+    expect(req.config.systemInstruction).toContain('Pictures and files she sends')
+    // and to Claude
+    vi.stubEnv('ANTHROPIC_API_KEY', 'k')
+    create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{"tajik":true,"blocks":[{"type":"text","text":"Ҳа"}]}' }] })
+    await answer(turns, 'Г', '', me, files)
+    const msgs = create.mock.calls[0][0].messages
+    expect(msgs[0]).toEqual({ role: 'user', content: 'Мҳлиё, пин кодро чи хел иваз кунам?' })
+    expect(msgs[2].content).toEqual([
+      { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: 'AAAA' } },
+      { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: 'BBBB' } },
+      { type: 'text', text: 'Файл «notes.txt»:\nЁддошти ман' },
+      { type: 'text', text: 'Нафаҳмидам' }
+    ])
+  })
+
+  it('the quick model thinks least; the others from "low"', async () => {
+    generate.mockRejectedValueOnce(new Error('busy')).mockResolvedValueOnce(ok([{ type: 'text', text: 'Ҳа' }]))
+    await answer(turns, 'Г', '', me)
+    expect(generate.mock.calls.map((c) => [c[0].model, c[0].config.thinkingConfig.thinkingLevel])).toEqual([['gemini-3.1-flash-lite', 'MINIMAL'], ['gemini-3.5-flash', 'LOW']])
+  })
+
+    it('without "private" the learner note keeps her name (for Claude)', () => {
     expect(learnerNote(me)).toContain('Name: Малика')
     expect(learnerNote(me, new Date(), { private: true })).toContain('not shared with you')
   })

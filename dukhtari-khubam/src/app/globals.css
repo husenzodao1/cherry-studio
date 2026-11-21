@@ -742,18 +742,40 @@ html.lite .lang-scrim { background: color-mix(in srgb, var(--bg) 72%, transparen
 
 /* ---------------------------------------------------------------- Mahliyo AI: a tab of her own (her face in a turning ring of
    light in the dock) and a quiet scene — soft moving light, her portrait in a glowing orb, her answers as rising cards */
-.dock a.dock-ai { overflow: visible; }
-.dock a.dock-ai::after { display: none; }
-.dock-ai img { position: relative; z-index: 1; width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
-  background: linear-gradient(160deg, #f3ecff, #e6d9ff); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 6px 14px -6px rgba(105, 57, 200, 0.55);
-  transition: transform 0.3s var(--ease); }
-.dock-ai-ring { position: absolute; inset: 2px; border-radius: 50%; padding: 2.5px;
+/* her tab: raised on a soft glass dome above the bar, her picture in a circle, her head rising out of it */
+.dock-gap { flex: none; width: 66px; }
+.dock-dome { position: absolute; left: 50%; bottom: 71px; width: 140px; height: 36px; margin-left: -70px; pointer-events: none;
+  clip-path: path('M0 36C26 36 34 2 70 2s44 34 70 34z');
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.74));
+  -webkit-backdrop-filter: blur(40px) saturate(1.5); backdrop-filter: blur(40px) saturate(1.5); }
+:root[data-theme='dark'] .dock-dome { background: linear-gradient(180deg, rgba(56, 42, 98, 0.8), rgba(48, 36, 84, 0.68)); }
+html.lite .dock-dome { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(255, 255, 255, 0.96); }
+:root[data-theme='dark'].lite .dock-dome { background: rgba(46, 35, 82, 0.97); }
+.dock-ai { position: absolute; left: 50%; bottom: 36px; z-index: 2; width: 62px; height: 84px; margin-left: -31px; pointer-events: auto;
+  -webkit-tap-highlight-color: transparent; outline-offset: 4px; }
+/* the circle */
+.dock-ai::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 62px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 28%, #faf7ff, #e6dbfb 62%, #d6c6f6);
+  box-shadow: 0 0 0 2.5px #fff, 0 12px 22px -10px rgba(105, 57, 200, 0.55); transition: box-shadow 0.3s var(--ease); }
+:root[data-theme='dark'] .dock-ai::before { background: radial-gradient(circle at 50% 28%, #efe8ff, #cdbcf5 62%, #b8a2ee);
+  box-shadow: 0 0 0 2.5px rgba(255, 255, 255, 0.85), 0 12px 24px -10px rgba(0, 0, 0, 0.7); }
+.dock-ai[aria-current='page']::before { box-shadow: 0 0 0 2.5px #fff, 0 0 0 5.5px color-mix(in srgb, var(--primary) 50%, transparent),
+  0 12px 26px -10px rgba(105, 57, 200, 0.75); }
+/* her picture: inside the circle, and above it only her head */
+.dock-ai-fig { position: absolute; inset: 0; transform-origin: 50% 100%; transition: transform 0.25s var(--ease);
+  -webkit-mask: radial-gradient(31px circle at 50% calc(100% - 31px), #000 30.5px, transparent 31px), linear-gradient(#000 0 0) top / 100% calc(100% - 31px) no-repeat;
+  mask: radial-gradient(31px circle at 50% calc(100% - 31px), #000 30.5px, transparent 31px), linear-gradient(#000 0 0) top / 100% calc(100% - 31px) no-repeat; }
+.dock-ai-fig img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; animation: dock-ai-peek 4.5s ease-in-out infinite; }
+.dock-ai:active .dock-ai-fig { transform: scale(0.93); }
+@keyframes dock-ai-peek { 0%, 100% { transform: translateY(1px); } 50% { transform: translateY(-1.5px); } }
+/* she answers in the background: a ring of light turns around her circle; an answer not yet seen: a dot */
+.dock-ai.is-thinking::after { content: ''; position: absolute; left: -4px; right: -4px; bottom: -4px; height: 70px; border-radius: 50%; padding: 2.5px;
   background: conic-gradient(from 0deg, #8a5be6, #d0679a, #f2b23e, #6ec6ff, #8a5be6);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
-  animation: ai-turn 6s linear infinite; opacity: 0.75; }
-.dock a.dock-ai[aria-current='page'] { background: none; box-shadow: none; }
-.dock a.dock-ai[aria-current='page'] img { transform: scale(1.08); }
-.dock a.dock-ai[aria-current='page'] .dock-ai-ring { opacity: 1; animation-duration: 3s; filter: drop-shadow(0 0 6px rgba(160, 110, 245, 0.7)); }
+  animation: ai-turn 1.6s linear infinite; pointer-events: none; }
+.dock-ai-news { position: absolute; right: 2px; bottom: 46px; z-index: 3; width: 13px; height: 13px; border-radius: 50%; background: #ff4f7e;
+  box-shadow: 0 0 0 2.5px #fff, 0 4px 10px rgba(255, 79, 126, 0.55); animation: ai-news 1.8s ease-in-out infinite; }
+@keyframes ai-news { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
 @keyframes ai-turn { to { transform: rotate(360deg); } }
 
 .app > .ai-scene { animation: none; }
@@ -785,30 +807,44 @@ html.lite .lang-scrim { background: color-mix(in srgb, var(--bg) 72%, transparen
 .ai-orb-lg { width: 150px; height: 150px; margin: 8px auto 4px; animation: rise 0.6s var(--ease) both; }
 .ai-orb-lg img { object-position: 50% 4%; box-shadow: 0 18px 40px -18px rgba(80, 40, 160, 0.6); }
 
-.ai-top { position: sticky; top: max(8px, env(safe-area-inset-top)); z-index: 5; display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 8px; border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 62%, transparent); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); animation: rise 0.4s var(--ease) both; }
-html.lite .ai-top { background: color-mix(in srgb, var(--bg) 92%, transparent); }
+.ai-top { display: flex; align-items: center; gap: 12px; padding: 6px 2px 0; animation: rise 0.4s var(--ease) both; }
 .ai-name { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
 .ai-status { display: block; font-size: 0.78rem; color: var(--ink-2); }
 .ai-status.is-busy { background: linear-gradient(90deg, var(--ink-2) 0%, var(--primary) 40%, #d0679a 55%, var(--ink-2) 80%); background-size: 220% 100%;
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: ai-shimmer 1.6s linear infinite; }
 @keyframes ai-shimmer { from { background-position: 110% 0; } to { background-position: -110% 0; } }
 
-.ai-chat { display: flex; flex-direction: column; gap: 12px; padding: 16px 2px 170px; flex: 1; }
+.ai-chat { display: flex; flex-direction: column; gap: 12px; padding: 16px 2px 230px; flex: 1; }
 .ai-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding-top: 6px; }
-.ai-greet { margin: 14px 0 0; font-size: 1.5rem; font-weight: 700; color: var(--ink); animation: rise 0.5s 0.1s var(--ease) both; }
-.ai-hello { margin: 0 0 6px; max-width: 34ch; font-size: 0.94rem; line-height: 1.5; color: var(--ink-2); animation: rise 0.5s 0.16s var(--ease) both; }
-.ai-suggest { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-.ai-chip { display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; border-radius: 20px; text-align: start; font: inherit; font-size: 0.88rem; line-height: 1.35;
-  color: var(--ink); cursor: pointer; background: var(--glass); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow);
-  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
-  animation: rise 0.45s var(--ease) both; animation-delay: calc(0.22s + var(--i, 0) * 0.06s); transition: transform 0.2s var(--ease); }
-.ai-chip svg { flex: none; margin-top: 1px; color: var(--primary); }
-.ai-chip:active { transform: scale(0.97); }
+.ai-greet { position: relative; display: grid; place-items: center; min-height: 2.5em; margin: 16px 0 0; font-size: 1.45rem; font-weight: 700; line-height: 1.25; color: var(--ink); }
+/* each line comes in from a soft blur and leaves the same way */
+.ai-greet-line { display: block; max-width: 22ch; animation: ai-line 3.6s var(--ease) both; }
+@keyframes ai-line {
+  0% { opacity: 0; transform: translateY(10px); filter: blur(6px); }
+  14%, 84% { opacity: 1; transform: none; filter: blur(0); }
+  100% { opacity: 0; transform: translateY(-8px); filter: blur(6px); }
+}
+.ai-hello { margin: 0 0 4px; max-width: 30ch; font-size: 0.92rem; line-height: 1.45; color: var(--ink-2); animation: rise 0.5s 0.16s var(--ease) both; }
+/* two rows of short questions laid like bricks, gliding past in opposite ways, fading in and out at the edges */
+.ai-marquee { display: flex; flex-direction: column; gap: 2px; width: calc(100% + 36px); margin: 6px -18px 0; animation: fade-in 0.8s 0.3s both;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent); mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent); }
+.ai-row { overflow: hidden; padding: 6px 0 16px; }
+.ai-track { display: flex; gap: 10px; width: max-content; animation: ai-glide 46s linear infinite; }
+.ai-row:nth-child(2) .ai-track { margin-inline-start: -64px; animation-duration: 54s; animation-direction: reverse; }
+.ai-marquee:hover .ai-track, .ai-marquee:active .ai-track, .ai-marquee:focus-within .ai-track { animation-play-state: paused; }
+@keyframes ai-glide { to { transform: translateX(calc(-50% - 5px)); } }
+.ai-chip { flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; white-space: nowrap; font: inherit; font-size: 0.88rem; font-weight: 500;
+  color: var(--ink); cursor: pointer; background: color-mix(in srgb, var(--bg) 35%, rgba(255, 255, 255, 0.82)); border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 22px -14px rgba(70, 40, 140, 0.32), 0 2px 6px -3px rgba(70, 40, 140, 0.12); transition: transform 0.2s var(--ease), box-shadow 0.2s; }
+:root[data-theme='dark'] .ai-chip { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.12); box-shadow: 0 10px 22px -14px rgba(0, 0, 0, 0.7); }
+.ai-chip svg { flex: none; color: var(--primary); }
+.ai-chip-icon { font-size: 1.05em; line-height: 1; }
+.ai-chip:active { transform: scale(0.96); }
 .ai-chip:disabled { opacity: 0.55; cursor: default; }
-.ai-follow { display: flex; justify-content: flex-start; padding-left: 40px; }
-.ai-follow .ai-chip { padding: 8px 12px; border-radius: 999px; font-size: 0.82rem; animation-delay: 0.5s; }
+.ai-follow { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; animation: rise 0.45s 0.5s var(--ease) both; }
+.ai-follow .ai-chip { padding: 8px 13px; font-size: 0.82rem; }
+.ai-chip-quiet { background: none; border-color: color-mix(in srgb, var(--ink-2) 18%, transparent); box-shadow: none; color: var(--ink-2); }
+.ai-chip-quiet svg { color: var(--ink-2); }
 
 .ai-said { display: flex; align-items: flex-start; gap: 8px; align-self: flex-start; width: 100%; scroll-margin-top: calc(max(8px, env(safe-area-inset-top)) + 76px); }
 .ai-said > img { width: 32px; height: 32px; flex: none; border-radius: 50%; object-fit: cover; margin-top: 2px;
@@ -847,8 +883,11 @@ html.lite .ai-top { background: color-mix(in srgb, var(--bg) 92%, transparent); 
 .ai-zoom p { margin: 0; max-width: 34ch; text-align: center; color: #fff; font-size: 0.95rem; line-height: 1.45; }
 .ai-zoom-x { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 14px; }
 
-.ai-link { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; padding: 11px 16px; border-radius: 999px; font-weight: 600; font-size: 0.92rem;
-  color: #fff; background: var(--pill); box-shadow: var(--pill-shadow); text-decoration: none; transition: transform 0.2s var(--ease); }
+.ai-link { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; font-weight: 600; font-size: 0.84rem;
+  color: var(--primary); text-decoration: none; background: color-mix(in srgb, var(--primary) 8%, rgba(255, 255, 255, 0.8));
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent); box-shadow: 0 6px 14px -10px rgba(105, 57, 200, 0.45);
+  transition: transform 0.2s var(--ease), background 0.2s; }
+:root[data-theme='dark'] .ai-link { color: #d9c8ff; background: color-mix(in srgb, var(--primary) 16%, transparent); border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
 .ai-link:active { transform: scale(0.96); }
 
 .ai-reminder { display: flex; align-items: center; gap: 12px; border-radius: 20px; }
@@ -872,22 +911,84 @@ html.lite .ai-top { background: color-mix(in srgb, var(--bg) 92%, transparent); 
 .ai-consultant { margin-top: 6px; align-self: flex-start; min-height: 38px; font-size: 0.86rem; }
 .ai-hero .ai-consultant { align-self: center; }
 
+/* without internet: a quiet line under her name */
+.ai-offline { display: flex; align-items: center; gap: 10px; margin: 12px 0 0; padding: 10px 14px; border-radius: 18px; font-size: 0.86rem; line-height: 1.4;
+  color: var(--ink); background: color-mix(in srgb, #f2b23e 18%, var(--bg));
+  border: 1px solid color-mix(in srgb, #f2b23e 35%, transparent); animation: rise 0.35s var(--ease) both; }
+.ai-offline svg { flex: none; color: #d98a1c; }
+/* her questions: a bubble (a tap shows what can be done with it) and, under the last, edit and copy */
+.ai-asked { align-self: flex-end; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; max-width: 84%; }
+.ai-asked .bubble { max-width: 100%; border: 0; font: inherit; text-align: start; cursor: pointer; }
+.ai-asked.is-editing .bubble { opacity: 0.55; }
+.ai-acts { display: flex; gap: 2px; animation: fade-in 0.3s both; }
+/* on its way, then arrived (while she thinks) */
+.ai-delivery { display: inline-flex; align-items: center; gap: 5px; padding: 2px 4px; font-size: 0.75rem; color: var(--ink-2); animation: fade-in 0.25s both; }
+.ai-delivery svg { color: #22a06b; }
+.ai-delivery.is-sending svg { color: var(--ink-2); animation: ai-turn 1.2s linear infinite; }
+/* pictures and files with a question */
+.ai-attached { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.ai-attached img { width: 92px; height: 92px; object-fit: cover; border-radius: 16px; box-shadow: 0 8px 18px -10px rgba(40, 20, 90, 0.5); }
+.ai-file-doc { display: inline-flex; align-items: center; gap: 6px; max-width: 180px; padding: 8px 10px; border-radius: 14px; font-size: 0.8rem; color: var(--ink);
+  background: var(--glass); border: 1px solid var(--glass-edge); }
+.ai-file-doc span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-file-doc svg { flex: none; color: var(--primary); }
+.ai-acts-start { margin-top: 4px; }
+.ai-act { width: 32px; height: 32px; border: 0; border-radius: 50%; display: grid; place-items: center; background: none; color: var(--ink-2); cursor: pointer;
+  opacity: 0.7; transition: background 0.2s, opacity 0.2s, transform 0.2s var(--ease); }
+.ai-act:hover, .ai-act:focus-visible { opacity: 1; background: color-mix(in srgb, var(--primary) 10%, transparent); }
+.ai-act:active { transform: scale(0.9); }
+/* a fresh answer: each block in its turn, its words one by one */
+.ai-blocks.is-fresh > * { animation-delay: var(--at); }
+.ai-blocks.is-fresh .ai-w { display: inline; animation: ai-word 0.42s var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--w)); }
+.ai-blocks.is-fresh .ai-steps li > .ai-step-n { animation: ai-word 0.42s var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--w)); }
+@keyframes ai-word { from { opacity: 0; filter: blur(4px); } to { opacity: 1; filter: none; } }
+/* she thinks; after a while, a word that she takes her time */
+.ai-thinking-row { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.ai-slow { margin: 0 0 0 6px; max-width: 34ch; font-size: 0.8rem; line-height: 1.4; color: var(--ink-2); animation: rise 0.4s var(--ease) both; }
+/* no answer: why, and what can be done */
+.ai-problem { display: flex; align-items: flex-start; gap: 8px; align-self: flex-start; max-width: 92%; animation: rise 0.4s var(--ease) both; }
+.ai-problem > img { width: 32px; height: 32px; flex: none; border-radius: 50%; object-fit: cover; filter: grayscale(0.2);
+  background: color-mix(in srgb, var(--primary-soft) 40%, white); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent); }
+.ai-problem p { margin: 0; padding: 11px 14px; border-radius: 6px 20px 20px 20px; font-size: 0.93rem; line-height: 1.5; color: var(--ink);
+  background: var(--glass); border: 1px solid color-mix(in srgb, #ff6b8a 26%, var(--glass-edge)); box-shadow: var(--glass-shadow); }
+.ai-problem.is-stopped p { border-color: var(--glass-edge); color: var(--ink-2); }
+.ai-follow-in { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ai-follow-in .ai-chip { padding: 8px 13px; font-size: 0.82rem; }
+
 /* the box to write in: a floating glass pill just above the tab bar */
-.ai-composer { position: fixed; left: 0; right: 0; margin: 0 auto; z-index: 30; bottom: calc(max(14px, env(safe-area-inset-bottom)) + 82px);
-  width: min(400px, calc(100vw - 36px)); display: flex; align-items: flex-end; gap: 8px; padding: 6px 6px 6px 16px; border-radius: 28px;
+.ai-composer { position: fixed; left: 0; right: 0; margin: 0 auto; z-index: 30; bottom: calc(max(14px, env(safe-area-inset-bottom)) + 136px);
+  width: min(400px, calc(100vw - 36px)); display: flex; flex-direction: column; gap: 4px; padding: 6px 6px 6px 16px; border-radius: 28px;
   background: color-mix(in srgb, var(--bg) 70%, transparent); border: 1px solid var(--glass-edge); box-shadow: 0 12px 30px -14px rgba(40, 20, 90, 0.45);
   -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4); }
 html.lite .ai-composer { background: color-mix(in srgb, var(--bg) 94%, transparent); }
+.ai-composer-row { display: flex; align-items: flex-end; gap: 6px; }
+.ai-attach { flex: none; width: 40px; height: 44px; margin-left: -10px; border: 0; border-radius: 50%; display: grid; place-items: center; background: none; color: var(--ink-2);
+  cursor: pointer; transition: color 0.2s, transform 0.2s var(--ease); }
+.ai-attach:not(:disabled):active { transform: scale(0.9); }
+.ai-attach:disabled { opacity: 0.4; cursor: default; }
+.ai-files { display: flex; gap: 8px; padding: 6px 0 2px; overflow-x: auto; animation: fade-in 0.25s both; }
+.ai-file { position: relative; flex: none; }
+.ai-file > img { display: block; width: 56px; height: 56px; object-fit: cover; border-radius: 14px; }
+.ai-file .ai-file-doc { max-width: 150px; height: 56px; }
+.ai-file-x { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  color: #fff; background: rgba(30, 20, 50, 0.78); box-shadow: 0 0 0 2px #fff; }
+.ai-editing { display: flex; align-items: center; gap: 6px; padding: 4px 0 0; font-size: 0.78rem; font-weight: 600; color: var(--primary); animation: fade-in 0.25s both; }
+.ai-editing .ai-act { width: 26px; height: 26px; }
+.ai-composer.is-editing { border-radius: 24px; box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 35%, transparent), 0 12px 30px -14px rgba(40, 20, 90, 0.45); }
 .ai-input { flex: 1; min-height: 44px; max-height: 132px; resize: none; border: 0; outline: 0; background: none; padding: 11px 0; font: inherit; font-size: 1rem; line-height: 1.4; color: var(--ink); }
 .ai-input::placeholder { color: var(--ink-2); opacity: 0.8; }
 .ai-send { flex: none; width: 44px; height: 44px; border: 0; border-radius: 50%; display: grid; place-items: center; color: #fff; cursor: pointer;
   background: var(--pill); box-shadow: var(--pill-shadow); transition: transform 0.2s var(--ease), opacity 0.2s; }
 .ai-send:disabled { opacity: 0.4; cursor: default; }
 .ai-send:not(:disabled):active { transform: scale(0.9); }
+/* while she answers, the button stops her */
+.ai-send.is-stop { background: var(--ink); box-shadow: 0 6px 14px -6px rgba(20, 10, 40, 0.5); animation: fade-in 0.2s both; }
+:root[data-theme='dark'] .ai-send.is-stop { background: #f3eeff; color: #1b1433; }
 
 html.lite .ai-aurora i { filter: blur(30px); animation: none; }
 @media (prefers-reduced-motion: reduce) {
-  .ai-aurora i, .ai-orb-ring, .dock-ai-ring, .ai-orb-glow, .ai-mark, .ai-pointer i + i, .ai-reminder.is-set .ai-reminder-icon svg { animation: none; }
+  .ai-track, .ai-greet-line, .ai-blocks.is-fresh .ai-w, .dock-ai.is-thinking::after,
+  .ai-aurora i, .ai-orb-ring, .dock-ai-fig img, .ai-orb-glow, .ai-mark, .ai-pointer i + i, .ai-reminder.is-set .ai-reminder-icon svg { animation: none; }
 }
 
 /* ---------------------------------------------------------------- the progress map (garden page): a soft map with contour

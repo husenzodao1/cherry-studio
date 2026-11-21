@@ -13,8 +13,39 @@ import { Icon } from './Icon'
 /**
  * Mahliyo's answer, drawn block by block (each rises in turn): a paragraph, numbered steps, a screenshot
  * of the app with a pulsing pointer on the place to tap (tap it to see it large), a button to a page, and
- * a reminder she set (it rings on the phone at that time; it can be taken back).
+ * a reminder she set (it rings on the phone at that time; it can be taken back). A fresh answer is drawn
+ * as she would say it: word after word, each block after the one before.
  */
+
+/** how long each word takes to come in, and a block without words */
+const WORD_MS = 34
+const BLOCK_MS = 380
+const words = (text: string) => text.split(/(\s+)/)
+const wordCount = (text: string) => text.split(/\s+/).filter(Boolean).length
+/** when each block starts (ms from the answer's start), and when the last has come in */
+export function timingOf(blocks: AiBlock[]) {
+  let t = 0
+  const starts = blocks.map((b) => {
+    const at = t
+    t += b.type === 'text' ? wordCount(b.text) * WORD_MS + 160
+      : b.type === 'steps' ? (wordCount(b.title) + b.items.reduce((n, s) => n + wordCount(s), 0)) * WORD_MS + b.items.length * 90 + 160
+      : BLOCK_MS
+    return at
+  })
+  return { starts, total: t }
+}
+
+/** Text whose words come in one by one, from `from` ms after its block starts. */
+function Words({ text, from = 0 }: { text: string; from?: number }) {
+  let n = 0
+  return (
+    <>
+      {words(text).map((w, i) => (/^\s+$/.test(w) || !w ? w : (
+        <span key={i} className="ai-w" style={{ ['--w' as string]: `${from + n++ * WORD_MS}ms` }}>{w}</span>
+      )))}
+    </>
+  )
+}
 
 /** where each place is on its screenshot, in % of the picture (made by tools/ai-screens) */
 const RECTS = SPOTS as Record<string, { x: number; y: number; w: number; h: number }>
@@ -31,20 +62,31 @@ const writeRem = (id: number, s: Status) => {
 
 export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: boolean }) {
   const [zoom, setZoom] = useState<Extract<AiBlock, { type: 'screen' }> | null>(null)
+  const { starts } = timingOf(blocks)
   return (
-    <div className="ai-blocks">
+    <div className={`ai-blocks${fresh ? ' is-fresh' : ''}`}>
       {blocks.map((b, i) => {
-        const style = { ['--i' as string]: i }
+        const style = { ['--i' as string]: i, ['--at' as string]: `${starts[i]}ms` }
         switch (b.type) {
           case 'text':
-            return <p key={i} className="ai-card ai-text" style={style}>{b.text}</p>
-          case 'steps':
+            return <p key={i} className="ai-card ai-text" style={style}>{fresh ? <Words text={b.text} /> : b.text}</p>
+          case 'steps': {
+            let from = wordCount(b.title) * WORD_MS
             return (
               <div key={i} className="ai-card ai-steps" style={style}>
-                {b.title ? <b>{b.title}</b> : null}
-                <ol>{b.items.map((s, n) => <li key={n}><span className="ai-step-n">{n + 1}</span><span>{s}</span></li>)}</ol>
+                {b.title ? <b>{fresh ? <Words text={b.title} /> : b.title}</b> : null}
+                <ol>{b.items.map((s, n) => {
+                  const at = from + n * 90
+                  from += wordCount(s) * WORD_MS
+                  return (
+                    <li key={n} style={{ ['--w' as string]: `${at}ms` }}>
+                      <span className="ai-step-n">{n + 1}</span><span>{fresh ? <Words text={s} from={at} /> : s}</span>
+                    </li>
+                  )
+                })}</ol>
               </div>
             )
+          }
           case 'screen':
             return (
               <figure key={i} className="ai-screen" style={style}>
