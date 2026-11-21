@@ -33,6 +33,18 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        MahliyoCall.foreground = true;
+    }
+
+    @Override
+    public void onPause() {
+        MahliyoCall.foreground = false;
+        super.onPause();
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         fromCall(intent);

@@ -67,16 +67,28 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   expect(her.y + her.height).toBeGreaterThan(bar.y)
   await tab.click()
   await expect(page).toHaveURL(/\/mahliyo\/?$/)
-  // full screen: no tab bar; a plain header — her name, the menu (☰) and, at the far right, leaving (✕)
+  // opened from her circle: the chat pours out of it, like a window from the dock
+  await expect(page.locator('.ai-scene.is-genie')).toHaveCount(1)
+  await expect(page.locator('.ai-scene.is-genie')).toHaveCount(0, { timeout: 3000 })
+  // full screen: no tab bar; a plain header — her name, "Дугонаи донои шумо", a new chat, the menu (☰) and, at the far right, leaving (✕)
   await expect(page.locator('.dock')).toHaveCount(0)
-  await expect(page.locator('.ai-top button')).toHaveCount(2)
-  await expect(page.locator('.ai-top button').first()).toHaveAccessibleName('Таърихи чатҳо')
+  await expect(page.locator('.ai-status')).toHaveText('Дугонаи донои шумо')
+  await expect(page.locator('.ai-top button')).toHaveCount(3)
+  await expect(page.locator('.ai-top button').first()).toHaveAccessibleName('Сӯҳбати нав')
+  await expect(page.locator('.ai-top button').nth(1)).toHaveAccessibleName('Таърихи чатҳо')
   const leaveBox = (await page.getByRole('button', { name: 'Баромадан' }).boundingBox())!
   expect(leaveBox.x + leaveBox.width).toBeGreaterThan(390 - 24)
   await expect(page.locator('.ai-hello')).toHaveCount(0)
-  await expect(page.locator('.ai-greet')).toHaveText('Салом, Малика! Чӣ меомӯзем?')
-  await expect(page.locator('.ai-greet')).toHaveText('Кофе бо Маҳлиё AI? ☕', { timeout: 6000 })
+  // one greeting of many, the same while the chat is open
+  const greet = page.locator('.ai-greet-line')
+  await expect(greet).toHaveText(/\p{L}/u)
+  const said = await greet.textContent()
+  expect(said).not.toContain('{name}')
+  await page.waitForTimeout(4200)
+  await expect(greet).toHaveText(said!)
+  // the box to write in is one line, its hint never wraps
   await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toBeVisible()
+  expect((await page.getByPlaceholder('Паём ба Mahliyo AI…').boundingBox())!.height).toBeLessThan(50)
   // the short questions glide past in two rows
   await expect(page.locator('.ai-row')).toHaveCount(2)
   const x0 = (await page.locator('.ai-row').first().locator('.ai-chip').first().boundingBox())!.x
@@ -91,6 +103,9 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   expect((await page.locator('.ai-row').first().locator('.ai-chip').first().boundingBox())!.x).toBe(held)
   await page.locator('.ai-chip', { hasText: 'PIN-ро чӣ тавр иваз кунам?' }).first().click()
   await expect(page.locator('.ai-thinking')).toContainText('Маҳлиё фикр мекунад')
+  // "she is thinking" is in view above the box to write in, not under it
+  await page.waitForTimeout(500)
+  expect((await page.locator('.ai-thinking').boundingBox())!.y + 30).toBeLessThan((await page.locator('.ai-composer').boundingBox())!.y)
   await expect(page.getByRole('button', { name: 'Қатъ кардан' })).toBeVisible()
   await expect(page.locator('.ai-blocks.is-fresh .ai-w').first()).toBeVisible()
   await expect(page.locator('.ai-text').first()).toHaveText('Пин-кодро дар «Танзимот» иваз мекунед.')
@@ -108,6 +123,8 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('Соати 20:00 ёдам деҳ')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   await expect(page.locator('.ai-reminder-state')).toHaveText('Ёдраскунӣ танҳо дар барномаи телефон занг мезанад.')
+  // the call card: its name, its time and taking it back — not the words of the notification
+  await expect(page.locator('.ai-reminder')).not.toContainText('дарс интизор аст')
   expect(asked[1].turns.map((t) => t.role)).toEqual(['user', 'assistant', 'user'])
   expect(asked[1].turns[1].content).toContain('1. «Профил»-ро кушоед')
 
@@ -121,7 +138,7 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   await page.reload()
   await expect(page.locator('.ai-said')).toHaveCount(3)
   await page.getByRole('button', { name: 'Таърихи чатҳо' }).click()
-  await page.getByRole('button', { name: 'Сӯҳбати нав' }).click()
+  await page.locator('.ai-history').getByRole('button', { name: 'Сӯҳбати нав' }).click()
   await expect(page.locator('.ai-said')).toHaveCount(0)
   await expect(page.locator('.ai-marquee')).toBeVisible()
   expect(errors).toEqual([])
@@ -154,7 +171,7 @@ test('her full screen: a soft plain colour, words without boxes; only the chat m
   // a new chat from the menu; the first stays in the history
   const menu = page.getByRole('button', { name: 'Таърихи чатҳо' })
   await menu.click()
-  await page.getByRole('button', { name: 'Сӯҳбати нав' }).click()
+  await page.locator('.ai-history').getByRole('button', { name: 'Сӯҳбати нав' }).click()
   await expect(page.locator('.ai-said')).toHaveCount(0)
   await box.fill('Саволи дуюм')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
@@ -435,6 +452,9 @@ test('a worked answer: formulas, a table and code drawn; a long question folds, 
   await expect(answer.locator('.ai-table table th').first()).toHaveText('Қадам')
   await expect(answer.locator('pre code')).toHaveText('print(2 / 7)')
   await expect(answer.locator('strong')).toHaveText('Ҷавоб:')
+  // her emoji are the chat's own (Fluent 3D), the same on every phone
+  await expect(answer.locator('img.emo[alt="🎉"]')).toBeVisible()
+  expect(await answer.locator('img.emo').first().getAttribute('src')).toBe('/assets/emoji/1f389.webp')
   expect(await answer.textContent()).not.toContain('$$')
   // her long question: its first lines, fading; tapped, whole
   const q = page.locator('.ai-q')
@@ -444,15 +464,61 @@ test('a worked answer: formulas, a table and code drawn; a long question folds, 
   await q.click()
   await expect(q).toHaveClass(/is-whole/)
   expect((await q.boundingBox())!.height).toBeGreaterThan(folded + 40)
+  // typed, an emoji turns into the chat's own at once; the learner's bubble shows it so too
+  await box.fill('Салом 😊')
+  await expect(page.locator('.ai-input-copy img.emo[alt="😊"]')).toBeVisible()
+  expect(await box.evaluate((e) => getComputedStyle(e).webkitTextFillColor)).toBe('rgba(0, 0, 0, 0)')
+  await page.screenshot({ path: 'test-results/mahliyo-emoji-box.png' })
   // a draft: written, not sent — kept for this chat, also after the app is opened again
   await box.fill('Ҳанӯз нафиристодам')
   await page.getByRole('button', { name: 'Таърихи чатҳо' }).click()
-  await page.getByRole('button', { name: 'Сӯҳбати нав' }).click()
+  await page.locator('.ai-history').getByRole('button', { name: 'Сӯҳбати нав' }).click()
   await expect(box).toHaveValue('')
   await page.reload()
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   await page.getByRole('button', { name: 'Таърихи чатҳо' }).click()
   await page.locator('.ai-history').getByText(/Сатри 1/).click()
   await expect(box).toHaveValue('Ҳанӯз нафиристодам')
+  expect(errors).toEqual([])
+})
+
+test('code: copy, and a web page previewed in a sealed frame; pulled down at its top, the chat lets go into a new one', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  const CODE = 'Ин саҳифа 😊\n\n```html\n<h1 id="hi">Салом!</h1>\n```'
+  await fakeMahliyo(page, () => ({ tajik: true, reply: CODE, blocks: [{ type: 'text', text: CODE }] }), 200)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('Коди HTML нависед')
+  await page.getByRole('button', { name: 'Фиристодан' }).click()
+  const code = page.locator('.ai-code')
+  await expect(code.locator('.ai-code-head')).toContainText('html', { timeout: 10_000 })
+  await expect(code.locator('pre code')).toHaveText('<h1 id="hi">Салом!</h1>')
+  await code.getByRole('button', { name: 'Нусха' }).click()
+  await expect(page.locator('.toast').filter({ hasText: /Нусха гирифта шуд|дастрас нест/ })).toBeVisible()
+  await code.getByRole('button', { name: 'Пешнамоиш' }).click()
+  const preview = page.getByRole('dialog', { name: 'Пешнамоиш' })
+  await expect(preview.locator('iframe')).toHaveAttribute('sandbox', 'allow-scripts')
+  await expect(preview.frameLocator('iframe').locator('#hi')).toHaveText('Салом!')
+  await page.screenshot({ path: 'test-results/mahliyo-code-preview.png' })
+  await preview.getByRole('button', { name: 'Пӯшидан' }).click()
+  await expect(preview).toHaveCount(0)
+  // pulled down at the top: the sign fills, and let go, a new chat
+  await page.locator('.ai-scroll').evaluate((el) => {
+    const touch = (y: number) => new Touch({ identifier: 1, target: el, clientX: 200, clientY: y })
+    const fire = (type: string, y: number) => el.dispatchEvent(new TouchEvent(type, { bubbles: true, cancelable: true, touches: type === 'touchend' ? [] : [touch(y)], changedTouches: [touch(y)] }))
+    fire('touchstart', 200)
+    for (let y = 220; y <= 760; y += 30) fire('touchmove', y)
+  })
+  await expect(page.locator('.ai-pull')).toHaveClass(/is-ready/)
+  await page.locator('.ai-scroll').evaluate((el) => el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [] })))
+  await expect(page.locator('.ai-said')).toHaveCount(0, { timeout: 3000 })
+  await expect(page.locator('.ai-hero')).toBeVisible()
+  // the first chat is still in the history
+  await page.getByRole('button', { name: 'Таърихи чатҳо' }).click()
+  await expect(page.locator('.ai-history')).toContainText('Коди HTML нависед')
+  // the test's own start-up script also runs in the sealed frame, where storage is closed: not the app's error
+  const own = errors.filter((e) => !e.includes('sandboxed'))
+  errors.splice(0, errors.length, ...own)
   expect(errors).toEqual([])
 })

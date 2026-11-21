@@ -240,8 +240,8 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.unavailable': "Mahliyo can’t answer right now. Please try a bit later.",
   'ai.clear': "New conversation",
   'ai.open': "Ask Mahliyo",
-  'ai.taglines': "Hi {name}! What shall we learn?\nCoffee with Mahliyo AI? ☕\nAlways ready to help ✨",
-  'ai.subtitle': "AI teacher",
+  'ai.taglines': "Hi {name}! What shall we learn today? 📚\nCoffee with Mahliyo? ☕\nAlways ready to help ✨\nHi {name}! I missed you 🌸\nWelcome! Ask away, I’m glad you’re here 😊\nTea and an interesting question? 🍵\nShall we discover something new today? 🔍\nHey hey, {name}! Ready? 💪\nA maths example? Let’s solve it! ➗\nHave a lovely day, {name}! ☀️\nMahliyo at your service 🎀\nKnowledge is true beauty 💎\nAsk me anything — I’m listening 👂\nHi, my friend! 💕\nTogether again! What’s new? 🌷\nOne step closer to your dream? 🚀\nPoetry, science or a problem — you choose 📝\nHi {name}! What will you ask me today? 💡\nLet’s think it through together 🤔\nWelcome to the corner of knowledge 🌿\nThe lessons are waiting, and so am I! 😄\nHow are you feeling, {name}? 🌈\nA small question, a big answer ✨\nTime to learn! ⏰",
+  'ai.subtitle': "Your wise friend",
   'ai.thinking': "Mahliyo is thinking",
   'ai.soon': "Mahliyo will be ready soon. Until then, write your questions to the consultant.",
   'ai.today': "Today",
@@ -298,5 +298,6 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.call_hide': "Hide",
   'ai.call_lock': "Allow Mahliyo’s call to fill the lock screen like a real call.",
   'ai.call_lock_allow': "Allow",
+  'ai.preview': "Preview",
   'pin.forgot_q': "Forgot it?"
 }

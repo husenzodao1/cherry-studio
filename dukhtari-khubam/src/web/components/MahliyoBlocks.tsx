@@ -11,6 +11,7 @@ import { allowLockScreen, lockScreenAllowed } from '../offline/call'
 import { cancelReminder, reminderId, setReminder } from '../offline/mahliyo'
 import { usePrefs } from '../prefs'
 import { AiMarkdown, isMarkdown } from './AiMarkdown'
+import { emojify } from './Emoji'
 import { Icon } from './Icon'
 
 /**
@@ -44,7 +45,7 @@ function Words({ text, from = 0 }: { text: string; from?: number }) {
   return (
     <>
       {words(text).map((w, i) => (/^\s+$/.test(w) || !w ? w : (
-        <span key={i} className="ai-w" style={{ ['--w' as string]: `${from + n++ * WORD_MS}ms` }}>{w}</span>
+        <span key={i} className="ai-w" style={{ ['--w' as string]: `${from + n++ * WORD_MS}ms` }}>{emojify(w)}</span>
       )))}
     </>
   )
@@ -75,18 +76,18 @@ export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: bool
             // a worked solution, a formula, a table or code: drawn as Markdown
             return isMarkdown(b.text)
               ? <div key={i} className="ai-card ai-text ai-md" style={style}><AiMarkdown text={b.text} fresh={fresh} step={WORD_MS} /></div>
-              : <p key={i} className="ai-card ai-text" style={style}>{fresh ? <Words text={b.text} /> : b.text}</p>
+              : <p key={i} className="ai-card ai-text" style={style}>{fresh ? <Words text={b.text} /> : emojify(b.text)}</p>
           case 'steps': {
             let from = wordCount(b.title) * WORD_MS
             return (
               <div key={i} className="ai-card ai-steps" style={style}>
-                {b.title ? <b>{fresh ? <Words text={b.title} /> : b.title}</b> : null}
+                {b.title ? <b>{fresh ? <Words text={b.title} /> : emojify(b.title)}</b> : null}
                 <ol>{b.items.map((s, n) => {
                   const at = from + n * 90
                   from += wordCount(s) * WORD_MS
                   return (
                     <li key={n} style={{ ['--w' as string]: `${at}ms` }}>
-                      <span className="ai-step-n">{n + 1}</span><span>{isMarkdown(s) ? <AiMarkdown text={s} fresh={fresh} from={at} step={WORD_MS} inline /> : fresh ? <Words text={s} from={at} /> : s}</span>
+                      <span className="ai-step-n">{n + 1}</span><span>{isMarkdown(s) ? <AiMarkdown text={s} fresh={fresh} from={at} step={WORD_MS} inline /> : fresh ? <Words text={s} from={at} /> : emojify(s)}</span>
                     </li>
                   )
                 })}</ol>
@@ -97,14 +98,14 @@ export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: bool
             return (
               <figure key={i} className="ai-screen" style={style}>
                 <button type="button" onClick={() => setZoom(b)} aria-label={b.caption}><Shot spot={b.spot} /></button>
-                {b.caption ? <figcaption>{b.caption}</figcaption> : null}
+                {b.caption ? <figcaption>{emojify(b.caption)}</figcaption> : null}
               </figure>
             )
           case 'link':
             return b.to.startsWith('/') ? (
-              <Link key={i} href={b.to} className="ai-link" style={style}><span>{b.label}</span><Icon name="arrow" size={18} /></Link>
+              <Link key={i} href={b.to} className="ai-link" style={style}><span>{emojify(b.label)}</span><Icon name="arrow" size={18} /></Link>
             ) : (
-              <a key={i} href={b.to} target="_blank" rel="noopener noreferrer" className="ai-link" style={style}><span>{b.label}</span><Icon name="arrow" size={18} /></a>
+              <a key={i} href={b.to} target="_blank" rel="noopener noreferrer" className="ai-link" style={style}><span>{emojify(b.label)}</span><Icon name="arrow" size={18} /></a>
             )
           case 'reminder':
             return <ReminderCard key={i} block={b} fresh={fresh} style={style} />
@@ -185,28 +186,27 @@ function ReminderCard({ block, fresh, style }: { block: Reminder; fresh: boolean
   }, [waiting])
   return (
     <div className={`ai-card ai-reminder${status === 'set' && !past ? ' is-set' : ''}`} style={style}>
-      <span className="ai-reminder-icon"><Icon name="phone" size={22} /></span>
+      <span className="ai-reminder-icon"><Icon name="phone" size={20} /></span>
       <div className="grow">
-        <b>{block.title}</b>
+        <b>{emojify(block.title)}</b>
         <span className="ai-reminder-time">{when(block.at, t)}</span>
-        {block.text ? <span className="muted">{block.text}</span> : null}
-        <span className="ai-reminder-state" role="status">
-          {status === 'set' ? (past ? t('ai.reminder_done') : t('ai.reminder_set'))
-            : status === 'cancelled' ? t('ai.reminder_cancelled')
-            : status === 'denied' ? t('ai.reminder_denied')
-            : status === 'web' ? t('ai.reminder_web') : null}
-        </span>
-        {waiting && !lock ? (
-          <span className="ai-reminder-lock">
-            <span>{t('ai.call_lock')}</span>
-            <button type="button" className="btn btn-soft ai-reminder-btn" onClick={allowLockScreen}>{t('ai.call_lock_allow')}</button>
-          </span>
-        ) : null}
       </div>
       {status === 'set' && !past ? (
         <button type="button" className="btn btn-soft ai-reminder-btn" onClick={cancel}>{t('ai.reminder_cancel')}</button>
       ) : (status === 'cancelled' || status === 'denied' || (!fresh && !status)) && !past ? (
         <button type="button" className="btn btn-soft ai-reminder-btn" onClick={put}>{t('ai.reminder_put')}</button>
+      ) : null}
+      {/* only what she must know: it did not work, it was taken back, or it is over */}
+      {status && status !== 'set' ? (
+        <span className="ai-reminder-state" role="status">
+          {status === 'cancelled' ? t('ai.reminder_cancelled') : status === 'denied' ? t('ai.reminder_denied') : status === 'web' ? t('ai.reminder_web') : null}
+        </span>
+      ) : status === 'set' && past ? <span className="ai-reminder-state" role="status">{t('ai.reminder_done')}</span> : null}
+      {waiting && !lock ? (
+        <span className="ai-reminder-lock">
+          <span>{t('ai.call_lock')}</span>
+          <button type="button" className="btn btn-soft ai-reminder-btn" onClick={allowLockScreen}>{t('ai.call_lock_allow')}</button>
+        </span>
       ) : null}
     </div>
   )

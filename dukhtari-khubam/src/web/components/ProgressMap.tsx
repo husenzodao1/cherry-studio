@@ -43,9 +43,15 @@ function MapLeg({ leg }: { leg: Leg }) {
       </header>
       <div className="map-road" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
-          {/* the road: its edge, the asphalt, the dashed middle line */}
+          <defs>
+            <linearGradient id={`road-${leg.course}`} x1="0" y1="0" x2="0" y2="1">
+              <stop className="map-g1" offset="0" /><stop className="map-g2" offset="0.55" /><stop className="map-g3" offset="1" />
+            </linearGradient>
+          </defs>
+          {/* the road: a soft glow, a ribbon of frosted glass, its colour running from the start to the cup, pearls along it */}
+          <path className="map-glow" d={road(pts)} />
           <path className="map-edge" d={road(pts)} />
-          <path className="map-way" d={road(pts)} />
+          <path className="map-way" d={road(pts)} stroke={`url(#road-${leg.course})`} />
           <path className="map-way-line" d={road(pts)} />
           {/* the part already walked, each stretch in the colour of the lesson it reaches */}
           {leg.stops.map((s, i) => (s.grade ? <path key={s.id} className={`map-walked is-${s.grade}`} d={road(pts.slice(i, i + 2))} /> : null))}
@@ -71,8 +77,8 @@ function MapLeg({ leg }: { leg: Leg }) {
 }
 
 /**
- * The progress map: no box and nothing behind — for every begun course a winding road like a road on a
- * real map (edge, asphalt, dashed middle line), through its lessons. A finished lesson's stop is green, yellow or red by its test; the next one pulses; a tap
+ * The progress map: no box and nothing behind — for every begun course a winding ribbon of frosted glass
+ * in the app's colours (lavender to rose, a soft glow, pearls along its middle), through its lessons. A finished lesson's stop is green, yellow or red by its test; the next one pulses; a tap
  * opens the lesson.
  */
 export function ProgressMap({ legs }: { legs: Leg[] }) {

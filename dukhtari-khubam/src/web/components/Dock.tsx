@@ -52,7 +52,8 @@ export function Dock() {
   }
   // her chat opens full screen (in the browser too, where it allows); "✕" brings the learner back here
   const toFull = () => {
-    try { sessionStorage.setItem('dk.ai-from', path) } catch { /* home */ }
+    // and the chat pours out of her circle (mahliyo/page.tsx)
+    try { sessionStorage.setItem('dk.ai-from', path); sessionStorage.setItem('dk.ai-genie', '1') } catch { /* home */ }
     const root = document.documentElement
     if (!document.fullscreenElement && root.requestFullscreen) void root.requestFullscreen({ navigationUI: 'hide' }).catch(() => undefined)
   }

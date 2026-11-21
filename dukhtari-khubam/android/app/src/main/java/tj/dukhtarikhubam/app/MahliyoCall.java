@@ -46,6 +46,8 @@ import java.util.Iterator;
  * the lock screen (full screen where the phone allows it). "Answer" opens the app, which plays her words
  * (web/components/MahliyoCall.tsx); "Decline" ends it; not taken in 30 seconds, it stops. The planned calls
  * come back after the phone restarts. The web layer plans and takes back calls, and learns which rang.
+ * With the app on the screen, the call rings in it at once; with notifications turned off, it is left for
+ * the app to ring when it is opened.
  * Taken, her voice plays as on a real call: from the earpiece at the top of the phone (the speaker when the
  * learner turns it on). Android 14 and later show a call over the lock screen only with the learner's
  * permission ("full-screen notifications"); the app asks for it when she sets a call.
@@ -65,6 +67,8 @@ public final class MahliyoCall {
     /** the call the app was opened by, until the web layer takes it */
     static volatile JSObject opened;
     static volatile CallPlugin plugin;
+    /** the app is on the screen now (MainActivity): her call rings in it, not as a notification */
+    static volatile boolean foreground;
 
     private MahliyoCall() {}
 
@@ -144,6 +148,24 @@ public final class MahliyoCall {
         JSONObject calls = planned(ctx);
         JSONObject c = calls.optJSONObject(String.valueOf(id));
         if (c == null) return;
+        JSObject info = new JSObject();
+        info.put("id", id);
+        info.put("title", c.optString("title"));
+        info.put("text", c.optString("text"));
+        // the app is open: it rings on its own screen at once
+        CallPlugin app = plugin;
+        if (foreground && app != null) {
+            calls.remove(String.valueOf(id));
+            keep(ctx, calls);
+            rang(ctx, id);
+            JSObject call = new JSObject();
+            call.put("call", info);
+            call.put("answered", false);
+            app.tell(call);
+            return;
+        }
+        // notifications are off: nothing could ring now — the app rings it when it is opened (soon after)
+        if (!NotificationManagerCompat.from(ctx).areNotificationsEnabled()) return;
         calls.remove(String.valueOf(id));
         keep(ctx, calls);
         rang(ctx, id);
@@ -161,10 +183,6 @@ public final class MahliyoCall {
             nm.createNotificationChannel(ch);
         }
 
-        JSObject info = new JSObject();
-        info.put("id", id);
-        info.put("title", c.optString("title"));
-        info.put("text", c.optString("text"));
         Intent open = new Intent(ctx, MainActivity.class)
             .putExtra(EXTRA, info.toString())
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);

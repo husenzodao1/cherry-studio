@@ -349,8 +349,8 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.unavailable': "Mahliyo hozir javob bera olmaydi. Birozdan keyin urinib ko‘ring.",
   'ai.clear': "Yangi suhbat",
   'ai.open': "Mahliyodan so‘rang",
-  'ai.taglines': "Salom, {name}! Nimani o‘rganamiz?\nMahliyo AI bilan qahva? ☕\nDoim yordamga tayyor ✨",
-  'ai.subtitle': "Sun’iy intellekt ustoz",
+  'ai.taglines': "Salom, {name}! Bugun nimani o‘rganamiz? 📚\nMahliyo bilan qahva? ☕\nDoim yordamga tayyorman ✨\nSalom, {name}! Sizni sog‘indim 🌸\nXush kelibsiz! So‘rang, xursandman 😊\nChoy va qiziq savol? 🍵\nBugun yangi narsa kashf qilamizmi? 🔍\nSalom-salom, {name}! Tayyormisiz? 💪\nMatematik misolmi? Keling, yechamiz! ➗\nKuningiz xayrli o‘tsin, {name}! ☀️\nMahliyo xizmatingizda 🎀\nBilim — haqiqiy go‘zallik 💎\nSo‘rang — men tinglayman 👂\nSalom, dugonajon! 💕\nYana uchrashdik! Qanday yangiliklar? 🌷\nOrzu sari bir qadam? 🚀\nShe’r, fan yoki masala — tanlov sizda 📝\nSalom, {name}! Bugun nima so‘raysiz? 💡\nKeling, birga o‘ylaymiz 🤔\nBilim go‘shasiga xush kelibsiz 🌿\nDarslar kutmoqda, men ham! 😄\nKayfiyatingiz qanday, {name}? 🌈\nKichik savol — katta javob ✨\nO‘qish vaqti keldi! ⏰",
+  'ai.subtitle': "Dono dugonangiz",
   'ai.thinking': "Mahliyo o‘ylayapti",
   'ai.soon': "Mahliyo tez orada tayyor bo‘ladi. Hozircha savollaringizni maslahatchiga yozing.",
   'ai.today': "Bugun",
@@ -407,6 +407,7 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.call_hide': "Yashirish",
   'ai.call_lock': "Mahliyo qo‘ng‘irog‘i qulf ekranida haqiqiy qo‘ng‘iroqdek chiqishi uchun ruxsat bering.",
   'ai.call_lock_allow': "Ruxsat berish",
+  'ai.preview': "Ko‘rish",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -757,8 +758,8 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.unavailable': "Mahliyo şu anda cevap veremiyor. Biraz sonra tekrar deneyin.",
   'ai.clear': "Yeni sohbet",
   'ai.open': "Mahliyo’ya sorun",
-  'ai.taglines': "Merhaba {name}! Ne öğreniyoruz?\nMahliyo AI ile kahve? ☕\nHer zaman yardıma hazır ✨",
-  'ai.subtitle': "Yapay zekâ öğretmen",
+  'ai.taglines': "Merhaba {name}! Bugün ne öğreniyoruz? 📚\nMahliyo ile kahve? ☕\nHer zaman yardıma hazırım ✨\nMerhaba {name}! Seni özledim 🌸\nHoş geldin! Sor bakalım, çok sevindim 😊\nÇay ve ilginç bir soru? 🍵\nBugün yeni bir şey keşfedelim mi? 🔍\nSelam selam, {name}! Hazır mısın? 💪\nBir matematik örneği mi? Hadi çözelim! ➗\nİyi günler, {name}! ☀️\nMahliyo hizmetinde 🎀\nBilgi gerçek güzelliktir 💎\nSor — dinliyorum 👂\nMerhaba arkadaşım! 💕\nYine birlikteyiz! Ne var ne yok? 🌷\nHayaline bir adım daha? 🚀\nŞiir, bilim ya da problem — sen seç 📝\nMerhaba {name}! Bugün bana ne soracaksın? 💡\nHadi birlikte düşünelim 🤔\nBilgi köşesine hoş geldin 🌿\nDersler bekliyor, ben de! 😄\nKeyfin nasıl, {name}? 🌈\nKüçük soru, büyük cevap ✨\nÖğrenme zamanı! ⏰",
+  'ai.subtitle': "Bilge arkadaşın",
   'ai.thinking': "Mahliyo düşünüyor",
   'ai.soon': "Mahliyo yakında hazır olacak. O zamana kadar sorularınızı danışmana yazın.",
   'ai.today': "Bugün",
@@ -815,6 +816,7 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.call_hide': "Gizle",
   'ai.call_lock': "Mahliyo’nun araması kilit ekranında gerçek bir arama gibi görünsün diye izin verin.",
   'ai.call_lock_allow': "İzin ver",
+  'ai.preview': "Önizleme",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1164,8 +1166,8 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.unavailable': "ماه‌لیا اکنون نمی‌تواند پاسخ دهد. کمی بعد دوباره تلاش کنید.",
   'ai.clear': "گفت‌وگوی تازه",
   'ai.open': "از ماه‌لیا بپرسید",
-  'ai.taglines': "سلام {name}! چه یاد بگیریم؟\nقهوه با Mahliyo AI؟ ☕\nهمیشه آمادهٔ کمک ✨",
-  'ai.subtitle': "آموزگار هوش مصنوعی",
+  'ai.taglines': "سلام {name}! امروز چه یاد بگیریم؟ 📚\nقهوه با مهلیا؟ ☕\nهمیشه آمادهٔ کمکم ✨\nسلام {name}! دلم برایت تنگ شده بود 🌸\nخوش آمدی! بپرس، خوشحالم 😊\nچای و یک سؤال جالب؟ 🍵\nامروز چیز تازه‌ای کشف کنیم؟ 🔍\nسلام سلام {name}! آماده‌ای؟ 💪\nیک مسئلهٔ ریاضی؟ بیا حلش کنیم! ➗\nروزت خوش، {name}! ☀️\nمهلیا در خدمت شماست 🎀\nدانش زیبایی واقعی است 💎\nبپرس — گوش می‌دهم 👂\nسلام دوست جان! 💕\nباز هم با هم! چه خبر؟ 🌷\nیک قدم به سوی آرزو؟ 🚀\nشعر، علم یا مسئله — انتخاب با تو 📝\nسلام {name}! امروز از من چه می‌پرسی؟ 💡\nبیا با هم فکر کنیم 🤔\nبه گوشهٔ دانش خوش آمدی 🌿\nدرس‌ها منتظرند، من هم! 😄\nحالت چطور است، {name}؟ 🌈\nسؤال کوچک، جواب بزرگ ✨\nوقت یادگیری است! ⏰",
+  'ai.subtitle': "دوست دانای شما",
   'ai.thinking': "ماه‌لیا فکر می‌کند",
   'ai.soon': "ماه‌لیا به‌زودی آماده می‌شود. تا آن زمان پرسش‌هایتان را به مشاور بنویسید.",
   'ai.today': "امروز",
@@ -1222,6 +1224,7 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.call_hide': "پنهان",
   'ai.call_lock': "اجازه دهید تماس مهلیا مانند تماس واقعی روی صفحهٔ قفل ظاهر شود.",
   'ai.call_lock_allow': "اجازه دادن",
+  'ai.preview': "پیش‌نمایش",
   'pin.forgot_q': "فراموش کردید؟"
 }
 

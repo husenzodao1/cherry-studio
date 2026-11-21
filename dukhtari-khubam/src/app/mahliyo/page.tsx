@@ -3,12 +3,13 @@
 import { Capacitor } from '@capacitor/core'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 import { onBack } from '@/web/components/BackButton'
 
 import { Icon } from '@/web/components/Icon'
+import { emojify } from '@/web/components/Emoji'
 import { AnswerBlocks, timingOf } from '@/web/components/MahliyoBlocks'
 import { showToast } from '@/web/components/Toast'
 import { useContent } from '@/web/offline/content'
@@ -28,6 +29,8 @@ const EXIT_MS = 2000
 /** rubber at the chat's ends: the share of the finger's travel it follows, and how far it can go */
 const PULL = 0.3
 const STRETCH = 90
+/** pulled down this far at the top of a chat, it lets go into a new chat */
+const NEW_AT = 64
 
 /** what the learner began writing in each chat and did not send (kept on this phone) */
 const DRAFTS = 'dk.ai.drafts'
@@ -71,9 +74,9 @@ export default function MahliyoPage() {
   const [opened, setOpened] = useState<number | null>(null)
   /** pictures and files chosen for the next question */
   const [files, setFiles] = useState<AiUpload[]>([])
-  const end = useRef<HTMLDivElement>(null)
   const scroller = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
+  const pull = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const box = useRef<HTMLTextAreaElement>(null)
   const picker = useRef<HTMLInputElement>(null)
@@ -83,6 +86,19 @@ export default function MahliyoPage() {
   const sending = busy && !pending.id
 
   useEffect(() => watch(), [])
+  // opened from her circle in the tab bar: the chat pours out of it
+  const [genie, setGenie] = useState(false)
+  useLayoutEffect(() => {
+    let from = false
+    try {
+      from = sessionStorage.getItem('dk.ai-genie') === '1'
+      sessionStorage.removeItem('dk.ai-genie')
+    } catch { /* no animation */ }
+    if (!from) return
+    setGenie(true)
+    const done = setTimeout(() => setGenie(false), 700)
+    return () => clearTimeout(done)
+  }, [])
   // a chat opens with what she had begun writing in it
   useEffect(() => {
     setEditing(null)
@@ -134,13 +150,35 @@ export default function MahliyoPage() {
     return () => window.removeEventListener('popstate', pop)
   }, [])
 
-  // only the conversation moves; at its ends it stretches like rubber and springs back
+  /** a new chat (the menu's button, or the chat pulled down at its top) */
+  const startNew = () => {
+    newChat()
+    setFiles([])
+  }
+  const startNewRef = useRef(startNew)
+  startNewRef.current = startNew
+  const hasTurns = useRef(false)
+  hasTurns.current = turns.length > 0 && !pending
+
+  // only the conversation moves; at its ends it stretches like rubber and springs back. Pulled far enough
+  // down at its top, it lets go into a new chat (the sign above it fills as it is pulled).
   useEffect(() => {
     const el = scroller.current
     const body = inner.current
-    if (!el || !body) return
+    const sign = pull.current
+    if (!el || !body || !sign) return
     let y0 = 0
     let d = 0
+    let ready = false
+    const show = () => {
+      const p = hasTurns.current && d > 0 ? Math.min(d / NEW_AT, 1) : 0
+      sign.style.setProperty('--p', String(p))
+      if (p >= 1 !== ready) {
+        ready = p >= 1
+        sign.classList.toggle('is-ready', ready)
+        if (ready) try { navigator.vibrate?.(12) } catch { /* no vibration */ }
+      }
+    }
     const start = (e: TouchEvent) => {
       y0 = e.touches[0].clientY
       body.style.transition = 'none'
@@ -152,18 +190,38 @@ export default function MahliyoPage() {
       if ((dy > 0 && atTop) || (dy < 0 && atEnd)) {
         d = Math.sign(dy) * STRETCH * (1 - Math.exp((-Math.abs(dy) * PULL) / STRETCH))
         body.style.transform = `translateY(${d}px)`
+        show()
         if (e.cancelable) e.preventDefault()
       } else if (d) {
         d = 0
         body.style.transform = ''
+        show()
         y0 = e.touches[0].clientY
       }
     }
     const end = () => {
       if (!d) return
-      body.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.15)'
-      body.style.transform = ''
+      if (ready) {
+        // let go: the old chat slides away, the new one comes in
+        body.style.transition = 'transform 0.32s ease-in, opacity 0.32s ease-in'
+        body.style.transform = `translateY(${STRETCH * 2}px)`
+        body.style.opacity = '0'
+        setTimeout(() => {
+          startNewRef.current()
+          body.style.transition = 'none'
+          body.style.transform = 'translateY(-24px)'
+          requestAnimationFrame(() => {
+            body.style.transition = 'transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.45s ease-out'
+            body.style.transform = ''
+            body.style.opacity = ''
+          })
+        }, 320)
+      } else {
+        body.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.15)'
+        body.style.transform = ''
+      }
       d = 0
+      show()
     }
     el.addEventListener('touchstart', start, { passive: true })
     el.addEventListener('touchmove', move, { passive: false })
@@ -181,9 +239,10 @@ export default function MahliyoPage() {
   useEffect(() => {
     const answer = !busy && turns[turns.length - 1]?.role === 'assistant' ? [...document.querySelectorAll('.ai-said')].pop() : null
     if (answer) answer.scrollIntoView({ block: 'start', behavior: 'smooth' })
-    else end.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    // the newest line — her question, then "she is thinking" once it arrived — in view above the box
+    else scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: 'smooth' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turns.length, busy, problem, chat])
+  }, [turns.length, busy, sending, problem, chat])
   // a fresh answer is drawn word by word once; then it stays drawn
   useEffect(() => {
     const a = turns[fresh]
@@ -262,13 +321,14 @@ export default function MahliyoPage() {
   const first = learner?.name?.split(/\s+/)[0]
 
   return (
-    <div className={`ai-scene${busy ? ' is-thinking' : ''}`}>
+    <div className={`ai-scene${busy ? ' is-thinking' : ''}${genie ? ' is-genie' : ''}`}>
       <header className="ai-top">
         <span className="ai-orb ai-orb-sm" aria-hidden="true"><span className="ai-orb-ring" /><img src={busy ? FACE_THINK : FACE} alt="" /></span>
         <div className="grow">
           <h1 className="ai-name">{t('ai.title')}</h1>
           <span className={`ai-status${busy ? ' is-busy' : ''}`} aria-live="polite">{sending ? t('ai.sending') : busy ? t('ai.thinking') : t('ai.subtitle')}</span>
         </div>
+        <button type="button" className="ai-menu" aria-label={t('ai.clear')} onClick={startNew} disabled={!turns.length}><Icon name="compose" size={21} /></button>
         <button type="button" className="ai-menu" aria-label={t('ai.history')} aria-haspopup="dialog" onClick={() => setHistory(true)}><Icon name="menu" size={22} /></button>
         <button type="button" className="ai-menu ai-leave" aria-label={t('ai.leave')} onClick={leave}><Icon name="x" size={20} /></button>
       </header>
@@ -276,7 +336,7 @@ export default function MahliyoPage() {
       {history ? (
         <History chats={chats} open={chat} onClose={() => setHistory(false)}
           onOpen={(id) => { openChat(id); setHistory(false) }}
-          onNew={() => { newChat(); setFiles([]); setHistory(false) }}
+          onNew={() => { startNew(); setHistory(false) }}
           onRemove={removeChat} onArchive={archiveChat} />
       ) : null}
 
@@ -285,6 +345,11 @@ export default function MahliyoPage() {
       )}
 
       <div className="ai-scroll" ref={scroller}>
+      <div className="ai-pull" ref={pull} aria-hidden="true">
+        <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" pathLength="1" /></svg>
+        <Icon name="compose" size={16} />
+        <span>{t('ai.clear')}</span>
+      </div>
       <div className="ai-chat" ref={inner}>
         {turns.length ? null : (
           <section className="ai-hero">
@@ -351,7 +416,6 @@ export default function MahliyoPage() {
             </div>
           </div>
         ) : null}
-        <div ref={end} />
       </div>
       </div>
 
@@ -376,10 +440,12 @@ export default function MahliyoPage() {
           <input ref={picker} type="file" hidden multiple accept="image/*,application/pdf,text/plain" onChange={(e) => void pick(e.target.files)} />
           <button type="button" className="ai-attach" aria-label={t('ai.attach')} disabled={ready === false || !!pending || files.length >= MAX_FILES}
             onClick={() => picker.current?.click()}><Icon name="clip" size={20} /></button>
-          <textarea ref={box} className="ai-input" rows={1} placeholder={online ? t('ai.placeholder') : t('ai.offline')} value={text} maxLength={QUESTION_CAP} lang="tg"
-            disabled={ready === false} aria-label={t('ai.placeholder')}
-            onChange={(e) => write(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!busy) send(text, files) } }} />
+          <EmojiBox text={text}>
+            <textarea ref={box} className="ai-input" rows={1} placeholder={online ? t('ai.placeholder') : t('ai.offline')} value={text} maxLength={QUESTION_CAP} lang="tg"
+              disabled={ready === false} aria-label={t('ai.placeholder')}
+              onChange={(e) => write(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!busy) send(text, files) } }} />
+          </EmojiBox>
           {busy ? (
             <button className="ai-send is-stop" aria-label={t('ai.stop')}><Icon name="stop" size={18} fill="currentColor" /></button>
           ) : (
@@ -387,6 +453,39 @@ export default function MahliyoPage() {
           )}
         </div>
       </form>
+    </div>
+  )
+}
+
+/**
+ * The box to write in, its emoji drawn as the chat's own as soon as they are typed: the words stay in the
+ * box (the caret, the selection), a copy beneath it draws them with the pictures, each as wide as the
+ * phone's emoji in the box, so every letter stays where it is.
+ */
+function EmojiBox({ text, children }: { text: string; children: ReactNode }) {
+  const own = useRef<HTMLDivElement>(null)
+  const copy = useRef<HTMLDivElement>(null)
+  const drawn = /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(text)
+  useLayoutEffect(() => {
+    const wrap = own.current
+    const box = wrap?.querySelector('textarea')
+    if (!wrap || !box || !drawn) return
+    try {
+      const ctx = document.createElement('canvas').getContext('2d')
+      if (ctx) {
+        ctx.font = getComputedStyle(box).font
+        wrap.style.setProperty('--emo-w', `${ctx.measureText('\u{1F600}').width}px`)
+      }
+    } catch { /* the pictures keep their own width */ }
+    const follow = () => { if (copy.current) copy.current.scrollTop = box.scrollTop }
+    follow()
+    box.addEventListener('scroll', follow)
+    return () => box.removeEventListener('scroll', follow)
+  }, [drawn, text])
+  return (
+    <div ref={own} className={`ai-input-wrap${drawn ? ' has-emo' : ''}`}>
+      {drawn ? <div ref={copy} className="ai-input ai-input-copy" aria-hidden="true">{emojify(text)}{'\u200b'}</div> : null}
+      {children}
     </div>
   )
 }
@@ -404,7 +503,7 @@ function Question({ text }: { text: string }) {
     if (el && !whole) setLong(el.scrollHeight > el.clientHeight + 4)
   }, [text, whole])
   return (
-    <span ref={own} className={`ai-q${long ? ' is-long' : ''}${whole ? ' is-whole' : ''}`} onClick={() => { if (long) setWhole(true) }}>{text}</span>
+    <span ref={own} className={`ai-q${long ? ' is-long' : ''}${whole ? ' is-whole' : ''}`} onClick={() => { if (long) setWhole(true) }}>{emojify(text)}</span>
   )
 }
 
@@ -529,17 +628,14 @@ function Attached({ files }: { files: AiFileView[] }) {
   )
 }
 
-/** Her short lines over the conversation's start, one after another: each comes in softly and goes. */
+/** Her greeting over the conversation's start: one of many, a different one each time her chat opens. */
 function Taglines({ lines }: { lines: string[] }) {
-  const [i, setI] = useState(0)
-  useEffect(() => {
-    if (lines.length < 2) return
-    const every = setInterval(() => setI((n) => (n + 1) % lines.length), 3600)
-    return () => clearInterval(every)
-  }, [lines.length])
+  // one greeting of many, chosen anew each time her chat opens (after the first paint: no mismatch)
+  const [i, setI] = useState<number | null>(null)
+  useEffect(() => { setI(Math.floor(Math.random() * lines.length)) }, [lines.length])
   return (
     <h2 className="ai-greet" aria-live="polite">
-      <span key={i} className="ai-greet-line">{lines[i % lines.length]}</span>
+      {i === null ? '\u00a0' : <span key={i} className="ai-greet-line">{emojify(lines[i])}</span>}
     </h2>
   )
 }
@@ -564,7 +660,7 @@ function Suggestions({ lines, disabled, onPick }: { lines: string[]; disabled: b
             {[...row, ...row].map((c, i) => (
               <button key={i} type="button" className="ai-chip" role={i < row.length ? 'listitem' : undefined} aria-hidden={i >= row.length || undefined}
                 tabIndex={i < row.length ? undefined : -1} disabled={disabled} onClick={() => onPick(c.text)}>
-                {c.icon ? <span className="ai-chip-icon" aria-hidden="true">{c.icon}</span> : null}<span>{c.text}</span>
+                {c.icon ? <span className="ai-chip-icon" aria-hidden="true">{emojify(c.icon)}</span> : null}<span>{emojify(c.text)}</span>
               </button>
             ))}
           </div>
