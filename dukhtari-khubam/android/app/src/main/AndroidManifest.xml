@@ -24,6 +24,10 @@
                 <data android:scheme="@string/custom_url_scheme" android:host="open" />
             </intent-filter>
         </activity>
+        <!-- Mahliyo's calls (MahliyoCall.java): the alarm, "Decline", and the calls planned again after a restart -->
+        <receiver android:name=".MahliyoCall$Receiver" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
+        </receiver>
         <!-- "last chance" for the day streak (StreakAlarm.java): the daily alarm and its return after a restart -->
         <receiver android:name=".StreakAlarm$Receiver" android:exported="true">
             <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
@@ -94,6 +98,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- a soft vibration when the PIN is wrong or right -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Mahliyo calls at a reminder's exact time, waking the phone and showing over its lock screen -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <!-- the streak alarm comes back after the phone restarts -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- saving the code picture to the gallery on Android 9 and older (newer phones need no permission) -->

@@ -26,23 +26,41 @@ export interface AiFileView { mime: string; name: string; thumb?: string }
 /** …and as it goes to her (base64). */
 export interface AiUpload extends AiFileView { data: string }
 
-const KEY = 'dk.ai'
-/** how much of the conversation the phone keeps, and how much goes with a question */
+/** the chats kept on this phone (newest first), and the one open; the single chat of earlier versions */
+const CHATS_KEY = 'dk.ai.chats'
+const CURRENT_KEY = 'dk.ai.current'
+const OLD_KEY = 'dk.ai'
+/** how many chats the phone keeps, how much of each, and how much goes with a question */
+const MAX_CHATS = 30
 const KEEP = 40
 const CONTEXT = 12
 /** the most the summary of the learner may be (the server's limit) */
 const ME_CAP = 4000
 
-export function loadChat(): AiTurn[] {
+export interface AiChat { id: string; title: string; at: string; turns: AiTurn[] }
+/** a chat as the history lists it */
+export type AiChatMeta = Omit<AiChat, 'turns'>
+
+const newId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `c${Date.now()}${Math.random().toString(36).slice(2)}`)
+/** a chat's name: its first question */
+const titleOf = (turns: AiTurn[]) => (turns.find((t) => t.role === 'user')?.content ?? '').replace(/\s+/g, ' ').trim().slice(0, 80)
+
+function readChats(): AiChat[] {
   try {
-    const t = JSON.parse(localStorage.getItem(KEY) || '[]') as AiTurn[]
-    return Array.isArray(t) ? t : []
+    const list = JSON.parse(localStorage.getItem(CHATS_KEY) || 'null') as AiChat[] | null
+    if (Array.isArray(list)) return list.filter((c) => c && typeof c.id === 'string' && Array.isArray(c.turns))
+    // the one chat of earlier versions becomes the first in the history
+    const old = JSON.parse(localStorage.getItem(OLD_KEY) || '[]') as AiTurn[]
+    return Array.isArray(old) && old.length ? [{ id: newId(), title: titleOf(old), at: old[old.length - 1].at ?? new Date().toISOString(), turns: old }] : []
   } catch {
     return []
   }
 }
-export function saveChat(turns: AiTurn[]) {
-  try { localStorage.setItem(KEY, JSON.stringify(turns.slice(-KEEP))) } catch { /* storage blocked: the chat is not kept */ }
+function writeChats(list: AiChat[]) {
+  try {
+    localStorage.setItem(CHATS_KEY, JSON.stringify(list.slice(0, MAX_CHATS)))
+    localStorage.removeItem(OLD_KEY)
+  } catch { /* storage blocked: the chats are not kept */ }
 }
 
 let ready: Promise<boolean> | null = null
@@ -133,22 +151,25 @@ function courses(out: string[], bundle: Bundle, progress: ProgressData) {
 /** A notification id for a reminder at `at` (the same time gives the same id: set twice, rings once). */
 export const reminderId = (at: string) => 300_000 + (Math.floor(Date.parse(at) / 60_000) % 1_000_000)
 
-/** Sets a reminder she was asked for: a notification at that time that opens Mahliyo's chat. */
+/**
+ * Sets a reminder she was asked for: at that time she calls — her call screen while the app is open, and in
+ * the phone app an incoming-call notification that rings over the lock screen even with the app closed.
+ */
 export async function setReminder(b: Extract<AiBlock, { type: 'reminder' }>): Promise<'set' | 'denied' | 'past' | 'web'> {
   const when = new Date(b.at)
   if (!(when.getTime() > Date.now() + 30_000)) return 'past'
   const { allowNotifications, canNotify } = await import('./notify')
-  if (!canNotify()) return 'web'
-  if (!(await allowNotifications())) return 'denied'
-  const { LocalNotifications } = await import('@capacitor/local-notifications')
-  await LocalNotifications.schedule({
-    notifications: [{ id: reminderId(b.at), title: b.title, body: b.text || b.title, largeBody: b.text || b.title, schedule: { at: when, allowWhileIdle: true }, extra: { href: '/mahliyo' } }]
-  })
-  return 'set'
+  const native = canNotify()
+  const allowed = native && (await allowNotifications())
+  const { planCall } = await import('./call')
+  planCall({ id: reminderId(b.at), at: when.toISOString(), title: b.title, text: b.text })
+  return !native ? 'web' : allowed ? 'set' : 'denied'
 }
 
-/** Removes a reminder she set. */
+/** Removes a reminder she set (and her call). */
 export async function cancelReminder(at: string): Promise<void> {
+  const { unplanCall } = await import('./call')
+  unplanCall(reminderId(at))
   const { canNotify } = await import('./notify')
   if (!canNotify()) return
   const { LocalNotifications } = await import('@capacitor/local-notifications')
@@ -160,9 +181,13 @@ export async function cancelReminder(at: string): Promise<void> {
 /** Why there is no answer to the last question: no internet, too many questions, she could not, or stopped. */
 export type AiProblem = 'offline' | 'limit' | 'unavailable' | 'stopped'
 export interface AiState {
+  /** the open chat, and its conversation */
+  chat: string
   turns: AiTurn[]
-  /** a question she is answering: its id once the server has it, and since when */
-  pending: { id: string | null; since: number } | null
+  /** every chat kept, newest first (the history) */
+  chats: AiChatMeta[]
+  /** a question she is answering: its id once the server has it, since when, and in which chat */
+  pending: { id: string | null; since: number; chat: string } | null
   problem: AiProblem | null
   /** the index of an answer that has just come (drawn word by word, its reminder set) */
   fresh: number
@@ -175,7 +200,8 @@ export interface Who { code?: string; name?: string; me?: string }
 const PENDING_KEY = 'dk.ai-pending'
 /** how long she may take before the question counts as unanswered (the server gives up after 5 minutes) */
 const PATIENCE = 5.5 * 60_000
-const EMPTY: AiState = { turns: [], pending: null, problem: null, fresh: -1, unseen: false, online: true }
+const EMPTY: AiState = { chat: '', turns: [], chats: [], pending: null, problem: null, fresh: -1, unseen: false, online: true }
+let chats: AiChat[] = []
 let state: AiState = EMPTY
 let started = false
 const listeners = new Set<() => void>()
@@ -200,19 +226,38 @@ function savePending(p: AiState['pending']) {
   } catch { /* storage blocked: the wait is not kept across openings */ }
 }
 
+const metaOf = (list: AiChat[]): AiChatMeta[] => list.map(({ id, title, at }) => ({ id, title, at }))
+const turnsOf = (id: string) => chats.find((c) => c.id === id)?.turns ?? []
+
+/** Keeps a chat's conversation (the newest chat first in the history). */
+function keep(id: string, turns: AiTurn[]) {
+  const rest = chats.filter((c) => c.id !== id)
+  chats = turns.length ? [{ id, title: titleOf(turns), at: new Date().toISOString(), turns: turns.slice(-KEEP) }, ...rest] : rest
+  writeChats(chats)
+  return metaOf(chats)
+}
+
 function start() {
   if (started || typeof window === 'undefined') return
   started = true
   let pending: AiState['pending'] = null
   try { pending = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null') } catch { /* none */ }
-  state = { ...state, turns: loadChat(), online: navigator.onLine !== false }
+  chats = readChats()
+  let chat = ''
+  try { chat = localStorage.getItem(CURRENT_KEY) || '' } catch { /* none */ }
+  // the chat open last (a new one not yet asked in is not in the history: it opens empty)
+  if (!chat) chat = chats[0]?.id ?? newId()
+  state = { ...state, chat, turns: turnsOf(chat), chats: metaOf(chats), online: navigator.onLine !== false }
   // a question asked before the app was closed: her answer is fetched now
-  if (pending?.id && Date.now() - pending.since < PATIENCE && state.turns[state.turns.length - 1]?.role === 'user') {
+  const asked = pending && turnsOf(pending.chat ?? chat)
+  const id = pending?.id
+  if (pending && id && Date.now() - pending.since < PATIENCE && asked?.[asked.length - 1]?.role === 'user') {
+    pending = { ...pending, chat: pending.chat ?? chat }
     state = { ...state, pending }
-    void wait(pending.id, pending.since, ++run)
+    void wait(id, pending.since, ++run)
   } else if (pending) {
     savePending(null)
-    if (state.turns[state.turns.length - 1]?.role === 'user') state = { ...state, problem: 'unavailable' }
+    if (asked?.[asked.length - 1]?.role === 'user' && (pending.chat ?? chat) === chat) state = { ...state, problem: 'unavailable' }
   }
   window.addEventListener('online', () => set({ online: true, problem: state.problem === 'offline' ? null : state.problem }))
   window.addEventListener('offline', () => set({ online: false }))
@@ -260,10 +305,10 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
   const turns: AiTurn[] = [...(editFrom === undefined ? state.turns : state.turns.slice(0, editFrom)),
     { role: 'user', content: q, at: new Date().toISOString(), ...(views.length ? { files: views } : {}) }]
   const my = ++run
-  const pending = { id: null, since: Date.now() }
-  saveChat(turns)
+  const chat = state.chat
+  const pending = { id: null, since: Date.now(), chat }
   savePending(pending)
-  set({ turns, pending, problem: null, fresh: -1 })
+  set({ turns, chats: keep(chat, turns), pending, problem: null, fresh: -1 })
   // the conversation sent starts with a question of hers (the server's rule)
   let recent = turns.slice(-CONTEXT)
   while (recent.length && recent[0].role !== 'user') recent = recent.slice(1)
@@ -280,8 +325,8 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
       ...(files.length ? { files: files.map(({ mime, name, data }) => ({ mime, name, data })) } : {})
     })
     if (!current(my)) return void post('/mahliyo/stop', { token: supportToken(), id }).catch(() => undefined)
-    savePending({ id, since: pending.since })
-    set({ pending: { id, since: pending.since } })
+    savePending({ id, since: pending.since, chat })
+    set({ pending: { id, since: pending.since, chat } })
     await wait(id, pending.since, my)
   } catch (e) {
     if (!current(my)) return
@@ -314,9 +359,11 @@ async function wait(id: string, since: number, my: number) {
     if (!current(my) || r.status === 'pending') continue
     if (r.status === 'failed') return end(r.reason === 'stopped' ? 'stopped' : 'unavailable')
     const blocks = r.blocks?.length ? r.blocks : [{ type: 'text' as const, text: r.reply ?? '' }]
-    const turns: AiTurn[] = [...state.turns, { role: 'assistant', content: r.reply ?? '', tajik: r.tajik !== false, blocks, at: new Date().toISOString() }]
-    saveChat(turns)
-    end(null, { turns, fresh: turns.length - 1, unseen: watching === 0 })
+    // into the chat she was asked in (the learner may have opened another meanwhile)
+    const chat = state.pending?.chat ?? state.chat
+    const turns: AiTurn[] = [...turnsOf(chat), { role: 'assistant', content: r.reply ?? '', tajik: r.tajik !== false, blocks, at: new Date().toISOString() }]
+    const here = chat === state.chat
+    end(null, { chats: keep(chat, turns), ...(here ? { turns, fresh: turns.length - 1 } : {}), unseen: watching === 0 || !here })
     void tell(r.reply ?? '')
     return
   }
@@ -329,7 +376,8 @@ async function tell(reply: string) {
   if (!canNotify()) return
   const { LocalNotifications } = await import('@capacitor/local-notifications')
   if ((await LocalNotifications.checkPermissions()).display !== 'granted') return
-  const body = reply.replace(/\[[^\]]*\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 160)
+  const said = reply.replace(/\[[^\]]*\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 140)
+  const body = `Ҷавоби шумо аз Маҳлиё омад: ${said}`
   await LocalNotifications.schedule({ notifications: [{ id: 299_999, title: 'Маҳлиё AI', body, largeBody: body, schedule: { at: new Date(Date.now() + 500) }, extra: { href: '/mahliyo' } }] }).catch(() => undefined)
 }
 
@@ -348,11 +396,31 @@ export function retry(who: Who) {
   if (last?.role === 'user') void ask(last.content, who, state.turns.length - 1, last.files?.length ? lastFiles : [])
 }
 
-/** A new conversation. */
-export function clear() {
-  stop()
-  saveChat([])
-  set({ turns: [], problem: null, fresh: -1, unseen: false })
+/** Opens a chat from the history. */
+export function openChat(id: string) {
+  if (!chats.some((c) => c.id === id) || id === state.chat) return
+  try { localStorage.setItem(CURRENT_KEY, id) } catch { /* not kept */ }
+  set({ chat: id, turns: turnsOf(id), problem: null, fresh: -1 })
+}
+
+/** A new chat (the one open stays in the history). */
+export function newChat() {
+  if (!state.turns.length) return
+  const id = newId()
+  try { localStorage.setItem(CURRENT_KEY, id) } catch { /* not kept */ }
+  set({ chat: id, turns: [], problem: null, fresh: -1 })
+}
+
+/** Removes a chat from the history (the one open: a new one opens). */
+export function removeChat(id: string) {
+  if (state.pending?.chat === id) stop()
+  chats = chats.filter((c) => c.id !== id)
+  writeChats(chats)
+  if (id === state.chat) {
+    const chat = newId()
+    try { localStorage.setItem(CURRENT_KEY, chat) } catch { /* not kept */ }
+    set({ chats: metaOf(chats), chat, turns: [], problem: null, fresh: -1 })
+  } else set({ chats: metaOf(chats) })
 }
 
 /** Her answer as text to copy: her words and steps, links by their names (no pictures or reminders). */

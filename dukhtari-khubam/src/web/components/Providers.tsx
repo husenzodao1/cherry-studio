@@ -20,6 +20,7 @@ import { PullSignature } from './PullSignature'
 import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
+import { MahliyoCall } from './MahliyoCall'
 import { NotifyBridge } from './NotifyBridge'
 import { SupportWatch } from './SupportWatch'
 import { showToast, Toaster } from './Toast'
@@ -122,6 +123,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <Gate>{children}</Gate>
               <PageButterflies />
               <Dock />
+              <MahliyoCall />
               <AppUpdate />
               <NotifyBridge />
               <SupportWatch />

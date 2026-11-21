@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import type { AiBlock } from '@/lib/aiCatalog'
 import SPOTS from '@/lib/aiSpots.json'
@@ -104,12 +105,14 @@ export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: bool
             return <ReminderCard key={i} block={b} fresh={fresh} style={style} />
         }
       })}
-      {zoom ? (
+      {/* large, over everything (the tab bar too) */}
+      {zoom ? createPortal(
         <div className="ai-zoom" role="dialog" aria-modal="true" aria-label={zoom.caption} onClick={() => setZoom(null)}>
           <Shot spot={zoom.spot} />
           {zoom.caption ? <p>{zoom.caption}</p> : null}
           <button type="button" className="icon-btn ai-zoom-x" aria-label="×" onClick={() => setZoom(null)}><Icon name="x" /></button>
-        </div>
+        </div>,
+        document.body
       ) : null}
     </div>
   )

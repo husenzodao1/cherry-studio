@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { LiquidGlass } from '../glass/LiquidGlass'
 import { useMahliyo } from '../offline/mahliyo'
@@ -23,15 +23,24 @@ export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|ad
  * Floating tab bar in clear, refracting glass; the current tab sits in a raised glass circle. In the
  * middle, raised on a soft dome above the bar, Mahliyo AI: her picture in a circle, her head rising out
  * of it (drawn outside the glass, which clips what it holds). While she answers in the background her
- * circle glows and turns; an answer the learner has not seen yet shows a dot.
+ * circle glows and turns; an answer the learner has not seen yet shows a dot, and for a few seconds a note
+ * above the bar says she answered (a tap opens her chat).
  */
 export function Dock() {
   const path = usePathname() ?? '/'
   const { t } = usePrefs()
   const hidden = noDock(path)
   const { pending, unseen } = useMahliyo()
+  const ai = /^\/mahliyo/.test(path)
+  const [notice, setNotice] = useState(false)
   // a screen without the tab bar keeps no room for it at the bottom (so a short one fits the phone)
   useEffect(() => { document.documentElement.classList.toggle('no-dock', hidden) }, [hidden])
+  useEffect(() => {
+    if (!unseen || ai) return setNotice(false)
+    setNotice(true)
+    const off = setTimeout(() => setNotice(false), 6000)
+    return () => clearTimeout(off)
+  }, [unseen, ai])
   if (hidden) return null
   const tab = (item: (typeof ITEMS)[number]) => {
     const on = item.match.test(path)
@@ -41,9 +50,13 @@ export function Dock() {
       </Link>
     )
   }
-  const ai = /^\/mahliyo/.test(path)
   return (
     <div className="dock-wrap">
+      {notice ? (
+        <Link href="/mahliyo" className="ai-notice" role="status">
+          <img src="/assets/mascot/face.webp" alt="" aria-hidden="true" /><span>{t('ai.answered')}</span><Icon name="forward" size={16} />
+        </Link>
+      ) : null}
       <span className="dock-dome" aria-hidden="true" />
       <LiquidGlass as="nav" label={t('nav.home')} radius={36} bezel={20} blur={40} className="dock">
         {ITEMS.slice(0, 2).map(tab)}

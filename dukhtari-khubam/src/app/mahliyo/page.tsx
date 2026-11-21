@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 
 import { Icon } from '@/web/components/Icon'
 import { AnswerBlocks, timingOf } from '@/web/components/MahliyoBlocks'
@@ -9,8 +10,8 @@ import { showToast } from '@/web/components/Toast'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
 import {
-  aboutMe, aiReady, ask, clear, copyOf, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, prepareFile, retry, stop, useMahliyo, watch,
-  type AiFileView, type AiTurn, type AiUpload
+  aboutMe, aiReady, ask, copyOf, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, removeChat, retry, stop,
+  useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { usePrefs } from '@/web/prefs'
 
@@ -22,8 +23,9 @@ const PORTRAIT_THINK = '/assets/mascot/think.webp'
 const SLOW_MS = 6000
 
 /**
- * "Маҳлиё AI", a tab of its own: a quiet scene with soft moving light, her portrait in a glowing orb, and
- * the conversation. She answers in Tajik about the app, what its schools teach and the learner's own
+ * "Маҳлиё AI", a tab of its own: a dark, quiet scene (a dense mosaic of tiny icons), her portrait in a
+ * glowing orb, and the conversation — her answers as plain text on the dark, no boxes. The menu (☰) keeps
+ * the history of chats: open one, start a new one, remove one. She answers in Tajik about the app, what its schools teach and the learner's own
  * progress (the phone sends a summary of it with each question), in blocks — steps, a screenshot with a
  * pointer, a link, a reminder that rings on the phone — drawn word by word as they come. The question goes
  * on in the background (web/offline/mahliyo.ts): the learner may leave and come back. While it is still on
@@ -36,7 +38,8 @@ export default function MahliyoPage() {
   const { t } = usePrefs()
   const { learner, progress } = useLearner()
   const { bundle } = useContent()
-  const { turns, pending, problem, fresh, online } = useMahliyo()
+  const { chat, chats, turns, pending, problem, fresh, online } = useMahliyo()
+  const [history, setHistory] = useState(false)
   const [ready, setReady] = useState<boolean | null>(null)
   const [text, setText] = useState('')
   /** the question being edited (its index), or none */
@@ -49,11 +52,17 @@ export default function MahliyoPage() {
   const end = useRef<HTMLDivElement>(null)
   const box = useRef<HTMLTextAreaElement>(null)
   const picker = useRef<HTMLInputElement>(null)
-  const busy = !!pending
+  /** she is answering a question of this chat (one question at a time, in any chat) */
+  const busy = !!pending && pending.chat === chat
   /** the question is still on its way (no id from the server yet) */
-  const sending = !!pending && !pending.id
+  const sending = busy && !pending.id
 
   useEffect(() => watch(), [])
+  // her scene is dark whatever the theme; so is the tab bar over it
+  useEffect(() => {
+    document.documentElement.classList.add('ai-dark')
+    return () => document.documentElement.classList.remove('ai-dark')
+  }, [])
   useEffect(() => { void aiReady().then(setReady) }, [])
   // her new answer is read from its beginning; otherwise the newest line stays in view
   useEffect(() => {
@@ -61,7 +70,7 @@ export default function MahliyoPage() {
     if (answer) answer.scrollIntoView({ block: 'start', behavior: 'smooth' })
     else end.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turns.length, busy, problem])
+  }, [turns.length, busy, problem, chat])
   // a fresh answer is drawn word by word once; then it stays drawn
   useEffect(() => {
     const a = turns[fresh]
@@ -88,7 +97,7 @@ export default function MahliyoPage() {
   const send = (question: string, withFiles: AiUpload[] = []) => {
     // a picture alone asks her to look at it
     const q = question.trim() || (withFiles.length ? t('ai.look') : '')
-    if (!q || busy || !ready) return
+    if (!q || pending || !ready) return
     void ask(q, who(), editing ?? undefined, withFiles)
     setText('')
     setFiles([])
@@ -132,15 +141,22 @@ export default function MahliyoPage() {
 
   return (
     <div className={`ai-scene${busy ? ' is-thinking' : ''}`}>
-      <div className="ai-aurora" aria-hidden="true"><i /><i /><i /></div>
+      <div className="ai-bg" aria-hidden="true" />
 
       <header className="ai-top">
         <span className="ai-orb ai-orb-sm" aria-hidden="true"><span className="ai-orb-ring" /><img src={busy ? FACE_THINK : FACE} alt="" /></span>
-        <div>
+        <div className="grow">
           <h1 className="ai-name">{t('ai.title')}</h1>
           <span className={`ai-status${busy ? ' is-busy' : ''}`} aria-live="polite">{sending ? t('ai.sending') : busy ? t('ai.thinking') : t('ai.subtitle')}</span>
         </div>
+        <button type="button" className="ai-menu" aria-label={t('ai.history')} aria-haspopup="dialog" onClick={() => setHistory(true)}><Icon name="menu" size={22} /></button>
       </header>
+      {history ? (
+        <History chats={chats} open={chat} onClose={() => setHistory(false)}
+          onOpen={(id) => { openChat(id); setEditing(null); setText(''); setHistory(false) }}
+          onNew={() => { newChat(); setEditing(null); setText(''); setFiles([]); setHistory(false) }}
+          onRemove={removeChat} />
+      ) : null}
 
       {online ? null : (
         <p className="ai-offline" role="status"><Icon name="globe" size={18} /><span>{t('ai.offline')}{busy ? ` ${t('ai.offline_wait')}` : ''}</span></p>
@@ -180,7 +196,6 @@ export default function MahliyoPage() {
           </div>
         ) : (
           <div key={i} className="ai-said">
-            <img src={FACE} alt="" aria-hidden="true" />
             <div className="grow">
               <AnswerBlocks blocks={m.blocks?.length ? m.blocks : [{ type: 'text', text: m.content }]} fresh={i === fresh} />
               {m.tajik === false ? <Link href="/support" className="btn btn-soft ai-consultant"><Icon name="bell" size={16} /> {t('ai.to_consultant')}</Link> : null}
@@ -202,7 +217,6 @@ export default function MahliyoPage() {
           </div>
         ) : busy ? null : problem && last?.role === 'user' ? (
           <div className={`ai-problem is-${problem}`} role="status">
-            <img src={FACE} alt="" aria-hidden="true" />
             <div className="grow">
               <p>{t(problem === 'limit' ? 'ai.limit' : problem === 'offline' ? 'ai.offline' : problem === 'stopped' ? 'ai.stopped' : 'ai.failed')}</p>
               {problem === 'limit' ? null : (
@@ -212,13 +226,6 @@ export default function MahliyoPage() {
                 </div>
               )}
             </div>
-          </div>
-        ) : turns.length ? (
-          <div className="ai-follow">
-            {last?.role === 'assistant' && last.tajik !== false ? (
-              <button type="button" className="ai-chip" onClick={() => send(t('ai.not_clear'))} disabled={!online}><Icon name="image" size={16} /><span>{t('ai.not_clear')}</span></button>
-            ) : null}
-            <button type="button" className="ai-chip ai-chip-quiet" onClick={() => { clear(); setEditing(null); setText('') }}><Icon name="refresh" size={16} /><span>{t('ai.clear')}</span></button>
           </div>
         ) : null}
         <div ref={end} />
@@ -243,7 +250,7 @@ export default function MahliyoPage() {
         ) : null}
         <div className="ai-composer-row">
           <input ref={picker} type="file" hidden multiple accept="image/*,application/pdf,text/plain" onChange={(e) => void pick(e.target.files)} />
-          <button type="button" className="ai-attach" aria-label={t('ai.attach')} disabled={ready === false || busy || files.length >= MAX_FILES}
+          <button type="button" className="ai-attach" aria-label={t('ai.attach')} disabled={ready === false || !!pending || files.length >= MAX_FILES}
             onClick={() => picker.current?.click()}><Icon name="clip" size={20} /></button>
           <textarea ref={box} className="ai-input" rows={1} placeholder={online ? t('ai.placeholder') : t('ai.offline')} value={text} maxLength={1000} lang="tg"
             disabled={ready === false} aria-label={t('ai.placeholder')}
@@ -252,11 +259,62 @@ export default function MahliyoPage() {
           {busy ? (
             <button className="ai-send is-stop" aria-label={t('ai.stop')}><Icon name="stop" size={18} fill="currentColor" /></button>
           ) : (
-            <button className="ai-send" aria-label={t('support.send')} disabled={!ready || !online || (!text.trim() && !files.length)}><Icon name="up" size={20} /></button>
+            <button className="ai-send" aria-label={t('support.send')} disabled={!ready || !online || !!pending || (!text.trim() && !files.length)}><Icon name="up" size={20} /></button>
           )}
         </div>
       </form>
     </div>
+  )
+}
+
+/** The history of chats: newest first, by day; the open one marked; a new chat at the top. */
+function History({ chats, open, onClose, onOpen, onNew, onRemove }: {
+  chats: AiChatMeta[]; open: string; onClose: () => void; onOpen: (id: string) => void; onNew: () => void; onRemove: (id: string) => void
+}) {
+  const { t } = usePrefs()
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', esc)
+    return () => window.removeEventListener('keydown', esc)
+  }, [onClose])
+  const dayOf = (at: string) => {
+    const d = new Date(at)
+    const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const p = (n: number) => String(n).padStart(2, '0')
+    return day === today ? t('ai.today') : day === today - 86_400_000 ? t('ai.yesterday') : `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`
+  }
+  let shown = ''
+  // over the tab bar: drawn at the page's top level
+  return createPortal(
+    <div className="ai-history ai-portal" role="dialog" aria-modal="true" aria-label={t('ai.history')} onClick={onClose}>
+      <aside className="ai-history-panel" onClick={(e) => e.stopPropagation()}>
+        <header className="ai-history-head">
+          <b className="grow">{t('ai.history')}</b>
+          <button type="button" className="ai-act" aria-label={t('action.close')} onClick={onClose}><Icon name="x" size={18} /></button>
+        </header>
+        <button type="button" className="ai-history-new" onClick={onNew}><Icon name="edit" size={18} /><span>{t('ai.clear')}</span></button>
+        {chats.length ? (
+          <ul className="ai-history-list">
+            {chats.map((c) => {
+              const day = dayOf(c.at)
+              const head = day !== shown ? (shown = day) : null
+              return (
+                <li key={c.id}>
+                  {head ? <span className="ai-history-day">{head}</span> : null}
+                  <div className={`ai-history-row${c.id === open ? ' is-open' : ''}`}>
+                    <button type="button" className="grow" onClick={() => onOpen(c.id)} aria-current={c.id === open || undefined}>{c.title || '…'}</button>
+                    <button type="button" className="ai-act" aria-label={`${t('ai.remove')}: ${c.title}`} onClick={() => onRemove(c.id)}><Icon name="trash" size={16} /></button>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        ) : <p className="ai-history-none">{t('ai.no_chats')}</p>}
+      </aside>
+    </div>,
+    document.body
   )
 }
 

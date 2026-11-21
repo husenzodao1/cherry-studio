@@ -101,8 +101,9 @@ describe('asking Mahliyo', () => {
     expect(req.thinking).toBeUndefined()
     expect(req.system[0].text).toContain('«Гулдухтар»')
     expect(req.system[0].text).toContain('Gratorslab')
-    expect(req.system[0].text).toContain('Your AI runs on Claude by Anthropic')
-    expect(req.system[0].text).not.toContain('{ENGINE}')
+    // she is only Mahliyo AI: the model behind her is not named to her learners
+    expect(req.system[0].text).toContain('Never name or hint at the technology')
+    expect(req.system[0].text).not.toMatch(/runs on|\{ENGINE\}/)
     expect(req.system[0].text).toContain('- settings.pin:')
     expect(req.system[0].text).not.toMatch(/\{(APP|SPOTS|ROUTES)\}/)
     expect(req.system[1]).toMatchObject({ cache_control: { type: 'ephemeral' } })
@@ -114,9 +115,10 @@ describe('asking Mahliyo', () => {
     expect(req.messages).toEqual([{ role: 'user', content: 'Тести марҳила чист?' }])
   })
 
-  it('another language: tajik false, her reply as given', async () => {
-    create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{"tajik":false,"blocks":[{"type":"text","text":"Извините, мой русский не очень хороший."}]}' }] })
-    expect(await answer([{ role: 'user', content: 'Привет' }], 'Г', '')).toEqual({ tajik: false, blocks: [{ type: 'text', text: 'Извините, мой русский не очень хороший.' }], reply: 'Извините, мой русский не очень хороший.' })
+  it('every language: she answers in it (never sent to the consultant for its language)', async () => {
+    create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{"tajik":false,"blocks":[{"type":"text","text":"Язык меняется в «Танзимот» → «Забон»."}]}' }] })
+    expect(await answer([{ role: 'user', content: 'Как поменять язык?' }], 'Г', '')).toEqual({ tajik: true, blocks: [{ type: 'text', text: 'Язык меняется в «Танзимот» → «Забон».' }], reply: 'Язык меняется в «Танзимот» → «Забон».' })
+    expect(create.mock.calls[0][0].system[0].text).toContain('Answer in the language of her LAST message')
   })
 
   it('declined, unreadable or empty: a kind Tajik apology that points to the consultant', async () => {
@@ -201,8 +203,8 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     expect(req.config).toMatchObject({ responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'MINIMAL' } })
     expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(5)
     const system = req.config.systemInstruction as string
-    for (const s of ['«Гулдухтар»', 'Gratorslab', 'Your AI runs on Gemini by Google', 'ДОНИШ', 'Study days: 5', 'HER CURRENT TIME: 2026-11-21T14:00:00+05:00']) expect(system).toContain(s)
-    for (const s of ['Малика', 'age 17', '03-01', '{ENGINE}']) expect(system).not.toContain(s)
+    for (const s of ['«Гулдухтар»', 'Gratorslab', 'BE BRIEF', 'ДОНИШ', 'Study days: 5', 'HER CURRENT TIME: 2026-11-21T14:00:00+05:00']) expect(system).toContain(s)
+    for (const s of ['Малика', 'age 17', '03-01', '{ENGINE}', 'runs on']) expect(system).not.toContain(s)
     expect(create).not.toHaveBeenCalled()
   })
 

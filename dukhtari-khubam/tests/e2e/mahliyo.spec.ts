@@ -53,7 +53,7 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   await signedIn(page)
   const { asked } = await fakeMahliyo(page, (q) => (q.startsWith('Соати')
     ? { tajik: true, reply: 'Хуб!', blocks: [{ type: 'text', text: 'Хуб, ёдатон медиҳам!' }, { type: 'reminder', at: new Date(Date.now() + 3 * 3600_000).toISOString(), title: 'Вақти дарс', text: 'Малика, дарс интизор аст!' }] }
-    : q.startsWith('Как') ? { tajik: false, reply: 'Извините…', blocks: [{ type: 'text', text: 'Извините, мой русский не очень хороший. Напишите свои вопросы консультанту.' }] }
+    : q.startsWith('Как') ? { tajik: true, reply: 'Язык…', blocks: [{ type: 'text', text: 'Язык меняется в «Танзимот» → «Забон».' }] }
     : PIN))
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
@@ -68,8 +68,9 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   await tab.click()
   await expect(page).toHaveURL(/\/mahliyo\/?$/)
   await expect(tab).toHaveAttribute('aria-current', 'page')
-  // a plain header (no box, no button); her lines come one after another
-  await expect(page.locator('.ai-top button')).toHaveCount(0)
+  // a plain header: her name, and only the menu (the history of chats); her lines come one after another
+  await expect(page.locator('.ai-top button')).toHaveCount(1)
+  await expect(page.locator('.ai-top button')).toHaveAccessibleName('Таърихи чатҳо')
   await expect(page.locator('.ai-greet')).toHaveText('Салом, Малика! Чӣ меомӯзем?')
   await expect(page.locator('.ai-greet')).toHaveText('Кофе бо Маҳлиё AI? ☕', { timeout: 6000 })
   await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toBeVisible()
@@ -107,18 +108,66 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   expect(asked[1].turns.map((t) => t.role)).toEqual(['user', 'assistant', 'user'])
   expect(asked[1].turns[1].content).toContain('1. «Профил»-ро кушоед')
 
-  // another language: her apology in it, and the way to the consultant
-  await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('Как поменять PIN?')
+  // another language: she answers in it
+  await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('Как поменять язык?')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
-  await expect(page.locator('.ai-said').last()).toContainText('Извините')
-  await expect(page.locator('.ai-said').last().getByRole('link', { name: 'Ба мушовир нависед' })).toHaveAttribute('href', '/support')
+  await expect(page.locator('.ai-said').last()).toContainText('Язык меняется')
+  await expect(page.locator('.ai-said').last().getByRole('link', { name: 'Ба мушовир нависед' })).toHaveCount(0)
 
-  // the conversation stays on the phone; a new one starts clean
+  // the conversation stays on the phone; a new one starts clean (from the menu)
   await page.reload()
   await expect(page.locator('.ai-said')).toHaveCount(3)
+  await page.getByRole('button', { name: 'Таърихи чатҳо' }).click()
   await page.getByRole('button', { name: 'Сӯҳбати нав' }).click()
   await expect(page.locator('.ai-said')).toHaveCount(0)
   await expect(page.locator('.ai-marquee')).toBeVisible()
+  expect(errors).toEqual([])
+})
+
+test('her scene is dark, her words without boxes; the menu keeps the history of chats: open, new, remove — kept after reopening', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await fakeMahliyo(page, (q) => ({ tajik: true, reply: `Ҷавоб ба «${q}»`, blocks: [{ type: 'text', text: `Ҷавоб ба «${q}»` }] }), 300)
+  await page.goto('/mahliyo')
+  // dark, whatever the theme; the tab bar too; her answer is plain text on it
+  await expect(page.locator('html')).toHaveClass(/ai-dark/)
+  expect(await page.locator('.ai-bg').evaluate((e) => getComputedStyle(e).backgroundImage)).toContain('ai-doodles.svg')
+  const box = page.getByPlaceholder('Паём ба Mahliyo AI…')
+  await box.fill('Саволи якум')
+  await page.getByRole('button', { name: 'Фиристодан' }).click()
+  await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи якум»', { timeout: 10_000 })
+  expect(await page.locator('.ai-text').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)')
+  // a new chat from the menu; the first stays in the history
+  const menu = page.getByRole('button', { name: 'Таърихи чатҳо' })
+  await menu.click()
+  await page.getByRole('button', { name: 'Сӯҳбати нав' }).click()
+  await expect(page.locator('.ai-said')).toHaveCount(0)
+  await box.fill('Саволи дуюм')
+  await page.getByRole('button', { name: 'Фиристодан' }).click()
+  await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи дуюм»', { timeout: 10_000 })
+  await menu.click()
+  const rows = page.locator('.ai-history-row')
+  await expect(rows).toHaveCount(2)
+  await expect(rows.first()).toContainText('Саволи дуюм')
+  await expect(rows.first()).toHaveClass(/is-open/)
+  await expect(page.locator('.ai-history-day').first()).toHaveText('Имрӯз')
+  // the drawer is over the tab bar
+  expect(await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight - 40)?.closest('.ai-history') !== null)).toBe(true)
+  await rows.nth(1).getByRole('button', { name: 'Саволи якум', exact: true }).click()
+  await expect(page.locator('.ai-history')).toHaveCount(0)
+  await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи якум»')
+  // kept after the app is opened again, with the chat that was open
+  await page.reload()
+  await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи якум»')
+  await menu.click()
+  await expect(rows).toHaveCount(2)
+  // removed
+  await rows.filter({ hasText: 'Саволи дуюм' }).getByRole('button', { name: /Нест кардан/ }).click()
+  await expect(rows).toHaveCount(1)
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.ai-history')).toHaveCount(0)
+  // leaving her scene: the page is light again
+  await page.locator('.dock').getByRole('link', { name: /асосӣ/i }).click()
+  await expect(page.locator('html')).not.toHaveClass(/ai-dark/)
   expect(errors).toEqual([])
 })
 
@@ -134,6 +183,8 @@ test('in the background: she goes on answering while the learner is elsewhere (t
   await expect(page.locator('.dock-ai.is-thinking')).toBeVisible()
   await expect(page.locator('.dock-ai-news')).toBeVisible({ timeout: 10_000 })
   await expect(page.locator('.dock-ai.is-thinking')).toHaveCount(0)
+  // and a note above the bar says she answered; a tap opens her chat
+  await expect(page.locator('.ai-notice')).toHaveText('Ҷавоби шумо аз Маҳлиё омад')
   await page.locator('.dock-wrap').getByRole('link', { name: 'Маҳлиё AI' }).click()
   await expect(page.locator('.ai-text').first()).toHaveText('Пин-кодро дар «Танзимот» иваз мекунед.')
   await expect(page.locator('.dock-ai-news')).toHaveCount(0)
@@ -252,5 +303,45 @@ test('a slow connection: "sending…" until the question arrived, then she think
   await expect(page.locator('.toast').filter({ hasText: 'Ин навъи файл дастгирӣ намешавад' })).toBeVisible()
   await expect(page.locator('.ai-files')).toHaveCount(0)
   // her link blocks are not like the learner's bubbles
+  expect(errors).toEqual([])
+})
+
+test('Mahliyo calls at a reminder\'s time: it rings; declined, it ends; answered, she speaks (her words on the screen) until it is ended', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  const plan = (id: number, title: string) => page.evaluate(([id, title]) => {
+    const list = JSON.parse(localStorage.getItem('dk.ai-calls') || '[]')
+    list.push({ id, at: new Date(Date.now() - 2000).toISOString(), title, text: 'Малика, дарс интизор аст!' })
+    localStorage.setItem('dk.ai-calls', JSON.stringify(list))
+  }, [id, title] as const)
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await plan(1, 'Вақти дарс')
+  // the app comes back to the screen: the reminder is due, she calls
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+  const call = page.getByRole('dialog', { name: /Занги Маҳлиё AI/ })
+  await expect(call).toBeVisible()
+  await expect(call.locator('.call-name')).toHaveText('Маҳлиё')
+  await expect(call.locator('.call-status')).toContainText('занг мезанад')
+  await expect(call.locator('.call-about')).toHaveText('Вақти дарс')
+  await page.screenshot({ path: 'test-results/mahliyo-call.png' })
+  // declined: the line's tones, and it closes
+  await call.getByRole('button', { name: 'Рад кардан' }).click()
+  await expect(call.locator('.call-status')).toHaveText('Занг анҷом ёфт')
+  await expect(call).toHaveCount(0, { timeout: 5000 })
+  // it rang once: it does not ring again
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+  await page.waitForTimeout(500)
+  await expect(call).toHaveCount(0)
+
+  // another: answered, she speaks; her words come on the screen; the time runs
+  await plan(2, 'Такрори рӯз')
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+  await expect(call).toBeVisible()
+  await call.getByRole('button', { name: 'Бардоштан' }).click()
+  await expect(call.locator('.call-wave')).toBeVisible()
+  await expect(call.locator('.call-line')).toHaveText(/Ау!|Салом, дӯстам!/, { timeout: 8000 })
+  await expect(call.locator('.call-status')).toHaveText(/^00:0[1-9]$/, { timeout: 5000 })
+  await call.getByRole('button', { name: 'Анҷом' }).click()
+  await expect(call).toHaveCount(0, { timeout: 5000 })
   expect(errors).toEqual([])
 })
