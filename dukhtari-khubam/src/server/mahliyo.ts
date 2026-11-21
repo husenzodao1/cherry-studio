@@ -541,7 +541,8 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
     const used = (Array.isArray(r.sources) ? r.sources : []).map((n) => refs[Number(n) - 1]).filter((w): w is Ref => !!w)
     const cited = [...new Set(used)]
     if (blocks.length && wantsPictures(question)) {
-      const pictures = (cited.length ? cited : web).filter((w) => w.image).slice(0, 4)
+      // only the pictures of what she used: another article's picture may show something else
+      const pictures = cited.filter((w) => w.image).slice(0, 4)
       if (pictures.length) blocks.push({ type: 'images', items: pictures.map((w) => ({ src: w.image!, title: w.title, url: w.url })) })
     }
     if (blocks.length && cited.length) blocks.push({ type: 'sources', items: cited.map((w) => ({ title: w.title, url: w.url, site: w.site })) })
