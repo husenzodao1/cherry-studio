@@ -233,5 +233,14 @@ export const en: Partial<Record<UiKey, string>> = {
   'support.rate_skip': "Later",
   'support.inbox': "Users’ questions",
   'support.new_question': "A new question from a user",
+  'ai.title': "Mahliyo AI",
+  'ai.hello': "Hello! I’m Mahliyo, your teacher. Ask me about the app and the lessons’ topics — I answer in Tajik.",
+  'ai.placeholder': "Ask in Tajik…",
+  'ai.suggest': "Барнома чӣ гуна кор мекунад?\nТести ниҳоии марҳила чист?\nПин-кодро фаромӯш кардам, чӣ кунам?\nЧӣ тавр ба худ бовар пайдо кунам?",
+  'ai.to_consultant': "Write to the consultant",
+  'ai.limit': "You’ve asked a lot. Take a short break and ask again later.",
+  'ai.unavailable': "Mahliyo can’t answer right now. Please try a bit later.",
+  'ai.clear': "New conversation",
+  'ai.open': "Ask Mahliyo",
   'pin.forgot_q': "Forgot it?"
 }

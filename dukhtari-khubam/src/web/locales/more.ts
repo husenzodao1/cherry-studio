@@ -342,6 +342,15 @@ export const uz: Partial<Record<UiKey, string>> = {
   'support.rate_skip': "Keyinroq",
   'support.inbox': "Foydalanuvchilar savollari",
   'support.new_question': "Foydalanuvchidan yangi savol",
+  'ai.title': "Mahliyo AI",
+  'ai.hello': "Salom! Men Mahliyo, sizning ustozingiz. Ilova va darslar mavzulari haqida so‘rang — men tojik tilida javob beraman.",
+  'ai.placeholder': "Tojikcha so‘rang…",
+  'ai.suggest': "Барнома чӣ гуна кор мекунад?\nТести ниҳоии марҳила чист?\nПин-кодро фаромӯш кардам, чӣ кунам?\nЧӣ тавр ба худ бовар пайдо кунам?",
+  'ai.to_consultant': "Maslahatchiga yozing",
+  'ai.limit': "Ko‘p savol berdingiz. Biroz dam oling va keyinroq yana so‘rang.",
+  'ai.unavailable': "Mahliyo hozir javob bera olmaydi. Birozdan keyin urinib ko‘ring.",
+  'ai.clear': "Yangi suhbat",
+  'ai.open': "Mahliyodan so‘rang",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -685,6 +694,15 @@ export const tr: Partial<Record<UiKey, string>> = {
   'support.rate_skip': "Sonra",
   'support.inbox': "Kullanıcı soruları",
   'support.new_question': "Kullanıcıdan yeni soru",
+  'ai.title': "Mahliyo AI",
+  'ai.hello': "Merhaba! Ben Mahliyo, öğretmeniniz. Uygulama ve derslerin konuları hakkında sorun — Tacikçe cevap veririm.",
+  'ai.placeholder': "Tacikçe sorun…",
+  'ai.suggest': "Барнома чӣ гуна кор мекунад?\nТести ниҳоии марҳила чист?\nПин-кодро фаромӯш кардам, чӣ кунам?\nЧӣ тавр ба худ бовар пайдо кунам?",
+  'ai.to_consultant': "Danışmana yazın",
+  'ai.limit': "Çok soru sordunuz. Biraz dinlenin ve sonra tekrar sorun.",
+  'ai.unavailable': "Mahliyo şu anda cevap veremiyor. Biraz sonra tekrar deneyin.",
+  'ai.clear': "Yeni sohbet",
+  'ai.open': "Mahliyo’ya sorun",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1027,6 +1045,15 @@ export const fa: Partial<Record<UiKey, string>> = {
   'support.rate_skip': "بعداً",
   'support.inbox': "پرسش‌های کاربران",
   'support.new_question': "پرسش تازه از یک کاربر",
+  'ai.title': "ماه‌لیا AI",
+  'ai.hello': "سلام! من ماه‌لیا، آموزگار شما هستم. دربارهٔ برنامه و موضوع‌های درس‌ها بپرسید — به زبان تاجیکی پاسخ می‌دهم.",
+  'ai.placeholder': "به تاجیکی بپرسید…",
+  'ai.suggest': "Барнома чӣ гуна кор мекунад?\nТести ниҳоии марҳила чист?\nПин-кодро фаромӯш кардам, чӣ кунам?\nЧӣ тавр ба худ бовар пайдо кунам?",
+  'ai.to_consultant': "به مشاور بنویسید",
+  'ai.limit': "پرسش‌های زیادی پرسیدید. کمی استراحت کنید و بعداً دوباره بپرسید.",
+  'ai.unavailable': "ماه‌لیا اکنون نمی‌تواند پاسخ دهد. کمی بعد دوباره تلاش کنید.",
+  'ai.clear': "گفت‌وگوی تازه",
+  'ai.open': "از ماه‌لیا بپرسید",
   'pin.forgot_q': "فراموش کردید؟"
 }
 

@@ -16,7 +16,7 @@ const ITEMS: { href: string; key: 'nav.home' | 'nav.schools' | 'nav.saved' | 'na
 ]
 
 /** Screens without the tab bar (reading, tests, signing in, the panel). */
-export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|admin|support)(\/|$)/.test(path)
+export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|admin|support|mahliyo)(\/|$)/.test(path)
 
 /** Floating tab bar in clear, refracting glass; the current tab sits in a raised glass circle. */
 export function Dock() {

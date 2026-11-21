@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState, type FormEvent } from 'react'
 
 import { Content } from '@/web/admin/Content'
+import { MahliyoLog } from '@/web/admin/MahliyoLog'
 import { MediaLibrary } from '@/web/admin/Media'
 import { Support } from '@/web/admin/Support'
 import { Texts } from '@/web/admin/Texts'
@@ -23,9 +24,9 @@ import { useApi } from '@/web/useApi'
  * as the apps; the database checks the signed-in user's role for each read and write.
  */
 
-type Tab = 'home' | 'support' | 'content' | 'media' | 'texts' | 'pages' | 'users'
+type Tab = 'home' | 'support' | 'ai' | 'content' | 'media' | 'texts' | 'pages' | 'users'
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'home', label: 'Панел' }, { id: 'support', label: 'Дастгирӣ' }, { id: 'content', label: 'Мундариҷа' }, { id: 'media', label: 'Медиа' },
+  { id: 'home', label: 'Панел' }, { id: 'support', label: 'Дастгирӣ' }, { id: 'ai', label: 'Маҳлиё AI' }, { id: 'content', label: 'Мундариҷа' }, { id: 'media', label: 'Медиа' },
   { id: 'texts', label: 'Матнҳо' }, { id: 'pages', label: 'Саҳифаҳо' }, { id: 'users', label: 'Корбарон' }
 ]
 
@@ -64,7 +65,7 @@ export default function AdminPage() {
           <button key={t.id} type="button" role="tab" className="chip" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </nav>
-      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'content' ? <Content /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
+      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'ai' ? <MahliyoLog /> : tab === 'content' ? <Content /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
     </div>
   )
 }

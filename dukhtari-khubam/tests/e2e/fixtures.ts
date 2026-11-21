@@ -36,6 +36,8 @@ export const test = base.extend<{ server: Server; errors: string[] }>({
       return r.fulfill(json({ ok: true }))
     })
     await page.route('**/api/v1/app-config', (r) => r.fulfill(json({ google_web_client_id: null })))
+    // Mahliyo AI is not set up (tests that need her say so)
+    await page.route('**/api/v1/mahliyo/status', (r) => r.fulfill(json({ ready: false })))
     // not a consultant (tests that need one say so)
     await page.route('**/api/v1/consultant', (r) => r.fulfill(json({ consultant: false })))
     await page.route('**/auth/v1/otp**', (r) => r.fulfill(json({})))

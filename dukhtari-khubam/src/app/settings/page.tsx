@@ -15,6 +15,7 @@ import { allowNotifications, canNotify, DEFAULT_NOTIFY, readNotify, writeNotify,
 import { TEXT_SIZES, THEMES, usePrefs } from '@/web/prefs'
 import { SITE } from '@/web/site'
 import { INBOX, useConsultant } from '@/web/components/SupportWatch'
+import { aiReady } from '@/web/offline/mahliyo'
 
 function Notifications() {
   const { t } = usePrefs()
@@ -113,6 +114,8 @@ export default function Settings() {
   const router = useRouter()
   const { learner, signOut } = useLearner()
   const staff = useConsultant()
+  const [ai, setAi] = useState(false)
+  useEffect(() => { void aiReady().then(setAi) }, [])
   const [native, setNative] = useState(false)
   useEffect(() => setNative(canNotify()), [])
   const leave = () => {
@@ -141,6 +144,7 @@ export default function Settings() {
         </div>
         <div className="glass menu">
           <Link href="/support" className="menu-row"><Icon name="bell" /><span className="grow">{t('support.title')}</span><Icon name="forward" size={18} /></Link>
+          {ai ? <Link href="/mahliyo" className="menu-row"><Icon name="sparkle" /><span className="grow">{t('ai.title')}</span><Icon name="forward" size={18} /></Link> : null}
           {/* a consultant's account: the users' questions, how many wait */}
           {staff.consultant ? (
             <Link href={INBOX} className="menu-row"><Icon name="layers" /><span className="grow">{t('support.inbox')}</span>

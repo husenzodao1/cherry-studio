@@ -125,3 +125,26 @@ describe('support chat', () => {
     await expectError(as(db, null, (tx) => rpc(tx, 'api_support_send', { p_token_hash: flood, p_name: null, p_username: null, p_body: 'one more' })), 'rate_limited')
   })
 })
+
+describe('Mahliyo AI questions', () => {
+  const phone = hash('ai-phone')
+  it('records a question, then her answer once; the staff see them; nobody else can read them', async () => {
+    const id = await as(db, null, (tx) => rpc(tx, 'api_mahliyo_ask', { p_token_hash: phone, p_code_hash: hash(code), p_name: 'Малика', p_question: ' Тести марҳила чист? ' }))
+    await as(db, null, (tx) => rpc(tx, 'api_mahliyo_answer', { p_id: id, p_answer: 'Тести охири марҳила…', p_tajik: true }))
+    // a second answer to the same question is ignored
+    await as(db, null, (tx) => rpc(tx, 'api_mahliyo_answer', { p_id: id, p_answer: 'дигар', p_tajik: false }))
+    await expectError(as(db, null, (tx) => rpc(tx, 'admin_mahliyo_questions')), 'forbidden')
+    const list = await as(db, editor, (tx) => rpc(tx, 'admin_mahliyo_questions'))
+    expect(list[0]).toMatchObject({ name: 'Малика', question: 'Тести марҳила чист?', answer: 'Тести охири марҳила…', tajik: true })
+    // the table itself is closed to the app's keys
+    await expect(as(db, null, (tx) => tx.query('select * from public.mahliyo_questions'))).rejects.toThrow(/permission denied/)
+  })
+
+  it('refuses empty or overlong questions and more than 30 an hour from one phone', async () => {
+    await expectError(as(db, null, (tx) => rpc(tx, 'api_mahliyo_ask', { p_token_hash: phone, p_code_hash: null, p_name: null, p_question: '  ' })), 'validation_failed')
+    await expectError(as(db, null, (tx) => rpc(tx, 'api_mahliyo_ask', { p_token_hash: phone, p_code_hash: null, p_name: null, p_question: 'х'.repeat(1001) })), 'validation_failed')
+    const busy = hash('busy-phone')
+    for (let i = 0; i < 30; i++) await as(db, null, (tx) => rpc(tx, 'api_mahliyo_ask', { p_token_hash: busy, p_code_hash: null, p_name: null, p_question: `савол ${i}` }))
+    await expectError(as(db, null, (tx) => rpc(tx, 'api_mahliyo_ask', { p_token_hash: busy, p_code_hash: null, p_name: null, p_question: 'боз' })), 'rate_limited')
+  })
+})

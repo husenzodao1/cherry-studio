@@ -110,11 +110,11 @@ export async function buildBundle(sb: SupabaseClient, locale: string) {
   return { v: 1, locale, version, generated_at: new Date().toISOString(), ...content }
 }
 
-const codeHash = (code: string) => createHash('sha256').update(code).digest('hex')
-const Code = z.string().refine(isCode, 'invalid_code')
+export const codeHash = (code: string) => createHash('sha256').update(code).digest('hex')
+export const Code = z.string().refine(isCode, 'invalid_code')
 const Username = z.string().trim().toLowerCase().regex(/^[a-z0-9_.]{3,32}$/, 'invalid_username')
 const Password = z.string().min(6).max(72)
-const Token = z.string().regex(/^[0-9a-f]{64}$/, 'invalid_token')
+export const Token = z.string().regex(/^[0-9a-f]{64}$/, 'invalid_token')
 
 interface Stored { name: string; data: unknown; updated_at: string }
 
