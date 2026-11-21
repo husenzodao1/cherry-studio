@@ -1,8 +1,12 @@
 'use client'
 
+import { Capacitor } from '@capacitor/core'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
+
+import { onBack } from '@/web/components/BackButton'
 
 import { Icon } from '@/web/components/Icon'
 import { AnswerBlocks, timingOf } from '@/web/components/MahliyoBlocks'
@@ -19,13 +23,18 @@ const FACE = '/assets/mascot/face.webp'
 const FACE_THINK = '/assets/mascot/face-think.webp'
 const PORTRAIT = '/assets/mascot/salom.webp'
 const PORTRAIT_THINK = '/assets/mascot/think.webp'
-/** after this long thinking, a word that she takes her time — and that the learner may leave meanwhile */
-const SLOW_MS = 6000
+/** a second "back" within this long leaves her full screen */
+const EXIT_MS = 2000
+/** rubber at the chat's ends: the share of the finger's travel it follows, and how far it can go */
+const PULL = 0.3
+const STRETCH = 90
 
 /**
- * "Маҳлиё AI", a tab of its own: a dark, quiet scene (a dense mosaic of tiny icons), her portrait in a
- * glowing orb, and the conversation — her answers as plain text on the dark, no boxes. The menu (☰) keeps
- * the history of chats: open one, start a new one, remove one. She answers in Tajik about the app, what its schools teach and the learner's own
+ * "Маҳлиё AI" opens full screen (no tab bar; the browser's bars hidden where it allows): a quiet scene in
+ * a soft plain colour of the theme, her portrait in a glowing orb, and the conversation — her answers as
+ * plain text, no boxes. Only the conversation moves, and at its ends it stretches like rubber. "✕" at the
+ * top right leaves; the phone's (or browser's) back says first how to leave, and a second press leaves.
+ * The menu (☰) keeps the history of chats. She answers in Tajik about the app, what its schools teach and the learner's own
  * progress (the phone sends a summary of it with each question), in blocks — steps, a screenshot with a
  * pointer, a link, a reminder that rings on the phone — drawn word by word as they come. The question goes
  * on in the background (web/offline/mahliyo.ts): the learner may leave and come back. While it is still on
@@ -46,10 +55,12 @@ export default function MahliyoPage() {
   const [editing, setEditing] = useState<number | null>(null)
   /** the question whose actions are shown (the last one's always are) */
   const [opened, setOpened] = useState<number | null>(null)
-  const [slow, setSlow] = useState(false)
   /** pictures and files chosen for the next question */
   const [files, setFiles] = useState<AiUpload[]>([])
   const end = useRef<HTMLDivElement>(null)
+  const scroller = useRef<HTMLDivElement>(null)
+  const inner = useRef<HTMLDivElement>(null)
+  const router = useRouter()
   const box = useRef<HTMLTextAreaElement>(null)
   const picker = useRef<HTMLInputElement>(null)
   /** she is answering a question of this chat (one question at a time, in any chat) */
@@ -58,10 +69,88 @@ export default function MahliyoPage() {
   const sending = busy && !pending.id
 
   useEffect(() => watch(), [])
-  // her scene is dark whatever the theme; so is the tab bar over it
+
+  // full screen: the page behind does not move
   useEffect(() => {
-    document.documentElement.classList.add('ai-dark')
-    return () => document.documentElement.classList.remove('ai-dark')
+    document.documentElement.classList.add('ai-full')
+    return () => document.documentElement.classList.remove('ai-full')
+  }, [])
+  /** leaves her full screen, back where the learner came from */
+  const leave = () => {
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+    let from = '/'
+    try { from = sessionStorage.getItem('dk.ai-from') || '/' } catch { /* home */ }
+    router.push(from)
+  }
+  const leaveRef = useRef(leave)
+  leaveRef.current = leave
+  const historyRef = useRef(history)
+  historyRef.current = history
+  const tRef = useRef(t)
+  tRef.current = t
+  // back (the phone's, or the browser's): the history closes first; then the first press says how to
+  // leave, and a second one within two seconds leaves
+  useEffect(() => {
+    let last = 0
+    const press = () => {
+      if (historyRef.current) return setHistory(false)
+      if (Date.now() - last < EXIT_MS) return leaveRef.current()
+      last = Date.now()
+      showToast(tRef.current('ai.exit_again'), 'info')
+    }
+    if (Capacitor.isNativePlatform()) return onBack(press)
+    const keep = () => window.history.pushState(window.history.state, '')
+    keep()
+    const pop = () => {
+      const leaving = !historyRef.current && Date.now() - last < EXIT_MS
+      press()
+      if (!leaving) keep()
+    }
+    window.addEventListener('popstate', pop)
+    return () => window.removeEventListener('popstate', pop)
+  }, [])
+
+  // only the conversation moves; at its ends it stretches like rubber and springs back
+  useEffect(() => {
+    const el = scroller.current
+    const body = inner.current
+    if (!el || !body) return
+    let y0 = 0
+    let d = 0
+    const start = (e: TouchEvent) => {
+      y0 = e.touches[0].clientY
+      body.style.transition = 'none'
+    }
+    const move = (e: TouchEvent) => {
+      const dy = e.touches[0].clientY - y0
+      const atTop = el.scrollTop <= 0
+      const atEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
+      if ((dy > 0 && atTop) || (dy < 0 && atEnd)) {
+        d = Math.sign(dy) * STRETCH * (1 - Math.exp((-Math.abs(dy) * PULL) / STRETCH))
+        body.style.transform = `translateY(${d}px)`
+        if (e.cancelable) e.preventDefault()
+      } else if (d) {
+        d = 0
+        body.style.transform = ''
+        y0 = e.touches[0].clientY
+      }
+    }
+    const end = () => {
+      if (!d) return
+      body.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.15)'
+      body.style.transform = ''
+      d = 0
+    }
+    el.addEventListener('touchstart', start, { passive: true })
+    el.addEventListener('touchmove', move, { passive: false })
+    el.addEventListener('touchend', end)
+    el.addEventListener('touchcancel', end)
+    return () => {
+      el.removeEventListener('touchstart', start)
+      el.removeEventListener('touchmove', move)
+      el.removeEventListener('touchend', end)
+      el.removeEventListener('touchcancel', end)
+    }
   }, [])
   useEffect(() => { void aiReady().then(setReady) }, [])
   // her new answer is read from its beginning; otherwise the newest line stays in view
@@ -78,13 +167,6 @@ export default function MahliyoPage() {
     const done = setTimeout(drawn, timingOf(a.blocks).total + 600)
     return () => clearTimeout(done)
   }, [fresh, turns])
-  // she takes her time: say so after a while
-  useEffect(() => {
-    setSlow(false)
-    if (!pending?.id) return
-    const later = setTimeout(() => setSlow(true), Math.max(0, SLOW_MS - (Date.now() - pending.since)))
-    return () => clearTimeout(later)
-  }, [pending])
   // the box grows with what she writes (up to five lines)
   useEffect(() => {
     const el = box.current
@@ -132,17 +214,28 @@ export default function MahliyoPage() {
     setText(turns[i].content)
     setTimeout(() => box.current?.focus(), 50)
   }
+  const textOf = (m: AiTurn) => (m.role === 'user' ? m.content : copyOf(m))
   const copy = async (m: AiTurn) => {
-    showToast(t((await copyText(m.role === 'user' ? m.content : copyOf(m))) ? 'ai.copied' : 'ai.unavailable'), 'copy')
+    showToast(t((await copyText(textOf(m))) ? 'ai.copied' : 'ai.unavailable'), 'copy')
   }
+  /** shares her answer with another app (the phone's share sheet; the browser's where it has one) */
+  const share = async (m: AiTurn) => {
+    const said = textOf(m)
+    if (Capacitor.isNativePlatform()) {
+      const { Share } = await import('@capacitor/share')
+      return void Share.share({ text: said, dialogTitle: t('ai.share') }).catch(() => undefined)
+    }
+    if (navigator.share) return void navigator.share({ text: said }).catch(() => undefined)
+    void copy(m)
+  }
+  /** the text whose words are being selected (a sheet where any part can be picked) */
+  const [selecting, setSelecting] = useState<string | null>(null)
   const last = turns[turns.length - 1]
   const lastQuestion = turns.map((m) => m.role).lastIndexOf('user')
   const first = learner?.name?.split(/\s+/)[0]
 
   return (
     <div className={`ai-scene${busy ? ' is-thinking' : ''}`}>
-      <div className="ai-bg" aria-hidden="true" />
-
       <header className="ai-top">
         <span className="ai-orb ai-orb-sm" aria-hidden="true"><span className="ai-orb-ring" /><img src={busy ? FACE_THINK : FACE} alt="" /></span>
         <div className="grow">
@@ -150,7 +243,9 @@ export default function MahliyoPage() {
           <span className={`ai-status${busy ? ' is-busy' : ''}`} aria-live="polite">{sending ? t('ai.sending') : busy ? t('ai.thinking') : t('ai.subtitle')}</span>
         </div>
         <button type="button" className="ai-menu" aria-label={t('ai.history')} aria-haspopup="dialog" onClick={() => setHistory(true)}><Icon name="menu" size={22} /></button>
+        <button type="button" className="ai-menu ai-leave" aria-label={t('ai.leave')} onClick={leave}><Icon name="x" size={20} /></button>
       </header>
+      {selecting !== null ? <SelectText text={selecting} onClose={() => setSelecting(null)} /> : null}
       {history ? (
         <History chats={chats} open={chat} onClose={() => setHistory(false)}
           onOpen={(id) => { openChat(id); setEditing(null); setText(''); setHistory(false) }}
@@ -162,7 +257,8 @@ export default function MahliyoPage() {
         <p className="ai-offline" role="status"><Icon name="globe" size={18} /><span>{t('ai.offline')}{busy ? ` ${t('ai.offline_wait')}` : ''}</span></p>
       )}
 
-      <div className="ai-chat">
+      <div className="ai-scroll" ref={scroller}>
+      <div className="ai-chat" ref={inner}>
         {turns.length ? null : (
           <section className="ai-hero">
             <span className="ai-orb ai-orb-lg" aria-hidden="true">
@@ -202,19 +298,18 @@ export default function MahliyoPage() {
               {m.tajik === false ? <Link href="/support" className="btn btn-soft ai-consultant"><Icon name="bell" size={16} /> {t('ai.to_consultant')}</Link> : null}
               <div className="ai-acts ai-acts-start">
                 <button type="button" className="ai-act" onClick={() => copy(m)} aria-label={t('ai.copy')}><Icon name="copy" size={16} /></button>
+                <button type="button" className="ai-act" onClick={() => setSelecting(textOf(m))} aria-label={t('ai.select')}><Icon name="select" size={16} /></button>
+                <button type="button" className="ai-act" onClick={() => share(m)} aria-label={t('ai.share')}><Icon name="share" size={16} /></button>
               </div>
             </div>
           </div>
         )))}
 
         {busy && !sending ? (
-          <div className="ai-thinking-row">
-            <div className="ai-thinking" aria-label={t('ai.thinking')}>
-              <span className="ai-orb ai-orb-xs" aria-hidden="true"><span className="ai-orb-ring" /><img src={FACE_THINK} alt="" /></span>
-              <span className="ai-thinking-text">{t('ai.thinking')}</span>
-              <span className="mi-dots"><i /><i /><i /></span>
-            </div>
-            {slow ? <p className="ai-slow">{t('ai.slow')}</p> : null}
+          <div className="ai-thinking" aria-label={t('ai.thinking')}>
+            <span className="ai-orb ai-orb-xs" aria-hidden="true"><span className="ai-orb-ring" /><img src={FACE_THINK} alt="" /></span>
+            <span className="ai-thinking-text">{t('ai.thinking')}</span>
+            <span className="mi-dots"><i /><i /><i /></span>
           </div>
         ) : busy ? null : problem && last?.role === 'user' ? (
           <div className={`ai-problem is-${problem}`} role="status">
@@ -230,6 +325,7 @@ export default function MahliyoPage() {
           </div>
         ) : null}
         <div ref={end} />
+      </div>
       </div>
 
       <form className={`ai-composer${editing !== null ? ' is-editing' : ''}`} onSubmit={submit}>
@@ -269,9 +365,9 @@ export default function MahliyoPage() {
 }
 
 /**
- * The history of chats: plain lines, newest first, by day; the open one marked; a new chat at the top.
- * Each chat's "⋯" puts it in the archive (kept, out of the list) or deletes it for good; the archive is
- * at the bottom, folded.
+ * The history of chats, over the whole screen: her name at the top (» closes); "Сӯҳбатҳо", folding; each
+ * chat a plain line — its name and when — with "⋮": to the archive, or deleted for good. At the bottom a
+ * search, the archive (its chats instead of the others) and a new chat.
  */
 function History({ chats, open, onClose, onOpen, onNew, onRemove, onArchive }: {
   chats: AiChatMeta[]; open: string; onClose: () => void; onOpen: (id: string) => void; onNew: () => void
@@ -280,72 +376,99 @@ function History({ chats, open, onClose, onOpen, onNew, onRemove, onArchive }: {
   const { t } = usePrefs()
   /** the chat whose actions are open */
   const [acts, setActs] = useState<string | null>(null)
-  const [showArchive, setShowArchive] = useState(false)
+  const [archive, setArchive] = useState(false)
+  const [folded, setFolded] = useState(false)
+  const [query, setQuery] = useState('')
   useEffect(() => {
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') (acts ? setActs(null) : onClose()) }
     window.addEventListener('keydown', esc)
     return () => window.removeEventListener('keydown', esc)
   }, [onClose, acts])
-  const dayOf = (at: string) => {
+  /** today, yesterday, a weekday this week, or the date */
+  const when = (at: string) => {
     const d = new Date(at)
     const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
     const p = (n: number) => String(n).padStart(2, '0')
-    return day === today ? t('ai.today') : day === today - 86_400_000 ? t('ai.yesterday') : `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`
+    if (day === today) return t('ai.today')
+    if (day === today - 86_400_000) return t('ai.yesterday')
+    if (today - day < 7 * 86_400_000) return t('ai.weekdays').split('\n')[d.getDay()] ?? ''
+    return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`
   }
-  const live = chats.filter((c) => !c.archived)
-  const archived = chats.filter((c) => c.archived)
-  const row = (c: AiChatMeta) => (
-    <div className={`ai-history-row${c.id === open ? ' is-open' : ''}`}>
-      <button type="button" className="grow" onClick={() => onOpen(c.id)} aria-current={c.id === open || undefined}>{c.title || '…'}</button>
-      <button type="button" className="ai-act" aria-label={`${t('ai.chat_actions')}: ${c.title}`} aria-expanded={acts === c.id}
-        onClick={() => setActs(acts === c.id ? null : c.id)}><Icon name="more" size={18} /></button>
-      {acts === c.id ? (
-        <div className="ai-history-menu" role="menu">
-          <button type="button" role="menuitem" onClick={() => { onArchive(c.id, !c.archived); setActs(null) }}>
-            <Icon name="archive" size={17} />{c.archived ? t('ai.unarchive') : t('ai.archive')}
-          </button>
-          <button type="button" role="menuitem" className="is-danger" onClick={() => { onRemove(c.id); setActs(null) }}>
-            <Icon name="trash" size={17} />{t('ai.delete_full')}
-          </button>
-        </div>
-      ) : null}
-    </div>
-  )
-  let shown = ''
+  const q = query.trim().toLowerCase()
+  const list = chats.filter((c) => !!c.archived === archive && (!q || c.title.toLowerCase().includes(q)))
   // over the tab bar: drawn at the page's top level
   return createPortal(
-    <div className="ai-history ai-portal" role="dialog" aria-modal="true" aria-label={t('ai.history')} onClick={onClose}>
+    <div className="ai-history" role="dialog" aria-modal="true" aria-label={t('ai.history')} onClick={onClose}>
       <aside className="ai-history-panel" onClick={(e) => { e.stopPropagation(); if (acts && !(e.target as HTMLElement).closest('.ai-history-row')) setActs(null) }}>
         <header className="ai-history-head">
-          <b className="grow">{t('ai.history')}</b>
-          <button type="button" className="ai-act" aria-label={t('action.close')} onClick={onClose}><Icon name="x" size={18} /></button>
+          {archive ? (
+            <button type="button" className="ai-history-round" aria-label={t('ai.chats')} onClick={() => setArchive(false)}><Icon name="back" size={20} /></button>
+          ) : <span className="ai-orb ai-orb-sm" aria-hidden="true"><img src={FACE} alt="" /></span>}
+          <b className="grow">{archive ? t('ai.archived') : t('ai.title')}</b>
+          <button type="button" className="ai-history-round" aria-label={t('action.close')} onClick={onClose}><Icon name="chevrons" size={20} /></button>
         </header>
-        <button type="button" className="ai-history-new" onClick={onNew}><Icon name="edit" size={18} /><span>{t('ai.clear')}</span></button>
-        {live.length ? (
+        <button type="button" className="ai-history-fold" aria-expanded={!folded} onClick={() => setFolded(!folded)}>
+          <span className="grow">{archive ? t('ai.archived') : t('ai.chats')}</span><Icon name={folded ? 'down' : 'up'} size={18} />
+        </button>
+        {folded ? null : list.length ? (
           <ul className="ai-history-list">
-            {live.map((c) => {
-              const day = dayOf(c.at)
-              const head = day !== shown ? (shown = day) : null
-              return (
-                <li key={c.id}>
-                  {head ? <span className="ai-history-day">{head}</span> : null}
-                  {row(c)}
-                </li>
-              )
-            })}
+            {list.map((c) => (
+              <li key={c.id} className={`ai-history-row${c.id === open ? ' is-open' : ''}`}>
+                <button type="button" className="grow" aria-label={c.title || '…'} aria-current={c.id === open || undefined} onClick={() => onOpen(c.id)}>
+                  <span className="ai-history-title">{c.title || '…'}</span>
+                  <span className="ai-history-when">{when(c.at)}</span>
+                </button>
+                <button type="button" className="ai-act ai-history-dots" aria-label={`${t('ai.chat_actions')}: ${c.title}`} aria-expanded={acts === c.id}
+                  onClick={() => setActs(acts === c.id ? null : c.id)}><Icon name="more" size={18} /></button>
+                {acts === c.id ? (
+                  <div className="ai-history-menu" role="menu">
+                    <button type="button" role="menuitem" onClick={() => { onArchive(c.id, !c.archived); setActs(null) }}>
+                      <Icon name="archive" size={17} />{c.archived ? t('ai.unarchive') : t('ai.archive')}
+                    </button>
+                    <button type="button" role="menuitem" className="is-danger" onClick={() => { onRemove(c.id); setActs(null) }}>
+                      <Icon name="trash" size={17} />{t('ai.delete_full')}
+                    </button>
+                  </div>
+                ) : null}
+              </li>
+            ))}
           </ul>
         ) : <p className="ai-history-none">{t('ai.no_chats')}</p>}
-        {archived.length ? (
-          <div className="ai-history-archive">
-            <button type="button" className="ai-history-fold" aria-expanded={showArchive} onClick={() => setShowArchive(!showArchive)}>
-              <Icon name="archive" size={17} /><span className="grow">{t('ai.archived')} · {archived.length}</span><Icon name={showArchive ? 'up' : 'down'} size={16} />
-            </button>
-            {showArchive ? <ul className="ai-history-list">{archived.map((c) => <li key={c.id}>{row(c)}</li>)}</ul> : null}
-          </div>
-        ) : null}
+        <footer className="ai-history-foot">
+          <label className="ai-history-search">
+            <Icon name="search" size={19} />
+            <input type="search" value={query} placeholder={t('action.search')} aria-label={t('action.search')} onChange={(e) => setQuery(e.target.value)} />
+          </label>
+          <button type="button" className={`ai-history-round${archive ? ' is-on' : ''}`} aria-label={t('ai.archived')} aria-pressed={archive} onClick={() => setArchive(!archive)}>
+            <Icon name="archive" size={20} />
+          </button>
+          <button type="button" className="ai-history-round" aria-label={t('ai.clear')} onClick={onNew}><Icon name="edit" size={20} /></button>
+        </footer>
       </aside>
+    </div>,
+    document.body
+  )
+}
+
+/** Her answer's words in a sheet where any part of them can be selected (and copied with the phone's own tools). */
+function SelectText({ text, onClose }: { text: string; onClose: () => void }) {
+  const { t } = usePrefs()
+  const area = useRef<HTMLTextAreaElement>(null)
+  useEffect(() => {
+    area.current?.focus()
+    area.current?.setSelectionRange(0, 0)
+  }, [])
+  return createPortal(
+    <div className="ai-select" role="dialog" aria-modal="true" aria-label={t('ai.select')} onClick={onClose}>
+      <div className="ai-select-sheet" onClick={(e) => e.stopPropagation()}>
+        <header className="ai-history-head">
+          <b className="grow">{t('ai.select')}</b>
+          <button type="button" className="ai-history-round" aria-label={t('action.close')} onClick={onClose}><Icon name="x" size={18} /></button>
+        </header>
+        <textarea ref={area} className="ai-select-text" readOnly value={text} />
+      </div>
     </div>,
     document.body
   )

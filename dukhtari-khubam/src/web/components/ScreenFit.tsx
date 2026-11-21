@@ -60,7 +60,9 @@ export function ScreenFit() {
       return false
     }
     const start = (e: TouchEvent) => {
-      pulling = !!app && root.classList.contains('fits') && !root.classList.contains('locked') && !scrollableAbove(e.target)
+      // Mahliyo's full screen stretches its own conversation (app/mahliyo/page.tsx)
+      const own = (e.target as HTMLElement | null)?.closest?.('.ai-scene, .ai-history')
+      pulling = !!app && !own && root.classList.contains('fits') && !root.classList.contains('locked') && !scrollableAbove(e.target)
       y0 = e.touches[0].clientY
       x0 = e.touches[0].clientX
       moved = false

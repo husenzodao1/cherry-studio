@@ -256,7 +256,6 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.reminder_put': "Set",
   'ai.offline': "No internet. Mahliyo answers only when you’re online.",
   'ai.offline_wait': "The answer will come once you’re online.",
-  'ai.slow': "Mahliyo is thinking carefully. You can go to another section — the answer won’t be lost.",
   'ai.failed': "Sorry, I couldn’t answer right now.",
   'ai.retry': "Try again",
   'ai.stopped': "You stopped the question.",
@@ -288,5 +287,11 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.delete_full': "Delete permanently",
   'ai.archived': "Archive",
   'ai.chat_actions': "Actions",
+  'ai.exit_again': "Repeat to leave full screen",
+  'ai.leave': "Leave",
+  'ai.weekdays': "Sunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday",
+  'ai.chats': "Chats",
+  'ai.select': "Select text",
+  'ai.share': "Share",
   'pin.forgot_q': "Forgot it?"
 }

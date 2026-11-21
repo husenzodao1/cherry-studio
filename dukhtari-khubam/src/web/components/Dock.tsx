@@ -16,13 +16,13 @@ const ITEMS: { href: string; key: 'nav.home' | 'nav.schools' | 'nav.saved' | 'na
   { href: '/profile', key: 'nav.profile', icon: 'user', match: /^\/(profile|settings)/ }
 ]
 
-/** Screens without the tab bar (reading, tests, signing in, the panel). */
-export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|admin|support)(\/|$)/.test(path)
+/** Screens without the tab bar (reading, tests, signing in, the panel, Mahliyo's full screen). */
+export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|admin|support|mahliyo)(\/|$)/.test(path)
 
 /**
  * Floating tab bar in clear, refracting glass; the current tab sits in a raised glass circle. In the
- * middle, raised on a soft dome above the bar, Mahliyo AI: her picture in a circle, her head rising out
- * of it (drawn outside the glass, which clips what it holds). While she answers in the background her
+ * middle, a little above the bar, Mahliyo AI: her picture in a circle, her head rising out of it (drawn
+ * outside the glass, which clips what it holds); the bar's edge keeps a small gap around her circle. While she answers in the background her
  * circle glows and turns; an answer the learner has not seen yet shows a dot, and for a few seconds a note
  * above the bar says she answered (a tap opens her chat).
  */
@@ -50,6 +50,12 @@ export function Dock() {
       </Link>
     )
   }
+  // her chat opens full screen (in the browser too, where it allows); "✕" brings the learner back here
+  const toFull = () => {
+    try { sessionStorage.setItem('dk.ai-from', path) } catch { /* home */ }
+    const root = document.documentElement
+    if (!document.fullscreenElement && root.requestFullscreen) void root.requestFullscreen({ navigationUI: 'hide' }).catch(() => undefined)
+  }
   return (
     <div className="dock-wrap">
       {notice ? (
@@ -57,13 +63,12 @@ export function Dock() {
           <img src="/assets/mascot/face.webp" alt="" aria-hidden="true" /><span>{t('ai.answered')}</span><Icon name="forward" size={16} />
         </Link>
       ) : null}
-      <span className="dock-dome" aria-hidden="true" />
       <LiquidGlass as="nav" label={t('nav.home')} radius={36} bezel={20} blur={40} className="dock">
         {ITEMS.slice(0, 2).map(tab)}
         <span className="dock-gap" aria-hidden="true" />
         {ITEMS.slice(2).map(tab)}
       </LiquidGlass>
-      <Link href="/mahliyo" className={`dock-ai${pending ? ' is-thinking' : ''}`} aria-current={ai ? 'page' : undefined}
+      <Link href="/mahliyo" className={`dock-ai${pending ? ' is-thinking' : ''}`} aria-current={ai ? 'page' : undefined} onClick={toFull}
         aria-label={pending ? `${t('ai.title')} · ${t('ai.thinking')}` : t('ai.title')}>
         <span className="dock-ai-fig"><img src="/assets/mascot/persona.webp" alt="" aria-hidden="true" /></span>
         {unseen && !ai ? <span className="dock-ai-news" aria-hidden="true" /> : null}

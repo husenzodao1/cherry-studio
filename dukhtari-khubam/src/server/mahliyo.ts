@@ -26,13 +26,21 @@ export const MODEL = process.env.MAHLIYO_MODEL || 'claude-fable-5-2'
  * first (about a second, good Tajik with the least thinking), then the slower, deeper ones; GEMINI_MODEL
  * may list others.
  */
-export const GEMINI_MODELS = (process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite,gemini-3.5-flash,gemini-flash-latest')
+export const GEMINI_MODELS = (process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite,gemini-3.5-flash,gemini-flash-latest,gemini-3-flash-preview,gemini-3.1-flash-lite-preview')
   .split(',').map((m) => m.trim()).filter(Boolean)
 /** the least thinking each model allows (the Lite models think least, the others from "low") */
 const thinkingOf = (model: string) => (model.includes('lite') ? ThinkingLevel.MINIMAL : ThinkingLevel.LOW)
 /** how long one Gemini model may take (the quick one less), and all of them together */
 const waitOf = (model: string) => (model.includes('lite') ? 25_000 : 50_000)
 const GEMINI_TOTAL = 150_000
+/**
+ * On the free tier every model is now and then "too busy" for a few seconds: the models are asked again
+ * in rounds, with a growing pause between them, until one answers or the time is up. A model over its
+ * free quota (429) is not asked again.
+ */
+const ROUNDS = 4
+const PAUSE_MS = [0, 1500, 4000, 8000]
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 /** What the app is and how it works, as Mahliyo should know it (Tajik). */
 export const GUIDE = `
@@ -393,7 +401,11 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
   const started = Date.now()
   let failure: unknown = new Error('no Gemini model')
   const arabicScript = /[\u0600-\u06FF]/.test(turns[turns.length - 1]?.content ?? '')
+  const spent = new Set<string>()
+  for (let round = 0; round < ROUNDS; round++) {
+    if (round) await sleep(PAUSE_MS[round] ?? 8000)
   for (const model of GEMINI_MODELS) {
+    if (spent.has(model)) continue
     if (Date.now() - started + waitOf(model) > GEMINI_TOTAL) break
     try {
       const r = await gemini.models.generateContent({
@@ -425,10 +437,13 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
       }
       return r.text ?? ''
     } catch (e) {
-      // busy, over the free quota or too slow: the next model
+      // busy, over the free quota or too slow: the next model (and, after a pause, all of them again)
       failure = e
-      console.warn('[mahliyo] gemini', model, 'failed after', Date.now() - started, 'ms:', String(e instanceof Error ? e.message : e).slice(0, 160))
+      const said = String(e instanceof Error ? e.message : e)
+      if (/"code":\s*(429|404|400)/.test(said)) spent.add(model)
+      console.warn('[mahliyo] gemini', model, 'round', round + 1, 'failed after', Date.now() - started, 'ms:', said.slice(0, 160))
     }
+  }
   }
   throw failure
 }

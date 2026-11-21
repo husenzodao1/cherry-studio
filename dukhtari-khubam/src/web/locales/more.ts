@@ -365,7 +365,6 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.reminder_put': "Qo‘yish",
   'ai.offline': "Internet yo‘q. Mahliyo faqat internet bilan javob beradi.",
   'ai.offline_wait': "Javob ulanishdan keyin keladi.",
-  'ai.slow': "Mahliyo diqqat bilan o‘ylayapti. Boshqa bo‘limga o‘tishingiz mumkin — javob yo‘qolmaydi.",
   'ai.failed': "Kechirasiz, hozir javob bera olmadim.",
   'ai.retry': "Qayta urinish",
   'ai.stopped': "Savolni to‘xtatdingiz.",
@@ -397,6 +396,12 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.delete_full': "Butunlay o‘chirish",
   'ai.archived': "Arxiv",
   'ai.chat_actions': "Amallar",
+  'ai.exit_again': "To‘liq ekrandan chiqish uchun amalni takrorlang",
+  'ai.leave': "Chiqish",
+  'ai.weekdays': "Yakshanba\nDushanba\nSeshanba\nChorshanba\nPayshanba\nJuma\nShanba",
+  'ai.chats': "Suhbatlar",
+  'ai.select': "Matnni belgilash",
+  'ai.share': "Ulashish",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -763,7 +768,6 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.reminder_put': "Kur",
   'ai.offline': "İnternet yok. Mahliyo yalnızca bağlantı varken cevap verir.",
   'ai.offline_wait': "Cevap bağlantı gelince gelecek.",
-  'ai.slow': "Mahliyo dikkatle düşünüyor. Başka bir bölüme geçebilirsiniz — cevap kaybolmaz.",
   'ai.failed': "Üzgünüm, şu anda cevap veremedim.",
   'ai.retry': "Tekrar dene",
   'ai.stopped': "Soruyu durdurdunuz.",
@@ -795,6 +799,12 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.delete_full': "Tamamen sil",
   'ai.archived': "Arşiv",
   'ai.chat_actions': "İşlemler",
+  'ai.exit_again': "Tam ekrandan çıkmak için tekrar edin",
+  'ai.leave': "Çık",
+  'ai.weekdays': "Pazar\nPazartesi\nSalı\nÇarşamba\nPerşembe\nCuma\nCumartesi",
+  'ai.chats': "Sohbetler",
+  'ai.select': "Metni seç",
+  'ai.share': "Paylaş",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1160,7 +1170,6 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.reminder_put': "گذاشتن",
   'ai.offline': "اینترنت نیست. ماه‌لیا فقط با اینترنت پاسخ می‌دهد.",
   'ai.offline_wait': "پاسخ پس از اتصال می‌آید.",
-  'ai.slow': "ماه‌لیا با دقت فکر می‌کند. می‌توانید به بخش دیگری بروید — پاسخ گم نمی‌شود.",
   'ai.failed': "ببخشید، الان نتوانستم پاسخ دهم.",
   'ai.retry': "دوباره تلاش کنید",
   'ai.stopped': "شما پرسش را متوقف کردید.",
@@ -1192,6 +1201,12 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.delete_full': "حذف کامل",
   'ai.archived': "بایگانی",
   'ai.chat_actions': "کارها",
+  'ai.exit_again': "برای خروج از تمام‌صفحه، دوباره انجام دهید",
+  'ai.leave': "خروج",
+  'ai.weekdays': "یکشنبه\nدوشنبه\nسه‌شنبه\nچهارشنبه\nپنجشنبه\nجمعه\nشنبه",
+  'ai.chats': "گفت‌وگوها",
+  'ai.select': "انتخاب متن",
+  'ai.share': "اشتراک‌گذاری",
   'pin.forgot_q': "فراموش کردید؟"
 }
 

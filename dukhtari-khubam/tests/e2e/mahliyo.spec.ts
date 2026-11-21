@@ -67,13 +67,12 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   expect(her.y + her.height).toBeGreaterThan(bar.y)
   await tab.click()
   await expect(page).toHaveURL(/\/mahliyo\/?$/)
-  await expect(tab).toHaveAttribute('aria-current', 'page')
-  // a plain header: her name, and only the menu (the history of chats); her lines come one after another
-  await expect(page.locator('.ai-top button')).toHaveCount(1)
-  await expect(page.locator('.ai-top button')).toHaveAccessibleName('Таърихи чатҳо')
-  // the menu sits at the far right; no line under her greeting
-  const menuBox = (await page.locator('.ai-menu').boundingBox())!
-  expect(menuBox.x + menuBox.width).toBeGreaterThan(390 - 24)
+  // full screen: no tab bar; a plain header — her name, the menu (☰) and, at the far right, leaving (✕)
+  await expect(page.locator('.dock')).toHaveCount(0)
+  await expect(page.locator('.ai-top button')).toHaveCount(2)
+  await expect(page.locator('.ai-top button').first()).toHaveAccessibleName('Таърихи чатҳо')
+  const leaveBox = (await page.getByRole('button', { name: 'Баромадан' }).boundingBox())!
+  expect(leaveBox.x + leaveBox.width).toBeGreaterThan(390 - 24)
   await expect(page.locator('.ai-hello')).toHaveCount(0)
   await expect(page.locator('.ai-greet')).toHaveText('Салом, Малика! Чӣ меомӯзем?')
   await expect(page.locator('.ai-greet')).toHaveText('Кофе бо Маҳлиё AI? ☕', { timeout: 6000 })
@@ -128,18 +127,30 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   expect(errors).toEqual([])
 })
 
-test('her scene is dark, her words without boxes; the menu keeps the history of chats: open, new, remove — kept after reopening', async ({ page, server: _, errors }) => {
+test('her full screen: a soft plain colour, words without boxes; only the chat moves; the history like a phone\'s side menu: open, new, archive, delete; ✕ and back leave', async ({ page, server: _, errors }) => {
   await signedIn(page)
   await fakeMahliyo(page, (q) => ({ tajik: true, reply: `Ҷавоб ба «${q}»`, blocks: [{ type: 'text', text: `Ҷавоб ба «${q}»` }] }), 300)
-  await page.goto('/mahliyo')
-  // dark, whatever the theme; the tab bar too; her answer is plain text on it
-  await expect(page.locator('html')).toHaveClass(/ai-dark/)
-  expect(await page.locator('.ai-bg').evaluate((e) => getComputedStyle(e).backgroundImage)).toContain('ai-doodles.svg')
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await page.locator('.dock-wrap').getByRole('link', { name: 'Маҳлиё AI' }).click()
+  await expect(page).toHaveURL(/\/mahliyo\/?$/)
+  // a soft plain colour (no gradient, no picture); her answer is plain text on it
+  const scene = page.locator('.ai-scene')
+  expect(await scene.evaluate((e) => getComputedStyle(e).backgroundImage)).toBe('none')
   const box = page.getByPlaceholder('Паём ба Mahliyo AI…')
   await box.fill('Саволи якум')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи якум»', { timeout: 10_000 })
   expect(await page.locator('.ai-text').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)')
+  // only the conversation scrolls: the page itself does not
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).overflow)).toBe('hidden')
+  expect(await page.locator('.ai-scroll').evaluate((e) => getComputedStyle(e).overflowY)).toBe('auto')
+  // beside "copy": select the words, share them
+  await page.locator('.ai-said').getByRole('button', { name: 'Интихоби матн' }).click()
+  await expect(page.locator('.ai-select-text')).toHaveValue('Ҷавоб ба «Саволи якум»')
+  await page.locator('.ai-select').getByRole('button', { name: 'Пӯшидан' }).click()
+  await expect(page.locator('.ai-select')).toHaveCount(0)
+  await expect(page.locator('.ai-said').getByRole('button', { name: 'Мубодила' })).toBeVisible()
   // a new chat from the menu; the first stays in the history
   const menu = page.getByRole('button', { name: 'Таърихи чатҳо' })
   await menu.click()
@@ -153,9 +164,13 @@ test('her scene is dark, her words without boxes; the menu keeps the history of 
   await expect(rows).toHaveCount(2)
   await expect(rows.first()).toContainText('Саволи дуюм')
   await expect(rows.first()).toHaveClass(/is-open/)
-  await expect(page.locator('.ai-history-day').first()).toHaveText('Имрӯз')
-  // the drawer is over the tab bar
+  await expect(rows.first().locator('.ai-history-when')).toHaveText('Имрӯз')
+  // over the whole screen
   expect(await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight - 40)?.closest('.ai-history') !== null)).toBe(true)
+  // search
+  await page.getByRole('searchbox', { name: 'Ҷустуҷӯ' }).fill('якум')
+  await expect(rows).toHaveCount(1)
+  await page.getByRole('searchbox', { name: 'Ҷустуҷӯ' }).fill('')
   await rows.nth(1).getByRole('button', { name: 'Саволи якум', exact: true }).click()
   await expect(page.locator('.ai-history')).toHaveCount(0)
   await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи якум»')
@@ -164,27 +179,36 @@ test('her scene is dark, her words without boxes; the menu keeps the history of 
   await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи якум»')
   await menu.click()
   await expect(rows).toHaveCount(2)
-  // plain lines, no boxes
-  expect(await page.locator('.ai-history-new').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)')
-  // "⋯" → to the archive: out of the list, in the folded archive at the bottom; and back
+  // "⋮" → to the archive: out of the list; the archive (at the bottom) shows it; and back
   await rows.filter({ hasText: 'Саволи дуюм' }).getByRole('button', { name: /^Амалҳо/ }).click()
   await page.getByRole('menuitem', { name: 'Ба архив партофтан' }).click()
-  await expect(page.locator('.ai-history-list').first().locator('.ai-history-row')).toHaveCount(1)
-  await page.getByRole('button', { name: 'Архив · 1' }).click()
-  await expect(page.locator('.ai-history-archive .ai-history-row')).toContainText('Саволи дуюм')
-  await page.locator('.ai-history-archive').getByRole('button', { name: /^Амалҳо/ }).click()
+  await expect(rows).toHaveCount(1)
+  await page.locator('.ai-history-foot').getByRole('button', { name: 'Архив' }).click()
+  await expect(rows).toHaveCount(1)
+  await expect(rows.first()).toContainText('Саволи дуюм')
+  await rows.first().getByRole('button', { name: /^Амалҳо/ }).click()
   await page.getByRole('menuitem', { name: 'Аз архив баровардан' }).click()
-  await expect(page.locator('.ai-history-archive')).toHaveCount(0)
+  await expect(rows).toHaveCount(0)
+  await page.locator('.ai-history-foot').getByRole('button', { name: 'Архив' }).click()
   await expect(rows).toHaveCount(2)
-  // "⋯" → deleted for good
+  // "⋮" → deleted for good
   await rows.filter({ hasText: 'Саволи дуюм' }).getByRole('button', { name: /^Амалҳо/ }).click()
   await page.getByRole('menuitem', { name: 'Пурра нест кардан' }).click()
   await expect(rows).toHaveCount(1)
-  await page.keyboard.press('Escape')
+  // back closes the history first
+  await page.goBack()
   await expect(page.locator('.ai-history')).toHaveCount(0)
-  // leaving her scene: the page is light again
-  await page.locator('.dock').getByRole('link', { name: /асосӣ/i }).click()
-  await expect(page.locator('html')).not.toHaveClass(/ai-dark/)
+  // back: first it says how to leave; a second press leaves (back where she came from)
+  await page.goBack()
+  await expect(page.locator('.toast').filter({ hasText: 'Барои баромадан аз реҷаи экрани пурра амалро такрор кунед' })).toBeVisible()
+  await expect(page).toHaveURL(/\/mahliyo\/?$/)
+  await page.goBack()
+  await expect(page).toHaveURL(/\/$/)
+  await expect(page.locator('.dock')).toBeVisible()
+  // ✕ leaves at once
+  await page.locator('.dock-wrap').getByRole('link', { name: 'Маҳлиё AI' }).click()
+  await page.getByRole('button', { name: 'Баромадан' }).click()
+  await expect(page).toHaveURL(/\/$/)
   expect(errors).toEqual([])
 })
 
@@ -195,8 +219,8 @@ test('in the background: she goes on answering while the learner is elsewhere (t
   await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('PIN-ро чӣ тавр иваз кунам?')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   await expect(page.locator('.ai-thinking')).toBeVisible()
-  // away to the schools: she keeps thinking
-  await page.locator('.dock').getByRole('link', { name: /мактаб/i }).click()
+  // away (✕): she keeps thinking
+  await page.getByRole('button', { name: 'Баромадан' }).click()
   await expect(page.locator('.dock-ai.is-thinking')).toBeVisible()
   await expect(page.locator('.dock-ai-news')).toBeVisible({ timeout: 10_000 })
   await expect(page.locator('.dock-ai.is-thinking')).toHaveCount(0)

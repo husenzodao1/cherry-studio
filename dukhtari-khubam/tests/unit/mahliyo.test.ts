@@ -214,10 +214,20 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     expect(generate.mock.calls.map((c) => c[0].model)).toEqual(GEMINI_MODELS.slice(0, 2))
   })
 
-  it('every model busy: an error (the route says she cannot answer now); blocked: her kind apology', async () => {
-    generate.mockRejectedValue(new Error('429 quota'))
-    await expect(answer(turns, 'Г', '', me)).rejects.toThrow('429 quota')
+  it('every model over its quota: each asked once, then an error; all busy: asked again in rounds; blocked: her kind apology', async () => {
+    generate.mockRejectedValue(new Error('{"error":{"code":429,"message":"quota"}}'))
+    await expect(answer(turns, 'Г', '', me)).rejects.toThrow('quota')
     expect(generate).toHaveBeenCalledTimes(GEMINI_MODELS.length)
+    // busy (503) everywhere in the first round: the second round finds one free
+    generate.mockReset()
+    vi.useFakeTimers()
+    for (let i = 0; i < GEMINI_MODELS.length; i++) generate.mockRejectedValueOnce(new Error('{"error":{"code":503,"message":"high demand"}}'))
+    generate.mockResolvedValueOnce(ok([{ type: 'text', text: 'Ниҳоят!' }]))
+    const late = answer(turns, 'Г', '', me)
+    await vi.runAllTimersAsync()
+    expect((await late).blocks).toEqual([{ type: 'text', text: 'Ниҳоят!' }])
+    expect(generate).toHaveBeenCalledTimes(GEMINI_MODELS.length + 1)
+    vi.useRealTimers()
     generate.mockReset()
     generate.mockResolvedValue({ text: '', candidates: [{ finishReason: 'SAFETY' }] })
     expect((await answer(turns, 'Г', '', me)).reply).toBe(SORRY)
