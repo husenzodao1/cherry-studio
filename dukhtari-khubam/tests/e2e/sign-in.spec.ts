@@ -167,7 +167,17 @@ test('PIN recovery by e-mail: the six code boxes keep their size (they used to s
   expect(errors).toEqual([])
 })
 
-test('PIN pad: "Фаромӯш кардед?" opens the life questions, with the e-mail way small below them', async ({ page, server: _, errors }) => {
+test('PIN pad: "Фаромӯш кардед?" opens the life questions; "Ҷавобҳоро низ дар хотир надоред?" the e-mail code; "Ба почта низ дастрасӣ нест?" support', async ({ page, server: _, errors }) => {
+  const sent: string[] = []
+  const thread = (body: string) => ({ id: 't1', status: 'open', needs_rating: false, messages: [
+    { id: 'm1', from_staff: false, kind: 'text', body, at: new Date().toISOString() },
+    { id: 'm2', from_staff: true, kind: 'bot', body: 'Салом! …', at: new Date().toISOString() }] })
+  await page.route('**/api/v1/support/send', (r) => {
+    const body = (r.request().postDataJSON() as { body: string }).body
+    sent.push(body)
+    return r.fulfill({ contentType: 'application/json', body: JSON.stringify(thread(body)) })
+  })
+  await page.route('**/api/v1/support/thread', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ thread: sent.length ? thread(sent[0]) : null }) }))
   await signedIn(page)
   await page.addInitScript(() => {
     localStorage.setItem('dk.pin', JSON.stringify({ salt: '00', hash: 'x', fails: 0, until: 0 }))
@@ -181,9 +191,22 @@ test('PIN pad: "Фаромӯш кардед?" opens the life questions, with the
   await expect(page.getByRole('heading', { name: 'Саволҳои ҳаётӣ' })).toBeVisible()
   // the e-mail way: small, below the questions
   const small = page.locator('.recovery-foot .pin-small')
-  await expect(small).toHaveText('Тасдиқ бо почта')
+  await expect(small).toHaveText('Ҷавобҳоро низ дар хотир надоред?')
   await small.click()
   await expect(page.getByRole('heading', { name: 'Тасдиқ бо почтаи электронӣ' })).toBeVisible()
   await expect(page.locator('.recovery .otp-boxes span')).toHaveCount(6)
+  // no access to the e-mail either: support opens with her request already sent, and Mahliyo answers
+  await page.getByRole('button', { name: 'Ба почта низ дастрасӣ нест?' }).click()
+  await expect(page).toHaveURL(/\/support\/?$/)
+  await expect.poll(() => sent).toEqual(['Салом! Ман ба почтаи m@gmail.com дастрасӣ надорам, лутфан кӯмак мекардед?'])
+  await expect(page.locator('.bubble-bot')).toContainText('Маҳлиё AI')
+  await expect(page.locator('.bubble-bot')).toContainText('ҳамаи мушовирони нуқтаи дастгирӣ банданд')
+  // the PIN still guards the app: leaving support goes back behind it
+  await page.getByRole('button', { name: 'Бозгашт' }).click()
+  await expect(page.getByRole('button', { name: 'Фаромӯш кардед?' })).toBeVisible()
+  // opened again, the request is not sent twice
+  await page.goto('/support?help=email')
+  await expect(page.locator('.bubble-bot')).toBeVisible()
+  expect(sent).toHaveLength(1)
   expect(errors).toEqual([])
 })

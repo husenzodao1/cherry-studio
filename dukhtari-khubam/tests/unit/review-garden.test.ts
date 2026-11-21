@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { emptyProgress, mergeProgress, type ProgressData } from '@/lib/progress'
 import type { Bundle } from '@/web/offline/content'
-import { gardenOf } from '@/web/offline/garden'
+import { gradeOf, journeyOf } from '@/web/offline/journey'
 import { addDays, dueToday, NEW_PER_DAY, reviewStats, schedule } from '@/web/offline/review'
 
 const q = (id: string, type = 'single_choice') => ({ id, type, points: 1, prompt: id, options: [{ id: `${id}a` }, { id: `${id}b` }] })
@@ -59,19 +59,28 @@ describe('spaced repetition', () => {
   })
 })
 
-describe('garden', () => {
-  it('puts a flower per finished lesson and a large bloom per finished course on the school shelf', () => {
-    const one = { ...emptyProgress(), lessons: { l1: { p: 100, done: '2026-11-17T10:00:00Z', at: '2026-11-17T10:00:00Z' } } }
-    expect(gardenOf(bundle, one)).toMatchObject({ flowers: 1, courses: 0, beds: [{ school: 'marifati-dini', lessons: 1, courses: 0 }] })
-    const both = { ...one, lessons: { ...one.lessons, l2: { p: 100, done: '2026-11-18T10:00:00Z', at: '2026-11-18T10:00:00Z' } } }
-    const g = gardenOf(bundle, both)
-    expect(g).toMatchObject({ flowers: 2, courses: 1 })
-    // the course bloom stands first, then the lessons in the order they were finished
-    expect(g.beds[0].blooms.map((b) => b.id)).toEqual(['course:c1', 'l1', 'l2'])
-    expect(gardenOf(bundle, both)).toEqual(g)
+describe('progress map', () => {
+  const at = '2026-11-17T10:00:00Z'
+  it('lays out every begun course as a road of its lessons; a finished one is coloured by its test, the next one marked', () => {
+    // l1 finished, its topic test z2 at 60% → yellow; l2 not finished → the next stop
+    const p = { ...emptyProgress(), lessons: { l1: { p: 100, done: at, at } }, quizzes: { z2: { best: 60, passed: true, tries: 1, at } } }
+    const withTest = { ...bundle, lessons: { ...bundle.lessons, l1: { ...bundle.lessons.l1, quizzes: [{ id: 'z2' }] } } } as unknown as Bundle
+    const j = journeyOf(withTest, p)
+    expect(j.legs).toHaveLength(1)
+    expect(j.legs[0]).toMatchObject({ course: 'c1', title: 'Курс', school: 'marifati-dini', done: 1 })
+    expect(j.legs[0].stops).toEqual([
+      { id: 'l1', title: 'Дарс 1', grade: 'fair', score: 60, next: false },
+      { id: 'l2', title: 'Дарс 2', grade: null, score: null, next: true }
+    ])
+    expect(j.counts).toEqual({ good: 0, fair: 1, weak: 0 })
   })
 
-  it('is empty before the first finished lesson', () => {
-    expect(gardenOf(bundle, emptyProgress()).beds).toEqual([])
+  it('green from 80%, yellow from 50%, red below; finished with no test is green', () => {
+    expect([100, 80, 79, 50, 49, 0, null].map(gradeOf)).toEqual(['good', 'good', 'fair', 'fair', 'weak', 'weak', 'good'])
+  })
+
+  it('shows no course she has not begun', () => {
+    expect(journeyOf(bundle, emptyProgress()).legs).toEqual([])
+    expect(journeyOf(null, emptyProgress()).legs).toEqual([])
   })
 })

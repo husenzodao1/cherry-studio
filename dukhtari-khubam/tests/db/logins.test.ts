@@ -64,17 +64,55 @@ describe('support chat', () => {
   const token = hash('phone-token')
   it('lets a phone write without an account and staff answer it', async () => {
     const t = await as(db, null, (tx) => rpc(tx, 'api_support_send', { p_token_hash: token, p_name: 'Малика', p_username: 'Malika', p_body: ' Кодро гум кардам ' }))
-    expect(t.messages).toHaveLength(1)
-    expect(t.messages[0]).toMatchObject({ from_staff: false, body: 'Кодро гум кардам' })
+    // her message, and at once Mahliyo's answer while no consultant is there
+    expect(t.messages).toHaveLength(2)
+    expect(t.messages[0]).toMatchObject({ from_staff: false, kind: 'text', body: 'Кодро гум кардам' })
+    expect(t.messages[1]).toMatchObject({ from_staff: true, kind: 'bot' })
+    expect(t.messages[1].body).toMatch(/^Салом! Лутфан интизор бошед/)
     await expectError(as(db, null, (tx) => rpc(tx, 'admin_support_threads')), 'forbidden')
     const list = await as(db, editor, (tx) => rpc(tx, 'admin_support_threads'))
     expect(list[0]).toMatchObject({ username: 'malika', unread_staff: 1, last_body: 'Кодро гум кардам' })
     await as(db, editor, (tx) => rpc(tx, 'admin_support_reply', { p_thread: t.id, p_body: 'Пароли муваққатӣ: …' }))
     expect(await as(db, null, (tx) => rpc(tx, 'api_support_unread', { p_token_hash: token }))).toBe(1)
     const mine = await as(db, null, (tx) => rpc(tx, 'api_support_thread', { p_token_hash: token }))
-    expect(mine.messages.map((m: { from_staff: boolean }) => m.from_staff)).toEqual([false, true])
+    expect(mine.messages.map((m: { kind: string }) => m.kind)).toEqual(['text', 'bot', 'text'])
     expect(await as(db, null, (tx) => rpc(tx, 'api_support_unread', { p_token_hash: token }))).toBe(0)
     expect((await as(db, editor, (tx) => rpc(tx, 'admin_support_thread', { p_thread: t.id }))).unread_staff).toBe(0)
+  })
+
+  it('a consultant joins once, the closed conversation asks for a rating once, a new one greets again', async () => {
+    const phone = hash('phone-2')
+    const t = await as(db, null, (tx) => rpc(tx, 'api_support_send', { p_token_hash: phone, p_name: 'Нигина', p_username: null, p_body: 'Ба почта дастрасӣ надорам' }))
+    await db.query(`update public.profiles set display_name = 'Руслан Ҳусейнзода' where id = '${owner}'`)
+    // opening it (again and again) adds "joined" once, with her name
+    await as(db, owner, (tx) => rpc(tx, 'admin_support_thread', { p_thread: t.id }))
+    const seen = await as(db, owner, (tx) => rpc(tx, 'admin_support_thread', { p_thread: t.id }))
+    expect(seen.messages.filter((m: { kind: string }) => m.kind === 'joined')).toEqual([expect.objectContaining({ body: 'Руслан Ҳусейнзода', from_staff: true })])
+    // a second message of hers gets no second greeting
+    const again = await as(db, null, (tx) => rpc(tx, 'api_support_send', { p_token_hash: phone, p_name: null, p_username: null, p_body: 'Илова' }))
+    expect(again.messages.map((m: { kind: string }) => m.kind)).toEqual(['text', 'bot', 'joined', 'text'])
+    await as(db, owner, (tx) => rpc(tx, 'admin_support_reply', { p_thread: t.id, p_body: 'Тайёр' }))
+    expect((await as(db, null, (tx) => rpc(tx, 'api_support_thread', { p_token_hash: phone }))).needs_rating).toBe(false)
+    await as(db, owner, (tx) => rpc(tx, 'admin_support_status', { p_thread: t.id, p_status: 'closed' }))
+    expect((await as(db, null, (tx) => rpc(tx, 'api_support_thread', { p_token_hash: phone }))).needs_rating).toBe(true)
+    await expectError(as(db, null, (tx) => rpc(tx, 'api_support_rate', { p_token_hash: phone, p_rating: 6, p_note: null })), 'validation_failed')
+    const rated = await as(db, null, (tx) => rpc(tx, 'api_support_rate', { p_token_hash: phone, p_rating: 5, p_note: ' Ташаккур! ' }))
+    expect(rated).toMatchObject({ needs_rating: false, rating: 5, rating_note: 'Ташаккур!' })
+    expect((await as(db, owner, (tx) => rpc(tx, 'admin_support_threads'))).find((x: { id: string }) => x.id === t.id)).toMatchObject({ rating: 5 })
+    // writing again opens a new conversation: Mahliyo greets once more
+    const next = await as(db, null, (tx) => rpc(tx, 'api_support_send', { p_token_hash: phone, p_name: null, p_username: null, p_body: 'Боз савол' }))
+    expect(next.status).toBe('open')
+    expect(next.messages.slice(-2).map((m: { kind: string }) => m.kind)).toEqual(['text', 'bot'])
+  })
+
+  it('tells a learner whose account is staff that she is a consultant, with the conversations waiting', async () => {
+    const mine = '512345678901234'
+    await as(db, null, (tx) => rpc(tx, 'api_profile_save', { p_code_hash: hash(mine), p_name: 'Руслан', p_data: { v: 1 } }))
+    await db.query(`insert into public.google_learners (user_id, code_hash, code) values ('${owner}', '${hash(mine)}', '${mine}')`)
+    const r = await as(db, null, (tx) => rpc(tx, 'api_consultant', { p_code_hash: hash(mine) }))
+    expect(r.consultant).toBe(true)
+    expect(r.waiting).toBeGreaterThanOrEqual(1)
+    expect(await as(db, null, (tx) => rpc(tx, 'api_consultant', { p_code_hash: hash(code) }))).toEqual({ consultant: false })
   })
 
   it('keeps threads private to their phone and limits flooding', async () => {

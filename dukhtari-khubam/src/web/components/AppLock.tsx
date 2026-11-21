@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useLayoutEffect, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -72,7 +72,7 @@ function Questions({ onPassed }: { onPassed: () => void }) {
 }
 
 /** Forgot PIN: a 6-digit code is sent to her e-mail; the right code opens the choices. */
-function EmailCode({ email, onPassed, onCancel }: { email: string; onPassed: () => void; onCancel: () => void }) {
+function EmailCode({ email, onPassed, onCancel, onNoAccess }: { email: string; onPassed: () => void; onCancel: () => void; onNoAccess: () => void }) {
   const { t } = usePrefs()
   const [otp, setOtp] = useState('')
   const [note, setNote] = useState<string | null>(null)
@@ -124,6 +124,8 @@ function EmailCode({ email, onPassed, onCancel }: { email: string; onPassed: () 
           {left > 0 ? t('email.resend_in').replace('{n}', String(left)) : t('email.resend')}
         </button>
       </div>
+      {/* the last way: the support chat writes her request for her */}
+      <button type="button" className="link-btn pin-small" onClick={onNoAccess}>{t('pin.no_email')}</button>
     </div>
   )
 }
@@ -133,11 +135,14 @@ function EmailCode({ email, onPassed, onCancel }: { email: string; onPassed: () 
  * minute away. Until the PIN is right nothing of the app is drawn (the boot script in layout.tsx marks
  * <html> as locked before the first paint). "Forgot PIN" sends a 6-digit code to her e-mail; the right
  * code offers to turn the PIN off or to set a new one. Without an e-mail it asks the three life questions
- * chosen with the PIN, or the phone's own lock, or the login password.
+ * chosen with the PIN, or the phone's own lock, or the login password. Below the questions, "Ҷавобҳоро
+ * низ дар хотир надоред?" leads to the e-mail code; below the code, "Ба почта низ дастрасӣ нест?" opens the
+ * support chat with her request already sent.
  */
 export function AppLock() {
   const { t } = usePrefs()
   const { learner } = useLearner()
+  const router = useRouter()
   const path = usePathname() ?? '/'
   const [locked, setLocked] = useState(false)
   const [stage, setStage] = useState<Stage>('pin')
@@ -200,6 +205,14 @@ export function AppLock() {
     if (learner?.username) setAsking(true)
     else setHint(t('pin.reinstall'))
   }
+  /** Neither the answers nor the e-mail: the support chat, with her request written and sent for her. */
+  const toSupport = (help: 'email' | 'answers') => {
+    setHint(null)
+    setStage('pin')
+    router.push(`/support?help=${help}`)
+  }
+  /** "Don't remember the answers either?": the code by e-mail when she has one, else support. */
+  const noAnswers = () => (learner?.email ? forgot() : toSupport('answers'))
   /** "Forgot it?": the life questions first when she chose them; otherwise straight to the e-mail way. */
   const forgotAsk = () => {
     setHint(null)
@@ -248,7 +261,7 @@ export function AppLock() {
           <h1 className="pin-title">{t(stage === 'choose' ? 'recovery.passed' : stage === 'email' ? 'pin.by_email_title' : 'recovery.title')}</h1>
         </div>
         {stage === 'email' && learner?.email ? (
-          <EmailCode email={learner.email} onPassed={() => setStage('choose')} onCancel={() => setStage('pin')} />
+          <EmailCode email={learner.email} onPassed={() => setStage('choose')} onCancel={() => setStage('pin')} onNoAccess={() => toSupport('email')} />
         ) : stage === 'questions' ? (
           <Questions onPassed={() => setStage('choose')} />
         ) : (
@@ -263,8 +276,8 @@ export function AppLock() {
         )}
         <div className="pin-foot recovery-foot">
           {stage === 'questions' ? <button type="button" className="link-btn" onClick={() => setStage('pin')}>{t('pin.cancel')}</button> : null}
-          {/* the other way, small, below the questions: a code sent to her e-mail */}
-          {stage === 'questions' && learner?.email ? <button type="button" className="link-btn pin-small" onClick={forgot}>{t('pin.by_email')}</button> : null}
+          {/* the other way, small, below the questions: a code sent to her e-mail (or support, without one) */}
+          {stage === 'questions' ? <button type="button" className="link-btn pin-small" onClick={noAnswers}>{t('pin.no_answers')}</button> : null}
         </div>
       </div>,
       document.body

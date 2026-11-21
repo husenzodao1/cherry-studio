@@ -96,3 +96,21 @@ test('the welcome questions fit every phone: top and button always in view, noth
   }
   expect(errors).toEqual([])
 })
+
+test('home stands still while it fits; when more comes in than fits, it scrolls and the schools come up above the tab bar', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await page.setViewportSize({ width: 412, height: 915 })
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('.school-row')).toBeVisible()
+  await expect(page.locator('html')).toHaveClass(/\bstill\b/)
+  // a short phone: the same screen no longer fits — it scrolls, nothing stays hidden under the bar
+  await page.setViewportSize({ width: 360, height: 560 })
+  await expect(page.locator('html')).not.toHaveClass(/\bstill\b/)
+  await page.mouse.wheel(0, 2000)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+  const row = (await page.locator('.school-row').boundingBox())!
+  const dock = (await page.locator('.dock').first().boundingBox())!
+  expect(row.y + row.height).toBeLessThanOrEqual(dock.y + 2)
+  expect(errors).toEqual([])
+})

@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
-import { checkForUpdate } from '@/web/components/AppUpdate'
 import { PinSettings } from '@/web/components/PinSettings'
 import { RateShare } from '@/web/components/RateShare'
 import { showToast } from '@/web/components/Toast'
@@ -14,6 +13,8 @@ import { LOCALE_LABELS, LOCALES } from '@/web/i18n'
 import { useLearner } from '@/web/offline/learner'
 import { allowNotifications, canNotify, DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyPrefs } from '@/web/offline/notify'
 import { TEXT_SIZES, THEMES, usePrefs } from '@/web/prefs'
+import { SITE } from '@/web/site'
+import { INBOX, useConsultant } from '@/web/components/SupportWatch'
 
 function Notifications() {
   const { t } = usePrefs()
@@ -111,6 +112,7 @@ export default function Settings() {
   const { t } = prefs
   const router = useRouter()
   const { learner, signOut } = useLearner()
+  const staff = useConsultant()
   const [native, setNative] = useState(false)
   useEffect(() => setNative(canNotify()), [])
   const leave = () => {
@@ -139,17 +141,33 @@ export default function Settings() {
         </div>
         <div className="glass menu">
           <Link href="/support" className="menu-row"><Icon name="bell" /><span className="grow">{t('support.title')}</span><Icon name="forward" size={18} /></Link>
-          <Link href="/page?slug=privacy" className="menu-row"><Icon name="lock" /><span className="grow">{t('settings.privacy')}</span><Icon name="forward" size={18} /></Link>
-          <Link href="/page?slug=about" className="menu-row"><Icon name="info" /><span className="grow">{t('settings.about')}</span><Icon name="forward" size={18} /></Link>
+          {/* a consultant's account: the users' questions, how many wait */}
+          {staff.consultant ? (
+            <Link href={INBOX} className="menu-row"><Icon name="layers" /><span className="grow">{t('support.inbox')}</span>
+              {staff.waiting ? <span className="review-badge" style={{ minWidth: 24, height: 24 }}>{staff.waiting}</span> : null}<Icon name="forward" size={18} /></Link>
+          ) : null}
+          {/* in the app these open the website in the phone's browser; on the website they are its own pages */}
+          {native ? (
+            <>
+              <a href={`${SITE}/page?slug=privacy`} target="_blank" rel="noopener noreferrer" className="menu-row"><Icon name="lock" /><span className="grow">{t('settings.privacy')}</span><Icon name="forward" size={18} /></a>
+              <a href={`${SITE}/page?slug=about`} target="_blank" rel="noopener noreferrer" className="menu-row"><Icon name="info" /><span className="grow">{t('settings.about')}</span><Icon name="forward" size={18} /></a>
+            </>
+          ) : (
+            <>
+              <Link href="/page?slug=privacy" className="menu-row"><Icon name="lock" /><span className="grow">{t('settings.privacy')}</span><Icon name="forward" size={18} /></Link>
+              <Link href="/page?slug=about" className="menu-row"><Icon name="info" /><span className="grow">{t('settings.about')}</span><Icon name="forward" size={18} /></Link>
+            </>
+          )}
           {/* the other apps of the studio: the list comes later */}
           <button type="button" className="menu-row" onClick={() => showToast(t('settings.other_apps_soon'), 'sparkle')}>
             <Icon name="grid" /><span className="grow">{t('settings.other_apps')}</span><span className="chip chip-soon">{t('settings.other_apps_soon')}</span>
           </button>
-          {/* the app's version (tap: look for a newer one) — only in the app; the website is always the newest */}
+          {/* the app's version — only in the app (the website is always the newest); a tap opens the website,
+              where the newest app is downloaded */}
           {native ? (
-            <button type="button" className="menu-row" onClick={() => checkForUpdate(t)}>
+            <a href={SITE} target="_blank" rel="noopener noreferrer" className="menu-row">
               <Icon name="install" /><span className="grow">{t('settings.version')}</span><span className="muted version-num">{process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}</span>
-            </button>
+            </a>
           ) : null}
           {learner ? <button type="button" className="menu-row danger" onClick={leave}><Icon name="logout" /><span className="grow">{t('profile.signout')}</span></button> : null}
         </div>

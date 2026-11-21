@@ -1,37 +1,35 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
-import { formatDay } from '@/lib/progress'
-import { GardenShelves } from '@/web/components/Garden'
 import { Header } from '@/web/components/Header'
-import { Icon } from '@/web/components/Icon'
+import { ProgressMap } from '@/web/components/ProgressMap'
 import { Empty } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
-import { gardenOf, type Bloom } from '@/web/offline/garden'
+import { journeyOf, type Grade } from '@/web/offline/journey'
 import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
 
-/** "Чаман": finished lessons and courses as glass flowers, one shelf per school. */
+const GRADES: Grade[] = ['good', 'fair', 'weak']
+
+/** "Харитаи пешравӣ": the learner's progress map — every begun course a road through its lessons. */
 export default function GardenPage() {
-  const { t, locale } = usePrefs()
+  const { t } = usePrefs()
   const { bundle } = useContent()
   const { progress } = useLearner()
-  const garden = useMemo(() => gardenOf(bundle, progress), [bundle, progress])
-  const [picked, setPicked] = useState<Bloom | null>(null)
+  const journey = useMemo(() => journeyOf(bundle, progress), [bundle, progress])
   return (
     <>
       <Header back="/profile" title={t('garden.title')} />
-      {garden.beds.length === 0 ? <Empty icon="sparkle" title={t('garden.empty')} /> : (
+      {journey.legs.length === 0 ? <Empty icon="sparkle" title={t('garden.empty')} /> : (
         <>
-          <div className="row" style={{ justifyContent: 'center', gap: 8, marginTop: 6 }}>
-            <span className="chip"><Icon name="sparkle" size={16} /> {t('garden.flowers').replace('{n}', String(garden.flowers))}</span>
-            <span className="chip"><Icon name="trophy" size={16} /> {t('garden.courses').replace('{n}', String(garden.courses))}</span>
+          <div className="map-legend" role="list">
+            {GRADES.map((g) => (
+              <span key={g} role="listitem" className={`chip map-key is-${g}`}><i aria-hidden="true" />{t(`map.${g}`)} · {journey.counts[g]}</span>
+            ))}
           </div>
-          <GardenShelves beds={garden.beds} picked={picked?.id} onPick={(b) => setPicked(picked?.id === b.id ? null : b)} />
-          <p className="muted" role="status" style={{ textAlign: 'center', minHeight: '1.5em', margin: '14px 8px 0', fontSize: '0.9em' }}>
-            {picked ? <><b style={{ color: 'var(--ink)' }}>{picked.title}</b> · {formatDay(picked.at, locale)}</> : t('garden.hint')}
-          </p>
+          <p className="muted" style={{ textAlign: 'center', margin: '8px 8px 0', fontSize: '0.86em' }}>{t('garden.hint')}</p>
+          <ProgressMap legs={journey.legs} />
         </>
       )}
     </>

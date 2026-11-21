@@ -71,10 +71,27 @@ export default function Home() {
     const timer = setInterval(() => setHour(new Date().getHours()), 60_000)
     return () => clearInterval(timer)
   }, [])
-  // the home screen stands still: only the row of schools moves, sideways
+  // the home screen stands still while it all fits above the tab bar (only the row of schools moves,
+  // sideways); once more comes in (the day's review) it grows and scrolls, and nothing hides under the bar
+  const home = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    document.documentElement.classList.add('still')
-    return () => document.documentElement.classList.remove('still')
+    const root = document.documentElement
+    const el = home.current
+    if (!el) return
+    const check = () => root.classList.toggle('still', el.offsetHeight <= (parseFloat(getComputedStyle(el).minHeight) || 0) + 1)
+    // after the frame: changing the page's layout inside the observer's own call would loop it
+    let raf = 0
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(check)
+    })
+    ro.observe(el)
+    check()
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+      root.classList.remove('still')
+    }
   }, [])
 
   const flower = useRef<HTMLImageElement>(null)
@@ -84,7 +101,7 @@ export default function Home() {
   const cont = lastLesson && !progress.lessons[lastLesson.id]?.done ? lastLesson : null
 
   return (
-    <div className="home">
+    <div ref={home} className="home">
       <RainDrop flower={flower} />
       <header className="home-top">
         <Link href="/profile" className="home-avatar" aria-label={t('nav.profile')}><Avatar name={name} /></Link>

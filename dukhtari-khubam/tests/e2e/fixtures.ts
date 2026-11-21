@@ -36,6 +36,8 @@ export const test = base.extend<{ server: Server; errors: string[] }>({
       return r.fulfill(json({ ok: true }))
     })
     await page.route('**/api/v1/app-config', (r) => r.fulfill(json({ google_web_client_id: null })))
+    // not a consultant (tests that need one say so)
+    await page.route('**/api/v1/consultant', (r) => r.fulfill(json({ consultant: false })))
     await page.route('**/auth/v1/otp**', (r) => r.fulfill(json({})))
     await page.route('**/auth/v1/verify**', (r) => {
       const token = (r.request().postDataJSON() as { token?: string }).token ?? ''

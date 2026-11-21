@@ -12,6 +12,7 @@ import { STATUS_LABEL } from '@/web/admin/ui'
 import { Users } from '@/web/admin/Users'
 import { useAuth } from '@/web/auth'
 import { Icon } from '@/web/components/Icon'
+import { useLearner } from '@/web/offline/learner'
 import { ErrorState, Loading } from '@/web/components/States'
 import { browserSupabase } from '@/web/supabase-browser'
 import { useOutbox } from '@/web/admin/outbox'
@@ -31,7 +32,11 @@ const TABS: { id: Tab; label: string }[] = [
 export default function AdminPage() {
   const { session, ready } = useAuth()
   const me = useApi<{ roles: string[] }>(session ? '/me' : null)
+  // the app's "Саволҳои корбарон" opens the panel straight on support
   const [tab, setTab] = useState<Tab>('home')
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tab') === 'support') setTab('support')
+  }, [])
 
   if (!ready || (session && !me.data && !me.error)) return <Loading />
   if (!session) return <StaffLogin />
@@ -90,28 +95,61 @@ function OutboxNote() {
 }
 
 /** Staff accounts are created by the owner in Supabase (Authentication → Users); learners never sign in here. */
+/**
+ * Staff sign-in: a 6-digit code sent to the staff member's e-mail (in the app, her own e-mail is filled
+ * in), or the e-mail and a password.
+ */
 function StaffLogin() {
+  const { learner } = useLearner()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [mode, setMode] = useState<'code' | 'password'>('code')
+  const [sent, setSent] = useState(false)
+  const [otp, setOtp] = useState('')
   const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const sb = browserSupabase()
+  useEffect(() => {
+    if (learner?.email) setEmail((e) => e || learner.email!)
+  }, [learner?.email])
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     if (!sb) return
     setBusy(true)
-    const { error } = await sb.auth.signInWithPassword({ email, password })
+    setMessage(null)
+    if (mode === 'password') {
+      const { error } = await sb.auth.signInWithPassword({ email, password })
+      setMessage(error ? error.message : null)
+    } else if (!sent) {
+      // only an account that exists: no new account is made from this form
+      const { error } = await sb.auth.signInWithOtp({ email: email.trim(), options: { shouldCreateUser: false } })
+      if (error) setMessage(error.message)
+      else setSent(true)
+    } else {
+      const { error } = await sb.auth.verifyOtp({ email: email.trim(), token: otp.trim(), type: 'email' })
+      setMessage(error ? 'Код нодуруст аст ё вақташ гузашт.' : null)
+    }
     setBusy(false)
-    setMessage(error ? error.message : null)
   }
   return (
     <form onSubmit={submit} className="card card-pad stack" style={{ maxWidth: 440, margin: '40px auto 0' }}>
       <h1 className="h-page">Идора</h1>
       <p className="muted" style={{ margin: 0 }}>Воридшавии кормандон.</p>
-      <input className="input" type="email" placeholder="Почта" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" />
-      <input className="input" type="password" placeholder="Рамз" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+      <input className="input" type="email" placeholder="Почта" required value={email} onChange={(e) => { setEmail(e.target.value); setSent(false) }} autoComplete="username" />
+      {mode === 'password' ? (
+        <input className="input" type="password" placeholder="Рамз" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+      ) : sent ? (
+        <>
+          <p className="muted" style={{ margin: 0, fontSize: '0.86em' }}>Коди 6-рақама ба {email} фиристода шуд.</p>
+          <input className="input" inputMode="numeric" autoComplete="one-time-code" placeholder="Код" required maxLength={6} value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} />
+        </>
+      ) : null}
       {message ? <p role="status" style={{ margin: 0, color: 'var(--bad)' }}>{message}</p> : null}
-      <button className="btn btn-block" disabled={busy || !sb}>Ворид шудан</button>
+      <button className="btn btn-block" disabled={busy || !sb}>{mode === 'password' ? 'Ворид шудан' : sent ? 'Тасдиқ' : 'Фиристодани код'}</button>
+      <button type="button" className="link-btn" onClick={() => { setMode(mode === 'code' ? 'password' : 'code'); setMessage(null) }}>
+        {mode === 'code' ? 'Бо рамз' : 'Бо коди почта'}
+      </button>
     </form>
   )
 }

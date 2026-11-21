@@ -7,8 +7,13 @@ import { apiUrl } from './base'
 
 const KEY = 'dk.support'
 
-export interface SupportMessage { id: string; from_staff: boolean; body: string; at: string }
-export interface SupportThread { id: string; status: 'open' | 'closed'; messages: SupportMessage[] }
+/**
+ * `kind`: 'text' a message (hers or a consultant's), 'bot' Mahliyo's answer at once while no consultant
+ * is there, 'joined' a consultant has opened the conversation (the body is her name).
+ */
+export interface SupportMessage { id: string; from_staff: boolean; kind: 'text' | 'bot' | 'joined'; body: string; at: string }
+/** `needs_rating`: the conversation is closed and she has not rated its consultant yet. */
+export interface SupportThread { id: string; status: 'open' | 'closed'; messages: SupportMessage[]; needs_rating?: boolean }
 
 /** This phone's token, created on first use. */
 export function supportToken(create = true): string | null {
@@ -34,3 +39,7 @@ export const loadThread = (token: string) => post<{ thread: SupportThread | null
 export const sendMessage = (token: string, body: string, who: { name?: string; username?: string }) =>
   post<SupportThread>('/support/send', { token, body, ...who })
 export const unreadReplies = (token: string) => post<{ unread: number }>('/support/unread', { token }).then((r) => r.unread)
+export const rateThread = (token: string, rating: number, note?: string) => post<SupportThread>('/support/rate', { token, rating, note })
+
+/** Whether her account is a consultant's, and how many conversations wait for an answer. */
+export const consultant = (code: string) => post<{ consultant: boolean; waiting?: number }>('/consultant', { code })

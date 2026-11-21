@@ -7,12 +7,16 @@ import { usePhoto } from '../offline/photo'
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
 
-/** Detail-screen header: round glass back button, centred title, optional action on the right. */
-export function Header({ back, title, end }: { back?: string; title?: ReactNode; end?: ReactNode }) {
+/**
+ * Detail-screen header: round glass back button, centred title, optional action on the right. `onBack`
+ * (instead of `back`) lets the page decide what going back does.
+ */
+export function Header({ back, onBack, title, end }: { back?: string; onBack?: () => void; title?: ReactNode; end?: ReactNode }) {
   const { t } = usePrefs()
   return (
     <header className="topbar">
-      {back ? <Link href={back} className="icon-btn" aria-label={t('action.back')}><Icon name="back" /></Link> : <span className="icon-spacer" />}
+      {onBack ? <button type="button" className="icon-btn" aria-label={t('action.back')} onClick={onBack}><Icon name="back" /></button>
+        : back ? <Link href={back} className="icon-btn" aria-label={t('action.back')}><Icon name="back" /></Link> : <span className="icon-spacer" />}
       <h1 className="topbar-title">{title}</h1>
       {end ?? <span className="icon-spacer" />}
     </header>

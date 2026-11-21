@@ -4,10 +4,8 @@ import { Capacitor } from '@capacitor/core'
 import { useEffect, useRef, useState } from 'react'
 
 import { API_BASE } from '../offline/base'
-import type { UiKey } from '../i18n'
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
-import { showToast } from './Toast'
 
 /**
  * Inside the Android app: content updates arrive by themselves, but new app code needs a new APK.
@@ -30,18 +28,6 @@ export async function latestVersion(): Promise<LatestVersion | null> {
   } catch {
     return null
   }
-}
-
-/** Settings → app version: installs the new APK, or says this one is the newest. */
-export async function checkForUpdate(say: (k: UiKey) => string): Promise<void> {
-  if (typeof navigator !== 'undefined' && navigator.onLine === false) return showToast(say('install.need_online'), 'wifiOff')
-  const v = await latestVersion()
-  if (!v) return showToast(say('state.error'), 'info')
-  if (Capacitor.isNativePlatform() && v.versionCode > BUILT_IN) {
-    window.location.href = v.url
-    return
-  }
-  showToast(say('app.latest').replace('{v}', v.versionName), 'check')
 }
 
 export function AppUpdate() {

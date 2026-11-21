@@ -229,5 +229,17 @@ export const offlineRoutes: AnyRoute[] = [
     summary: 'Number of unread staff replies for this phone',
     body: z.strictObject({ token: Token }),
     handler: async ({ sb, body }) => ({ unread: await call<number>(sb(), 'api_support_unread', { p_token_hash: codeHash(body.token) }) })
+  }),
+  route({
+    method: 'POST', path: '/support/rate', access: 'public', tag: 'Support',
+    summary: 'Rate the consultant of the conversation just closed (1–5, an optional note); returns the thread',
+    body: z.strictObject({ token: Token, rating: z.number().int().min(1).max(5), note: z.string().max(500).optional() }),
+    handler: async ({ sb, body }) => call(sb(), 'api_support_rate', { p_token_hash: codeHash(body.token), p_rating: body.rating, p_note: body.note ?? null })
+  }),
+  route({
+    method: 'POST', path: '/consultant', access: 'public', tag: 'Support',
+    summary: "Whether the account tied to this learner's code is a consultant, and how many conversations wait",
+    body: z.strictObject({ code: Code }),
+    handler: async ({ sb, body }) => call(sb(), 'api_consultant', { p_code_hash: codeHash(body.code) })
   })
 ]

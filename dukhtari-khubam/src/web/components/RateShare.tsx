@@ -8,8 +8,8 @@ import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
 import { RateSheet } from './RateSheet'
 import { showToast } from './Toast'
+import { SITE } from '../site'
 
-const SITE = 'https://dukhtari-khubam.vercel.app'
 
 /** Where a friend gets the app: the site's APK page from the app, this site from a browser. */
 function appLink(): string {

@@ -12,8 +12,13 @@ import { errorText, send, sendNow } from './ui'
  * box, close/reopen, and — for a learner who lost both code and password — a temporary password.
  */
 
-interface ThreadRow { id: string; name: string | null; username: string | null; status: 'open' | 'closed'; unread_staff: number; last_message_at: string; last_body: string | null }
-interface Message { id: string; from_staff: boolean; body: string; at: string }
+interface ThreadRow {
+  id: string; name: string | null; username: string | null; status: 'open' | 'closed'; unread_staff: number; last_message_at: string; last_body: string | null
+  /** the learner's rating of the consultant (1–5) and her note */
+  rating?: number | null; rating_note?: string | null
+}
+/** 'bot': Mahliyo's answer at once; 'joined': a consultant opened the conversation (the body is her name) */
+interface Message { id: string; from_staff: boolean; kind?: 'text' | 'bot' | 'joined'; body: string; at: string }
 interface Thread extends ThreadRow { messages: Message[] }
 
 const when = (iso: string) => new Date(iso).toLocaleString('ru', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
@@ -41,6 +46,7 @@ export function Support() {
           <span className="row-end" style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
             <span>{when(t.last_message_at)}</span>
             {t.unread_staff ? <span className="review-badge" style={{ minWidth: 26, height: 26 }}>{t.unread_staff}</span> : null}
+            {t.rating ? <span title={t.rating_note ?? undefined} style={{ color: '#e0a21c' }}>{'★'.repeat(t.rating)}</span> : null}
           </span>
         </button>
       ))}
@@ -101,12 +107,16 @@ function ThreadView({ id, onBack }: { id: string; onBack: () => void }) {
         <button type="button" className="chip" onClick={() => status(t.status === 'open' ? 'closed' : 'open')}>{t.status === 'open' ? 'Бастан' : 'Кушодан'}</button>
       </div>
       <div className="chat" style={{ paddingBottom: 8 }}>
-        {t.messages.map((m) => (
-          <div key={m.id} className={`bubble${m.from_staff ? '' : ' bubble-staff'}`}>
+        {t.messages.map((m) => m.kind === 'joined' ? (
+          <p key={m.id} className="muted" style={{ textAlign: 'center', fontSize: '0.8em', margin: 0 }}>Мушовир «{m.body}» пайваст шуд · {when(m.at)}</p>
+        ) : (
+          <div key={m.id} className={`bubble${m.from_staff ? '' : ' bubble-staff'}`} style={m.kind === 'bot' ? { opacity: 0.75 } : undefined}>
+            {m.kind === 'bot' ? <span className="bubble-who" style={{ color: 'inherit' }}>Маҳлиё (худкор)</span> : null}
             <span style={{ whiteSpace: 'pre-wrap' }}>{m.body}</span>
             <time>{when(m.at)}</time>
           </div>
         ))}
+        {t.rating ? <p className="muted" style={{ textAlign: 'center', margin: 0 }}>Баҳо: <span style={{ color: '#e0a21c' }}>{'★'.repeat(t.rating)}</span>{t.rating_note ? ` — «${t.rating_note}»` : ''}</p> : null}
       </div>
       <form className="stack" style={{ gap: 8 }} onSubmit={reply}>
         <textarea className="input" rows={3} placeholder="Ҷавоб…" value={text} maxLength={2000} onChange={(e) => setText(e.target.value)} />

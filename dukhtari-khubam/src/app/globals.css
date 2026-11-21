@@ -740,36 +740,60 @@ html.lite .lang-scrim { background: color-mix(in srgb, var(--bg) 72%, transparen
   display: inline-block; padding: 0.14em 0.34em 0.46em; margin: -0.14em -0.34em -0.36em; overflow: visible; }
 :root[data-theme='dark'] .brand { background: linear-gradient(180deg, #e3d4ff, #b596f5); -webkit-background-clip: text; background-clip: text; }
 
-/* ---------------------------------------------------------------- garden: glass shelves */
-.shelves { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
-.shelf { position: relative; padding: 12px 14px 18px; border-radius: 26px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.22));
-  border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
-:root[data-theme='dark'] .shelf { background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)); }
-.shelf-head { display: flex; align-items: center; gap: 10px; }
-.shelf-head img { width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(86, 56, 160, 0.2)); }
-.shelf-title { flex: 1; font-weight: 600; font-size: 0.95rem; color: var(--ink); }
-.shelf-count { min-width: 30px; height: 26px; padding: 0 10px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
-  font-size: 0.82rem; font-weight: 600; color: var(--primary); background: rgba(255, 255, 255, 0.7); }
-:root[data-theme='dark'] .shelf-count { background: rgba(255, 255, 255, 0.1); }
-/* flowers stand in an even row on the shelf, bottoms aligned */
-.shelf-row { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); align-items: end;
-  gap: 2px 4px; margin-top: 6px; min-height: 80px; }
-.shelf-glass { position: absolute; left: 12px; right: 12px; bottom: 12px; height: 12px; border-radius: 6px; z-index: 1; pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(214, 196, 246, 0.55) 55%, rgba(150, 120, 220, 0.35));
-  box-shadow: 0 6px 12px -6px rgba(86, 56, 160, 0.45), inset 0 1px 0 #fff; }
-:root[data-theme='dark'] .shelf-glass { background: linear-gradient(180deg, rgba(220, 205, 255, 0.55), rgba(120, 90, 210, 0.35)); }
-.bloom { position: relative; display: flex; align-items: flex-end; justify-content: center; height: 80px; padding: 0 0 6px; border: 0; background: none; cursor: pointer;
-  filter: hue-rotate(var(--hue)) drop-shadow(0 6px 6px rgba(86, 56, 160, 0.22)); animation: grow 0.6s var(--ease) backwards; transition: transform 0.2s var(--ease); }
-.bloom img { width: 100%; max-width: 68px; max-height: 74px; object-fit: contain; display: block; }
-.bloom-big { grid-column: span 2; height: 100px; filter: hue-rotate(var(--hue)) drop-shadow(0 0 12px rgba(255, 210, 120, 0.75)) drop-shadow(0 6px 8px rgba(86, 56, 160, 0.25)); }
-.bloom-big img { max-width: 116px; max-height: 96px; }
-.bloom-new::after { content: ''; position: absolute; left: 50%; top: 6%; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%;
-  background: radial-gradient(circle, #fff 0 2px, rgba(255, 255, 255, 0.5) 3px, transparent 8px); animation: twinkle 2.4s ease-in-out infinite; }
-.bloom-picked { transform: translateY(-6px); filter: hue-rotate(var(--hue)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 8px 10px rgba(86, 56, 160, 0.3)); }
-.bloom:active { transform: scale(0.92); }
-@keyframes grow { from { opacity: 0; transform: scale(0.4) translateY(14px); } to { opacity: 1; transform: none; } }
-@keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.4); } 50% { opacity: 1; transform: scale(1.2); } }
+/* ---------------------------------------------------------------- the progress map (garden page): a soft map with contour
+   lines; per begun course a winding road from a flag to a cup, its lessons as stops coloured by their tests */
+.map-legend { display: flex; justify-content: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.map-key i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-inline-end: 6px; }
+.map-key.is-good i { background: #34b574; } .map-key.is-fair i { background: #f2b01e; } .map-key.is-weak i { background: #e5484d; }
+.map { display: flex; flex-direction: column; gap: 14px; margin: 14px 0 8px; padding: 12px 10px 18px; border-radius: 30px;
+  border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='300' viewBox='0 0 360 300' fill='none' stroke='%238a63ea' stroke-opacity='.11' stroke-width='1.3'%3E%3Cpath d='M-10 40c50-26 92 22 150 4s104-38 160-6 66 20 70 18'/%3E%3Cpath d='M-10 62c50-26 92 22 150 4s104-38 160-6 66 20 70 18'/%3E%3Cpath d='M40 170c0-30 40-46 74-40s48 34 26 52-66 26-86 14-14-14-14-26z'/%3E%3Cpath d='M58 168c0-18 26-28 48-24s30 20 16 32-42 16-54 9-10-9-10-17z'/%3E%3Cpath d='M230 210c10-32 62-38 88-18s14 52-22 58-74-12-66-40z'/%3E%3Cpath d='M250 214c6-18 36-22 52-10s8 30-12 34-44-8-40-24z'/%3E%3Cpath d='M-10 268c60-20 110 18 170 2s110-30 200 6'/%3E%3C/svg%3E") center top / 360px auto repeat,
+    radial-gradient(60% 30% at 18% 12%, rgba(170, 232, 212, 0.55), transparent 70%),
+    radial-gradient(55% 28% at 86% 36%, rgba(255, 210, 186, 0.6), transparent 70%),
+    radial-gradient(60% 30% at 22% 70%, rgba(178, 204, 255, 0.45), transparent 70%),
+    radial-gradient(50% 26% at 80% 92%, color-mix(in srgb, var(--rose-strong) 40%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--lavender) 75%, white), color-mix(in srgb, var(--primary-soft) 25%, white)); }
+:root[data-theme='dark'] .map { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='300' viewBox='0 0 360 300' fill='none' stroke='%238a63ea' stroke-opacity='.11' stroke-width='1.3'%3E%3Cpath d='M-10 40c50-26 92 22 150 4s104-38 160-6 66 20 70 18'/%3E%3Cpath d='M-10 62c50-26 92 22 150 4s104-38 160-6 66 20 70 18'/%3E%3Cpath d='M40 170c0-30 40-46 74-40s48 34 26 52-66 26-86 14-14-14-14-26z'/%3E%3Cpath d='M58 168c0-18 26-28 48-24s30 20 16 32-42 16-54 9-10-9-10-17z'/%3E%3Cpath d='M230 210c10-32 62-38 88-18s14 52-22 58-74-12-66-40z'/%3E%3Cpath d='M250 214c6-18 36-22 52-10s8 30-12 34-44-8-40-24z'/%3E%3Cpath d='M-10 268c60-20 110 18 170 2s110-30 200 6'/%3E%3C/svg%3E") center top / 360px auto repeat, linear-gradient(180deg, #2a1f4f, #1d1638); }
+.map-head { display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; border-radius: 999px; }
+.map-head img { width: 38px; height: 38px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(86, 56, 160, 0.2)); }
+.map-head b { flex: 1; font-weight: 600; font-size: 0.95rem; color: var(--ink); line-height: 1.25; }
+.map-count { font-size: 0.82rem; font-weight: 700; color: var(--primary); }
+.map-road { position: relative; width: 100%; }
+.map-road svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+/* the road: a wide soft band with a dashed middle line; the walked part over it, in the lessons' colours */
+.map-way { stroke: rgba(255, 255, 255, 0.85); stroke-width: 30; fill: none; stroke-linecap: round; filter: drop-shadow(0 6px 10px rgba(105, 57, 200, 0.14)); }
+:root[data-theme='dark'] .map-way { stroke: rgba(255, 255, 255, 0.14); }
+.map-way-line { stroke: color-mix(in srgb, var(--primary) 35%, transparent); stroke-width: 2.5; stroke-dasharray: 2 9; fill: none; stroke-linecap: round; }
+.map-walked { stroke-width: 9; fill: none; stroke-linecap: round; opacity: 0.85; }
+.map-walked.is-good { stroke: #34b574; } .map-walked.is-fair { stroke: #f2b01e; } .map-walked.is-weak { stroke: #e5484d; }
+.map-mark { position: absolute; width: 40px; height: 40px; object-fit: contain; transform: translate(-50%, -50%) rotate(-6deg); opacity: 0.9; pointer-events: none;
+  filter: drop-shadow(0 5px 6px rgba(105, 57, 200, 0.18)); }
+.map-flag, .map-goal { position: absolute; transform: translate(-50%, -50%); }
+.map-flag { padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; color: #fff; background: var(--pill); box-shadow: var(--pill-shadow); }
+.map-goal { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.7); border: 2px dashed color-mix(in srgb, var(--primary) 35%, transparent); }
+.map-goal.is-done { color: #fff; border: 3px solid #fff; background: radial-gradient(circle at 35% 30%, #ffe08a, #e6a817); box-shadow: 0 8px 18px rgba(200, 140, 20, 0.4); }
+/* a stop: a round button, the lesson's title in a small pill beneath */
+.map-stop { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; text-decoration: none; z-index: 1; }
+.map-dot { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; border: 3px solid #fff; font-weight: 700; font-size: 0.92rem; color: #fff;
+  box-shadow: 0 10px 20px -6px rgba(60, 30, 120, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.45); transition: transform 0.2s var(--ease); }
+.map-stop:active .map-dot { transform: scale(0.92); }
+.map-stop.is-good .map-dot { background: radial-gradient(circle at 35% 30%, #7fe2aa, #2fa86a); }
+.map-stop.is-fair .map-dot { background: radial-gradient(circle at 35% 30%, #ffe08a, #ee9f12); }
+.map-stop.is-weak .map-dot { background: radial-gradient(circle at 35% 30%, #ff9c9c, #dc3c44); }
+.map-stop.is-next .map-dot { color: var(--primary); background: #fff; animation: map-next 1.8s ease-out infinite; }
+.map-stop.is-wait .map-dot { color: var(--ink-2); background: rgba(255, 255, 255, 0.6); border-style: dashed; border-color: color-mix(in srgb, var(--primary) 35%, transparent); }
+:root[data-theme='dark'] .map-stop.is-wait .map-dot { background: rgba(255, 255, 255, 0.08); }
+@keyframes map-next { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 45%, transparent), 0 10px 20px -6px rgba(60, 30, 120, 0.35); }
+  100% { box-shadow: 0 0 0 16px transparent, 0 10px 20px -6px rgba(60, 30, 120, 0.35); } }
+.map-label { margin-top: 6px; max-width: 132px; padding: 3px 10px; border-radius: 12px; font-size: 0.74rem; line-height: 1.25; font-weight: 600; text-align: center;
+  color: var(--ink); background: rgba(255, 255, 255, 0.82); box-shadow: 0 4px 10px rgba(80, 40, 160, 0.1);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+:root[data-theme='dark'] .map-label { background: rgba(44, 33, 82, 0.9); }
+/* the label hangs below the stop: the stop itself stays on the road */
+.map-stop .map-label { position: absolute; top: calc(100% - 2px); left: 50%; width: max-content; transform: translateX(-50%); }
+@media (prefers-reduced-motion: reduce) { .map-stop.is-next .map-dot { animation: none; } }
 
 /* ---------------------------------------------------------------- daily review */
 .review-pill { margin-top: 12px; }
@@ -813,6 +837,30 @@ html.lite .lang-scrim { background: color-mix(in srgb, var(--bg) 72%, transparen
 .bubble-staff { align-self: flex-start; border-radius: 20px 20px 20px 6px; color: var(--ink);
   background: var(--glass); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
 .bubble-who { font-size: 0.75rem; font-weight: 600; color: var(--primary); }
+/* Mahliyo's answer at once: her little picture and name */
+.bubble-bot { border-color: color-mix(in srgb, var(--primary) 26%, var(--glass-edge)); }
+.bubble-bot .bubble-who { display: inline-flex; align-items: center; gap: 6px; }
+.bubble-bot .bubble-who img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; object-position: 50% 8%;
+  background: color-mix(in srgb, var(--primary-soft) 40%, white); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent); }
+/* a consultant has joined: a quiet line in the middle, her name in a fair hand */
+.chat-joined { align-self: center; max-width: 88%; text-align: center; padding: 10px 16px 12px; margin: 6px 0; font-size: 0.86rem; line-height: 1.5;
+  color: var(--ink-2); border-top: 1px solid color-mix(in srgb, var(--primary) 18%, transparent); animation: rise 0.45s var(--ease) both; }
+.chat-joined-name { display: block; margin: 2px 0; font-family: var(--font-brand); font-weight: 400; font-size: 1.45rem; line-height: 1.5; padding-inline: 0.2em;
+  background: linear-gradient(90deg, #8a5be6, #d0679a); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+/* rating the consultant: a card over a soft veil */
+.consult-screen { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px;
+  background: color-mix(in srgb, var(--bg) 55%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: fade-in 0.25s both; }
+html.lite .consult-screen { background: color-mix(in srgb, var(--bg) 86%, transparent); }
+.consult-card { position: relative; width: min(100%, 380px); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+  padding: 92px 20px 16px; border-radius: 30px; animation: rise 0.4s var(--ease) both; }
+.consult-girl { position: absolute; top: -78px; height: 164px; width: auto; filter: drop-shadow(0 0 12px color-mix(in srgb, var(--bg) 85%, transparent)); }
+.consult-title { margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+.consult-stars { display: flex; gap: 6px; }
+.consult-stars button { border: 0; padding: 4px; background: none; color: color-mix(in srgb, var(--ink-2) 45%, transparent); cursor: pointer;
+  transition: transform 0.2s var(--ease), color 0.2s; }
+.consult-stars button.is-on { color: #f2b23e; transform: scale(1.08); }
+.consult-stars button:active { transform: scale(0.9); }
+.consult-card .input { width: 100%; }
 .chat-form, .app > .chat-form { position: fixed; left: 0; right: 0; margin: 0 auto; animation: none; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 30;
   width: min(524px, calc(100vw - 24px)); padding: 10px; border-radius: 28px; display: flex; flex-direction: column; gap: 8px; }
 .chat-form .input { min-height: 46px; }
@@ -993,10 +1041,11 @@ html.locked body { background:
 .menu-row .row-sub { display: block; font-size: 0.78em; color: var(--muted); margin-top: 1px; }
 @media (max-height: 640px) { .pin-keys { grid-template-columns: repeat(3, 66px); gap: 10px 22px; } .pin-key { width: 66px; height: 66px; } .pin-head { margin-top: 0; } }
 
-/* ---------------------------------------------------------------- home: a still screen; the schools move sideways */
+/* ---------------------------------------------------------------- home: a still screen while it fits (the schools move
+   sideways); taller (the day's review), it scrolls */
 html.still, html.still body { overflow: hidden; overscroll-behavior: none; }
 html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
-.home { display: flex; flex-direction: column; gap: 12px; height: calc(100dvh - max(14px, env(safe-area-inset-top)) - 112px); }
+.home { display: flex; flex-direction: column; gap: 12px; min-height: calc(100dvh - max(14px, env(safe-area-inset-top)) - 112px); }
 .home > * { flex: none; }
 .home .hello { margin-top: 4px; min-height: 150px; }
 .home .pill-card { margin: 0; }
@@ -1009,7 +1058,7 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
 @media (max-height: 740px) { .home .hello { min-height: 118px; } .home .h-hero { font-size: 1.9rem; } .home { gap: 9px; } }
 
 /* words of the day: a soft gradient card (no shapes) */
-.words { position: relative; flex: 1 1 auto !important; min-height: calc(60px + 6.9rem); max-height: 240px; overflow: hidden; border-radius: 26px;
+.words { position: relative; flex: 1 1 0 !important; min-height: calc(60px + 6.9rem); max-height: 240px; overflow: hidden; border-radius: 26px;
   border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow);
   background: linear-gradient(125deg, color-mix(in srgb, var(--rose-strong) 70%, white) 0%, color-mix(in srgb, var(--primary-soft) 45%, white) 52%, color-mix(in srgb, var(--lilac) 80%, white) 100%); }
 :root[data-theme='dark'] .words { background: linear-gradient(125deg, color-mix(in srgb, var(--rose-strong) 80%, black), color-mix(in srgb, var(--primary-soft) 55%, black) 52%, var(--lilac)); }
