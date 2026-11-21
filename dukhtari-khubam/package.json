@@ -28,6 +28,7 @@
     "@capacitor/toast": "8.0.1",
     "@capgo/capacitor-native-biometric": "8.9.1",
     "@capgo/capacitor-social-login": "8.7.11",
+    "@google/genai": "2.32.0",
     "@supabase/supabase-js": "^2.119.0",
     "idb-keyval": "^6.2.2",
     "next": "^16.4.6",

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { linkAllowed, SPOT_IDS } from '@/lib/aiCatalog'
 import { emptyProgress, type ProgressData } from '@/lib/progress'
@@ -7,8 +7,10 @@ import { aboutMe, localIso, reminderId } from '@/web/offline/mahliyo'
 
 const create = vi.fn()
 vi.mock('@anthropic-ai/sdk', () => ({ default: class { beta = { messages: { create } } } }))
+const generate = vi.fn()
+vi.mock('@google/genai', () => ({ GoogleGenAI: class { models = { generateContent: generate } }, ThinkingLevel: { LOW: 'LOW' } }))
 
-const { answer, cleanBlocks, knowledgeOf, KNOWLEDGE_CAP, learnerNote, MODEL, plainOf, SORRY } = await import('@/server/mahliyo')
+const { answer, cleanBlocks, configured, GEMINI_MODELS, knowledgeOf, KNOWLEDGE_CAP, learnerNote, MODEL, plainOf, provider, SORRY } = await import('@/server/mahliyo')
 
 const bundle = {
   ui: { 'app.name': 'Гулдухтар' },
@@ -80,7 +82,12 @@ describe('her answer as blocks', () => {
 })
 
 describe('asking Mahliyo', () => {
-  beforeEach(() => create.mockReset())
+  beforeEach(() => {
+    create.mockReset()
+    vi.stubEnv('ANTHROPIC_API_KEY', 'k')
+    vi.stubEnv('GEMINI_API_KEY', '')
+  })
+  afterEach(() => vi.unstubAllEnvs())
   const turns = [{ role: 'user' as const, content: 'Тести марҳила чист?' }]
 
   it('asks the most capable model with fallbacks, cached guide and material, the learner after the cache; reads her blocks', async () => {
@@ -94,6 +101,8 @@ describe('asking Mahliyo', () => {
     expect(req.thinking).toBeUndefined()
     expect(req.system[0].text).toContain('«Гулдухтар»')
     expect(req.system[0].text).toContain('Gratorslab')
+    expect(req.system[0].text).toContain('Your AI runs on Claude by Anthropic')
+    expect(req.system[0].text).not.toContain('{ENGINE}')
     expect(req.system[0].text).toContain('- settings.pin:')
     expect(req.system[0].text).not.toMatch(/\{(APP|SPOTS|ROUTES)\}/)
     expect(req.system[1]).toMatchObject({ cache_control: { type: 'ephemeral' } })
@@ -101,6 +110,7 @@ describe('asking Mahliyo', () => {
     expect(req.system[1].text).toContain('Ҳусейнзода Руслани Анвар')
     expect(req.system[2].cache_control).toBeUndefined()
     expect(req.system[2].text).toContain('Name: Малика')
+    expect(generate).not.toHaveBeenCalled()
     expect(req.messages).toEqual([{ role: 'user', content: 'Тести марҳила чист?' }])
   })
 
@@ -151,5 +161,70 @@ describe('what the phone tells her about the learner', () => {
     expect(localIso(new Date(2026, 10, 21, 8, 5, 9))).toMatch(/^2026-11-21T08:05:09[+-]\d{2}:\d{2}$/)
     expect(reminderId('2026-11-21T15:00:00.000Z')).toBe(reminderId('2026-11-21T20:00:00+05:00'))
     expect(reminderId('2026-11-21T15:00:00.000Z')).not.toBe(reminderId('2026-11-21T15:01:00.000Z'))
+  })
+})
+
+describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
+  const turns = [{ role: 'user' as const, content: 'Мҳлиё, пин кодро чи хел иваз кунам?' }, { role: 'assistant' as const, content: 'Аввал…' }, { role: 'user' as const, content: 'Нафаҳмидам' }]
+  const me = { me: 'Name: Малика; age 17; birthday 03-01\nStudy days: 5', now: '2026-11-21T14:00:00+05:00' }
+  const ok = (blocks: unknown[]) => ({ text: JSON.stringify({ tajik: true, blocks }), candidates: [{ finishReason: 'STOP' }] })
+  beforeEach(() => {
+    generate.mockReset()
+    create.mockReset()
+    vi.stubEnv('ANTHROPIC_API_KEY', '')
+    vi.stubEnv('GEMINI_API_KEY', 'g')
+  })
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('who answers: Claude when its key is set, otherwise Gemini, otherwise no one', () => {
+    expect(provider()).toBe('gemini')
+    vi.stubEnv('ANTHROPIC_API_KEY', 'k')
+    expect(provider()).toBe('claude')
+    vi.stubEnv('ANTHROPIC_API_KEY', '')
+    vi.stubEnv('GEMINI_API_KEY', '')
+    expect(provider()).toBeNull()
+    expect(configured()).toBe(false)
+  })
+
+  it('asks the best free model with the same rules and blocks; her name, age and birthday stay with the app', async () => {
+    generate.mockResolvedValue(ok([{ type: 'text', text: 'Ба «Танзимот» дароед.' }, { type: 'screen', spot: 'settings.pin', caption: 'Инҷо' }]))
+    const a = await answer(turns, 'Гулдухтар', 'ДОНИШ', me)
+    expect(a).toMatchObject({ tajik: true, blocks: [{ type: 'text', text: 'Ба «Танзимот» дароед.' }, { type: 'screen', spot: 'settings.pin', caption: 'Инҷо' }] })
+    const req = generate.mock.calls[0][0]
+    expect(GEMINI_MODELS[0]).toBe('gemini-3.5-flash')
+    expect(req.model).toBe('gemini-3.5-flash')
+    expect(req.contents).toEqual([
+      { role: 'user', parts: [{ text: 'Мҳлиё, пин кодро чи хел иваз кунам?' }] },
+      { role: 'model', parts: [{ text: 'Аввал…' }] },
+      { role: 'user', parts: [{ text: 'Нафаҳмидам' }] }
+    ])
+    expect(req.config).toMatchObject({ responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'LOW' } })
+    expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(5)
+    const system = req.config.systemInstruction as string
+    for (const s of ['«Гулдухтар»', 'Gratorslab', 'Your AI runs on Gemini by Google', 'ДОНИШ', 'Study days: 5', 'HER CURRENT TIME: 2026-11-21T14:00:00+05:00']) expect(system).toContain(s)
+    for (const s of ['Малика', 'age 17', '03-01', '{ENGINE}']) expect(system).not.toContain(s)
+    expect(create).not.toHaveBeenCalled()
+  })
+
+  it('a busy model: the next one answers', async () => {
+    generate.mockRejectedValueOnce(new Error('503 high demand')).mockResolvedValueOnce(ok([{ type: 'text', text: 'Салом!' }]))
+    expect((await answer(turns, 'Г', '', me)).blocks).toEqual([{ type: 'text', text: 'Салом!' }])
+    expect(generate.mock.calls.map((c) => c[0].model)).toEqual(GEMINI_MODELS.slice(0, 2))
+  })
+
+  it('every model busy: an error (the route says she cannot answer now); blocked: her kind apology', async () => {
+    generate.mockRejectedValue(new Error('429 quota'))
+    await expect(answer(turns, 'Г', '', me)).rejects.toThrow('429 quota')
+    expect(generate).toHaveBeenCalledTimes(GEMINI_MODELS.length)
+    generate.mockReset()
+    generate.mockResolvedValue({ text: '', candidates: [{ finishReason: 'SAFETY' }] })
+    expect((await answer(turns, 'Г', '', me)).reply).toBe(SORRY)
+    generate.mockResolvedValue({ text: '', promptFeedback: { blockReason: 'PROHIBITED_CONTENT' } })
+    expect((await answer(turns, 'Г', '', me)).reply).toBe(SORRY)
+  })
+
+  it('without "private" the learner note keeps her name (for Claude)', () => {
+    expect(learnerNote(me)).toContain('Name: Малика')
+    expect(learnerNote(me, new Date(), { private: true })).toContain('not shared with you')
   })
 })
