@@ -343,7 +343,6 @@ export const uz: Partial<Record<UiKey, string>> = {
   'support.inbox': "Foydalanuvchilar savollari",
   'support.new_question': "Foydalanuvchidan yangi savol",
   'ai.title': "Mahliyo AI",
-  'ai.hello': "Ilova, darslar va yutuqlaringiz haqida so‘rang — istalgan tilda.",
   'ai.placeholder': "Mahliyo AI’ga xabar…",
   'ai.suggest': "📈 Yutuqlarim qanday?\n🔁 Nimani takrorlay?\n🔐 PIN-ni qanday almashtiraman?\n⏰ Soat 20:00 da eslat\n🏫 Maktablar nima haqida?\n🌐 Tilni qanday almashtiraman?\n🎓 Bosqich testi nima?\n🤝 Seni kim yaratgan?\n💡 Bugungi maslahat\n☕ Mahliyo AI bilan qahva?",
   'ai.to_consultant': "Maslahatchiga yozing",
@@ -393,6 +392,11 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.call_end': "Tugatish",
   'ai.call_ended': "Qo‘ng‘iroq tugadi",
   'ai.answered': "Mahliyodan javob keldi",
+  'ai.archive': "Arxivga olish",
+  'ai.unarchive': "Arxivdan chiqarish",
+  'ai.delete_full': "Butunlay o‘chirish",
+  'ai.archived': "Arxiv",
+  'ai.chat_actions': "Amallar",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -737,7 +741,6 @@ export const tr: Partial<Record<UiKey, string>> = {
   'support.inbox': "Kullanıcı soruları",
   'support.new_question': "Kullanıcıdan yeni soru",
   'ai.title': "Mahliyo AI",
-  'ai.hello': "Uygulama, dersler ve ilerlemeniz hakkında sorun — istediğiniz dilde.",
   'ai.placeholder': "Mahliyo AI’a mesaj…",
   'ai.suggest': "📈 Nasıl gidiyorum?\n🔁 Neyi tekrar edeyim?\n🔐 PIN’imi nasıl değiştiririm?\n⏰ Saat 20:00’de hatırlat\n🏫 Okullar ne hakkında?\n🌐 Dili nasıl değiştiririm?\n🎓 Aşama testi nedir?\n🤝 Seni kim yaptı?\n💡 Bugün için bir ipucu\n☕ Mahliyo AI ile kahve?",
   'ai.to_consultant': "Danışmana yazın",
@@ -787,6 +790,11 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.call_end': "Bitir",
   'ai.call_ended': "Arama sona erdi",
   'ai.answered': "Mahliyo’dan cevap geldi",
+  'ai.archive': "Arşive at",
+  'ai.unarchive': "Arşivden çıkar",
+  'ai.delete_full': "Tamamen sil",
+  'ai.archived': "Arşiv",
+  'ai.chat_actions': "İşlemler",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1130,7 +1138,6 @@ export const fa: Partial<Record<UiKey, string>> = {
   'support.inbox': "پرسش‌های کاربران",
   'support.new_question': "پرسش تازه از یک کاربر",
   'ai.title': "ماه‌لیا AI",
-  'ai.hello': "دربارهٔ برنامه، درس‌ها و پیشرفت خود بپرسید — به هر زبانی.",
   'ai.placeholder': "پیام به Mahliyo AI…",
   'ai.suggest': "📈 پیشرفت من چطور است؟\n🔁 چه چیزی را مرور کنم؟\n🔐 رمز PIN را چطور عوض کنم؟\n⏰ ساعت ۲۰:۰۰ یادم بینداز\n🏫 مکتب‌ها دربارهٔ چیست؟\n🌐 زبان را چطور عوض کنم؟\n🎓 آزمون مرحله چیست؟\n🤝 چه کسی تو را ساخته؟\n💡 یک توصیه برای امروز\n☕ قهوه با Mahliyo AI؟",
   'ai.to_consultant': "به مشاور بنویسید",
@@ -1180,6 +1187,11 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.call_end': "پایان",
   'ai.call_ended': "تماس پایان یافت",
   'ai.answered': "پاسخ ماه‌لیا رسید",
+  'ai.archive': "بایگانی کردن",
+  'ai.unarchive': "خارج کردن از بایگانی",
+  'ai.delete_full': "حذف کامل",
+  'ai.archived': "بایگانی",
+  'ai.chat_actions': "کارها",
   'pin.forgot_q': "فراموش کردید؟"
 }
 

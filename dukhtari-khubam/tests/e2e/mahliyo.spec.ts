@@ -71,6 +71,10 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   // a plain header: her name, and only the menu (the history of chats); her lines come one after another
   await expect(page.locator('.ai-top button')).toHaveCount(1)
   await expect(page.locator('.ai-top button')).toHaveAccessibleName('Таърихи чатҳо')
+  // the menu sits at the far right; no line under her greeting
+  const menuBox = (await page.locator('.ai-menu').boundingBox())!
+  expect(menuBox.x + menuBox.width).toBeGreaterThan(390 - 24)
+  await expect(page.locator('.ai-hello')).toHaveCount(0)
   await expect(page.locator('.ai-greet')).toHaveText('Салом, Малика! Чӣ меомӯзем?')
   await expect(page.locator('.ai-greet')).toHaveText('Кофе бо Маҳлиё AI? ☕', { timeout: 6000 })
   await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toBeVisible()
@@ -160,8 +164,21 @@ test('her scene is dark, her words without boxes; the menu keeps the history of 
   await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи якум»')
   await menu.click()
   await expect(rows).toHaveCount(2)
-  // removed
-  await rows.filter({ hasText: 'Саволи дуюм' }).getByRole('button', { name: /Нест кардан/ }).click()
+  // plain lines, no boxes
+  expect(await page.locator('.ai-history-new').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)')
+  // "⋯" → to the archive: out of the list, in the folded archive at the bottom; and back
+  await rows.filter({ hasText: 'Саволи дуюм' }).getByRole('button', { name: /^Амалҳо/ }).click()
+  await page.getByRole('menuitem', { name: 'Ба архив партофтан' }).click()
+  await expect(page.locator('.ai-history-list').first().locator('.ai-history-row')).toHaveCount(1)
+  await page.getByRole('button', { name: 'Архив · 1' }).click()
+  await expect(page.locator('.ai-history-archive .ai-history-row')).toContainText('Саволи дуюм')
+  await page.locator('.ai-history-archive').getByRole('button', { name: /^Амалҳо/ }).click()
+  await page.getByRole('menuitem', { name: 'Аз архив баровардан' }).click()
+  await expect(page.locator('.ai-history-archive')).toHaveCount(0)
+  await expect(rows).toHaveCount(2)
+  // "⋯" → deleted for good
+  await rows.filter({ hasText: 'Саволи дуюм' }).getByRole('button', { name: /^Амалҳо/ }).click()
+  await page.getByRole('menuitem', { name: 'Пурра нест кардан' }).click()
   await expect(rows).toHaveCount(1)
   await page.keyboard.press('Escape')
   await expect(page.locator('.ai-history')).toHaveCount(0)

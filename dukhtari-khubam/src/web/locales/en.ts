@@ -234,7 +234,6 @@ export const en: Partial<Record<UiKey, string>> = {
   'support.inbox': "Users’ questions",
   'support.new_question': "A new question from a user",
   'ai.title': "Mahliyo AI",
-  'ai.hello': "Ask about the app, the lessons and your progress — in any language.",
   'ai.placeholder': "Message Mahliyo AI…",
   'ai.suggest': "📈 How am I doing?\n🔁 What should I review?\n🔐 How do I change my PIN?\n⏰ Remind me at 8 pm\n🏫 What are the schools about?\n🌐 How do I change the language?\n🎓 What is the stage test?\n🤝 Who made you?\n💡 A tip for today\n☕ Coffee with Mahliyo AI?",
   'ai.to_consultant': "Write to the consultant",
@@ -284,5 +283,10 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.call_end': "End",
   'ai.call_ended': "Call ended",
   'ai.answered': "Mahliyo has answered you",
+  'ai.archive': "Archive",
+  'ai.unarchive': "Unarchive",
+  'ai.delete_full': "Delete permanently",
+  'ai.archived': "Archive",
+  'ai.chat_actions': "Actions",
   'pin.forgot_q': "Forgot it?"
 }

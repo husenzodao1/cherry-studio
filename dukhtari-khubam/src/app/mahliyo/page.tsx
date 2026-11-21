@@ -10,7 +10,7 @@ import { showToast } from '@/web/components/Toast'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
 import {
-  aboutMe, aiReady, ask, copyOf, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, removeChat, retry, stop,
+  aboutMe, aiReady, archiveChat, ask, copyOf, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, removeChat, retry, stop,
   useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { usePrefs } from '@/web/prefs'
@@ -155,7 +155,7 @@ export default function MahliyoPage() {
         <History chats={chats} open={chat} onClose={() => setHistory(false)}
           onOpen={(id) => { openChat(id); setEditing(null); setText(''); setHistory(false) }}
           onNew={() => { newChat(); setEditing(null); setText(''); setFiles([]); setHistory(false) }}
-          onRemove={removeChat} />
+          onRemove={removeChat} onArchive={archiveChat} />
       ) : null}
 
       {online ? null : (
@@ -170,7 +170,8 @@ export default function MahliyoPage() {
               <img src={busy ? PORTRAIT_THINK : PORTRAIT} alt="" />
             </span>
             <Taglines lines={t('ai.taglines').split('\n').filter(Boolean).map((l) => (first ? l.replace('{name}', first) : l.replace(/,?\s*\{name\}/, '')))} />
-            <p className="ai-hello">{ready === false ? t('ai.soon') : t('ai.hello')}</p>
+            {/* no line under her greeting: only when she is not there yet, why */}
+            {ready === false ? <p className="ai-hello">{t('ai.soon')}</p> : null}
             {ready === false ? (
               <Link href="/support" className="btn btn-soft ai-consultant"><Icon name="bell" size={16} /> {t('ai.to_consultant')}</Link>
             ) : <Suggestions lines={t('ai.suggest').split('\n').filter(Boolean)} disabled={!ready || !online} onPick={send} />}
@@ -267,16 +268,24 @@ export default function MahliyoPage() {
   )
 }
 
-/** The history of chats: newest first, by day; the open one marked; a new chat at the top. */
-function History({ chats, open, onClose, onOpen, onNew, onRemove }: {
-  chats: AiChatMeta[]; open: string; onClose: () => void; onOpen: (id: string) => void; onNew: () => void; onRemove: (id: string) => void
+/**
+ * The history of chats: plain lines, newest first, by day; the open one marked; a new chat at the top.
+ * Each chat's "⋯" puts it in the archive (kept, out of the list) or deletes it for good; the archive is
+ * at the bottom, folded.
+ */
+function History({ chats, open, onClose, onOpen, onNew, onRemove, onArchive }: {
+  chats: AiChatMeta[]; open: string; onClose: () => void; onOpen: (id: string) => void; onNew: () => void
+  onRemove: (id: string) => void; onArchive: (id: string, archived: boolean) => void
 }) {
   const { t } = usePrefs()
+  /** the chat whose actions are open */
+  const [acts, setActs] = useState<string | null>(null)
+  const [showArchive, setShowArchive] = useState(false)
   useEffect(() => {
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') (acts ? setActs(null) : onClose()) }
     window.addEventListener('keydown', esc)
     return () => window.removeEventListener('keydown', esc)
-  }, [onClose])
+  }, [onClose, acts])
   const dayOf = (at: string) => {
     const d = new Date(at)
     const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
@@ -285,33 +294,57 @@ function History({ chats, open, onClose, onOpen, onNew, onRemove }: {
     const p = (n: number) => String(n).padStart(2, '0')
     return day === today ? t('ai.today') : day === today - 86_400_000 ? t('ai.yesterday') : `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}`
   }
+  const live = chats.filter((c) => !c.archived)
+  const archived = chats.filter((c) => c.archived)
+  const row = (c: AiChatMeta) => (
+    <div className={`ai-history-row${c.id === open ? ' is-open' : ''}`}>
+      <button type="button" className="grow" onClick={() => onOpen(c.id)} aria-current={c.id === open || undefined}>{c.title || '…'}</button>
+      <button type="button" className="ai-act" aria-label={`${t('ai.chat_actions')}: ${c.title}`} aria-expanded={acts === c.id}
+        onClick={() => setActs(acts === c.id ? null : c.id)}><Icon name="more" size={18} /></button>
+      {acts === c.id ? (
+        <div className="ai-history-menu" role="menu">
+          <button type="button" role="menuitem" onClick={() => { onArchive(c.id, !c.archived); setActs(null) }}>
+            <Icon name="archive" size={17} />{c.archived ? t('ai.unarchive') : t('ai.archive')}
+          </button>
+          <button type="button" role="menuitem" className="is-danger" onClick={() => { onRemove(c.id); setActs(null) }}>
+            <Icon name="trash" size={17} />{t('ai.delete_full')}
+          </button>
+        </div>
+      ) : null}
+    </div>
+  )
   let shown = ''
   // over the tab bar: drawn at the page's top level
   return createPortal(
     <div className="ai-history ai-portal" role="dialog" aria-modal="true" aria-label={t('ai.history')} onClick={onClose}>
-      <aside className="ai-history-panel" onClick={(e) => e.stopPropagation()}>
+      <aside className="ai-history-panel" onClick={(e) => { e.stopPropagation(); if (acts && !(e.target as HTMLElement).closest('.ai-history-row')) setActs(null) }}>
         <header className="ai-history-head">
           <b className="grow">{t('ai.history')}</b>
           <button type="button" className="ai-act" aria-label={t('action.close')} onClick={onClose}><Icon name="x" size={18} /></button>
         </header>
         <button type="button" className="ai-history-new" onClick={onNew}><Icon name="edit" size={18} /><span>{t('ai.clear')}</span></button>
-        {chats.length ? (
+        {live.length ? (
           <ul className="ai-history-list">
-            {chats.map((c) => {
+            {live.map((c) => {
               const day = dayOf(c.at)
               const head = day !== shown ? (shown = day) : null
               return (
                 <li key={c.id}>
                   {head ? <span className="ai-history-day">{head}</span> : null}
-                  <div className={`ai-history-row${c.id === open ? ' is-open' : ''}`}>
-                    <button type="button" className="grow" onClick={() => onOpen(c.id)} aria-current={c.id === open || undefined}>{c.title || '…'}</button>
-                    <button type="button" className="ai-act" aria-label={`${t('ai.remove')}: ${c.title}`} onClick={() => onRemove(c.id)}><Icon name="trash" size={16} /></button>
-                  </div>
+                  {row(c)}
                 </li>
               )
             })}
           </ul>
         ) : <p className="ai-history-none">{t('ai.no_chats')}</p>}
+        {archived.length ? (
+          <div className="ai-history-archive">
+            <button type="button" className="ai-history-fold" aria-expanded={showArchive} onClick={() => setShowArchive(!showArchive)}>
+              <Icon name="archive" size={17} /><span className="grow">{t('ai.archived')} · {archived.length}</span><Icon name={showArchive ? 'up' : 'down'} size={16} />
+            </button>
+            {showArchive ? <ul className="ai-history-list">{archived.map((c) => <li key={c.id}>{row(c)}</li>)}</ul> : null}
+          </div>
+        ) : null}
       </aside>
     </div>,
     document.body

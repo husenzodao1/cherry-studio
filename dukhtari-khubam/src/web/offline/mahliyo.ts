@@ -37,7 +37,7 @@ const CONTEXT = 12
 /** the most the summary of the learner may be (the server's limit) */
 const ME_CAP = 4000
 
-export interface AiChat { id: string; title: string; at: string; turns: AiTurn[] }
+export interface AiChat { id: string; title: string; at: string; turns: AiTurn[]; archived?: boolean }
 /** a chat as the history lists it */
 export type AiChatMeta = Omit<AiChat, 'turns'>
 
@@ -226,10 +226,10 @@ function savePending(p: AiState['pending']) {
   } catch { /* storage blocked: the wait is not kept across openings */ }
 }
 
-const metaOf = (list: AiChat[]): AiChatMeta[] => list.map(({ id, title, at }) => ({ id, title, at }))
+const metaOf = (list: AiChat[]): AiChatMeta[] => list.map(({ id, title, at, archived }) => ({ id, title, at, ...(archived ? { archived } : {}) }))
 const turnsOf = (id: string) => chats.find((c) => c.id === id)?.turns ?? []
 
-/** Keeps a chat's conversation (the newest chat first in the history). */
+/** Keeps a chat's conversation (the newest chat first in the history; talked in again, it leaves the archive). */
 function keep(id: string, turns: AiTurn[]) {
   const rest = chats.filter((c) => c.id !== id)
   chats = turns.length ? [{ id, title: titleOf(turns), at: new Date().toISOString(), turns: turns.slice(-KEEP) }, ...rest] : rest
@@ -411,7 +411,18 @@ export function newChat() {
   set({ chat: id, turns: [], problem: null, fresh: -1 })
 }
 
-/** Removes a chat from the history (the one open: a new one opens). */
+/** Puts a chat in the archive, or takes it out (the one open, archived: a new one opens). */
+export function archiveChat(id: string, archived = true) {
+  chats = chats.map((c) => (c.id === id ? { ...c, archived } : c))
+  writeChats(chats)
+  if (archived && id === state.chat) {
+    const chat = newId()
+    try { localStorage.setItem(CURRENT_KEY, chat) } catch { /* not kept */ }
+    set({ chats: metaOf(chats), chat, turns: [], problem: null, fresh: -1 })
+  } else set({ chats: metaOf(chats) })
+}
+
+/** Removes a chat for good (the one open: a new one opens). */
 export function removeChat(id: string) {
   if (state.pending?.chat === id) stop()
   chats = chats.filter((c) => c.id !== id)
