@@ -9,10 +9,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetFileDescriptor;
 import android.media.AudioAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -29,6 +33,10 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 
 /**
@@ -38,6 +46,9 @@ import java.util.Iterator;
  * the lock screen (full screen where the phone allows it). "Answer" opens the app, which plays her words
  * (web/components/MahliyoCall.tsx); "Decline" ends it; not taken in 30 seconds, it stops. The planned calls
  * come back after the phone restarts. The web layer plans and takes back calls, and learns which rang.
+ * Taken, her voice plays as on a real call: from the earpiece at the top of the phone (the speaker when the
+ * learner turns it on). Android 14 and later show a call over the lock screen only with the learner's
+ * permission ("full-screen notifications"); the app asks for it when she sets a call.
  */
 public final class MahliyoCall {
     static final String PREFS = "dk_calls";
@@ -296,6 +307,124 @@ public final class MahliyoCall {
         public void stop(PluginCall call) {
             silence(getContext());
             call.resolve();
+        }
+
+        /** Whether her call may cover the lock screen (Android 14+ asks the learner once). */
+        @PluginMethod
+        public void canFullScreen(PluginCall call) {
+            JSObject out = new JSObject();
+            NotificationManager nm = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            out.put("granted", Build.VERSION.SDK_INT < 34 || nm == null || nm.canUseFullScreenIntent());
+            call.resolve(out);
+        }
+
+        /** Opens the phone's setting where the app may show calls over the lock screen. */
+        @PluginMethod
+        public void askFullScreen(PluginCall call) {
+            Context ctx = getContext();
+            try {
+                Intent i = Build.VERSION.SDK_INT >= 34
+                    ? new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:" + ctx.getPackageName()))
+                    : new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, ctx.getPackageName());
+                getActivity().startActivity(i);
+            } catch (Exception e) {
+                getActivity().startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + ctx.getPackageName())));
+            }
+            call.resolve();
+        }
+
+        private MediaPlayer player;
+
+        /** Her recorded words (`src`, a file of the app) on the call line: the earpiece, or the speaker. */
+        @PluginMethod
+        public void voice(PluginCall call) {
+            String src = call.getString("src", "");
+            boolean speaker = call.getBoolean("speaker", false);
+            Context ctx = getContext();
+            release();
+            try {
+                AudioManager am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
+                am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                route(am, speaker);
+                MediaPlayer mp = new MediaPlayer();
+                mp.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build());
+                String path = "public" + (src.startsWith("/") ? src : "/" + src);
+                try (AssetFileDescriptor fd = ctx.getAssets().openFd(path)) {
+                    mp.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getLength());
+                } catch (Exception compressed) {
+                    // packed compressed in the app: played from a copy
+                    File copy = new File(ctx.getCacheDir(), "call-" + path.replaceAll("[^A-Za-z0-9.]", "_"));
+                    if (!copy.exists()) {
+                        try (InputStream in = ctx.getAssets().open(path); OutputStream out = new FileOutputStream(copy)) {
+                            byte[] buf = new byte[16384];
+                            int n;
+                            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                        }
+                    }
+                    mp.setDataSource(copy.getAbsolutePath());
+                }
+                mp.setOnCompletionListener((m) -> notifyListeners("voiceEnded", new JSObject()));
+                mp.setOnErrorListener((m, what, extra) -> {
+                    notifyListeners("voiceEnded", new JSObject());
+                    return true;
+                });
+                mp.prepare();
+                mp.start();
+                player = mp;
+                call.resolve();
+            } catch (Exception e) {
+                release();
+                call.reject("no voice");
+            }
+        }
+
+        /** The speaker on or off (off: the earpiece). */
+        @PluginMethod
+        public void speaker(PluginCall call) {
+            AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+            route(am, call.getBoolean("on", false));
+            call.resolve();
+        }
+
+        /** Her voice stops; the phone's sound is as before the call. */
+        @PluginMethod
+        public void hush(PluginCall call) {
+            release();
+            call.resolve();
+        }
+
+        private void route(AudioManager am, boolean speaker) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                int want = speaker ? AudioDeviceInfo.TYPE_BUILTIN_SPEAKER : AudioDeviceInfo.TYPE_BUILTIN_EARPIECE;
+                for (AudioDeviceInfo d : am.getAvailableCommunicationDevices()) {
+                    if (d.getType() == want) {
+                        am.setCommunicationDevice(d);
+                        return;
+                    }
+                }
+            }
+            am.setSpeakerphoneOn(speaker);
+        }
+
+        private void release() {
+            if (player != null) {
+                try { player.stop(); } catch (Exception ignored) { /* not playing */ }
+                player.release();
+                player = null;
+            }
+            AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+            if (am == null) return;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) am.clearCommunicationDevice();
+            else am.setSpeakerphoneOn(false);
+            am.setMode(AudioManager.MODE_NORMAL);
+        }
+
+        @Override
+        protected void handleOnDestroy() {
+            release();
         }
 
         /** The call is over: the app no longer shows over the lock screen. */

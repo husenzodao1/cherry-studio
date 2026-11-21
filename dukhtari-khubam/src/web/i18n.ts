@@ -58,7 +58,6 @@ const tg = {
   'search.placeholder': 'Ҷустуҷӯ…',
   'garden.title': "Харитаи пешравӣ",
   'garden.empty': "Ҳанӯз ягон дарсро оғоз накардаед",
-  'garden.hint': "Ранги ҳар дарс — натиҷаи тести он",
   'map.good': "Олӣ", 'map.fair': "Миёна", 'map.weak': "Бад", 'map.start': "Оғоз", 'map.finish': "Анҷом",
   'review.title': 'Такрори рӯз', 'review.count': '{n} савол', 'review.done_today': 'Такрори имрӯз анҷом ёфт',
   'review.empty': 'Саволи такрорӣ нест', 'review.result': '{ok} аз {n} дуруст', 'review.keep': 'Ҷавобҳои нодуруст пагоҳ такрор мешаванд.',
@@ -278,7 +277,7 @@ const tg = {
   'ai.soon': "Маҳлиё ба наздикӣ омода мешавад. То он вақт саволҳоятонро ба мушовир нависед.",
   'ai.today': "Имрӯз",
   'ai.tomorrow': "Пагоҳ",
-  'ai.reminder_set': "Ёдраскунӣ гузошта шуд: телефон дар ҳамин вақт огоҳ мекунад.",
+  'ai.reminder_set': "Тайёр! Дар ҳамин вақт Маҳлиё ба шумо занг мезанад 📞",
   'ai.reminder_done': "Вақти ёдраскунӣ гузашт.",
   'ai.reminder_cancel': "Бекор кардан",
   'ai.reminder_cancelled': "Ёдраскунӣ бекор карда шуд.",
@@ -324,6 +323,12 @@ const tg = {
   'ai.chats': "Сӯҳбатҳо",
   'ai.select': "Интихоби матн",
   'ai.share': "Мубодила",
+  'ai.call_mute': "Хомӯш",
+  'ai.call_keypad': "Рақамҳо",
+  'ai.call_speaker': "Динамик",
+  'ai.call_hide': "Пинҳон",
+  'ai.call_lock': "Барои он ки занги Маҳлиё дар экрани қулф мисли занги ҳақиқӣ пурра пайдо шавад, иҷозат диҳед.",
+  'ai.call_lock_allow': "Иҷозат додан",
   'pin.forgot_q': "Фаромӯш кардед?"
 }
 
@@ -362,7 +367,6 @@ const ru: Partial<Record<UiKey, string>> = {
   'search.placeholder': 'Поиск…',
   'garden.title': "Карта прогресса",
   'garden.empty': "Вы ещё не начали ни одного урока",
-  'garden.hint': "Цвет урока — результат его теста",
   'map.good': "Отлично", 'map.fair': "Средне", 'map.weak': "Слабо", 'map.start': "Старт", 'map.finish': "Финиш",
   'review.title': 'Повторение дня', 'review.count': 'Вопросов: {n}', 'review.done_today': 'Повторение на сегодня выполнено',
   'review.empty': 'Вопросов для повторения нет', 'review.result': 'Верно {ok} из {n}', 'review.keep': 'Ошибочные ответы повторяются завтра.',
@@ -635,7 +639,7 @@ const ru: Partial<Record<UiKey, string>> = {
   'ai.soon': "Махлиё скоро будет готова. А пока пишите вопросы консультанту.",
   'ai.today': "Сегодня",
   'ai.tomorrow': "Завтра",
-  'ai.reminder_set': "Напоминание поставлено: телефон напомнит в это время.",
+  'ai.reminder_set': "Готово! В это время Махлиё вам позвонит 📞",
   'ai.reminder_done': "Время напоминания прошло.",
   'ai.reminder_cancel': "Отменить",
   'ai.reminder_cancelled': "Напоминание отменено.",
@@ -681,6 +685,12 @@ const ru: Partial<Record<UiKey, string>> = {
   'ai.chats': "Разговоры",
   'ai.select': "Выделить текст",
   'ai.share': "Поделиться",
+  'ai.call_mute': "Без звука",
+  'ai.call_keypad': "Клавиши",
+  'ai.call_speaker': "Динамик",
+  'ai.call_hide': "Скрыть",
+  'ai.call_lock': "Чтобы звонок Махлиё появлялся на экране блокировки как настоящий, разрешите это.",
+  'ai.call_lock_allow': "Разрешить",
   'pin.forgot_q': "Забыли?"
 }
 

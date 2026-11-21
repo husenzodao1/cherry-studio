@@ -21,7 +21,15 @@ interface NativeCalls {
   taken(): Promise<{ opened?: NativeOpened; rang?: number[] }>
   stop(): Promise<void>
   done(): Promise<void>
+  /** her words on the call line: the earpiece, or the speaker */
+  voice(o: { src: string; speaker: boolean }): Promise<void>
+  speaker(o: { on: boolean }): Promise<void>
+  hush(): Promise<void>
+  /** whether her call may cover the lock screen (Android 14+ asks the learner) */
+  canFullScreen(): Promise<{ granted: boolean }>
+  askFullScreen(): Promise<void>
   addListener(event: 'opened', f: (c: NativeOpened) => void): Promise<PluginListenerHandle>
+  addListener(event: 'voiceEnded', f: () => void): Promise<PluginListenerHandle>
 }
 interface NativeOpened { call: { id: number; title: string; text: string }; answered: boolean }
 const Native = registerPlugin<NativeCalls>('MahliyoCall')
@@ -106,4 +114,53 @@ export function onNativeCall(): () => void {
 }
 export function useCall(): CallInfo | null {
   return useSyncExternalStore((l) => { listeners.add(l); return () => { listeners.delete(l) } }, () => current, () => null)
+}
+
+/** Whether her call may cover the lock screen like a real call (always, outside the phone app). */
+export async function lockScreenAllowed(): Promise<boolean> {
+  if (!native()) return true
+  return (await Native.canFullScreen().catch(() => ({ granted: true }))).granted
+}
+/** Opens the phone's setting that lets her call cover the lock screen. */
+export function allowLockScreen() {
+  if (native()) void Native.askFullScreen().catch(() => undefined)
+}
+
+/**
+ * The call line: her recorded words, first from the earpiece at the top of the phone (as a real call),
+ * from the speaker when it is turned on. In the browser, the earpiece is her voice played quietly.
+ */
+export interface CallLine {
+  play(src: string, ended: () => void): Promise<void>
+  speaker(on: boolean): void
+  stop(): void
+}
+const EARPIECE_VOLUME = 0.3
+export function callLine(): CallLine {
+  let loud = false
+  if (native()) {
+    let handle: PluginListenerHandle | null = null
+    return {
+      async play(src, ended) {
+        await handle?.remove()
+        handle = await Native.addListener('voiceEnded', ended)
+        await Native.voice({ src, speaker: loud })
+      },
+      speaker(on) { loud = on; void Native.speaker({ on }).catch(() => undefined) },
+      stop() { void handle?.remove(); void Native.hush().catch(() => undefined) }
+    }
+  }
+  let audio: HTMLAudioElement | null = null
+  return {
+    async play(src, ended) {
+      audio?.pause()
+      audio = new Audio(src)
+      audio.volume = loud ? 1 : EARPIECE_VOLUME
+      audio.onended = ended
+      audio.onerror = ended
+      await audio.play()
+    },
+    speaker(on) { loud = on; if (audio) audio.volume = on ? 1 : EARPIECE_VOLUME },
+    stop() { audio?.pause(); audio = null }
+  }
 }

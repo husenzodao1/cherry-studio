@@ -2,20 +2,17 @@
 
 import Link from 'next/link'
 
-import { ART } from '../art'
 import type { Leg } from '../offline/journey'
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
 
-/** The road's width in the drawing (it scales to the screen), the step between stops and the sway. */
+/** The drawing's width (it scales to the screen), the step between stops and the sway. */
 const W = 360
-const STEP = 108
+const STEP = 112
 const TOP = 70
-const SWAY = 92
-/** little landmarks beside the road, by turns */
-const MARKS = [ART.leaves, ART.tulip, ART.crystals, ART.lotus, ART.petals, ART.flowerSide]
-
-const xAt = (i: number) => W / 2 + SWAY * Math.sin(i * 1.15 + 0.5)
+const SWAY = 100
+/** a road as on a real map: its bends wide and narrow by turns, never the same twice */
+const xAt = (i: number) => W / 2 + SWAY * (0.62 + 0.38 * Math.sin(i * 2.3 + 1)) * Math.sin(i * 1.15 + 0.5)
 const yAt = (i: number) => TOP + i * STEP
 
 /** A smooth road through the points (Catmull-Rom turned into Bézier curves). */
@@ -39,22 +36,20 @@ function MapLeg({ leg }: { leg: Leg }) {
   const finished = leg.done === n
   return (
     <section className="map-leg">
-      <header className="map-head glass">
+      <header className="map-head">
         {leg.icon ? <img src={leg.icon.src} alt="" aria-hidden="true" /> : null}
         <b>{leg.title}</b>
         <span className="map-count">{leg.done}/{n}</span>
       </header>
       <div className="map-road" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+          {/* the road: its edge, the asphalt, the dashed middle line */}
+          <path className="map-edge" d={road(pts)} />
           <path className="map-way" d={road(pts)} />
           <path className="map-way-line" d={road(pts)} />
           {/* the part already walked, each stretch in the colour of the lesson it reaches */}
           {leg.stops.map((s, i) => (s.grade ? <path key={s.id} className={`map-walked is-${s.grade}`} d={road(pts.slice(i, i + 2))} /> : null))}
         </svg>
-        {leg.stops.map((_, i) => (i % 2 ? null : (
-          <img key={`m${i}`} className="map-mark" src={MARKS[(i / 2) % MARKS.length].src} alt="" aria-hidden="true"
-            style={{ ...pct([xAt(i) > W / 2 ? xAt(i) - 128 : xAt(i) + 128, yAt(i) + STEP * 0.45]), ['--i' as string]: i }} />
-        )))}
         <span className="map-flag" style={pct(pts[0])}>{t('map.start')}</span>
         {leg.stops.map((s, i) => (
           <Link key={s.id} href={`/lesson?id=${encodeURIComponent(s.id)}`} style={pct([xAt(i), yAt(i)])}
@@ -76,8 +71,8 @@ function MapLeg({ leg }: { leg: Leg }) {
 }
 
 /**
- * The progress map: a soft map with contour lines; for every begun course a winding road through its
- * lessons. A finished lesson's stop is green, yellow or red by its test; the next one pulses; a tap
+ * The progress map: no box and nothing behind — for every begun course a winding road like a road on a
+ * real map (edge, asphalt, dashed middle line), through its lessons. A finished lesson's stop is green, yellow or red by its test; the next one pulses; a tap
  * opens the lesson.
  */
 export function ProgressMap({ legs }: { legs: Leg[] }) {

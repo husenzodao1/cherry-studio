@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { ApiError } from '@/lib/http'
 import { route, type AnyRoute } from '@/lib/router'
 
-import { answer, ATTACHMENT_MIMES, configured, knowledgeOf, type Attachment, type Learner, type Turn } from '../mahliyo'
+import { answer, ATTACHMENT_MIMES, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type Turn } from '../mahliyo'
 import { call } from '../util'
 import { buildBundle, Code, codeHash, Token } from './offline'
 
@@ -17,26 +17,40 @@ import { buildBundle, Code, codeHash, Token } from './offline'
  * the chat or closed the app; the learner can stop a question.
  */
 
-/** The course material she reads, built from the published Tajik catalogue at most every 15 minutes. */
-let known: { at: number; text: string; app: string } | null = null
-async function knowledge(sb: SupabaseClient) {
-  if (known && Date.now() - known.at < 15 * 60_000) return known
-  const bundle = await buildBundle(sb, 'tg')
-  known = { at: Date.now(), text: knowledgeOf(bundle), app: String((bundle.ui as Record<string, string> | undefined)?.['app.name'] ?? 'Духтари хубам') }
-  return known
+/**
+ * The course material she reads: the published Tajik catalogue (every lesson, block and test the staff
+ * published), built again as soon as the live content stamp changes — so what the panel publishes is in
+ * her next answer. Without a stamp (it could not be read), rebuilt at most every 15 minutes.
+ */
+interface Known { at: number; stamp: string | null; parts: Knowledge; app: string }
+let known: Known | null = null
+let building: Promise<Known> | null = null
+async function knowledge(sb: SupabaseClient): Promise<Known> {
+  const stamp = await call<string>(sb, 'api_content_stamp', {}).then(String).catch(() => null)
+  if (known && (stamp ? known.stamp === stamp : Date.now() - known.at < 15 * 60_000)) return known
+  building ??= buildBundle(sb, 'tg').then((bundle) => {
+    const k: Known = { at: Date.now(), stamp, parts: knowledgePartsOf(bundle), app: String((bundle.ui as Record<string, string> | undefined)?.['app.name'] ?? 'Духтари хубам') }
+    known = k
+    return k
+  }).finally(() => { building = null })
+  return building
 }
+/** what she reads for this conversation: the material nearest her recent questions, when it is all too much */
+const materialFor = (k: Knowledge, turns: Turn[]) => knowledgeText(k, turns.filter((t) => t.role === 'user').slice(-3).map((t) => t.content).join(' '))
 
+/** a question may be long (a whole problem pasted in); the staff's list keeps its first 990 characters */
+const QUESTION_CAP = 4000
 // her own answers come back as she gave them (plain text of her blocks), so they may be longer
 const Turns = z.array(z.strictObject({ role: z.enum(['user', 'assistant']), content: z.string().trim().min(1).max(6000) }))
   .min(1).max(12)
   .refine((t) => t[0].role === 'user' && t[t.length - 1].role === 'user', 'turns must start and end with the learner')
-  .refine((t) => t[t.length - 1].content.length <= 1000, 'a question is at most 1000 characters')
+  .refine((t) => t[t.length - 1].content.length <= QUESTION_CAP, 'a question is at most 4000 characters')
 
 /** Her answer to a recorded question, kept with it (or why there is none). */
 async function answerInto(sb: SupabaseClient, id: string, turns: Turn[], me: Learner, files: Attachment[]) {
   try {
     const k = await knowledge(sb)
-    const a = await answer(turns, k.app, k.text, me, files)
+    const a = await answer(turns, k.app, materialFor(k.parts, turns), me, files)
     await call(sb, 'api_mahliyo_answer', { p_id: id, p_answer: a.reply, p_tajik: a.tajik, p_blocks: a.blocks })
   } catch (e) {
     console.error('[mahliyo] the AI failed', e instanceof Error ? e.message : String(e))
@@ -77,7 +91,7 @@ export const mahliyoRoutes: AnyRoute[] = [
       const id = await call<string>(sb(), 'api_mahliyo_ask', {
         p_token_hash: codeHash(body.token), p_code_hash: body.code ? codeHash(body.code) : null, p_name: body.name ?? null,
         // the staff see that pictures or files came with it
-        p_question: files.length ? `${question.slice(0, 990)} 📎${files.length}` : question
+        p_question: `${question.length > 990 ? `${question.slice(0, 989)}…` : question}${files.length ? ` 📎${files.length}` : ''}`
       })
       const me = { me: body.me, now: body.now, tz: body.tz }
       if (body.background) {
@@ -88,7 +102,7 @@ export const mahliyoRoutes: AnyRoute[] = [
       const k = await knowledge(sb())
       let a
       try {
-        a = await answer(turns, k.app, k.text, me, files)
+        a = await answer(turns, k.app, materialFor(k.parts, turns), me, files)
       } catch (e) {
         console.error('[mahliyo] the AI failed', e instanceof Error ? e.message : String(e))
         throw new ApiError(502, 'ai_unavailable', 'Маҳлиё ҳоло ҷавоб дода наметавонад. Каме дертар кӯшиш кунед.')

@@ -3,7 +3,7 @@
 import { Capacitor } from '@capacitor/core'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 
 import { onBack } from '@/web/components/BackButton'
@@ -14,7 +14,7 @@ import { showToast } from '@/web/components/Toast'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
 import {
-  aboutMe, aiReady, archiveChat, ask, copyOf, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, removeChat, retry, stop,
+  aboutMe, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, removeChat, retry, stop,
   useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { usePrefs } from '@/web/prefs'
@@ -28,6 +28,20 @@ const EXIT_MS = 2000
 /** rubber at the chat's ends: the share of the finger's travel it follows, and how far it can go */
 const PULL = 0.3
 const STRETCH = 90
+
+/** what the learner began writing in each chat and did not send (kept on this phone) */
+const DRAFTS = 'dk.ai.drafts'
+const drafts = (): Record<string, string> => {
+  try { return JSON.parse(localStorage.getItem(DRAFTS) || '{}') as Record<string, string> } catch { return {} }
+}
+const keepDraft = (chat: string, text: string) => {
+  try {
+    const all = drafts()
+    if (text.trim()) all[chat] = text
+    else delete all[chat]
+    localStorage.setItem(DRAFTS, JSON.stringify(all))
+  } catch { /* storage blocked: no draft */ }
+}
 
 /**
  * "Маҳлиё AI" opens full screen (no tab bar; the browser's bars hidden where it allows): a quiet scene in
@@ -69,6 +83,16 @@ export default function MahliyoPage() {
   const sending = busy && !pending.id
 
   useEffect(() => watch(), [])
+  // a chat opens with what she had begun writing in it
+  useEffect(() => {
+    setEditing(null)
+    setText(drafts()[chat] ?? '')
+  }, [chat])
+  /** what she writes (a new question, not an edit, is kept as the chat's draft) */
+  const write = (value: string) => {
+    setText(value)
+    if (editing === null) keepDraft(chat, value)
+  }
 
   // full screen: the page behind does not move
   useEffect(() => {
@@ -181,7 +205,9 @@ export default function MahliyoPage() {
     const q = question.trim() || (withFiles.length ? t('ai.look') : '')
     if (!q || pending || !ready) return
     void ask(q, who(), editing ?? undefined, withFiles)
-    setText('')
+    // a new question was the draft; after an edit, the draft comes back
+    if (editing === null) keepDraft(chat, '')
+    setText(editing === null ? '' : drafts()[chat] ?? '')
     setFiles([])
     setEditing(null)
     setOpened(null)
@@ -210,6 +236,7 @@ export default function MahliyoPage() {
   }
   const edit = (i: number) => {
     if (busy) stop()
+    // the draft stays kept; the box shows the question being edited
     setEditing(i)
     setText(turns[i].content)
     setTimeout(() => box.current?.focus(), 50)
@@ -248,8 +275,8 @@ export default function MahliyoPage() {
       {selecting !== null ? <SelectText text={selecting} onClose={() => setSelecting(null)} /> : null}
       {history ? (
         <History chats={chats} open={chat} onClose={() => setHistory(false)}
-          onOpen={(id) => { openChat(id); setEditing(null); setText(''); setHistory(false) }}
-          onNew={() => { newChat(); setEditing(null); setText(''); setFiles([]); setHistory(false) }}
+          onOpen={(id) => { openChat(id); setHistory(false) }}
+          onNew={() => { newChat(); setFiles([]); setHistory(false) }}
           onRemove={removeChat} onArchive={archiveChat} />
       ) : null}
 
@@ -278,7 +305,7 @@ export default function MahliyoPage() {
           <div key={i} className={`ai-asked${editing === i ? ' is-editing' : ''}`}>
             {m.files?.length ? <Attached files={m.files} /> : null}
             <button type="button" className="bubble" onClick={() => setOpened(opened === i ? null : i)} aria-expanded={opened === i || i === lastQuestion}>
-              <span style={{ whiteSpace: 'pre-wrap' }}>{m.content}</span>
+              <Question text={m.content} />
             </button>
             {i === lastQuestion && busy ? (
               <span className={`ai-delivery${sending ? ' is-sending' : ''}`} role="status">
@@ -332,7 +359,7 @@ export default function MahliyoPage() {
         {editing !== null ? (
           <span className="ai-editing">
             <Icon name="edit" size={14} /><span className="grow">{t('ai.editing')}</span>
-            <button type="button" className="ai-act" aria-label={t('pin.cancel')} onClick={() => { setEditing(null); setText('') }}><Icon name="x" size={14} /></button>
+            <button type="button" className="ai-act" aria-label={t('pin.cancel')} onClick={() => { setEditing(null); setText(drafts()[chat] ?? '') }}><Icon name="x" size={14} /></button>
           </span>
         ) : null}
         {files.length ? (
@@ -349,9 +376,9 @@ export default function MahliyoPage() {
           <input ref={picker} type="file" hidden multiple accept="image/*,application/pdf,text/plain" onChange={(e) => void pick(e.target.files)} />
           <button type="button" className="ai-attach" aria-label={t('ai.attach')} disabled={ready === false || !!pending || files.length >= MAX_FILES}
             onClick={() => picker.current?.click()}><Icon name="clip" size={20} /></button>
-          <textarea ref={box} className="ai-input" rows={1} placeholder={online ? t('ai.placeholder') : t('ai.offline')} value={text} maxLength={1000} lang="tg"
+          <textarea ref={box} className="ai-input" rows={1} placeholder={online ? t('ai.placeholder') : t('ai.offline')} value={text} maxLength={QUESTION_CAP} lang="tg"
             disabled={ready === false} aria-label={t('ai.placeholder')}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => write(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!busy) send(text, files) } }} />
           {busy ? (
             <button className="ai-send is-stop" aria-label={t('ai.stop')}><Icon name="stop" size={18} fill="currentColor" /></button>
@@ -361,6 +388,23 @@ export default function MahliyoPage() {
         </div>
       </form>
     </div>
+  )
+}
+
+/**
+ * Her question in its bubble; a long one shows its first lines, fading out below (so she sees it goes on),
+ * and opens whole when tapped.
+ */
+function Question({ text }: { text: string }) {
+  const own = useRef<HTMLSpanElement>(null)
+  const [long, setLong] = useState(false)
+  const [whole, setWhole] = useState(false)
+  useLayoutEffect(() => {
+    const el = own.current
+    if (el && !whole) setLong(el.scrollHeight > el.clientHeight + 4)
+  }, [text, whole])
+  return (
+    <span ref={own} className={`ai-q${long ? ' is-long' : ''}${whole ? ' is-whole' : ''}`} onClick={() => { if (long) setWhole(true) }}>{text}</span>
   )
 }
 

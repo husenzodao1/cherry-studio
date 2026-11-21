@@ -7,8 +7,10 @@ import { createPortal } from 'react-dom'
 import type { AiBlock } from '@/lib/aiCatalog'
 import SPOTS from '@/lib/aiSpots.json'
 
+import { allowLockScreen, lockScreenAllowed } from '../offline/call'
 import { cancelReminder, reminderId, setReminder } from '../offline/mahliyo'
 import { usePrefs } from '../prefs'
+import { AiMarkdown, isMarkdown } from './AiMarkdown'
 import { Icon } from './Icon'
 
 /**
@@ -70,7 +72,10 @@ export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: bool
         const style = { ['--i' as string]: i, ['--at' as string]: `${starts[i]}ms` }
         switch (b.type) {
           case 'text':
-            return <p key={i} className="ai-card ai-text" style={style}>{fresh ? <Words text={b.text} /> : b.text}</p>
+            // a worked solution, a formula, a table or code: drawn as Markdown
+            return isMarkdown(b.text)
+              ? <div key={i} className="ai-card ai-text ai-md" style={style}><AiMarkdown text={b.text} fresh={fresh} step={WORD_MS} /></div>
+              : <p key={i} className="ai-card ai-text" style={style}>{fresh ? <Words text={b.text} /> : b.text}</p>
           case 'steps': {
             let from = wordCount(b.title) * WORD_MS
             return (
@@ -81,7 +86,7 @@ export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: bool
                   from += wordCount(s) * WORD_MS
                   return (
                     <li key={n} style={{ ['--w' as string]: `${at}ms` }}>
-                      <span className="ai-step-n">{n + 1}</span><span>{fresh ? <Words text={s} from={at} /> : s}</span>
+                      <span className="ai-step-n">{n + 1}</span><span>{isMarkdown(s) ? <AiMarkdown text={s} fresh={fresh} from={at} step={WORD_MS} inline /> : fresh ? <Words text={s} from={at} /> : s}</span>
                     </li>
                   )
                 })}</ol>
@@ -167,9 +172,20 @@ function ReminderCard({ block, fresh, style }: { block: Reminder; fresh: boolean
     setStatus('cancelled')
   }
   const past = new Date(block.at).getTime() <= Date.now()
+  // her call covers the lock screen only with the phone's permission (Android 14+): asked here, and
+  // looked at again when the learner comes back from the phone's settings
+  const [lock, setLock] = useState(true)
+  const waiting = status === 'set' && !past
+  useEffect(() => {
+    if (!waiting) return
+    const look = () => void lockScreenAllowed().then(setLock)
+    look()
+    document.addEventListener('visibilitychange', look)
+    return () => document.removeEventListener('visibilitychange', look)
+  }, [waiting])
   return (
     <div className={`ai-card ai-reminder${status === 'set' && !past ? ' is-set' : ''}`} style={style}>
-      <span className="ai-reminder-icon"><Icon name="bell" size={22} /></span>
+      <span className="ai-reminder-icon"><Icon name="phone" size={22} /></span>
       <div className="grow">
         <b>{block.title}</b>
         <span className="ai-reminder-time">{when(block.at, t)}</span>
@@ -180,6 +196,12 @@ function ReminderCard({ block, fresh, style }: { block: Reminder; fresh: boolean
             : status === 'denied' ? t('ai.reminder_denied')
             : status === 'web' ? t('ai.reminder_web') : null}
         </span>
+        {waiting && !lock ? (
+          <span className="ai-reminder-lock">
+            <span>{t('ai.call_lock')}</span>
+            <button type="button" className="btn btn-soft ai-reminder-btn" onClick={allowLockScreen}>{t('ai.call_lock_allow')}</button>
+          </span>
+        ) : null}
       </div>
       {status === 'set' && !past ? (
         <button type="button" className="btn btn-soft ai-reminder-btn" onClick={cancel}>{t('ai.reminder_cancel')}</button>

@@ -46,7 +46,6 @@ export const en: Partial<Record<UiKey, string>> = {
  
   'garden.title': "Progress map",
   'garden.empty': "You haven’t started any lesson yet",
-  'garden.hint': "A lesson’s colour is its test result",
   'map.good': "Excellent", 'map.fair': "Fair", 'map.weak': "Weak", 'map.start': "Start", 'map.finish': "Finish",
   'review.title': 'Review of the day', 'review.count': 'Questions: {n}', 'review.done_today': "Today's review is done", 'review.empty': 'No questions to review',
   'review.result': '{ok} of {n} right', 'review.keep': 'Wrong answers come back tomorrow.',
@@ -247,7 +246,7 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.soon': "Mahliyo will be ready soon. Until then, write your questions to the consultant.",
   'ai.today': "Today",
   'ai.tomorrow': "Tomorrow",
-  'ai.reminder_set': "Reminder set: your phone will remind you at that time.",
+  'ai.reminder_set': "Done! Mahliyo will call you at that time 📞",
   'ai.reminder_done': "The reminder’s time has passed.",
   'ai.reminder_cancel': "Cancel",
   'ai.reminder_cancelled': "Reminder cancelled.",
@@ -293,5 +292,11 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.chats': "Chats",
   'ai.select': "Select text",
   'ai.share': "Share",
+  'ai.call_mute': "Mute",
+  'ai.call_keypad': "Keypad",
+  'ai.call_speaker': "Speaker",
+  'ai.call_hide': "Hide",
+  'ai.call_lock': "Allow Mahliyo’s call to fill the lock screen like a real call.",
+  'ai.call_lock_allow': "Allow",
   'pin.forgot_q': "Forgot it?"
 }

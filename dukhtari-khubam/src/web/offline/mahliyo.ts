@@ -292,6 +292,9 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return (await res.json()) as T
 }
 
+/** the longest question (a whole problem may be pasted in) */
+export const QUESTION_CAP = 4000
+
 /**
  * Asks her: the conversation so far (from `editFrom` on, when a question is edited, the rest is left out)
  * and the new question. She answers in the background.
@@ -320,7 +323,7 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
       // an earlier question's pictures are named, not sent again
       turns: recent.map((t, i) => ({
         role: t.role,
-        content: (i < recent.length - 1 && t.files?.length ? `${t.content}\n[📎 ${t.files.map((f) => f.name).join(', ')}]` : t.content).slice(0, t.role === 'user' ? 1000 : 6000)
+        content: (i < recent.length - 1 && t.files?.length ? `${t.content}\n[📎 ${t.files.map((f) => f.name).join(', ')}]` : t.content).slice(0, t.role === 'user' ? QUESTION_CAP : 6000)
       })),
       ...(files.length ? { files: files.map(({ mime, name, data }) => ({ mime, name, data })) } : {})
     })
@@ -341,10 +344,9 @@ function end(problem: AiProblem | null, patch: Partial<AiState> = {}) {
 
 /** Waits for her answer to question `id` (asking the server now and then; without internet, it waits). */
 async function wait(id: string, since: number, my: number) {
-  let every = 900
   while (current(my)) {
-    await sleep(every)
-    every = Math.min(every * 1.3, 3000)
+    // often while an answer is likely (she usually answers in seconds), then less often
+    await sleep(Date.now() - since < 40_000 ? 600 : 1500)
     if (!current(my)) return
     if (Date.now() - since > PATIENCE) return end('unavailable')
     if (offline()) continue

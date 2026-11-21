@@ -28,7 +28,6 @@ export default function GardenPage() {
               <span key={g} role="listitem" className={`chip map-key is-${g}`}><i aria-hidden="true" />{t(`map.${g}`)} · {journey.counts[g]}</span>
             ))}
           </div>
-          <p className="muted" style={{ textAlign: 'center', margin: '8px 8px 0', fontSize: '0.86em' }}>{t('garden.hint')}</p>
           <ProgressMap legs={journey.legs} />
         </>
       )}

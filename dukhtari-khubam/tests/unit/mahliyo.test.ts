@@ -8,9 +8,9 @@ import { aboutMe, localIso, reminderId } from '@/web/offline/mahliyo'
 const create = vi.fn()
 vi.mock('@anthropic-ai/sdk', () => ({ default: class { beta = { messages: { create } } } }))
 const generate = vi.fn()
-vi.mock('@google/genai', () => ({ GoogleGenAI: class { models = { generateContent: generate } }, ThinkingLevel: { LOW: 'LOW', MINIMAL: 'MINIMAL' } }))
+vi.mock('@google/genai', () => ({ GoogleGenAI: class { models = { generateContent: generate } }, ThinkingLevel: { LOW: 'LOW', MINIMAL: 'MINIMAL', MEDIUM: 'MEDIUM' } }))
 
-const { answer, cleanBlocks, configured, GEMINI_MODELS, knowledgeOf, KNOWLEDGE_CAP, languageOf, learnerNote, MODEL, plainOf, provider, SORRY } = await import('@/server/mahliyo')
+const { answer, cleanBlocks, configured, fixLatex, GEMINI_MODELS, isProblem, knowledgeOf, knowledgePartsOf, knowledgeText, KNOWLEDGE_CAP, languageOf, learnerNote, MODEL, plainOf, provider, quizText, reminderAsked, SORRY } = await import('@/server/mahliyo')
 
 const bundle = {
   ui: { 'app.name': 'Гулдухтар' },
@@ -21,7 +21,12 @@ const bundle = {
   lessons: { l1: { title: 'Намоз', blocks: [
     { id: 'b1', type: 'paragraph', props: {}, content: { spans: [{ text: 'Намоз сутуни дин аст.' }] } },
     { id: 'b2', type: 'image', props: { asset_id: 'a1' }, content: { caption: 'Масҷид', url: 'https://x/y.png' } }
-  ] } }
+  ], quizzes: [{ id: 'q1' }] } },
+  quizzes: { q1: {
+    quiz: { id: 'q1', title: 'Тести намоз', pass_score_percent: 70 },
+    questions: [{ id: 'x1', type: 'single_choice', prompt: 'Намоз дар як рӯз чанд маротиба аст?', options: [{ id: 'o1', text: 'Се' }, { id: 'o2', text: 'Панҷ' }] }],
+    grading: { x1: { key: { correct_option_ids: ['o2'], accepted_answers: {}, correct_order: [], matching: {} }, explanation_correct: 'Панҷ намози фарз.' } }
+  } }
 }
 
 describe('what Mahliyo knows', () => {
@@ -30,6 +35,24 @@ describe('what Mahliyo knows', () => {
     for (const s of ['Сиёсати махфият', '/page?slug=privacy', 'ба касе намедиҳем', 'Мактаб: Маърифати динӣ (/school?key=s1)', 'Курс: Асосҳо (/course?id=c1)',
       'Шинохтани арконҳо', 'Дарс: Намоз (/lesson?id=l1)', 'Намоз сутуни дин аст.', 'Масҷид']) expect(k).toContain(s)
     for (const s of ['b1', 'a1', 'https://x/y.png', 'paragraph']) expect(k).not.toContain(s)
+  })
+
+  it('reads every test the staff published: its questions, answers, the right one and the explanation', () => {
+    const k = knowledgeOf(bundle)
+    for (const s of ['Тест «Тести намоз» (барои гузаштан 70%)', '1. Намоз дар як рӯз чанд маротиба аст?', 'Ҷавобҳо: Се; Панҷ', 'Ҷавоби дуруст: Панҷ', 'Шарҳ: Панҷ намози фарз.']) expect(k).toContain(s)
+    expect(quizText({ quiz: { title: 'T' }, questions: [{ id: 'a', prompt: 'Пойтахт?' }], grading: { a: { key: { accepted_answers: { tg: ['Душанбе'] } } } } })).toContain('Ҷавоби дуруст: Душанбе')
+  })
+
+  it('too much material: the outline always, then the lessons nearest her question (typed with Russian letters too)', () => {
+    const lessons = Object.fromEntries(Array.from({ length: 30 }, (_, i) => [`l${i}`, { title: `Дарси ${i}`, blocks: [{ content: { text: `${i === 17 ? 'Наврӯз ҷашни баҳор аст. ' : ''}${'матн '.repeat(400)}` } }] }]))
+    const many = { ...bundle, quizzes: {}, lessons, courses: { c1: { modules: [{ topics: [{ lessons: Object.keys(lessons).map((id) => ({ id, title: id })) }] }] } } }
+    const k = knowledgePartsOf(many)
+    const small = knowledgeText(k, 'навруз чист?', 8000)
+    expect(small.length).toBeLessThanOrEqual(8000)
+    expect(small).toContain('Наврӯз ҷашни баҳор аст.')
+    expect(small).toContain('Дарс: Дарси 29 (/lesson?id=l29)')
+    // all of it fits: everything, in the same order whatever is asked
+    expect(knowledgeText(k, 'навруз')).toBe(knowledgeText(k, 'намоз'))
   })
 
   it('keeps the course material within its limit', () => {
@@ -264,6 +287,48 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
       { type: 'text', text: 'Файл «notes.txt»:\nЁддошти ман' },
       { type: 'text', text: 'Нафаҳмидам' }
     ])
+  })
+
+  it('three keys: the questions are spread over them; a request that hangs gets another beside it, the first answer wins', async () => {
+    vi.stubEnv('GEMINI_API_KEY_2', 'g2')
+    vi.stubEnv('GEMINI_API_KEY_3', 'g3')
+    vi.useFakeTimers()
+    const aborted: boolean[] = []
+    generate.mockImplementationOnce(({ config }) => new Promise((_, no) => config.abortSignal.addEventListener('abort', () => { aborted.push(true); no(new Error('aborted')) })))
+      .mockResolvedValueOnce(ok([{ type: 'text', text: 'Тез!' }]))
+    const late = answer(turns, 'Г', '', me)
+    await vi.advanceTimersByTimeAsync(5_900)
+    expect(generate).toHaveBeenCalledTimes(1)
+    await vi.advanceTimersByTimeAsync(200)
+    expect((await late).blocks).toEqual([{ type: 'text', text: 'Тез!' }])
+    expect(generate).toHaveBeenCalledTimes(2)
+    expect(aborted).toEqual([true])
+    vi.useRealTimers()
+    // over one key's quota: the next model, with the next key
+    generate.mockReset()
+    generate.mockRejectedValueOnce(new Error('{"error":{"code":429}}')).mockResolvedValueOnce(ok([{ type: 'text', text: 'Ҳа' }]))
+    await answer(turns, 'Г', '', me)
+    expect(generate).toHaveBeenCalledTimes(2)
+  })
+
+  it('asked to call in 4 minutes, she confirmed without the reminder: it is set all the same', async () => {
+    const now = Date.parse('2026-11-21T15:00:00Z')
+    expect(reminderAsked('Баъди 4 дақиқа ба ман занг занед', now)).toMatchObject({ type: 'reminder', at: '2026-11-21T15:04:00.000Z', title: 'Занги Маҳлиё' })
+    expect(reminderAsked('Напомни через 2 часа', now)?.at).toBe('2026-11-21T17:00:00.000Z')
+    expect(reminderAsked('4 дақиқа дарс хондам', now)).toBeNull()
+    generate.mockResolvedValue(ok([{ type: 'text', text: 'Хуб, баъди 4 дақиқа ба шумо занг мезанам! 😊📞' }]))
+    const a = await answer([{ role: 'user', content: 'Баъди 4 дақиқа ба ман занг занед' }], 'Г', '', me)
+    expect(a.blocks.map((b) => b.type)).toEqual(['text', 'reminder'])
+  })
+
+  it('a problem to solve is thought through more; LaTeX whose backslash was lost is mended', async () => {
+    expect(isProblem('Муодилаи квадратиро ёбед: 4x²+3x²-2=0')).toBe(true)
+    expect(isProblem('2+2')).toBe(true)
+    expect(isProblem('Пин-кодро чӣ тавр иваз кунам?')).toBe(false)
+    generate.mockResolvedValue(ok([{ type: 'text', text: '$$x=\frac{1}{2}$$' }]))
+    await answer([{ role: 'user', content: 'Ҳал кунед: 2x=1' }], 'Г', '', me)
+    expect(generate.mock.calls[0][0].config.thinkingConfig.thinkingLevel).toBe('LOW')
+    expect(fixLatex('$\u000crac{1}{2} \u0009imes 3$')).toBe('$\\frac{1}{2} \\times 3$')
   })
 
   it('the quick model thinks least; the others from "low"', async () => {

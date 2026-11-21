@@ -132,7 +132,6 @@ export const uz: Partial<Record<UiKey, string>> = {
   'search.placeholder': "Qidirish…",
   'garden.title': "Rivojlanish xaritasi",
   'garden.empty': "Hali birorta darsni boshlamadingiz",
-  'garden.hint': "Dars rangi — uning test natijasi",
   'map.good': "A’lo", 'map.fair': "O‘rtacha", 'map.weak': "Yomon", 'map.start': "Boshlanish", 'map.finish': "Yakun",
   'review.title': "Kun takrori",
   'review.count': "Savollar: {n}",
@@ -356,7 +355,7 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.soon': "Mahliyo tez orada tayyor bo‘ladi. Hozircha savollaringizni maslahatchiga yozing.",
   'ai.today': "Bugun",
   'ai.tomorrow': "Ertaga",
-  'ai.reminder_set': "Eslatma qo‘yildi: telefon shu vaqtda eslatadi.",
+  'ai.reminder_set': "Tayyor! Shu vaqtda Mahliyo sizga qo‘ng‘iroq qiladi 📞",
   'ai.reminder_done': "Eslatma vaqti o‘tdi.",
   'ai.reminder_cancel': "Bekor qilish",
   'ai.reminder_cancelled': "Eslatma bekor qilindi.",
@@ -402,6 +401,12 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.chats': "Suhbatlar",
   'ai.select': "Matnni belgilash",
   'ai.share': "Ulashish",
+  'ai.call_mute': "Ovozsiz",
+  'ai.call_keypad': "Raqamlar",
+  'ai.call_speaker': "Karnay",
+  'ai.call_hide': "Yashirish",
+  'ai.call_lock': "Mahliyo qo‘ng‘irog‘i qulf ekranida haqiqiy qo‘ng‘iroqdek chiqishi uchun ruxsat bering.",
+  'ai.call_lock_allow': "Ruxsat berish",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -535,7 +540,6 @@ export const tr: Partial<Record<UiKey, string>> = {
   'search.placeholder': "Ara…",
   'garden.title': "İlerleme haritası",
   'garden.empty': "Henüz hiçbir derse başlamadınız",
-  'garden.hint': "Dersin rengi testinin sonucudur",
   'map.good': "Mükemmel", 'map.fair': "Orta", 'map.weak': "Zayıf", 'map.start': "Başlangıç", 'map.finish': "Bitiş",
   'review.title': "Günün tekrarı",
   'review.count': "Soru: {n}",
@@ -759,7 +763,7 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.soon': "Mahliyo yakında hazır olacak. O zamana kadar sorularınızı danışmana yazın.",
   'ai.today': "Bugün",
   'ai.tomorrow': "Yarın",
-  'ai.reminder_set': "Hatırlatıcı kuruldu: telefon o saatte hatırlatacak.",
+  'ai.reminder_set': "Tamam! O saatte Mahliyo sizi arayacak 📞",
   'ai.reminder_done': "Hatırlatıcının zamanı geçti.",
   'ai.reminder_cancel': "İptal et",
   'ai.reminder_cancelled': "Hatırlatıcı iptal edildi.",
@@ -805,6 +809,12 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.chats': "Sohbetler",
   'ai.select': "Metni seç",
   'ai.share': "Paylaş",
+  'ai.call_mute': "Sessiz",
+  'ai.call_keypad': "Tuşlar",
+  'ai.call_speaker': "Hoparlör",
+  'ai.call_hide': "Gizle",
+  'ai.call_lock': "Mahliyo’nun araması kilit ekranında gerçek bir arama gibi görünsün diye izin verin.",
+  'ai.call_lock_allow': "İzin ver",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -937,7 +947,6 @@ export const fa: Partial<Record<UiKey, string>> = {
   'search.placeholder': "جست‌وجو…",
   'garden.title': "نقشهٔ پیشرفت",
   'garden.empty': "هنوز هیچ درسی را شروع نکرده‌اید",
-  'garden.hint': "رنگ هر درس، نتیجهٔ آزمون آن است",
   'map.good': "عالی", 'map.fair': "متوسط", 'map.weak': "ضعیف", 'map.start': "آغاز", 'map.finish': "پایان",
   'review.title': "مرور روز",
   'review.count': "{n} پرسش",
@@ -1161,7 +1170,7 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.soon': "ماه‌لیا به‌زودی آماده می‌شود. تا آن زمان پرسش‌هایتان را به مشاور بنویسید.",
   'ai.today': "امروز",
   'ai.tomorrow': "فردا",
-  'ai.reminder_set': "یادآوری گذاشته شد: گوشی در همان زمان یادآوری می‌کند.",
+  'ai.reminder_set': "آماده است! در همان زمان مهلیا به شما زنگ می‌زند 📞",
   'ai.reminder_done': "زمان یادآوری گذشت.",
   'ai.reminder_cancel': "لغو",
   'ai.reminder_cancelled': "یادآوری لغو شد.",
@@ -1207,6 +1216,12 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.chats': "گفت‌وگوها",
   'ai.select': "انتخاب متن",
   'ai.share': "اشتراک‌گذاری",
+  'ai.call_mute': "بی‌صدا",
+  'ai.call_keypad': "صفحه‌کلید",
+  'ai.call_speaker': "بلندگو",
+  'ai.call_hide': "پنهان",
+  'ai.call_lock': "اجازه دهید تماس مهلیا مانند تماس واقعی روی صفحهٔ قفل ظاهر شود.",
+  'ai.call_lock_allow': "اجازه دادن",
   'pin.forgot_q': "فراموش کردید؟"
 }
 
