@@ -174,4 +174,4 @@ export function AiMarkdown({ text, fresh = false, from = 0, step = 34, inline: o
 }
 
 /** whether a text needs drawing as Markdown (or is plain words) */
-export const isMarkdown = (text: string) => /[$*`|_#>]|^\s*([-+]|\d+\.)\s/m.test(text)
+export const isMarkdown = (text: string) => /[$*`|_#>]|^\s*([-+]|\d+\.)\s|\[[^\]]+\]\(|https?:\/\//m.test(text)

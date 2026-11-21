@@ -304,5 +304,7 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.sources': "Sources",
   'ai.scroll_down': "To the bottom",
   'guard.no_capture': "Screenshots and screen recording are strictly forbidden",
+  'ai.books_search': "Searching the company's official sources for an exact answer…",
+  'ai.limit_reached': "This conversation has reached its limit. Get Premium or continue in a new chat.",
   'pin.forgot_q': "Forgot it?"
 }

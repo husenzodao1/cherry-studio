@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState, type FormEvent } from 'react'
 
 import { Content } from '@/web/admin/Content'
-import { MahliyoLog } from '@/web/admin/MahliyoLog'
+import { AiAdmin } from '@/web/admin/AiAdmin'
 import { MediaLibrary } from '@/web/admin/Media'
 import { Support } from '@/web/admin/Support'
 import { Texts } from '@/web/admin/Texts'
@@ -65,7 +65,7 @@ export default function AdminPage() {
           <button key={t.id} type="button" role="tab" className="chip" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </nav>
-      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'ai' ? <MahliyoLog /> : tab === 'content' ? <Content /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
+      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'ai' ? <AiAdmin /> : tab === 'content' ? <Content /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
     </div>
   )
 }

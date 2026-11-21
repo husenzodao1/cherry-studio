@@ -577,3 +577,26 @@ test('her sources small at the end of the row (a list of blue links), pictures, 
   await expect(page.locator('.ai-down.is-writing .mi-dots')).toBeVisible()
   expect(errors).toEqual([])
 })
+
+test('a chat holds twenty questions: then a quiet note where the box was, and a new chat goes on', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await fakeMahliyo(page, () => ({ tajik: true, reply: 'Ҳа', blocks: [{ type: 'text', text: 'Ҳа' }] }), 100)
+  await page.addInitScript(() => {
+    if (localStorage.getItem('dk.ai.chats')) return
+    const turns = Array.from({ length: 40 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: `Паёми ${i + 1}`, at: new Date().toISOString(), ...(i % 2 ? { blocks: [{ type: 'text', text: `Паёми ${i + 1}` }] } : {}) }))
+    localStorage.setItem('dk.ai.chats', JSON.stringify([{ id: 'full', title: 'Паёми 1', at: new Date().toISOString(), turns }]))
+    localStorage.setItem('dk.ai.current', 'full')
+  })
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const note = page.locator('.ai-limit')
+  await expect(note).toContainText('Контексти ин сӯҳбат ба поён расид')
+  await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toHaveCount(0)
+  expect(await note.locator('p').evaluate((e) => parseFloat(getComputedStyle(e).fontSize))).toBeLessThan(13)
+  await page.screenshot({ path: 'test-results/mahliyo-limit.png' })
+  await note.getByRole('button', { name: 'Сӯҳбати нав' }).click()
+  await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toBeVisible()
+  await expect(note).toHaveCount(0)
+  expect(errors).toEqual([])
+})

@@ -413,6 +413,8 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.sources': "Manbalar",
   'ai.scroll_down': "Pastga",
   'guard.no_capture': "Skrinshot va ekranni yozib olish qat’iyan taqiqlangan",
+  'ai.books_search': "Aniq javob uchun kompaniyaning rasmiy manbalaridan qidiryapman…",
+  'ai.limit_reached': "Bu suhbat konteksti tugadi. Premium oling yoki yangi suhbatda davom eting.",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -827,6 +829,8 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.sources': "Kaynaklar",
   'ai.scroll_down': "Aşağı",
   'guard.no_capture': "Ekran görüntüsü ve ekran kaydı kesinlikle yasaktır",
+  'ai.books_search': "Kesin bir yanıt için şirketin resmi kaynaklarında arıyorum…",
+  'ai.limit_reached': "Bu sohbetin bağlamı doldu. Premium alın ya da yeni bir sohbette devam edin.",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1240,6 +1244,8 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.sources': "منابع",
   'ai.scroll_down': "پایین",
   'guard.no_capture': "گرفتن اسکرین‌شات و ضبط صفحه اکیداً ممنوع است",
+  'ai.books_search': "برای پاسخ دقیق، در منابع رسمی شرکت جست‌وجو می‌کنم…",
+  'ai.limit_reached': "ظرفیت این گفت‌وگو به پایان رسید. لطفاً Premium بگیرید یا در گفت‌وگوی تازه ادامه دهید.",
   'pin.forgot_q': "فراموش کردید؟"
 }
 

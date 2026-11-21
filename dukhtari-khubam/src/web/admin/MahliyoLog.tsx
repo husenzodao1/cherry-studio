@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { ErrorState, Loading } from '../components/States'
 import { useApi } from '../useApi'
 
-interface Asked { id: string; name: string | null; question: string; answer: string | null; tajik: boolean | null; at: string }
+interface Asked { id: string; name: string | null; question: string; answer: string | null; tajik: boolean | null; rating?: 1 | -1 | null; at: string }
 
 const when = (iso: string) => new Date(iso).toLocaleString('ru', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
@@ -25,7 +25,7 @@ export function MahliyoLog() {
         <div key={q.id} className="glass card-pad stack" style={{ gap: 6 }}>
           <div className="row" style={{ justifyContent: 'space-between', gap: 8 }}>
             <b>{q.name ?? 'Бе ном'}</b>
-            <span className="muted" style={{ fontSize: '0.8em' }}>{when(q.at)}{q.tajik === false ? ' · ба забони дигар' : ''}</span>
+            <span className="muted" style={{ fontSize: '0.8em' }}>{q.rating === 1 ? '👍 · ' : q.rating === -1 ? '👎 · ' : ''}{when(q.at)}{q.tajik === false ? ' · ба забони дигар' : ''}</span>
           </div>
           <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{q.question}</p>
           {q.answer ? <p className="muted" style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: '0.9em' }}>Маҳлиё: {q.answer}</p>

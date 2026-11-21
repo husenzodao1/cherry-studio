@@ -139,7 +139,7 @@ export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: bool
 }
 
 /** the sites, by their first letter (W for Wikipedia), each a little circle */
-const siteMark = (site: string) => (/wikipedia/.test(site) ? 'W' : site.replace(/^www\./, '')[0]?.toUpperCase() ?? '•')
+const siteMark = (site: string) => (/wikipedia/.test(site) ? 'W' : site === 'Китоби расмӣ' ? '📖' : site.replace(/^www\./, '')[0]?.toUpperCase() ?? '•')
 
 /**
  * Where her answer came from, small at the end of its row (as a messenger shows it): the sites' marks, one
@@ -152,7 +152,7 @@ export function Sources({ items }: { items: Extract<AiBlock, { type: 'sources' }
   return (
     <>
       <button type="button" className="ai-sources" onClick={() => setOpen(true)} aria-haspopup="dialog">
-        <span className="ai-sources-marks" aria-hidden="true">{items.slice(0, 3).map((s, n) => <i key={n}>{siteMark(s.site)}</i>)}</span>
+        <span className="ai-sources-marks" aria-hidden="true">{items.slice(0, 3).map((s, n) => <i key={n}>{emojify(siteMark(s.site))}</i>)}</span>
         <span>{t('ai.sources')}</span>
       </button>
       {open ? createPortal(
@@ -164,8 +164,8 @@ export function Sources({ items }: { items: Extract<AiBlock, { type: 'sources' }
             <ol>
               {items.map((s, n) => (
                 <li key={n}>
-                  <i aria-hidden="true">{siteMark(s.site)}</i>
-                  <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title}</a>
+                  <i aria-hidden="true">{emojify(siteMark(s.site))}</i>
+                  {s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title}</a> : <b>{s.title}</b>}
                   <span>{s.site}</span>
                 </li>
               ))}

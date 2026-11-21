@@ -191,7 +191,8 @@ export interface AiState {
   /** every chat kept, newest first (the history) */
   chats: AiChatMeta[]
   /** a question she is answering: its id once the server has it, since when, and in which chat */
-  pending: { id: string | null; since: number; chat: string } | null
+  /** `books`: the staff gave her books, so a long wait is her searching them */
+  pending: { id: string | null; since: number; chat: string; books?: boolean } | null
   problem: AiProblem | null
   /** the index of an answer that has just come (drawn word by word, its reminder set) */
   fresh: number
@@ -322,7 +323,7 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
   let tz: string | undefined
   try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone } catch { /* unknown zone */ }
   try {
-    const { id } = await post<{ id: string }>('/mahliyo/ask', {
+    const { id, books } = await post<{ id: string; books?: boolean }>('/mahliyo/ask', {
       token: supportToken(), ...who, now: localIso(), tz: tz?.slice(0, 64), background: true,
       // an earlier question's pictures are named, not sent again
       turns: recent.map((t, i) => ({
@@ -332,8 +333,8 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
       ...(files.length ? { files: files.map(({ mime, name, data }) => ({ mime, name, data })) } : {})
     })
     if (!current(my)) return void post('/mahliyo/stop', { token: supportToken(), id }).catch(() => undefined)
-    savePending({ id, since: pending.since, chat })
-    set({ pending: { id, since: pending.since, chat } })
+    savePending({ id, since: pending.since, chat, books: !!books })
+    set({ pending: { id, since: pending.since, chat, books: !!books } })
     await wait(id, pending.since, my)
   } catch (e) {
     if (!current(my)) return

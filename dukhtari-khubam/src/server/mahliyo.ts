@@ -4,6 +4,7 @@ import { GoogleGenAI, ThinkingLevel } from '@google/genai'
 import { linkAllowed, ROUTES, SPOT_IDS, SPOTS, type AiBlock, type SpotId } from '@/lib/aiCatalog'
 
 import { ABOUT } from './mahliyoAbout'
+import { askCompatible, type ActiveModel, type BookPassage } from './aiModels'
 import { needsWeb, searchWeb, wantsPictures, type WebSource } from './webSearch'
 
 /**
@@ -155,7 +156,8 @@ WHAT YOU TALK ABOUT
 - Health and the mind: general, scientifically sound information only; never present yourself as a doctor or psychologist, never diagnose, never recommend medicines, doses or risky treatments; with serious signs — a doctor; anything urgent — call an ambulance (103) or tell a trusted adult at once. Legal or money matters: general guidance and a qualified person.
 - She may be young: keep everything age-appropriate and safe; treat relationships, health and safety with care; in a dangerous situation direct her to a trusted adult or the right specialist.
 
-INTERNET
+OFFICIAL BOOKS AND THE INTERNET
+- When "OFFICIAL BOOKS" passages are given below, they are the company's own materials, chosen for her question: they come first — before general knowledge and before the internet. Answer from them faithfully (do not change their meaning; quote exactly when quoting), and put their numbers in "sources". If they do not fit the question, ignore them.
 - When "WEB RESULTS" are given below, they are what an internet search (Wikipedia) found for her question: use them for facts, names, dates and numbers, and put the numbers of the results you used in "sources" (the app shows them as links under your answer; do not write the links yourself). When she asked for pictures, the app shows the results' pictures: say a word about them. Results that do not fit the question are ignored.
 
 HONESTY (accuracy matters more than a beautiful answer; knowledge over guessing)
@@ -481,11 +483,20 @@ export function reminderAsked(question: string, now = Date.now()): Extract<Block
   return { type: 'reminder', at: new Date(now + ms).toISOString(), title: call ? 'Занги Маҳлиё' : 'Ёдраскунии Маҳлиё', text: 'Вақти дарс расид! 📚' }
 }
 
-/** The internet's answer to a question, as she reads it: numbered results. */
-export function webNote(web: WebSource[]): string {
-  if (!web.length) return ''
-  return ['WEB RESULTS (an internet search for her question; cite the numbers you use in "sources"):',
-    ...web.map((w, i) => `[${i + 1}] ${w.title} — ${w.url}\n${w.text}`)].join('\n\n')
+/** What she may cite: the staff's books' passages first, then the internet's results, numbered together. */
+interface Ref { title: string; url: string; site: string; text: string; image?: string }
+export const BOOK_SITE = 'Китоби расмӣ'
+export function refsOf(books: BookPassage[], web: WebSource[]): Ref[] {
+  return [...books.map((b) => ({ title: b.page ? `${b.book}, саҳ. ${b.page}` : b.book, url: '', site: BOOK_SITE, text: b.text })), ...web]
+}
+export function webNote(refs: Ref[]): string {
+  if (!refs.length) return ''
+  const part = (title: string, from: Ref[], at: number) => (from.length ? [title, ...from.map((r, i) => `[${at + i + 1}] ${r.title}${r.url ? ` — ${r.url}` : ''}\n${r.text}`)] : [])
+  const books = refs.filter((r) => !r.url)
+  return [
+    ...part('OFFICIAL BOOKS (the company\'s own materials for her question; cite the numbers you use in "sources"):', books, 0),
+    ...part('WEB RESULTS (an internet search for her question; cite the numbers you use in "sources"):', refs.filter((r) => r.url), books.length)
+  ].join('\n\n')
 }
 /** which Wikipedia to look in: the question's language */
 const webLang = (question: string): 'tg' | 'ru' | 'en' => {
@@ -493,19 +504,41 @@ const webLang = (question: string): 'tg' | 'ru' | 'en' => {
   return l.startsWith('Russian') ? 'ru' : /[а-яёӣӯқҳҷғ]/i.test(question) ? 'tg' : 'en'
 }
 
+/** What the server adds to a question: the model the staff chose, and the passages of their books for it. */
+export interface Extra { active?: ActiveModel | null; books?: BookPassage[] }
+
+/** The answer as JSON text from the model the staff chose; when it fails, from the app's own default. */
+async function ask(turns: Turn[], appName: string, material: string, me: Learner, files: Attachment[], chosen?: ActiveModel | null): Promise<string | null> {
+  if (chosen) {
+    try {
+      if (chosen.provider === 'anthropic') return await askClaude(turns, appName, material, me, files, { key: chosen.key, model: chosen.model })
+      if (chosen.provider === 'google') return await askGemini(turns, appName, material, me, files, { keys: [chosen.key], models: [chosen.model] })
+      const system = [rules(appName), JSON_SHAPE, `${GUIDE}\n\n${ABOUT}\n\n${material}`, learnerNote(me, new Date(), { private: true }), languageNote(turns)].join('\n\n')
+      return await askCompatible(chosen, system, turns, files)
+    } catch (e) {
+      console.warn('[mahliyo] the chosen model', chosen.provider, chosen.model, 'failed; the default answers:', e instanceof Error ? e.message.slice(0, 200) : String(e))
+    }
+  }
+  if (!configured()) throw new Error('no AI')
+  return provider() === 'gemini' ? askGemini(turns, appName, material, me, files) : askClaude(turns, appName, material, me, files)
+}
+/** for the models without a schema of their own (OpenAI-compatible): her answer's shape */
+const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…"}.`
+
 /** Her answer to the conversation (its last turn is the learner's question). */
-export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = []): Promise<Answer> {
+export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = [], extra: Extra = {}): Promise<Answer> {
   const question = turns[turns.length - 1]?.content ?? ''
   // a question about the world: looked up on the internet first (a few seconds at most)
   const web = !files.length && needsWeb(question) ? await searchWeb(question, webLang(question)) : []
-  const material = web.length ? `${knowledge}\n\n${webNote(web)}` : knowledge
-  const text = provider() === 'gemini' ? await askGemini(turns, appName, material, me, files) : await askClaude(turns, appName, material, me, files)
+  const refs = refsOf(extra.books ?? [], web)
+  const material = refs.length ? `${knowledge}\n\n${webNote(refs)}` : knowledge
+  const text = await ask(turns, appName, material, me, files, extra.active)
   if (text === null) return sorry()
   try {
     const r = JSON.parse(text) as { tajik?: unknown; blocks?: unknown; sources?: unknown }
     const blocks = cleanBlocks(r.blocks)
-    // the results she used: as links under her answer (and their pictures, when pictures were asked for)
-    const used = (Array.isArray(r.sources) ? r.sources : []).map((n) => web[Number(n) - 1]).filter((w): w is WebSource => !!w)
+    // what she used (the books, the internet): as sources under her answer (and pictures, when asked for)
+    const used = (Array.isArray(r.sources) ? r.sources : []).map((n) => refs[Number(n) - 1]).filter((w): w is Ref => !!w)
     const cited = [...new Set(used)]
     if (blocks.length && wantsPictures(question)) {
       const pictures = (cited.length ? cited : web).filter((w) => w.image).slice(0, 4)
@@ -524,15 +557,14 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
 }
 
 /** Claude's answer as JSON text, or null when it declined. */
-async function askClaude(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[]): Promise<string | null> {
-  client ??= new Anthropic()
-  const response = await client.beta.messages.create({
-    model: MODEL,
+async function askClaude(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[], over?: { key: string; model: string }): Promise<string | null> {
+  const c = over ? new Anthropic({ apiKey: over.key }) : (client ??= new Anthropic())
+  const response = await c.beta.messages.create({
+    model: over?.model ?? MODEL,
     // her thinking counts towards this as well as her answer
     max_tokens: 8000,
-    betas: ['server-side-fallback-2026-07-01'],
-    // a declined question is retried on the model Anthropic recommends for it
-    fallbacks: 'default',
+    // the default model: a declined question is retried on the model Anthropic recommends for it
+    ...(over ? {} : { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const }),
     // a chat: quick answers; the model's best Tajik either way
     output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
     system: [
@@ -584,8 +616,9 @@ const clientOf = (key: string) => {
  * Gemini's answer as JSON text, or null when it was blocked. Requests go out as described at HEDGE_MS;
  * when none answers in time, the last error (the route says she cannot answer now).
  */
-async function askGemini(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[]): Promise<string | null> {
-  const keys = geminiKeys()
+async function askGemini(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[], over?: { keys: string[]; models: string[] }): Promise<string | null> {
+  const keys = over?.keys ?? geminiKeys()
+  const models = over?.models ?? GEMINI_MODELS
   const started = Date.now()
   const first = nextKey++ % keys.length
   const question = turns[turns.length - 1]?.content ?? ''
@@ -621,7 +654,7 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
       if (settled) return
       clearTimeout(hedge)
       const left = GEMINI_TOTAL - (Date.now() - started)
-      const t = triesOf(GEMINI_MODELS, keys.length, first, spent, cursor)
+      const t = triesOf(models, keys.length, first, spent, cursor)
       if (!t || left < 3_000) {
         if (!live.size) finish(() => reject(failure))
         return
@@ -661,10 +694,10 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
         else if (/"code":\s*(404|400)/.test(said)) spent.add(`*|${t.model}`)
         console.warn('[mahliyo] gemini', t.model, 'key', t.key + 1, 'failed after', Date.now() - begun, 'ms:', said.slice(0, 160))
         // nothing left to ask and no one still answering: she cannot answer now
-        if (!live.size && !triesOf(GEMINI_MODELS, keys.length, first, spent, cursor)) return finish(() => reject(failure))
+        if (!live.size && !triesOf(models, keys.length, first, spent, cursor)) return finish(() => reject(failure))
         // every model failed in a row: a pause before the next round (others may still be answering)
         fails++
-        const pause = fails % GEMINI_MODELS.length === 0 ? PAUSES_MS[Math.min(fails / GEMINI_MODELS.length - 1, PAUSES_MS.length - 1)] : 0
+        const pause = fails % models.length === 0 ? PAUSES_MS[Math.min(fails / models.length - 1, PAUSES_MS.length - 1)] : 0
         if (pause) {
           clearTimeout(hedge)
           hedge = setTimeout(launch, pause)

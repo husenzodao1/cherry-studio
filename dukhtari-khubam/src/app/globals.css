@@ -2260,3 +2260,20 @@ html.no-capture main, html.no-capture main * { -webkit-user-select: none; user-s
 html.no-capture main img, html.no-capture main video { -webkit-user-drag: none; pointer-events: auto; }
 html.no-capture.is-away main { filter: blur(22px); }
 @media print { html.no-capture body { display: none !important; } }
+
+/* she takes a while and has the company's books: a tiny line under "thinking", a light sweeping over it */
+.ai-thinking-row { display: inline-flex; align-items: center; gap: 6px; }
+.ai-books-hint { display: block; margin-top: 1px; font-size: 0.68rem; line-height: 1.3; letter-spacing: 0.01em; font-weight: 500;
+  background: linear-gradient(100deg, var(--ink-2) 0%, var(--ink-2) 35%, color-mix(in srgb, var(--ink-2) 25%, #fff) 50%, var(--ink-2) 65%, var(--ink-2) 100%);
+  background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: ai-hint-sweep 2.2s linear infinite, fade-in 0.4s both; }
+@keyframes ai-hint-sweep { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+@media (prefers-reduced-motion: reduce) { .ai-books-hint { animation: none; -webkit-text-fill-color: var(--ink-2); } }
+
+/* a chat that has held all its questions: a quiet note where the box was, and a new chat */
+.ai-limit { flex: none; width: min(400px, calc(100vw - 36px)); margin: 6px auto max(14px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center; animation: rise 0.35s var(--ease) both; }
+.ai-limit p { margin: 0; max-width: 34ch; font-size: 0.72rem; line-height: 1.45; letter-spacing: 0.01em; color: var(--ink-2); }
+.ai-limit-new { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 16px; border: 1px solid var(--glass-edge); border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--ink); background: color-mix(in srgb, var(--bg) 80%, #fff); box-shadow: 0 6px 16px -10px rgba(40, 20, 90, 0.45); }
+.ai-limit-new:active { transform: scale(0.95); }

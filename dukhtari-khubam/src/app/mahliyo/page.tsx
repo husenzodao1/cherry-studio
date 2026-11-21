@@ -13,7 +13,9 @@ import { emojify } from '@/web/components/Emoji'
 import { AnswerBlocks, Sources, timingOf } from '@/web/components/MahliyoBlocks'
 import { showToast } from '@/web/components/Toast'
 import { useContent } from '@/web/offline/content'
+import { useAuth } from '@/web/auth'
 import { useLearner } from '@/web/offline/learner'
+import { useApi } from '@/web/useApi'
 import {
   aboutMe, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, rate, removeChat, retry, stop,
   useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
@@ -29,6 +31,8 @@ const EXIT_MS = 2000
 /** rubber at the chat's ends: the share of the finger's travel it follows, and how far it can go */
 const PULL = 0.3
 const STRETCH = 90
+/** questions one chat holds; then it says its context is over (a Premium account has no such end) */
+const CHAT_LIMIT = 20
 /** pulled down this far at the top of a chat, it lets go into a new chat */
 const NEW_AT = 64
 
@@ -63,6 +67,8 @@ const keepDraft = (chat: string, text: string) => {
 export default function MahliyoPage() {
   const { t } = usePrefs()
   const { learner, progress } = useLearner()
+  const { session } = useAuth()
+  const me = useApi<{ premium?: boolean }>(session ? '/me' : null)
   const { bundle } = useContent()
   const { chat, chats, turns, pending, problem, fresh, online } = useMahliyo()
   const [history, setHistory] = useState(false)
@@ -84,6 +90,8 @@ export default function MahliyoPage() {
   const busy = !!pending && pending.chat === chat
   /** the question is still on its way (no id from the server yet) */
   const sending = busy && !pending.id
+  /** this chat has held as many questions as it can (not for a Premium account): a new chat goes on */
+  const full = !me.data?.premium && turns.filter((m) => m.role === 'user').length >= CHAT_LIMIT && !busy
 
   useEffect(() => watch(), [])
   // opened from her circle in the tab bar: the chat pours out of it
@@ -275,7 +283,7 @@ export default function MahliyoPage() {
   const send = (question: string, withFiles: AiUpload[] = []) => {
     // a picture alone asks her to look at it
     const q = question.trim() || (withFiles.length ? t('ai.look') : '')
-    if (!q || pending || !ready) return
+    if (!q || pending || !ready || (full && editing === null)) return
     void ask(q, who(), editing ?? undefined, withFiles)
     // a new question was the draft; after an edit, the draft comes back
     if (editing === null) keepDraft(chat, '')
@@ -421,8 +429,10 @@ export default function MahliyoPage() {
         {busy && !sending ? (
           <div className="ai-thinking" aria-label={t('ai.thinking')}>
             <span className="ai-orb ai-orb-xs" aria-hidden="true"><span className="ai-orb-ring" /><img src={FACE_THINK} alt="" /></span>
-            <span className="ai-thinking-text">{t('ai.thinking')}</span>
-            <span className="mi-dots"><i /><i /><i /></span>
+            <span className="grow">
+              <span className="ai-thinking-row"><span className="ai-thinking-text">{t('ai.thinking')}</span><span className="mi-dots"><i /><i /><i /></span></span>
+              {pending?.books ? <BooksHint since={pending.since} /> : null}
+            </span>
           </div>
         ) : busy ? null : problem && last?.role === 'user' ? (
           <div className={`ai-problem is-${problem}`} role="status">
@@ -440,6 +450,12 @@ export default function MahliyoPage() {
       </div>
       </div>
 
+      {full ? (
+        <div className="ai-limit" role="status">
+          <p>{t('ai.limit_reached')}</p>
+          <button type="button" className="ai-limit-new" onClick={startNew}><Icon name="compose" size={14} />{t('ai.clear')}</button>
+        </div>
+      ) : (
       <form className={`ai-composer${editing !== null ? ' is-editing' : ''}`} onSubmit={submit}>
         {below ? (
           <button type="button" className={`ai-down${busy ? ' is-writing' : ''}`} onClick={down} aria-label={busy ? `${t('ai.scroll_down')} · ${t('ai.thinking')}` : t('ai.scroll_down')}>
@@ -479,8 +495,23 @@ export default function MahliyoPage() {
           )}
         </div>
       </form>
+      )}
     </div>
   )
+}
+
+/** a wait this long, with books: she is searching the company's own sources */
+const BOOKS_AFTER_MS = 2500
+/** Under "she is thinking", once she takes a while and has books: a tiny line, a light sweeping over it. */
+function BooksHint({ since }: { since: number }) {
+  const { t } = usePrefs()
+  const [show, setShow] = useState(() => Date.now() - since >= BOOKS_AFTER_MS)
+  useEffect(() => {
+    if (show) return
+    const later = setTimeout(() => setShow(true), Math.max(0, BOOKS_AFTER_MS - (Date.now() - since)))
+    return () => clearTimeout(later)
+  }, [show, since])
+  return show ? <span className="ai-books-hint" role="status">{t('ai.books_search')}</span> : null
 }
 
 /**
