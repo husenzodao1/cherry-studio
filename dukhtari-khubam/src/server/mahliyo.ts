@@ -109,6 +109,7 @@ LANGUAGE
 - Answer in the language of her LAST message, whatever it is (Tajik, Russian, English, Uzbek, Persian/Dari, Turkish, Arabic, …), naturally and fluently, as a kind, educated teacher talking to a younger sister: warm, respectful (the polite "you"), clear, never stiff or machine-translated. If she mixes languages, answer in the one she mostly used; when unsure, in Tajik. Always set "tajik" to true.
 - Tajik is the app's own language: when she writes Tajik, answer in correct, natural, literary Tajik (Cyrillic). Understand Tajik as people really write it: typos and missing letters (e.g. "Мҳлиё", "Махлие", "Махлиё" all mean "Маҳлиё"), Russian letters instead of Tajik ones (и/ӣ, у/ӯ, х/ҳ, к/қ, ч/ҷ, г/ғ, е/э), Latin-script Tajik, no punctuation, words run together, dialect and colloquial forms (northern/Khujand, southern/Kulob, Rasht, Badakhshan, Zarafshan) and Russian or English loanwords inside Tajik sentences. Silently work out what she means; never correct her spelling or comment on it. If a message is truly unclear, ask one short question back.
 - The app's buttons and screens are named in Tajik in the guide: in another language, give their Tajik names in «…» as they appear, explained in her language.
+- Persian (Farsi/Dari) written in the Persian-Arabic script is answered in Persian in that same script — never turned into Tajik Cyrillic, close as the languages are. E.g. to "زبان را چطور عوض کنم؟": "برای تغییر زبان، دکمهٔ «⋯» را بزنید و «Забон» را انتخاب کنید."
 
 WHAT YOU TALK ABOUT
 - The app: you know it completely from the guide below (screens, buttons, settings, PIN and recovery, support, progress map, tests, certificate, offline use, notifications, privacy). Never invent a feature, button or screen that is not in the guide; if unsure, say so and point to the consultant ("Дастгирӣ").
@@ -306,6 +307,25 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
   ].join('\n')
 }
 
+/**
+ * What language her last message seems to be in, said last to the model (the quick models follow what is
+ * nearest the question): Tajik by its own letters; Russian by letters and words Tajik does not use (Tajik
+ * typed with Russian letters stays Tajik); Persian/Arabic by script; Latin letters left to the model.
+ */
+export function languageOf(text: string): string | null {
+  if (/[ӣӯқҳҷғ]/i.test(text)) return 'Tajik (Cyrillic)'
+  if (/[а-яё]/i.test(text) && (/[ыщь]/i.test(text) || /(^|[^а-яёӣӯқҳҷғ])(как|что|почему|зачем|где|когда|мне|меня|это|можно|пожалуйста|привет|здравствуйте|спасибо|ты|вы|я|мой|моя|какой|какие|сколько|нужно|хочу)(?=$|[^а-яёӣӯқҳҷғ])/i.test(text))) return 'Russian'
+  // Persian (Farsi/Dari) by its own letters; otherwise Arabic. Never answered in Tajik Cyrillic.
+  if (/[پچژگ]|ی/.test(text)) return 'Persian (Farsi/Dari) in the Persian (Arabic) script, not in Tajik Cyrillic'
+  if (/[\u0600-\u06FF]/.test(text)) return 'Arabic, in the Arabic script'
+  if (/[a-z]/i.test(text) && !/[а-яё]/i.test(text)) return 'the language she wrote in, in Latin letters (English, Uzbek, Turkish, or Tajik in Latin script)'
+  return null
+}
+const languageNote = (turns: Turn[]) => {
+  const lang = languageOf(turns[turns.length - 1]?.content ?? '')
+  return `REPLY LANGUAGE: write every text of your answer in ${lang ?? 'the language of her last message (Tajik when unsure)'}.`
+}
+
 let client: Anthropic | null = null
 let gemini: GoogleGenAI | null = null
 
@@ -346,7 +366,7 @@ async function askClaude(turns: Turn[], appName: string, knowledge: string, me: 
       // the guide and the course material change rarely: cached between questions
       { type: 'text', text: `${GUIDE}\n\n${knowledge}`, cache_control: { type: 'ephemeral' } },
       // after the cached part: different for every learner and every question
-      { type: 'text', text: learnerNote(me) }
+      { type: 'text', text: `${learnerNote(me)}\n\n${languageNote(turns)}` }
     ],
     // the pictures and files go with the last question, before its words
     messages: turns.map((t, i) => (i === turns.length - 1 && files.length ? {
@@ -372,6 +392,7 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
   gemini ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { retryOptions: { attempts: 1 } } })
   const started = Date.now()
   let failure: unknown = new Error('no Gemini model')
+  const arabicScript = /[\u0600-\u06FF]/.test(turns[turns.length - 1]?.content ?? '')
   for (const model of GEMINI_MODELS) {
     if (Date.now() - started + waitOf(model) > GEMINI_TOTAL) break
     try {
@@ -386,7 +407,7 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
           ]
         })),
         config: {
-          systemInstruction: [rules(appName), `${GUIDE}\n\n${knowledge}`, learnerNote(me, new Date(), { private: true })].join('\n\n'),
+          systemInstruction: [rules(appName), `${GUIDE}\n\n${knowledge}`, learnerNote(me, new Date(), { private: true }), languageNote(turns)].join('\n\n'),
           responseMimeType: 'application/json',
           responseJsonSchema: SCHEMA,
           // a chat: quick answers
@@ -397,6 +418,11 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
       })
       const finish = r.candidates?.[0]?.finishReason
       if (r.promptFeedback?.blockReason || (finish && finish !== 'STOP' && finish !== 'MAX_TOKENS')) return null
+      // written to in the Persian-Arabic script, answered in another: the next, deeper model answers
+      if (arabicScript && !/[\u0600-\u06FF]/.test(r.text ?? '') && model !== GEMINI_MODELS[GEMINI_MODELS.length - 1]) {
+        failure = new Error('answered in another script')
+        continue
+      }
       return r.text ?? ''
     } catch (e) {
       // busy, over the free quota or too slow: the next model

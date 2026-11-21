@@ -10,7 +10,7 @@ vi.mock('@anthropic-ai/sdk', () => ({ default: class { beta = { messages: { crea
 const generate = vi.fn()
 vi.mock('@google/genai', () => ({ GoogleGenAI: class { models = { generateContent: generate } }, ThinkingLevel: { LOW: 'LOW', MINIMAL: 'MINIMAL' } }))
 
-const { answer, cleanBlocks, configured, GEMINI_MODELS, knowledgeOf, KNOWLEDGE_CAP, learnerNote, MODEL, plainOf, provider, SORRY } = await import('@/server/mahliyo')
+const { answer, cleanBlocks, configured, GEMINI_MODELS, knowledgeOf, KNOWLEDGE_CAP, languageOf, learnerNote, MODEL, plainOf, provider, SORRY } = await import('@/server/mahliyo')
 
 const bundle = {
   ui: { 'app.name': 'Гулдухтар' },
@@ -260,6 +260,26 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     generate.mockRejectedValueOnce(new Error('busy')).mockResolvedValueOnce(ok([{ type: 'text', text: 'Ҳа' }]))
     await answer(turns, 'Г', '', me)
     expect(generate.mock.calls.map((c) => [c[0].model, c[0].config.thinkingConfig.thinkingLevel])).toEqual([['gemini-3.1-flash-lite', 'MINIMAL'], ['gemini-3.5-flash', 'LOW']])
+  })
+
+    it('the language of her last message is said last: Tajik (also typed with Russian letters), Russian, Persian, Latin', async () => {
+    expect(languageOf('Пин-кодро чӣ тавр иваз кунам?')).toBe('Tajik (Cyrillic)')
+    expect(languageOf('чи хел пин кодро иваз кунам')).toBeNull()
+    expect(languageOf('Как поменять язык приложения?')).toBe('Russian')
+    expect(languageOf('Ты Gemini от Google?')).toBe('Russian')
+    expect(languageOf('زبان را چطور عوض کنم؟')).toMatch(/^Persian .*not in Tajik Cyrillic/)
+    expect(languageOf('كيف أغير اللغة؟')).toMatch(/^Arabic/)
+    expect(languageOf('How do I change my PIN?')).toMatch(/Latin letters/)
+    generate.mockResolvedValue(ok([{ type: 'text', text: 'Язык меняется в «Танзимот».' }]))
+    await answer([{ role: 'user', content: 'Как поменять язык?' }], 'Г', '', me)
+    expect(generate.mock.calls[0][0].config.systemInstruction).toMatch(/REPLY LANGUAGE: write every text of your answer in Russian\.$/)
+  })
+
+    it('Persian answered in Tajik Cyrillic by the quick model: the next model answers', async () => {
+    generate.mockResolvedValueOnce(ok([{ type: 'text', text: 'Барои тағйири забон…' }])).mockResolvedValueOnce(ok([{ type: 'text', text: 'برای تغییر زبان…' }]))
+    const a = await answer([{ role: 'user', content: 'زبان را چطور عوض کنم؟' }], 'Г', '', me)
+    expect(a.blocks).toEqual([{ type: 'text', text: 'برای تغییر زبان…' }])
+    expect(generate).toHaveBeenCalledTimes(2)
   })
 
     it('without "private" the learner note keeps her name (for Claude)', () => {
