@@ -31,3 +31,24 @@ test('a lesson: soft white page, calm labelled blocks, no errors', async ({ page
   await page.screenshot({ path: 'test-results/lesson.png', fullPage: true })
   expect(errors).toEqual([])
 })
+
+test('a lesson stays private: its words cannot be selected; the screenshot keys and printing say it is forbidden; away, it hides', async ({ page, server: _, errors }) => {
+  await page.route('**/api/v1/bundle**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...BUNDLE, lessons: { [LESSON.id]: LESSON }, courses: { [COURSE.id]: COURSE } }) }))
+  await signedIn(page)
+  await page.goto(`/lesson?id=${LESSON.id}`)
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('html')).toHaveClass(/no-capture/)
+  expect(await page.locator('.callout').first().evaluate((e) => getComputedStyle(e).userSelect)).toBe('none')
+  for (const key of ['PrintScreen', 'Control+p']) {
+    await page.keyboard.press(key)
+    await expect(page.locator('.toast').filter({ hasText: 'Скриншот ва ё сабти гирфтан қатъиян манъ аст' })).toBeVisible()
+  }
+  await page.evaluate(() => window.dispatchEvent(new Event('blur')))
+  expect(await page.locator('main').evaluate((e) => getComputedStyle(e).filter)).toContain('blur')
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  // elsewhere (the home page), nothing is guarded
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('html')).not.toHaveClass(/no-capture/)
+  expect(errors).toEqual([])
+})

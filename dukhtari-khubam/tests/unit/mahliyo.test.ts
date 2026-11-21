@@ -331,6 +331,36 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     expect(fixLatex('$\u000crac{1}{2} \u0009imes 3$')).toBe('$\\frac{1}{2} \\times 3$')
   })
 
+  it('a question about the world is looked up on the internet (Wikipedia): her sources come as links under her answer, pictures when asked', async () => {
+    const page = (title: string, lang: string, image?: string) => ({ index: 1, title, fullurl: `https://${lang}.wikipedia.org/wiki/${title}`, extract: `${title} — мақолаи кӯтоҳ.`, ...(image ? { thumbnail: { source: image } } : {}) })
+    const fetched: string[] = []
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      fetched.push(url)
+      const lang = new URL(url).hostname.split('.')[0]
+      return { ok: true, json: async () => ({ query: { pages: { 1: page(lang === 'tg' ? 'Оҳу' : 'Deer', lang, `https://upload.wikimedia.org/${lang}.jpg`) } } }) }
+    }))
+    generate.mockResolvedValue({ text: JSON.stringify({ tajik: true, blocks: [{ type: 'text', text: 'Оҳу ҳайвони зебост 🦌' }], sources: [1, 2] }), candidates: [{ finishReason: 'STOP' }] })
+    const a = await answer([{ role: 'user', content: 'Расмҳои оҳу ва дар бораи онҳо бо манбаъ' }], 'Г', 'ДОНИШ', me)
+    expect(fetched.map((u) => new URL(u).hostname)).toEqual(['tg.wikipedia.org', 'en.wikipedia.org'])
+    expect(new URL(fetched[0]).searchParams.get('gsrsearch')).toBe('оҳу')
+    const system = generate.mock.calls[0][0].config.systemInstruction as string
+    expect(system).toContain('WEB RESULTS')
+    expect(system).toContain('[1] Оҳу — https://tg.wikipedia.org/wiki/Оҳу')
+    expect(a.blocks).toEqual([
+      { type: 'text', text: 'Оҳу ҳайвони зебост 🦌' },
+      { type: 'images', items: [{ src: 'https://upload.wikimedia.org/tg.jpg', title: 'Оҳу', url: 'https://tg.wikipedia.org/wiki/Оҳу' }, { src: 'https://upload.wikimedia.org/en.jpg', title: 'Deer', url: 'https://en.wikipedia.org/wiki/Deer' }] },
+      { type: 'sources', items: [{ title: 'Оҳу', url: 'https://tg.wikipedia.org/wiki/Оҳу', site: 'tg.wikipedia.org' }, { title: 'Deer', url: 'https://en.wikipedia.org/wiki/Deer', site: 'en.wikipedia.org' }] }
+    ])
+    // about the app, a greeting: no search
+    fetched.length = 0
+    await answer([{ role: 'user', content: 'Пин-кодро чӣ тавр иваз кунам?' }], 'Г', '', me)
+    await answer([{ role: 'user', content: 'Салом, чӣ хелӣ?' }], 'Г', '', me)
+    expect(fetched).toEqual([])
+    // Ruslan only when asked
+    expect(system).toContain('never bring up his life')
+    vi.unstubAllGlobals()
+  })
+
   it('the quick model thinks least; the others from "low"', async () => {
     generate.mockRejectedValueOnce(new Error('busy')).mockResolvedValueOnce(ok([{ type: 'text', text: 'Ҳа' }]))
     await answer(turns, 'Г', '', me)

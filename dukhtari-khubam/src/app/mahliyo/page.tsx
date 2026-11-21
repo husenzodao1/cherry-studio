@@ -10,12 +10,12 @@ import { onBack } from '@/web/components/BackButton'
 
 import { Icon } from '@/web/components/Icon'
 import { emojify } from '@/web/components/Emoji'
-import { AnswerBlocks, timingOf } from '@/web/components/MahliyoBlocks'
+import { AnswerBlocks, Sources, timingOf } from '@/web/components/MahliyoBlocks'
 import { showToast } from '@/web/components/Toast'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
 import {
-  aboutMe, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, removeChat, retry, stop,
+  aboutMe, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, rate, removeChat, retry, stop,
   useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { usePrefs } from '@/web/prefs'
@@ -235,6 +235,19 @@ export default function MahliyoPage() {
     }
   }, [])
   useEffect(() => { void aiReady().then(setReady) }, [])
+  // read further up: a small button takes her back down (with her dots while she is writing below)
+  const [below, setBelow] = useState(false)
+  useEffect(() => {
+    const el = scroller.current
+    if (!el) return
+    const look = () => setBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 160)
+    look()
+    el.addEventListener('scroll', look, { passive: true })
+    const grew = new ResizeObserver(look)
+    if (inner.current) grew.observe(inner.current)
+    return () => { el.removeEventListener('scroll', look); grew.disconnect() }
+  }, [])
+  const down = () => scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: 'smooth' })
   // her new answer is read from its beginning; otherwise the newest line stays in view
   useEffect(() => {
     const answer = !busy && turns[turns.length - 1]?.role === 'assistant' ? [...document.querySelectorAll('.ai-said')].pop() : null
@@ -392,6 +405,14 @@ export default function MahliyoPage() {
                 <button type="button" className="ai-act" onClick={() => copy(m)} aria-label={t('ai.copy')}><Icon name="copy" size={16} /></button>
                 <button type="button" className="ai-act" onClick={() => setSelecting(textOf(m))} aria-label={t('ai.select')}><Icon name="select" size={16} /></button>
                 <button type="button" className="ai-act" onClick={() => share(m)} aria-label={t('ai.share')}><Icon name="share" size={16} /></button>
+                <button type="button" className={`ai-act${m.rating === 1 ? ' is-on' : ''}`} aria-pressed={m.rating === 1} onClick={() => rate(i, 1)} aria-label={t('ai.like')}>
+                  <Icon name="thumb-up" size={16} fill={m.rating === 1 ? 'currentColor' : 'none'} />
+                </button>
+                <button type="button" className={`ai-act${m.rating === -1 ? ' is-on' : ''}`} aria-pressed={m.rating === -1} onClick={() => rate(i, -1)} aria-label={t('ai.dislike')}>
+                  <Icon name="thumb-down" size={16} fill={m.rating === -1 ? 'currentColor' : 'none'} />
+                </button>
+                {/* where her answer came from: at the end of the row, small */}
+                {m.blocks?.map((b, n) => (b.type === 'sources' ? <Sources key={n} items={b.items} /> : null))}
               </div>
             </div>
           </div>
@@ -420,6 +441,11 @@ export default function MahliyoPage() {
       </div>
 
       <form className={`ai-composer${editing !== null ? ' is-editing' : ''}`} onSubmit={submit}>
+        {below ? (
+          <button type="button" className={`ai-down${busy ? ' is-writing' : ''}`} onClick={down} aria-label={busy ? `${t('ai.scroll_down')} · ${t('ai.thinking')}` : t('ai.scroll_down')}>
+            {busy ? <span className="mi-dots"><i /><i /><i /></span> : <Icon name="arrow-down" size={18} />}
+          </button>
+        ) : null}
         {editing !== null ? (
           <span className="ai-editing">
             <Icon name="edit" size={14} /><span className="grow">{t('ai.editing')}</span>

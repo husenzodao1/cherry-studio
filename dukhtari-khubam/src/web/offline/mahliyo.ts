@@ -20,7 +20,11 @@ import { supportToken } from './support'
  * again; without internet the chat says so and waits.
  */
 
-export interface AiTurn { role: 'user' | 'assistant'; content: string; at: string; tajik?: boolean; blocks?: AiBlock[]; files?: AiFileView[] }
+export interface AiTurn {
+  role: 'user' | 'assistant'; content: string; at: string; tajik?: boolean; blocks?: AiBlock[]; files?: AiFileView[]
+  /** her answer's question on the server (to mark it 👍/👎), and how the learner marked it */
+  id?: string; rating?: 1 | -1
+}
 /** A picture or a file sent with a question, as the chat keeps it (a small picture, no data). */
 export interface AiFileView { mime: string; name: string; thumb?: string }
 /** …and as it goes to her (base64). */
@@ -363,7 +367,7 @@ async function wait(id: string, since: number, my: number) {
     const blocks = r.blocks?.length ? r.blocks : [{ type: 'text' as const, text: r.reply ?? '' }]
     // into the chat she was asked in (the learner may have opened another meanwhile)
     const chat = state.pending?.chat ?? state.chat
-    const turns: AiTurn[] = [...turnsOf(chat), { role: 'assistant', content: r.reply ?? '', tajik: r.tajik !== false, blocks, at: new Date().toISOString() }]
+    const turns: AiTurn[] = [...turnsOf(chat), { role: 'assistant', content: r.reply ?? '', tajik: r.tajik !== false, blocks, at: new Date().toISOString(), id }]
     const here = chat === state.chat
     end(null, { chats: keep(chat, turns), ...(here ? { turns, fresh: turns.length - 1 } : {}), unseen: watching === 0 || !here })
     void tell(r.reply ?? '')
@@ -414,6 +418,16 @@ export function newChat() {
 }
 
 /** Puts a chat in the archive, or takes it out (the one open, archived: a new one opens). */
+/** The learner marks her answer (turn `i` of the open chat) 👍 or 👎; the same again takes it back. The staff see it. */
+export function rate(i: number, rating: 1 | -1) {
+  const turn = state.turns[i]
+  if (!turn || turn.role !== 'assistant') return
+  const next = turn.rating === rating ? undefined : rating
+  const turns = state.turns.map((t, n) => (n === i ? { ...t, rating: next } : t))
+  set({ turns, chats: keep(state.chat, turns) })
+  if (turn.id) void post('/mahliyo/rate', { token: supportToken(), id: turn.id, rating: next ?? null }).catch(() => undefined)
+}
+
 export function archiveChat(id: string, archived = true) {
   chats = chats.map((c) => (c.id === id ? { ...c, archived } : c))
   writeChats(chats)

@@ -21,6 +21,7 @@ import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
 import { MahliyoCall } from './MahliyoCall'
+import { ScreenGuard } from './ScreenGuard'
 import { NotifyBridge } from './NotifyBridge'
 import { SupportWatch } from './SupportWatch'
 import { showToast, Toaster } from './Toast'
@@ -124,6 +125,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <PageButterflies />
               <Dock />
               <MahliyoCall />
+              <ScreenGuard />
               <AppUpdate />
               <NotifyBridge />
               <SupportWatch />

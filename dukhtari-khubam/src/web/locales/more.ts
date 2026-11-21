@@ -408,6 +408,11 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.call_lock': "Mahliyo qo‘ng‘irog‘i qulf ekranida haqiqiy qo‘ng‘iroqdek chiqishi uchun ruxsat bering.",
   'ai.call_lock_allow': "Ruxsat berish",
   'ai.preview': "Ko‘rish",
+  'ai.like': "Yaxshi javob",
+  'ai.dislike': "Yomon javob",
+  'ai.sources': "Manbalar",
+  'ai.scroll_down': "Pastga",
+  'guard.no_capture': "Skrinshot va ekranni yozib olish qat’iyan taqiqlangan",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -817,6 +822,11 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.call_lock': "Mahliyo’nun araması kilit ekranında gerçek bir arama gibi görünsün diye izin verin.",
   'ai.call_lock_allow': "İzin ver",
   'ai.preview': "Önizleme",
+  'ai.like': "İyi yanıt",
+  'ai.dislike': "Kötü yanıt",
+  'ai.sources': "Kaynaklar",
+  'ai.scroll_down': "Aşağı",
+  'guard.no_capture': "Ekran görüntüsü ve ekran kaydı kesinlikle yasaktır",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1225,6 +1235,11 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.call_lock': "اجازه دهید تماس مهلیا مانند تماس واقعی روی صفحهٔ قفل ظاهر شود.",
   'ai.call_lock_allow': "اجازه دادن",
   'ai.preview': "پیش‌نمایش",
+  'ai.like': "پاسخ خوب",
+  'ai.dislike': "پاسخ بد",
+  'ai.sources': "منابع",
+  'ai.scroll_down': "پایین",
+  'guard.no_capture': "گرفتن اسکرین‌شات و ضبط صفحه اکیداً ممنوع است",
   'pin.forgot_q': "فراموش کردید؟"
 }
 

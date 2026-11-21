@@ -26,10 +26,26 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
         registerPlugin(WidgetsPlugin.class);
         registerPlugin(StreakAlarm.StreakPlugin.class);
         registerPlugin(MahliyoCall.CallPlugin.class);
+        registerPlugin(ScreenGuard.class);
         super.onCreate(savedInstanceState);
         // her words play as soon as her call is answered (also when answered from the notification)
         if (getBridge() != null && getBridge().getWebView() != null) getBridge().getWebView().getSettings().setMediaPlaybackRequiresUserGesture(false);
         fromCall(getIntent());
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // screenshots and recordings of a lesson are told to the web layer (ScreenGuard)
+        ScreenGuard g = ScreenGuard.plugin;
+        if (g != null) g.watch(this);
+    }
+
+    @Override
+    public void onStop() {
+        ScreenGuard g = ScreenGuard.plugin;
+        if (g != null) g.unwatch(this);
+        super.onStop();
     }
 
     @Override

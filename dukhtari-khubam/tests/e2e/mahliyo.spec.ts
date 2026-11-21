@@ -522,3 +522,58 @@ test('code: copy, and a web page previewed in a sealed frame; pulled down at its
   errors.splice(0, errors.length, ...own)
   expect(errors).toEqual([])
 })
+
+test('her sources small at the end of the row (a list of blue links), pictures, 👍 👎 that reach the staff, and a button back down that shows her dots', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  const rated: unknown[] = []
+  await page.route('**/api/v1/mahliyo/rate', (r) => { rated.push(r.request().postDataJSON()); return r.fulfill(json({ ok: true })) })
+  const long = Array.from({ length: 30 }, (_, i) => `Сатри ${i + 1} дар бораи оҳу.`).join('\n\n')
+  const PIC = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30"><rect width="40" height="30" fill="#c96"/></svg>')
+  await fakeMahliyo(page, (q) => (q.startsWith('Расм')
+    ? { tajik: true, reply: 'Оҳу…', blocks: [
+      { type: 'text', text: 'Оҳу ҳайвони зебост 🦌 — [мақола](https://tg.wikipedia.org/wiki/Оҳу)' },
+      { type: 'images', items: [{ src: PIC, title: 'Оҳу', url: 'https://tg.wikipedia.org/wiki/Оҳу' }, { src: PIC, title: 'Deer', url: 'https://en.wikipedia.org/wiki/Deer' }] },
+      { type: 'sources', items: [{ title: 'Оҳу', url: 'https://tg.wikipedia.org/wiki/Оҳу', site: 'tg.wikipedia.org' }, { title: 'Deer', url: 'https://en.wikipedia.org/wiki/Deer', site: 'en.wikipedia.org' }] }
+    ] }
+    : { tajik: true, reply: long, blocks: [{ type: 'text', text: long }] }), 300)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const box = page.getByPlaceholder('Паём ба Mahliyo AI…')
+  await box.fill('Расмҳои оҳу бо манбаъ')
+  await page.getByRole('button', { name: 'Фиристодан' }).click()
+  const said = page.locator('.ai-said').last()
+  await expect(said.locator('.ai-image img')).toHaveCount(2, { timeout: 10_000 })
+  // her emoji are the iPhone's pictures; a link in her words is blue
+  await expect(said.locator('img.emo[alt="🦌"]')).toHaveAttribute('src', '/assets/emoji/1f98c.webp')
+  expect(await said.locator('.ai-md a').evaluate((e) => getComputedStyle(e).color)).toBe('rgb(47, 123, 246)')
+  // the sources: small, at the end of the row; tapped, the list
+  const sources = said.locator('.ai-acts .ai-sources')
+  await expect(sources).toContainText('Манбаъҳо')
+  await expect(sources.locator('.ai-sources-marks i')).toHaveCount(2)
+  await page.screenshot({ path: 'test-results/mahliyo-sources.png' })
+  await sources.click()
+  const sheet = page.getByRole('dialog', { name: 'Манбаъҳо' })
+  await expect(sheet.getByRole('link', { name: 'Deer' })).toHaveAttribute('href', 'https://en.wikipedia.org/wiki/Deer')
+  await sheet.getByRole('button', { name: 'Пӯшидан' }).click()
+  // 👍, then 👎, then 👎 again (taken back): each reaches the staff
+  await said.getByRole('button', { name: 'Ҷавоби хуб' }).click()
+  await expect(said.getByRole('button', { name: 'Ҷавоби хуб' })).toHaveAttribute('aria-pressed', 'true')
+  await said.getByRole('button', { name: 'Ҷавоби бад' }).click()
+  await said.getByRole('button', { name: 'Ҷавоби бад' }).click()
+  await expect.poll(() => rated.map((r) => (r as { rating: number | null }).rating)).toEqual([1, -1, null])
+  // a long answer read from its top: a button back down; while she writes below, it shows her dots
+  await box.fill('Бисёр нависед')
+  await page.getByRole('button', { name: 'Фиристодан' }).click()
+  await expect(page.locator('.ai-said')).toHaveCount(2, { timeout: 10_000 })
+  await page.locator('.ai-scroll').evaluate((e) => e.scrollTo({ top: 0 }))
+  const down = page.getByRole('button', { name: 'Ба поён' })
+  await expect(down).toBeVisible()
+  await down.click()
+  await expect(down).toHaveCount(0)
+  await box.fill('Боз нависед')
+  await page.getByRole('button', { name: 'Фиристодан' }).click()
+  await page.locator('.ai-scroll').evaluate((e) => e.scrollTo({ top: 0 }))
+  await expect(page.locator('.ai-down.is-writing .mi-dots')).toBeVisible()
+  expect(errors).toEqual([])
+})

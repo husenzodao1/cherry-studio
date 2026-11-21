@@ -3,9 +3,9 @@ import { Fragment, type ReactNode } from 'react'
 import NAMES from '@/lib/emojiNames.json'
 
 /**
- * The chat's own emoji (like a messenger's): Microsoft's Fluent 3D emoji (MIT, public/assets/emoji), the
- * same on every phone, instead of the phone's. A skin-toned emoji is shown in its base colour; an emoji
- * the set does not have stays the phone's.
+ * The chat's own emoji, as on an iPhone (Apple's pictures, public/assets/emoji — used at the app owner's
+ * request: see its LICENSE.txt), the same on every phone, instead of the phone's. A skin tone the set
+ * lacks falls back to the base emoji; an emoji the set does not have stays the phone's.
  */
 
 const KNOWN = new Set<string>(NAMES)
@@ -15,7 +15,9 @@ export const EMOJI_RE = /\p{Regional_Indicator}{2}|[#*0-9]️?⃣|\p{Extended_Pi
 
 /** the picture's file name for an emoji, or null when the set does not have it */
 export function emojiName(emoji: string): string | null {
-  const cps = [...emoji].map((c) => c.codePointAt(0)!.toString(16)).filter((c) => !/^1f3f[b-f]$/.test(c))
+  const all = [...emoji].map((c) => c.codePointAt(0)!.toString(16).padStart(4, '0'))
+  for (const tried of [all, all.filter((c) => c !== 'fe0f')]) if (KNOWN.has(tried.join('-'))) return tried.join('-')
+  const cps = all.filter((c) => !/^1f3f[b-f]$/.test(c))
   const full = cps.join('-')
   if (KNOWN.has(full)) return full
   const bare = cps.filter((c) => c !== 'fe0f').join('-')

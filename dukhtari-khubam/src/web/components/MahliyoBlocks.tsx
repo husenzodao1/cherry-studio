@@ -109,6 +109,20 @@ export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: bool
             )
           case 'reminder':
             return <ReminderCard key={i} block={b} fresh={fresh} style={style} />
+          case 'images':
+            return (
+              <div key={i} className={`ai-images${b.items.length === 1 ? ' is-one' : ''}`} style={style}>
+                {b.items.map((p, n) => (
+                  <a key={n} href={p.url} target="_blank" rel="noopener noreferrer" className="ai-image">
+                    <img src={p.src} alt={p.title} loading="lazy" referrerPolicy="no-referrer" />
+                    <span>{p.title}</span>
+                  </a>
+                ))}
+              </div>
+            )
+          case 'sources':
+            // shown small at the end of her answer's row (Sources)
+            return null
         }
       })}
       {/* large, over everything (the tab bar too) */}
@@ -121,6 +135,46 @@ export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: bool
         document.body
       ) : null}
     </div>
+  )
+}
+
+/** the sites, by their first letter (W for Wikipedia), each a little circle */
+const siteMark = (site: string) => (/wikipedia/.test(site) ? 'W' : site.replace(/^www\./, '')[0]?.toUpperCase() ?? '•')
+
+/**
+ * Where her answer came from, small at the end of its row (as a messenger shows it): the sites' marks, one
+ * over another, and "Манбаъҳо"; tapped, the list — each source's name in blue, and its site.
+ */
+export function Sources({ items }: { items: Extract<AiBlock, { type: 'sources' }>['items'] }) {
+  const { t } = usePrefs()
+  const [open, setOpen] = useState(false)
+  if (!items.length) return null
+  return (
+    <>
+      <button type="button" className="ai-sources" onClick={() => setOpen(true)} aria-haspopup="dialog">
+        <span className="ai-sources-marks" aria-hidden="true">{items.slice(0, 3).map((s, n) => <i key={n}>{siteMark(s.site)}</i>)}</span>
+        <span>{t('ai.sources')}</span>
+      </button>
+      {open ? createPortal(
+        <div className="ai-sheet-back" role="presentation" onClick={() => setOpen(false)}>
+          <div className="ai-sheet ai-sources-sheet" role="dialog" aria-modal="true" aria-label={t('ai.sources')} onClick={(e) => e.stopPropagation()}>
+            <div className="ai-sheet-head"><b>{t('ai.sources')}</b><span className="grow" />
+              <button type="button" className="ai-act" onClick={() => setOpen(false)} aria-label={t('action.close')}><Icon name="x" size={16} /></button>
+            </div>
+            <ol>
+              {items.map((s, n) => (
+                <li key={n}>
+                  <i aria-hidden="true">{siteMark(s.site)}</i>
+                  <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title}</a>
+                  <span>{s.site}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>,
+        document.body
+      ) : null}
+    </>
   )
 }
 

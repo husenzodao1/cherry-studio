@@ -299,5 +299,10 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.call_lock': "Allow Mahliyo’s call to fill the lock screen like a real call.",
   'ai.call_lock_allow': "Allow",
   'ai.preview': "Preview",
+  'ai.like': "Good answer",
+  'ai.dislike': "Bad answer",
+  'ai.sources': "Sources",
+  'ai.scroll_down': "To the bottom",
+  'guard.no_capture': "Screenshots and screen recording are strictly forbidden",
   'pin.forgot_q': "Forgot it?"
 }

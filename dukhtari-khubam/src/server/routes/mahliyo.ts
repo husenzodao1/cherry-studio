@@ -126,6 +126,14 @@ export const mahliyoRoutes: AnyRoute[] = [
     }
   }),
   route({
+    method: 'POST', path: '/mahliyo/rate', access: 'public', tag: 'Mahliyo AI', summary: 'The learner marks her answer 👍 (1), 👎 (-1) or takes it back (null)',
+    body: Asked.extend({ rating: z.union([z.literal(1), z.literal(-1), z.null()]) }),
+    handler: async ({ sb, body }) => {
+      await call(sb(), 'api_mahliyo_rate', { p_id: body.id, p_token_hash: codeHash(body.token), p_rating: body.rating })
+      return { ok: true }
+    }
+  }),
+  route({
     method: 'GET', path: '/admin/mahliyo', access: 'staff', tag: 'Admin · support', summary: 'Every question learners asked Mahliyo AI, newest first',
     handler: async ({ sb }) => call(sb(), 'admin_mahliyo_questions')
   })

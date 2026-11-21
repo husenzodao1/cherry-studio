@@ -59,6 +59,10 @@ export type AiBlock =
   | { type: 'screen'; spot: SpotId; caption: string }
   | { type: 'link'; to: string; label: string }
   | { type: 'reminder'; at: string; title: string; text: string }
+  /** where her answer came from (internet sources she used; added by the server) */
+  | { type: 'sources'; items: { title: string; url: string; site: string }[] }
+  /** pictures of what she was asked about, from those sources (added by the server) */
+  | { type: 'images'; items: { src: string; title: string; url: string }[] }
 
 /** Whether a link she gives may be opened: a page of the app, a lesson or course of it, or an https address. */
 export function linkAllowed(target: string): boolean {

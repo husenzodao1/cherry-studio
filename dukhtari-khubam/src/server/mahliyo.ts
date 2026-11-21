@@ -4,6 +4,7 @@ import { GoogleGenAI, ThinkingLevel } from '@google/genai'
 import { linkAllowed, ROUTES, SPOT_IDS, SPOTS, type AiBlock, type SpotId } from '@/lib/aiCatalog'
 
 import { ABOUT } from './mahliyoAbout'
+import { needsWeb, searchWeb, wantsPictures, type WebSource } from './webSearch'
 
 /**
  * Mahliyo AI: the app's teacher answers learners' questions (in the language they write in; Tajik first), about the app, about what its
@@ -141,6 +142,7 @@ LANGUAGE
 
 WHAT YOU TALK ABOUT
 - The app: you know it completely from the guide below (screens, buttons, settings, PIN and recovery, support, progress map, tests, certificate, offline use, notifications, privacy). Never invent a feature, button or screen that is not in the guide; if unsure, say so and point to the consultant ("Дастгирӣ").
+- Ҳусейнзода Руслан: never bring up his life, his poetry or the story of your name on your own. Only when she asks about him (or why you are called Маҳлиё) tell what part 10 says. To "who made you?" answer only: Gratorslab, led by Ҳусейнзода Руслан, in 2026.
 - The project itself: what «Духтари хубам» is, why it was made, its goals, its seven schools, Gratorslab and its CEO — from "ДУХТАРИ ХУБАМ — маълумоти расмии лоиҳа" below. About the CEO, Ҳусейнзода Руслани Анвар, tell what its part 10 says when asked (his birth, studies, poetry since 2018, why you are named Маҳлиё, his poems — quoted exactly as written, never changed or made up — with a link to https://gratorslab.vercel.app); nothing about him or the staff beyond that (no guessed contacts, education details or achievements): say that such information has not been provided.
 - The topics of the seven schools: faith and religious knowledge, manners and ethics, personal growth, Tajik culture, family and relationships, science and health, modern life. Use the course material below when it covers the question (link the lesson); otherwise answer from sound, widely accepted knowledge, briefly, and say in a few words that it is general knowledge, not from the app's lessons.
 - Study questions of any school or university subject: mathematics (equations, examples, word problems, geometry), physics, chemistry, biology, languages and grammar, literature, history, geography, informatics and programming as a subject, and so on — help gladly: solve exercises and problems correctly and step by step, show the working, check the result (substitute it back), and give the final answer clearly. Explain so that she learns, not only the answer.
@@ -152,6 +154,9 @@ WHAT YOU TALK ABOUT
 - Religious questions: quote the Quran (sura and verse) or a hadith (its collection) only when you are sure of it; never call a hadith authentic without that being established; present disputed matters as disputed, never one school's (madhhab's) view as the view of all Muslims; keep apart a religious ruling, a national custom and a personal opinion; for a personal ruling suggest a knowledgeable, trusted scholar.
 - Health and the mind: general, scientifically sound information only; never present yourself as a doctor or psychologist, never diagnose, never recommend medicines, doses or risky treatments; with serious signs — a doctor; anything urgent — call an ambulance (103) or tell a trusted adult at once. Legal or money matters: general guidance and a qualified person.
 - She may be young: keep everything age-appropriate and safe; treat relationships, health and safety with care; in a dangerous situation direct her to a trusted adult or the right specialist.
+
+INTERNET
+- When "WEB RESULTS" are given below, they are what an internet search (Wikipedia) found for her question: use them for facts, names, dates and numbers, and put the numbers of the results you used in "sources" (the app shows them as links under your answer; do not write the links yourself). When she asked for pictures, the app shows the results' pictures: say a word about them. Results that do not fit the question are ignored.
 
 HONESTY (accuracy matters more than a beautiful answer; knowledge over guessing)
 - Never invent facts, quotations, sources, laws, hadiths, numbers, lessons, modules, videos, test results or personal data. If the material below does not have the answer, say so honestly, e.g. "Дар маводи дастрас ҷавоби дақиқи ин савол мавҷуд нест…", and suggest an official source or the right specialist.
@@ -347,7 +352,9 @@ const SCHEMA = {
           block('reminder', { at: { type: 'string', format: 'date-time' }, title: str, text: str })
         ]
       }
-    }
+    },
+    // the WEB RESULTS she used (their numbers)
+    sources: { type: 'array', items: { type: 'integer' } }
   },
   required: ['tajik', 'blocks'],
   additionalProperties: false
@@ -410,6 +417,8 @@ export function plainOf(blocks: Block[]): string {
       case 'screen': return `[Расми экран: ${b.spot}] ${b.caption}`.trim()
       case 'link': return `[Пайванд: ${b.label} → ${b.to}]`
       case 'reminder': return `[Ёдраскунӣ: ${b.at} — ${b.title}] ${b.text}`.trim()
+      case 'sources': return `[Манбаъҳо: ${b.items.map((i) => i.url).join(', ')}]`
+      case 'images': return `[Расмҳо: ${b.items.length}]`
     }
   }).join('\n\n')
 }
@@ -472,13 +481,37 @@ export function reminderAsked(question: string, now = Date.now()): Extract<Block
   return { type: 'reminder', at: new Date(now + ms).toISOString(), title: call ? 'Занги Маҳлиё' : 'Ёдраскунии Маҳлиё', text: 'Вақти дарс расид! 📚' }
 }
 
+/** The internet's answer to a question, as she reads it: numbered results. */
+export function webNote(web: WebSource[]): string {
+  if (!web.length) return ''
+  return ['WEB RESULTS (an internet search for her question; cite the numbers you use in "sources"):',
+    ...web.map((w, i) => `[${i + 1}] ${w.title} — ${w.url}\n${w.text}`)].join('\n\n')
+}
+/** which Wikipedia to look in: the question's language */
+const webLang = (question: string): 'tg' | 'ru' | 'en' => {
+  const l = languageOf(question) ?? ''
+  return l.startsWith('Russian') ? 'ru' : /[а-яёӣӯқҳҷғ]/i.test(question) ? 'tg' : 'en'
+}
+
 /** Her answer to the conversation (its last turn is the learner's question). */
 export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = []): Promise<Answer> {
-  const text = provider() === 'gemini' ? await askGemini(turns, appName, knowledge, me, files) : await askClaude(turns, appName, knowledge, me, files)
+  const question = turns[turns.length - 1]?.content ?? ''
+  // a question about the world: looked up on the internet first (a few seconds at most)
+  const web = !files.length && needsWeb(question) ? await searchWeb(question, webLang(question)) : []
+  const material = web.length ? `${knowledge}\n\n${webNote(web)}` : knowledge
+  const text = provider() === 'gemini' ? await askGemini(turns, appName, material, me, files) : await askClaude(turns, appName, material, me, files)
   if (text === null) return sorry()
   try {
-    const r = JSON.parse(text) as { tajik?: unknown; blocks?: unknown }
+    const r = JSON.parse(text) as { tajik?: unknown; blocks?: unknown; sources?: unknown }
     const blocks = cleanBlocks(r.blocks)
+    // the results she used: as links under her answer (and their pictures, when pictures were asked for)
+    const used = (Array.isArray(r.sources) ? r.sources : []).map((n) => web[Number(n) - 1]).filter((w): w is WebSource => !!w)
+    const cited = [...new Set(used)]
+    if (blocks.length && wantsPictures(question)) {
+      const pictures = (cited.length ? cited : web).filter((w) => w.image).slice(0, 4)
+      if (pictures.length) blocks.push({ type: 'images', items: pictures.map((w) => ({ src: w.image!, title: w.title, url: w.url })) })
+    }
+    if (blocks.length && cited.length) blocks.push({ type: 'sources', items: cited.map((w) => ({ title: w.title, url: w.url, site: w.site })) })
     // asked to call or remind, she confirmed without setting it: set here
     const asked = blocks.some((b) => b.type === 'reminder') ? null : reminderAsked(turns[turns.length - 1]?.content ?? '')
     if (asked && blocks.length) blocks.push(asked)
