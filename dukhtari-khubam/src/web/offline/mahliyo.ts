@@ -106,9 +106,13 @@ function writeChats(list: AiChat[]) {
 let ready: Promise<boolean> | null = null
 /** Whether she can answer — asked once per opening of the app. */
 export function aiReady(): Promise<boolean> {
+  // only "she can" is kept; "not" (or no answer) is asked again next time
   ready ??= fetch(apiUrl('/mahliyo/status'))
     .then((r) => (r.ok ? r.json() : { ready: false }))
-    .then((r: { ready?: boolean }) => !!r.ready)
+    .then((r: { ready?: boolean }) => {
+      if (!r.ready) ready = null
+      return !!r.ready
+    })
     .catch(() => {
       ready = null
       return false

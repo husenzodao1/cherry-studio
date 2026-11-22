@@ -671,3 +671,24 @@ test('another account on the same phone: a thin line "Шумо аккаунтр�
   expect(asked[1].name).toBe('Зарина')
   expect(errors).toEqual([])
 })
+
+test('a new chat: her sign-in clip, silent and once, in her circle with her head above it; a failed first look at her readiness is looked at again', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  let looks = 0
+  await page.route('**/api/v1/mahliyo/status', (r) => r.fulfill(looks++ ? json({ ready: true }) : { status: 503, body: '' }))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const clip = page.locator('.ai-orb-fig video')
+  await expect(clip).toHaveAttribute('src', '/assets/mahliyo/signin.webm')
+  expect(await clip.evaluate((v: HTMLVideoElement) => ({ muted: v.muted, loop: v.loop }))).toEqual({ muted: true, loop: false })
+  // her figure rises above her circle
+  const fig = (await page.locator('.ai-orb-fig').boundingBox())!
+  const disc = (await page.locator('.ai-orb-disc').boundingBox())!
+  expect(fig.y).toBeLessThan(disc.y - 20)
+  // "not ready yet" at first, then she is there by herself
+  await expect(page.locator('.ai-hello')).toBeVisible()
+  await expect(page.locator('.ai-hello')).toHaveCount(0, { timeout: 9000 })
+  await expect(page.locator('.ai-input')).toBeEnabled()
+  expect(errors).toEqual([])
+})

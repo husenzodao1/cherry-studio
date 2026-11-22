@@ -20,12 +20,11 @@ import {
   aboutMe, accountChanged, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
   useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
+import { alphaVideo, CLIPS } from '@/web/mahliyo'
 import { usePrefs } from '@/web/prefs'
 
 const FACE = '/assets/mascot/face.webp'
 const FACE_THINK = '/assets/mascot/face-think.webp'
-const PORTRAIT = '/assets/mascot/salom.webp'
-const PORTRAIT_THINK = '/assets/mascot/think.webp'
 /** a second "back" within this long leaves her full screen */
 const EXIT_MS = 2000
 /** rubber at the chat's ends: the share of the finger's travel it follows, and how far it can go */
@@ -246,7 +245,21 @@ export default function MahliyoPage() {
       el.removeEventListener('touchcancel', end)
     }
   }, [])
-  useEffect(() => { void aiReady().then(setReady) }, [])
+  // whether she can answer: looked at again (every few seconds, and when the connection comes back) until
+  // she can — a failed first look (a weak connection on opening) must not leave "she is not ready yet"
+  useEffect(() => {
+    let alive = true
+    let again = 0
+    const look = () => void aiReady().then((r) => {
+      if (!alive) return
+      setReady(r)
+      clearTimeout(again)
+      if (!r) again = window.setTimeout(look, 5000)
+    })
+    look()
+    window.addEventListener('online', look)
+    return () => { alive = false; clearTimeout(again); window.removeEventListener('online', look) }
+  }, [])
   // read further up: a small button takes her back down (with her dots while she is writing below)
   const [below, setBelow] = useState(false)
   useEffect(() => {
@@ -380,10 +393,7 @@ export default function MahliyoPage() {
       <div className="ai-chat" ref={inner}>
         {turns.length ? null : (
           <section className="ai-hero">
-            <span className="ai-orb ai-orb-lg" aria-hidden="true">
-              <span className="ai-orb-glow" /><span className="ai-orb-ring" />
-              <img src={busy ? PORTRAIT_THINK : PORTRAIT} alt="" />
-            </span>
+            <HeroPortrait />
             <Taglines lines={t('ai.taglines').split('\n').filter(Boolean).map((l) => (first ? l.replace('{name}', first) : l.replace(/,?\s*\{name\}/, '')))} />
             {/* no line under her greeting: only when she is not there yet, why */}
             {ready === false ? <p className="ai-hello">{t('ai.soon')}</p> : null}
@@ -749,6 +759,26 @@ function ChatActions({ chat, onClose, onArchive, onRemove }: { chat: AiChatMeta;
         </footer>
       )}
     </div>
+  )
+}
+
+/**
+ * Her portrait over a new chat: the clip of the sign-in screen, silent and once (she leafs through her
+ * book, looks up and waves, and stays so), inside her circle with her head a little above it. A still
+ * picture where clear video is not drawn (iPhone) or less motion is asked for.
+ */
+function HeroPortrait() {
+  const [live, setLive] = useState(false)
+  useEffect(() => setLive(alphaVideo()), [])
+  return (
+    <span className="ai-orb ai-orb-lg ai-orb-live" aria-hidden="true">
+      <span className="ai-orb-glow" /><span className="ai-orb-ring" /><span className="ai-orb-disc" />
+      <span className="ai-orb-fig">
+        {live
+          ? <video src={CLIPS.signin.video} poster={CLIPS.signin.still} muted autoPlay playsInline preload="auto" disableRemotePlayback />
+          : <img src={CLIPS.signin.still} alt="" />}
+      </span>
+    </span>
   )
 }
 

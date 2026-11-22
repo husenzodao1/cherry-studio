@@ -1560,33 +1560,35 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
 :root[data-theme='dark'] .words { background: linear-gradient(125deg, color-mix(in srgb, var(--rose-strong) 80%, black), color-mix(in srgb, var(--primary-soft) 55%, black) 52%, var(--lilac)); }
 /* its name in a fair hand; the words themselves in a plain, calm letter */
 .words-label { position: absolute; left: 18px; top: 6px; font-family: var(--font-hand), var(--font-brand); font-weight: 700; font-size: 1.25rem; line-height: 1.2; color: var(--plum); opacity: 0.9; z-index: 2; }
-.words-track { position: absolute; inset: 36px 18px 22px; }
+.words-track { position: absolute; inset: 36px 18px 16px; }
 .words-item { position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; align-items: stretch; justify-content: center; text-align: center; gap: 4px;
   padding-inline: 4%; opacity: 0; transform: translateX(110%); transition: transform 0.8s var(--ease), opacity 0.6s var(--ease); }
 .words-item.is-in { opacity: 1; transform: none; }
 .words-item.is-out { opacity: 0; transform: translateX(-110%); }
 /* the quote takes the room left above its author line, never under it; line breaks are kept (poems) */
 .words-text { flex: 0 1 auto; min-height: 0; max-height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+/* the quote in the middle of the room it has; who said it and where at the very bottom of the card */
+.words-item > .words-text { margin-block: auto; }
 .words-item blockquote { margin: 0; font-family: var(--font-serif), serif; font-weight: 500; font-size: 1.2rem; line-height: 1.32; color: var(--ink);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); overflow-wrap: anywhere; white-space: pre-line; text-wrap: balance; padding: 0.08em 0.3em; }
 /* longer than four lines: four lines show and the rest scrolls up — by itself, slowly, or by finger.
    Once the beginning has moved up, the top line is shaded (and the bottom one while more is below) */
 .words-text.is-rising { flex: none; display: block; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none;
-  --fade-top: 26%; --fade-end: 18%;
+  --fade-top: 11%; --fade-end: 12%;
   -webkit-mask-image: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35) calc(var(--fade-top) * 0.45), #000 var(--fade-top), #000 calc(100% - var(--fade-end)), transparent);
   mask-image: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35) calc(var(--fade-top) * 0.45), #000 var(--fade-top), #000 calc(100% - var(--fade-end)), transparent); }
 .words-text.is-rising::-webkit-scrollbar { display: none; }
 .words-text.is-rising.at-top { --fade-top: 0%; }
 .words-text.is-rising.at-end { --fade-end: 0%; }
 :root[data-theme='dark'] .words-item blockquote { text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); }
-.words-item figcaption { flex: none; position: relative; display: flex; justify-content: center; align-items: baseline; gap: 6px; margin: 2px 12% 0; padding-top: 6px;
+.words-item figcaption { flex: none; position: relative; display: flex; justify-content: center; align-items: baseline; gap: 6px; margin: 0 12%; padding-top: 4px;
   font-family: var(--font-ui); font-size: 0.74rem; line-height: 1.3; color: var(--ink-2); white-space: nowrap; overflow: hidden; }
 .words-item figcaption::before { content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 1px;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--plum) 35%, transparent), transparent); }
 .words-item figcaption b { font-weight: 600; color: var(--plum); overflow: hidden; text-overflow: ellipsis; }
 .words-item figcaption i { font-style: normal; opacity: 0.5; }
 .words-item figcaption span { opacity: 0.8; overflow: hidden; text-overflow: ellipsis; }
-.words-dots { position: absolute; left: 0; right: 0; bottom: 9px; display: flex; justify-content: center; gap: 5px; z-index: 2; }
+.words-dots { position: absolute; left: 0; right: 0; bottom: 6px; display: flex; justify-content: center; gap: 5px; z-index: 2; }
 .words-dots span { width: 5px; height: 5px; border-radius: 3px; background: var(--ink-2); opacity: 0.3; transition: width 0.3s var(--ease), opacity 0.3s; }
 .words-dots span.is-on { width: 14px; opacity: 0.7; }
 
@@ -2378,3 +2380,13 @@ html.is-scrolling *, html.is-scrolling *::before, html.is-scrolling *::after { a
 .ai-composer.is-busy { box-shadow: 0 -14px 30px -18px rgba(40, 20, 90, 0.35), 0 12px 30px -14px rgba(40, 20, 90, 0.45), 0 0 22px -8px color-mix(in srgb, var(--primary) 55%, transparent); }
 @media (prefers-reduced-motion: reduce) { .ai-ring::before { animation-duration: 8s; } }
 .chat-joined-who { white-space: nowrap; }
+
+/* her live portrait over a new chat: a soft circle; inside it the clip, and above it only her head */
+.ai-orb-live { overflow: visible; }
+.ai-orb-disc { position: absolute; inset: 0; z-index: 1; border-radius: 50%; background: radial-gradient(circle at 50% 30%, #fbf8ff, #e4d6ff 70%);
+  box-shadow: 0 18px 40px -18px rgba(80, 40, 160, 0.6); }
+.ai-orb-fig { position: absolute; left: 0; right: 0; bottom: 0; height: 122%; z-index: 2;
+  -webkit-mask: radial-gradient(75px circle at 50% calc(100% - 75px), #000 74.5px, transparent 75px), linear-gradient(#000 0 0) top / 100% calc(100% - 75px) no-repeat;
+  mask: radial-gradient(75px circle at 50% calc(100% - 75px), #000 74.5px, transparent 75px), linear-gradient(#000 0 0) top / 100% calc(100% - 75px) no-repeat; }
+.ai-orb-fig video, .ai-orb .ai-orb-fig img { position: static; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0;
+  border-radius: 0; background: none; box-shadow: none; }
