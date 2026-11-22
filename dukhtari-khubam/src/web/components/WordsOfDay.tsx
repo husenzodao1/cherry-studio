@@ -24,7 +24,7 @@ const HELD_MS = 10 * 60_000
  * first lines have moved up, the top line is shaded, so it is clear the beginning is above.
  * Calls `onTime` with how long it needs on screen.
  */
-function Quote({ body, author, active, onTime }: { body: string; author: string | null; active: boolean; onTime: (ms: number) => void }) {
+function Quote({ body, author, source, active, onTime }: { body: string; author: string | null; source: string | null; active: boolean; onTime: (ms: number) => void }) {
   const box = useRef<HTMLDivElement>(null)
   const text = useRef<HTMLQuoteElement>(null)
   const [fit, setFit] = useState<Fit>({ size: SIZES[0], rise: 0 })
@@ -49,7 +49,7 @@ function Quote({ body, author, active, onTime }: { body: string; author: string 
     ro.observe(el.parentElement ?? el)
     document.fonts?.ready.then(measure).catch(() => undefined)
     return () => ro.disconnect()
-  }, [body, author])
+  }, [body, author, source])
 
   useEffect(() => {
     if (active && !fit.rise) onTime(STAY_MS)
@@ -129,7 +129,8 @@ function Quote({ body, author, active, onTime }: { body: string; author: string 
           {body.trim()}
         </blockquote>
       </div>
-      {author ? <figcaption>— {author}</figcaption> : null}
+      {/* who said it and where, under a thin line */}
+      {author || source ? <figcaption>{author ? <b>{author}</b> : null}{author && source ? <i aria-hidden="true">·</i> : null}{source ? <span>{source}</span> : null}</figcaption> : null}
     </>
   )
 }
@@ -167,8 +168,7 @@ export function WordsOfDay() {
       <div className="words-track" aria-live="polite">
         {items.map((q, n) => (
           <figure key={n} className={`words-item${n === at ? ' is-in' : count > 1 && n === prev ? ' is-out' : ''}`} aria-hidden={n !== at}>
-            <Quote body={q.body} active={n === at} onTime={setStay}
-              author={q.author_name ? `${q.author_name}${q.source_title ? `, ${q.source_title}` : ''}` : null} />
+            <Quote body={q.body} active={n === at} onTime={setStay} author={q.author_name || null} source={q.source_title || null} />
           </figure>
         ))}
       </div>

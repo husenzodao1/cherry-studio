@@ -8,7 +8,7 @@ export const LOCALES: Locale[] = ['tg', 'ru', 'en', 'uz', 'tr', 'fa', 'prs']
 export const isRtl = (l: Locale) => l === 'fa' || l === 'prs'
 
 const tg = {
-  'app.name': 'Духтари хубам',
+  'app.name': 'Гулдухтар',
   'nav.home': 'Асосӣ', 'nav.schools': 'Мактабҳо', 'nav.saved': 'Захираҳо', 'nav.profile': 'Профил',
   'home.greeting': 'Салом', 'home.continue_learning': 'Идомаи омӯзиш', 'home.seven_schools': '7 оинаи духтар',
   'home.all_schools': 'Ҳамаи мактабҳо',
@@ -46,7 +46,7 @@ const tg = {
   'home.motto': 'Зебоӣ дар дониш аст.', 'home.continue_course': 'Идома додани курс', 'home.start_learning': 'Оғози омӯзиш',
   'home.choose_school': 'Интихоби мактаб', 'home.all': 'Ҳамааш', 'home.quote': 'Дониш — нурест, ки роҳро равшан мекунад.', 'home.words': 'Суханҳои рӯз', 'school.courses_n': '{n} курс', 'course.modules_n': '{n} модул', 'course.lessons_n': '{n} дарс',
   'lesson.next_page': 'Саҳифаи оянда', 'lesson.prev_page': 'Саҳифаи қаблӣ',
-  'profile.tagline': 'Духтари хубам', 'profile.streak': "Рӯзҳои пайдарпай", 'profile.achievements': "Дастовардҳо",
+  'profile.tagline': 'Гулдухтар', 'profile.streak': "Рӯзҳои пайдарпай", 'profile.achievements': "Дастовардҳо",
   'profile.night': "Ҳолати шабона", 'profile.my_saved': 'Захираҳои ман', 'profile.my_progress': 'Пешрафт',
   'settings.code_hint': "Коди тасдиқ барои воридшавӣ аз телефони дигар.", 'settings.unlock_title': 'Тасдиқи шахсият', 'settings.unlock_reason': 'Барои дидани код қулфи телефонро кушоед', 'settings.unlock_password': "Пароли худро ворид кунед",
   'settings.version': 'Версия', 'notify.daily': "Ёдраскунии дарс ва илҳоми рӯз", 'notify.time': 'Вақт',
@@ -120,7 +120,7 @@ const tg = {
   'rate.soon': "Баҳогузорӣ пас аз нашр дар Google Play фаъол мешавад",
   'share.title': "Мубодила бо дугонаҳо",
   'share.sub': "Барномаро ба дигарон фиристед",
-  'share.text': "«Духтари хубам» — барномаи омӯзишӣ барои духтарон. Зебоӣ дар дониш аст:",
+  'share.text': "«Гулдухтар» — барномаи омӯзишӣ барои духтарон. Зебоӣ дар дониш аст:",
   'share.copied': "Пайванд нусха гирифта шуд",
   'app.exit_again': "Барои баромадан бори дигар пахш кунед",
   'email.label': "Почтаи электронӣ",
@@ -361,6 +361,7 @@ const tg = {
   'perm.done': "Тайёр",
   'perm.later': "Баъдтар",
   'perm.all_set': "Ҳамаи иҷозатҳо дода шуданд",
+  'ai.account_switched': "Шумо аккаунтро иваз кардед",
   'pin.forgot_q': "Фаромӯш кардед?"
 }
 
@@ -463,7 +464,7 @@ const ru: Partial<Record<UiKey, string>> = {
   'rate.soon': "Оценка станет доступна после публикации в Google Play",
   'share.title': "Поделиться с подругами",
   'share.sub': "Отправьте приложение другим",
-  'share.text': "«Духтари хубам» — обучающее приложение для девушек. Красота — в знании:",
+  'share.text': "«Гулдухтар» — обучающее приложение для девушек. Красота — в знании:",
   'share.copied': "Ссылка скопирована",
   'app.exit_again': "Нажмите ещё раз, чтобы выйти",
   'email.label': "Почта",
@@ -570,7 +571,7 @@ const ru: Partial<Record<UiKey, string>> = {
   'block.audio': "Аудио",
   'block.video': "Видео",
   'block.task': "Практическое задание",
-  'app.name': "Духтари хубам",
+  'app.name': "Гулдухтар",
   'action.start_course': "Начать курс",
   'action.save': "Сохранить",
   'action.saved': "Сохранено",
@@ -622,7 +623,7 @@ const ru: Partial<Record<UiKey, string>> = {
   'profile.courses': "Курсы",
   'profile.quizzes': "Тесты",
   'profile.badges': "Значки",
-  'profile.tagline': "Духтари хубам",
+  'profile.tagline': "Гулдухтар",
   'state.course_soon': "Уроки этого курса скоро появятся",
   'state.school_soon': "Курсы скоро появятся",
   'state.not_found': "Этот материал сейчас недоступен",
@@ -757,6 +758,7 @@ const ru: Partial<Record<UiKey, string>> = {
   'perm.done': "Готово",
   'perm.later': "Позже",
   'perm.all_set': "Все разрешения выданы",
+  'ai.account_switched': "Вы сменили аккаунт",
   'pin.forgot_q': "Забыли?"
 }
 

@@ -1,4 +1,4 @@
-/* Духтари хубам · lavender glass design system.
+/* Гулдухтар · lavender glass design system.
    Frosted white glass on a lavender sky, purple gradient pills, rendered glass flowers at the edges.
    Colours are tokens only; screens never hard-code values. */
 
@@ -822,7 +822,7 @@ html.lite .lang-scrim { background: color-mix(in srgb, var(--bg) 72%, transparen
 .call-wave b:nth-child(5) { animation-delay: 0.6s; }
 @keyframes call-bar { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
 .call-line { margin: 0; max-width: 30ch; font-size: 1.05rem; line-height: 1.5; color: #f4efff; animation: ai-line-in 0.4s var(--ease) both; }
-@keyframes ai-line-in { from { opacity: 0; transform: translateY(6px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes ai-line-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 /* answer and decline */
 .call-actions { display: flex; justify-content: space-around; width: min(100%, 320px); min-height: 104px; }
 .call-btn { display: flex; flex-direction: column; align-items: center; gap: 10px; border: 0; background: none; color: #d8ceef; font: inherit; font-size: 0.82rem; cursor: pointer; }
@@ -883,6 +883,7 @@ html.ai-full, html.ai-full body { overflow: hidden; overscroll-behavior: none; }
 
 .ai-top { flex: none; display: flex; align-items: center; gap: 12px; width: min(100%, 560px); margin: 0 auto;
   padding: max(12px, env(safe-area-inset-top)) 16px 8px; animation: rise 0.4s var(--ease) both; }
+.ai-stage { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
 .ai-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: none; scrollbar-width: none; }
 /* her words fade softly at the edges, so they never seem stuck to the header or the box to write in:
    two thin veils of the scene's colour that stay at the edges (cheaper to draw than a mask while scrolling) */
@@ -891,8 +892,8 @@ html.ai-full, html.ai-full body { overflow: hidden; overscroll-behavior: none; }
 .ai-chat::after { bottom: 0; height: 36px; margin: auto -18px -44px; background: linear-gradient(transparent, var(--ai-bg)); }
 .ai-scroll::-webkit-scrollbar { display: none; }
 .ai-scroll { position: relative; }
-/* above the chat's top, pulled down: a ring that fills, then "new chat" */
-.ai-pull { position: absolute; bottom: 18px; left: 50%; z-index: 0; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 8px; border-radius: 999px;
+/* under the chat's end, pulled up: a ring that fills, then "new chat" (over the veil; the words have moved up out of its way) */
+.ai-pull { position: absolute; bottom: 10px; left: 50%; z-index: 3; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 8px; border-radius: 999px;
   transform: translateX(-50%) scale(calc(0.85 + var(--p, 0) * 0.15)); opacity: var(--p, 0); pointer-events: none;
   font-size: 0.82rem; font-weight: 600; color: var(--ink-2); background: color-mix(in srgb, var(--bg) 80%, #fff); border: 1px solid var(--glass-edge);
   box-shadow: 0 8px 20px -12px rgba(40, 20, 90, 0.4); transition: color 0.2s, background 0.2s; }
@@ -909,14 +910,13 @@ html.ai-full, html.ai-full body { overflow: hidden; overscroll-behavior: none; }
 html.genie-open::view-transition-old(root) { animation: none; }
 html.genie-open::view-transition-new(root) { animation: ai-genie 0.8s cubic-bezier(0.22, 0.85, 0.25, 1) both; transform-origin: 50% calc(100% - 68px); }
 html.genie-open .ai-scene, html.genie-open .ai-top { animation: none; }
+/* only moving and fading (drawn by the phone's graphics chip, no redrawing): a narrow drop from her circle
+   widens and rises into the whole screen */
 @keyframes ai-genie {
-  0% { opacity: 0.3; transform: scale(0.16, 0.05); border-radius: 50%;
-    clip-path: polygon(42% calc(100% - 110px), 58% calc(100% - 110px), 54% calc(100% - 40px), 46% calc(100% - 40px)); }
-  35% { opacity: 1; transform: scale(0.66, 0.52);
-    clip-path: polygon(18% 30%, 82% 30%, 60% 100%, 40% 100%); }
-  70% { transform: scale(0.97, 0.95);
-    clip-path: polygon(2% 3%, 98% 3%, 91% 100%, 9% 100%); }
-  100% { opacity: 1; transform: none; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  0% { opacity: 0; transform: translateY(18%) scale(0.14, 0.06); }
+  30% { opacity: 1; transform: translateY(8%) scale(0.55, 0.42); }
+  65% { transform: translateY(1%) scale(0.95, 0.93); }
+  100% { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) { .ai-scene.is-genie { animation: fade-in 0.2s both; } }
 .ai-name { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
@@ -1138,7 +1138,7 @@ html.genie-open .ai-scene, html.genie-open .ai-top { animation: none; }
 .ai-blocks.is-fresh > * { animation-delay: var(--at); }
 .ai-blocks.is-fresh .ai-w { display: inline; animation: ai-word 0.42s var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--w)); }
 .ai-blocks.is-fresh .ai-steps li > .ai-step-n { animation: ai-word 0.42s var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--w)); }
-@keyframes ai-word { from { opacity: 0; filter: blur(4px); } to { opacity: 1; filter: none; } }
+@keyframes ai-word { from { opacity: 0; } to { opacity: 1; } }
 /* she thinks; after a while, a word that she takes her time */
 /* no answer: why, and what can be done */
 .ai-problem { display: flex; align-items: flex-start; gap: 8px; align-self: flex-start; max-width: 92%; animation: rise 0.4s var(--ease) both; }
@@ -1151,7 +1151,7 @@ html.genie-open .ai-scene, html.genie-open .ai-top { animation: none; }
 .ai-follow-in .ai-chip { padding: 8px 13px; font-size: 0.82rem; }
 
 /* the box to write in: a floating glass pill just above the tab bar */
-.ai-composer { flex: none; position: relative; margin: 4px auto max(12px, env(safe-area-inset-bottom));
+.ai-composer { flex: none; position: relative; z-index: 3; margin: 4px auto max(12px, env(safe-area-inset-bottom));
   width: min(400px, calc(100vw - 36px)); display: flex; flex-direction: column; gap: 4px; padding: 6px 6px 6px 16px; border-radius: 28px;
   background: color-mix(in srgb, var(--bg) 70%, transparent); border: 1px solid var(--glass-edge);
   /* a soft shadow upward too: her words above never seem to touch the box */
@@ -1340,7 +1340,8 @@ html.lite .ai-composer { background: color-mix(in srgb, var(--bg) 94%, transpare
 /* a consultant has joined: a quiet line in the middle, her name in a fair hand */
 .chat-joined { align-self: center; max-width: 88%; text-align: center; padding: 10px 16px 12px; margin: 6px 0; font-size: 0.86rem; line-height: 1.5;
   color: var(--ink-2); border-top: 1px solid color-mix(in srgb, var(--primary) 18%, transparent); animation: rise 0.45s var(--ease) both; }
-.chat-joined-name { display: block; margin: 2px 0; font-family: var(--font-brand); font-weight: 400; font-size: 1.45rem; line-height: 1.5; padding-inline: 0.2em;
+.chat-joined-name { display: inline-block; margin: 0 0 -0.4em; padding: 0.05em 0.12em 0.4em; vertical-align: baseline; font-family: var(--font-brand); font-weight: 400;
+  font-size: 1.05rem; line-height: 1.25; white-space: nowrap;
   background: linear-gradient(90deg, #8a5be6, #d0679a); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 /* rating the consultant: a card over a soft veil */
 .consult-screen { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px;
@@ -1557,15 +1558,16 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
   border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow);
   background: linear-gradient(125deg, color-mix(in srgb, var(--rose-strong) 70%, white) 0%, color-mix(in srgb, var(--primary-soft) 45%, white) 52%, color-mix(in srgb, var(--lilac) 80%, white) 100%); }
 :root[data-theme='dark'] .words { background: linear-gradient(125deg, color-mix(in srgb, var(--rose-strong) 80%, black), color-mix(in srgb, var(--primary-soft) 55%, black) 52%, var(--lilac)); }
-.words-label { position: absolute; left: 18px; top: 12px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--plum); opacity: 0.8; z-index: 2; }
-.words-track { position: absolute; inset: 32px 18px 24px; }
+/* its name in a fair hand; the words themselves in a plain, calm letter */
+.words-label { position: absolute; left: 18px; top: 6px; font-family: var(--font-hand), var(--font-brand); font-weight: 700; font-size: 1.25rem; line-height: 1.2; color: var(--plum); opacity: 0.9; z-index: 2; }
+.words-track { position: absolute; inset: 36px 18px 22px; }
 .words-item { position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; align-items: stretch; justify-content: center; text-align: center; gap: 4px;
   padding-inline: 4%; opacity: 0; transform: translateX(110%); transition: transform 0.8s var(--ease), opacity 0.6s var(--ease); }
 .words-item.is-in { opacity: 1; transform: none; }
 .words-item.is-out { opacity: 0; transform: translateX(-110%); }
 /* the quote takes the room left above its author line, never under it; line breaks are kept (poems) */
 .words-text { flex: 0 1 auto; min-height: 0; max-height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.words-item blockquote { margin: 0; font-family: var(--font-hand), var(--font-brand); font-weight: 600; font-size: 1.45rem; line-height: 1.18; color: var(--ink);
+.words-item blockquote { margin: 0; font-family: var(--font-serif), serif; font-weight: 500; font-size: 1.2rem; line-height: 1.32; color: var(--ink);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); overflow-wrap: anywhere; white-space: pre-line; text-wrap: balance; padding: 0.08em 0.3em; }
 /* longer than four lines: four lines show and the rest scrolls up — by itself, slowly, or by finger.
    Once the beginning has moved up, the top line is shaded (and the bottom one while more is below) */
@@ -1577,8 +1579,13 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
 .words-text.is-rising.at-top { --fade-top: 0%; }
 .words-text.is-rising.at-end { --fade-end: 0%; }
 :root[data-theme='dark'] .words-item blockquote { text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); }
-.words-item figcaption { flex: none; font-family: var(--font-hand), var(--font-brand); font-size: 1rem; line-height: 1.2; color: var(--ink-2); opacity: 0.85;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-inline: 0.3em; }
+.words-item figcaption { flex: none; position: relative; display: flex; justify-content: center; align-items: baseline; gap: 6px; margin: 2px 12% 0; padding-top: 6px;
+  font-family: var(--font-ui); font-size: 0.74rem; line-height: 1.3; color: var(--ink-2); white-space: nowrap; overflow: hidden; }
+.words-item figcaption::before { content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--plum) 35%, transparent), transparent); }
+.words-item figcaption b { font-weight: 600; color: var(--plum); overflow: hidden; text-overflow: ellipsis; }
+.words-item figcaption i { font-style: normal; opacity: 0.5; }
+.words-item figcaption span { opacity: 0.8; overflow: hidden; text-overflow: ellipsis; }
 .words-dots { position: absolute; left: 0; right: 0; bottom: 9px; display: flex; justify-content: center; gap: 5px; z-index: 2; }
 .words-dots span { width: 5px; height: 5px; border-radius: 3px; background: var(--ink-2); opacity: 0.3; transition: width 0.3s var(--ease), opacity 0.3s; }
 .words-dots span.is-on { width: 14px; opacity: 0.7; }
@@ -1740,7 +1747,7 @@ html.intro .home > .review-pill { animation-delay: 0.14s; }
 html.intro .home > .words { animation-delay: 0.22s; }
 html.intro .home > .home-schools { animation-delay: 0.3s; }
 html.intro .dock-wrap { animation: intro-dock 0.8s 0.1s cubic-bezier(0.25, 0.9, 0.3, 1.15) both; }
-@keyframes intro-box { from { opacity: 0; transform: translateY(26px) scale(0.94); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes intro-box { from { opacity: 0; transform: translateY(26px) scale(0.94); } to { opacity: 1; transform: none; } }
 @keyframes intro-dock { from { opacity: 0; transform: translateY(90px) scaleX(0.6); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
 /* 2. the flowers open */
 html.intro .hello-flower { animation: intro-bloom 1.3s 0.6s cubic-bezier(0.2, 0.8, 0.25, 1.1) both; }
@@ -2353,3 +2360,21 @@ html.is-scrolling *, html.is-scrolling *::before, html.is-scrolling *::after { a
 .perm-ok { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: #2fa86b; animation: pop 0.3s var(--ease) both; }
 .perm-foot { width: min(100%, 520px); margin: 0 auto; padding: 10px 20px max(14px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .perm-later { border: 0; background: none; font: inherit; font-size: 0.86rem; color: var(--ink-2); padding: 8px 16px; cursor: pointer; }
+
+/* the account on this phone was changed: a thin line with a few small words across the chat */
+.ai-switched { display: flex; align-items: center; gap: 12px; margin: 10px 4px; font-size: 0.72rem; color: var(--ink-2); }
+.ai-switched::before, .ai-switched::after { content: ''; flex: 1; height: 1px; background: color-mix(in srgb, var(--ink) 14%, transparent); }
+.ai-switched span { flex: none; max-width: 70%; text-align: center; }
+
+/* while she answers, a thin gradient light runs round the box to write in (only a turning layer: light to draw) */
+.ai-ring { position: absolute; inset: -1.5px; border-radius: inherit; padding: 1.5px; overflow: hidden; pointer-events: none; z-index: 1;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); animation: fade-in 0.5s both; }
+.ai-ring::before { content: ''; position: absolute; left: 50%; top: 50%; width: max(140%, 480px); aspect-ratio: 1; translate: -50% -50%;
+  background: conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb, var(--primary) 20%, transparent) 40deg, #ff9a7a 110deg, var(--primary) 150deg,
+    #d0679a 195deg, #9a6cf0 240deg, color-mix(in srgb, #9a6cf0 20%, transparent) 290deg, transparent 330deg);
+  animation: ai-ring-turn 2.4s linear infinite; will-change: transform; }
+@keyframes ai-ring-turn { to { transform: rotate(1turn); } }
+.ai-composer.is-busy { box-shadow: 0 -14px 30px -18px rgba(40, 20, 90, 0.35), 0 12px 30px -14px rgba(40, 20, 90, 0.45), 0 0 22px -8px color-mix(in srgb, var(--primary) 55%, transparent); }
+@media (prefers-reduced-motion: reduce) { .ai-ring::before { animation-duration: 8s; } }
+.chat-joined-who { white-space: nowrap; }

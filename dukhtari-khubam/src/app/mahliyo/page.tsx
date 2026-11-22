@@ -3,7 +3,7 @@
 import { Capacitor } from '@capacitor/core'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 import { onBack } from '@/web/components/BackButton'
@@ -17,7 +17,7 @@ import { useAuth } from '@/web/auth'
 import { useLearner } from '@/web/offline/learner'
 import { useApi } from '@/web/useApi'
 import {
-  aboutMe, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
+  aboutMe, accountChanged, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
   useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { usePrefs } from '@/web/prefs'
@@ -283,7 +283,7 @@ export default function MahliyoPage() {
     el.style.height = `${Math.min(el.scrollHeight, 132)}px`
   }, [text])
 
-  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle) })
+  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email })
   const send = (question: string, withFiles: AiUpload[] = []) => {
     // a picture alone asks her to look at it
     const q = question.trim() || (withFiles.length ? t('ai.look') : '')
@@ -369,12 +369,14 @@ export default function MahliyoPage() {
         <p className="ai-offline" role="status"><Icon name="globe" size={18} /><span>{t('ai.offline')}{busy ? ` ${t('ai.offline_wait')}` : ''}</span></p>
       )}
 
-      <div className="ai-scroll" ref={scroller}>
+      {/* the chat, and under its end (not inside it, so it never lies over her words) the "new chat" sign */}
+      <div className="ai-stage">
       <div className="ai-pull" ref={pull} aria-hidden="true">
         <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" pathLength="1" /></svg>
         <Icon name="compose" size={16} />
         <span>{t('ai.clear')}</span>
       </div>
+      <div className="ai-scroll" ref={scroller}>
       <div className="ai-chat" ref={inner}>
         {turns.length ? null : (
           <section className="ai-hero">
@@ -392,7 +394,10 @@ export default function MahliyoPage() {
         )}
 
         {turns.map((m, i) => (m.role === 'user' ? (
-          <div key={i} className={`ai-asked${editing === i ? ' is-editing' : ''}`}>
+          <Fragment key={i}>
+          {/* the account on this phone was changed: what follows is the new one's */}
+          {accountChanged(turns, i) ? <div className="ai-switched" role="separator"><span>{t('ai.account_switched')}</span></div> : null}
+          <div className={`ai-asked${editing === i ? ' is-editing' : ''}`}>
             {m.files?.length ? <Attached files={m.files} /> : null}
             <button type="button" className="bubble" onClick={() => setOpened(opened === i ? null : i)} aria-expanded={opened === i || i === lastQuestion}>
               <Question text={m.content} />
@@ -408,6 +413,7 @@ export default function MahliyoPage() {
               </div>
             ) : null}
           </div>
+          </Fragment>
         ) : (
           <div key={i} className="ai-said">
             <div className="grow">
@@ -453,6 +459,7 @@ export default function MahliyoPage() {
         ) : null}
       </div>
       </div>
+      </div>
 
       {full ? (
         <div className="ai-limit" role="status">
@@ -460,7 +467,9 @@ export default function MahliyoPage() {
           <button type="button" className="ai-limit-new" onClick={startNew}><Icon name="compose" size={14} />{t('ai.clear')}</button>
         </div>
       ) : (
-      <form className={`ai-composer${editing !== null ? ' is-editing' : ''}`} onSubmit={submit}>
+      <form className={`ai-composer${editing !== null ? ' is-editing' : ''}${busy ? ' is-busy' : ''}`} onSubmit={submit}>
+        {/* while she answers: a thin gradient light runs round the box */}
+        {busy ? <span className="ai-ring" aria-hidden="true" /> : null}
         {below ? (
           <button type="button" className={`ai-down${busy ? ' is-writing' : ''}`} onClick={down} aria-label={busy ? `${t('ai.scroll_down')} · ${t('ai.thinking')}` : t('ai.scroll_down')}>
             {busy ? <span className="mi-dots"><i /><i /><i /></span> : <Icon name="arrow-down" size={18} />}

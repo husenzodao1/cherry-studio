@@ -57,7 +57,7 @@ export function Dock() {
     const root = document.documentElement
     if (!document.fullscreenElement && root.requestFullscreen) void root.requestFullscreen({ navigationUI: 'hide' }).catch(() => undefined)
     // the chat pours out of her circle, slowly, over the screen she was on (which stays as it is meanwhile)
-    const doc = document as Document & { startViewTransition?: (update: () => Promise<void>) => { finished: Promise<void> } }
+    const doc = document as Document & { startViewTransition?: (update: () => Promise<void>) => { finished: Promise<void>; ready: Promise<void>; updateCallbackDone: Promise<void> } }
     if (!doc.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) {
       try { sessionStorage.setItem('dk.ai-genie', '1') } catch { /* no animation */ }
       return
@@ -69,6 +69,9 @@ export function Dock() {
       setTimeout(shown, 1500)
       router.push('/mahliyo')
     }))
+    // a transition the browser gives up (a slow phone) just shows the chat at once: not an error
+    void t.ready.catch(() => undefined)
+    void t.updateCallbackDone.catch(() => undefined)
     void t.finished.catch(() => undefined).finally(() => root.classList.remove('genie-open'))
   }
   return (

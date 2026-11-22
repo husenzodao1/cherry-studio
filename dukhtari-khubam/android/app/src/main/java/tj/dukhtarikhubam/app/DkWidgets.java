@@ -74,7 +74,7 @@ public final class DkWidgets {
             v.setTextViewText(R.id.w_streak_label, streakText);
             v.setOnClickPendingIntent(R.id.w_root, open(ctx, "/profile", 1));
         } else if (layout == R.layout.widget_progress) {
-            v.setTextViewText(R.id.w_brand, d.optString("brand", "Духтари хубам"));
+            v.setTextViewText(R.id.w_brand, d.optString("brand", "Гулдухтар"));
             v.setTextViewText(R.id.w_done, String.valueOf(d.optInt("done", 0)));
             v.setTextViewText(R.id.w_done_label, d.optString("doneText", "дарс хонда шуд"));
             v.setProgressBar(R.id.w_bar, 100, Math.max(0, Math.min(100, d.optInt("percent", 0))), false);

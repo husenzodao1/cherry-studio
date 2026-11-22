@@ -24,7 +24,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 /**
- * Saves a PNG straight into the phone's gallery (Pictures/Духтари хубам), without the share sheet.
+ * Saves a PNG straight into the phone's gallery (Pictures/Гулдухтар), without the share sheet.
  * Android 10 and newer need no permission for this; older phones ask once for storage access.
  */
 @CapacitorPlugin(
@@ -32,7 +32,7 @@ import java.io.OutputStream;
     permissions = { @Permission(alias = "storage", strings = { Manifest.permission.WRITE_EXTERNAL_STORAGE }) }
 )
 public class GallerySaverPlugin extends Plugin {
-    private static final String ALBUM = "Духтари хубам";
+    private static final String ALBUM = "Гулдухтар";
 
     @PluginMethod
     public void savePng(PluginCall call) {

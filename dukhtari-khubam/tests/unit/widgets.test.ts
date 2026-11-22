@@ -4,7 +4,7 @@ import { emptyProgress, localDay } from '@/lib/progress'
 import { widgetPath } from '@/web/components/WidgetBridge'
 import { widgetSummary } from '@/web/offline/widgets'
 
-const texts = { brand: 'Духтари хубам', streak: 'рӯз', done: 'дарс', continueFallback: 'Оғоз', words: 'Суханҳои рӯз', quote: 'Дониш нур аст.' }
+const texts = { brand: 'Гулдухтар', streak: 'рӯз', done: 'дарс', continueFallback: 'Оғоз', words: 'Суханҳои рӯз', quote: 'Дониш нур аст.' }
 const day = (now: Date, back: number) => localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - back))
 
 describe('home-screen widgets', () => {

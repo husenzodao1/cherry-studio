@@ -1,10 +1,10 @@
 /** Sizing of the "Words of the day" card (WordsOfDay.tsx). */
 
 /** Font sizes tried, largest first; at the smallest, words longer than four lines scroll upward. */
-export const SIZES = [1.45, 1.28, 1.14, 1.02]
+export const SIZES = [1.2, 1.1, 1.0, 0.92]
 /** The card shows at most this many lines at once. */
 export const LINES = 4
-export const LINE_HEIGHT = 1.18
+export const LINE_HEIGHT = 1.32
 
 export interface Fit { size: number; rise: number }
 

@@ -123,6 +123,7 @@ describe('asking Mahliyo', () => {
     expect(req).toMatchObject({ model: MODEL, fallbacks: 'default', betas: ['server-side-fallback-2026-07-01'], output_config: { effort: 'low', format: { type: 'json_schema' } } })
     expect(req.thinking).toBeUndefined()
     expect(req.system[0].text).toContain('«Гулдухтар»')
+    expect(req.system[0].text).toContain('It was earlier called «Духтари хубам»')
     expect(req.system[0].text).toContain('Gratorslab')
     // she is only Mahliyo AI: the model behind her is not named to her learners
     expect(req.system[0].text).toContain('Never name or hint at the technology')

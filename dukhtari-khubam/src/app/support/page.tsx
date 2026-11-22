@@ -141,7 +141,10 @@ export default function SupportPage() {
     const [before, after] = t('support.joined').split('{name}')
     return (
       <div key={m.id} className="chat-joined" role="status">
-        <span>{before}</span><b className="chat-joined-name">{m.body}</b><span>{after}</span>
+        {/* the name with its quotes kept together on one line */}
+        <span>{before.replace(/[«"“]$/, '')}</span>
+        <span className="chat-joined-who">{before.match(/[«"“]$/)?.[0]}<b className="chat-joined-name">{m.body}</b>{after.match(/^[»"”]/)?.[0]}</span>
+        <span>{after.replace(/^[»"”]/, '')}</span>
       </div>
     )
   }

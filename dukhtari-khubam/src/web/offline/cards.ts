@@ -167,7 +167,7 @@ export async function savePicture(b: Blob, fileName: string, title: string): Pro
   setTimeout(() => URL.revokeObjectURL(url), 5000)
 }
 
-/** The Android app's own saver (GallerySaverPlugin.java): writes the PNG to Pictures/Духтари хубам. */
+/** The Android app's own saver (GallerySaverPlugin.java): writes the PNG to Pictures/Гулдухтар. */
 const GallerySaver = registerPlugin<{ savePng(o: { data: string; fileName: string }): Promise<void> }>('GallerySaver')
 
 /** Saves a picture to the phone's gallery (in a browser: downloads it). */

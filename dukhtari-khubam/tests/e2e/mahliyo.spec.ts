@@ -543,6 +543,11 @@ test('code: copy, and a web page previewed in its own box; a chat shared as a li
     for (let y = 740; y >= 200; y -= 30) fire('touchmove', y)
   })
   await expect(page.locator('.ai-pull')).toHaveClass(/is-ready/)
+  // the sign lies under her last words (never over them) and above the box to write in
+  const sign = (await page.locator('.ai-pull').boundingBox())!
+  const lastWords = (await page.locator('.ai-said').last().locator('.ai-blocks').boundingBox())!
+  expect(sign.y).toBeGreaterThanOrEqual(lastWords.y + lastWords.height)
+  expect(sign.y + sign.height).toBeLessThanOrEqual((await page.locator('.ai-composer').boundingBox())!.y)
   await page.locator('.ai-scroll').evaluate((el) => el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [] })))
   await expect(page.locator('.ai-said')).toHaveCount(0, { timeout: 3000 })
   await expect(page.locator('.ai-hero')).toBeVisible()
@@ -630,5 +635,39 @@ test('a chat holds twenty questions: then a quiet note where the box was, and a 
   await note.getByRole('button', { name: 'Сӯҳбати нав' }).click()
   await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toBeVisible()
   await expect(note).toHaveCount(0)
+  expect(errors).toEqual([])
+})
+
+test('another account on the same phone: a thin line "Шумо аккаунтро иваз кардед" before its first question; what was said before is not sent', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  // after the switch (a flag for this tab), the phone's learner is another one on every opening
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('e2e.switched')) localStorage.setItem('dk.learner', JSON.stringify({ name: 'Зарина', code: '598765432109876', email: 'z@gmail.com' }))
+  })
+  const { asked } = await fakeMahliyo(page, (q) => ({ tajik: true, reply: `Ҷавоб: ${q}`, blocks: [{ type: 'text', text: `Ҷавоб: ${q}` }] }), 1500)
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const box = page.locator('.ai-input')
+  await box.fill('Саволи Малика')
+  await box.press('Enter')
+  // while she answers, a light runs round the box
+  await expect(page.locator('.ai-composer .ai-ring')).toBeVisible()
+  await expect(page.locator('.ai-said')).toHaveCount(1)
+  await expect(page.locator('.ai-composer .ai-ring')).toHaveCount(0)
+  await expect(page.locator('.ai-switched')).toHaveCount(0)
+  // another learner signs in on this phone
+  await page.evaluate(() => sessionStorage.setItem('e2e.switched', '1'))
+  await page.reload()
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('.ai-switched')).toHaveCount(0)
+  await box.fill('Саволи Зарина')
+  await box.press('Enter')
+  const line = page.locator('.ai-switched')
+  await expect(line).toHaveText('Шумо аккаунтро иваз кардед')
+  // the line stands right before her first question
+  await expect(page.locator('.ai-switched + .ai-asked')).toContainText('Саволи Зарина')
+  await expect(page.locator('.ai-said')).toHaveCount(2)
+  expect(asked[1].turns.map((t) => t.content)).toEqual(['Саволи Зарина'])
+  expect(asked[1].name).toBe('Зарина')
   expect(errors).toEqual([])
 })

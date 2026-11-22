@@ -31,7 +31,7 @@ async function knowledge(sb: SupabaseClient): Promise<Known> {
   const stamp = await call<string>(sb, 'api_content_stamp', {}).then(String).catch(() => null)
   if (known && (stamp ? known.stamp === stamp : Date.now() - known.at < 15 * 60_000)) return known
   building ??= buildBundle(sb, 'tg').then((bundle) => {
-    const k: Known = { at: Date.now(), stamp, parts: knowledgePartsOf(bundle), app: String((bundle.ui as Record<string, string> | undefined)?.['app.name'] ?? 'Духтари хубам') }
+    const k: Known = { at: Date.now(), stamp, parts: knowledgePartsOf(bundle), app: String((bundle.ui as Record<string, string> | undefined)?.['app.name'] ?? 'Гулдухтар') }
     known = k
     return k
   }).finally(() => { building = null })

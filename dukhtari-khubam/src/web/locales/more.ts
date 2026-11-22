@@ -24,7 +24,7 @@ export const uz: Partial<Record<UiKey, string>> = {
   'welcome.next': 'Keyingi', 'welcome.skip': 'O‘tkazib yuborish', 'welcome.preparing': 'Darslaringiz tayyorlanmoqda', 'welcome.ready': 'Tayyor!',
   'intro.name': 'Mahliyo', 'intro.hello': 'Salom, aziz do‘stim!', 'intro.me': 'Men sizning ustozingizman.', 'intro.here': 'Bu yerda o‘zingizni yaxshiroq his qilasiz va yangi narsalarni o‘rganasiz!', 'intro.ready': 'Boshlashga tayyormisiz?', 'intro.yes': 'Ha', 'intro.bravo': 'Barakalla!', 'intro.go': 'Unda ketdik!', 'intro.awaits': 'Sizni yangi narsalar kutmoqda!',
   'poem.title': 'Ijod gulzori', 'splash.loading': 'Yuklanmoqda',
-  'app.name': "Dukhtari Khubam",
+  'app.name': "Guldukhtar",
   'home.seven_schools': "Qizning 7 oynasi",
   'app.update': "Yangi versiya mavjud",
   'app.update_action': "Yangilash",
@@ -110,7 +110,7 @@ export const uz: Partial<Record<UiKey, string>> = {
   'course.lessons_n': "Darslar: {n}",
   'lesson.next_page': "Keyingi sahifa",
   'lesson.prev_page': "Oldingi sahifa",
-  'profile.tagline': "Dukhtari Khubam",
+  'profile.tagline': "Guldukhtar",
   'profile.night': "Tungi rejim",
   'profile.my_saved': "Saqlanganlarim",
   'profile.my_progress': "Natijalarim",
@@ -231,7 +231,7 @@ export const uz: Partial<Record<UiKey, string>> = {
   'rate.soon': "Baholash Google Play’da chiqqandan keyin ishlaydi",
   'share.title': "Dugonalar bilan ulashish",
   'share.sub': "Ilovani boshqalarga yuboring",
-  'share.text': "«Dukhtari Khubam» — qizlar uchun o‘quv ilovasi. Go‘zallik — bilimda:",
+  'share.text': "«Guldukhtar» — qizlar uchun o‘quv ilovasi. Go‘zallik — bilimda:",
   'share.copied': "Havola nusxalandi",
   'app.exit_again': "Chiqish uchun yana bir marta bosing",
   'email.send_code': "Kodni yuborish",
@@ -441,6 +441,7 @@ export const uz: Partial<Record<UiKey, string>> = {
   'perm.done': "Tayyor",
   'perm.later': "Keyinroq",
   'perm.all_set': "Barcha ruxsatlar berildi",
+  'ai.account_switched': "Siz akkauntni almashtirdingiz",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -466,7 +467,7 @@ export const tr: Partial<Record<UiKey, string>> = {
   'welcome.next': 'İleri', 'welcome.skip': 'Geç', 'welcome.preparing': 'Dersleriniz hazırlanıyor', 'welcome.ready': 'Hazır!',
   'intro.name': 'Mahliyo', 'intro.hello': 'Merhaba, sevgili dostum!', 'intro.me': 'Ben sizin öğretmeninizim.', 'intro.here': 'Burada kendinizi daha iyi hissedebilir ve yeni şeyler öğrenebilirsiniz!', 'intro.ready': 'Başlamaya hazır mısınız?', 'intro.yes': 'Evet', 'intro.bravo': 'Aferin!', 'intro.go': 'O hâlde haydi!', 'intro.awaits': 'Sizi yeni şeyler bekliyor!',
   'poem.title': 'Şiir bahçesi', 'splash.loading': 'Yükleniyor',
-  'app.name': "Dukhtari Khubam",
+  'app.name': "Guldukhtar",
   'home.seven_schools': "Bir kızın 7 aynası",
   'app.update': "Yeni sürüm mevcut",
   'app.update_action': "Güncelle",
@@ -552,7 +553,7 @@ export const tr: Partial<Record<UiKey, string>> = {
   'course.lessons_n': "Ders: {n}",
   'lesson.next_page': "Sonraki sayfa",
   'lesson.prev_page': "Önceki sayfa",
-  'profile.tagline': "Dukhtari Khubam",
+  'profile.tagline': "Guldukhtar",
   'profile.night': "Gece modu",
   'profile.my_saved': "Kaydettiklerim",
   'profile.my_progress': "İlerlemem",
@@ -673,7 +674,7 @@ export const tr: Partial<Record<UiKey, string>> = {
   'rate.soon': "Değerlendirme, uygulama Google Play’de yayınlanınca açılacak",
   'share.title': "Arkadaşlarla paylaş",
   'share.sub': "Uygulamayı başkalarına gönderin",
-  'share.text': "«Dukhtari Khubam» — kızlar için bir eğitim uygulaması. Güzellik bilgidedir:",
+  'share.text': "«Guldukhtar» — kızlar için bir eğitim uygulaması. Güzellik bilgidedir:",
   'share.copied': "Bağlantı kopyalandı",
   'app.exit_again': "Çıkmak için tekrar basın",
   'email.send_code': "Kodu gönder",
@@ -883,6 +884,7 @@ export const tr: Partial<Record<UiKey, string>> = {
   'perm.done': "Tamam",
   'perm.later': "Sonra",
   'perm.all_set': "Tüm izinler verildi",
+  'ai.account_switched': "Hesap değiştirdiniz",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -908,7 +910,7 @@ export const fa: Partial<Record<UiKey, string>> = {
   'welcome.next': 'بعدی', 'welcome.skip': 'رد شدن', 'welcome.preparing': 'درس‌های شما آماده می‌شود', 'welcome.ready': 'آماده است!',
   'intro.name': 'ماه‌لیا', 'intro.hello': 'سلام، دوست عزیز!', 'intro.me': 'من آموزگار شما هستم.', 'intro.here': 'اینجا می‌توانید حال بهتری داشته باشید و چیزهای تازه بیاموزید!', 'intro.ready': 'آماده‌اید شروع کنیم؟', 'intro.yes': 'بله', 'intro.bravo': 'آفرین!', 'intro.go': 'پس برویم!', 'intro.awaits': 'چیزهای تازه در انتظار شماست!',
   'poem.title': 'گلستان سخن', 'splash.loading': 'در حال بارگذاری',
-  'app.name': "دختر خوبم",
+  'app.name': "گل‌دختر",
   'home.seven_schools': "۷ آینهٔ دختر",
   'app.update': "نسخهٔ جدید آماده است",
   'app.update_action': "به‌روزرسانی",
@@ -993,7 +995,7 @@ export const fa: Partial<Record<UiKey, string>> = {
   'course.lessons_n': "{n} درس",
   'lesson.next_page': "صفحهٔ بعد",
   'lesson.prev_page': "صفحهٔ قبل",
-  'profile.tagline': "دختر خوبم",
+  'profile.tagline': "گل‌دختر",
   'profile.night': "حالت شب",
   'profile.my_saved': "ذخیره‌های من",
   'profile.my_progress': "پیشرفت من",
@@ -1114,7 +1116,7 @@ export const fa: Partial<Record<UiKey, string>> = {
   'rate.soon': "امتیازدهی پس از انتشار در Google Play فعال می‌شود",
   'share.title': "اشتراک با دوستان",
   'share.sub': "برنامه را برای دیگران بفرستید",
-  'share.text': "«دختر خوبم» — برنامهٔ آموزشی برای دختران. زیبایی در دانش است:",
+  'share.text': "«گل‌دختر» — برنامهٔ آموزشی برای دختران. زیبایی در دانش است:",
   'share.copied': "پیوند کپی شد",
   'app.exit_again': "برای خروج دوباره بزنید",
   'email.send_code': "ارسال کد",
@@ -1324,6 +1326,7 @@ export const fa: Partial<Record<UiKey, string>> = {
   'perm.done': "آماده",
   'perm.later': "بعداً",
   'perm.all_set': "همهٔ مجوزها داده شد",
+  'ai.account_switched': "حساب را عوض کردید",
   'pin.forgot_q': "فراموش کردید؟"
 }
 
@@ -1368,5 +1371,6 @@ export const prs: Partial<Record<UiKey, string>> = {
   'perm.done': "آماده",
   'perm.later': "بعداً",
   'perm.all_set': "همهٔ اجازه‌ها داده شد",
+  'ai.account_switched': "حساب را تبدیل کردید",
   'install.app': "نصب برنامه روی تلفن"
 }

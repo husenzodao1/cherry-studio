@@ -25,6 +25,21 @@ export interface AiTurn {
   role: 'user' | 'assistant'; content: string; at: string; tajik?: boolean; blocks?: AiBlock[]; files?: AiFileView[]
   /** her answer's question on the server (to mark it 👍/👎), and how the learner marked it */
   id?: string; rating?: 1 | -1
+  /** the account a question was asked from (its answer belongs to the same) */
+  account?: string
+}
+
+/** whose each turn is: a question's account, and its answer's the same */
+const ownersOf = (turns: AiTurn[]) => {
+  let owner: string | undefined
+  return turns.map((t) => (t.role === 'user' ? (owner = t.account) : owner))
+}
+/** Whether question `i` is the first one asked after the account on this phone was changed. */
+export function accountChanged(turns: AiTurn[], i: number): boolean {
+  const mine = turns[i]?.account
+  if (turns[i]?.role !== 'user' || !mine) return false
+  for (let j = i - 1; j >= 0; j--) if (turns[j].role === 'user' && turns[j].account) return turns[j].account !== mine
+  return false
 }
 /** A picture or a file sent with a question, as the chat keeps it (a small picture, no data). */
 export interface AiFileView { mime: string; name: string; thumb?: string }
@@ -221,7 +236,7 @@ export interface AiState {
   unseen: boolean
   online: boolean
 }
-export interface Who { code?: string; name?: string; me?: string }
+export interface Who { code?: string; name?: string; me?: string; account?: string }
 
 const PENDING_KEY = 'dk.ai-pending'
 /** how long she may take before the question counts as unanswered (the server gives up after 5 minutes) */
@@ -332,20 +347,23 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
   lastFiles = files
   const views = files.map(({ mime, name, thumb }) => ({ mime, name, thumb }))
   const turns: AiTurn[] = [...(editFrom === undefined ? state.turns : state.turns.slice(0, editFrom)),
-    { role: 'user', content: q, at: new Date().toISOString(), ...(views.length ? { files: views } : {}) }]
+    { role: 'user', content: q, at: new Date().toISOString(), ...(views.length ? { files: views } : {}), ...(who.account ? { account: who.account } : {}) }]
   const my = ++run
   const chat = state.chat
   const pending = { id: null, since: Date.now(), chat }
   savePending(pending)
   set({ turns, chats: keep(chat, turns), pending, problem: null, fresh: -1 })
   // the conversation sent starts with a question of hers (the server's rule)
-  let recent = turns.slice(-CONTEXT)
+  // what was said from another account on this phone is not hers: it is not sent
+  const owners = ownersOf(turns)
+  let recent = turns.filter((_, i) => !who.account || !owners[i] || owners[i] === who.account).slice(-CONTEXT)
   while (recent.length && recent[0].role !== 'user') recent = recent.slice(1)
   let tz: string | undefined
   try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone } catch { /* unknown zone */ }
   try {
+    const { account: _account, ...asker } = who
     const { id, books } = await post<{ id: string; books?: boolean }>('/mahliyo/ask', {
-      token: supportToken(), ...who, now: localIso(), tz: tz?.slice(0, 64), background: true,
+      token: supportToken(), ...asker, now: localIso(), tz: tz?.slice(0, 64), background: true,
       // an earlier question's pictures are named, not sent again
       turns: recent.map((t, i) => ({
         role: t.role,
