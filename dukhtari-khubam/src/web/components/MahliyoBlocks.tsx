@@ -203,6 +203,7 @@ function PictureTile({ picture, onOpen, onFail }: { picture: Picture; onOpen: ()
 }
 
 export function AnswerBlocks({ blocks, fresh, id, onQuiz }: { blocks: AiBlock[]; fresh: boolean; id?: string; onQuiz?: (result: string) => void }) {
+  const { t } = usePrefs()
   const [zoom, setZoom] = useState<Extract<AiBlock, { type: 'screen' }> | null>(null)
   const { starts } = timingOf(blocks)
   return (
@@ -253,6 +254,9 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz }: { blocks: AiBlock[];
             return <QuizCard key={i} block={b} id={id ? `${id}:${i}` : undefined} onQuiz={onQuiz} style={style} />
           case 'premium':
             return null
+          case 'warning':
+            // insults or pressure: only this, in red
+            return <p key={i} className="ai-card ai-warning" role="alert" style={style}>{t('ai.warning')}</p>
           case 'sources':
             // shown small at the end of her answer's row (Sources)
             return null

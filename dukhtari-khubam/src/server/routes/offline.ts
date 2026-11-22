@@ -236,10 +236,18 @@ export const offlineRoutes: AnyRoute[] = [
   route({
     method: 'POST', path: '/support/send', access: 'public', tag: 'Support',
     summary: 'Write to support from this phone (no account needed); returns the thread',
-    body: z.strictObject({ token: Token, name: z.string().max(80).optional(), username: z.string().max(40).optional(), body: z.string().trim().min(1).max(2000) }),
-    handler: async ({ sb, body }) => call(sb(), 'api_support_send', {
-      p_token_hash: codeHash(body.token), p_name: body.name ?? null, p_username: body.username ?? null, p_body: body.body
-    })
+    body: z.strictObject({
+      token: Token, name: z.string().max(80).optional(), username: z.string().max(40).optional(), body: z.string().trim().min(1).max(2000),
+      // the account she writes for (so the consultant can help with it)
+      email: z.email().max(200).optional()
+    }),
+    handler: async ({ sb, body }) => {
+      const thread = await call<Record<string, unknown>>(sb(), 'api_support_send', {
+        p_token_hash: codeHash(body.token), p_name: body.name ?? null, p_username: body.username ?? null, p_body: body.body
+      })
+      if (body.email) await call(sb(), 'api_support_email', { p_token_hash: codeHash(body.token), p_email: body.email }).catch(() => undefined)
+      return thread
+    }
   }),
   route({
     method: 'POST', path: '/support/thread', access: 'public', tag: 'Support',

@@ -2482,3 +2482,11 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
 .ai-quiz-score { flex: 1; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.92rem; color: var(--ink); animation: rise 0.35s var(--ease) both; }
 .ai-quiz-bar { height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 8%, transparent); overflow: hidden; }
 .ai-quiz-bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #2fa86b); transition: width 0.8s var(--ease); }
+
+/* the consultant's help in the support chat: a new PIN shown large */
+.help-pin { display: inline-block; margin-left: 4px; font-size: 1.3em; letter-spacing: 0.18em; font-variant-numeric: tabular-nums; }
+.pin-by-email { margin-top: 6px; }
+
+/* insults or pressure: her answer is only this warning, in red */
+.ai-scene .ai-said .ai-warning, .ai-warning { margin: 0; color: #d8343e; font-weight: 600; font-size: 1rem; line-height: 1.55; }
+.ai-closed p { color: #d8343e; font-weight: 600; }

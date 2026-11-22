@@ -755,3 +755,33 @@ test('a test in the chat: questions to answer, "Санҷидан" marks them and
   await expect(page.locator('.ai-quiz').first().locator('.ai-quiz-score')).toContainText('1 аз 2 дуруст')
   expect(errors).toEqual([])
 })
+
+test('insults or pressure: only a red warning; after three, the next one closes the chat and signs her out — and it stays closed', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  // after the sign-out, the same account signs in again (a flag for this tab)
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('e2e.again')) localStorage.setItem('dk.learner', JSON.stringify({ name: 'Малика', code: '512345678901234', email: 'm@gmail.com' }))
+  })
+  await fakeMahliyo(page, () => ({ tajik: true, reply: 'warning', blocks: [{ type: 'warning' }] }), 300)
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const box = page.locator('.ai-input')
+  for (let n = 1; n <= 3; n++) {
+    await box.fill(`Суханони бад ${n}`)
+    await box.press('Enter')
+    await expect(page.locator('.ai-warning')).toHaveCount(n)
+  }
+  await expect(page.locator('.ai-warning').first()).toHaveText('Ба ман суханҳои ноҷо ва ё ҳақорату фишор овардан мумкин нест, лутфан бас кун ва ё ҳисоби ту баъди 3 огоҳӣ баста мешавад 😠')
+  expect(await page.locator('.ai-warning').first().evaluate((e) => getComputedStyle(e).color)).toBe('rgb(216, 52, 62)')
+  // the fourth: signed out
+  await box.fill('Суханони бад 4')
+  await box.press('Enter')
+  await expect(page).toHaveURL(/\/start/, { timeout: 10_000 })
+  // signed in again: the chat stays closed
+  await page.evaluate(() => sessionStorage.setItem('e2e.again', '1'))
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('.ai-closed')).toHaveText('Чат барои суханҳои ноҷо ва фишор пурра қуфл шуд.')
+  await expect(page.locator('.ai-input')).toHaveCount(0)
+  expect(errors).toEqual([])
+})

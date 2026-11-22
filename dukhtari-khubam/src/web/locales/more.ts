@@ -454,6 +454,12 @@ export const uz: Partial<Record<UiKey, string>> = {
   'ai.quiz_result': "Test natijam: {total} tadan {n}",
   'ai.quiz_mine': "mening javobim",
   'ai.quiz_right': "to'g'risi",
+  'support.help_pin': "Yangi PIN kodingiz: ",
+  'support.help_unlock': "PIN o'chirildi — ilova endi PINsiz ochiladi.",
+  'support.help_new_email': "Akkauntingiz pochtasi o'zgartirildi: {email}",
+  'pin.remove_by_email': "PINni pochta orqali olib tashlash",
+  'ai.warning': "Menga qo'pol so'zlar, haqorat yoki bosim qilish mumkin emas. Iltimos, to'xta, aks holda 3 ogohlantirishdan keyin hisobing yopiladi 😠",
+  'ai.closed': "Chat qo'pollik va bosim sababli butunlay yopildi.",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -909,6 +915,12 @@ export const tr: Partial<Record<UiKey, string>> = {
   'ai.quiz_result': "Test sonucum: {total} sorudan {n}",
   'ai.quiz_mine': "cevabım",
   'ai.quiz_right': "doğrusu",
+  'support.help_pin': "Yeni PIN kodunuz: ",
+  'support.help_unlock': "PIN kapatıldı — uygulama artık PIN olmadan açılır.",
+  'support.help_new_email': "Hesabınızın e-postası değiştirildi: {email}",
+  'pin.remove_by_email': "PIN'i e-posta ile kaldır",
+  'ai.warning': "Bana kaba sözler, hakaret ya da baskı yapılamaz. Lütfen dur, yoksa 3 uyarıdan sonra hesabın kapatılır 😠",
+  'ai.closed': "Sohbet, kaba sözler ve baskı yüzünden tamamen kapatıldı.",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1363,6 +1375,12 @@ export const fa: Partial<Record<UiKey, string>> = {
   'ai.quiz_result': "نتیجهٔ آزمون من: {n} از {total}",
   'ai.quiz_mine': "پاسخ من",
   'ai.quiz_right': "درست",
+  'support.help_pin': "PIN جدید شما: ",
+  'support.help_unlock': "PIN خاموش شد — برنامه اکنون بدون PIN باز می‌شود.",
+  'support.help_new_email': "ایمیل حساب شما تغییر کرد: {email}",
+  'pin.remove_by_email': "حذف PIN با تأیید ایمیل",
+  'ai.warning': "نمی‌شود به من سخنان ناروا، توهین یا فشار بیاوری. لطفاً بس کن، وگرنه پس از ۳ هشدار حسابت بسته می‌شود 😠",
+  'ai.closed': "گفتگو به‌خاطر سخنان ناروا و فشار کاملاً بسته شد.",
   'pin.forgot_q': "فراموش کردید؟"
 }
 
@@ -1420,5 +1438,11 @@ export const prs: Partial<Record<UiKey, string>> = {
   'ai.quiz_result': "نتیجهٔ آزمون من: {n} از {total}",
   'ai.quiz_mine': "جواب من",
   'ai.quiz_right': "درست",
+  'support.help_pin': "PIN جدید شما: ",
+  'support.help_unlock': "PIN خاموش شد — برنامه اکنون بدون PIN باز می‌شود.",
+  'support.help_new_email': "ایمیل حساب شما تغییر کرد: {email}",
+  'pin.remove_by_email': "حذف PIN با تأیید ایمیل",
+  'ai.warning': "نمی‌شود به من سخنان ناروا، توهین یا فشار بیاوری. لطفاً بس کن، ورنه پس از ۳ اخطار حسابت بسته می‌شود 😠",
+  'ai.closed': "گفتگو به‌خاطر سخنان ناروا و فشار کاملاً بسته شد.",
   'install.app': "نصب برنامه روی تلفن"
 }

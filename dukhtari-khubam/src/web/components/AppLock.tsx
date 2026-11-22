@@ -153,6 +153,14 @@ export function AppLock() {
   // wrong PINs in a row: after five, a clear "forgot your PIN?" with the reset by e-mail
   const [wrongs, setWrongs] = useState(0)
   const onSupport = /^\/support(\/|$)/.test(path)
+  /** her e-mail: the one she confirmed, or her Google account's (both receive the code) */
+  const email = learner?.email ?? learner?.google ?? null
+  // a consultant turned the PIN off (support chat): the app opens
+  useEffect(() => {
+    const cleared = () => { setStage('pin'); setHint(null); setLocked(false) }
+    window.addEventListener('dk-pin-cleared', cleared)
+    return () => window.removeEventListener('dk-pin-cleared', cleared)
+  }, [])
 
   // before the first paint, so nothing behind the lock flashes
   useLayoutEffect(() => {
@@ -199,7 +207,7 @@ export function AppLock() {
     setHint(null)
     const r = await unlockWithPhone(t('pin.phone_title'), t('pin.phone_reason'))
     if (r === 'cancelled') return setHint(t('pin.phone_needed'))
-    if (learner?.email) return setStage('email')
+    if (email) return setStage('email')
     if (hasRecovery()) return setStage('questions')
     if (r === 'ok') return setStage('choose')
     if (learner?.username) setAsking(true)
@@ -212,7 +220,7 @@ export function AppLock() {
     router.push(`/support?help=${help}`)
   }
   /** "Don't remember the answers either?": the code by e-mail when she has one, else support. */
-  const noAnswers = () => (learner?.email ? forgot() : toSupport('answers'))
+  const noAnswers = () => (email ? forgot() : toSupport('answers'))
   /** "Forgot it?": the life questions first when she chose them; otherwise straight to the e-mail way. */
   const forgotAsk = () => {
     setHint(null)
@@ -260,8 +268,8 @@ export function AppLock() {
           </span>
           <h1 className="pin-title">{t(stage === 'choose' ? 'recovery.passed' : stage === 'email' ? 'pin.by_email_title' : 'recovery.title')}</h1>
         </div>
-        {stage === 'email' && learner?.email ? (
-          <EmailCode email={learner.email} onPassed={() => setStage('choose')} onCancel={() => setStage('pin')} onNoAccess={() => toSupport('email')} />
+        {stage === 'email' && email ? (
+          <EmailCode email={email} onPassed={() => setStage('choose')} onCancel={() => setStage('pin')} onNoAccess={() => toSupport('email')} />
         ) : stage === 'questions' ? (
           <Questions onPassed={() => setStage('choose')} />
         ) : (
@@ -308,6 +316,9 @@ export function AppLock() {
           <span className="row-sub">{t('pin.too_many_sub')}</span>
           <button type="button" className="btn btn-block" onClick={forgotAsk}>{t('pin.reset')}</button>
         </div>
+      ) : email ? (
+        // the PIN off (or a new one) with a code sent to her e-mail: always in sight, small
+        <button type="button" className="link-btn pin-small pin-by-email" onClick={() => void forgot()}>{t('pin.remove_by_email')}</button>
       ) : null}
     </PinPad>
   )

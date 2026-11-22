@@ -8,7 +8,8 @@ import { onBack } from '@/web/components/BackButton'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { useLearner } from '@/web/offline/learner'
-import { loadThread, rateThread, sendMessage, supportToken, type SupportMessage, type SupportThread } from '@/web/offline/support'
+import { clearPin, setPin } from '@/web/offline/pin'
+import { loadThread, markDone, pendingHelp, rateThread, sendMessage, supportToken, type SupportMessage, type SupportThread } from '@/web/offline/support'
 import { usePrefs } from '@/web/prefs'
 
 /** Why she came from the PIN screen: no e-mail access, or neither the answers nor an e-mail. */
@@ -53,7 +54,7 @@ function RateConsultant({ onDone }: { onDone: (rating?: number, note?: string) =
  */
 export default function SupportPage() {
   const { t, locale } = usePrefs()
-  const { learner } = useLearner()
+  const { learner, confirmEmail } = useLearner()
   const router = useRouter()
   const [thread, setThread] = useState<SupportThread | null>(null)
   const [text, setText] = useState('')
@@ -83,6 +84,17 @@ export default function SupportPage() {
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'end' })
   }, [thread?.messages.length])
+  // the consultant's help, carried out here at once: a new PIN, the PIN off, the account's new e-mail
+  useEffect(() => {
+    for (const m of pendingHelp(thread)) {
+      if (m.action === 'pin' && /^\d{4}$/.test(m.body)) void setPin(m.body)
+      else if (m.action === 'unlock') {
+        clearPin()
+        window.dispatchEvent(new Event('dk-pin-cleared'))
+      } else if (m.action === 'email' && /@/.test(m.body)) confirmEmail(m.body)
+      markDone(m.id)
+    }
+  }, [thread, confirmEmail])
 
   const post = useCallback(async (body: string) => {
     if (navigator.onLine === false) return setState('offline')
@@ -90,7 +102,9 @@ export default function SupportPage() {
     try {
       const token = supportToken()!
       setThread(await sendMessage(token, body, {
-        name: learner?.name ?? (name.trim() || undefined), username: learner?.username ?? (username.trim() || undefined)
+        name: learner?.name ?? (name.trim() || undefined), username: learner?.username ?? (username.trim() || undefined),
+        // the account she writes for, so the consultant can help with it (change its e-mail)
+        email: learner?.email ?? learner?.google ?? undefined
       }))
       setText('')
       setState('idle')
@@ -161,9 +175,13 @@ export default function SupportPage() {
             <time>{when(m)}</time>
           </div>
         ) : (
-          <div key={m.id} className={`bubble${m.from_staff ? ' bubble-staff' : ''}`}>
+          <div key={m.id} className={`bubble${m.from_staff ? ' bubble-staff' : ''}${m.action ? ' bubble-help' : ''}`}>
             {m.from_staff ? <span className="bubble-who">{t('support.staff')}</span> : null}
-            <span style={{ whiteSpace: 'pre-wrap' }}>{m.body}</span>
+            {/* the consultant's help, in words (the phone has carried it out) */}
+            {m.action === 'pin' ? <span>{t('support.help_pin')}<b className="help-pin">{m.body}</b></span>
+              : m.action === 'unlock' ? <span>{t('support.help_unlock')}</span>
+              : m.action === 'email' ? <span>{t('support.help_new_email').replace('{email}', m.body)}</span>
+              : <span style={{ whiteSpace: 'pre-wrap' }}>{m.body}</span>}
             <time>{when(m)}</time>
           </div>
         ))}

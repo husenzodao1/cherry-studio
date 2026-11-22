@@ -9,7 +9,7 @@ import { errorText, send, sendNow } from './ui'
 
 /**
  * Support chat for staff: threads written from phones (newest and open first), the conversation, a reply
- * box, close/reopen, and — for a learner who lost both code and password — a temporary password.
+ * box, close/reopen, and the help her phone carries out itself: a new PIN, the PIN off, her account's new e-mail.
  */
 
 interface ThreadRow {
@@ -18,8 +18,9 @@ interface ThreadRow {
   rating?: number | null; rating_note?: string | null
 }
 /** 'bot': Mahliyo's answer at once; 'joined': a consultant opened the conversation (the body is her name) */
-interface Message { id: string; from_staff: boolean; kind?: 'text' | 'bot' | 'joined'; body: string; at: string }
-interface Thread extends ThreadRow { messages: Message[] }
+interface Message { id: string; from_staff: boolean; kind?: 'text' | 'bot' | 'joined'; body: string; at: string; action?: 'pin' | 'unlock' | 'email' | null }
+/** `email`: the account the learner wrote for (her phone told it) */
+interface Thread extends ThreadRow { messages: Message[]; email?: string | null }
 
 const when = (iso: string) => new Date(iso).toLocaleString('ru', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
@@ -59,10 +60,7 @@ function ThreadView({ id, onBack }: { id: string; onBack: () => void }) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState<string | null>(null)
-  const [username, setUsername] = useState('')
-  useEffect(() => {
-    if (thread.data?.username) setUsername(thread.data.username)
-  }, [thread.data?.username])
+  const [email, setEmail] = useState('')
   useEffect(() => {
     const timer = setInterval(thread.reload, 10_000)
     return () => clearInterval(timer)
@@ -89,12 +87,19 @@ function ThreadView({ id, onBack }: { id: string; onBack: () => void }) {
     await send(`/admin/support/${id}/status`, 'POST', { status: s }).catch((err) => setNote(errorText(err)))
     thread.reload()
   }
-  const reset = async () => {
-    if (!username.trim() || !confirm(`«${username}»: пароли муваққатӣ ва коди нав дода шавад? Коди пешина кор намекунад.`)) return
+  /** the consultant's help, carried out by her phone when it reads the conversation */
+  const help = async (action: 'pin' | 'unlock' | 'email') => {
+    const ask = action === 'pin' ? 'PIN-и нави 4-рақама ба корбар фиристода шавад? Телефонаш онро худ мегузорад.'
+      : action === 'unlock' ? 'PIN-и корбар хомӯш карда шавад? Барнома бе PIN кушода мешавад.'
+      : `Почтаи ҳисоб ба «${email.trim()}» иваз карда шавад?`
+    if (action === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) return setNote('Почтаи дурусти навро нависед.')
+    if (!confirm(ask)) return
     try {
-      const r = await sendNow<{ username: string; password: string }>('/admin/learners/reset', 'POST', { username: username.trim() })
-      setText(`Логин: ${r.username}\nПароли муваққатӣ: ${r.password}\nБо онҳо ворид шавед ва пароли нав интихоб кунед.`)
-      setNote('Пароли муваққатӣ дар майдони ҷавоб гузошта шуд — фиристед.')
+      await sendNow(`/admin/support/${id}/action`, 'POST', action === 'email' ? { action, value: email.trim() } : { action })
+      setNote(action === 'pin' ? 'PIN-и нав фиристода шуд — дар телефони корбар худ гузошта мешавад.'
+        : action === 'unlock' ? 'PIN хомӯш карда шуд — барномаи корбар кушода мешавад.' : 'Почта иваз шуд.')
+      if (action === 'email') setEmail('')
+      thread.reload()
     } catch (err) {
       setNote(errorText(err))
     }
@@ -112,7 +117,7 @@ function ThreadView({ id, onBack }: { id: string; onBack: () => void }) {
         ) : (
           <div key={m.id} className={`bubble${m.from_staff ? '' : ' bubble-staff'}`} style={m.kind === 'bot' ? { opacity: 0.75 } : undefined}>
             {m.kind === 'bot' ? <span className="bubble-who" style={{ color: 'inherit' }}>Маҳлиё (худкор)</span> : null}
-            <span style={{ whiteSpace: 'pre-wrap' }}>{m.body}</span>
+            <span style={{ whiteSpace: 'pre-wrap' }}>{m.action === 'pin' ? `PIN-и нав: ${m.body}` : m.action === 'unlock' ? 'PIN хомӯш карда шуд' : m.action === 'email' ? `Почтаи нав: ${m.body}` : m.body}</span>
             <time>{when(m.at)}</time>
           </div>
         ))}
@@ -122,12 +127,19 @@ function ThreadView({ id, onBack }: { id: string; onBack: () => void }) {
         <textarea className="input" rows={3} placeholder="Ҷавоб…" value={text} maxLength={2000} onChange={(e) => setText(e.target.value)} />
         <button className="btn btn-block" disabled={busy || !text.trim()}>Фиристодан <Icon name="arrow" size={16} /></button>
       </form>
-      <div className="glass card-pad stack" style={{ gap: 8 }}>
-        <b style={{ fontWeight: 500 }}>Логин ва парол фаромӯш шуд</b>
-        <span className="muted" style={{ fontSize: '0.85em' }}>Пароли муваққатӣ ва коди нав (танҳо super_admin). Пешрафт нигоҳ дошта мешавад.</span>
+      {/* the consultant's help: her phone carries it out itself when it reads the conversation */}
+      <div className="glass card-pad stack" style={{ gap: 10 }}>
+        <b style={{ fontWeight: 500 }}>Ёрӣ ба корбар</b>
+        <span className="muted" style={{ fontSize: '0.85em' }}>
+          {t.email ? <>Ҳисоб: <b>{t.email}</b></> : 'Почтаи ҳисоб маълум нест (корбар бе почта навиштааст).'}
+        </span>
+        <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+          <button type="button" className="btn btn-soft" onClick={() => help('pin')}><Icon name="key" size={16} /> PIN-и нав додан</button>
+          <button type="button" className="btn btn-soft" onClick={() => help('unlock')}><Icon name="lock" size={16} /> PIN-ро хомӯш кардан</button>
+        </div>
         <div className="row" style={{ gap: 8 }}>
-          <input className="input" placeholder="логин" value={username} onChange={(e) => setUsername(e.target.value)} autoCapitalize="none" />
-          <button type="button" className="btn btn-soft" onClick={reset}>Додан</button>
+          <input className="input" type="email" placeholder="почтаи нав" value={email} onChange={(e) => setEmail(e.target.value)} autoCapitalize="none" />
+          <button type="button" className="btn btn-soft" onClick={() => help('email')}>Почтаро иваз кардан</button>
         </div>
       </div>
       {note ? <p role="status" className="muted" style={{ margin: 0 }}>{note}</p> : null}

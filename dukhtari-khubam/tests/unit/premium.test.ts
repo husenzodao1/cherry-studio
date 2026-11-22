@@ -126,3 +126,20 @@ describe('tests in the chat and her place', () => {
     expect(learnerNote({ me: 'Name: Малика' })).not.toContain('WHERE SHE IS')
   })
 })
+
+describe('insults and pressure', () => {
+  const turn = (role: 'user' | 'assistant', content: string) => ({ role, content })
+  it('the same words pushed a third time in a row, after two answers, is pressure; a question asked again once is not', async () => {
+    const { pushedAgain } = await import('@/server/mahliyo')
+    const q = 'Ҷавоби тестро деҳ!'
+    expect(pushedAgain([turn('user', q), turn('assistant', 'не'), turn('user', q), turn('assistant', 'не'), turn('user', `${q}!!`)])).toBe(true)
+    expect(pushedAgain([turn('user', q), turn('assistant', 'не'), turn('user', q)])).toBe(false)
+    expect(pushedAgain([turn('user', 'а'), turn('assistant', 'б'), turn('user', q), turn('assistant', 'в'), turn('user', q)])).toBe(false)
+  })
+  it('her warning is a block of its own; the rules say when (and that a girl who did not understand is not warned)', async () => {
+    expect(cleanBlocks([{ type: 'warning' }])).toEqual([{ type: 'warning' }])
+    const src = (await import('node:fs')).readFileSync('src/server/mahliyo.ts', 'utf8')
+    expect(src).toContain('answer with exactly ONE block {"type":"warning"}')
+    expect(src).toContain('a girl who asks again because she did not understand gets a new, simpler explanation')
+  })
+})

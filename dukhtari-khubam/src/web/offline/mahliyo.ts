@@ -451,6 +451,8 @@ async function wait(id: string, since: number, my: number) {
     const turns: AiTurn[] = [...turnsOf(chat), { role: 'assistant', content: r.reply ?? '', tajik: r.tajik !== false, blocks, at: new Date().toISOString(), id }]
     const here = chat === state.chat
     end(null, { chats: keep(chat, turns), ...(here ? { turns, fresh: turns.length - 1 } : {}), unseen: watching === 0 || !here })
+    // insults or pressure: she warned; the chat screen counts it (after three, the chat closes)
+    if (blocks.some((b) => b.type === 'warning')) window.dispatchEvent(new Event('dk-ai-warning'))
     void tell(r.reply ?? '')
     return
   }
@@ -635,3 +637,24 @@ export async function prepareFile(file: File): Promise<AiUpload> {
   if (file.size > FILE_BYTES) throw new FileProblem('big')
   return { mime: file.type, name, data: await base64Of(file) }
 }
+
+/**
+ * Warnings for insults and pressure, counted per account on this phone; after three, the next one closes
+ * the chat for that account for good (and she is signed out). Kept apart from her profile, so signing out
+ * and in again does not undo it.
+ */
+const WARN_KEY = 'dk.ai.warnings'
+export const WARNINGS_ALLOWED = 3
+const warnings = (): Record<string, number> => {
+  try { return JSON.parse(localStorage.getItem(WARN_KEY) || '{}') as Record<string, number> } catch { return {} }
+}
+export const warningsOf = (account: string | undefined) => (account ? warnings()[account] ?? 0 : 0)
+/** one more warning for this account; resolves how many it has now */
+export function warnOnce(account: string | undefined): number {
+  if (!account) return 0
+  const n = warningsOf(account) + 1
+  try { localStorage.setItem(WARN_KEY, JSON.stringify({ ...warnings(), [account]: n })) } catch { /* not kept */ }
+  return n
+}
+/** whether this account's chat is closed (more warnings than allowed) */
+export const chatClosed = (account: string | undefined) => warningsOf(account) > WARNINGS_ALLOWED

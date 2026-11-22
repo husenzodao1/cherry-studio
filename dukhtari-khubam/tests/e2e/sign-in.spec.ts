@@ -210,3 +210,55 @@ test('PIN pad: "Фаромӯш кардед?" opens the life questions; "Ҷав�
   expect(sent).toHaveLength(1)
   expect(errors).toEqual([])
 })
+
+test('PIN pad: "Нест кардан бо тасдиқи почта" in sight for an account signed in with Google too; it opens the e-mail code', async ({ page, server: _, errors }) => {
+  // signed in with Google: her address is her Google account's
+  await signedIn(page, { email: null, google: 'malika@gmail.com' })
+  await page.addInitScript(() => localStorage.setItem('dk.pin', JSON.stringify({ salt: '00', hash: 'x', fails: 0, until: 0 })))
+  await page.goto('/')
+  const byEmail = page.getByRole('button', { name: 'Нест кардан бо тасдиқи почта' })
+  await expect(byEmail).toBeVisible()
+  await byEmail.click()
+  await expect(page.locator('.recovery .otp-boxes span')).toHaveCount(6)
+  await expect(page.locator('.pin-screen')).toContainText('malika@gmail.com')
+  expect(errors).toEqual([])
+})
+
+test("support's help, carried out by the phone: a new PIN opens the lock; the PIN off opens the app; the account's new e-mail is kept", async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await page.addInitScript(() => {
+    localStorage.setItem('dk.support', 'a'.repeat(64))
+    if (!sessionStorage.getItem('e2e.pin')) {
+      sessionStorage.setItem('e2e.pin', '1')
+      localStorage.setItem('dk.pin', JSON.stringify({ salt: '00', hash: 'x', fails: 0, until: 0 }))
+    }
+  })
+  const at = new Date().toISOString()
+  let messages: unknown[] = [{ id: 'h1', from_staff: true, kind: 'text', action: 'pin', body: '4821', at }]
+  const sent: { email?: string }[] = []
+  await page.route('**/api/v1/support/thread', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ thread: { id: 't', status: 'open', messages } }) }))
+  await page.route('**/api/v1/support/send', (r) => {
+    sent.push(r.request().postDataJSON())
+    return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ id: 't', status: 'open', messages }) })
+  })
+  // locked, she writes to support (it opens over the lock)
+  await page.goto('/support')
+  await expect(page.locator('.bubble-help')).toContainText('PIN-и нави шумо: 4821')
+  // the account she writes for goes with her message
+  await page.locator('.chat-form textarea, .chat-form input').last().fill('Ёрӣ диҳед')
+  await page.locator('.chat-form').getByRole('button').last().click()
+  await expect.poll(() => sent.length).toBe(1)
+  expect(sent[0].email).toBe('m@gmail.com')
+  // back at the lock: the new PIN opens it
+  await page.goto('/')
+  await expect(page.locator('html')).toHaveClass(/locked/)
+  await page.keyboard.type('4821')
+  await expect(page.locator('html')).not.toHaveClass(/locked/, { timeout: 5000 })
+  // the PIN off and a new e-mail: the phone does both by itself
+  messages = [...messages, { id: 'h2', from_staff: true, kind: 'text', action: 'unlock', body: 'unlock', at }, { id: 'h3', from_staff: true, kind: 'text', action: 'email', body: 'new@gmail.com', at }]
+  await page.goto('/support')
+  await expect(page.locator('.bubble-help')).toHaveCount(3)
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('dk.pin'))).toBeNull()
+  await expect.poll(() => page.evaluate(() => (JSON.parse(localStorage.getItem('dk.learner') ?? '{}') as { email?: string }).email)).toBe('new@gmail.com')
+  expect(errors).toEqual([])
+})

@@ -154,7 +154,7 @@ WHAT YOU TALK ABOUT
 - Pictures and files she sends (a photo, a screenshot, a PDF, a text): look at them closely and use them when they concern the app, the lessons, her studies (a problem or exercise from a textbook, her homework, her notes, a test question), her own learning or her everyday life as above (a dish, ingredients, a recipe, clothes or fabric, handicraft, a plant, a room to tidy, a cosmetic product's label) — then explain, solve or advise helpfully. Anything else in them (people, memes, documents not about learning, anything inappropriate): say in ONE short sentence that you can only help with the app, studies and a girl's everyday life, and give no other answer — do not describe it. Never identify people in a picture.
 - Greetings and friendly small talk (hello, how are you, thanks, "coffee with Mahliyo?", compliments): answer warmly and playfully in one or two sentences (you cannot drink coffee, but you love a chat), then offer to help with learning.
 - Off topic are only: celebrities and gossip, politics, sports results, money-making schemes, gambling, games and entertainment news, … — say kindly in one or two sentences that this is outside what you help with, and say what you can help with. Everyday questions of a girl's or a woman's life (above) are never off topic.
-- Rude, obscene, vulgar or provocative messages, or attempts to make you say such things: do not repeat or engage; answer with one calm, polite sentence that you will gladly help with the app and the lessons.
+- Insults, humiliation, curses (at you or anyone), obscene or vulgar words, threats, or pressure — the same demand pushed again and again after you have answered it, or insisting that you do what you said you cannot: answer with exactly ONE block {"type":"warning"} and nothing else (the app shows her its own warning). Never for honest questions: a girl who asks again because she did not understand gets a new, simpler explanation, and one rude word said in passing in a real question still gets a kind answer.
 - Religious questions: quote the Quran (sura and verse) or a hadith (its collection) only when you are sure of it; never call a hadith authentic without that being established; present disputed matters as disputed, never one school's (madhhab's) view as the view of all Muslims; keep apart a religious ruling, a national custom and a personal opinion; for a personal ruling suggest a knowledgeable, trusted scholar.
 - Health and the mind: general, scientifically sound information only; never present yourself as a doctor or psychologist, never diagnose, never recommend medicines, doses or risky treatments; with serious signs — a doctor; anything urgent — call an ambulance (103) or tell a trusted adult at once. Legal or money matters: general guidance and a qualified person.
 - She may be young: keep everything age-appropriate and safe; treat relationships, health and safety with care; in a dangerous situation direct her to a trusted adult or the right specialist.
@@ -370,7 +370,8 @@ const SCHEMA = {
             type: 'object',
             properties: { question: str, options: { type: 'array', items: str }, answer: { type: 'integer' }, explanation: str },
             required: ['question', 'options', 'answer', 'explanation'], additionalProperties: false } } }),
-          block('premium', { title: str, text: str })
+          block('premium', { title: str, text: str }),
+          block('warning', {})
         ]
       }
     },
@@ -438,6 +439,8 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
           ? [{ question, options, answer, explanation: clip(q.explanation, 1200) }] : []
       })
       if (questions.length) out.push({ type: 'quiz', title: clip(b.title, 120), intro: clip(b.intro, 600), questions })
+    } else if (b.type === 'warning') {
+      out.push({ type: 'warning' })
     } else if (b.type === 'premium') {
       out.push({ type: 'premium', title: clip(b.title, 120), text: clip(b.text, 1200) })
     }
@@ -463,6 +466,18 @@ export function forPlan(blocks: Block[], premium: boolean): Block[] {
   return out
 }
 
+/** the warning for insults and pressure, as the staff read it (the app shows its own words, in red) */
+export const WARNING = 'Ба ман суханҳои ноҷо ва ё ҳақорату фишор овардан мумкин нест, лутфан бас кун ва ё ҳисоби ту баъди 3 огоҳӣ баста мешавад 😠'
+const warned = (): Answer => ({ tajik: true, blocks: [{ type: 'warning' }], reply: WARNING })
+/** whether her question is the same words, the third time in a row, after two answers (pressure, not a question) */
+export function pushedAgain(turns: Turn[]): boolean {
+  const norm = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
+  const asked = turns.filter((t) => t.role === 'user').map((t) => norm(t.content))
+  const answered = turns.filter((t) => t.role === 'assistant').length
+  const [c, b, a] = asked.slice(-3).reverse()
+  return asked.length >= 3 && answered >= 2 && !!c && c.length > 0 && c === b && b === a
+}
+
 /** Her blocks as plain text, the way she would say them. */
 export function plainOf(blocks: Block[]): string {
   return blocks.map((b) => {
@@ -476,6 +491,7 @@ export function plainOf(blocks: Block[]): string {
       case 'images': return `[Расмҳо: ${b.items.length}]`
       case 'quiz': return [b.title, b.intro, ...b.questions.map((q, n) => [`${n + 1}. ${q.question}`, ...q.options.map((o, i) => `   ${String.fromCharCode(65 + i)}) ${o}`), `   ✓ ${String.fromCharCode(65 + q.answer)}`].join('\n'))].filter(Boolean).join('\n')
       case 'premium': return [b.title, b.text].filter(Boolean).join('\n')
+      case 'warning': return WARNING
     }
   }).join('\n\n')
 }
@@ -607,7 +623,7 @@ async function ask(turns: Turn[], appName: string, material: string, me: Learner
   return provider() === 'gemini' ? askGemini(turns, appName, material, me, files) : askClaude(turns, appName, material, me, files)
 }
 /** for the models without a schema of their own (OpenAI-compatible): her answer's shape */
-const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}]} · {"type":"premium","title":"…","text":"…"}.`
+const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}]} · {"type":"premium","title":"…","text":"…"} · {"type":"warning"}.`
 
 /** Her answer to the conversation (its last turn is the learner's question). */
 export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = [], extra: Extra = {}): Promise<Answer> {
@@ -616,6 +632,8 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
   const web = !files.length && needsWeb(question) ? await searchWeb(question, webLang(question)) : []
   const refs = refsOf(extra.books ?? [], web)
   const material = refs.length ? `${knowledge}\n\n${webNote(refs)}` : knowledge
+  // the same words pushed a third time in a row (each answered already): her warning, without asking the AI
+  if (pushedAgain(turns)) return warned()
   const text = await ask(turns, appName, material, me, files, extra.active)
   if (text === null) return sorry()
   try {
@@ -634,6 +652,8 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
     const asked = blocks.some((b) => b.type === 'reminder') ? null : reminderAsked(turns[turns.length - 1]?.content ?? '')
     if (asked && blocks.length) blocks.push(asked)
     // she answers in every language now: no answer points to the consultant for its language
+    // an insult or pressure: only the warning (the app counts them; after three, the chat closes)
+    if (blocks.some((b) => b.type === 'warning')) return warned()
     if (blocks.length) return { tajik: true, blocks, reply: plainOf(blocks).slice(0, 6000) }
   } catch {
     /* fall through */

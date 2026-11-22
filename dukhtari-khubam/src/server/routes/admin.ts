@@ -545,10 +545,10 @@ export const adminRoutes: AnyRoute[] = [
     handler: async ({ sb, params, body }) => call(sb(), 'admin_support_status', { p_thread: id(params.id), p_status: body.status })
   }),
   route({
-    method: 'POST', path: '/admin/learners/reset', access: 'staff', tag: 'Admin · support',
-    summary: 'Temporary password and a new code for a learner who lost both (super admin)',
-    body: z.strictObject({ username: z.string().trim().min(3).max(32) }),
-    handler: async ({ sb, body }) => call(sb(), 'admin_profile_reset', { p_username: body.username })
+    method: 'POST', path: '/admin/support/:id/action', access: 'staff', tag: 'Admin · support',
+    summary: "The consultant's help, carried out by the learner's phone: a new PIN, the PIN off, or her account's e-mail changed",
+    body: z.strictObject({ action: z.enum(['pin', 'unlock', 'email']), value: z.string().trim().max(200).optional() }),
+    handler: async ({ sb, params, body }) => call(sb(), 'admin_support_action', { p_thread: id(params.id), p_action: body.action, p_value: body.value ?? null })
   }),
 
   // ------------------------------------------------------------------ dashboard, search, audit

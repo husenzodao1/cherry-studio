@@ -63,6 +63,8 @@ export type AiBlock =
   | { type: 'quiz'; title: string; intro: string; questions: { question: string; options: string[]; answer: number; explanation: string }[] }
   /** the card that opens the Premium screen (a free learner asked for a Premium part) */
   | { type: 'premium'; title: string; text: string }
+  /** insults or pressure: only this, shown in red; after three, the chat closes and she is signed out */
+  | { type: 'warning' }
   /** where her answer came from (internet sources she used; added by the server) */
   | { type: 'sources'; items: { title: string; url: string; site: string }[] }
   /** pictures of what she was asked about, from those sources (added by the server) */

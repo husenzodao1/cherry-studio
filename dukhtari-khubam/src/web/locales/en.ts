@@ -345,5 +345,11 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.quiz_result': "My test result: {n} of {total}",
   'ai.quiz_mine': "my answer",
   'ai.quiz_right': "right",
+  'support.help_pin': "Your new PIN: ",
+  'support.help_unlock': "The PIN is off — the app now opens without it.",
+  'support.help_new_email': "Your account's e-mail is now {email}",
+  'pin.remove_by_email': "Remove the PIN by e-mail",
+  'ai.warning': "You can't write rude words, insults or pressure to me. Please stop, or your account will be closed after 3 warnings 😠",
+  'ai.closed': "The chat is closed for good because of insults and pressure.",
   'pin.forgot_q': "Forgot it?"
 }

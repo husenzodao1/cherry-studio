@@ -229,9 +229,9 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
       { role: 'user', parts: [{ text: 'Нафаҳмидам' }] }
     ])
     expect(req.config).toMatchObject({ responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'MINIMAL' } })
-    expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(7)
+    expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(8)
     // a test question (Premium) and the card that opens the Premium screen are among her blocks
-    expect(req.config.responseJsonSchema.properties.blocks.items.anyOf.map((b: { properties: { type: { enum: string[] } } }) => b.properties.type.enum[0])).toEqual(expect.arrayContaining(['quiz', 'premium']))
+    expect(req.config.responseJsonSchema.properties.blocks.items.anyOf.map((b: { properties: { type: { enum: string[] } } }) => b.properties.type.enum[0])).toEqual(expect.arrayContaining(['quiz', 'premium', 'warning']))
     const system = req.config.systemInstruction as string
     for (const s of ['«Гулдухтар»', 'Gratorslab', 'AS LONG AS THE QUESTION NEEDS', 'ДОНИШ', 'Study days: 5', 'HER CURRENT TIME: 2026-11-21T14:00:00+05:00']) expect(system).toContain(s)
     // her name: she is greeted by it; her age and birthday stay with the app
