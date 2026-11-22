@@ -51,11 +51,11 @@ export function Dock() {
       </Link>
     )
   }
-  // her chat opens full screen (in the browser too, where it allows); "✕" brings the learner back here
+  // her chat covers the whole screen; "✕" brings the learner back here. The browser's own full screen is not
+  // asked for: on Android Chrome, going full screen while the chat pours out left only a black screen.
   const toFull = (e: MouseEvent) => {
     try { sessionStorage.setItem('dk.ai-from', path) } catch { /* home */ }
     const root = document.documentElement
-    if (!document.fullscreenElement && root.requestFullscreen) void root.requestFullscreen({ navigationUI: 'hide' }).catch(() => undefined)
     // the chat pours out of her circle, slowly, over the screen she was on (which stays as it is meanwhile)
     const doc = document as Document & { startViewTransition?: (update: () => Promise<void>) => { finished: Promise<void>; ready: Promise<void>; updateCallbackDone: Promise<void> } }
     if (!doc.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -73,6 +73,9 @@ export function Dock() {
     void t.ready.catch(() => undefined)
     void t.updateCallbackDone.catch(() => undefined)
     void t.finished.catch(() => undefined).finally(() => root.classList.remove('genie-open'))
+    // a phone's browser that stalls the pouring out: after a moment the chat is simply there
+    const skip = (t as { skipTransition?: () => void }).skipTransition
+    setTimeout(() => { if (root.classList.contains('genie-open')) skip?.call(t) }, 2500)
   }
   return (
     <div className="dock-wrap">

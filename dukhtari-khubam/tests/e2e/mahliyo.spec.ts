@@ -785,3 +785,21 @@ test('insults or pressure: only a red warning; after three, the next one closes 
   await expect(page.locator('.ai-input')).toHaveCount(0)
   expect(errors).toEqual([])
 })
+
+test.describe('on a phone, in the browser', () => {
+  test.use({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 })
+  test('her circle opens the chat without the browser\'s full screen (Android Chrome left it black), and no greeting card over it', async ({ page, server: _, errors }) => {
+    await signedIn(page)
+    await page.route('**/api/v1/mahliyo/status', (r) => r.fulfill(json({ ready: true })))
+    await page.goto('/')
+    await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+    await page.locator('.dock-ai').click()
+    await expect(page).toHaveURL(/\/mahliyo\/?$/)
+    await expect(page.locator('.ai-scene')).toBeVisible()
+    expect(await page.evaluate(() => !!document.fullscreenElement)).toBe(false)
+    await page.waitForTimeout(2500)
+    await expect(page.locator('.mascot')).toHaveCount(0)
+    await expect(page.locator('html')).not.toHaveClass(/genie-open/)
+    expect(errors).toEqual([])
+  })
+})

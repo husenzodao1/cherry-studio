@@ -122,7 +122,8 @@ export function Mascot() {
     return () => clearTimeout(timer)
   }, [path, learner])
 
-  if (!card) return null
+  // her own chat has her whole screen: no card over it
+  if (!card || /^\/mahliyo(\/|$)/.test(path)) return null
   return (
     <div key={card.id} className={`mascot is-${card.moment}${noGirl ? ' no-girl' : ''}${leaving ? ' is-leaving' : ''}`}
       style={{ ['--mascot-bottom' as string]: noDock(path) ? '0px' : '86px' }}
