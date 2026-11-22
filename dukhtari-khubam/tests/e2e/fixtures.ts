@@ -67,6 +67,12 @@ export async function signedIn(page: Page, extra: Record<string, unknown> = {}) 
   await page.addInitScript(([p, x]) => {
     localStorage.setItem('dk.learner', JSON.stringify({ name: 'Малика', code: '512345678901234', email: 'm@gmail.com', ...x }))
     localStorage.setItem('dk.progress', JSON.stringify(p))
+    // tests may run at night: the bedtime screen is dismissed for tonight (its own test shows it)
+    if (!x.night) {
+      const d = new Date()
+      if (d.getHours() < 5) d.setDate(d.getDate() - 1)
+      localStorage.setItem('dk.night', d.toISOString().slice(0, 10))
+    }
   }, [PROGRESS, extra] as const)
 }
 

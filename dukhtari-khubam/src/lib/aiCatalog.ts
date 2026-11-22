@@ -53,6 +53,13 @@ export const ROUTES: Record<string, string> = {
 }
 
 /** One part of her answer, as the app draws it (MahliyoBlocks.tsx). */
+/** how an option or a result is marked: her first pick, good, a risk, or plain */
+export type Tone = 'best' | 'good' | 'risk' | 'neutral'
+/** a value of a calculator: `id` is its name in the formulas; `options` (if any) are its choices instead of − / + */
+export interface CalcInput { id: string; label: string; value: number; min: number; max: number; step: number; unit: string; options: number[] }
+/** a result of a calculator; the first `big` one is shown large */
+export interface CalcOutput { label: string; formula: string; unit: string; tone: Tone; big: boolean }
+
 export type AiBlock =
   | { type: 'text'; text: string }
   | { type: 'steps'; title: string; items: string[] }
@@ -60,7 +67,19 @@ export type AiBlock =
   | { type: 'link'; to: string; label: string }
   | { type: 'reminder'; at: string; title: string; text: string; daily?: boolean }
   /** a test in the chat: up to ten questions; the app checks the answers and sends her result to Mahliyo */
-  | { type: 'quiz'; title: string; intro: string; questions: { question: string; options: string[]; answer: number; explanation: string }[] }
+  /** `answer` −1: a question about herself, with no right answer (a character test); `comment`: the question of the
+   *  comment box at its end ("" none), sent with her result */
+  | { type: 'quiz'; title: string; intro: string; questions: { question: string; options: string[]; answer: number; explanation: string }[]; comment?: string }
+  /** she did not understand: what she asks, and choices to tap (or her own words) */
+  | { type: 'clarify'; question: string; options: string[] }
+  /** questions to go on with, shown under her answer; a tap asks one */
+  | { type: 'follow'; items: string[] }
+  /** options side by side: each with a few points; one may be her first pick (green), one a risk (red) */
+  | { type: 'choices'; title: string; intro: string; items: { name: string; badge: string; tone: Tone; points: string[]; note: string }[] }
+  /** a framed note: a danger or risk (red), a warning (amber), a tip (green), a plain note */
+  | { type: 'callout'; tone: 'danger' | 'warning' | 'tip' | 'info'; title: string; text: string }
+  /** a live calculator: values she changes with − / + or a choice, results worked out by their formulas */
+  | { type: 'calc'; title: string; inputs: CalcInput[]; outputs: CalcOutput[]; note: string }
   /** the card that opens the Premium screen (a free learner asked for a Premium part) */
   | { type: 'premium'; title: string; text: string }
   /** insults or pressure: only this, in red — one of the staff's words, chosen at random */

@@ -2735,6 +2735,15 @@
                   "place": {
                     "type": "string",
                     "pattern": "^-?\\d{1,2}(\\.\\d)?, -?\\d{1,3}(\\.\\d)?$"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "precise",
+                      "science",
+                      "friendly",
+                      "girly"
+                    ]
                   }
                 },
                 "required": [

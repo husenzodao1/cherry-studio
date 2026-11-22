@@ -10,6 +10,7 @@ import { AgeFilter, ContentProvider, useContent } from '../offline/content'
 import { LearnerProvider, useLearner } from '../offline/learner'
 import { PrefsProvider, usePrefs } from '../prefs'
 import { AppLock } from './AppLock'
+import { NightGuard } from './NightGuard'
 import { AppUpdate } from './AppUpdate'
 import { BackButton } from './BackButton'
 import { installGlobalHealing } from '../heal'
@@ -147,6 +148,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <NotifyBridge />
               <SupportWatch />
               <Permissions />
+              <NightGuard />
               <AppLock />
               <Splash />
               <PerfProbe />

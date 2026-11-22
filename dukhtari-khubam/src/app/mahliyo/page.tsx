@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom'
 
 import { onBack } from '@/web/components/BackButton'
 
+import { AttachSheet } from '@/web/components/AttachSheet'
 import { Icon } from '@/web/components/Icon'
 import { emojify } from '@/web/components/Emoji'
 import { AnswerBlocks, Sources, timingOf } from '@/web/components/MahliyoBlocks'
@@ -17,8 +18,8 @@ import { useAuth } from '@/web/auth'
 import { useLearner } from '@/web/offline/learner'
 import { useApi } from '@/web/useApi'
 import {
-  aboutMe, accountChanged, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
-  useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
+  aboutMe, accountChanged, aiReady, archiveChat, tempChat, leaveTemp, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
+  useMahliyo, watch, type AiChatMeta, type AiMode, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { alphaVideo, CLIPS } from '@/web/mahliyo'
 import { placeNote, refreshPlace } from '@/web/offline/place'
@@ -72,7 +73,7 @@ export default function MahliyoPage() {
   // a Premium account keeps its chats; the others, a week
   useEffect(() => { if (me.data || !session) keepChatsForever(!!me.data?.premium) }, [me.data, session])
   const { bundle } = useContent()
-  const { chat, chats, turns, pending, problem, fresh, online } = useMahliyo()
+  const { chat, chats, turns, pending, problem, fresh, online, temp } = useMahliyo()
   const [history, setHistory] = useState(false)
   const [ready, setReady] = useState<boolean | null>(null)
   const [text, setText] = useState('')
@@ -82,6 +83,14 @@ export default function MahliyoPage() {
   const [opened, setOpened] = useState<number | null>(null)
   /** pictures and files chosen for the next question */
   const [files, setFiles] = useState<AiUpload[]>([])
+  // the paperclip's sheet, and the way she asked to be answered (kept on the phone)
+  const [sheet, setSheet] = useState(false)
+  const [mode, setModeState] = useState<AiMode | null>(null)
+  useEffect(() => { try { setModeState((localStorage.getItem('dk.ai.mode') as AiMode | null) || null) } catch { /* none */ } }, [])
+  const setMode = (m: AiMode | null) => {
+    setModeState(m)
+    try { if (m) localStorage.setItem('dk.ai.mode', m); else localStorage.removeItem('dk.ai.mode') } catch { /* only for now */ }
+  }
   const scroller = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
   const pull = useRef<HTMLDivElement>(null)
@@ -324,7 +333,7 @@ export default function MahliyoPage() {
     el.style.height = `${Math.min(el.scrollHeight, 132)}px`
   }, [text])
 
-  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email, place: placeNote() })
+  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email, place: placeNote(), ...(mode ? { mode } : {}) })
   const send = (question: string, withFiles: AiUpload[] = []) => {
     // a picture alone asks her to look at it
     const q = question.trim() || (withFiles.length ? t('ai.look') : '')
@@ -337,7 +346,7 @@ export default function MahliyoPage() {
     setEditing(null)
     setOpened(null)
   }
-  const pick = async (chosen: FileList | null) => {
+  const pick = async (chosen: FileList | File[] | null) => {
     const list = [...(chosen ?? [])]
     if (picker.current) picker.current.value = ''
     if (!list.length) return
@@ -394,8 +403,10 @@ export default function MahliyoPage() {
           <h1 className="ai-name">{t('ai.title')}</h1>
           <span className={`ai-status${busy ? ' is-busy' : ''}`} aria-live="polite">{sending ? t('ai.sending') : busy ? t('ai.thinking') : t('ai.subtitle')}</span>
         </div>
-        <button type="button" className="ai-menu" aria-label={t('ai.clear')} onClick={startNew} disabled={!turns.length}><Icon name="compose" size={21} /></button>
-        <button type="button" className="ai-menu" aria-label={t('ai.history')} aria-haspopup="dialog" onClick={() => setHistory(true)}><Icon name="menu" size={22} /></button>
+        <button type="button" className="ai-menu" aria-label={t('ai.clear')} onClick={startNew} disabled={!turns.length && !temp}><Icon name="compose" size={21} /></button>
+        <button type="button" className={`ai-menu ai-temp${temp ? ' is-on' : ''}`} aria-label={t('ai.temp')} aria-pressed={!!temp}
+          onClick={() => { if (temp) startNew(); else { tempChat(); setFiles([]) } }}><Icon name="ghostChat" size={21} /></button>
+        <button type="button" className="ai-menu" aria-label={t('ai.history')} aria-haspopup="dialog" onClick={() => { leaveTemp(); setHistory(true) }}><Icon name="menu" size={22} /></button>
         <button type="button" className="ai-menu ai-leave" aria-label={t('ai.leave')} onClick={leave}><Icon name="x" size={20} /></button>
       </header>
       {selecting !== null ? <SelectText text={selecting} onClose={() => setSelecting(null)} /> : null}
@@ -406,6 +417,7 @@ export default function MahliyoPage() {
           onRemove={removeChat} onArchive={archiveChat} />
       ) : null}
 
+      {temp ? <p className="ai-temp-note" role="status"><Icon name="ghostChat" size={16} /><span>{t('ai.temp_on')}</span></p> : null}
       {online ? null : (
         <p className="ai-offline" role="status"><Icon name="globe" size={18} /><span>{t('ai.offline')}{busy ? ` ${t('ai.offline_wait')}` : ''}</span></p>
       )}
@@ -422,7 +434,7 @@ export default function MahliyoPage() {
         {turns.length ? null : (
           <section className="ai-hero">
             <HeroPortrait />
-            <Taglines lines={t('ai.taglines').split('\n').filter(Boolean).map((l) => (first ? l.replace('{name}', first) : l.replace(/,?\s*\{name\}/, '')))} />
+            <Taglines lines={t(taglinesKey(new Date().getHours())).split('\n').filter(Boolean).map((l) => (first ? l.replace('{name}', first) : l.replace(/,?\s*\{name\}/, '')))} />
             {/* no line under her greeting: only when she is not there yet, why */}
             {ready === false ? <p className="ai-hello">{t('ai.soon')}</p> : null}
             {ready === false ? (
@@ -456,7 +468,7 @@ export default function MahliyoPage() {
           <div key={i} className="ai-said">
             <div className="grow">
               <AnswerBlocks blocks={m.blocks?.length ? m.blocks : [{ type: 'text', text: m.content }]} fresh={i === fresh}
-                id={m.id ?? m.at} onQuiz={(result) => send(result)} />
+                id={m.id ?? m.at} onQuiz={(result) => send(result)} onAsk={i === turns.length - 1 ? (text) => send(text) : undefined} />
               {m.tajik === false ? <Link href="/support" className="btn btn-soft ai-consultant"><Icon name="bell" size={16} /> {t('ai.to_consultant')}</Link> : null}
               <div className="ai-acts ai-acts-start">
                 <button type="button" className="ai-act" onClick={() => copy(m)} aria-label={t('ai.copy')}><Icon name="copy" size={16} /></button>
@@ -530,10 +542,15 @@ export default function MahliyoPage() {
             ))}
           </div>
         ) : null}
+        {mode ? (
+          <span className="ai-mode-chip"><Icon name={MODE_ICON[mode]} size={14} />{t(`ai.mode_${mode}`)}
+            <button type="button" aria-label={t('ai.remove')} onClick={() => setMode(null)}><Icon name="x" size={12} /></button></span>
+        ) : null}
+        {sheet ? <AttachSheet max={MAX_FILES - files.length} mode={mode} onMode={(m) => { setMode(m); setSheet(false) }} onFiles={(f) => void pick(f)} onClose={() => setSheet(false)} /> : null}
         <div className="ai-composer-row">
           <input ref={picker} type="file" hidden multiple accept="image/*,application/pdf,text/plain" onChange={(e) => void pick(e.target.files)} />
           <button type="button" className="ai-attach" aria-label={t('ai.attach')} disabled={ready === false || !!pending || files.length >= MAX_FILES}
-            onClick={() => picker.current?.click()}><Icon name="clip" size={20} /></button>
+            onClick={() => setSheet(true)}><Icon name="clip" size={20} /></button>
           <EmojiBox text={text}>
             <textarea ref={box} className="ai-input" rows={1} placeholder={online ? t('ai.placeholder') : t('ai.offline')} value={text} maxLength={QUESTION_CAP} lang="tg"
               disabled={ready === false} aria-label={t('ai.placeholder')}
@@ -864,6 +881,12 @@ function Wave({ text }: { text: string }) {
     </span>
   )
 }
+
+const MODE_ICON = { precise: 'target', science: 'flask', friendly: 'smile', girly: 'heart' } as const
+
+/** Her greetings fit the hour: the night (22–5), the morning (5–11), the evening (17–22), or any time. */
+export const taglinesKey = (h: number) =>
+  h >= 22 || h < 5 ? 'ai.taglines_night' as const : h < 11 ? 'ai.taglines_morning' as const : h >= 17 ? 'ai.taglines_evening' as const : 'ai.taglines' as const
 
 /** Her greeting over the conversation's start: one of many, a different one each time her chat opens; it stays until she writes. */
 function Taglines({ lines }: { lines: string[] }) {

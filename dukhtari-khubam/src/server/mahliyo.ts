@@ -1,7 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { GoogleGenAI, ThinkingLevel } from '@google/genai'
 
-import { linkAllowed, ROUTES, SPOT_IDS, SPOTS, type AiBlock, type SpotId } from '@/lib/aiCatalog'
+import { linkAllowed, ROUTES, SPOT_IDS, SPOTS, type AiBlock, type CalcInput, type CalcOutput, type SpotId, type Tone } from '@/lib/aiCatalog'
+import { evaluate, formatNumber } from '@/lib/calc'
 
 import { ABOUT } from './mahliyoAbout'
 import { askCompatible, type ActiveModel, type BookPassage } from './aiModels'
@@ -186,6 +187,13 @@ BEAUTIFUL, FRIENDLY AND EXACT — AS LONG AS THE QUESTION NEEDS
 HOW YOU ANSWER — as blocks (the app draws each one)
 - "text": a short paragraph (1–3 sentences), or a worked solution. Most answers are one text block. A text may use Markdown: **bold**, *italic*, "- " lists, "1. " lists, tables (GitHub style, with a header row), inline \`code\` and fenced code blocks with the language (\`\`\`python … \`\`\`), and math in LaTeX — inline $x^2+1$ and on its own line $$x=\\frac{-b\\pm\\sqrt{D}}{2a}$$. Use math for every formula, equation and calculation (not plain "x^2" or "sqrt"), a table when comparing things, a code block for code. No headings with #. In the JSON, every backslash of LaTeX is written twice ("\\\\frac").
 - "steps": numbered steps for anything she has to do in the app — one short action per step, in order, exactly as the screens say it (button names in «…»). Use steps whenever you explain how to do something.
+- "choices": when she compares or chooses (which provider, which phone, which course, which recipe, which plan): 2–5 options as cards. Each: "name"; "points" — 2–5 short facts; "badge" — a 2–4 word label or ""; "tone" — "best" for YOUR first pick (exactly one, badge e.g. «Интихоби аввалини ман»), "good", "risk" when it has a real danger or drawback, else "neutral"; "note" — one short line or "". "title" names the choice; "intro" one sentence or "". After the cards, one short text saying why the first pick.
+- "callout": a framed note that stands out. "tone": "danger" (red) for a real risk, harm, loss of money, health or safety, or a mistake that costs a lot — say it plainly; "warning" (amber) to stress something easy to miss; "tip" (green) for a good practical tip; "info" for a plain important note. "title" 2–5 words, "text" 1–3 sentences (Markdown allowed). Use one when it truly matters; never more than two in an answer.
+- "calc": a LIVE CALCULATOR when her question is about numbers she may change — a budget, prices, profit, savings, a loan, calories, a recipe for more people, grades, time. "inputs": the values she may change, each with "id" (latin letters, e.g. price), "label", "value" (your starting value), "min", "max", "step", "unit" (сомонӣ, %, кг, … or ""), and "options" — a few typical values to choose from as buttons, or [] for − / + buttons. "outputs": the results, each with "label", "formula" (arithmetic on the input ids only: + - * / ^ ( ) and min, max, round, floor, ceil, abs, sqrt — e.g. "price*count - cost"), "unit", "tone" ("good" for a gain, "risk" for a cost or loss, "best" for the main answer, else "neutral") and "big" (true for the one main result). "title" says what it works out; "note" one short line of what it leaves out, or "". Give the worked numbers in a text block too.
+- Group long answers clearly: a short text with the point, then the blocks that carry the details (choices, steps, a table, a calc), a danger or tip callout where it matters, and a one-line conclusion in **bold**.
+- "clarify": when her message is unclear, could mean very different things, or you still do not understand it after she said it again — do not guess: ONE clarify block only (no other blocks): "question" kindly says you did not quite understand and asks what she means; "options" — 2–4 short, concrete guesses of what she may want (she can also write her own). Never for a clear question.
+- "follow": at the end of every real answer (not greetings, warnings or clarify), 2–3 short questions she may ask next on the same topic, in her language, written as she would ask them (e.g. «Техникаҳои ранг ва соя»). No question marks needed; each under 60 characters.
+- Tests ("quiz"): for knowledge, "answer" is the right option's number; for a test about HER (character, interests, style, what suits her) there is no right answer — "answer": -1 and "explanation": "". "comment": the question of a small box at the end where she adds words of her own, fitted to the test (e.g. «Дар бораи худ каме нақл кунед, то дақиқтар фаҳмам…»), or "" when not needed. When she sends a test's result, read her picks and her comment and answer them warmly and exactly.
 - "screen": a screenshot of an app screen with a pulsing pointer on a place, from the list of SPOTS below, with a one-line caption saying what to tap. Add one (or two) when she says she did not understand, asks "where", asks again about the same thing, or the steps are hard to find; put them after the steps.
 - "link": a button to a page: one of the app pages below, "/lesson?id=<id>" or "/course?id=<id>" for a lesson or course from the course material, or an https address from the material (sources). Give one when it saves her looking.
 - "reminder": when she asks to be reminded, notified or CALLED at some time ("соати 6 ёдам деҳ", "пагоҳ субҳ огоҳ кун", "баъд аз 2 соат", "баъди 4 дақиқа ба ман занг зан"), set it: "at" is that moment as ISO 8601 with her UTC offset, worked out from HER CURRENT TIME below; "title" is short; "text" is what the notification says (kind, in her language). Only a future time within 30 days; otherwise explain kindly. Confirm it in a short, cheerful text block too. The reminder block is what sets it: never confirm a reminder or a call without adding the reminder block.
@@ -344,9 +352,21 @@ export interface Learner {
   place?: string
   /** her city and country as her connection shows them */
   region?: string
+  /** how she asked to be answered */
+  mode?: 'precise' | 'science' | 'friendly' | 'girly'
+}
+
+/** what each answering mode asks of her */
+const MODE_NOTE: Record<NonNullable<Learner['mode']>, string> = {
+  precise: 'ANSWER MODE — PRECISE ADVICE: be exact and practical: the concrete recommendation first, then the reasons; numbers, names, steps; use choices, callout and calc blocks where they help; no small talk.',
+  science: 'ANSWER MODE — SCIENTIFIC: explain like a good scientist and teacher: precise terms (explained), how and why it works, formulas in LaTeX, evidence and its limits, sources where you have them.',
+  friendly: 'ANSWER MODE — FRIENDLY: warm, light and encouraging, like a kind older friend; simple words, a little humour and a few emoji, still correct.',
+  girly: 'ANSWER MODE — GIRLY: tender, cheerful and caring, like a close girlfriend; soft words, cute emoji (🌸💜✨), compliments where sincere, still correct and modest.'
 }
 
 const str = { type: 'string' } as const
+const num = { type: 'number' } as const
+const TONE = { type: 'string', enum: ['best', 'good', 'risk', 'neutral'] } as const
 const block = (type: string, props: Record<string, unknown>) => ({
   type: 'object',
   properties: { type: { type: 'string', enum: [type] }, ...props },
@@ -369,7 +389,23 @@ const SCHEMA = {
           block('quiz', { title: str, intro: str, questions: { type: 'array', items: {
             type: 'object',
             properties: { question: str, options: { type: 'array', items: str }, answer: { type: 'integer' }, explanation: str },
-            required: ['question', 'options', 'answer', 'explanation'], additionalProperties: false } } }),
+            required: ['question', 'options', 'answer', 'explanation'], additionalProperties: false } }, comment: str }),
+          block('clarify', { question: str, options: { type: 'array', items: str } }),
+          block('follow', { items: { type: 'array', items: str } }),
+          block('choices', { title: str, intro: str, items: { type: 'array', items: {
+            type: 'object',
+            properties: { name: str, badge: str, tone: TONE, points: { type: 'array', items: str }, note: str },
+            required: ['name', 'badge', 'tone', 'points', 'note'], additionalProperties: false } } }),
+          block('callout', { tone: { type: 'string', enum: ['danger', 'warning', 'tip', 'info'] }, title: str, text: str }),
+          block('calc', { title: str, note: str,
+            inputs: { type: 'array', items: {
+              type: 'object',
+              properties: { id: str, label: str, value: num, min: num, max: num, step: num, unit: str, options: { type: 'array', items: num } },
+              required: ['id', 'label', 'value', 'min', 'max', 'step', 'unit', 'options'], additionalProperties: false } },
+            outputs: { type: 'array', items: {
+              type: 'object',
+              properties: { label: str, formula: str, unit: str, tone: TONE, big: { type: 'boolean' } },
+              required: ['label', 'formula', 'unit', 'tone', 'big'], additionalProperties: false } } }),
           block('premium', { title: str, text: str }),
           block('warning', { text: str, rule: { type: 'integer' } })
         ]
@@ -404,6 +440,38 @@ export const fixLatex = (text: string) => text
 /** the most questions one test in the chat may have */
 export const QUIZ_MAX = 10
 
+const toneOf = (t: unknown): Tone => (t === 'best' || t === 'good' || t === 'risk' ? t : 'neutral')
+const numOf = (x: unknown, d = 0) => (typeof x === 'number' && Number.isFinite(x) ? x : d)
+/** A calculator the app can run: valid ids, sane ranges, and formulas that work out with its starting values. */
+export function cleanCalc(b: Record<string, unknown>): Extract<Block, { type: 'calc' }> | null {
+  const seen = new Set<string>()
+  const inputs: CalcInput[] = (Array.isArray(b.inputs) ? b.inputs : []).slice(0, 6).flatMap((x: unknown) => {
+    const o = (x ?? {}) as Record<string, unknown>
+    const id = clip(o.id, 30)
+    if (!/^[a-z_][a-z0-9_]*$/i.test(id) || seen.has(id)) return []
+    seen.add(id)
+    let min = numOf(o.min), max = numOf(o.max, 100)
+    if (max < min) [min, max] = [max, min]
+    const step = Math.abs(numOf(o.step, 1)) || 1
+    const value = Math.min(max, Math.max(min, numOf(o.value, min)))
+    const options = (Array.isArray(o.options) ? o.options : []).filter((v): v is number => typeof v === 'number' && Number.isFinite(v)).slice(0, 6)
+    return [{ id, label: clip(o.label, 80) || id, value, min, max, step, unit: clip(o.unit, 20), options }]
+  })
+  if (!inputs.length) return null
+  const values = Object.fromEntries(inputs.map((i) => [i.id, i.value]))
+  let big = false
+  const outputs: CalcOutput[] = (Array.isArray(b.outputs) ? b.outputs : []).slice(0, 6).flatMap((x: unknown) => {
+    const o = (x ?? {}) as Record<string, unknown>
+    const formula = clip(o.formula, 300)
+    if (evaluate(formula, values) === null) return []
+    const isBig = o.big === true && !big
+    if (isBig) big = true
+    return [{ label: clip(o.label, 80) || formula, formula, unit: clip(o.unit, 20), tone: toneOf(o.tone), big: isBig }]
+  })
+  if (!outputs.length) return null
+  return { type: 'calc', title: clip(b.title, 160), inputs, outputs, note: clip(b.note, 300) }
+}
+
 /** Her blocks as the app may show them: unknown places, links and times are left out. */
 export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
   if (!Array.isArray(raw)) return []
@@ -435,10 +503,36 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
         const options = (Array.isArray(q.options) ? q.options : []).map((o) => clip(o, 300)).filter(Boolean).slice(0, 6)
         const answer = Number(q.answer)
         const question = clip(q.question, 600)
-        return question && options.length >= 2 && Number.isInteger(answer) && answer >= 0 && answer < options.length
+        return question && options.length >= 2 && Number.isInteger(answer) && answer >= -1 && answer < options.length
           ? [{ question, options, answer, explanation: clip(q.explanation, 1200) }] : []
       })
-      if (questions.length) out.push({ type: 'quiz', title: clip(b.title, 120), intro: clip(b.intro, 600), questions })
+      const comment = clip(b.comment, 200)
+      if (questions.length) out.push({ type: 'quiz', title: clip(b.title, 120), intro: clip(b.intro, 600), questions, ...(comment ? { comment } : {}) })
+    } else if (b.type === 'clarify') {
+      const options = (Array.isArray(b.options) ? b.options : []).map((o) => clip(o, 160)).filter(Boolean).slice(0, 4)
+      const question = clip(b.question, 300)
+      if (question && options.length >= 2) out.push({ type: 'clarify', question, options })
+    } else if (b.type === 'follow') {
+      const items = (Array.isArray(b.items) ? b.items : []).map((o) => clip(o, 120)).filter(Boolean).slice(0, 3)
+      if (items.length) out.push({ type: 'follow', items })
+    } else if (b.type === 'choices') {
+      const items = (Array.isArray(b.items) ? b.items : []).slice(0, 5).flatMap((x: unknown) => {
+        const o = (x ?? {}) as Record<string, unknown>
+        const name = clip(o.name, 120)
+        const points = (Array.isArray(o.points) ? o.points : []).map((p) => clip(p, 300)).filter(Boolean).slice(0, 6)
+        return name ? [{ name, badge: clip(o.badge, 40), tone: toneOf(o.tone), points, note: clip(o.note, 300) }] : []
+      })
+      // one first pick at most
+      let best = false
+      for (const it of items) { if (it.tone === 'best') { if (best) it.tone = 'good'; best = true } }
+      if (items.length >= 2) out.push({ type: 'choices', title: clip(b.title, 160), intro: clip(b.intro, 400), items })
+    } else if (b.type === 'callout') {
+      const tone = (['danger', 'warning', 'tip', 'info'] as const).find((t) => t === b.tone) ?? 'info'
+      const text = fixLatex(clip(b.text, 1200))
+      if (text) out.push({ type: 'callout', tone, title: clip(b.title, 80), text })
+    } else if (b.type === 'calc') {
+      const calc = cleanCalc(b)
+      if (calc) out.push(calc)
     } else if (b.type === 'warning') {
       // its words are chosen by the server (warned): what the model wrote is not shown, only which word it matched
       const rule = Number(b.rule)
@@ -549,7 +643,15 @@ export function plainOf(blocks: Block[]): string {
       case 'reminder': return `[Ёдраскунӣ: ${b.at} — ${b.title}] ${b.text}`.trim()
       case 'sources': return `[Манбаъҳо: ${b.items.map((i) => i.url).join(', ')}]`
       case 'images': return `[Расмҳо: ${b.items.length}]`
-      case 'quiz': return [b.title, b.intro, ...b.questions.map((q, n) => [`${n + 1}. ${q.question}`, ...q.options.map((o, i) => `   ${String.fromCharCode(65 + i)}) ${o}`), `   ✓ ${String.fromCharCode(65 + q.answer)}`].join('\n'))].filter(Boolean).join('\n')
+      case 'quiz': return [b.title, b.intro, ...b.questions.map((q, n) => [`${n + 1}. ${q.question}`, ...q.options.map((o, i) => `   ${String.fromCharCode(65 + i)}) ${o}`), q.answer >= 0 ? `   ✓ ${String.fromCharCode(65 + q.answer)}` : ''].filter(Boolean).join('\n'))].filter(Boolean).join('\n')
+      case 'choices': return [b.title, b.intro, ...b.items.map((it, n) => [`${n + 1}. ${it.name}${it.badge ? ` (${it.badge})` : ''}`, ...it.points.map((p) => `   - ${p}`), it.note ? `   ${it.note}` : ''].filter(Boolean).join('\n'))].filter(Boolean).join('\n')
+      case 'callout': return [b.title, b.text].filter(Boolean).join(': ')
+      case 'clarify': return [b.question, ...b.options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`)].join('\n')
+      case 'follow': return ''
+      case 'calc': {
+        const values = Object.fromEntries(b.inputs.map((i) => [i.id, i.value]))
+        return [b.title, ...b.inputs.map((i) => `${i.label}: ${i.value} ${i.unit}`.trim()), ...b.outputs.map((o) => `${o.label}: ${formatNumber(evaluate(o.formula, values) ?? 0)} ${o.unit}`.trim()), b.note].filter(Boolean).join('\n')
+      }
       case 'premium': return [b.title, b.text].filter(Boolean).join('\n')
       case 'warning': return b.text
     }
@@ -572,6 +674,7 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
     ...(only.private ? ['(Her age and birthday are not shared with you.)'] : []),
     ...(me.place || me.region ? [`WHERE SHE IS (roughly; use it for what is true there — her country's customs, holidays, time, places, shops, prices, laws; never say the coordinates or that you know her place unless she asks): ${[me.place ? `about ${me.place} (latitude, longitude, ±10 km)` : '', me.region ? `connection: ${me.region}` : ''].filter(Boolean).join('; ')}`] : []),
     ...(premiumLive() ? [planNote(!!me.premium)] : []),
+    ...(me.mode ? [MODE_NOTE[me.mode]] : []),
     about || 'Nothing is known yet: she has not read lessons on this phone.'
   ].join('\n')
 }
@@ -683,7 +786,7 @@ async function ask(turns: Turn[], appName: string, material: string, me: Learner
   return provider() === 'gemini' ? askGemini(turns, appName, material, me, files) : askClaude(turns, appName, material, me, files)
 }
 /** for the models without a schema of their own (OpenAI-compatible): her answer's shape */
-const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}]} · {"type":"premium","title":"…","text":"…"} · {"type":"warning","text":"","rule":0}.`
+const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}],"comment":"…"} · {"type":"choices","title":"…","intro":"…","items":[{"name":"…","badge":"…","tone":"best|good|risk|neutral","points":["…"],"note":"…"}]} · {"type":"callout","tone":"danger|warning|tip|info","title":"…","text":"…"} · {"type":"calc","title":"…","note":"…","inputs":[{"id":"price","label":"…","value":40,"min":0,"max":100,"step":5,"unit":"…","options":[]}],"outputs":[{"label":"…","formula":"price*2","unit":"…","tone":"best","big":true}]} · {"type":"clarify","question":"…","options":["…","…"]} · {"type":"follow","items":["…","…"]} · {"type":"premium","title":"…","text":"…"} · {"type":"warning","text":"","rule":0}.`
 
 /** Her answer to the conversation (its last turn is the learner's question). */
 export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = [], extra: Extra = {}): Promise<Answer> {

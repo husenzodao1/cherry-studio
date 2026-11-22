@@ -82,9 +82,10 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   // full screen: no tab bar; a plain header — her name, "Дугонаи донои шумо", a new chat, the menu (☰) and, at the far right, leaving (✕)
   await expect(page.locator('.dock')).toHaveCount(0)
   await expect(page.locator('.ai-status')).toHaveText('Дугонаи донои шумо')
-  await expect(page.locator('.ai-top button')).toHaveCount(3)
+  await expect(page.locator('.ai-top button')).toHaveCount(4)
   await expect(page.locator('.ai-top button').first()).toHaveAccessibleName('Сӯҳбати нав')
-  await expect(page.locator('.ai-top button').nth(1)).toHaveAccessibleName('Таърихи чатҳо')
+  await expect(page.locator('.ai-top button').nth(1)).toHaveAccessibleName('Чати муваққатӣ')
+  await expect(page.locator('.ai-top button').nth(2)).toHaveAccessibleName('Таърихи чатҳо')
   const leaveBox = (await page.getByRole('button', { name: 'Баромадан' }).boundingBox())!
   expect(leaveBox.x + leaveBox.width).toBeGreaterThan(390 - 24)
   await expect(page.locator('.ai-hello')).toHaveCount(0)
@@ -795,4 +796,91 @@ test.describe('on a phone, in the browser', () => {
     await expect(page.locator('html')).not.toHaveClass(/genie-open/)
     expect(errors).toEqual([])
   })
+})
+
+test('her richer answers: choices with a first pick, a red danger, a live calculator, a test about her with a comment, follow-up questions; a temporary chat is not kept', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  const rich: Answer = {
+    tajik: true, reply: 'rich',
+    blocks: [
+      { type: 'text', text: 'Ман се варианти воқеиро баррасӣ кардам.' },
+      { type: 'choices', title: 'Интихоби провайдер', intro: '', items: [
+        { name: 'Smartpay', badge: 'Интихоби аввалини ман', tone: 'best', points: ['Visa ва Mastercard', 'API барои барномаҳо'], note: '' },
+        { name: 'Z Pay', badge: '', tone: 'neutral', points: ['Recurring Billing'], note: '' },
+        { name: 'Alif', badge: 'Хатар', tone: 'risk', points: ['Танҳо маҳаллӣ'], note: 'Шартномаро бодиққат хонед' }] },
+      { type: 'callout', tone: 'danger', title: 'Хатар', text: 'Харҷи AI метавонад аз даромад зиёд шавад.' },
+      { type: 'calc', title: 'Буҷаи AI', note: 'Пеш аз тарҳи сервер.', inputs: [
+        { id: 'price', label: 'Нархи обуна', value: 40, min: 0, max: 100, step: 5, unit: 'сомонӣ', options: [25, 30, 40, 50] },
+        { id: 'msgs', label: 'Паём дар як моҳ', value: 2500, min: 0, max: 10000, step: 500, unit: '', options: [] }],
+        outputs: [{ label: 'Фоидаи боқимонда', formula: 'price - msgs*0.0008*11', unit: 'сомонӣ', tone: 'best', big: true },
+          { label: 'Харҷи AI', formula: 'msgs*0.0008*11', unit: 'сомонӣ', tone: 'risk', big: false }] },
+      { type: 'follow', items: ['Техникаҳои ранг ва соя', 'Стилҳои манга'] }
+    ]
+  }
+  const quiz: Answer = { tajik: true, reply: 'quiz', blocks: [{ type: 'quiz', title: 'Тести хислат', intro: '', comment: 'Дар бораи худ каме нақл кунед…',
+    questions: [{ question: 'Дӯстатон маслиҳат мепурсад?', options: ['Гӯш мекунам', 'Дарҳол мегӯям'], answer: -1, explanation: '' }] }] }
+  const { asked } = await fakeMahliyo(page, (q) => (q.includes('тест') ? quiz : rich), 200)
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const box = page.locator('.ai-input')
+  await box.fill('Кадом провайдер беҳтар аст?')
+  await box.press('Enter')
+  await expect(page.locator('.ai-choice')).toHaveCount(3)
+  await expect(page.locator('.ai-choice.tone-best .ai-choice-badge')).toHaveText('Интихоби аввалини ман')
+  await expect(page.locator('.ai-callout.tone-danger')).toBeVisible()
+  // the calculator: a choice and − / + change the results at once
+  const main = page.locator('.ai-calc-main b')
+  await expect(main).toHaveText('18 сомонӣ')
+  await page.locator('.ai-calc-options button', { hasText: '50' }).click()
+  await expect(main).toHaveText('28 сомонӣ')
+  await page.getByRole('button', { name: 'Паём дар як моҳ +' }).click()
+  await expect(main).toHaveText('23,6 сомонӣ')
+  await page.waitForTimeout(2500)
+  await page.locator('.ai-blocks').last().screenshot({ path: 'test-results/ai-rich.png' })
+  // a follow-up question asks it
+  await page.locator('.ai-follow button', { hasText: 'Стилҳои манга' }).click()
+  await expect.poll(() => asked.length).toBe(2)
+  expect(asked[1].turns.at(-1)!.content).toBe('Стилҳои манга')
+  // a test about her: no score, her picks and words go to Mahliyo
+  await expect(page.locator('.ai-choice')).toHaveCount(6)
+  await box.fill('Як тест дар бораи хислати ман гир')
+  await box.press('Enter')
+  await page.locator('.ai-quiz-opt', { hasText: 'Гӯш мекунам' }).click()
+  await page.getByPlaceholder('Дар бораи худ каме нақл кунед…').fill('Ман ором ҳастам')
+  await page.locator('.ai-quiz-check').click()
+  await expect.poll(() => asked.length).toBe(4)
+  expect(asked[3].turns.at(-1)!.content).toContain('«Гӯш мекунам»')
+  expect(asked[3].turns.at(-1)!.content).toContain('Ман ором ҳастам')
+  await expect(page.locator('.ai-quiz')).toHaveCount(2)
+  // a temporary chat: its words are never in the history
+  await page.getByRole('button', { name: 'Чати муваққатӣ' }).click()
+  await expect(page.locator('.ai-temp-note')).toBeVisible()
+  await box.fill('Саволи пинҳонӣ')
+  await box.press('Enter')
+  await expect(page.locator('.ai-choice')).toHaveCount(3)
+  const kept = await page.evaluate(() => localStorage.getItem('dk.ai.chats') ?? '')
+  expect(kept.length).toBeGreaterThan(0)
+  expect(await page.evaluate(() => localStorage.getItem('dk.ai.chats') ?? '')).toBe(kept)
+  await page.getByRole('button', { name: 'Таърихи чатҳо' }).click()
+  await expect(page.locator('.ai-temp-note')).toHaveCount(0)
+  expect(errors).toEqual([])
+})
+
+test('the paperclip opens a sheet: camera, gallery, document and four ways of answering; a chosen way goes with the question', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  const { asked } = await fakeMahliyo(page, () => ({ tajik: true, reply: 'ok', blocks: [{ type: 'text', text: 'Хуб' }] }), 200)
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await page.locator('.ai-attach').click()
+  await expect(page.locator('.attach')).toBeVisible()
+  await expect(page.locator('.attach-actions button')).toHaveCount(6)
+  await page.screenshot({ path: 'test-results/attach-sheet.png' })
+  await page.locator('.attach-actions button', { hasText: 'Режими илмӣ' }).click()
+  await expect(page.locator('.ai-mode-chip')).toContainText('Режими илмӣ')
+  const box = page.locator('.ai-input')
+  await box.fill('Фотосинтез чист?')
+  await box.press('Enter')
+  await expect.poll(() => asked.length).toBe(1)
+  expect((asked[0] as Asked & { mode?: string }).mode).toBe('science')
+  expect(errors).toEqual([])
 })

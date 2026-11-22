@@ -257,3 +257,19 @@ test('every profile picture wears the little gold crown, tilted to one side', as
   }
   expect(errors).toEqual([])
 })
+
+test('after 22:00 a sleepy Mahliyo asks her to sleep: the time in the words, "close and sleep", and a quiet "Рад кардан" at the bottom that lets her go on until morning', async ({ page, server: _, errors }) => {
+  await page.clock.install({ time: new Date('2026-11-23T23:47:00') })
+  await signedIn(page, { night: true })
+  await page.goto('/')
+  await expect(page.locator('.night')).toBeVisible({ timeout: 10_000 })
+  await expect(page.locator('.night-text')).toContainText('23:47')
+  await expect(page.locator('.night-sleep')).toBeVisible()
+  await page.screenshot({ path: 'test-results/night.png' })
+  await page.locator('.night-refuse').click()
+  await expect(page.locator('.night')).toHaveCount(0)
+  await page.reload()
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('.night')).toHaveCount(0)
+  expect(errors).toEqual([])
+})

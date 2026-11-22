@@ -1,5 +1,6 @@
 'use client'
 
+import { evaluate, formatNumber } from '@/lib/calc'
 import Link from 'next/link'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
@@ -91,6 +92,9 @@ function QuizCard({ block, id, onQuiz, style }: { block: Extract<AiBlock, { type
   const [checked, setChecked] = useState(() => !!(id && readQuiz()[id]?.checked))
   const answered = picked.filter((p) => p !== null).length
   const score = block.questions.filter((q, n) => picked[n] === q.answer).length
+  // a test about her (character, taste): no right answers, no score — her picks and words go to Mahliyo
+  const personal = block.questions.every((q) => q.answer < 0)
+  const [comment, setComment] = useState('')
   const pick = (n: number, o: number) => {
     if (checked) return
     const next = picked.map((p, k) => (k === n ? o : p))
@@ -101,19 +105,30 @@ function QuizCard({ block, id, onQuiz, style }: { block: Extract<AiBlock, { type
     if (answered < total) return
     setChecked(true)
     if (id) keepQuiz(id, { picked, checked: true })
+    const words = comment.trim() ? `${t('ai.quiz_comment_mine')}: ${comment.trim()}` : ''
+    if (personal) {
+      // her picks, one per question, and her own words
+      onQuiz?.([
+        t('ai.quiz_picks') + (block.title ? ` («${block.title}»)` : ''),
+        ...block.questions.map((q, n) => `${n + 1}. ${q.question} — «${q.options[picked[n] ?? 0]}»`),
+        words
+      ].filter(Boolean).join('\n'))
+      return
+    }
     // her result, for Mahliyo to answer: the score and each mistake
     const wrong = block.questions.map((q, n) => ({ q, n })).filter(({ q, n }) => picked[n] !== q.answer)
     onQuiz?.([
       t('ai.quiz_result').replace('{n}', String(score)).replace('{total}', String(total)) + (block.title ? ` («${block.title}»)` : ''),
-      ...wrong.map(({ q, n }) => `${n + 1}. ${q.question} — ${t('ai.quiz_mine')}: «${q.options[picked[n] ?? 0]}», ${t('ai.quiz_right')}: «${q.options[q.answer]}»`)
-    ].join('\n'))
+      ...wrong.map(({ q, n }) => `${n + 1}. ${q.question} — ${t('ai.quiz_mine')}: «${q.options[picked[n] ?? 0]}», ${t('ai.quiz_right')}: «${q.options[q.answer]}»`),
+      words
+    ].filter(Boolean).join('\n'))
   }
   return (
     <section className={`ai-quiz${checked ? ' is-checked' : ''}`} style={style} aria-label={block.title || t('ai.quiz')}>
       <header className="ai-quiz-head">
         <span className="ai-quiz-icon" aria-hidden="true"><Icon name="check" size={16} strokeWidth={2.4} /></span>
         <b className="grow">{block.title ? emojify(block.title) : t('ai.quiz')}</b>
-        <span className="ai-quiz-count">{checked ? `${score}/${total}` : t('ai.quiz_count').replace('{n}', String(total))}</span>
+        <span className="ai-quiz-count">{checked && !personal ? `${score}/${total}` : t('ai.quiz_count').replace('{n}', String(total))}</span>
       </header>
       {block.intro ? <p className="ai-quiz-intro"><Rich text={block.intro} /></p> : null}
       <ol className="ai-quiz-list">
@@ -123,11 +138,12 @@ function QuizCard({ block, id, onQuiz, style }: { block: Extract<AiBlock, { type
             <div className="ai-quiz-opts" role="radiogroup" aria-label={q.question}>
               {q.options.map((o, k) => {
                 const mine = picked[n] === k
-                const mark = checked ? (k === q.answer ? ' is-right' : mine ? ' is-wrong' : '') : mine ? ' is-picked' : ''
+                const mark = checked && !personal ? (k === q.answer ? ' is-right' : mine ? ' is-wrong' : '') : mine ? ' is-picked' : ''
                 return (
                   <button key={k} type="button" role="radio" aria-checked={mine} className={`ai-quiz-opt${mark}`} disabled={checked} onClick={() => pick(n, k)}>
                     <i aria-hidden="true">{String.fromCharCode(65 + k)}</i><span><Rich text={o} /></span>
-                    {checked && k === q.answer ? <Icon name="check" size={16} strokeWidth={2.6} /> : checked && mine ? <Icon name="x" size={16} strokeWidth={2.6} /> : null}
+                    {personal ? (mine ? <Icon name="check" size={16} strokeWidth={2.6} /> : null)
+                      : checked && k === q.answer ? <Icon name="check" size={16} strokeWidth={2.6} /> : checked && mine ? <Icon name="x" size={16} strokeWidth={2.6} /> : null}
                   </button>
                 )
               })}
@@ -136,8 +152,17 @@ function QuizCard({ block, id, onQuiz, style }: { block: Extract<AiBlock, { type
           </li>
         ))}
       </ol>
+      {block.comment ? (
+        <label className="ai-quiz-comment">
+          <Icon name="edit" size={16} aria-hidden="true" />
+          <textarea rows={1} value={comment} disabled={checked} placeholder={block.comment} aria-label={block.comment} maxLength={1000}
+            onChange={(e) => { setComment(e.target.value); e.target.style.height = 'auto'; e.target.style.height = `${e.target.scrollHeight}px` }} />
+        </label>
+      ) : null}
       <footer className="ai-quiz-foot">
-        {checked ? (
+        {checked && personal ? (
+          <p className="ai-quiz-score" role="status"><b>{t('ai.quiz_sent')}</b></p>
+        ) : checked ? (
           <p className="ai-quiz-score" role="status"><b>{t('ai.quiz_score').replace('{n}', String(score)).replace('{total}', String(total))}</b>
             <span className="ai-quiz-bar" aria-hidden="true"><i style={{ width: `${Math.round((score / total) * 100)}%` }} /></span></p>
         ) : (
@@ -148,6 +173,136 @@ function QuizCard({ block, id, onQuiz, style }: { block: Extract<AiBlock, { type
         )}
       </footer>
     </section>
+  )
+}
+
+const TONE_LABEL_ICON = { best: 'star', good: 'check', risk: 'alert', neutral: null } as const
+
+/** Options side by side: name, a badge (her first pick in green, a risk in red), a few points, a note. */
+function ChoicesCard({ block, style }: { block: Extract<AiBlock, { type: 'choices' }>; style: CSSProperties }) {
+  return (
+    <section className="ai-choices" style={style} aria-label={block.title}>
+      {block.title ? <h3 className="ai-choices-title">{emojify(block.title)}</h3> : null}
+      {block.intro ? <p className="ai-choices-intro"><Rich text={block.intro} /></p> : null}
+      <ol className="ai-choices-list">
+        {block.items.map((it, n) => {
+          const icon = TONE_LABEL_ICON[it.tone]
+          return (
+            <li key={n} className={`ai-choice tone-${it.tone}`}>
+              <div className="ai-choice-head">
+                <span className="ai-choice-n" aria-hidden="true">{n + 1}</span>
+                <b className="grow">{emojify(it.name)}</b>
+              </div>
+              {it.badge ? <span className="ai-choice-badge">{icon ? <Icon name={icon} size={13} strokeWidth={2.4} /> : null}{emojify(it.badge)}</span> : null}
+              {it.points.length ? <ul>{it.points.map((p, k) => <li key={k}><Rich text={p} /></li>)}</ul> : null}
+              {it.note ? <p className="ai-choice-note"><Rich text={it.note} /></p> : null}
+            </li>
+          )
+        })}
+      </ol>
+    </section>
+  )
+}
+
+const CALLOUT_ICON = { danger: 'alert', warning: 'alert', tip: 'sparkle', info: 'info' } as const
+/** A framed note: a real danger in red, a warning in amber, a tip in green, a plain note. */
+function CalloutCard({ block, style }: { block: Extract<AiBlock, { type: 'callout' }>; style: CSSProperties }) {
+  return (
+    <aside className={`ai-callout tone-${block.tone}`} style={style} role={block.tone === 'danger' ? 'alert' : 'note'}>
+      <span className="ai-callout-icon" aria-hidden="true"><Icon name={CALLOUT_ICON[block.tone]} size={18} strokeWidth={2.2} /></span>
+      <div className="grow">
+        {block.title ? <b>{emojify(block.title)}</b> : null}
+        {isMarkdown(block.text) ? <AiMarkdown text={block.text} /> : <p>{emojify(block.text)}</p>}
+      </div>
+    </aside>
+  )
+}
+
+/** A live calculator: each value changes with − / + or a choice, and the results follow at once. */
+function CalcCard({ block, style }: { block: Extract<AiBlock, { type: 'calc' }>; style: CSSProperties }) {
+  const [values, setValues] = useState<Record<string, number>>(() => Object.fromEntries(block.inputs.map((i) => [i.id, i.value])))
+  const set = (id: string, v: number) => setValues((all) => ({ ...all, [id]: v }))
+  const fmt = (v: number, unit: string) => `${formatNumber(v)}${unit ? ` ${unit}` : ''}`
+  const results = block.outputs.map((o) => ({ o, v: evaluate(o.formula, values) }))
+  const main = results.find((r) => r.o.big) ?? null
+  return (
+    <section className="ai-calc" style={style} aria-label={block.title}>
+      {block.title ? <h3 className="ai-calc-title">{emojify(block.title)}</h3> : null}
+      <div className="ai-calc-inputs">
+        {block.inputs.map((i) => {
+          const v = values[i.id]
+          const round = (x: number) => Number(x.toFixed(6))
+          return (
+            <div key={i.id} className="ai-calc-input">
+              <span className="ai-calc-label">{emojify(i.label)}</span>
+              {i.options.length ? (
+                <div className="ai-calc-options" role="radiogroup" aria-label={i.label}>
+                  {i.options.map((o) => (
+                    <button key={o} type="button" role="radio" aria-checked={v === o} className={v === o ? 'is-on' : ''} onClick={() => set(i.id, o)}>{formatNumber(o)}</button>
+                  ))}
+                </div>
+              ) : (
+                <div className="ai-calc-stepper">
+                  <button type="button" aria-label={`${i.label} −`} disabled={v <= i.min} onClick={() => set(i.id, round(Math.max(i.min, v - i.step)))}><Icon name="minus" size={16} strokeWidth={2.4} /></button>
+                  <output aria-live="polite">{fmt(v, i.unit)}</output>
+                  <button type="button" aria-label={`${i.label} +`} disabled={v >= i.max} onClick={() => set(i.id, round(Math.min(i.max, v + i.step)))}><Icon name="plus" size={16} strokeWidth={2.4} /></button>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+      <div className="ai-calc-results">
+        {main && main.v !== null ? (
+          <div className={`ai-calc-main tone-${main.o.tone}`}><span>{emojify(main.o.label)}</span><b>{fmt(main.v, main.o.unit)}</b></div>
+        ) : null}
+        {results.filter((r) => r !== main && r.v !== null).map(({ o, v }, n) => (
+          <div key={n} className={`ai-calc-row tone-${o.tone}`}><span>{emojify(o.label)}</span><b>{fmt(v!, o.unit)}</b></div>
+        ))}
+      </div>
+      {block.note ? <p className="ai-calc-note">{emojify(block.note)}</p> : null}
+    </section>
+  )
+}
+
+/** She did not understand: her question, choices to tap, and a line to write one's own. */
+function ClarifyCard({ block, onAsk, style }: { block: Extract<AiBlock, { type: 'clarify' }>; onAsk?: (text: string) => void; style: CSSProperties }) {
+  const { t } = usePrefs()
+  const [own, setOwn] = useState('')
+  const [done, setDone] = useState(false)
+  const ask = (text: string) => {
+    if (done || !text.trim() || !onAsk) return
+    setDone(true)
+    onAsk(text.trim())
+  }
+  return (
+    <section className={`ai-clarify${done ? ' is-done' : ''}`} style={style} aria-label={block.question}>
+      <p className="ai-clarify-q"><Icon name="help" size={18} aria-hidden="true" /><span>{emojify(block.question)}</span></p>
+      <div className="ai-clarify-opts">
+        {block.options.map((o, k) => (
+          <button key={k} type="button" className="ai-quiz-opt" disabled={done} onClick={() => ask(o)}>
+            <i aria-hidden="true">{String.fromCharCode(65 + k)}</i><span>{emojify(o)}</span>
+          </button>
+        ))}
+        <form className="ai-clarify-own" onSubmit={(e) => { e.preventDefault(); ask(own) }}>
+          <Icon name="edit" size={16} aria-hidden="true" />
+          <input value={own} disabled={done} maxLength={500} placeholder={t('ai.clarify_own')} aria-label={t('ai.clarify_own')} onChange={(e) => setOwn(e.target.value)} />
+          {own.trim() ? <button type="submit" aria-label={t('ai.send')}><Icon name="arrow" size={16} /></button> : null}
+        </form>
+      </div>
+    </section>
+  )
+}
+
+/** Questions to go on with, under her answer: a tap asks one. */
+function FollowList({ block, onAsk, style }: { block: Extract<AiBlock, { type: 'follow' }>; onAsk?: (text: string) => void; style: CSSProperties }) {
+  if (!onAsk) return null
+  return (
+    <div className="ai-follow" style={style}>
+      {block.items.map((q, k) => (
+        <button key={k} type="button" onClick={() => onAsk(q)}><Icon name="follow" size={18} aria-hidden="true" /><span>{emojify(q)}</span></button>
+      ))}
+    </div>
   )
 }
 
@@ -202,7 +357,7 @@ function PictureTile({ picture, onOpen, onFail }: { picture: Picture; onOpen: ()
   )
 }
 
-export function AnswerBlocks({ blocks, fresh, id, onQuiz }: { blocks: AiBlock[]; fresh: boolean; id?: string; onQuiz?: (result: string) => void }) {
+export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk }: { blocks: AiBlock[]; fresh: boolean; id?: string; onQuiz?: (result: string) => void; onAsk?: (text: string) => void }) {
   const { t } = usePrefs()
   const [zoom, setZoom] = useState<Extract<AiBlock, { type: 'screen' }> | null>(null)
   const { starts } = timingOf(blocks)
@@ -252,6 +407,16 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz }: { blocks: AiBlock[];
             return <Pictures key={i} items={b.items} style={style} />
           case 'quiz':
             return <QuizCard key={i} block={b} id={id ? `${id}:${i}` : undefined} onQuiz={onQuiz} style={style} />
+          case 'choices':
+            return <ChoicesCard key={i} block={b} style={style} />
+          case 'callout':
+            return <CalloutCard key={i} block={b} style={style} />
+          case 'calc':
+            return <CalcCard key={i} block={b} style={style} />
+          case 'clarify':
+            return <ClarifyCard key={i} block={b} onAsk={onAsk} style={style} />
+          case 'follow':
+            return <FollowList key={i} block={b} onAsk={onAsk} style={style} />
           case 'premium':
             return null
           case 'warning':

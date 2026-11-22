@@ -239,14 +239,20 @@ export interface AiState {
   /** she answered while her chat was not open */
   unseen: boolean
   online: boolean
+  /** the open chat is temporary: never kept in the history, gone after a new chat or another one is opened */
+  temp?: boolean
 }
-export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string }
+export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string; mode?: AiMode }
+/** how she asks to be answered (the attach sheet's modes) */
+export type AiMode = 'precise' | 'science' | 'friendly' | 'girly'
 
 const PENDING_KEY = 'dk.ai-pending'
 /** how long she may take before the question counts as unanswered (the server gives up after 5 minutes) */
 const PATIENCE = 5.5 * 60_000
 const EMPTY: AiState = { chat: '', turns: [], chats: [], pending: null, problem: null, fresh: -1, unseen: false, online: true }
 let chats: AiChat[] = []
+/** temporary chats' conversations, in memory only (never written to the phone's storage) */
+const temp = new Map<string, AiTurn[]>()
 let state: AiState = EMPTY
 let started = false
 const listeners = new Set<() => void>()
@@ -272,10 +278,15 @@ function savePending(p: AiState['pending']) {
 }
 
 const metaOf = (list: AiChat[]): AiChatMeta[] => list.map(({ id, title, at, archived }) => ({ id, title, at, ...(archived ? { archived } : {}) }))
-const turnsOf = (id: string) => chats.find((c) => c.id === id)?.turns ?? []
+const turnsOf = (id: string) => chats.find((c) => c.id === id)?.turns ?? temp.get(id) ?? []
 
 /** Keeps a chat's conversation (the newest chat first in the history; talked in again, it leaves the archive). */
 function keep(id: string, turns: AiTurn[]) {
+  // a temporary chat stays in memory only
+  if (temp.has(id)) {
+    temp.set(id, turns)
+    return metaOf(chats)
+  }
   const rest = chats.filter((c) => c.id !== id)
   chats = turns.length ? [{ id, title: titleOf(turns), at: new Date().toISOString(), turns: turns.slice(-KEEP) }, ...rest] : rest
   writeChats(chats)
@@ -483,19 +494,45 @@ export function retry(who: Who) {
   if (last?.role === 'user') void ask(last.content, who, state.turns.length - 1, last.files?.length ? lastFiles : [])
 }
 
+/** Leaving a temporary chat: its words are dropped (and an answer still coming to it is not waited for). */
+function dropTemp() {
+  if (!state.temp) return
+  if (state.pending?.chat === state.chat) stop()
+  temp.delete(state.chat)
+}
+
 /** Opens a chat from the history. */
 export function openChat(id: string) {
   if (!chats.some((c) => c.id === id) || id === state.chat) return
+  dropTemp()
   try { localStorage.setItem(CURRENT_KEY, id) } catch { /* not kept */ }
-  set({ chat: id, turns: turnsOf(id), problem: null, fresh: -1 })
+  set({ chat: id, turns: turnsOf(id), problem: null, fresh: -1, temp: false })
 }
 
-/** A new chat (the one open stays in the history). */
+/** A new chat (the one open stays in the history; a temporary one is dropped). */
 export function newChat() {
-  if (!state.turns.length) return
+  if (!state.turns.length && !state.temp) return
+  dropTemp()
   const id = newId()
   try { localStorage.setItem(CURRENT_KEY, id) } catch { /* not kept */ }
-  set({ chat: id, turns: [], problem: null, fresh: -1 })
+  set({ chat: id, turns: [], problem: null, fresh: -1, temp: false })
+}
+
+/** A temporary chat: nothing of it is kept in the history or on the phone. */
+export function tempChat() {
+  if (state.temp && !state.turns.length) return
+  dropTemp()
+  const id = newId()
+  temp.set(id, [])
+  set({ chat: id, turns: [], problem: null, fresh: -1, temp: true })
+}
+/** Leaves a temporary chat for the history's newest one (when the history is opened). */
+export function leaveTemp() {
+  if (!state.temp) return
+  dropTemp()
+  const id = chats[0]?.id ?? newId()
+  try { localStorage.setItem(CURRENT_KEY, id) } catch { /* not kept */ }
+  set({ chat: id, turns: turnsOf(id), problem: null, fresh: -1, temp: false })
 }
 
 /** Puts a chat in the archive, or takes it out (the one open, archived: a new one opens). */
