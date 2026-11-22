@@ -62,4 +62,13 @@ describe('presentation styles', () => {
     }
     expect(styleIn('/презентатсия\nСтил: Илмӣ #s03')).toBe('s03')
   })
+
+  it('no two styles look alike: each its own cover, pattern and font together, and many fonts', async () => {
+    const { SLIDE_STYLES, SLIDE_FONTS, coverShapes, styleNote } = await import('@/lib/slideStyles')
+    const looks = SLIDE_STYLES.map((s) => `${s.layout}|${s.motif}|${s.font}`)
+    expect(new Set(looks).size).toBe(100)
+    expect(SLIDE_FONTS.length).toBeGreaterThanOrEqual(40)
+    for (const s of SLIDE_STYLES) expect(coverShapes(s).title.w).toBeGreaterThan(40)
+    expect(styleNote(SLIDE_STYLES[0])).toMatch(/ADVERTISING/)
+  })
 })

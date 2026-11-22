@@ -1,22 +1,54 @@
 'use client'
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { withCommand } from '@/lib/aiCommands'
-import { SLIDE_STYLES, type SlideStyle } from '@/lib/slideStyles'
+import { bodyFont, coverShapes, FONTS_URL, paint, SLIDE_STYLES, type SlideStyle } from '@/lib/slideStyles'
 
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
 
-/** A presentation's cover in a style: its layout and colours, the title on it (the same as the file's first slide). */
+/** A presentation's cover in a style: the same shapes, font and colours as the file's first slide. */
 export function SlideCover({ style, title, sub }: { style: SlideStyle; title: string; sub?: string }) {
+  const c = coverShapes(style)
+  const t = c.title
   return (
-    <div className={`slide-cover is-${style.layout}`} style={{ '--bg': style.bg, '--fg': style.fg, '--ac': style.accent } as CSSProperties}>
-      <i className="sc-a" /><i className="sc-b" />
-      <div className="sc-text"><b>{title}</b>{sub ? <span>{sub}</span> : null}</div>
-    </div>
+    <svg className="slide-cover" viewBox="0 0 160 90" role="img" aria-label={style.name}>
+      <rect width="160" height="90" fill={paint(c.back, style)} />
+      {c.shapes.map((sh, i) => {
+        const fill = paint(sh.c, style)
+        const turn = sh.r ? `rotate(${sh.r} ${sh.x + sh.w / 2} ${sh.y + sh.h / 2})` : undefined
+        if (sh.k === 'rect') return <rect key={i} x={sh.x} y={sh.y} width={sh.w} height={sh.h} fill={fill} opacity={sh.o ?? 1} transform={turn} />
+        if (sh.k === 'box') return <rect key={i} x={sh.x} y={sh.y} width={sh.w} height={sh.h} fill="none" stroke={fill} strokeWidth={sh.line ?? 0.5} opacity={sh.o ?? 1} transform={turn} />
+        if (sh.k === 'ellipse' || sh.k === 'ring') {
+          return <ellipse key={i} cx={sh.x + sh.w / 2} cy={sh.y + sh.h / 2} rx={sh.w / 2} ry={sh.h / 2} fill={sh.k === 'ring' ? 'none' : fill} stroke={sh.k === 'ring' ? fill : undefined} strokeWidth={sh.line} opacity={sh.o ?? 1} transform={turn} />
+        }
+        const pts = sh.k === 'tri'
+          ? `${sh.x + sh.w / 2},${sh.y} ${sh.x + sh.w},${sh.y + sh.h} ${sh.x},${sh.y + sh.h}`
+          : sh.flip ? `${sh.x + sh.w},${sh.y} ${sh.x + sh.w},${sh.y + sh.h} ${sh.x},${sh.y + sh.h}` : `${sh.x},${sh.y} ${sh.x + sh.w},${sh.y + sh.h} ${sh.x},${sh.y + sh.h}`
+        return <polygon key={i} points={pts} fill={fill} opacity={sh.o ?? 1} transform={turn} />
+      })}
+      <foreignObject x={t.x} y={t.y} width={t.w} height={t.h}>
+        <div className={`sc-text v-${t.valign}`} style={{ textAlign: t.align, color: paint(t.c, style) }}>
+          <b style={{ fontFamily: `'${style.font}', sans-serif`, fontSize: t.size }}>{title}</b>
+          {sub ? <span style={{ fontFamily: `'${bodyFont(style)}', sans-serif`, fontSize: t.size * 0.42, color: paint(t.sub, style) }}>{sub}</span> : null}
+        </div>
+      </foreignObject>
+    </svg>
   )
+}
+
+/** the styles' fonts, loaded once for the previews */
+function useSlideFonts() {
+  useEffect(() => {
+    if (document.getElementById('slide-fonts')) return
+    const link = document.createElement('link')
+    link.id = 'slide-fonts'
+    link.rel = 'stylesheet'
+    link.href = FONTS_URL
+    document.head.appendChild(link)
+  }, [])
 }
 
 const EXTRAS = ['notes', 'quiz', 'summary', 'examples', 'sources'] as const
@@ -37,6 +69,7 @@ export function SlidesSetup({ onSend, onClose }: { onSend: (question: string) =>
   const [extras, setExtras] = useState<Extra[]>(['notes', 'summary'])
   const row = useRef<HTMLDivElement>(null)
   const style = SLIDE_STYLES[at]
+  useSlideFonts()
 
   // the chosen cover in the middle of the row
   useEffect(() => {
@@ -76,7 +109,7 @@ export function SlidesSetup({ onSend, onClose }: { onSend: (question: string) =>
           <div ref={row} className="slides-row" role="listbox" aria-label={t('slides.style')}>
             {SLIDE_STYLES.map((s, i) => (
               <button key={s.id} type="button" role="option" aria-selected={i === at} className={i === at ? 'is-on' : ''} onClick={() => setAt(i)}>
-                <SlideCover style={s} title={topic.trim() || s.name} />
+                <SlideCover style={s} title={topic.trim() || s.name} sub={topic.trim() ? s.name : undefined} />
                 <span>{s.name}</span>
               </button>
             ))}

@@ -4,7 +4,7 @@ import { GoogleGenAI, ThinkingLevel } from '@google/genai'
 import { linkAllowed, ROUTES, SPOT_IDS, SPOTS, type AiBlock, type CalcInput, type CalcOutput, type SpotId, type Tone } from '@/lib/aiCatalog'
 import { commandNote, splitCommand } from '@/lib/aiCommands'
 import { FILE_CAP, FILES_MAX, fileType, safeFileName, type FileKind } from '@/lib/aiFiles'
-import { styleIn } from '@/lib/slideStyles'
+import { slideStyle, styleIn, styleNote } from '@/lib/slideStyles'
 import { evaluate, formatNumber } from '@/lib/calc'
 
 import { ABOUT } from './mahliyoAbout'
@@ -924,9 +924,11 @@ async function writeFiles(blocks: Block[], turns: Turn[], me: Learner, chosen?: 
   }))
 }
 
-async function writeFile(file: { name: string; title: string; about: string }, turns: Turn[], me: Learner, until: number, chosen?: ActiveModel | null): Promise<string> {
+async function writeFile(file: { name: string; title: string; about: string; style?: string }, turns: Turn[], me: Learner, until: number, chosen?: ActiveModel | null): Promise<string> {
   const kind = fileType(file.name)?.kind ?? 'text'
-  const system = [FILE_WRITER, FILE_RULES[kind], learnerNote(me, new Date(), { private: true }), languageNote(turns)].join('\n\n')
+  // a presentation's style: its look and how to write for it
+  const look = kind === 'pptx' && file.style ? styleNote(slideStyle(file.style)) : ''
+  const system = [FILE_WRITER, FILE_RULES[kind], look, learnerNote(me, new Date(), { private: true }), languageNote(turns)].filter(Boolean).join('\n\n')
   const task = `Write the complete file «${file.name}» — ${file.title}${file.about ? ` (${file.about})` : ''}.`
   const last = turns[turns.length - 1]
   const asked: Turn[] = [...turns.slice(0, -1), { role: 'user', content: `${last?.content ?? ''}\n\n— ${task}` }]
