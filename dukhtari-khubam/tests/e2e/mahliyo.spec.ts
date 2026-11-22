@@ -769,7 +769,9 @@ test('insults or pressure: only a red warning, in words that change each time; t
     await box.press('Enter')
     await expect(page.locator('.ai-warning')).toHaveCount(k)
   }
-  await expect(page.locator('.ai-warning')).toHaveText(words)
+  // the emoji are pictures (the iPhone's), so the text is the words without them
+  await expect(page.locator('.ai-warning')).toHaveText(words.map((w) => new RegExp(`^${w.replace(/\s*\p{Extended_Pictographic}/gu, '')}\\s*$`, 'u')))
+  await expect(page.locator('.ai-warning img')).toHaveCount(3)
   expect(await page.locator('.ai-warning').first().evaluate((e) => getComputedStyle(e).color)).toBe('rgb(216, 52, 62)')
   // still signed in, the chat still open
   await expect(page).toHaveURL(/\/mahliyo\/?$/)
