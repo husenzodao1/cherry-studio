@@ -100,9 +100,9 @@ export function Permissions() {
     await recheck()
   }
   const next: Need | null = !granted.notify ? 'notify' : !granted.call ? 'call' : null
-  const rows: { id: Need; icon: 'bell' | 'phone'; label: string; hint: string }[] = [
-    { id: 'notify', icon: 'bell', label: t('perm.notify'), hint: t('perm.notify_hint') },
-    { id: 'call', icon: 'phone', label: t('perm.call'), hint: t('perm.call_hint') }
+  const rows: { id: Need; icon: 'bell' | 'phone'; label: string }[] = [
+    { id: 'notify', icon: 'bell', label: t('perm.notify') },
+    { id: 'call', icon: 'phone', label: t('perm.call') }
   ]
 
   return (
@@ -110,12 +110,11 @@ export function Permissions() {
       <div className="perm-body">
         <span className="perm-icon" aria-hidden="true"><Icon name="key" size={24} /></span>
         <h2 className="perm-title">{t('perm.title')}</h2>
-        <p className="perm-lead">{t('perm.lead')}</p>
         <ul className="perm-list">
           {rows.map((r) => (
             <li key={r.id} className={`perm-row${granted[r.id] ? ' is-on' : ''}`}>
               <span className="perm-row-icon"><Icon name={r.icon} size={19} /></span>
-              <span className="grow"><b>{r.label}</b><span>{r.hint}</span></span>
+              <b className="grow">{r.label}</b>
               {granted[r.id]
                 ? <span className="perm-ok" aria-label={t('perm.allowed')}><Icon name="check" size={16} /></span>
                 : <button type="button" className="perm-chip" onClick={() => void ask(r.id)}>{t('perm.allow')}</button>}
