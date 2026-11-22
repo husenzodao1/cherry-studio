@@ -390,17 +390,54 @@ function end(problem: AiProblem | null, patch: Partial<AiState> = {}) {
   set({ pending: null, problem, ...patch })
 }
 
+type AnswerState = { status: 'pending' | 'done' | 'failed'; reason?: string; tajik?: boolean; reply?: string; blocks?: AiBlock[] | null }
+
+const DB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const DB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+/** the phone's token as the database keeps it (sha-256, hex) */
+async function tokenHash(): Promise<string> {
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(supportToken() ?? ''))
+  return [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+/**
+ * Whether her answer is ready: asked straight from the database (as the content stamp is), not through
+ * the app's server — waiting costs the server nothing, however many learners wait. The server is asked
+ * only when the database cannot be reached this way.
+ */
+async function readAnswer(id: string): Promise<AnswerState> {
+  if (DB_URL && DB_KEY && typeof crypto !== 'undefined' && crypto.subtle) {
+    try {
+      const res = await fetch(`${DB_URL}/rest/v1/rpc/api_mahliyo_result`, {
+        method: 'POST',
+        headers: { apikey: DB_KEY, authorization: `Bearer ${DB_KEY}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ p_id: id, p_token_hash: await tokenHash() }),
+        cache: 'no-store'
+      })
+      if (res.ok) {
+        const r = (await res.json()) as AnswerState | null
+        if (r && typeof r.status === 'string') return r
+        throw new AiError(404)
+      }
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) throw new AiError(res.status)
+    } catch (e) {
+      if (e instanceof AiError) throw e
+      /* the database could not be reached this way: the server is asked */
+    }
+  }
+  return post<AnswerState>('/mahliyo/answer', { token: supportToken(), id })
+}
+
 /** Waits for her answer to question `id` (asking the server now and then; without internet, it waits). */
 async function wait(id: string, since: number, my: number) {
   while (current(my)) {
     // often while an answer is likely (she usually answers in seconds), then less often
-    await sleep(Date.now() - since < 40_000 ? 600 : 1500)
+    await sleep(Date.now() - since < 40_000 ? 1000 : 2500)
     if (!current(my)) return
     if (Date.now() - since > PATIENCE) return end('unavailable')
     if (offline()) continue
-    let r: { status: 'pending' | 'done' | 'failed'; reason?: string; tajik?: boolean; reply?: string; blocks?: AiBlock[] | null }
+    let r: AnswerState
     try {
-      r = await post('/mahliyo/answer', { token: supportToken(), id })
+      r = await readAnswer(id)
     } catch (e) {
       // the connection dropped or the server stumbled: ask again; a question it does not know: give up
       if (e instanceof AiError && e.status < 500 && e.status !== 429) return current(my) ? end('unavailable') : undefined

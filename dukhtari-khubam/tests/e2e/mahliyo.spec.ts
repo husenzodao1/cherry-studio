@@ -34,19 +34,22 @@ async function fakeMahliyo(page: Page, reply: (q: string) => Answer | null, afte
     ready.set(id, { at: Date.now() + after, a: reply(body.turns[body.turns.length - 1].content) })
     return r.fulfill(json({ id }))
   })
-  await page.route('**/api/v1/mahliyo/answer', (r) => {
-    const { id } = r.request().postDataJSON() as { id: string }
+  // her answer, as the app reads it: straight from the database (or, failing that, through the server)
+  const result = (id: string) => {
     const q = ready.get(id)
-    if (!q) return r.fulfill(json({ error: { code: 'not_found' } }, 404))
-    if (stopped.includes(id)) return r.fulfill(json({ status: 'failed', reason: 'stopped' }))
-    if (Date.now() < q.at) return r.fulfill(json({ status: 'pending' }))
-    return r.fulfill(json(q.a ? { status: 'done', ...q.a } : { status: 'failed', reason: 'busy' }))
-  })
+    if (!q) return json({ error: { code: 'not_found' } }, 404)
+    if (stopped.includes(id)) return json({ status: 'failed', reason: 'stopped' })
+    if (Date.now() < q.at) return json({ status: 'pending' })
+    return json(q.a ? { status: 'done', ...q.a } : { status: 'failed', reason: 'busy' })
+  }
+  const server = { answers: 0 }
+  await page.route('**/api/v1/mahliyo/answer', (r) => { server.answers++; return r.fulfill(result((r.request().postDataJSON() as { id: string }).id)) })
+  await page.route('**/rest/v1/rpc/api_mahliyo_result', (r) => r.fulfill(result((r.request().postDataJSON() as { p_id: string }).p_id)))
   await page.route('**/api/v1/mahliyo/stop', (r) => {
     stopped.push((r.request().postDataJSON() as { id: string }).id)
     return r.fulfill(json({ ok: true }))
   })
-  return { asked, stopped }
+  return { asked, stopped, server }
 }
 
 test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answers in blocks drawn word by word', async ({ page, server: _, errors }) => {
@@ -644,7 +647,7 @@ test('another account on the same phone: a thin line "Шумо аккаунтр�
   await page.addInitScript(() => {
     if (sessionStorage.getItem('e2e.switched')) localStorage.setItem('dk.learner', JSON.stringify({ name: 'Зарина', code: '598765432109876', email: 'z@gmail.com' }))
   })
-  const { asked } = await fakeMahliyo(page, (q) => ({ tajik: true, reply: `Ҷавоб: ${q}`, blocks: [{ type: 'text', text: `Ҷавоб: ${q}` }] }), 1500)
+  const { asked, server } = await fakeMahliyo(page, (q) => ({ tajik: true, reply: `Ҷавоб: ${q}`, blocks: [{ type: 'text', text: `Ҷавоб: ${q}` }] }), 1500)
   await page.goto('/mahliyo')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   const box = page.locator('.ai-input')
@@ -668,6 +671,8 @@ test('another account on the same phone: a thin line "Шумо аккаунтр�
   await expect(page.locator('.ai-switched + .ai-asked')).toContainText('Саволи Зарина')
   await expect(page.locator('.ai-said')).toHaveCount(2)
   expect(asked[1].turns.map((t) => t.content)).toEqual(['Саволи Зарина'])
+  // waiting for her answers cost the app's server nothing: it was read straight from the database
+  expect(server.answers).toBe(0)
   expect(asked[1].name).toBe('Зарина')
   expect(errors).toEqual([])
 })

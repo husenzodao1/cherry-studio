@@ -4,6 +4,9 @@ import { grantOf, notificationToken, playAccountId, rtdnKeyOk } from '@/server/g
 import { cleanBlocks, forPlan, learnerNote, planNote } from '@/server/mahliyo'
 import { turnsFor } from '@/server/routes/mahliyo'
 
+// these tests are about Premium being sold
+process.env.PREMIUM_LIVE = '1'
+
 const QUIZ = { type: 'quiz', question: '2 + 2 = ?', options: ['3', '4', '5'], answer: 1, explanation: '2 + 2 = 4' }
 
 describe('Premium in the chat', () => {
@@ -84,5 +87,22 @@ describe('Google Play subscriptions', () => {
     const id = playAccountId('00000000-0000-0000-0000-000000000001')
     expect(id).toMatch(/^[0-9a-f]{64}$/)
     expect(id).not.toContain('0000-0000')
+  })
+})
+
+describe('before Premium is sold (PREMIUM_LIVE unset)', () => {
+  it('she answers as before: no plan said, no tests or Premium card shown, a daily call is a one-time call', () => {
+    const was = process.env.PREMIUM_LIVE
+    delete process.env.PREMIUM_LIVE
+    try {
+      const at = new Date(Date.now() + 3600_000).toISOString()
+      const blocks = cleanBlocks([{ type: 'text', text: 'Салом' }, QUIZ, { type: 'premium', title: 'x', text: '' }, { type: 'reminder', at, title: 'Дарс', text: '', daily: true }])
+      const out = forPlan(blocks, false)
+      expect(out.map((b) => b.type)).toEqual(['text', 'reminder'])
+      expect((out[1] as { daily?: boolean }).daily).toBeUndefined()
+      expect(learnerNote({ me: 'Name: Малика' })).not.toContain('HER PLAN')
+    } finally {
+      process.env.PREMIUM_LIVE = was
+    }
   })
 })

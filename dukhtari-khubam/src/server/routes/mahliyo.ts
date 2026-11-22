@@ -7,7 +7,7 @@ import { ApiError } from '@/lib/http'
 import { route, type AnyRoute } from '@/lib/router'
 import { supabaseFor } from '@/lib/supabase'
 
-import { answer, ATTACHMENT_MIMES, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type Turn } from '../mahliyo'
+import { answer, ATTACHMENT_MIMES, premiumLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type Turn } from '../mahliyo'
 import { activeModel, bookPassages, forgetActive, hasBooks, sealKey, serverReady } from '../aiModels'
 import { call } from '../util'
 import { buildBundle, Code, codeHash, Token } from './offline'
@@ -53,7 +53,8 @@ const Turns = z.array(z.strictObject({ role: z.enum(['user', 'assistant']), cont
 /** what the server adds to a question: the staff's chosen model, and their books' passages for it */
 /** the chosen model, and — for a Premium learner only — the passages of the official books near her question */
 async function extraFor(sb: SupabaseClient, turns: Turn[], premium = false) {
-  const [active, books] = await Promise.all([activeModel(sb), premium ? bookPassages(sb, turns[turns.length - 1].content) : Promise.resolve([])])
+  // before Premium is sold, the books answer everyone (as they always did)
+  const [active, books] = await Promise.all([activeModel(sb), premium || !premiumLive() ? bookPassages(sb, turns[turns.length - 1].content) : Promise.resolve([])])
   return { active, books }
 }
 /** whether the learner who asks has Premium (her session, checked by the database; never what the phone says) */
@@ -130,7 +131,7 @@ export const mahliyoRoutes: AnyRoute[] = [
         const client = sb()
         after(() => answerInto(client, id, turns, me, files))
         // the staff gave her books: when her answer takes a while, the app says she searches them
-        return { id, books: premium && await hasBooks(client) }
+        return { id, books: (premium || !premiumLive()) && await hasBooks(client) }
       }
       const [k, extra] = await Promise.all([knowledge(sb()), extraFor(sb(), turns, premium)])
       let a

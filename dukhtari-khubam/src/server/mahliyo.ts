@@ -433,6 +433,8 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
  * place; a Premium learner never sees the card.
  */
 export function forPlan(blocks: Block[], premium: boolean): Block[] {
+  // before Premium is sold, she answers as she always did: no tests, no daily calls, no Premium card
+  if (!premiumLive()) return blocks.filter((b) => b.type !== 'quiz' && b.type !== 'premium').map((b) => (b.type === 'reminder' && b.daily ? { ...b, daily: undefined } : b))
   if (premium) return blocks.filter((b) => b.type !== 'premium')
   let held = false
   const out = blocks.filter((b) => {
@@ -474,7 +476,7 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
     'ABOUT THE LEARNER (from her phone; only for answering her):',
     ...(name ? [`HER NAME: ${name} — you know her: greet her by her name, and use it now and then, naturally (not in every sentence). When she asks her name, tell it.`] : []),
     ...(only.private ? ['(Her age and birthday are not shared with you.)'] : []),
-    planNote(!!me.premium),
+    ...(premiumLive() ? [planNote(!!me.premium)] : []),
     about || 'Nothing is known yet: she has not read lessons on this phone.'
   ].join('\n')
 }
@@ -483,6 +485,8 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
  * Her plan. Premium's parts are never given to a free learner — not even a little: Mahliyo says they are
  * Premium, tells what Premium gives, and puts the card that opens the Premium screen.
  */
+/** whether Premium is sold yet (PREMIUM_LIVE=1, set once a payment way works): until then nothing is held back */
+export const premiumLive = () => process.env.PREMIUM_LIVE === '1'
 export const PREMIUM_PARTS = [
   'tests in the chat: test questions with answers to choose, checked at once, with explanations (the "quiz" block), and tests made from the official books',
   'preparing for the ММТ (the national entrance exam, Маркази миллии тестӣ): its subjects, its kind of test questions, a plan for it, answers from the official books and textbooks the staff gave you',
