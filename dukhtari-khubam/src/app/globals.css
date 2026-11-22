@@ -2716,4 +2716,42 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
 .scene-dinner .night-stars { opacity: 0.4; }
 .night-art.is-portrait { width: min(62vw, 260px); aspect-ratio: auto; margin: 0; -webkit-mask: none; mask: none; }
 .night-art.is-portrait img { height: auto; border-radius: 50%; }
+.night-art.is-art { width: min(86vw, 380px); aspect-ratio: auto; margin: 0; -webkit-mask: none; mask: none; }
+.night-art.is-art img { height: auto; max-height: 42vh; filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.32)); }
 .scene-morning .night-z, .scene-breakfast .night-z, .scene-lunch .night-z, .scene-dinner .night-z { left: 64%; top: 8%; font-family: inherit; }
+
+/* the empty box's hint, a new one every few seconds rising softly into place */
+.ai-hint { position: absolute; left: 0; right: 4px; top: 11px; line-height: 1.4; font-size: 1rem; color: var(--ink-2); opacity: 0.8; pointer-events: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: ai-hint 0.6s var(--ease) both; }
+@keyframes ai-hint { from { opacity: 0; transform: translateY(60%); filter: blur(4px); } to { opacity: 0.8; transform: none; filter: none; } }
+
+/* a ready command: a quiet grey chip, in the box and in her sent question */
+.ai-cmd-chip { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; margin: 0 0 4px; padding: 3px 4px 3px 10px; border-radius: 9px;
+  font-size: 0.82rem; font-weight: 600; color: var(--ink-2); background: color-mix(in srgb, var(--ink) 9%, transparent); }
+.ai-cmd-chip button { width: 20px; height: 20px; border-radius: 50%; border: 0; display: grid; place-items: center; color: inherit; background: none; cursor: pointer; }
+.ai-cmd-chip.is-sent { display: table; margin: 0 0 6px; padding: 2px 9px; color: inherit; opacity: 0.85; background: color-mix(in srgb, currentColor 14%, transparent); }
+
+/* the list of ready commands over the box ("/") */
+.slash { position: absolute; left: 0; right: 0; bottom: calc(100% + 8px); display: flex; flex-direction: column; max-height: min(300px, 46vh); overflow: hidden;
+  border-radius: 22px; background: color-mix(in srgb, var(--bg) 88%, transparent); border: 1px solid var(--glass-edge);
+  box-shadow: 0 18px 40px -18px rgba(40, 20, 90, 0.45); -webkit-backdrop-filter: blur(22px) saturate(1.4); backdrop-filter: blur(22px) saturate(1.4);
+  transition: max-height 0.35s var(--ease); animation: slash-in 0.22s var(--ease) both; }
+.slash.is-tall { max-height: calc(100dvh - 190px); }
+@keyframes slash-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+.slash-handle { flex: none; display: grid; place-items: center; height: 18px; cursor: grab; touch-action: none; }
+.slash-handle span { width: 36px; height: 4px; border-radius: 4px; background: color-mix(in srgb, var(--ink) 20%, transparent); }
+.slash-head { flex: none; display: flex; align-items: baseline; justify-content: space-between; padding: 0 16px 6px; font-size: 0.74rem; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); }
+.slash-head small { font-weight: 500; opacity: 0.7; }
+.slash-list { overflow-y: auto; overscroll-behavior: contain; padding: 0 6px 8px; scrollbar-width: none; }
+.slash-list::-webkit-scrollbar { display: none; }
+.slash-list h4 { position: sticky; top: 0; margin: 0; padding: 8px 10px 4px; font-size: 0.72rem; font-weight: 600; color: var(--ink-2);
+  background: color-mix(in srgb, var(--bg) 92%, transparent); }
+.slash-row { width: 100%; display: flex; align-items: baseline; gap: 10px; padding: 8px 10px; border: 0; border-radius: 12px; background: none; color: var(--ink);
+  font: inherit; text-align: start; cursor: pointer; }
+.slash-row:hover, .slash-row:focus-visible { background: color-mix(in srgb, var(--primary) 9%, transparent); outline: 0; }
+.slash-row b { font-weight: 600; font-size: 0.92rem; }
+.slash-row span { margin-inline-start: auto; font-size: 0.74rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slash-none { margin: 6px 10px 10px; font-size: 0.86rem; color: var(--ink-2); }
+.slash-more { width: 100%; margin-top: 4px; padding: 8px; border: 0; border-radius: 12px; background: none; color: var(--primary); font: inherit; font-size: 0.82rem; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .ai-hint, .slash { animation: none; } }

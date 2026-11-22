@@ -6,9 +6,11 @@ import { useRouter } from 'next/navigation'
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
+import { findCommands, splitCommand, withCommand } from '@/lib/aiCommands'
 import { onBack } from '@/web/components/BackButton'
 
 import { AttachSheet } from '@/web/components/AttachSheet'
+import { SlashMenu } from '@/web/components/SlashMenu'
 import { Icon } from '@/web/components/Icon'
 import { emojify } from '@/web/components/Emoji'
 import { AnswerBlocks, Sources, timingOf } from '@/web/components/MahliyoBlocks'
@@ -86,6 +88,15 @@ export default function MahliyoPage() {
   // the paperclip's sheet, and the way she asked to be answered (kept on the phone)
   const [sheet, setSheet] = useState(false)
   const [mode, setModeState] = useState<AiMode | null>(null)
+  /** the ready command chosen after "/" (a grey chip in the box; it goes first in the question) */
+  const [command, setCommand] = useState<string | null>(null)
+  /** "/" typed at the start: the list of ready commands, for the words after it */
+  const slash = command === null && /^\/[^\n]*$/.test(text) ? text.slice(1) : null
+  const pickCommand = (title: string) => {
+    setCommand(title)
+    write('')
+    box.current?.focus()
+  }
   useEffect(() => { try { setModeState((localStorage.getItem('dk.ai.mode') as AiMode | null) || null) } catch { /* none */ } }, [])
   const setMode = (m: AiMode | null) => {
     setModeState(m)
@@ -336,9 +347,11 @@ export default function MahliyoPage() {
   const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email, place: placeNote(), ...(mode ? { mode } : {}) })
   const send = (question: string, withFiles: AiUpload[] = []) => {
     // a picture alone asks her to look at it
-    const q = question.trim() || (withFiles.length ? t('ai.look') : '')
+    const said = question.trim() || (withFiles.length ? t('ai.look') : '')
+    const q = command ? withCommand(command, said) : said
     if (!q || pending || !ready || (full && editing === null)) return
     void ask(q, who(), editing ?? undefined, withFiles)
+    setCommand(null)
     // a new question was the draft; after an edit, the draft comes back
     if (editing === null) keepDraft(chat, '')
     setText(editing === null ? '' : drafts()[chat] ?? '')
@@ -372,7 +385,10 @@ export default function MahliyoPage() {
     if (busy) stop()
     // the draft stays kept; the box shows the question being edited
     setEditing(i)
-    setText(turns[i].content)
+    // a question with a ready command: the chip again, and her words
+    const { command: had, rest } = splitCommand(turns[i].content)
+    setCommand(had?.title ?? null)
+    setText(had ? rest : turns[i].content)
     setTimeout(() => box.current?.focus(), 50)
   }
   const textOf = (m: AiTurn) => (m.role === 'user' ? m.content : copyOf(m))
@@ -394,6 +410,8 @@ export default function MahliyoPage() {
   const last = turns[turns.length - 1]
   const lastQuestion = turns.map((m) => m.role).lastIndexOf('user')
   const first = learner?.name?.split(/\s+/)[0]
+  /** the empty box shows a hint that changes every few seconds */
+  const hinting = online && !text && command === null && ready !== false
 
   return (
     <div className={`ai-scene${busy ? ' is-thinking' : ''}${genie ? ' is-genie' : ''}`}>
@@ -529,7 +547,7 @@ export default function MahliyoPage() {
         {editing !== null ? (
           <span className="ai-editing">
             <Icon name="edit" size={14} /><span className="grow">{t('ai.editing')}</span>
-            <button type="button" className="ai-act" aria-label={t('pin.cancel')} onClick={() => { setEditing(null); setText(drafts()[chat] ?? '') }}><Icon name="x" size={14} /></button>
+            <button type="button" className="ai-act" aria-label={t('pin.cancel')} onClick={() => { setEditing(null); setCommand(null); setText(drafts()[chat] ?? '') }}><Icon name="x" size={14} /></button>
           </span>
         ) : null}
         {files.length ? (
@@ -546,21 +564,34 @@ export default function MahliyoPage() {
           <span className="ai-mode-chip"><Icon name={MODE_ICON[mode]} size={14} />{t(`ai.mode_${mode}`)}
             <button type="button" aria-label={t('ai.remove')} onClick={() => setMode(null)}><Icon name="x" size={12} /></button></span>
         ) : null}
+        {command !== null ? (
+          <span className="ai-cmd-chip">/{command}
+            <button type="button" aria-label={t('ai.remove')} onClick={() => { setCommand(null); box.current?.focus() }}><Icon name="x" size={12} /></button></span>
+        ) : null}
+        {slash !== null ? <SlashMenu query={slash} onPick={pickCommand} /> : null}
         {sheet ? <AttachSheet max={MAX_FILES - files.length} mode={mode} onMode={(m) => { setMode(m); setSheet(false) }} onFiles={(f) => void pick(f)} onClose={() => setSheet(false)} /> : null}
         <div className="ai-composer-row">
           <input ref={picker} type="file" hidden multiple accept="image/*,application/pdf,text/plain" onChange={(e) => void pick(e.target.files)} />
           <button type="button" className="ai-attach" aria-label={t('ai.attach')} disabled={ready === false || !!pending || files.length >= MAX_FILES}
             onClick={() => setSheet(true)}><Icon name="clip" size={20} /></button>
           <EmojiBox text={text}>
-            <textarea ref={box} className="ai-input" rows={1} placeholder={online ? t('ai.placeholder') : t('ai.offline')} value={text} maxLength={QUESTION_CAP} lang="tg"
+            <textarea ref={box} className="ai-input" rows={1} placeholder={online ? (hinting ? '' : t('ai.placeholder')) : t('ai.offline')} value={text} maxLength={QUESTION_CAP} lang="tg"
               disabled={ready === false} aria-label={t('ai.placeholder')}
               onChange={(e) => write(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!busy) send(text, files) } }} />
+              onKeyDown={(e) => {
+                // in the list of commands: Enter takes the first that fits, Escape closes it
+                if (slash !== null && e.key === 'Enter') { e.preventDefault(); const first = findCommands(slash)[0]; if (first) pickCommand(first.title); return }
+                if (slash !== null && e.key === 'Escape') { e.preventDefault(); write(''); return }
+                // Backspace in an empty box takes the chip away
+                if (command !== null && e.key === 'Backspace' && !text) { e.preventDefault(); setCommand(null); return }
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!busy) send(text, files) }
+              }} />
+            {hinting ? <RotatingHint lines={t('ai.placeholders').split('\n').filter(Boolean)} /> : null}
           </EmojiBox>
           {busy ? (
             <button className="ai-send is-stop" aria-label={t('ai.stop')}><Icon name="stop" size={18} fill="currentColor" /></button>
           ) : (
-            <button className="ai-send" aria-label={t('support.send')} disabled={!ready || !online || !!pending || (!text.trim() && !files.length)}><Icon name="up" size={20} /></button>
+            <button className="ai-send" aria-label={t('support.send')} disabled={!ready || !online || !!pending || (!text.trim() && !files.length && command === null)}><Icon name="up" size={20} /></button>
           )}
         </div>
       </form>
@@ -580,6 +611,17 @@ function ThinkingWords() {
     return () => clearInterval(next)
   }, [])
   return <span key={n} className="ai-thinking-text" aria-live="polite">{t(THINKING_LINES[n])}</span>
+}
+
+/** the empty box's hint: the next one every few seconds, rising softly into place */
+const HINT_MS = 3000
+function RotatingHint({ lines }: { lines: string[] }) {
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    const next = setInterval(() => setN((x) => (x + 1) % Math.max(lines.length, 1)), HINT_MS)
+    return () => clearInterval(next)
+  }, [lines.length])
+  return <span key={n} className="ai-hint" aria-hidden="true">{lines[n % Math.max(lines.length, 1)]}</span>
 }
 
 /** a wait this long, with books: she is searching the company's own sources */
@@ -633,7 +675,8 @@ function EmojiBox({ text, children }: { text: string; children: ReactNode }) {
  * Her question in its bubble; a long one shows its first lines, fading out below (so she sees it goes on),
  * and opens whole when tapped.
  */
-function Question({ text }: { text: string }) {
+function Question({ text: said }: { text: string }) {
+  const { command, rest: text } = splitCommand(said)
   const own = useRef<HTMLSpanElement>(null)
   const [long, setLong] = useState(false)
   const [whole, setWhole] = useState(false)
@@ -642,7 +685,8 @@ function Question({ text }: { text: string }) {
     if (el && !whole) setLong(el.scrollHeight > el.clientHeight + 4)
   }, [text, whole])
   return (
-    <span ref={own} className={`ai-q${long ? ' is-long' : ''}${whole ? ' is-whole' : ''}`} onClick={() => { if (long) setWhole(true) }}>{emojify(text)}</span>
+    <span ref={own} className={`ai-q${long ? ' is-long' : ''}${whole ? ' is-whole' : ''}`} onClick={() => { if (long) setWhole(true) }}>
+      {command ? <span className="ai-cmd-chip is-sent">/{command.title}</span> : null}{text ? emojify(text) : null}</span>
   )
 }
 

@@ -18,12 +18,14 @@ import type { UiKey } from '../i18n'
  * - breakfast (07:40–08:40), lunch (12:30–13:30), and dinner (from 30 to 90 minutes after sunset where she is:
  *   early in winter, late in summer) — eat first, learn after.
  * A scene's clip plays once (a transparent film), then she stays in its last moment and only its small effect goes
- * on (Z's, a sun, steam…). Scenes whose clip is not made yet show her picture with that effect.
+ * on (Z's, a sun, steam…). The other scenes are a picture of her (`art`) with that effect.
  */
 type SceneId = 'night' | 'morning' | 'breakfast' | 'lunch' | 'dinner'
 interface Scene {
   id: SceneId
   clip: { video: string; first: string; end: string } | null
+  /** her picture for the scene (a transparent image), for a scene without a clip */
+  art?: string
   /** the small effect that goes on after the clip */
   fx: string[]
   close: UiKey
@@ -31,10 +33,10 @@ interface Scene {
 }
 const SCENES: Record<SceneId, Scene> = {
   night: { id: 'night', clip: { video: '/assets/mahliyo/sleep.webm', first: '/assets/mahliyo/sleep.webp', end: '/assets/mahliyo/sleep-end.webp' }, fx: ['Z', 'z', 'z'], close: 'night.sleep', stay: 'night.refuse' },
-  morning: { id: 'morning', clip: null, fx: ['☀️', '✨', '✨'], close: 'scene.close', stay: 'scene.go_on' },
-  breakfast: { id: 'breakfast', clip: null, fx: ['☕', '🍳', '💛'], close: 'scene.close_eat', stay: 'scene.go_on' },
-  lunch: { id: 'lunch', clip: null, fx: ['🍲', '🥗', '💚'], close: 'scene.close_eat', stay: 'scene.go_on' },
-  dinner: { id: 'dinner', clip: null, fx: ['🍵', '🌙', '✨'], close: 'scene.close_eat', stay: 'scene.go_on' }
+  morning: { id: 'morning', clip: null, art: '/assets/mahliyo/morning.webp', fx: ['☀️', '✨', '✨'], close: 'scene.close', stay: 'scene.go_on' },
+  breakfast: { id: 'breakfast', clip: null, art: '/assets/mahliyo/breakfast.webp', fx: ['☕', '🍳', '💛'], close: 'scene.close_eat', stay: 'scene.go_on' },
+  lunch: { id: 'lunch', clip: null, art: '/assets/mahliyo/lunch.webp', fx: ['🍲', '🥗', '💚'], close: 'scene.close_eat', stay: 'scene.go_on' },
+  dinner: { id: 'dinner', clip: null, art: '/assets/mahliyo/dinner.webp', fx: ['🍵', '🌙', '✨'], close: 'scene.close_eat', stay: 'scene.go_on' }
 }
 const KEY = 'dk.scene'
 const DUSHANBE = { lat: 38.56, lon: 68.78 }
@@ -103,14 +105,14 @@ export function NightGuard() {
     }
     setBye(true)
   }
-  // without the clip (not made yet, iPhone, less motion asked): her picture with the effect at once
+  // without the clip (a picture scene, iPhone, less motion asked): her picture with the effect at once
   const still = !scene.clip || !video || ended
-  const picture = scene.clip ? (still ? scene.clip.end : scene.clip.first) : CLIPS.signin.still
+  const picture = scene.clip ? (still ? scene.clip.end : scene.clip.first) : scene.art ?? CLIPS.signin.still
   return (
     <div className={`night scene-${scene.id}`} role="dialog" aria-modal="true" aria-label={t(`scene.${scene.id}_title`)}>
       <div className="night-sky" aria-hidden="true"><i className="night-moon" /><i className="night-stars" /><i className="night-stars night-stars-2" /><i className="night-shoot" /></div>
       <h2 className="night-title">{t(`scene.${scene.id}_title`)}</h2>
-      <div className={`night-art${scene.clip ? '' : ' is-portrait'}`} aria-hidden="true">
+      <div className={`night-art${scene.clip ? '' : scene.art ? ' is-art' : ' is-portrait'}`} aria-hidden="true">
         {still
           ? <img className="night-breathe" src={picture} alt="" />
           : <video src={scene.clip!.video} poster={scene.clip!.first} autoPlay muted playsInline onEnded={() => setEnded(true)} onError={() => setEnded(true)} />}

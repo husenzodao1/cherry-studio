@@ -286,3 +286,21 @@ test('from 5:00 to 7:40 a morning scene: the phone first thing harms the mind; "
   await expect(page.locator('.night')).toHaveCount(0)
   expect(errors).toEqual([])
 })
+
+test.describe('meal scenes in Dushanbe', () => {
+  // dinner follows the sunset where she is: about 17:00 there in November
+  test.use({ timezoneId: 'Asia/Dushanbe' })
+  for (const [scene, at] of [['breakfast', '08:05'], ['lunch', '12:50'], ['dinner', '17:40']] as const) {
+  test(`a meal scene (${scene}): her picture, the time, "close and eat"`, async ({ page, server: _, errors }) => {
+    await page.clock.install({ time: new Date(`2026-11-23T${at}:00`) })
+    await signedIn(page, { night: true })
+    await page.goto('/')
+    await expect(page.locator(`.scene-${scene}`)).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('.night-art.is-art img')).toHaveAttribute('src', `/assets/mahliyo/${scene}.webp`)
+    await expect(page.locator('.night-text')).toContainText(at)
+    await page.waitForTimeout(800)
+    await page.screenshot({ path: `test-results/${scene}.png` })
+    expect(errors).toEqual([])
+  })
+}
+})

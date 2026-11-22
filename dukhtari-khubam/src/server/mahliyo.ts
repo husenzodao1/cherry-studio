@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { GoogleGenAI, ThinkingLevel } from '@google/genai'
 
 import { linkAllowed, ROUTES, SPOT_IDS, SPOTS, type AiBlock, type CalcInput, type CalcOutput, type SpotId, type Tone } from '@/lib/aiCatalog'
+import { commandNote, splitCommand } from '@/lib/aiCommands'
 import { evaluate, formatNumber } from '@/lib/calc'
 
 import { ABOUT } from './mahliyoAbout'
@@ -718,8 +719,12 @@ export function languageOf(text: string): string | null {
   return null
 }
 const languageNote = (turns: Turn[]) => {
-  const lang = languageOf(turns[turns.length - 1]?.content ?? '')
-  return `REPLY LANGUAGE: write every text of your answer in ${lang ?? 'the language of her last message (Tajik when unsure)'}.`
+  const last = turns[turns.length - 1]?.content ?? ''
+  const lang = languageOf(splitCommand(last).rest || last)
+  const said = `REPLY LANGUAGE: write every text of your answer in ${lang ?? 'the language of her last message (Tajik when unsure)'}.`
+  // a ready command ("/ош"): how to answer that kind of topic
+  const command = commandNote(last)
+  return command ? `${said}\n\n${command}` : said
 }
 
 let client: Anthropic | null = null

@@ -382,6 +382,7 @@ export const uz: Partial<Record<UiKey, string>> = {
   'support.new_question': "Foydalanuvchidan yangi savol",
   'ai.title': "Mahliyo AI",
   'ai.placeholder': "Mahliyo AI’ga xabar…",
+  'ai.placeholders': "Mahliyo AI’ga xabar…\nIstalgan narsa haqida so‘rang…\n«/» yozing — tayyor buyruqlar…\nPalov retsepti kerakmi? /ош\nMasalani yuboring — yechamiz…\nMatnni tarjima qilaymi?\nFizika yoki kimyo savoli?\nRasm yuboring — tushuntiraman…\nOdob haqida maslahat?\nKeling, insho yozamiz…", 'ai.cmd_title': "Tayyor buyruqlar", 'ai.cmd_none': "Bunday buyruq yo‘q", 'ai.cmd_more': "Hammasini ko‘rsatish",
   'ai.suggest': "📈 Yutuqlarim qanday?\n🔁 Nimani takrorlay?\n🔐 PIN-ni qanday almashtiraman?\n⏰ Soat 20:00 da eslat\n🏫 Maktablar nima haqida?\n🌐 Tilni qanday almashtiraman?\n🎓 Bosqich testi nima?\n🤝 Seni kim yaratgan?\n💡 Bugungi maslahat\n☕ Mahliyo AI bilan qahva?",
   'ai.to_consultant': "Maslahatchiga yozing",
   'ai.limit': "Ko‘p savol berdingiz. Biroz dam oling va keyinroq yana so‘rang.",
@@ -879,6 +880,7 @@ export const tr: Partial<Record<UiKey, string>> = {
   'support.new_question': "Kullanıcıdan yeni soru",
   'ai.title': "Mahliyo AI",
   'ai.placeholder': "Mahliyo AI’a mesaj…",
+  'ai.placeholders': "Mahliyo AI’a mesaj…\nHer şeyi sorun…\n“/” yazın — hazır komutlar…\nPilav tarifi mi? /ош\nProblemi gönderin — çözelim…\nMetni çevireyim mi?\nFizik ya da kimya sorusu mu?\nFotoğraf gönderin — açıklayayım…\nGörgü kuralları hakkında öneri?\nHadi bir kompozisyon yazalım…", 'ai.cmd_title': "Hazır komutlar", 'ai.cmd_none': "Böyle bir komut yok", 'ai.cmd_more': "Hepsini göster",
   'ai.suggest': "📈 Nasıl gidiyorum?\n🔁 Neyi tekrar edeyim?\n🔐 PIN’imi nasıl değiştiririm?\n⏰ Saat 20:00’de hatırlat\n🏫 Okullar ne hakkında?\n🌐 Dili nasıl değiştiririm?\n🎓 Aşama testi nedir?\n🤝 Seni kim yaptı?\n💡 Bugün için bir ipucu\n☕ Mahliyo AI ile kahve?",
   'ai.to_consultant': "Danışmana yazın",
   'ai.limit': "Çok soru sordunuz. Biraz dinlenin ve sonra tekrar sorun.",
@@ -1375,6 +1377,7 @@ export const fa: Partial<Record<UiKey, string>> = {
   'support.new_question': "پرسش تازه از یک کاربر",
   'ai.title': "ماه‌لیا AI",
   'ai.placeholder': "پیام به Mahliyo AI…",
+  'ai.placeholders': "پیام به Mahliyo AI…\nدربارهٔ هر چیزی بپرسید…\n«/» بنویسید — فرمان‌های آماده…\nدستور پخت پلو؟ /ош\nمسئله را بفرستید — حلش می‌کنیم…\nمتن را ترجمه کنم؟\nسؤال فیزیک یا شیمی؟\nعکس بفرستید — توضیح می‌دهم…\nمشورت دربارهٔ ادب؟\nبیایید انشا بنویسیم…", 'ai.cmd_title': "فرمان‌های آماده", 'ai.cmd_none': "چنین فرمانی نیست", 'ai.cmd_more': "نمایش همه",
   'ai.suggest': "📈 پیشرفت من چطور است؟\n🔁 چه چیزی را مرور کنم؟\n🔐 رمز PIN را چطور عوض کنم؟\n⏰ ساعت ۲۰:۰۰ یادم بینداز\n🏫 مکتب‌ها دربارهٔ چیست؟\n🌐 زبان را چطور عوض کنم؟\n🎓 آزمون مرحله چیست؟\n🤝 چه کسی تو را ساخته؟\n💡 یک توصیه برای امروز\n☕ قهوه با Mahliyo AI؟",
   'ai.to_consultant': "به مشاور بنویسید",
   'ai.limit': "پرسش‌های زیادی پرسیدید. کمی استراحت کنید و بعداً دوباره بپرسید.",
@@ -1494,6 +1497,7 @@ export const fa: Partial<Record<UiKey, string>> = {
 
 /** Dari (Afghanistan): close to Persian, with its own everyday words. */
 export const prs: Partial<Record<UiKey, string>> = {
+  'ai.placeholders': "پیام به Mahliyo AI…\nدربارهٔ هر چیز بپرسید…\n«/» بنویسید — فرمان‌های آماده…\nطرز پخت پلو؟ /ош\nمسئله را روان کنید — حلش می‌کنیم…\nمتن را ترجمه کنم؟\nسوال فزیک یا کیمیا؟\nعکس روان کنید — توضیح می‌دهم…\nمشوره دربارهٔ ادب؟\nبیایید انشا بنویسیم…", 'ai.cmd_title': "فرمان‌های آماده", 'ai.cmd_none': "چنین فرمانی نیست", 'ai.cmd_more': "نمایش همه",
   'scene.night_title': "وقت خواب",
   'scene.night_text': "ساعت {соат} است و شما هنوز بیدارید و در برنامه وقت می‌گذرانید. لطفاً بخوابید — یا برای ادامه این پیام را رد کنید!",
   'scene.morning_title': "صبح بخیر ☀️",

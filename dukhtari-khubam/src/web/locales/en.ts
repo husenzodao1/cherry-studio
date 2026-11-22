@@ -234,6 +234,7 @@ export const en: Partial<Record<UiKey, string>> = {
   'support.new_question': "A new question from a user",
   'ai.title': "Mahliyo AI",
   'ai.placeholder': "Message Mahliyo AI…",
+  'ai.placeholders': "Message Mahliyo AI…\nAsk about anything…\nType “/” for ready commands…\nNeed a plov recipe? /ош\nSend a problem — we’ll solve it…\nTranslate a text?\nA physics or chemistry question?\nSend a photo — I’ll explain…\nAdvice on good manners?\nLet’s write an essay…", 'ai.cmd_title': "Ready commands", 'ai.cmd_none': "No such command", 'ai.cmd_more': "Show all",
   'ai.suggest': "📈 How am I doing?\n🔁 What should I review?\n🔐 How do I change my PIN?\n⏰ Remind me at 8 pm\n🏫 What are the schools about?\n🌐 How do I change the language?\n🎓 What is the stage test?\n🤝 Who made you?\n💡 A tip for today\n☕ Coffee with Mahliyo AI?",
   'ai.to_consultant': "Write to the consultant",
   'ai.limit': "You’ve asked a lot. Take a short break and ask again later.",
