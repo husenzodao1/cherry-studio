@@ -1786,7 +1786,8 @@ html.intro .backdrop .bd:nth-child(n + 7) { animation-delay: 1.4s; }
 html.intro .greet { animation: intro-slide 0.7s 1.3s var(--ease) both; }
 html.intro .motto { animation: intro-wipe 1.1s 1.45s cubic-bezier(0.6, 0.05, 0.3, 1) both; }
 @keyframes intro-slide { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
-@keyframes intro-wipe { from { clip-path: inset(-20% 100% -20% 0); } to { clip-path: inset(-20% -5% -20% 0); } }
+/* the wipe keeps room above and below the line: the tails of hand-written letters (the «з» of «рӯз») are never cut */
+@keyframes intro-wipe { from { clip-path: inset(-60% 100% -80% -5%); } to { clip-path: inset(-60% -10% -80% -5%); } }
 /* the avatar grows inside a ring that draws itself */
 html.intro .home-avatar { position: relative; display: inline-flex; animation: intro-pop 0.6s 1.5s cubic-bezier(0.3, 0.7, 0.4, 1.4) both; }
 html.intro .home-avatar::after { content: ''; position: absolute; inset: -5px; border-radius: 50%;

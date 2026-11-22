@@ -36,6 +36,18 @@ test.describe('main screens of a signed-in learner', () => {
     expect(errors).toEqual([])
   })
 
+  test('home: what moves by itself (the schools touring, the words rising) never pauses the animations', async ({ page, server: _, errors }) => {
+    await signedIn(page)
+    await page.goto('/')
+    await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+    await page.waitForTimeout(5000)
+    await expect(page.locator('html')).not.toHaveClass(/is-scrolling/)
+    // the label's wipe leaves room for hanging letters (the «з» of «рӯз»)
+    const clip = await page.locator('.words-label').evaluate((e) => getComputedStyle(e).clipPath)
+    expect(clip === 'none' || /inset\(-60%/.test(clip)).toBe(true)
+    expect(errors).toEqual([])
+  })
+
   test('settings: Mahliyo AI first in the list, Support last just above signing out', async ({ page, server: _, errors }) => {
     await signedIn(page)
     await page.route('**/api/v1/mahliyo/status', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ready: true }) }))
