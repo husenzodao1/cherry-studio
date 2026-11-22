@@ -58,7 +58,11 @@ export type AiBlock =
   | { type: 'steps'; title: string; items: string[] }
   | { type: 'screen'; spot: SpotId; caption: string }
   | { type: 'link'; to: string; label: string }
-  | { type: 'reminder'; at: string; title: string; text: string }
+  | { type: 'reminder'; at: string; title: string; text: string; daily?: boolean }
+  /** a test question in the chat (Premium): tapped answers are checked at once */
+  | { type: 'quiz'; question: string; options: string[]; answer: number; explanation: string }
+  /** the card that opens the Premium screen (a free learner asked for a Premium part) */
+  | { type: 'premium'; title: string; text: string }
   /** where her answer came from (internet sources she used; added by the server) */
   | { type: 'sources'; items: { title: string; url: string; site: string }[] }
   /** pictures of what she was asked about, from those sources (added by the server) */

@@ -123,11 +123,16 @@ export const offlineRoutes: AnyRoute[] = [
   route({
     method: 'GET', path: '/app-config', access: 'public', tag: 'Offline app',
     summary: 'Public settings the installed app reads at run time (Google sign-in client ID, whether to ask for the birthday)', cache: 60,
-    handler: async () => ({
-      google_web_client_id: process.env.GOOGLE_WEB_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID || null,
-      // the birthday is a sensitive Google scope: asked only once the Google app is verified (GOOGLE_ASK_BIRTHDAY=1)
-      google_birthday: process.env.GOOGLE_ASK_BIRTHDAY === '1'
-    })
+    handler: async ({ sb }) => {
+      const settings = await call<Record<string, unknown>>(sb(), 'api_app_settings').catch(() => ({} as Record<string, unknown>))
+      return {
+        google_web_client_id: process.env.GOOGLE_WEB_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID || null,
+        // the birthday is a sensitive Google scope: asked only once the Google app is verified (GOOGLE_ASK_BIRTHDAY=1)
+        google_birthday: process.env.GOOGLE_ASK_BIRTHDAY === '1',
+        // the Premium screen of the Google Play app: "no Google Pay? write to a consultant" (the panel's switch)
+        premium_consultant: settings.premium_consultant === true
+      }
+    }
   }),
   route({
     method: 'GET', path: '/bundle', access: 'public', tag: 'Offline app',

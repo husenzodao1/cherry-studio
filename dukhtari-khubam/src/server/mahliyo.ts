@@ -334,6 +334,8 @@ export interface Learner {
   now?: string
   /** the learner's time zone (IANA) */
   tz?: string
+  /** whether she has Premium (checked by the server, never taken from the phone) */
+  premium?: boolean
 }
 
 const str = { type: 'string' } as const
@@ -355,7 +357,9 @@ const SCHEMA = {
           block('steps', { title: str, items: { type: 'array', items: str } }),
           block('screen', { spot: { type: 'string', enum: SPOT_IDS }, caption: str }),
           block('link', { to: str, label: str }),
-          block('reminder', { at: { type: 'string', format: 'date-time' }, title: str, text: str })
+          block('reminder', { at: { type: 'string', format: 'date-time' }, title: str, text: str, daily: { type: 'boolean' } }),
+          block('quiz', { question: str, options: { type: 'array', items: str }, answer: { type: 'integer' }, explanation: str }),
+          block('premium', { title: str, text: str })
         ]
       }
     },
@@ -407,10 +411,35 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
       const at = Date.parse(clip(b.at, 40))
       const title = clip(b.title, 80)
       if (Number.isFinite(at) && at - now >= REMIND_MIN && at - now <= REMIND_MAX && title) {
-        out.push({ type: 'reminder', at: new Date(at).toISOString(), title, text: clip(b.text, 300) })
+        out.push({ type: 'reminder', at: new Date(at).toISOString(), title, text: clip(b.text, 300), ...(b.daily === true ? { daily: true } : {}) })
       }
+    } else if (b.type === 'quiz') {
+      // a test question in the chat: 2–6 answers, one of them right
+      const options = (Array.isArray(b.options) ? b.options : []).map((o) => clip(o, 300)).filter(Boolean).slice(0, 6)
+      const answer = Number(b.answer)
+      const question = clip(b.question, 600)
+      if (question && options.length >= 2 && Number.isInteger(answer) && answer >= 0 && answer < options.length) {
+        out.push({ type: 'quiz', question, options, answer, explanation: clip(b.explanation, 1200) })
+      }
+    } else if (b.type === 'premium') {
+      out.push({ type: 'premium', title: clip(b.title, 120), text: clip(b.text, 1200) })
     }
   }
+  return out
+}
+
+/**
+ * A free learner's answer: Premium's parts taken out (a test, a daily call), and the Premium card in their
+ * place; a Premium learner never sees the card.
+ */
+export function forPlan(blocks: Block[], premium: boolean): Block[] {
+  if (premium) return blocks.filter((b) => b.type !== 'premium')
+  let held = false
+  const out = blocks.filter((b) => {
+    if (b.type === 'quiz' || (b.type === 'reminder' && b.daily)) { held = true; return false }
+    return true
+  })
+  if (held && !out.some((b) => b.type === 'premium')) out.push({ type: 'premium', title: 'Гулдухтар Premium', text: '' })
   return out
 }
 
@@ -425,6 +454,8 @@ export function plainOf(blocks: Block[]): string {
       case 'reminder': return `[Ёдраскунӣ: ${b.at} — ${b.title}] ${b.text}`.trim()
       case 'sources': return `[Манбаъҳо: ${b.items.map((i) => i.url).join(', ')}]`
       case 'images': return `[Расмҳо: ${b.items.length}]`
+      case 'quiz': return [b.question, ...b.options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`), `✓ ${String.fromCharCode(65 + b.answer)}`].join('\n')
+      case 'premium': return [b.title, b.text].filter(Boolean).join('\n')
     }
   }).join('\n\n')
 }
@@ -443,8 +474,31 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
     'ABOUT THE LEARNER (from her phone; only for answering her):',
     ...(name ? [`HER NAME: ${name} — you know her: greet her by her name, and use it now and then, naturally (not in every sentence). When she asks her name, tell it.`] : []),
     ...(only.private ? ['(Her age and birthday are not shared with you.)'] : []),
+    planNote(!!me.premium),
     about || 'Nothing is known yet: she has not read lessons on this phone.'
   ].join('\n')
+}
+
+/**
+ * Her plan. Premium's parts are never given to a free learner — not even a little: Mahliyo says they are
+ * Premium, tells what Premium gives, and puts the card that opens the Premium screen.
+ */
+export const PREMIUM_PARTS = [
+  'tests in the chat: test questions with answers to choose, checked at once, with explanations (the "quiz" block), and tests made from the official books',
+  'preparing for the ММТ (the national entrance exam, Маркази миллии тестӣ): its subjects, its kind of test questions, a plan for it, answers from the official books and textbooks the staff gave you',
+  'a personal course: a study plan made for her from the books and her results, and a call from you every day at her time to come and study (a daily call)',
+  'all schools and courses of the app (a free learner has only a few of them; Premium courses are marked with a lock)',
+  'Mahliyo without limits: a far longer conversation (a free chat ends after 20 questions), a stronger, deeper mind for hard questions, and chats kept for ever (free: one week)'
+]
+export function planNote(premium: boolean): string {
+  if (premium) {
+    return ['HER PLAN: Premium ✨ — everything is open to her, use it all gladly:',
+      ...PREMIUM_PARTS.map((p) => `- ${p}`),
+      'For a test give 3–5 "quiz" blocks (one question each, 2–6 answers, "answer" = the number of the right one from 0, a short "explanation"), from the books, lessons or the subject she asked. For a daily call use a reminder with "daily": true at her chosen time. Never show the "premium" block to her.'].join('\n')
+  }
+  return ['HER PLAN: Free. These are PREMIUM — do NOT give her any of them, not even a part or a sample:',
+    ...PREMIUM_PARTS.map((p) => `- ${p}`),
+    'Never use a "quiz" block for her and never write test questions for her to answer; never set a daily call ("daily" is always false); never answer from the official books or ММТ material. When she asks for one of these: warmly say that it is a Premium feature, then tell her what Premium gives — beautifully, exactly and attractively, like a good advertisement (2–4 short lines with emojis, the parts above), with the price: the first month 30 somoni, then 50 somoni a month, cancelled any time in Google Play — and add the block {"type":"premium","title":"Гулдухтар Premium","text":"<one inviting line>"}, which opens the Premium screen. Everything else (the app, school subjects, everyday life) you answer fully as always.'].join('\n')
 }
 
 /**
@@ -530,7 +584,7 @@ async function ask(turns: Turn[], appName: string, material: string, me: Learner
   return provider() === 'gemini' ? askGemini(turns, appName, material, me, files) : askClaude(turns, appName, material, me, files)
 }
 /** for the models without a schema of their own (OpenAI-compatible): her answer's shape */
-const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…"}.`
+const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","question":"…","options":["…","…"],"answer":0,"explanation":"…"} · {"type":"premium","title":"…","text":"…"}.`
 
 /** Her answer to the conversation (its last turn is the learner's question). */
 export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = [], extra: Extra = {}): Promise<Answer> {
@@ -543,7 +597,7 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
   if (text === null) return sorry()
   try {
     const r = JSON.parse(text) as { tajik?: unknown; blocks?: unknown; sources?: unknown }
-    const blocks = cleanBlocks(r.blocks)
+    const blocks = forPlan(cleanBlocks(r.blocks), !!me.premium)
     // what she used (the books, the internet): as sources under her answer (and pictures, when asked for)
     const used = (Array.isArray(r.sources) ? r.sources : []).map((n) => refs[Number(n) - 1]).filter((w): w is Ref => !!w)
     const cited = [...new Set(used)]
@@ -626,7 +680,8 @@ const clientOf = (key: string) => {
  */
 async function askGemini(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[], over?: { keys: string[]; models: string[] }): Promise<string | null> {
   const keys = over?.keys ?? geminiKeys()
-  const models = over?.models ?? GEMINI_MODELS
+  // a Premium learner: the deeper model first (the quick one is only the last resort)
+  const models = over?.models ?? (me.premium ? [...GEMINI_MODELS.filter((m) => !m.includes('lite')), ...GEMINI_MODELS.filter((m) => m.includes('lite'))] : GEMINI_MODELS)
   const started = Date.now()
   const first = nextKey++ % keys.length
   const question = turns[turns.length - 1]?.content ?? ''
@@ -680,7 +735,7 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
           systemInstruction: system,
           responseMimeType: 'application/json',
           responseJsonSchema: SCHEMA,
-          thinkingConfig: { thinkingLevel: thinkingOf(t.model, problem) },
+          thinkingConfig: { thinkingLevel: thinkingOf(t.model, problem || !!me.premium) },
           maxOutputTokens: 8000,
           abortSignal: stop.signal,
           httpOptions: { timeout: Math.min(WAIT_MS, left) }

@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { PROVIDER_IDS, providerOf, type ProviderId } from '@/lib/aiProviders'
 import { ApiError } from '@/lib/http'
 import { route, type AnyRoute } from '@/lib/router'
+import { supabaseFor } from '@/lib/supabase'
 
 import { answer, ATTACHMENT_MIMES, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type Turn } from '../mahliyo'
 import { activeModel, bookPassages, forgetActive, hasBooks, sealKey, serverReady } from '../aiModels'
@@ -44,22 +45,40 @@ const materialFor = (k: Knowledge, turns: Turn[]) => knowledgeText(k, turns.filt
 const QUESTION_CAP = 4000
 // her own answers come back as she gave them (plain text of her blocks), so they may be longer
 const Turns = z.array(z.strictObject({ role: z.enum(['user', 'assistant']), content: z.string().trim().min(1).max(6000) }))
-  .min(1).max(12)
+  .min(1).max(40)
   .refine((t) => t[0].role === 'user' && t[t.length - 1].role === 'user', 'turns must start and end with the learner')
   .refine((t) => t[t.length - 1].content.length <= QUESTION_CAP, 'a question is at most 4000 characters')
 
 /** Her answer to a recorded question, kept with it (or why there is none). */
 /** what the server adds to a question: the staff's chosen model, and their books' passages for it */
-async function extraFor(sb: SupabaseClient, turns: Turn[]) {
-  const [active, books] = await Promise.all([activeModel(sb), bookPassages(sb, turns[turns.length - 1].content)])
+/** the chosen model, and — for a Premium learner only — the passages of the official books near her question */
+async function extraFor(sb: SupabaseClient, turns: Turn[], premium = false) {
+  const [active, books] = await Promise.all([activeModel(sb), premium ? bookPassages(sb, turns[turns.length - 1].content) : Promise.resolve([])])
   return { active, books }
+}
+/** whether the learner who asks has Premium (her session, checked by the database; never what the phone says) */
+async function premiumOf(session: string | undefined): Promise<boolean> {
+  if (!session) return false
+  try {
+    return !!(await call<{ premium?: boolean }>(supabaseFor(session), 'api_my_premium')).premium
+  } catch {
+    return false
+  }
+}
+/** how much of the conversation she reads: a free learner's last 12 turns, a Premium learner's last 40 */
+const FREE_TURNS = 12
+export function turnsFor(turns: Turn[], premium: boolean): Turn[] {
+  if (premium) return turns
+  let recent = turns.slice(-FREE_TURNS)
+  while (recent.length > 1 && recent[0].role !== 'user') recent = recent.slice(1)
+  return recent
 }
 /** whether anyone can answer: the staff chose a model, or the server has a key of its own */
 const anyone = async (sb: SupabaseClient) => configured() || !!(await activeModel(sb))
 
 async function answerInto(sb: SupabaseClient, id: string, turns: Turn[], me: Learner, files: Attachment[]) {
   try {
-    const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns)])
+    const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns, !!me.premium)])
     const a = await answer(turns, k.app, materialFor(k.parts, turns), me, files, extra)
     await call(sb, 'api_mahliyo_answer', { p_id: id, p_answer: a.reply, p_tajik: a.tajik, p_blocks: a.blocks })
   } catch (e) {
@@ -91,11 +110,14 @@ export const mahliyoRoutes: AnyRoute[] = [
       me: z.string().max(4000).optional(), now: z.iso.datetime({ offset: true }).optional(), tz: z.string().max(64).optional(),
       // the app's way: { id } at once, her answer from /mahliyo/answer (without it: her answer in the reply)
       background: z.boolean().optional(),
-      files: Files.optional()
+      files: Files.optional(),
+      // her sign-in (when she has an account): Premium is checked with it
+      session: z.string().max(4000).optional()
     }),
     handler: async ({ sb, body }) => {
       if (!(await anyone(sb()))) throw new ApiError(503, 'not_configured', 'Маҳлиё ҳоло дастрас нест.')
-      const turns = body.turns as Turn[]
+      const premium = await premiumOf(body.session)
+      const turns = turnsFor(body.turns as Turn[], premium)
       const files = (body.files ?? []) as Attachment[]
       const question = turns[turns.length - 1].content
       const id = await call<string>(sb(), 'api_mahliyo_ask', {
@@ -103,14 +125,14 @@ export const mahliyoRoutes: AnyRoute[] = [
         // the staff see that pictures or files came with it
         p_question: `${question.length > 990 ? `${question.slice(0, 989)}…` : question}${files.length ? ` 📎${files.length}` : ''}`
       })
-      const me = { me: body.me, now: body.now, tz: body.tz }
+      const me = { me: body.me, now: body.now, tz: body.tz, premium }
       if (body.background) {
         const client = sb()
         after(() => answerInto(client, id, turns, me, files))
         // the staff gave her books: when her answer takes a while, the app says she searches them
-        return { id, books: await hasBooks(client) }
+        return { id, books: premium && await hasBooks(client) }
       }
-      const [k, extra] = await Promise.all([knowledge(sb()), extraFor(sb(), turns)])
+      const [k, extra] = await Promise.all([knowledge(sb()), extraFor(sb(), turns, premium)])
       let a
       try {
         a = await answer(turns, k.app, materialFor(k.parts, turns), me, files, extra)
