@@ -2331,8 +2331,13 @@ html.is-scrolling *, html.is-scrolling *::before, html.is-scrolling *::after { a
 /* on entering the app: everything it needs leave for, on one screen (the app's look, like a chat's actions) */
 .perm { position: fixed; inset: 0; z-index: 140; display: flex; flex-direction: column; background: var(--bg); animation: rise 0.35s var(--ease) both; }
 .perm-body { flex: 1; overflow-y: auto; width: min(100%, 520px); margin: 0 auto; padding: max(24px, env(safe-area-inset-top)) 20px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.perm-icon { width: 58px; height: 58px; border-radius: 19px; display: grid; place-items: center; color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 12%, transparent); margin-top: 8vh; }
+.perm-lock { color: var(--primary); margin-top: 8vh; overflow: visible; filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--primary) 28%, transparent)); animation: perm-bob 3.6s ease-in-out infinite; }
+.perm-lock-shackle { transform-box: view-box; transform-origin: 16px 22px; animation: perm-open 3.6s ease-in-out infinite; }
+.perm-lock-body { transform-box: view-box; transform-origin: 24px 32px; animation: perm-shake 3.6s ease-in-out infinite; }
+@keyframes perm-open { 0%, 14% { transform: none; } 24% { transform: translateY(-6px); } 36%, 56% { transform: translateY(-6px) scaleX(-1); } 66% { transform: translateY(-6px); } 74%, 100% { transform: none; } }
+@keyframes perm-shake { 0%, 74% { transform: none; } 78% { transform: rotate(-6deg); } 82% { transform: rotate(5deg); } 86% { transform: rotate(-3deg); } 90%, 100% { transform: none; } }
+@keyframes perm-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .perm-lock, .perm-lock-shackle, .perm-lock-body { animation: none; } }
 .perm-title { margin: 4px 0 14px; text-align: center; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
 .perm-list { list-style: none; margin: 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 10px; }
 .perm-row { display: flex; align-items: center; gap: 14px; padding: 14px 14px 14px 16px; border-radius: 20px;

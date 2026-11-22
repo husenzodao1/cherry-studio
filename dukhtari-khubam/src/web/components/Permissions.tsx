@@ -108,7 +108,14 @@ export function Permissions() {
   return (
     <div className="perm" role="dialog" aria-modal="true" aria-label={t('perm.title')}>
       <div className="perm-body">
-        <span className="perm-icon" aria-hidden="true"><Icon name="key" size={24} /></span>
+        {/* a lock, no box: its shackle opens and closes again, endlessly */}
+        <svg className="perm-lock" viewBox="0 0 48 48" width="64" height="64" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path className="perm-lock-shackle" d="M16 22v-6a8 8 0 0 1 16 0v6" />
+          <g className="perm-lock-body">
+            <rect x="10" y="22" width="28" height="20" rx="6" fill="color-mix(in srgb, currentColor 14%, transparent)" />
+            <path d="M24 30v4" />
+          </g>
+        </svg>
         <h2 className="perm-title">{t('perm.title')}</h2>
         <ul className="perm-list">
           {rows.map((r) => (

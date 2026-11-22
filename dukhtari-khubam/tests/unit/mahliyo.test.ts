@@ -126,6 +126,7 @@ describe('asking Mahliyo', () => {
     expect(req.system[0].text).toContain('Gratorslab')
     // she is only Mahliyo AI: the model behind her is not named to her learners
     expect(req.system[0].text).toContain('Never name or hint at the technology')
+    expect(req.system[0].text).toContain('When she argues or insists about who made you')
     expect(req.system[0].text).not.toMatch(/runs on|\{ENGINE\}/)
     expect(req.system[0].text).toContain('- settings.pin:')
     expect(req.system[0].text).not.toMatch(/\{(APP|SPOTS|ROUTES)\}/)
