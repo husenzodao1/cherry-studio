@@ -323,5 +323,17 @@ export const en: Partial<Record<UiKey, string>> = {
   'widget.say_done': "Well done! Today's lesson is done 🌟\nYou're amazing! The flame burns on 🔥\nAnother win today! 🎉\nYour knowledge grows every day 💎\nGreat! See you tomorrow 😊\nI'm proud of you ❤️\nOne more lovely day of learning ✨",
   'widget.say_late': "It's evening — don't let the flame go out! 🔥\nThere's still time: a short lesson? 🌙\nShall we keep your streak? 💪\nA little lesson before bed 📖\nI'm waiting — just 5 minutes ⏰\nLet's end the day with knowledge ✨\nThe flame is counting on you 🔥",
   'widget.go': "Start",
+  'perm.title': "Permissions",
+  'perm.lead': "So that reminders, messages and Mahliyo's calls always reach you, give the app these permissions.",
+  'perm.notify': "Notifications and messages",
+  'perm.notify_hint': "Lesson reminders, the inspiration of the day, Mahliyo's messages and support replies",
+  'perm.call': "Mahliyo's calls",
+  'perm.call_hint': "A full-screen call on the lock screen, like a real one",
+  'perm.allow': "Allow",
+  'perm.allow_all': "Allow",
+  'perm.allowed': "Allowed",
+  'perm.done': "Done",
+  'perm.later': "Later",
+  'perm.all_set': "All permissions are granted",
   'pin.forgot_q': "Forgot it?"
 }

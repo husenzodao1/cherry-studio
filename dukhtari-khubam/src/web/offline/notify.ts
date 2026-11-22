@@ -60,6 +60,13 @@ export function writeNotify(p: NotifyPrefs) {
   window.dispatchEvent(new Event('dk-notify'))
 }
 
+/** Whether notifications are allowed (without asking). */
+export async function notificationsAllowed(): Promise<boolean> {
+  if (!canNotify()) return true
+  const { LocalNotifications } = await import('@capacitor/local-notifications')
+  return (await LocalNotifications.checkPermissions()).display === 'granted'
+}
+
 /** Asks Android for permission to show notifications (Android 13+ shows a system dialog once). */
 export async function allowNotifications(): Promise<boolean> {
   if (!canNotify()) return false

@@ -432,6 +432,18 @@ export const uz: Partial<Record<UiKey, string>> = {
   'widget.say_done': "Ofarin! Bugungi dars o‘qildi 🌟\nSiz ajoyibsiz! Olov yonmoqda 🔥\nBugun ham g‘alaba! 🎉\nBilimingiz har kuni o‘sib bormoqda 💎\nJuda yaxshi! Ertaga ko‘rishamiz 😊\nMen siz bilan faxrlanaman ❤️\nBilim bilan yana bir go‘zal kun ✨",
   'widget.say_late': "Kech bo‘ldi — olovni o‘chirmang! 🔥\nHali vaqt bor: qisqa dars? 🌙\nSeriyangizni saqlaymizmi? 💪\nUyqudan oldin kichik dars 📖\nKutyapman — atigi 5 daqiqa ⏰\nKunni bilim bilan yakunlaylik ✨\nOlov sizga umid bog‘lagan 🔥",
   'widget.go': "Boshlash",
+  'perm.title': "Ruxsatlar",
+  'perm.lead': "Eslatmalar, xabarlar va Mahliyoning qo'ng'iroqlari uzilishsiz kelishi uchun ilovaga bu ruxsatlarni bering.",
+  'perm.notify': "Bildirishnomalar va xabarlar",
+  'perm.notify_hint': "Dars eslatmasi, kun ilhomi, Mahliyo xabarlari va qo'llab-quvvatlash javoblari",
+  'perm.call': "Mahliyoning qo'ng'iroqlari",
+  'perm.call_hint': "Qulf ekranida to'liq qo'ng'iroq, xuddi haqiqiydek",
+  'perm.allow': "Ruxsat",
+  'perm.allow_all': "Ruxsat berish",
+  'perm.allowed': "Ruxsat berildi",
+  'perm.done': "Tayyor",
+  'perm.later': "Keyinroq",
+  'perm.all_set': "Barcha ruxsatlar berildi",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -865,6 +877,18 @@ export const tr: Partial<Record<UiKey, string>> = {
   'widget.say_done': "Aferin! Bugünün dersi tamam 🌟\nHarikasın! Alev yanıyor 🔥\nBugün de zafer! 🎉\nBilgin her gün büyüyor 💎\nÇok güzel! Yarın görüşürüz 😊\nSeninle gurur duyuyorum ❤️\nBilgiyle geçen bir güzel gün daha ✨",
   'widget.say_late': "Akşam oldu — alevi söndürme! 🔥\nHâlâ vakit var: kısa bir ders? 🌙\nSerini koruyalım mı? 💪\nUyumadan önce küçük bir ders 📖\nBekliyorum — sadece 5 dakika ⏰\nGünü bilgiyle bitirelim ✨\nAlev sana güveniyor 🔥",
   'widget.go': "Başla",
+  'perm.title': "İzinler",
+  'perm.lead': "Hatırlatmalar, mesajlar ve Mahliyo'nun aramaları sorunsuz ulaşsın diye uygulamaya bu izinleri verin.",
+  'perm.notify': "Bildirimler ve mesajlar",
+  'perm.notify_hint': "Ders hatırlatması, günün ilhamı, Mahliyo'nun mesajları ve destek yanıtları",
+  'perm.call': "Mahliyo'nun aramaları",
+  'perm.call_hint': "Kilit ekranında tam ekran arama, gerçeği gibi",
+  'perm.allow': "İzin ver",
+  'perm.allow_all': "İzin ver",
+  'perm.allowed': "İzin verildi",
+  'perm.done': "Tamam",
+  'perm.later': "Sonra",
+  'perm.all_set': "Tüm izinler verildi",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1297,6 +1321,18 @@ export const fa: Partial<Record<UiKey, string>> = {
   'widget.say_done': "آفرین! درس امروز خوانده شد 🌟\nفوق‌العاده‌ای! شعله روشن است 🔥\nامروز هم پیروزی! 🎉\nدانشت هر روز بیشتر می‌شود 💎\nعالی! فردا می‌بینمت 😊\nبه تو افتخار می‌کنم ❤️\nیک روز زیبای دیگر با دانش ✨",
   'widget.say_late': "عصر شد — نگذار شعله خاموش شود! 🔥\nهنوز وقت هست: یک درس کوتاه؟ 🌙\nزنجیره‌ات را نگه داریم؟ 💪\nیک درس کوچک پیش از خواب 📖\nمنتظرم — فقط ۵ دقیقه ⏰\nروز را با دانش تمام کنیم ✨\nشعله به تو امید دارد 🔥",
   'widget.go': "شروع",
+  'perm.title': "مجوزها",
+  'perm.lead': "برای این‌که یادآوری‌ها، پیام‌ها و تماس‌های مهلیو بی‌خطا برسند، این مجوزها را به برنامه بدهید.",
+  'perm.notify': "اعلان‌ها و پیام‌ها",
+  'perm.notify_hint': "یادآوری درس، الهام روز، پیام‌های مهلیو و پاسخ پشتیبانی",
+  'perm.call': "تماس‌های مهلیو",
+  'perm.call_hint': "تماس تمام‌صفحه روی صفحهٔ قفل، مثل تماس واقعی",
+  'perm.allow': "اجازه",
+  'perm.allow_all': "اجازه دادن",
+  'perm.allowed': "اجازه داده شد",
+  'perm.done': "آماده",
+  'perm.later': "بعداً",
+  'perm.all_set': "همهٔ مجوزها داده شد",
   'pin.forgot_q': "فراموش کردید؟"
 }
 
@@ -1332,5 +1368,17 @@ export const prs: Partial<Record<UiKey, string>> = {
   'pin.phone_title': "تأیید صاحب تلفن",
   'pin.phone_reason': "رمز تلفن را وارد کنید یا اثر انگشت بگذارید",
   'pin.phone_needed': "اول رمز تلفن را وارد کنید، سپس کدی به ایمیل‌تان می‌آید",
+  'perm.title': "اجازه‌ها",
+  'perm.lead': "برای این‌که یادآوری‌ها، پیام‌ها و زنگ‌های مهلیو بی‌خطا برسند، این اجازه‌ها را به برنامه بدهید.",
+  'perm.notify': "اطلاعیه‌ها و پیام‌ها",
+  'perm.notify_hint': "یادآوری درس، الهام روز، پیام‌های مهلیو و جواب پشتیبانی",
+  'perm.call': "زنگ‌های مهلیو",
+  'perm.call_hint': "زنگ تمام‌صفحه روی صفحهٔ قفل، مانند زنگ واقعی",
+  'perm.allow': "اجازه",
+  'perm.allow_all': "اجازه دادن",
+  'perm.allowed': "اجازه داده شد",
+  'perm.done': "آماده",
+  'perm.later': "بعداً",
+  'perm.all_set': "همهٔ اجازه‌ها داده شد",
   'install.app': "نصب برنامه روی تلفن"
 }

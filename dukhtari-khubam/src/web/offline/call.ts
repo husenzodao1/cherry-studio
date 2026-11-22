@@ -28,6 +28,8 @@ interface NativeCalls {
   /** whether her call may cover the lock screen (Android 14+ asks the learner) */
   canFullScreen(): Promise<{ granted: boolean }>
   askFullScreen(): Promise<void>
+  /** the app's notification settings */
+  notifySettings(): Promise<void>
   addListener(event: 'opened', f: (c: NativeOpened) => void): Promise<PluginListenerHandle>
   addListener(event: 'voiceEnded', f: () => void): Promise<PluginListenerHandle>
 }
@@ -124,6 +126,10 @@ export async function lockScreenAllowed(): Promise<boolean> {
 /** Opens the phone's setting that lets her call cover the lock screen. */
 export function allowLockScreen() {
   if (native()) void Native.askFullScreen().catch(() => undefined)
+}
+/** Opens the app's notification settings (Android asks only until the learner once says "no"). */
+export function openNotifySettings() {
+  if (native()) void Native.notifySettings().catch(() => undefined)
 }
 
 /**

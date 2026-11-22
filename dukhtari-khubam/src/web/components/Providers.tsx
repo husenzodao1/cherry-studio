@@ -14,6 +14,7 @@ import { AppUpdate } from './AppUpdate'
 import { BackButton } from './BackButton'
 import { installGlobalHealing } from '../heal'
 import { PerfProbe } from './PerfProbe'
+import { Permissions } from './Permissions'
 import { Splash } from './Splash'
 import { Mascot } from './Mascot'
 import { PullSignature } from './PullSignature'
@@ -142,6 +143,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <AppUpdate />
               <NotifyBridge />
               <SupportWatch />
+              <Permissions />
               <AppLock />
               <Splash />
               <PerfProbe />

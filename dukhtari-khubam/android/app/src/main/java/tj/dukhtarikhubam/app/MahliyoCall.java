@@ -351,6 +351,18 @@ public final class MahliyoCall {
             call.resolve();
         }
 
+        /** Opens the app's notification settings (when the learner once said "no", Android asks no more). */
+        @PluginMethod
+        public void notifySettings(PluginCall call) {
+            Context ctx = getContext();
+            try {
+                getActivity().startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, ctx.getPackageName()));
+            } catch (Exception e) {
+                getActivity().startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + ctx.getPackageName())));
+            }
+            call.resolve();
+        }
+
         private MediaPlayer player;
 
         /** Her recorded words (`src`, a file of the app) on the call line: the earpiece, or the speaker. */
