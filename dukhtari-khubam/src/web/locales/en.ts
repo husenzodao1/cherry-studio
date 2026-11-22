@@ -310,8 +310,6 @@ export const en: Partial<Record<UiKey, string>> = {
   'ai.shared_title': "A conversation with Mahliyo AI",
   'ai.shared_cta': "Talk with Mahliyo",
   'ai.share_link': "Share",
-  'ai.share_hint': "A link is made: anyone with it can read the conversation",
-  'ai.archive_hint': "Hidden from the list, kept in the Archive",
   'ai.delete_hint': "Deleted from this phone for good",
   'ai.next': "Next",
   'ai.link_ready': "The link is ready",

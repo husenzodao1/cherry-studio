@@ -239,19 +239,30 @@ function HelpRow({ k, loc, enabled, icon, tr, onSaved }: { k: string; loc: Loc; 
 interface RedReply { word: string; reply: string }
 
 /**
- * Mahliyo's red replies: as many as the staff like, each a word that may be in the learner's message and
- * her exact answer to it, in red ("Аблаҳ" → "Маро аблаҳ нагӯ …"). A reply without a word is a general
- * warning, chosen at random for other insults. No account is closed for it.
+ * Mahliyo's red replies. Above: as many word → reply pairs as the staff like ("+ Ҷавоби сурх"): a word that may
+ * be in the learner's message and her exact answer to it, in red ("Аблаҳ" → "Маро аблаҳ нагӯ …"). Below: general
+ * replies, one chosen at random when an insult matches none of the words. Kept together (a general reply is a
+ * reply without a word); no account is closed for it.
  */
 function Warnings() {
   const list = useApi<{ items: RedReply[] }>('/admin/ai/warnings')
-  const [items, setItems] = useState<RedReply[] | null>(null)
+  const [pairs, setPairs] = useState<RedReply[] | null>(null)
+  const [general, setGeneral] = useState<string[] | null>(null)
   const act = useAction()
-  const shown = items ?? list.data?.items ?? []
-  const change = (i: number, part: Partial<RedReply>) => setItems(shown.map((r, k) => (k === i ? { ...r, ...part } : r)))
+  const loaded = list.data?.items ?? []
+  const shownPairs = pairs ?? loaded.filter((r) => r.word.trim())
+  const shownGeneral = general ?? loaded.filter((r) => !r.word.trim()).map((r) => r.reply)
+  const changePair = (i: number, part: Partial<RedReply>) => setPairs(shownPairs.map((r, k) => (k === i ? { ...r, ...part } : r)))
   const save = async () => {
-    const clean = shown.map((r) => ({ word: r.word.trim(), reply: r.reply.trim() })).filter((r) => r.reply)
-    if (await act.run(() => send('/admin/ai/warnings', 'POST', { items: clean }), 'Сабт шуд')) { setItems(null); list.reload() }
+    const clean = [
+      ...shownPairs.map((r) => ({ word: r.word.trim(), reply: r.reply.trim() })),
+      ...shownGeneral.map((reply) => ({ word: '', reply: reply.trim() }))
+    ].filter((r) => r.reply)
+    if (await act.run(() => send('/admin/ai/warnings', 'POST', { items: clean }), 'Сабт шуд')) {
+      setPairs(null)
+      setGeneral(null)
+      list.reload()
+    }
   }
   if (list.error) return <ErrorState error={list.error} onRetry={list.reload} />
   if (!list.data) return <Loading />
@@ -259,19 +270,33 @@ function Warnings() {
     <div className="stack" style={{ gap: 10 }}>
       <p className="muted" style={{ margin: 0 }}>
         Агар дар паёми корбар калима бошад (ё шакли дигари он: «аблаҳ» дар «Ту аблаҳи бесаводӣ!»), Маҳлиё айнан ҷавоби ҳамон калимаро бо ранги сурх медиҳад.
-        Ҷавоби бе калима — огоҳии умумӣ: барои ҳақорату фишори дигар яке аз онҳо тасодуфӣ меояд.
         <b> {'{ном}'}</b> — номи корбар: «Ман аблаҳ нестам, {'{ном}'}» → «Ман аблаҳ нестам, Малика»; <b>{'{ном}'}-и</b> → «Маликаи».
       </p>
-      {shown.map((r, i) => (
-        <div key={i} className="red-reply">
+      <div className="eyebrow">Ҷавобҳо аз рӯи калима</div>
+      {shownPairs.map((r, i) => (
+        <div key={`w${i}`} className="red-reply red-reply-word">
           <input className="input" value={r.word} maxLength={100} placeholder="Калима дар паёми корбар" aria-label={`Калимаи ${i + 1}`}
-            onChange={(e) => change(i, { word: e.target.value })} />
+            onChange={(e) => changePair(i, { word: e.target.value })} />
           <textarea className="input" rows={2} value={r.reply} maxLength={400} placeholder="Ҷавоби сурхи Маҳлиё" aria-label={`Ҷавоби ${i + 1}`}
-            onChange={(e) => change(i, { reply: e.target.value })} />
-          <button type="button" className="btn btn-soft" aria-label={`Нест кардани ${i + 1}`} onClick={() => setItems(shown.filter((_, k) => k !== i))}>✕</button>
+            onChange={(e) => changePair(i, { reply: e.target.value })} />
+          <button type="button" className="btn btn-soft" aria-label={`Нест кардани ${i + 1}`} onClick={() => setPairs(shownPairs.filter((_, k) => k !== i))}>✕</button>
         </div>
       ))}
-      <button type="button" className="btn btn-soft" onClick={() => setItems([...shown, { word: '', reply: '' }])}>+ Ҷавоби сурх</button>
+      <button type="button" className="btn btn-soft" onClick={() => setPairs([...shownPairs, { word: '', reply: '' }])}>+ Ҷавоби сурх</button>
+
+      <div className="eyebrow" style={{ marginTop: 10 }}>Ҷавобҳои тасодуфӣ</div>
+      <p className="muted" style={{ margin: 0, fontSize: '0.86em' }}>
+        Барои ҳақорату фишоре, ки ба ягон калимаи боло мувофиқ нест, яке аз инҳо тасодуфӣ дода мешавад. {'{ном}'} дар инҳо ҳам кор мекунад.
+      </p>
+      {shownGeneral.map((reply, i) => (
+        <div key={`g${i}`} className="red-reply red-reply-random">
+          <textarea className="input" rows={2} value={reply} maxLength={400} placeholder="Ҷавоби тасодуфии Маҳлиё" aria-label={`Ҷавоби тасодуфии ${i + 1}`}
+            onChange={(e) => setGeneral(shownGeneral.map((x, k) => (k === i ? e.target.value : x)))} />
+          <button type="button" className="btn btn-soft" aria-label={`Нест кардани ҷавоби тасодуфии ${i + 1}`} onClick={() => setGeneral(shownGeneral.filter((_, k) => k !== i))}>✕</button>
+        </div>
+      ))}
+      <button type="button" className="btn btn-soft" onClick={() => setGeneral([...shownGeneral, ''])}>+ Ҷавоби тасодуфӣ</button>
+
       <button type="button" className="btn" onClick={save} disabled={act.busy}>Сабт кардан</button>
       <Note message={act.message} />
     </div>

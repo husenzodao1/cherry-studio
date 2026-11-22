@@ -722,10 +722,10 @@ function ChatActions({ chat, onClose, onArchive, onRemove }: { chat: AiChatMeta;
   const [pick, setPick] = useState<'archive' | 'share' | 'delete' | null>(null)
   const [busy, setBusy] = useState(false)
   const [link, setLink] = useState<string | null>(null)
-  const options = [
-    { id: 'archive' as const, icon: 'archive' as const, label: chat.archived ? t('ai.unarchive') : t('ai.archive'), hint: t('ai.archive_hint') },
-    { id: 'share' as const, icon: 'share' as const, label: t('ai.share_link'), hint: t('ai.share_hint') },
-    { id: 'delete' as const, icon: 'trash' as const, label: t('ai.delete_full'), hint: t('ai.delete_hint') }
+  const options: { id: 'archive' | 'share' | 'delete'; icon: 'archive' | 'share' | 'trash'; label: string; hint?: string }[] = [
+    { id: 'archive', icon: 'archive', label: chat.archived ? t('ai.unarchive') : t('ai.archive') },
+    { id: 'share', icon: 'share', label: t('ai.share_link') },
+    { id: 'delete', icon: 'trash', label: t('ai.delete_full'), hint: t('ai.delete_hint') }
   ]
   const next = async () => {
     if (pick === 'archive') { onArchive(); return onClose() }
@@ -773,7 +773,7 @@ function ChatActions({ chat, onClose, onArchive, onRemove }: { chat: AiChatMeta;
               <label key={o.id} className={`ai-actions-option${pick === o.id ? ' is-on' : ''}${o.id === 'delete' ? ' is-danger' : ''}`}>
                 <input type="radio" name="chat-action" value={o.id} checked={pick === o.id} onChange={() => setPick(o.id)} />
                 <span className="ai-actions-option-icon"><Icon name={o.icon} size={19} /></span>
-                <span className="grow"><b>{o.label}</b><span>{o.hint}</span></span>
+                <span className="grow"><b>{o.label}</b>{o.hint ? <span>{o.hint}</span> : null}</span>
                 <i className="ai-actions-radio" aria-hidden="true" />
               </label>
             ))}

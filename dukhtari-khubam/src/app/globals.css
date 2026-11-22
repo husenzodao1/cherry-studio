@@ -1136,9 +1136,17 @@ html.genie-open .ai-scene, html.genie-open .ai-top { animation: none; }
 .ai-act:active { transform: scale(0.9); }
 /* a fresh answer: each block in its turn, its words one by one */
 .ai-blocks.is-fresh > * { animation-delay: var(--at); }
-.ai-blocks.is-fresh .ai-w { display: inline; animation: ai-word 0.42s var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--w)); }
-.ai-blocks.is-fresh .ai-steps li > .ai-step-n { animation: ai-word 0.42s var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--w)); }
-@keyframes ai-word { from { opacity: 0; } to { opacity: 1; } }
+/* each word is "written in light": it rises out of a soft blur in the theme's colour, glows for a moment, then
+   settles into the text colour — one after another, so the answer seems to be written as it is read */
+.ai-blocks.is-fresh .ai-w { display: inline-block; animation: ai-ink 0.75s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(var(--at, 0ms) + var(--w)); }
+.ai-blocks.is-fresh .ai-steps li > .ai-step-n { animation: ai-ink 0.75s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(var(--at, 0ms) + var(--w)); }
+@keyframes ai-ink {
+  0% { opacity: 0; filter: blur(5px); transform: translateY(0.42em) scale(0.92); color: var(--primary);
+    text-shadow: 0 0 14px color-mix(in srgb, var(--primary) 75%, transparent); }
+  45% { opacity: 1; filter: blur(0); transform: translateY(-0.05em) scale(1.03); color: var(--primary);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--primary) 45%, transparent); }
+  100% { opacity: 1; filter: none; transform: none; }
+}
 /* she thinks; after a while, a word that she takes her time */
 /* no answer: why, and what can be done */
 .ai-problem { display: flex; align-items: flex-start; gap: 8px; align-self: flex-start; max-width: 92%; animation: rise 0.4s var(--ease) both; }
@@ -2493,4 +2501,6 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
 /* the panel's red replies: the word on the left, Mahliyo's reply on the right, ✕ at the end */
 .red-reply { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto; gap: 8px; align-items: start; }
 .red-reply textarea { resize: vertical; color: #c62828; min-height: 0; height: auto; padding-block: 10px; line-height: 1.35; }
+.red-reply.red-reply-random { grid-template-columns: minmax(0, 1fr) auto; }
+.red-reply.red-reply-random textarea { grid-column: auto; grid-row: auto; }
 @media (max-width: 560px) { .red-reply { grid-template-columns: minmax(0, 1fr) auto; } .red-reply textarea { grid-column: 1 / -1; grid-row: 2; } }
