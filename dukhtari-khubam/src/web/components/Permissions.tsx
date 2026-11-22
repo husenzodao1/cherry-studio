@@ -4,9 +4,10 @@ import { Capacitor } from '@capacitor/core'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
-import { allowLockScreen, lockScreenAllowed, openNotifySettings, useCall } from '../offline/call'
+import { allowLockScreen, lockScreenAllowed, openAppSettings, openNotifySettings, useCall } from '../offline/call'
 import { useLearner } from '../offline/learner'
 import { allowNotifications, notificationsAllowed, readNotify, writeNotify } from '../offline/notify'
+import { askPlace, placeAllowed } from '../offline/place'
 import { usePrefs } from '../prefs'
 import { onBack } from './BackButton'
 import { Icon } from './Icon'
@@ -23,13 +24,15 @@ const QUIET = /^\/(start|welcome|admin|page|support|share)(\/|$)/
 /** asked once per opening of the app */
 let askedThisOpening = false
 
-type Need = 'notify' | 'call'
+type Need = 'notify' | 'call' | 'place'
 type Granted = Record<Need, boolean>
 
 const check = async (): Promise<Granted> => ({
   notify: await notificationsAllowed().catch(() => true),
-  call: await lockScreenAllowed().catch(() => true)
+  call: await lockScreenAllowed().catch(() => true),
+  place: await placeAllowed().catch(() => true)
 })
+const all = (g: Granted) => g.notify && g.call && g.place
 
 /** whether the PIN lock covers the app (html.locked) */
 function useUnlocked(): boolean {
@@ -63,7 +66,7 @@ export function Permissions() {
       if (askedThisOpening) return
       askedThisOpening = true
       setGranted(g)
-      if (!g.notify || !g.call) setShown(true)
+      if (!all(g)) setShown(true)
     }, 1200)
     return () => clearTimeout(wait)
   }, [time])
@@ -75,7 +78,7 @@ export function Permissions() {
       if (g.notify && !was?.notify) writeNotify(readNotify()) // the reminders are planned now
       return g
     })
-    if (g.notify && g.call) {
+    if (all(g)) {
       setShown(false)
       showToast(t('perm.all_set'), 'check')
     }
@@ -96,13 +99,16 @@ export function Permissions() {
     if (need === 'notify') {
       // the system's own question; once she said "no", Android asks no more: its settings open instead
       if (!(await allowNotifications().catch(() => false))) openNotifySettings()
-    } else allowLockScreen()
+    } else if (need === 'call') allowLockScreen()
+    // the phone's own question (once said "no", it asks no more: the app's settings open instead)
+    else if (!(await askPlace())) openAppSettings()
     await recheck()
   }
-  const next: Need | null = !granted.notify ? 'notify' : !granted.call ? 'call' : null
-  const rows: { id: Need; icon: 'bell' | 'phone'; label: string }[] = [
+  const next: Need | null = !granted.notify ? 'notify' : !granted.call ? 'call' : !granted.place ? 'place' : null
+  const rows: { id: Need; icon: 'bell' | 'phone' | 'globe'; label: string }[] = [
     { id: 'notify', icon: 'bell', label: t('perm.notify') },
-    { id: 'call', icon: 'phone', label: t('perm.call') }
+    { id: 'call', icon: 'phone', label: t('perm.call') },
+    { id: 'place', icon: 'globe', label: t('perm.place') }
   ]
 
   return (

@@ -178,6 +178,9 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- her rough place (Mahliyo answers with what is true where she lives); the precise one only if she chooses it -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- a soft vibration when the PIN is wrong or right -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Mahliyo calls at a reminder's exact time, waking the phone and showing over its lock screen -->

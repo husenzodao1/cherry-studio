@@ -277,7 +277,7 @@ function CallScreen({ info }: { info: CallInfo }) {
           <button type="button" className={`call-tool${muted ? ' is-on' : ''}`} aria-pressed={muted} onClick={() => setMuted(!muted)}>
             <span><Icon name={muted ? 'mic-off' : 'mic'} size={26} /></span>{t('ai.call_mute')}
           </button>
-          <button type="button" className={`call-tool${keypad ? ' is-on' : ''}`} aria-pressed={keypad} onClick={() => setKeypad(!keypad)}>
+          <button type="button" className={`call-tool is-keypad${keypad ? ' is-on' : ''}`} aria-pressed={keypad} onClick={() => setKeypad(!keypad)}>
             <span><Icon name="keypad" size={26} strokeWidth={3.4} /></span>{keypad ? t('ai.call_hide') : t('ai.call_keypad')}
           </button>
           <button type="button" className={`call-tool${speaker ? ' is-on' : ''}`} aria-pressed={speaker} onClick={loud}>

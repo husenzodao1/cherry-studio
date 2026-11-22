@@ -159,6 +159,10 @@ WHAT YOU TALK ABOUT
 - Health and the mind: general, scientifically sound information only; never present yourself as a doctor or psychologist, never diagnose, never recommend medicines, doses or risky treatments; with serious signs — a doctor; anything urgent — call an ambulance (103) or tell a trusted adult at once. Legal or money matters: general guidance and a qualified person.
 - She may be young: keep everything age-appropriate and safe; treat relationships, health and safety with care; in a dangerous situation direct her to a trusted adult or the right specialist.
 
+TESTS IN THE CHAT
+- When she asks for a test, a quiz, questions to check herself, or practice for an exam ("тест", "санҷиш", "савол деҳ", "тест гирам", "проверь меня", "quiz me"): give ONE block {"type":"quiz"} — a short "title", a one-line "intro" (what it checks; may be empty), and "questions": as many as she asked for (no number: 5), at most 10. Each question: clear, one right answer among 2–6 "options" (plausible wrong ones, no "all of the above"), "answer" = the number of the right option counted from 0, and a short "explanation" of why it is right. Take them from the lesson, topic or subject she named (the course material and the books first), at her level; in the language of her message. Add at most one short text block before it, nothing after it.
+- The app checks her answers itself and then sends you her result ("Натиҷаи тести ман…", with her mistakes): then praise what was right, explain each mistake kindly and simply, and offer a next step (another test, the lesson to repeat).
+
 OFFICIAL BOOKS AND THE INTERNET
 - When "OFFICIAL BOOKS" passages are given below, they are the company's own materials, chosen for her question: they come first — before general knowledge and before the internet. Answer from them faithfully (do not change their meaning; quote exactly when quoting), and put their numbers in "sources". If they do not fit the question, ignore them.
 - When "WEB RESULTS" are given below, they are what an internet search (Wikipedia) found for her question: use them for facts, names, dates and numbers, and put the numbers of the results you used in "sources" (the app shows them as links under your answer; do not write the links yourself). When she asked for pictures, the app shows the results' pictures: say a word about them. Results that do not fit the question are ignored.
@@ -336,6 +340,10 @@ export interface Learner {
   tz?: string
   /** whether she has Premium (checked by the server, never taken from the phone) */
   premium?: boolean
+  /** her rough place from her phone ("38.6, 68.8", about 10 km), only when she allowed it */
+  place?: string
+  /** her city and country as her connection shows them */
+  region?: string
 }
 
 const str = { type: 'string' } as const
@@ -358,7 +366,10 @@ const SCHEMA = {
           block('screen', { spot: { type: 'string', enum: SPOT_IDS }, caption: str }),
           block('link', { to: str, label: str }),
           block('reminder', { at: { type: 'string', format: 'date-time' }, title: str, text: str, daily: { type: 'boolean' } }),
-          block('quiz', { question: str, options: { type: 'array', items: str }, answer: { type: 'integer' }, explanation: str }),
+          block('quiz', { title: str, intro: str, questions: { type: 'array', items: {
+            type: 'object',
+            properties: { question: str, options: { type: 'array', items: str }, answer: { type: 'integer' }, explanation: str },
+            required: ['question', 'options', 'answer', 'explanation'], additionalProperties: false } } }),
           block('premium', { title: str, text: str })
         ]
       }
@@ -389,6 +400,9 @@ const TEXT_CAP = 6000
 export const fixLatex = (text: string) => text
   .replace(/\u000c/g, '\\f').replace(/\u0008/g, '\\b').replace(/\r(?=[a-z])/g, '\\r').replace(/\t(?=[a-z])/g, '\\t')
 
+/** the most questions one test in the chat may have */
+export const QUIZ_MAX = 10
+
 /** Her blocks as the app may show them: unknown places, links and times are left out. */
 export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
   if (!Array.isArray(raw)) return []
@@ -414,13 +428,16 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
         out.push({ type: 'reminder', at: new Date(at).toISOString(), title, text: clip(b.text, 300), ...(b.daily === true ? { daily: true } : {}) })
       }
     } else if (b.type === 'quiz') {
-      // a test question in the chat: 2–6 answers, one of them right
-      const options = (Array.isArray(b.options) ? b.options : []).map((o) => clip(o, 300)).filter(Boolean).slice(0, 6)
-      const answer = Number(b.answer)
-      const question = clip(b.question, 600)
-      if (question && options.length >= 2 && Number.isInteger(answer) && answer >= 0 && answer < options.length) {
-        out.push({ type: 'quiz', question, options, answer, explanation: clip(b.explanation, 1200) })
-      }
+      // a test in the chat: up to ten questions, each with 2–6 answers, one of them right
+      const questions = (Array.isArray(b.questions) ? b.questions : []).slice(0, QUIZ_MAX).flatMap((x: unknown) => {
+        const q = (x ?? {}) as Record<string, unknown>
+        const options = (Array.isArray(q.options) ? q.options : []).map((o) => clip(o, 300)).filter(Boolean).slice(0, 6)
+        const answer = Number(q.answer)
+        const question = clip(q.question, 600)
+        return question && options.length >= 2 && Number.isInteger(answer) && answer >= 0 && answer < options.length
+          ? [{ question, options, answer, explanation: clip(q.explanation, 1200) }] : []
+      })
+      if (questions.length) out.push({ type: 'quiz', title: clip(b.title, 120), intro: clip(b.intro, 600), questions })
     } else if (b.type === 'premium') {
       out.push({ type: 'premium', title: clip(b.title, 120), text: clip(b.text, 1200) })
     }
@@ -434,7 +451,8 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
  */
 export function forPlan(blocks: Block[], premium: boolean): Block[] {
   // before Premium is sold, she answers as she always did: no tests, no daily calls, no Premium card
-  if (!premiumLive()) return blocks.filter((b) => b.type !== 'quiz' && b.type !== 'premium').map((b) => (b.type === 'reminder' && b.daily ? { ...b, daily: undefined } : b))
+  // before Premium is sold, she answers as she always did, and tests are for everyone: no daily calls, no Premium card
+  if (!premiumLive()) return blocks.filter((b) => b.type !== 'premium').map((b) => (b.type === 'reminder' && b.daily ? { ...b, daily: undefined } : b))
   if (premium) return blocks.filter((b) => b.type !== 'premium')
   let held = false
   const out = blocks.filter((b) => {
@@ -456,7 +474,7 @@ export function plainOf(blocks: Block[]): string {
       case 'reminder': return `[Ёдраскунӣ: ${b.at} — ${b.title}] ${b.text}`.trim()
       case 'sources': return `[Манбаъҳо: ${b.items.map((i) => i.url).join(', ')}]`
       case 'images': return `[Расмҳо: ${b.items.length}]`
-      case 'quiz': return [b.question, ...b.options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`), `✓ ${String.fromCharCode(65 + b.answer)}`].join('\n')
+      case 'quiz': return [b.title, b.intro, ...b.questions.map((q, n) => [`${n + 1}. ${q.question}`, ...q.options.map((o, i) => `   ${String.fromCharCode(65 + i)}) ${o}`), `   ✓ ${String.fromCharCode(65 + q.answer)}`].join('\n'))].filter(Boolean).join('\n')
       case 'premium': return [b.title, b.text].filter(Boolean).join('\n')
     }
   }).join('\n\n')
@@ -476,6 +494,7 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
     'ABOUT THE LEARNER (from her phone; only for answering her):',
     ...(name ? [`HER NAME: ${name} — you know her: greet her by her name, and use it now and then, naturally (not in every sentence). When she asks her name, tell it.`] : []),
     ...(only.private ? ['(Her age and birthday are not shared with you.)'] : []),
+    ...(me.place || me.region ? [`WHERE SHE IS (roughly; use it for what is true there — her country's customs, holidays, time, places, shops, prices, laws; never say the coordinates or that you know her place unless she asks): ${[me.place ? `about ${me.place} (latitude, longitude, ±10 km)` : '', me.region ? `connection: ${me.region}` : ''].filter(Boolean).join('; ')}`] : []),
     ...(premiumLive() ? [planNote(!!me.premium)] : []),
     about || 'Nothing is known yet: she has not read lessons on this phone.'
   ].join('\n')
@@ -498,7 +517,7 @@ export function planNote(premium: boolean): string {
   if (premium) {
     return ['HER PLAN: Premium ✨ — everything is open to her, use it all gladly:',
       ...PREMIUM_PARTS.map((p) => `- ${p}`),
-      'For a test give 3–5 "quiz" blocks (one question each, 2–6 answers, "answer" = the number of the right one from 0, a short "explanation"), from the books, lessons or the subject she asked. For a daily call use a reminder with "daily": true at her chosen time. Never show the "premium" block to her.'].join('\n')
+      'For a daily call use a reminder with "daily": true at her chosen time. Never show the "premium" block to her.'].join('\n')
   }
   return ['HER PLAN: Free. These are PREMIUM — do NOT give her any of them, not even a part or a sample:',
     ...PREMIUM_PARTS.map((p) => `- ${p}`),
@@ -588,7 +607,7 @@ async function ask(turns: Turn[], appName: string, material: string, me: Learner
   return provider() === 'gemini' ? askGemini(turns, appName, material, me, files) : askClaude(turns, appName, material, me, files)
 }
 /** for the models without a schema of their own (OpenAI-compatible): her answer's shape */
-const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","question":"…","options":["…","…"],"answer":0,"explanation":"…"} · {"type":"premium","title":"…","text":"…"}.`
+const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}]} · {"type":"premium","title":"…","text":"…"}.`
 
 /** Her answer to the conversation (its last turn is the learner's question). */
 export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = [], extra: Extra = {}): Promise<Answer> {

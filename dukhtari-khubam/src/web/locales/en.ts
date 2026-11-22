@@ -333,5 +333,17 @@ export const en: Partial<Record<UiKey, string>> = {
   'perm.later': "Later",
   'perm.all_set': "All permissions are granted",
   'ai.account_switched': "You switched accounts",
+  'video.blocked': "This video can't play here — open it in the official app",
+  'video.retry': "Try again",
+  'lesson.ask_mahliyo': "Ask Mahliyo about this topic",
+  'lesson.ask_prefill': "In the topic “{title}” I didn't understand: ",
+  'perm.place': "Location",
+  'ai.quiz': "Test",
+  'ai.quiz_count': "{n} questions",
+  'ai.quiz_check': "Check",
+  'ai.quiz_score': "{n} of {total} right",
+  'ai.quiz_result': "My test result: {n} of {total}",
+  'ai.quiz_mine': "my answer",
+  'ai.quiz_right': "right",
   'pin.forgot_q': "Forgot it?"
 }

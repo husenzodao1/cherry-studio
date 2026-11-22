@@ -363,6 +363,16 @@ public final class MahliyoCall {
             call.resolve();
         }
 
+        /** Opens the app's settings page (a permission once refused is given there). */
+        @PluginMethod
+        public void appSettings(PluginCall call) {
+            Context ctx = getContext();
+            Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + ctx.getPackageName()));
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(i);
+            call.resolve();
+        }
+
         private MediaPlayer player;
 
         /** Her recorded words (`src`, a file of the app) on the call line: the earpiece, or the speaker. */

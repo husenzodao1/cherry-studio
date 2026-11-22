@@ -442,6 +442,18 @@ export const uz: Partial<Record<UiKey, string>> = {
   'perm.later': "Keyinroq",
   'perm.all_set': "Barcha ruxsatlar berildi",
   'ai.account_switched': "Siz akkauntni almashtirdingiz",
+  'video.blocked': "To'g'ridan-to'g'ri ijro mavjud emas, rasmiy ilovaga o'ting",
+  'video.retry': "Qayta urinish",
+  'lesson.ask_mahliyo': "Mahliyodan bu mavzu haqida so'rang",
+  'lesson.ask_prefill': "«{title}» mavzusida tushunmadim: ",
+  'perm.place': "Joylashuv",
+  'ai.quiz': "Test",
+  'ai.quiz_count': "{n} savol",
+  'ai.quiz_check': "Tekshirish",
+  'ai.quiz_score': "{total} tadan {n} tasi to'g'ri",
+  'ai.quiz_result': "Test natijam: {total} tadan {n}",
+  'ai.quiz_mine': "mening javobim",
+  'ai.quiz_right': "to'g'risi",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -885,6 +897,18 @@ export const tr: Partial<Record<UiKey, string>> = {
   'perm.later': "Sonra",
   'perm.all_set': "Tüm izinler verildi",
   'ai.account_switched': "Hesap değiştirdiniz",
+  'video.blocked': "Burada oynatılamıyor, resmi uygulamada açın",
+  'video.retry': "Tekrar dene",
+  'lesson.ask_mahliyo': "Bu konuyu Mahliyo'ya sorun",
+  'lesson.ask_prefill': "«{title}» konusunda anlamadığım: ",
+  'perm.place': "Konum",
+  'ai.quiz': "Test",
+  'ai.quiz_count': "{n} soru",
+  'ai.quiz_check': "Kontrol et",
+  'ai.quiz_score': "{total} sorudan {n} doğru",
+  'ai.quiz_result': "Test sonucum: {total} sorudan {n}",
+  'ai.quiz_mine': "cevabım",
+  'ai.quiz_right': "doğrusu",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1327,6 +1351,18 @@ export const fa: Partial<Record<UiKey, string>> = {
   'perm.later': "بعداً",
   'perm.all_set': "همهٔ مجوزها داده شد",
   'ai.account_switched': "حساب را عوض کردید",
+  'video.blocked': "پخش مستقیم ممکن نیست، به برنامهٔ رسمی بروید",
+  'video.retry': "دوباره",
+  'lesson.ask_mahliyo': "از مهلیو دربارهٔ این موضوع بپرسید",
+  'lesson.ask_prefill': "در موضوع «{title}» این را نفهمیدم: ",
+  'perm.place': "موقعیت مکانی",
+  'ai.quiz': "آزمون",
+  'ai.quiz_count': "{n} پرسش",
+  'ai.quiz_check': "بررسی",
+  'ai.quiz_score': "{n} از {total} درست",
+  'ai.quiz_result': "نتیجهٔ آزمون من: {n} از {total}",
+  'ai.quiz_mine': "پاسخ من",
+  'ai.quiz_right': "درست",
   'pin.forgot_q': "فراموش کردید؟"
 }
 
@@ -1372,5 +1408,17 @@ export const prs: Partial<Record<UiKey, string>> = {
   'perm.later': "بعداً",
   'perm.all_set': "همهٔ اجازه‌ها داده شد",
   'ai.account_switched': "حساب را تبدیل کردید",
+  'video.blocked': "پخش مستقیم ممکن نیست، به برنامهٔ رسمی بروید",
+  'video.retry': "دوباره",
+  'lesson.ask_mahliyo': "از مهلیو دربارهٔ این موضوع بپرسید",
+  'lesson.ask_prefill': "در موضوع «{title}» این را نفهمیدم: ",
+  'perm.place': "موقعیت مکانی",
+  'ai.quiz': "آزمون",
+  'ai.quiz_count': "{n} سوال",
+  'ai.quiz_check': "بررسی",
+  'ai.quiz_score': "{n} از {total} درست",
+  'ai.quiz_result': "نتیجهٔ آزمون من: {n} از {total}",
+  'ai.quiz_mine': "جواب من",
+  'ai.quiz_right': "درست",
   'install.app': "نصب برنامه روی تلفن"
 }

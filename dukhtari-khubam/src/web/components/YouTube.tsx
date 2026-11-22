@@ -49,6 +49,9 @@ export function YouTube({ id, start, title }: { id: string; start?: number; titl
   const [time, setTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [controls, setControls] = useState(true)
+  /** the player could not play it here (the video forbids playing elsewhere, or the player never answered) */
+  const [failed, setFailed] = useState(false)
+  const heard = useRef(false)
   const hideTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const send = useCallback((func: string, args: unknown[] = []) => {
@@ -66,6 +69,9 @@ export function YouTube({ id, start, title }: { id: string; start?: number; titl
       } catch {
         return
       }
+      heard.current = true
+      // the player's own error (embedding not allowed, not found, …): it cannot be played here
+      if (msg.event === 'onError') return setFailed(true)
       const info = msg.info
       if (!info || typeof info !== 'object') return
       if (typeof info.currentTime === 'number') setTime(info.currentTime)
@@ -74,7 +80,10 @@ export function YouTube({ id, start, title }: { id: string; start?: number; titl
       if (typeof info.playerState === 'number') setPlaying(info.playerState === 1 || info.playerState === 3)
     }
     window.addEventListener('message', onMessage)
-    return () => window.removeEventListener('message', onMessage)
+    // a player that says nothing at all within a while has not started: the way to the official app is offered
+    heard.current = false
+    const silent = setTimeout(() => { if (!heard.current) setFailed(true) }, 10_000)
+    return () => { window.removeEventListener('message', onMessage); clearTimeout(silent) }
   }, [open])
 
   // controls fade away while the video plays; a tap brings them back
@@ -97,7 +106,14 @@ export function YouTube({ id, start, title }: { id: string; start?: number; titl
       return
     }
     setOffline(false)
+    setFailed(false)
     setOpen(true)
+  }
+  /** "try again": the player is opened afresh */
+  const retry = () => {
+    setOpen(false)
+    setFailed(false)
+    setTimeout(start0, 60)
   }
   const onLoad = () => {
     frame.current?.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id, channel: 'widget' }), HOST)
@@ -138,6 +154,13 @@ export function YouTube({ id, start, title }: { id: string; start?: number; titl
         </button>
       )}
       {offline ? <span className="yt-offline glass" role="status">{t('video.offline')}</span> : null}
+      {/* it cannot be played here: the official YouTube app (a tap on the words), or try again */}
+      {failed ? (
+        <div className="yt-failed" role="alert">
+          <a href={`https://www.youtube.com/watch?v=${id}${start ? `&t=${start}s` : ''}`} target="_blank" rel="noopener noreferrer">{t('video.blocked')}</a>
+          <button type="button" className="btn btn-soft" onClick={retry}><Icon name="refresh" size={16} /> {t('video.retry')}</button>
+        </div>
+      ) : null}
     </figure>
   )
 }

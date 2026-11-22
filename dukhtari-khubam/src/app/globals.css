@@ -1209,8 +1209,25 @@ html.lite .ai-composer { background: color-mix(in srgb, var(--bg) 94%, transpare
 /* pictures of what she was asked about: two by two, rounded, each its name beneath */
 .ai-images { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 6px 0 4px; }
 .ai-images.is-one { grid-template-columns: 1fr; }
-.ai-image { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: var(--ink); font-size: 0.82rem; font-weight: 600; line-height: 1.3; }
-.ai-image img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.ai-image { display: flex; flex-direction: column; gap: 6px; padding: 0; border: 0; background: none; text-align: start; font: inherit; color: var(--ink);
+  font-size: 0.82rem; font-weight: 600; line-height: 1.3; cursor: zoom-in; }
+.ai-image:disabled { cursor: default; }
+.ai-image-frame { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ink) 5%, transparent) 30%, color-mix(in srgb, var(--primary) 9%, transparent) 50%, color-mix(in srgb, var(--ink) 5%, transparent) 70%);
+  background-size: 250% 100%; animation: ai-img-shine 1.6s linear infinite; }
+.ai-image.is-ready .ai-image-frame { animation: none; background: none; }
+.ai-image img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 0.4s var(--ease); }
+.ai-image.is-ready img { opacity: 1; }
+.ai-image.is-ready:active .ai-image-frame { transform: scale(0.98); }
+/* three dots turning round the middle while the picture comes */
+.ai-image-wait { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; animation: ai-img-turn 1.1s linear infinite; }
+.ai-image-wait i { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--primary); left: 13px; top: 0; }
+.ai-image-wait i:nth-child(2) { transform: rotate(120deg); transform-origin: 4px 17px; opacity: 0.7; }
+.ai-image-wait i:nth-child(3) { transform: rotate(240deg); transform-origin: 4px 17px; opacity: 0.4; }
+@keyframes ai-img-turn { to { transform: rotate(1turn); } }
+@keyframes ai-img-shine { from { background-position: 125% 0; } to { background-position: -125% 0; } }
+/* a picture opened large, over everything */
+.ai-photo img { width: min(94vw, 720px); height: auto; max-height: 76vh; border-radius: 18px; object-fit: contain; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5); }
 /* read further up: back down — small, at the right above the box, a soft shadow; her dots while she writes */
 .ai-down { position: absolute; right: 8px; top: -54px; z-index: 2; width: 40px; height: 40px; border: 1px solid var(--glass-edge); border-radius: 50%; padding: 0;
   display: grid; place-items: center; color: var(--ink); background: color-mix(in srgb, var(--bg) 88%, #fff); cursor: pointer;
@@ -1559,7 +1576,7 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
   background: linear-gradient(125deg, color-mix(in srgb, var(--rose-strong) 70%, white) 0%, color-mix(in srgb, var(--primary-soft) 45%, white) 52%, color-mix(in srgb, var(--lilac) 80%, white) 100%); }
 :root[data-theme='dark'] .words { background: linear-gradient(125deg, color-mix(in srgb, var(--rose-strong) 80%, black), color-mix(in srgb, var(--primary-soft) 55%, black) 52%, var(--lilac)); }
 /* its name in a fair hand; the words themselves in a plain, calm letter */
-.words-label { position: absolute; left: 18px; top: 6px; font-family: var(--font-hand), var(--font-brand); font-weight: 700; font-size: 1.25rem; line-height: 1.2; color: var(--plum); opacity: 0.9; z-index: 2; }
+.words-label { position: absolute; left: 18px; top: 8px; font-family: var(--font-hand), var(--font-brand); font-weight: 700; font-size: 1.08rem; line-height: 1.2; color: var(--plum); opacity: 0.9; z-index: 2; }
 .words-track { position: absolute; inset: 36px 18px 16px; }
 .words-item { position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; align-items: stretch; justify-content: center; text-align: center; gap: 4px;
   padding-inline: 4%; opacity: 0; transform: translateX(110%); transition: transform 0.8s var(--ease), opacity 0.6s var(--ease); }
@@ -1569,7 +1586,7 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
 .words-text { flex: 0 1 auto; min-height: 0; max-height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 /* the quote in the middle of the room it has; who said it and where at the very bottom of the card */
 .words-item > .words-text { margin-block: auto; }
-.words-item blockquote { margin: 0; font-family: var(--font-serif), serif; font-weight: 500; font-size: 1.2rem; line-height: 1.32; color: var(--ink);
+.words-item blockquote { margin: 0; font-family: var(--font-ui); font-weight: 500; font-size: 1.2rem; line-height: 1.32; letter-spacing: -0.01em; color: var(--ink);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); overflow-wrap: anywhere; white-space: pre-line; text-wrap: balance; padding: 0.08em 0.3em; }
 /* longer than four lines: four lines show and the rest scrolls up — by itself, slowly, or by finger.
    Once the beginning has moved up, the top line is shaded (and the bottom one while more is below) */
@@ -1581,13 +1598,14 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
 .words-text.is-rising.at-top { --fade-top: 0%; }
 .words-text.is-rising.at-end { --fade-end: 0%; }
 :root[data-theme='dark'] .words-item blockquote { text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); }
-.words-item figcaption { flex: none; position: relative; display: flex; justify-content: center; align-items: baseline; gap: 6px; margin: 0 12%; padding-top: 4px;
+.words-item figcaption { flex: none; position: relative; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 0; padding-top: 5px;
   font-family: var(--font-ui); font-size: 0.74rem; line-height: 1.3; color: var(--ink-2); white-space: nowrap; overflow: hidden; }
-.words-item figcaption::before { content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 1px;
+.words-item figcaption::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--plum) 35%, transparent), transparent); }
-.words-item figcaption b { font-weight: 600; color: var(--plum); overflow: hidden; text-overflow: ellipsis; }
-.words-item figcaption i { font-style: normal; opacity: 0.5; }
-.words-item figcaption span { opacity: 0.8; overflow: hidden; text-overflow: ellipsis; }
+.words-item figcaption b { font-weight: 600; color: var(--plum); overflow: hidden; text-overflow: ellipsis; text-align: end; }
+.words-item figcaption span { opacity: 0.8; overflow: hidden; text-overflow: ellipsis; text-align: start; }
+/* a poem: each of its lines whole on one line (the size shrinks to fit the longest) */
+.words-item blockquote.is-poem { white-space: pre; text-wrap: nowrap; }
 .words-dots { position: absolute; left: 0; right: 0; bottom: 6px; display: flex; justify-content: center; gap: 5px; z-index: 2; }
 .words-dots span { width: 5px; height: 5px; border-radius: 3px; background: var(--ink-2); opacity: 0.3; transition: width 0.3s var(--ease), opacity 0.3s; }
 .words-dots span.is-on { width: 14px; opacity: 0.7; }
@@ -2333,6 +2351,8 @@ html.no-capture.is-away main { filter: blur(22px); }
 
 /* scrolling: the endless decorative animations rest a moment (AppFeel) */
 html.is-scrolling *, html.is-scrolling *::before, html.is-scrolling *::after { animation-play-state: paused !important; }
+/* …except the letters that hop in a greeting: frozen half-way they look broken, and they cost nothing to move */
+html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state: running !important; }
 
 /* her thinking lines come in one after another */
 .ai-thinking .ai-thinking-text { animation: ai-line-in 0.45s var(--ease) both; }
@@ -2390,3 +2410,74 @@ html.is-scrolling *, html.is-scrolling *::before, html.is-scrolling *::after { a
   mask: radial-gradient(75px circle at 50% calc(100% - 75px), #000 74.5px, transparent 75px), linear-gradient(#000 0 0) top / 100% calc(100% - 75px) no-repeat; }
 .ai-orb-fig video, .ai-orb .ai-orb-fig img { position: static; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0;
   border-radius: 0; background: none; box-shadow: none; }
+
+/* a YouTube video that cannot play here: a calm note in its own frame — the words open the official app */
+.yt-failed { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: 20px; text-align: center; background: rgba(20, 12, 40, 0.82); }
+.yt-failed a { color: #fff; font-weight: 600; font-size: 0.95rem; line-height: 1.4; text-decoration: underline; text-underline-offset: 3px; max-width: 30ch; }
+.yt-failed .btn { min-height: 40px; }
+
+/* a lesson: her small circle at the lower right — asks her about what is unclear here */
+.lesson-ask { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: calc(max(16px, env(safe-area-inset-bottom)) + 8px); z-index: 25;
+  width: 54px; height: 54px; padding: 0; border: 0; border-radius: 50%; overflow: hidden; cursor: pointer;
+  background: radial-gradient(circle at 50% 30%, #fbf8ff, #e4d6ff 70%);
+  box-shadow: 0 0 0 2.5px #fff, 0 0 0 5px color-mix(in srgb, var(--primary) 35%, transparent), 0 12px 24px -8px rgba(80, 40, 160, 0.55);
+  animation: rise 0.5s 0.4s var(--ease) both; }
+.lesson-ask img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 8%; display: block; }
+.lesson-ask:active { transform: scale(0.92); }
+
+/* the keypad open: keys a little smaller and room above the tools, so "hide" never sits pressed against the keys;
+   its button does not stay lit white (it looked stuck pressed) — only a lighter round */
+.call.has-keypad .call-keys { grid-template-columns: repeat(3, 64px); gap: 10px 24px; }
+.call.has-keypad .call-key { width: 64px; height: 64px; font-size: 1.55rem; }
+.call.has-keypad .call-keypad { gap: 10px; margin-bottom: 18px; }
+.call-tool.is-keypad.is-on > span { background: rgba(255, 255, 255, 0.24); color: #fff; }
+@media (max-height: 720px) {
+  .call.has-keypad .call-keys { grid-template-columns: repeat(3, 58px); gap: 8px 22px; }
+  .call.has-keypad .call-key { width: 58px; height: 58px; font-size: 1.4rem; }
+  .call.has-keypad .call-tool > span { width: 56px; height: 56px; }
+}
+
+/* a test in the chat: a quiet card — numbered questions, answers as soft rounded rows, marks after "Санҷидан" */
+.ai-quiz { display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 22px; margin: 2px 0;
+  border: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); background: color-mix(in srgb, var(--bg) 55%, #fff);
+  box-shadow: 0 10px 26px -18px rgba(40, 20, 90, 0.35); }
+.ai-quiz-head { display: flex; align-items: center; gap: 10px; }
+.ai-quiz-head b { font-size: 1rem; color: var(--ink); }
+.ai-quiz-icon { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; color: #fff;
+  background: linear-gradient(135deg, var(--primary), #d0679a); }
+.ai-quiz-count { flex: none; font-size: 0.76rem; font-weight: 600; color: var(--ink-2); padding: 3px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.ai-quiz.is-checked .ai-quiz-count { color: #fff; background: var(--primary); }
+.ai-quiz-intro { margin: -4px 0 0; font-size: 0.86rem; line-height: 1.45; color: var(--ink-2); }
+.ai-quiz-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.ai-quiz-item { display: flex; flex-direction: column; gap: 8px; }
+.ai-quiz-q { margin: 0; display: flex; gap: 9px; font-size: 0.96rem; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.ai-quiz-n { flex: none; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center; font-size: 0.74rem; font-weight: 700;
+  color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
+.ai-quiz-opts { display: flex; flex-direction: column; gap: 7px; padding-left: 31px; }
+.ai-quiz-opt { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 14px; text-align: start; font: inherit;
+  font-size: 0.92rem; line-height: 1.35; color: var(--ink); cursor: pointer; border: 1.5px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  background: color-mix(in srgb, var(--bg) 40%, #fff); transition: border-color 0.2s, background 0.2s, transform 0.15s; }
+.ai-quiz-opt:not(:disabled):active { transform: scale(0.985); }
+.ai-quiz-opt > span { flex: 1; min-width: 0; }
+.ai-quiz-opt > i { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 0.74rem; font-weight: 700;
+  color: var(--ink-2); background: color-mix(in srgb, var(--ink) 7%, transparent); transition: background 0.2s, color 0.2s; }
+.ai-quiz-opt.is-picked { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, var(--bg)); }
+.ai-quiz-opt.is-picked > i { color: #fff; background: var(--primary); }
+.ai-quiz-opt:disabled { cursor: default; }
+.ai-quiz-opt.is-right { border-color: #2fa86b; background: color-mix(in srgb, #2fa86b 10%, var(--bg)); color: var(--ink); }
+.ai-quiz-opt.is-right > i { color: #fff; background: #2fa86b; }
+.ai-quiz-opt.is-right svg { color: #2fa86b; }
+.ai-quiz-opt.is-wrong { border-color: #e5484d; background: color-mix(in srgb, #e5484d 8%, var(--bg)); }
+.ai-quiz-opt.is-wrong > i { color: #fff; background: #e5484d; }
+.ai-quiz-opt.is-wrong svg { color: #e5484d; }
+.ai-quiz.is-checked .ai-quiz-opt:not(.is-right):not(.is-wrong) { opacity: 0.55; }
+.ai-quiz-why { margin: 0 0 0 31px; padding: 9px 12px; border-radius: 12px; font-size: 0.84rem; line-height: 1.45; color: var(--ink-2);
+  background: color-mix(in srgb, var(--ink) 4%, transparent); animation: fade-in 0.3s both; }
+.ai-quiz-foot { display: flex; align-items: center; gap: 12px; padding-top: 4px; }
+.ai-quiz-progress { flex: 1; font-size: 0.8rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ai-quiz-check { min-height: 42px; padding: 0 22px; }
+.ai-quiz-score { flex: 1; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.92rem; color: var(--ink); animation: rise 0.35s var(--ease) both; }
+.ai-quiz-bar { height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 8%, transparent); overflow: hidden; }
+.ai-quiz-bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #2fa86b); transition: width 0.8s var(--ease); }

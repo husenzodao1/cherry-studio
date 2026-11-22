@@ -7,13 +7,16 @@ import { turnsFor } from '@/server/routes/mahliyo'
 // these tests are about Premium being sold
 process.env.PREMIUM_LIVE = '1'
 
-const QUIZ = { type: 'quiz', question: '2 + 2 = ?', options: ['3', '4', '5'], answer: 1, explanation: '2 + 2 = 4' }
+const Q = { question: '2 + 2 = ?', options: ['3', '4', '5'], answer: 1, explanation: '2 + 2 = 4' }
+const QUIZ = { type: 'quiz', title: 'Ҳисоб', intro: '', questions: [Q] }
 
 describe('Premium in the chat', () => {
-  it('a test question is kept only when it is whole (2–6 answers, the right one among them)', () => {
+  it('a test keeps only its whole questions (2–6 answers, the right one among them), at most ten', () => {
     expect(cleanBlocks([QUIZ])).toEqual([QUIZ])
-    expect(cleanBlocks([{ ...QUIZ, answer: 3 }])).toEqual([])
-    expect(cleanBlocks([{ ...QUIZ, options: ['4'] , answer: 0 }])).toEqual([])
+    expect(cleanBlocks([{ ...QUIZ, questions: [{ ...Q, answer: 3 }] }])).toEqual([])
+    expect(cleanBlocks([{ ...QUIZ, questions: [{ ...Q, options: ['4'], answer: 0 }, Q] }])).toEqual([{ ...QUIZ, questions: [Q] }])
+    const many = cleanBlocks([{ ...QUIZ, questions: Array.from({ length: 14 }, () => Q) }])[0] as { questions: unknown[] }
+    expect(many.questions).toHaveLength(10)
   })
 
   it("a free learner never gets Premium's parts: a test or a daily call is taken out and the Premium card put in", () => {
@@ -91,18 +94,35 @@ describe('Google Play subscriptions', () => {
 })
 
 describe('before Premium is sold (PREMIUM_LIVE unset)', () => {
-  it('she answers as before: no plan said, no tests or Premium card shown, a daily call is a one-time call', () => {
+  it('she answers as before, tests for everyone: no plan said, no Premium card, a daily call is a one-time call', () => {
     const was = process.env.PREMIUM_LIVE
     delete process.env.PREMIUM_LIVE
     try {
       const at = new Date(Date.now() + 3600_000).toISOString()
       const blocks = cleanBlocks([{ type: 'text', text: 'Салом' }, QUIZ, { type: 'premium', title: 'x', text: '' }, { type: 'reminder', at, title: 'Дарс', text: '', daily: true }])
       const out = forPlan(blocks, false)
-      expect(out.map((b) => b.type)).toEqual(['text', 'reminder'])
-      expect((out[1] as { daily?: boolean }).daily).toBeUndefined()
+      // tests are for everyone until then; no Premium card, a daily call becomes a one-time call
+      expect(out.map((b) => b.type)).toEqual(['text', 'quiz', 'reminder'])
+      expect((out[2] as { daily?: boolean }).daily).toBeUndefined()
       expect(learnerNote({ me: 'Name: Малика' })).not.toContain('HER PLAN')
     } finally {
       process.env.PREMIUM_LIVE = was
     }
+  })
+})
+
+describe('tests in the chat and her place', () => {
+  it('she is told how to make a test (one block, up to ten questions) and what to do with the result', async () => {
+    const src = (await import('node:fs')).readFileSync('src/server/mahliyo.ts', 'utf8')
+    expect(src).toContain('TESTS IN THE CHAT')
+    expect(src).toContain('at most 10')
+    expect(src).toContain('Натиҷаи тести ман')
+  })
+  it('her rough place and her connection\'s city reach her, never as exact coordinates', () => {
+    const note = learnerNote({ me: 'Name: Малика', place: '38.6, 68.8', region: 'Dushanbe, TJ' })
+    expect(note).toContain('about 38.6, 68.8')
+    expect(note).toContain('connection: Dushanbe, TJ')
+    expect(note).toContain('never say the coordinates')
+    expect(learnerNote({ me: 'Name: Малика' })).not.toContain('WHERE SHE IS')
   })
 })

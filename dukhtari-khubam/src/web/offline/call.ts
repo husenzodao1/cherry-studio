@@ -30,6 +30,8 @@ interface NativeCalls {
   askFullScreen(): Promise<void>
   /** the app's notification settings */
   notifySettings(): Promise<void>
+  /** the app's own settings page (permissions) */
+  appSettings(): Promise<void>
   addListener(event: 'opened', f: (c: NativeOpened) => void): Promise<PluginListenerHandle>
   addListener(event: 'voiceEnded', f: () => void): Promise<PluginListenerHandle>
 }
@@ -130,6 +132,10 @@ export function allowLockScreen() {
 /** Opens the app's notification settings (Android asks only until the learner once says "no"). */
 export function openNotifySettings() {
   if (native()) void Native.notifySettings().catch(() => undefined)
+}
+/** Opens the app's settings page (where a permission once refused is given). */
+export function openAppSettings() {
+  if (native()) void Native.appSettings().catch(() => undefined)
 }
 
 /**

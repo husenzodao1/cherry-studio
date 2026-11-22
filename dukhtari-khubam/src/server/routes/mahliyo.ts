@@ -113,9 +113,11 @@ export const mahliyoRoutes: AnyRoute[] = [
       background: z.boolean().optional(),
       files: Files.optional(),
       // her sign-in (when she has an account): Premium is checked with it
-      session: z.string().max(4000).optional()
+      session: z.string().max(4000).optional(),
+      // her rough place, only when she allowed it ("38.6, 68.8": one decimal, about 10 km)
+      place: z.string().regex(/^-?\d{1,2}(\.\d)?, -?\d{1,3}(\.\d)?$/).optional()
     }),
-    handler: async ({ sb, body }) => {
+    handler: async ({ sb, body, req }) => {
       if (!(await anyone(sb()))) throw new ApiError(503, 'not_configured', 'Маҳлиё ҳоло дастрас нест.')
       const premium = await premiumOf(body.session)
       const turns = turnsFor(body.turns as Turn[], premium)
@@ -126,7 +128,9 @@ export const mahliyoRoutes: AnyRoute[] = [
         // the staff see that pictures or files came with it
         p_question: `${question.length > 990 ? `${question.slice(0, 989)}…` : question}${files.length ? ` 📎${files.length}` : ''}`
       })
-      const me = { me: body.me, now: body.now, tz: body.tz, premium }
+      // where she is: her rough place if she allowed it; her country and city as her connection shows them
+      const ipPlace = [req.headers.get('x-vercel-ip-city'), req.headers.get('x-vercel-ip-country')].filter(Boolean).map((v) => decodeURIComponent(v!)).join(', ')
+      const me = { me: body.me, now: body.now, tz: body.tz, premium, place: body.place, region: ipPlace || undefined }
       if (body.background) {
         const client = sb()
         after(() => answerInto(client, id, turns, me, files))

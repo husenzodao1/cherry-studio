@@ -21,6 +21,7 @@ import {
   useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { alphaVideo, CLIPS } from '@/web/mahliyo'
+import { placeNote, refreshPlace } from '@/web/offline/place'
 import { usePrefs } from '@/web/prefs'
 
 const FACE = '/assets/mascot/face.webp'
@@ -110,10 +111,15 @@ export default function MahliyoPage() {
     const done = setTimeout(() => setGenie(false), 700)
     return () => clearTimeout(done)
   }, [])
+  /** a question begun elsewhere (a lesson's circle), put into the box of the new chat once it opens */
+  const prefill = useRef<string | null>(null)
   // a chat opens with what she had begun writing in it
   useEffect(() => {
     setEditing(null)
-    setText(drafts()[chat] ?? '')
+    const begun = prefill.current
+    prefill.current = null
+    if (begun) keepDraft(chat, begun)
+    setText(begun ?? drafts()[chat] ?? '')
   }, [chat])
   /** what she writes (a new question, not an edit, is kept as the chat's draft) */
   const write = (value: string) => {
@@ -166,6 +172,28 @@ export default function MahliyoPage() {
     newChat()
     setFiles([])
   }
+  // opened from a lesson's circle ("what is unclear here?"): a new chat with the question begun in the box
+  useEffect(() => {
+    let asked: string | null = null
+    try {
+      asked = sessionStorage.getItem('dk.ai.ask')
+      sessionStorage.removeItem('dk.ai.ask')
+    } catch { /* storage blocked */ }
+    if (!asked) return
+    prefill.current = asked
+    startNew()
+    setTimeout(() => {
+      // the chat was new already (no change of chat to carry it in): put it in now
+      if (prefill.current) { setText(prefill.current); prefill.current = null }
+      const el = box.current
+      if (!el) return
+      el.focus()
+      el.setSelectionRange(el.value.length, el.value.length)
+    }, 120)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  // her rough place, looked at again when a day old (only if she allowed it)
+  useEffect(() => { void refreshPlace() }, [])
   const startNewRef = useRef(startNew)
   startNewRef.current = startNew
   const hasTurns = useRef(false)
@@ -296,7 +324,7 @@ export default function MahliyoPage() {
     el.style.height = `${Math.min(el.scrollHeight, 132)}px`
   }, [text])
 
-  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email })
+  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email, place: placeNote() })
   const send = (question: string, withFiles: AiUpload[] = []) => {
     // a picture alone asks her to look at it
     const q = question.trim() || (withFiles.length ? t('ai.look') : '')
@@ -427,7 +455,8 @@ export default function MahliyoPage() {
         ) : (
           <div key={i} className="ai-said">
             <div className="grow">
-              <AnswerBlocks blocks={m.blocks?.length ? m.blocks : [{ type: 'text', text: m.content }]} fresh={i === fresh} />
+              <AnswerBlocks blocks={m.blocks?.length ? m.blocks : [{ type: 'text', text: m.content }]} fresh={i === fresh}
+                id={m.id ?? m.at} onQuiz={(result) => send(result)} />
               {m.tajik === false ? <Link href="/support" className="btn btn-soft ai-consultant"><Icon name="bell" size={16} /> {t('ai.to_consultant')}</Link> : null}
               <div className="ai-acts ai-acts-start">
                 <button type="button" className="ai-act" onClick={() => copy(m)} aria-label={t('ai.copy')}><Icon name="copy" size={16} /></button>

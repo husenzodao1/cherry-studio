@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { AiBlock } from '@/lib/aiCatalog'
@@ -64,7 +64,145 @@ const writeRem = (id: number, s: Status) => {
   try { localStorage.setItem(REM_KEY, JSON.stringify({ ...readRem(), [id]: s })) } catch { /* not kept */ }
 }
 
-export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: boolean }) {
+/** what was chosen in a test, kept on this phone (the test still shows its marks when the chat is opened again) */
+const QUIZ_KEY = 'dk.ai.quiz'
+type QuizSaved = Record<string, { picked: (number | null)[]; checked: boolean }>
+const readQuiz = (): QuizSaved => {
+  try { return JSON.parse(localStorage.getItem(QUIZ_KEY) || '{}') as QuizSaved } catch { return {} }
+}
+const keepQuiz = (id: string, v: QuizSaved[string]) => {
+  try {
+    // only the last fifty tests are kept
+    const all = Object.entries({ ...readQuiz(), [id]: v }).slice(-50)
+    localStorage.setItem(QUIZ_KEY, JSON.stringify(Object.fromEntries(all)))
+  } catch { /* not kept */ }
+}
+/** a question's or an answer's words: Markdown and formulas when they have them */
+const Rich = ({ text }: { text: string }) => (isMarkdown(text) ? <AiMarkdown text={text} inline /> : <>{emojify(text)}</>)
+
+/**
+ * A test in the chat: up to ten questions, an answer chosen for each; "Санҷидан" marks them right or wrong
+ * at once, with each one's explanation and the score — and sends her result to Mahliyo, who answers it.
+ */
+function QuizCard({ block, id, onQuiz, style }: { block: Extract<AiBlock, { type: 'quiz' }>; id?: string; onQuiz?: (result: string) => void; style: CSSProperties }) {
+  const { t } = usePrefs()
+  const total = block.questions.length
+  const [picked, setPicked] = useState<(number | null)[]>(() => (id && readQuiz()[id]?.picked) || block.questions.map(() => null))
+  const [checked, setChecked] = useState(() => !!(id && readQuiz()[id]?.checked))
+  const answered = picked.filter((p) => p !== null).length
+  const score = block.questions.filter((q, n) => picked[n] === q.answer).length
+  const pick = (n: number, o: number) => {
+    if (checked) return
+    const next = picked.map((p, k) => (k === n ? o : p))
+    setPicked(next)
+    if (id) keepQuiz(id, { picked: next, checked: false })
+  }
+  const check = () => {
+    if (answered < total) return
+    setChecked(true)
+    if (id) keepQuiz(id, { picked, checked: true })
+    // her result, for Mahliyo to answer: the score and each mistake
+    const wrong = block.questions.map((q, n) => ({ q, n })).filter(({ q, n }) => picked[n] !== q.answer)
+    onQuiz?.([
+      t('ai.quiz_result').replace('{n}', String(score)).replace('{total}', String(total)) + (block.title ? ` («${block.title}»)` : ''),
+      ...wrong.map(({ q, n }) => `${n + 1}. ${q.question} — ${t('ai.quiz_mine')}: «${q.options[picked[n] ?? 0]}», ${t('ai.quiz_right')}: «${q.options[q.answer]}»`)
+    ].join('\n'))
+  }
+  return (
+    <section className={`ai-quiz${checked ? ' is-checked' : ''}`} style={style} aria-label={block.title || t('ai.quiz')}>
+      <header className="ai-quiz-head">
+        <span className="ai-quiz-icon" aria-hidden="true"><Icon name="check" size={16} strokeWidth={2.4} /></span>
+        <b className="grow">{block.title ? emojify(block.title) : t('ai.quiz')}</b>
+        <span className="ai-quiz-count">{checked ? `${score}/${total}` : t('ai.quiz_count').replace('{n}', String(total))}</span>
+      </header>
+      {block.intro ? <p className="ai-quiz-intro"><Rich text={block.intro} /></p> : null}
+      <ol className="ai-quiz-list">
+        {block.questions.map((q, n) => (
+          <li key={n} className="ai-quiz-item">
+            <p className="ai-quiz-q"><span className="ai-quiz-n">{n + 1}</span><span><Rich text={q.question} /></span></p>
+            <div className="ai-quiz-opts" role="radiogroup" aria-label={q.question}>
+              {q.options.map((o, k) => {
+                const mine = picked[n] === k
+                const mark = checked ? (k === q.answer ? ' is-right' : mine ? ' is-wrong' : '') : mine ? ' is-picked' : ''
+                return (
+                  <button key={k} type="button" role="radio" aria-checked={mine} className={`ai-quiz-opt${mark}`} disabled={checked} onClick={() => pick(n, k)}>
+                    <i aria-hidden="true">{String.fromCharCode(65 + k)}</i><span><Rich text={o} /></span>
+                    {checked && k === q.answer ? <Icon name="check" size={16} strokeWidth={2.6} /> : checked && mine ? <Icon name="x" size={16} strokeWidth={2.6} /> : null}
+                  </button>
+                )
+              })}
+            </div>
+            {checked && q.explanation ? <p className="ai-quiz-why"><Rich text={q.explanation} /></p> : null}
+          </li>
+        ))}
+      </ol>
+      <footer className="ai-quiz-foot">
+        {checked ? (
+          <p className="ai-quiz-score" role="status"><b>{t('ai.quiz_score').replace('{n}', String(score)).replace('{total}', String(total))}</b>
+            <span className="ai-quiz-bar" aria-hidden="true"><i style={{ width: `${Math.round((score / total) * 100)}%` }} /></span></p>
+        ) : (
+          <>
+            <span className="ai-quiz-progress">{answered}/{total}</span>
+            <button type="button" className="btn ai-quiz-check" disabled={answered < total} onClick={check}>{t('ai.quiz_check')}</button>
+          </>
+        )}
+      </footer>
+    </section>
+  )
+}
+
+type Picture = Extract<AiBlock, { type: 'images' }>['items'][number]
+
+/**
+ * Pictures of what she was asked about: while one comes, three dots turn on a soft shimmer; one that cannot
+ * come is left out (none at all: nothing is shown); a tap opens it large, here in the app.
+ */
+function Pictures({ items, style }: { items: Picture[]; style: CSSProperties }) {
+  const [failed, setFailed] = useState<Set<number>>(new Set())
+  const [open, setOpen] = useState<Picture | null>(null)
+  const shown = items.map((p, n) => ({ p, n })).filter(({ n }) => !failed.has(n))
+  if (!shown.length) return null
+  return (
+    <div className={`ai-images${shown.length === 1 ? ' is-one' : ''}`} style={style}>
+      {shown.map(({ p, n }) => (
+        <PictureTile key={n} picture={p} onOpen={() => setOpen(p)} onFail={() => setFailed((f) => new Set(f).add(n))} />
+      ))}
+      {open ? createPortal(
+        <div className="ai-zoom ai-photo" role="dialog" aria-modal="true" aria-label={open.title} onClick={() => setOpen(null)}>
+          <img src={open.src} alt={open.title} referrerPolicy="no-referrer" />
+          {open.title ? <p>{open.title}</p> : null}
+          <button type="button" className="icon-btn ai-zoom-x" aria-label="×" onClick={() => setOpen(null)}><Icon name="x" /></button>
+        </div>,
+        document.body
+      ) : null}
+    </div>
+  )
+}
+
+function PictureTile({ picture, onOpen, onFail }: { picture: Picture; onOpen: () => void; onFail: () => void }) {
+  const [ready, setReady] = useState(false)
+  const tried = useRef(false)
+  return (
+    <button type="button" className={`ai-image${ready ? ' is-ready' : ''}`} onClick={onOpen} disabled={!ready}>
+      <span className="ai-image-frame">
+        {/* not "lazy": inside the chat's own scrolling, the phone's browser may never start it */}
+        <img src={picture.src} alt={picture.title} referrerPolicy="no-referrer" decoding="async"
+          onLoad={() => setReady(true)}
+          onError={(e) => {
+            // once more (a weak connection), then it is left out
+            if (tried.current) return onFail()
+            tried.current = true
+            const img = e.currentTarget
+            setTimeout(() => { img.src = `${picture.src}${picture.src.includes('?') ? '&' : '?'}r=1` }, 1500)
+          }} />
+        {ready ? null : <span className="ai-image-wait" aria-hidden="true"><i /><i /><i /></span>}
+      </span>
+      {picture.title ? <span>{picture.title}</span> : null}
+    </button>
+  )
+}
+
+export function AnswerBlocks({ blocks, fresh, id, onQuiz }: { blocks: AiBlock[]; fresh: boolean; id?: string; onQuiz?: (result: string) => void }) {
   const [zoom, setZoom] = useState<Extract<AiBlock, { type: 'screen' }> | null>(null)
   const { starts } = timingOf(blocks)
   return (
@@ -110,16 +248,11 @@ export function AnswerBlocks({ blocks, fresh }: { blocks: AiBlock[]; fresh: bool
           case 'reminder':
             return <ReminderCard key={i} block={b} fresh={fresh} style={style} />
           case 'images':
-            return (
-              <div key={i} className={`ai-images${b.items.length === 1 ? ' is-one' : ''}`} style={style}>
-                {b.items.map((p, n) => (
-                  <a key={n} href={p.url} target="_blank" rel="noopener noreferrer" className="ai-image">
-                    <img src={p.src} alt={p.title} loading="lazy" referrerPolicy="no-referrer" />
-                    <span>{p.title}</span>
-                  </a>
-                ))}
-              </div>
-            )
+            return <Pictures key={i} items={b.items} style={style} />
+          case 'quiz':
+            return <QuizCard key={i} block={b} id={id ? `${id}:${i}` : undefined} onQuiz={onQuiz} style={style} />
+          case 'premium':
+            return null
           case 'sources':
             // shown small at the end of her answer's row (Sources)
             return null

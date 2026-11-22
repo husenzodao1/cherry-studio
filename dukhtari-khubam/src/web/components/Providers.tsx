@@ -92,7 +92,10 @@ function AppFeel() {
   useEffect(() => {
     const root = document.documentElement
     let rest = 0
-    const moving = () => {
+    const moving = (e: Event) => {
+      // the words of the day rise by themselves, frame by frame: that is not her scrolling (else every animation
+      // would stand still for as long as a poem rises — a greeting frozen half-way)
+      if ((e.target as Element | null)?.closest?.('.words-text')) return
       if (!rest) root.classList.add('is-scrolling')
       clearTimeout(rest)
       rest = window.setTimeout(() => { rest = 0; root.classList.remove('is-scrolling') }, 180)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { fitQuote, LINE_HEIGHT, LINES } from '@/lib/wordsFit'
+import { fitQuote, LINE_HEIGHT, LINES, MIN_SIZE } from '@/lib/wordsFit'
 
 const REM = 16
 /** words that take `lines` lines at any size */
@@ -30,5 +30,16 @@ describe('words of the day: four lines, the rest scrolls upward', () => {
   it('a low card scrolls within the room it has', () => {
     const fit = fitQuote(lines(4), 50, REM)
     expect(fit.rise).toBe(Math.ceil(4 * LINE_HEIGHT * 0.92 * REM - 50))
+  })
+})
+
+describe('a poem keeps each line whole', () => {
+  it('sizes too wide are skipped; when all are, it shrinks below them, never under MIN_SIZE', () => {
+    const fit = fitQuote(lines(2), 400, REM, (size) => size <= 1.0)
+    expect(fit.size).toBe(1.0)
+    const tiny = fitQuote(lines(2), 400, REM, (size) => size <= 0.8)
+    expect(tiny.size).toBeLessThanOrEqual(0.8)
+    expect(tiny.size).toBeGreaterThanOrEqual(MIN_SIZE)
+    expect(fitQuote(lines(2), 400, REM, () => false).size).toBe(MIN_SIZE)
   })
 })

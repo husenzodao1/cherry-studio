@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, signedIn, test } from './fixtures'
 
-interface Phone { notify: 'prompt' | 'granted' | 'denied'; call: boolean; asked: string[]; refuse?: boolean }
+interface Phone { notify: 'prompt' | 'granted' | 'denied'; call: boolean; asked: string[]; refuse?: boolean; place?: boolean }
 
 /**
  * The page as the Android app: every plugin method answers through a fake bridge; notifications and the
@@ -17,6 +17,17 @@ async function asPhone(page: Page, phone: Phone) {
       set: (o, k, v) => { o[k] = v; sessionStorage.setItem('e2e.phone', JSON.stringify(o)); return true }
     })) as typeof start
     w.androidBridge = {}
+    // her place: allowed already unless the test says otherwise; asking gives it (rounded by the app)
+    if (state.place === undefined) state.place = true
+    const perms = navigator.permissions
+    const query = perms.query.bind(perms)
+    perms.query = ((d: { name: string }) => (d.name === 'geolocation'
+      ? Promise.resolve({ state: state.place ? 'granted' : 'prompt' } as PermissionStatus) : query(d as PermissionDescriptor))) as typeof perms.query
+    navigator.geolocation.getCurrentPosition = ((ok: PositionCallback) => {
+      state.asked = [...state.asked, 'place']
+      state.place = true
+      ok({ coords: { latitude: 38.5598, longitude: 68.7870 } } as GeolocationPosition)
+    }) as typeof navigator.geolocation.getCurrentPosition
     const header = { name: '', methods: { find: () => ({ name: '', rtype: 'promise' }) } }
     w.Capacitor = {
       PluginHeaders: { find: () => header },
@@ -40,26 +51,30 @@ async function asPhone(page: Page, phone: Phone) {
   }, phone)
 }
 
-test('on entering the phone app: notifications and Mahliyo\'s calls asked on one screen, until both are allowed', async ({ page, server: _, errors }) => {
+test('on entering the phone app: notifications, Mahliyo\'s calls and her place asked on one screen, until all are allowed', async ({ page, server: _, errors }) => {
   await signedIn(page)
-  await asPhone(page, { notify: 'prompt', call: false, asked: [] })
+  await asPhone(page, { notify: 'prompt', call: false, asked: [], place: false })
   await page.goto('/')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   const sheet = page.locator('.perm')
   await expect(sheet).toBeVisible()
   await expect(sheet.locator('.perm-title')).toHaveText('Иҷозатҳо')
-  await expect(sheet.locator('.perm-row')).toHaveCount(2)
+  await expect(sheet.locator('.perm-row')).toHaveCount(3)
   await expect(sheet.locator('.perm-row.is-on')).toHaveCount(0)
   await page.screenshot({ path: 'test-results/permissions.png' })
   // one button: first the system's own question about notifications …
   await sheet.getByRole('button', { name: 'Иҷозат додан' }).click()
   await expect(sheet.locator('.perm-row.is-on')).toHaveCount(1)
   await expect(sheet.locator('.perm-row', { hasText: 'Огоҳиномаҳо' })).toHaveClass(/is-on/)
-  // … then the setting for calls over the lock screen; all allowed, the screen goes by itself
+  // … then the setting for calls over the lock screen, then her place; all allowed, the screen goes by itself
+  await sheet.getByRole('button', { name: 'Иҷозат додан' }).click()
+  await expect(sheet.locator('.perm-row', { hasText: 'Зангҳои Маҳлиё' })).toHaveClass(/is-on/)
   await sheet.getByRole('button', { name: 'Иҷозат додан' }).click()
   await expect(sheet).toHaveCount(0)
+  // her place is kept only roughly (about 10 km)
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dk.place') ?? 'null'))).toMatchObject({ lat: 38.6, lon: 68.8 })
   await expect(page.locator('.toast').filter({ hasText: 'Ҳамаи иҷозатҳо дода шуданд' })).toBeVisible()
-  expect(await page.evaluate(() => (window as unknown as { __phone: Phone }).__phone.asked)).toEqual(['notify-dialog', 'call-settings'])
+  expect(await page.evaluate(() => (window as unknown as { __phone: Phone }).__phone.asked)).toEqual(['notify-dialog', 'call-settings', 'place'])
   // the next opening: everything is allowed, nothing is asked
   await page.reload()
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })

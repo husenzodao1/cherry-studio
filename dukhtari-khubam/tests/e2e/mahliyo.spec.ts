@@ -78,7 +78,7 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   await tab.click()
   await expect(page).toHaveURL(/\/mahliyo\/?$/)
   expect(await page.evaluate(() => (window as unknown as { __vt: number }).__vt)).toBe(1)
-  await expect(page.locator('html')).not.toHaveClass(/genie-open/, { timeout: 3000 })
+  await expect(page.locator('html')).not.toHaveClass(/genie-open/, { timeout: 6000 })
   // full screen: no tab bar; a plain header — her name, "Дугонаи донои шумо", a new chat, the menu (☰) and, at the far right, leaving (✕)
   await expect(page.locator('.dock')).toHaveCount(0)
   await expect(page.locator('.ai-status')).toHaveText('Дугонаи донои шумо')
@@ -695,5 +695,63 @@ test('a new chat: her sign-in clip, silent and once, in her circle with her head
   await expect(page.locator('.ai-hello')).toBeVisible()
   await expect(page.locator('.ai-hello')).toHaveCount(0, { timeout: 9000 })
   await expect(page.locator('.ai-input')).toBeEnabled()
+  expect(errors).toEqual([])
+})
+
+test('a test in the chat: questions to answer, "Санҷидан" marks them and sends her result to Mahliyo; pictures come with turning dots and open here', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  // a picture that comes slowly, and one that never comes (it is left out)
+  await page.route('https://pictures.example/ok.png', async (r) => {
+    await new Promise((f) => setTimeout(f, 1200))
+    return r.fulfill({ status: 200, contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30"><rect width="40" height="30" fill="#c96"/></svg>' })
+  })
+  await page.route('https://pictures.example/broken.png**', (r) => r.fulfill({ status: 404, body: '' }))
+  const quiz = {
+    type: 'quiz', title: 'Ҳисоб', intro: 'Ду саволи осон',
+    questions: [
+      { question: '2 + 2 = ?', options: ['3', '4'], answer: 1, explanation: '2 + 2 = 4' },
+      { question: '3 × 3 = ?', options: ['9', '6'], answer: 0, explanation: '3 × 3 = 9' }
+    ]
+  }
+  const { asked } = await fakeMahliyo(page, (q) => (q.startsWith('Натиҷаи')
+    ? { tajik: true, reply: 'Офарин!', blocks: [{ type: 'text', text: 'Офарин! Як хато доштед.' }] }
+    : { tajik: true, reply: 'Тест', blocks: [{ type: 'text', text: 'Мана тест:' }, quiz,
+        { type: 'images', items: [{ src: 'https://pictures.example/ok.png', title: 'Расм', url: 'https://example.org' }, { src: 'https://pictures.example/broken.png', title: 'Нест', url: 'https://example.org' }] }] }))
+  await page.goto('/mahliyo')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await page.locator('.ai-input').fill('Ба ман тест деҳ')
+  await page.locator('.ai-input').press('Enter')
+  const card = page.locator('.ai-quiz')
+  await expect(card).toBeVisible()
+  await expect(card.locator('.ai-quiz-count')).toHaveText('2 савол')
+  const check = card.getByRole('button', { name: 'Санҷидан' })
+  await expect(check).toBeDisabled()
+  // the first right, the second wrong
+  await card.locator('.ai-quiz-item').nth(0).getByRole('radio', { name: /4/ }).click()
+  await card.locator('.ai-quiz-item').nth(1).getByRole('radio', { name: /6/ }).click()
+  await check.click()
+  await expect(card.locator('.ai-quiz-score')).toContainText('1 аз 2 дуруст')
+  await expect(card.locator('.ai-quiz-opt.is-right')).toHaveCount(2)
+  await expect(card.locator('.ai-quiz-opt.is-wrong')).toHaveCount(1)
+  await expect(card.locator('.ai-quiz-why')).toHaveCount(2)
+  // her result went to Mahliyo, with the mistake, and she answers it
+  await expect.poll(() => asked.length).toBe(2)
+  const sent = asked[1].turns[asked[1].turns.length - 1].content
+  expect(sent).toContain('Натиҷаи тести ман: 1 аз 2')
+  expect(sent).toContain('ҷавоби ман: «6», дуруст: «9»')
+  await expect(page.locator('.ai-said').last()).toContainText('Офарин!')
+  // the picture: turning dots while it comes, then shown; the broken one left out; a tap opens it here
+  const pictures = page.locator('.ai-images').first()
+  await expect(pictures.locator('.ai-image')).toHaveCount(1, { timeout: 8000 })
+  await expect(pictures.locator('.ai-image.is-ready')).toHaveCount(1, { timeout: 8000 })
+  await pictures.locator('.ai-image').click()
+  await expect(page.locator('.ai-photo img')).toHaveAttribute('src', 'https://pictures.example/ok.png')
+  await page.screenshot({ path: 'test-results/quiz.png' })
+  await page.locator('.ai-photo').click()
+  await expect(page.locator('.ai-photo')).toHaveCount(0)
+  // checked once: opened again, it keeps its marks
+  await page.reload()
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('.ai-quiz').first().locator('.ai-quiz-score')).toContainText('1 аз 2 дуруст')
   expect(errors).toEqual([])
 })

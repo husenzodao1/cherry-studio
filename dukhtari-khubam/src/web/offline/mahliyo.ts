@@ -240,7 +240,7 @@ export interface AiState {
   unseen: boolean
   online: boolean
 }
-export interface Who { code?: string; name?: string; me?: string; account?: string }
+export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string }
 
 const PENDING_KEY = 'dk.ai-pending'
 /** how long she may take before the question counts as unanswered (the server gives up after 5 minutes) */

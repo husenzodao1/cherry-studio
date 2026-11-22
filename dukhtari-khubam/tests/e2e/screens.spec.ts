@@ -36,6 +36,19 @@ test.describe('main screens of a signed-in learner', () => {
     expect(errors).toEqual([])
   })
 
+  test('settings: Mahliyo AI first in the list, Support last just above signing out', async ({ page, server: _, errors }) => {
+    await signedIn(page)
+    await page.route('**/api/v1/mahliyo/status', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ready: true }) }))
+    await page.goto('/settings')
+    const rows = page.locator('.menu .menu-row')
+    await expect(rows.first()).toContainText('Маҳлиё AI')
+    const names = await rows.allInnerTexts()
+    const support = names.findIndex((n) => n.includes('Дастгирӣ'))
+    expect(support).toBe(names.length - 2)
+    expect(names[names.length - 1]).toContain('Баромадан')
+    expect(errors).toEqual([])
+  })
+
   test('rating the app: a sheet with five faces and a comment, then a thank-you', async ({ page, server, errors }) => {
     await signedIn(page)
     await page.goto('/settings')
@@ -155,7 +168,7 @@ test('words of the day: a long poem keeps its lines, shows four and scrolls upwa
   await expect(text).toHaveClass(/is-rising/)
   const quote = text.locator('blockquote')
   // the poem's own line breaks are kept
-  expect(await quote.evaluate((el) => getComputedStyle(el).whiteSpace)).toBe('pre-line')
+  expect(await quote.evaluate((el) => getComputedStyle(el).whiteSpace)).toBe('pre')
   // the window holds four lines
   const lines = await text.evaluate((el) => el.clientHeight / parseFloat(getComputedStyle(el.querySelector('blockquote')!).lineHeight))
   expect(Math.round(lines)).toBe(4)

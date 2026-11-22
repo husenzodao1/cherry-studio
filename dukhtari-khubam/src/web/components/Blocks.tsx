@@ -133,7 +133,8 @@ function Video({ asset, poster, title, caption }: { asset?: Asset; poster?: Asse
   if (!asset) return null
   return (
     <figure className="media-block">
-      <BlockLabel icon="play" text={title} kind="video" />
+      {/* no "Video" word over a video: only its title, when it has one */}
+      {title ? <BlockLabel icon="play" text={title} kind="video" bare /> : null}
       {url ? (
         <video controls preload="metadata" playsInline poster={posterUrl} style={{ width: '100%', borderRadius: 20, background: '#000' }}>
           <source src={url} type={asset.mime_type} />
@@ -158,7 +159,7 @@ function Audio({ asset, title, speaker }: { asset?: Asset; title?: string; speak
   const name = title ?? asset.title ?? ''
   return (
     <div className="media-block stack" style={{ gap: 8 }}>
-      <BlockLabel icon="volume" text={[name, speaker].filter(Boolean).join(' · ')} kind="audio" />
+      {name || speaker ? <BlockLabel icon="volume" text={[name, speaker].filter(Boolean).join(' · ')} kind="audio" bare /> : null}
       <div className="player">
         <button type="button" className="play-btn" style={{ width: 42, height: 42 }} disabled={!url} aria-label={name || 'audio'}
           onClick={() => (el.current?.paused ? el.current.play() : el.current?.pause())}>
@@ -179,12 +180,12 @@ const CALLOUT_ICON: Record<string, IconName> = { important: 'star', warning: 'al
 const CALLOUTS = ['important', 'warning', 'note', 'tip', 'info']
 
 /** A small line above a lesson block: its kind (Video, Audio, Note…) with an icon, then its title. */
-function BlockLabel({ icon, kind, text }: { icon: IconName; kind: string; text?: string | null }) {
+function BlockLabel({ icon, kind, text, bare = false }: { icon: IconName; kind: string; text?: string | null; bare?: boolean }) {
   const { t } = usePrefs()
   return (
     <span className={`block-label block-label-${kind}`}>
       <Icon name={icon} size={15} strokeWidth={2} />
-      <span className="block-kind">{t(`block.${kind}` as UiKey)}</span>
+      {bare ? null : <span className="block-kind">{t(`block.${kind}` as UiKey)}</span>}
       {text ? <span className="block-title">{text}</span> : null}
     </span>
   )
@@ -243,7 +244,6 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
     case 'youtube':
       return typeof p.video_id === 'string' ? (
         <div className="media-block stack" style={{ gap: 8 }}>
-          <BlockLabel icon="play" kind="video" />
           <YouTube id={p.video_id} start={p.start} title={c.title} />
           {c.caption ? <p className="muted" style={{ fontSize: '0.88em' }}>{c.caption}</p> : null}
           {chip}

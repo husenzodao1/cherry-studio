@@ -362,6 +362,18 @@ const tg = {
   'perm.later': "Баъдтар",
   'perm.all_set': "Ҳамаи иҷозатҳо дода шуданд",
   'ai.account_switched': "Шумо аккаунтро иваз кардед",
+  'video.blocked': "Пахши мустақим дастрас нест, ба барномаи расмӣ равед",
+  'video.retry': "Аз нав",
+  'lesson.ask_mahliyo': "Аз Маҳлиё дар бораи ин мавзӯъ пурсед",
+  'lesson.ask_prefill': "Дар мавзӯи «{title}» инро нафаҳмидам: ",
+  'perm.place': "Ҷойгиршавӣ",
+  'ai.quiz': "Тест",
+  'ai.quiz_count': "{n} савол",
+  'ai.quiz_check': "Санҷидан",
+  'ai.quiz_score': "{n} аз {total} дуруст",
+  'ai.quiz_result': "Натиҷаи тести ман: {n} аз {total}",
+  'ai.quiz_mine': "ҷавоби ман",
+  'ai.quiz_right': "дуруст",
   'pin.forgot_q': "Фаромӯш кардед?"
 }
 
@@ -759,6 +771,18 @@ const ru: Partial<Record<UiKey, string>> = {
   'perm.later': "Позже",
   'perm.all_set': "Все разрешения выданы",
   'ai.account_switched': "Вы сменили аккаунт",
+  'video.blocked': "Прямое воспроизведение недоступно, откройте официальное приложение",
+  'video.retry': "Повторить",
+  'lesson.ask_mahliyo': "Спросить Махлиё об этой теме",
+  'lesson.ask_prefill': "В теме «{title}» я не поняла: ",
+  'perm.place': "Местоположение",
+  'ai.quiz': "Тест",
+  'ai.quiz_count': "Вопросов: {n}",
+  'ai.quiz_check': "Проверить",
+  'ai.quiz_score': "Верно {n} из {total}",
+  'ai.quiz_result': "Мой результат теста: {n} из {total}",
+  'ai.quiz_mine': "мой ответ",
+  'ai.quiz_right': "верно",
   'pin.forgot_q': "Забыли?"
 }
 

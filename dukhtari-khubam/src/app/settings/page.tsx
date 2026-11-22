@@ -143,7 +143,6 @@ export default function Settings() {
           </div>
         </div>
         <div className="glass menu">
-          <Link href="/support" className="menu-row"><Icon name="bell" /><span className="grow">{t('support.title')}</span><Icon name="forward" size={18} /></Link>
           {ai ? <Link href="/mahliyo" className="menu-row"><Icon name="sparkle" /><span className="grow">{t('ai.title')}</span><Icon name="forward" size={18} /></Link> : null}
           {/* a consultant's account: the users' questions, how many wait */}
           {staff.consultant ? (
@@ -173,6 +172,8 @@ export default function Settings() {
               <Icon name="install" /><span className="grow">{t('settings.version')}</span><span className="muted version-num">{process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}</span>
             </a>
           ) : null}
+          {/* Mahliyo first; support last, just above signing out */}
+          <Link href="/support" className="menu-row"><Icon name="bell" /><span className="grow">{t('support.title')}</span><Icon name="forward" size={18} /></Link>
           {learner ? <button type="button" className="menu-row danger" onClick={leave}><Icon name="logout" /><span className="grow">{t('profile.signout')}</span></button> : null}
         </div>
         <RateShare />

@@ -40,7 +40,10 @@ function Quote({ body, author, source, active, onTime }: { body: string; author:
       const room = item.clientHeight - (caption ? caption.getBoundingClientRect().height + 4 : 0)
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
       const heightAt = (size: number) => { q.style.fontSize = `${size}rem`; return q.scrollHeight }
-      const next = fitQuote(heightAt, room, rem)
+      // a poem (its own line breaks) keeps each line on one line: the size shrinks until the longest fits
+      const poem = body.includes('\n')
+      const fitsWidth = (size: number) => { q.style.fontSize = `${size}rem`; return !poem || q.scrollWidth <= q.clientWidth + 1 }
+      const next = fitQuote(heightAt, room, rem, fitsWidth)
       q.style.fontSize = `${next.size}rem`
       setFit((f) => (f.size === next.size && f.rise === next.rise ? f : next))
     }
@@ -125,12 +128,12 @@ function Quote({ body, author, source, active, onTime }: { body: string; author:
     <>
       <div ref={box} className={`words-text${fit.rise ? ' is-rising at-top' : ''}`}
         style={fit.rise ? { height: `${LINES * LINE_HEIGHT * fit.size}rem` } : undefined}>
-        <blockquote ref={text} style={{ fontSize: `${fit.size}rem` }}>
+        <blockquote ref={text} className={body.includes('\n') ? 'is-poem' : undefined} style={{ fontSize: `${fit.size}rem` }}>
           {body.trim()}
         </blockquote>
       </div>
       {/* who said it and where, under a thin line */}
-      {author || source ? <figcaption>{author ? <b>{author}</b> : null}{author && source ? <i aria-hidden="true">·</i> : null}{source ? <span>{source}</span> : null}</figcaption> : null}
+      {author || source ? <figcaption><span>{source ?? ''}</span><b>{author ?? ''}</b></figcaption> : null}
     </>
   )
 }

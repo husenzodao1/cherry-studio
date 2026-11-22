@@ -124,6 +124,16 @@ function Lesson() {
           </button>
         )
       ) : null}
+      {/* her small circle at the lower right: a tap asks her about what is unclear in this lesson */}
+      {!l.locked ? (
+        <button type="button" className="lesson-ask" aria-label={t('lesson.ask_mahliyo')}
+          onClick={() => {
+            try { sessionStorage.setItem('dk.ai.ask', t('lesson.ask_prefill').replace('{title}', l.title)) } catch { /* storage blocked: the chat opens empty */ }
+            router.push('/mahliyo')
+          }}>
+          <img src="/assets/mascot/face.webp" alt="" aria-hidden="true" />
+        </button>
+      ) : null}
       {stageDone ? <StageDone course={l.context.course.title} school={l.context.school.title} onClose={() => setStageDone(false)} /> : null}
 
       <nav className="reader-nav" aria-label={t('section.lessons')}>

@@ -59,8 +59,8 @@ export type AiBlock =
   | { type: 'screen'; spot: SpotId; caption: string }
   | { type: 'link'; to: string; label: string }
   | { type: 'reminder'; at: string; title: string; text: string; daily?: boolean }
-  /** a test question in the chat (Premium): tapped answers are checked at once */
-  | { type: 'quiz'; question: string; options: string[]; answer: number; explanation: string }
+  /** a test in the chat: up to ten questions; the app checks the answers and sends her result to Mahliyo */
+  | { type: 'quiz'; title: string; intro: string; questions: { question: string; options: string[]; answer: number; explanation: string }[] }
   /** the card that opens the Premium screen (a free learner asked for a Premium part) */
   | { type: 'premium'; title: string; text: string }
   /** where her answer came from (internet sources she used; added by the server) */
