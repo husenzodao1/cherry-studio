@@ -1,0 +1,7 @@
+[
+ {"name": "leaf-ant-3", "model": "models/anthurium_botany_01/model.gltf", "hdri": "hdri/studio_small_09_2k.hdr", "onlyNode": 3, "pitch": 72, "azimuth": 0, "zoom": 0.84, "size": 1100, "noShadow": true, "exposure": 1.32, "tone": "neutral"},
+ {"name": "leaf-ant-1", "model": "models/anthurium_botany_01/model.gltf", "hdri": "hdri/studio_small_09_2k.hdr", "onlyNode": 1, "pitch": 72, "azimuth": 0, "zoom": 0.84, "size": 1100, "noShadow": true, "exposure": 1.32, "tone": "neutral"},
+ {"name": "leaf-cal-2", "model": "models/calathea_orbifolia_01/model.gltf", "hdri": "hdri/studio_small_09_2k.hdr", "onlyNode": 2, "pitch": 72, "azimuth": 20, "zoom": 0.84, "size": 1100, "noShadow": true, "exposure": 1.32, "tone": "neutral"},
+ {"name": "leaf-cal-1", "model": "models/calathea_orbifolia_01/model.gltf", "hdri": "hdri/studio_small_09_2k.hdr", "onlyNode": 1, "pitch": 72, "azimuth": 20, "zoom": 0.84, "size": 1100, "noShadow": true, "exposure": 1.32, "tone": "neutral"},
+ {"name": "star-rosegold", "kind": "star", "color": "#e9b9a4", "tilt": -0.25, "hdri": "hdri/studio_small_09_2k.hdr", "pitch": 10, "zoom": 0.8, "size": 500, "noShadow": true, "exposure": 1.15}
+]

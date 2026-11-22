@@ -1,0 +1,48 @@
+# Духтари хубам: a weekly backup of the Supabase database (schema and data), encrypted before it leaves
+# the runner, kept 90 days as a workflow artifact. Needs two repository secrets:
+#   DUKHTARI_DB_URL        Supabase → Project Settings → Database → Connection string (URI, session pooler)
+#   DUKHTARI_BACKUP_KEY    any long passphrase; it is needed to open the backup, keep it safe
+# Restore: download the artifact, then
+#   gpg --batch --passphrase "$KEY" -d dukhtari-*.sql.gz.gpg | gunzip | psql "$DB_URL"
+name: dukhtari-backup
+
+on:
+  schedule:
+    - cron: '17 2 * * 1' # Mondays 02:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check secrets
+        env:
+          DB: ${{ secrets.DUKHTARI_DB_URL }}
+          KEY: ${{ secrets.DUKHTARI_BACKUP_KEY }}
+        run: |
+          if [ -z "$DB" ] || [ -z "$KEY" ]; then echo "::error::Add the DUKHTARI_DB_URL and DUKHTARI_BACKUP_KEY secrets"; exit 1; fi
+      - name: PostgreSQL 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+      - name: Dump, compress, encrypt
+        env:
+          DB: ${{ secrets.DUKHTARI_DB_URL }}
+          KEY: ${{ secrets.DUKHTARI_BACKUP_KEY }}
+        run: |
+          name="dukhtari-$(date -u +%Y-%m-%d).sql.gz.gpg"
+          /usr/lib/postgresql/17/bin/pg_dump "$DB" --no-owner --no-privileges --schema=public --schema=private --schema=auth \
+            | gzip -9 | gpg --batch --yes --pinentry-mode loopback --passphrase "$KEY" --symmetric --cipher-algo AES256 -o "$name"
+          ls -la "$name"
+          echo "NAME=$name" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NAME }}
+          path: ${{ env.NAME }}
+          retention-days: 90

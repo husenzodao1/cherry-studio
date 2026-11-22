@@ -1,0 +1,6 @@
+Apple Color Emoji images — Copyright © Apple Inc.
+Taken from emoji-datasource-apple 16.0.0 (https://github.com/iamcal/emoji-data), 64 px, converted to WebP.
+Its README states: "Apple images, Copyright © Apple Inc., are not licensed for commercial usage."
+They are used here at the app owner's request and on the owner's responsibility.
+
+The emoji data (names, code points) — emoji-data, MIT License, Copyright (c) 2013 Cal Henderson.

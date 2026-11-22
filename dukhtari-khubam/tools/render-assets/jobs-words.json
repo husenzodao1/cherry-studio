@@ -1,0 +1,36 @@
+[
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "envIntensity": 0.9,
+  "keyIntensity": 1.8,
+  "shadowOpacity": 0,
+  "size": 1400,
+  "rims": [
+   {
+    "color": "#e3ccff",
+    "intensity": 5,
+    "dir": [
+     0.6,
+     0.6,
+     -1
+    ]
+   },
+   {
+    "color": "#ffd6f0",
+    "intensity": 3,
+    "dir": [
+     -0.8,
+     0.4,
+     -0.6
+    ]
+   }
+  ],
+  "name": "words-band",
+  "kind": "words3",
+  "pitch": 8,
+  "azimuth": 0,
+  "zoom": 1.0
+ }
+]

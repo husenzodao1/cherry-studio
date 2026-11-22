@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <!-- opened from the launcher through the icon aliases below (one enabled at a time) -->
+            <!-- links from the home-screen widgets (tj.dukhtarikhubam.app://open/<path>) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="@string/custom_url_scheme" android:host="open" />
+            </intent-filter>
+        </activity>
+        <!-- Mahliyo's calls (MahliyoCall.java): the alarm, "Decline", and the calls planned again after a restart -->
+        <receiver android:name=".MahliyoCall$Receiver" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
+        </receiver>
+        <!-- "last chance" for the day streak (StreakAlarm.java): the daily alarm and its return after a restart -->
+        <receiver android:name=".StreakAlarm$Receiver" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
+        </receiver>
+        <!-- the launcher icon switches by itself at 06:00 and 18:00 and after a restart (AppIconPlugin.java) -->
+        <receiver android:name=".AppIconPlugin$Switch" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
+        </receiver>
+        <!-- home-screen widgets (DkWidgets.java) -->
+        <receiver android:name=".DkWidgets$StreakWidget" android:exported="false" android:label="@string/widget_streak">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_streak" />
+        </receiver>
+        <receiver android:name=".DkWidgets$ProgressWidget" android:exported="false" android:label="@string/widget_progress">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_progress" />
+        </receiver>
+        <receiver android:name=".DkWidgets$WordsWidget" android:exported="false" android:label="@string/widget_words">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_words" />
+        </receiver>
+        <receiver android:name=".DkWidgets$WeekWidget" android:exported="false" android:label="@string/widget_week">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_week" />
+        </receiver>
+        <receiver android:name=".DkWidgets$MahliyoWidget" android:exported="false" android:label="@string/widget_mahliyo">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_mahliyo" />
+        </receiver>
+
+        <!-- launcher icon: by day one of seven glass icons (a new one each day), the crescent moon at night (AppIconPlugin.java switches them) -->
+        <activity-alias
+            android:name=".IconDefault"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconMoon"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_moon"
+            android:roundIcon="@mipmap/ic_moon"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconTulip"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_tulip"
+            android:roundIcon="@mipmap/ic_tulip"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconLotus"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_lotus"
+            android:roundIcon="@mipmap/ic_lotus"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconCrown"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_crown"
+            android:roundIcon="@mipmap/ic_crown"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconCrystals"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_crystals"
+            android:roundIcon="@mipmap/ic_crystals"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconBook"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_book"
+            android:roundIcon="@mipmap/ic_book"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconMahliyo"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_mahliyo"
+            android:roundIcon="@mipmap/ic_mahliyo"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+    </application>
+
+    <!-- Permissions -->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- her rough place (Mahliyo answers with what is true where she lives); the precise one only if she chooses it -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- a soft vibration when the PIN is wrong or right -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Mahliyo calls at a reminder's exact time, waking the phone and showing over its lock screen -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- her voice on the call line: the earpiece, or the speaker -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!-- a screenshot or a recording of a lesson is noticed (it shows black: the lessons stay private) -->
+    <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />
+    <uses-permission android:name="android.permission.DETECT_SCREEN_RECORDING" />
+    <!-- the streak alarm comes back after the phone restarts -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- saving the code picture to the gallery on Android 9 and older (newer phones need no permission) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+</manifest>

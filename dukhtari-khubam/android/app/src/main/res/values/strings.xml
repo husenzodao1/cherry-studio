@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Гулдухтар</string>
+    <string name="title_activity_main">Гулдухтар</string>
+    <string name="package_name">tj.dukhtarikhubam.app</string>
+    <string name="custom_url_scheme">tj.dukhtarikhubam.app</string>
+    <string name="widget_streak">Рӯзҳои пайдарпай</string>
+    <string name="widget_progress">Пешрафти имрӯз</string>
+    <string name="widget_words">Суханҳои рӯз</string>
+    <string name="widget_week">Ҳафтаи ман</string>
+    <string name="widget_mahliyo">Маҳлиё</string>
+</resources>

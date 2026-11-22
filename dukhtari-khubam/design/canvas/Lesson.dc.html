@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="tg">
+<head>
+<meta charset="utf-8">
+<title>Дарс</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Lora:ital,wght@0,500;0,600;0,700;1,500&amp;display=swap">
+<style>
+body{margin:0}
+.dk{--bg:#FBF9FD;--surface:#FFFFFF;--lav:#EEE7F6;--lilac:#DCCCEB;--primary:#A78BCB;--plum:#59446E;--rose:#EBDCE4;--champ:#E8D7B9;--sage:#DDE9DF;--ink:#2E2338;--muted:#6B5A7B;--accent-ink:#6B4F8F;--glass:rgba(255,255,255,.55);--glass-strong:rgba(255,255,255,.8);--edge:rgba(255,255,255,.92);--edge-low:rgba(167,139,203,.24);--shadow:rgba(89,68,110,.18);--btn-top:#7C61A3;--btn-bot:#59446E;--on-btn:#FFFFFF;--gold-ink:#7A5A26;--gold-bg:#F6EEDF;--note-bg:#F3EEF9;font-family:'Onest',system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+.dk.dark{--bg:#17131E;--surface:#211B2A;--lav:#30263B;--lilac:#4A3C5A;--primary:#B7A0D3;--plum:#D8C8EA;--rose:#3A2B36;--champ:#CBB58F;--sage:#2F3F35;--ink:#F4EFF8;--muted:#BDB1CB;--accent-ink:#D8C8EA;--glass:rgba(48,38,59,.5);--glass-strong:rgba(48,38,59,.82);--edge:rgba(216,200,234,.26);--edge-low:rgba(0,0,0,.35);--shadow:rgba(0,0,0,.5);--btn-top:#CDBBE3;--btn-bot:#B7A0D3;--on-btn:#17131E;--gold-ink:#E8D2A6;--gold-bg:#2E2720;--note-bg:#2A2234}
+.serif{font-family:'Lora',Georgia,serif}
+.glass{background:linear-gradient(140deg,var(--glass-strong),var(--glass));border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--edge),inset 0 -1px 0 var(--edge-low),0 14px 34px -12px var(--shadow);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)}
+.ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--plum);text-decoration:none;flex:none;cursor:pointer;padding:0;font-family:inherit}
+.callout{display:flex;gap:12px;padding:16px;border-radius:20px}
+.callout b{display:block;font-size:14px;font-weight:700;margin-bottom:4px}
+.callout p{margin:0;font-size:14px;line-height:1.55}
+.nav{display:flex;align-items:center;justify-content:center;gap:6px;height:52px;flex:1;border-radius:26px;font-size:15px;font-weight:600;text-decoration:none}
+.audio-btn{width:44px;height:44px;border-radius:50%;border:0;display:flex;align-items:center;justify-content:center;color:var(--on-btn);background:radial-gradient(120% 120% at 30% 25%,var(--btn-top),var(--btn-bot));cursor:pointer;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 8px 16px -8px var(--shadow)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+</style>
+</helmet>
+<div class="{{rootClass}}" style="width:390px;height:844px;position:relative;overflow:hidden;box-sizing:border-box">
+
+<header style="position:absolute;left:16px;right:16px;top:48px;display:flex;align-items:center;gap:8px;z-index:2">
+<a href="School.dc.html" class="glass ico" aria-label="Бозгашт">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</a>
+<span style="flex:1"></span>
+<button type="button" class="glass ico" aria-label="Захира" aria-pressed="{{savedPressed}}" onClick="{{toggleSave}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="{{bookmarkFill}}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>
+</button>
+<button type="button" class="glass ico" aria-label="Андозаи матн" onClick="{{cycleSize}}" style="font-size:15px;font-weight:700">Aa</button>
+<button type="button" class="glass ico" aria-label="Бештар">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>
+</button>
+</header>
+<div role="progressbar" aria-label="Пешрафти хондан" aria-valuemin="0" aria-valuemax="100" aria-valuenow="28" style="position:absolute;left:0;right:0;top:104px;height:3px;background:var(--lilac)"><div style="width:28%;height:100%;background:linear-gradient(90deg,var(--primary),var(--plum))"></div></div>
+
+<article style="position:absolute;left:24px;right:24px;top:124px;display:flex;flex-direction:column;gap:16px">
+<span style="font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--accent-ink)">Маърифати динӣ · Модули [N]</span>
+<h1 class="serif" style="margin:-8px 0 0;font-size:26px;line-height:1.25;font-weight:600;color:var(--plum)">[Сарлавҳаи дарс]</h1>
+<p style="margin:0;font-size:{{leadFs}};line-height:1.55;color:var(--muted)">[Lead Text — муқаддимаи кӯтоҳ, ки муаллиф ворид мекунад.]</p>
+<figure style="margin:0;display:flex;flex-direction:column;gap:8px">
+<div role="img" aria-label="Ҷойи расм аз Media Library" style="height:168px;border-radius:20px;overflow:hidden;position:relative;background:linear-gradient(160deg,var(--lav),var(--rose));display:flex;align-items:center;justify-content:center">
+<dc-import name="Art" kind="lotus" size="150" hint-size="150px,150px"></dc-import>
+<span style="position:absolute;left:12px;top:12px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px;background:var(--glass-strong);color:var(--accent-ink)">Image block</span>
+</div>
+<figcaption style="font-size:12px;color:var(--muted)">[Тавзеҳи расм · манбаъ]</figcaption>
+</figure>
+<p style="margin:0;font-size:{{bodyFs}};line-height:1.65;color:var(--ink)">[Параграф — матни дарс аз CMS. Ҳар блок тартиб, услуб ва тарҷумаи худро дорад.]</p>
+<div class="callout" style="background:var(--gold-bg);border:1px solid var(--champ)">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold-ink)" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v6"></path><circle cx="12" cy="16.6" r=".6" fill="var(--gold-ink)"></circle></svg>
+<div style="color:var(--gold-ink)"><b>Муҳим</b><p>[Матни муаллиф]</p></div>
+</div>
+<div class="glass" style="border-radius:24px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+<button type="button" class="audio-btn" aria-label="{{audioLabel}}" onClick="{{toggleAudio}}">
+<sc-if value="{{playing}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg></sc-if>
+<sc-if value="{{paused}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"></path></svg></sc-if>
+</button>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:13px;font-weight:600">[Номи аудио]</span>
+<div style="height:4px;border-radius:2px;background:var(--lilac);overflow:hidden"><div style="width:{{audioPct}};height:100%;background:var(--plum);transition:width .3s"></div></div>
+</div>
+<span style="font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums">{{audioTime}}</span>
+</div>
+<div class="callout" style="background:var(--note-bg);border:1px solid var(--lilac)">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M5 4h10l4 4v12H5z"></path><path d="M9 12h6M9 16h4"></path></svg>
+<div style="color:var(--accent-ink)"><b>Эзоҳ</b><p>[Матни муаллиф]</p></div>
+</div>
+</article>
+
+<div style="position:absolute;left:16px;right:16px;bottom:22px;display:flex;gap:10px;z-index:2">
+<a href="School.dc.html" class="glass nav" style="color:var(--plum)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Қаблӣ</a>
+<a href="Quiz.dc.html" class="nav" style="color:var(--on-btn);background:linear-gradient(180deg,var(--btn-top),var(--btn-bot));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 14px 26px -12px var(--shadow)">Навбатӣ
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Theme"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { saved: false, size: 1, playing: false };
+  }
+  renderVals() {
+    const dark = !!this.props.dark;
+    const body = [15, 17, 19][this.state.size];
+    const lead = [16, 18, 20][this.state.size];
+    const playing = this.state.playing;
+    return {
+      rootClass: dark ? 'dk dark' : 'dk',
+      savedPressed: this.state.saved ? 'true' : 'false',
+      bookmarkFill: this.state.saved ? 'currentColor' : 'none',
+      toggleSave: () => this.setState({ saved: !this.state.saved }),
+      cycleSize: () => this.setState({ size: (this.state.size + 1) % 3 }),
+      bodyFs: body + 'px',
+      leadFs: lead + 'px',
+      playing,
+      paused: !playing,
+      audioLabel: playing ? 'Таваққуф' : 'Пахш',
+      audioPct: playing ? '35%' : '0%',
+      audioTime: playing ? '[0:00]' : '0:00',
+      toggleAudio: () => this.setState({ playing: !playing })
+    };
+  }
+}
+</script>
+</body>
+</html>

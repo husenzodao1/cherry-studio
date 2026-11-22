@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="tg">
+<head>
+<meta charset="utf-8">
+<title>Admin · Full Text Editor</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Lora:ital,wght@0,500;0,600;0,700;1,500&amp;family=Noto+Naskh+Arabic:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+.ed{font-family:'Onest',system-ui,sans-serif;color:#2E2338;background:#F6F2FA}
+.side a,.side span.cur{display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:12px;color:#4E3F5E;text-decoration:none;font-size:14px;font-weight:500}
+.side span.cur{background:#FFFFFF;color:#59446E;font-weight:600;box-shadow:0 6px 14px -10px rgba(89,68,110,.4),inset 0 0 0 1px #EEE7F6}
+.side a:hover{background:rgba(255,255,255,.6)}
+.tb{height:36px;padding:0 14px;border-radius:18px;border:1px solid #DCCCEB;background:#FFFFFF;color:#59446E;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.tb.pri{background:linear-gradient(180deg,#7C61A3,#59446E);color:#FFFFFF;border-color:transparent}
+.tb.on{background:#EEE7F6;border-color:#A78BCB}
+.tb:disabled{opacity:.45;cursor:not-allowed}
+.lang{height:32px;padding:0 12px;border:0;border-radius:14px;background:transparent;font-family:inherit;font-size:13px;font-weight:500;color:#6B5A7B;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.lang.on{background:#FFFFFF;color:#2E2338;font-weight:600;box-shadow:0 4px 10px -6px rgba(89,68,110,.4)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.pal{display:flex;align-items:center;gap:8px;width:100%;height:34px;padding:0 10px;border:1px solid transparent;border-radius:10px;background:transparent;font-family:inherit;font-size:13px;color:#2E2338;cursor:pointer;text-align:left}
+.pal:hover{background:#FFFFFF;border-color:#EEE7F6}
+.pal i{width:20px;height:20px;border-radius:6px;background:#EEE7F6;color:#6B4F8F;font-style:normal;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.grp{margin:14px 0 6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6B5A7B}
+.fmt{width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:#4E3F5E;font-family:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.fmt:hover{background:#EEE7F6}
+.fmt.on{background:#DCCCEB;color:#2E2338}
+.sep{width:1px;height:20px;background:#DCCCEB;margin:0 4px}
+.blk{position:relative;border:1.5px solid transparent;border-radius:16px;padding:10px 14px 14px;background:#FFFFFF;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.blk:hover{border-color:#EEE7F6}
+.blk.sel{border-color:#A78BCB;box-shadow:0 10px 26px -16px rgba(89,68,110,.5)}
+.bh{display:flex;align-items:center;gap:6px;margin-bottom:6px;height:24px}
+.tag{font-size:11px;font-weight:600;color:#6B4F8F;background:#F3EEF9;padding:2px 8px;border-radius:8px}
+.mini{width:26px;height:26px;border:0;border-radius:7px;background:transparent;color:#6B5A7B;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+.blk:hover .mini,.blk.sel .mini{opacity:1}
+.mini:hover{background:#EEE7F6;color:#2E2338}
+.mini:disabled{opacity:.25!important;cursor:not-allowed}
+.media{height:120px;border-radius:12px;background:linear-gradient(160deg,#EEE7F6,#EBDCE4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#59446E;font-size:12px;font-weight:500}
+.prev .bh{display:none}
+.prev .blk{border-color:transparent!important;box-shadow:none!important;padding:6px 4px;cursor:default}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#4E3F5E}
+.fld input,.fld textarea{font-family:inherit;font-size:13px;font-weight:400;color:#2E2338;border:1px solid #DCCCEB;border-radius:10px;padding:8px 10px;background:#FFFFFF;resize:none}
+.vchip{height:30px;padding:0 10px;border-radius:15px;border:1px solid #DCCCEB;background:#FFFFFF;font-family:inherit;font-size:12px;font-weight:500;color:#2E2338;cursor:pointer}
+.vchip.on{background:#59446E;color:#FFFFFF;border-color:transparent}
+.swc{width:28px;height:28px;border-radius:50%;border:2px solid #FFFFFF;box-shadow:0 0 0 1px #DCCCEB;cursor:pointer;padding:0}
+.swc.on{box-shadow:0 0 0 2px #59446E}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #EEE7F6;font-size:13px}
+.rev{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;background:#FFFFFF;border:1px solid #EEE7F6;font-size:13px}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #A78BCB;outline-offset:2px}
+</style>
+</helmet>
+<div class="ed" style="width:1440px;height:960px;display:flex;overflow:hidden">
+
+<aside class="side" style="width:232px;flex:none;padding:24px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;background:linear-gradient(180deg,#EEE7F6,#F6F2FA)">
+<div style="display:flex;align-items:center;gap:10px;padding:0 8px 18px">
+<dc-import name="Art" kind="lotus" size="36" hint-size="36px,36px"></dc-import>
+<div style="display:flex;flex-direction:column"><b class="serif" style="font-family:'Lora',serif;font-size:16px;color:#59446E">Духтари хубам</b><span style="font-size:11px;color:#6B5A7B">Admin Panel</span></div>
+</div>
+<a href="#">Панели асосӣ</a>
+<a href="#">Мактабҳо</a>
+<a href="#">Курсҳо</a>
+<a href="#">Модулҳо</a>
+<a href="#">Мавзӯъҳо</a>
+<span class="cur">Дарсҳо</span>
+<a href="#">Медиа</a>
+<a href="#">Тестҳо</a>
+<a href="#">Илҳоми рӯз</a>
+<a href="#">Тарҷумаҳо</a>
+<a href="#">Огоҳиҳо</a>
+<a href="#">Корбарон ва нақшҳо</a>
+<a href="#">Омор</a>
+</aside>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<header style="height:72px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;border-bottom:1px solid #EEE7F6;background:#FBF9FD">
+<nav aria-label="Роҳ" style="font-size:13px;color:#6B5A7B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">Маърифати динӣ / [Курс] / [Модул] / [Мавзӯъ] / <b style="color:#2E2338">[Дарс]</b></nav>
+<span style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:10px;background:{{statusBg}};color:{{statusInk}};white-space:nowrap">{{status}}</span>
+<span style="flex:1"></span>
+<div role="tablist" aria-label="Забон" style="display:flex;gap:2px;padding:3px;border-radius:17px;background:#EEE7F6">
+<sc-for list="{{langs}}" as="l" hint-placeholder-count="3">
+<button type="button" role="tab" class="{{l.cls}}" aria-selected="{{l.sel}}" onClick="{{l.pick}}"><span class="dot" style="background:{{l.dot}}"></span><span style="{{l.font}}">{{l.label}}</span></button>
+</sc-for>
+</div>
+<button type="button" class="{{historyCls}}" aria-pressed="{{historyPressed}}" onClick="{{toggleHistory}}">Таърих</button>
+<button type="button" class="{{previewCls}}" aria-pressed="{{previewPressed}}" onClick="{{togglePreview}}">Пешнамоиш</button>
+<button type="button" class="tb" onClick="{{saveDraft}}">Нигоҳ доштан</button>
+<button type="button" class="tb" onClick="{{sendReview}}" disabled="{{inReview}}">Ба тафтиш</button>
+<button type="button" class="tb pri" disabled="{{true}}" title="Пас аз тасдиқи Reviewer">Нашр</button>
+</header>
+
+<div style="flex:1;min-height:0;display:flex">
+<aside aria-label="Блокҳо" style="width:216px;flex:none;padding:12px 14px;box-sizing:border-box;overflow:auto;border-right:1px solid #EEE7F6;background:#FBF9FD">
+<div class="grp" style="margin-top:4px">Матн</div>
+<sc-for list="{{palText}}" as="p" hint-placeholder-count="6"><button type="button" class="pal" onClick="{{p.add}}"><i aria-hidden="true">{{p.glyph}}</i>{{p.label}}</button></sc-for>
+<div class="grp">Медиа</div>
+<sc-for list="{{palMedia}}" as="p" hint-placeholder-count="5"><button type="button" class="pal" onClick="{{p.add}}"><i aria-hidden="true">{{p.glyph}}</i>{{p.label}}</button></sc-for>
+<div class="grp">Таъкид</div>
+<sc-for list="{{palCallout}}" as="p" hint-placeholder-count="4"><button type="button" class="pal" onClick="{{p.add}}"><i aria-hidden="true" style="{{p.swatch}}">{{p.glyph}}</i>{{p.label}}</button></sc-for>
+<div class="grp">Дигар</div>
+<sc-for list="{{palOther}}" as="p" hint-placeholder-count="3"><button type="button" class="pal" onClick="{{p.add}}"><i aria-hidden="true">{{p.glyph}}</i>{{p.label}}</button></sc-for>
+</aside>
+
+<main style="flex:1;min-width:0;display:flex;flex-direction:column;background:#F6F2FA">
+<div role="toolbar" aria-label="Формат" style="height:52px;flex:none;display:flex;align-items:center;gap:2px;padding:0 16px;border-bottom:1px solid #EEE7F6;background:#FFFFFF">
+<button type="button" class="{{f.b}}" aria-label="Bold" aria-pressed="{{f.bP}}" onClick="{{fx.b}}"><b>B</b></button>
+<button type="button" class="{{f.i}}" aria-label="Italic" aria-pressed="{{f.iP}}" onClick="{{fx.i}}"><i style="font-family:'Lora',serif">I</i></button>
+<button type="button" class="{{f.u}}" aria-label="Underline" aria-pressed="{{f.uP}}" onClick="{{fx.u}}"><span style="text-decoration:underline">U</span></button>
+<button type="button" class="{{f.s}}" aria-label="Strikethrough" aria-pressed="{{f.sP}}" onClick="{{fx.s}}"><span style="text-decoration:line-through">S</span></button>
+<span class="sep"></span>
+<button type="button" class="{{f.al}}" aria-label="Чап" onClick="{{fx.al}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h14"></path></svg></button>
+<button type="button" class="{{f.ac}}" aria-label="Марказ" onClick="{{fx.ac}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M5 18h14"></path></svg></button>
+<button type="button" class="{{f.ar}}" aria-label="Рост" onClick="{{fx.ar}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M10 12h10M6 18h14"></path></svg></button>
+<span class="sep"></span>
+<button type="button" class="{{f.h1}}" onClick="{{fx.h1}}" style="font-size:12px;font-weight:700">H1</button>
+<button type="button" class="{{f.h2}}" onClick="{{fx.h2}}" style="font-size:12px;font-weight:700">H2</button>
+<button type="button" class="{{f.h3}}" onClick="{{fx.h3}}" style="font-size:12px;font-weight:700">H3</button>
+<span class="sep"></span>
+<span style="font-size:12px;color:#6B5A7B;margin:0 6px">Ранг</span>
+<sc-for list="{{colors}}" as="c" hint-placeholder-count="6"><button type="button" class="{{c.cls}}" aria-label="{{c.name}}" onClick="{{c.pick}}" style="width:22px;height:22px;margin:0 2px;background:{{c.hex}}"></button></sc-for>
+<span class="sep"></span>
+<button type="button" class="{{f.hl}}" aria-label="Highlight" aria-pressed="{{f.hlP}}" onClick="{{fx.hl}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 15l-4 4h6l1.5-1.5"></path><path d="M14.5 4.5l5 5L12 17l-5-5z"></path></svg></button>
+<button type="button" class="{{f.ln}}" aria-label="Пайванд" aria-pressed="{{f.lnP}}" onClick="{{fx.ln}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"></path><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"></path></svg></button>
+<button type="button" class="fmt" aria-label="Тоза кардани формат" onClick="{{fx.clear}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 5h12M12 5l-3 14M4 20l16-16"></path></svg></button>
+<span style="flex:1"></span>
+<span style="font-size:12px;color:#6B5A7B">{{savedText}}</span>
+</div>
+
+<div style="flex:1;min-height:0;overflow:auto;padding:24px">
+<sc-if value="{{banner}}" hint-placeholder-val="{{false}}">
+<div role="status" style="max-width:720px;margin:0 auto 14px;padding:10px 14px;border-radius:12px;background:#F6EEDF;border:1px solid #E8D7B9;color:#7A5A26;font-size:13px">{{bannerText}}</div>
+</sc-if>
+<div class="{{canvasCls}}" dir="{{dir}}" style="margin:0 auto;max-width:{{canvasW}};display:flex;flex-direction:column;gap:8px;padding:{{canvasPad}};border-radius:{{canvasRadius}};background:{{canvasBg}};box-shadow:{{canvasShadow}}">
+<sc-if value="{{previewOn}}" hint-placeholder-val="{{false}}"><span style="align-self:center;font-size:11px;font-weight:600;color:#6B4F8F;letter-spacing:.06em;text-transform:uppercase">Пешнамоиш · Mobile · 390</span></sc-if>
+<sc-for list="{{blocks}}" as="b" hint-placeholder-count="8">
+<div class="{{b.cls}}" onClick="{{b.select}}">
+<div class="bh">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="#B9AEC6" aria-hidden="true"><circle cx="9" cy="6" r="1.6"></circle><circle cx="15" cy="6" r="1.6"></circle><circle cx="9" cy="12" r="1.6"></circle><circle cx="15" cy="12" r="1.6"></circle><circle cx="9" cy="18" r="1.6"></circle><circle cx="15" cy="18" r="1.6"></circle></svg>
+<span class="tag">{{b.label}}</span>
+<span style="font-size:11px;color:#9A8DAA">#{{b.n}}</span>
+<span style="flex:1"></span>
+<button type="button" class="mini" aria-label="Боло" disabled="{{b.first}}" onClick="{{b.up}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
+<button type="button" class="mini" aria-label="Поён" disabled="{{b.last}}" onClick="{{b.down}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></button>
+<button type="button" class="mini" aria-label="Нусха" onClick="{{b.dup}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"></path></svg></button>
+<button type="button" class="mini" aria-label="Ҳазф" onClick="{{b.del}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg></button>
+</div>
+<sc-if value="{{b.isText}}" hint-placeholder-val="{{true}}"><div style="white-space:pre-line;{{b.textStyle}}">{{b.text}}</div></sc-if>
+<sc-if value="{{b.isCallout}}" hint-placeholder-val="{{false}}"><div style="padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.5;{{b.calloutStyle}}"><b style="display:block;margin-bottom:2px">{{b.label}}</b>{{b.text}}</div></sc-if>
+<sc-if value="{{b.isMedia}}" hint-placeholder-val="{{false}}"><div class="media"><span style="font-size:22px;line-height:1" aria-hidden="true">{{b.glyph}}</span><span>{{b.text}}</span></div></sc-if>
+<sc-if value="{{b.isDivider}}" hint-placeholder-val="{{false}}"><div style="height:1px;background:#DCCCEB;margin:8px 0"></div></sc-if>
+<sc-if value="{{b.isOther}}" hint-placeholder-val="{{false}}"><div style="padding:14px;border-radius:12px;border:1.5px dashed #DCCCEB;font-size:13px;color:#6B4F8F;text-align:center">{{b.text}}</div></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</main>
+
+<aside aria-label="Хусусиятҳо" style="width:300px;flex:none;padding:20px;box-sizing:border-box;overflow:auto;border-left:1px solid #EEE7F6;background:#FBF9FD;display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{showProps}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;justify-content:space-between"><b style="font-size:15px">Хусусиятҳо</b><span class="tag">{{sel.label}}</span></div>
+
+<sc-if value="{{sel.isCallout}}" hint-placeholder-val="{{false}}">
+<div class="fld"><span>Навъ</span><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{variants}}" as="v" hint-placeholder-count="4"><button type="button" class="{{v.cls}}" onClick="{{v.pick}}">{{v.label}}</button></sc-for></div></div>
+<label class="fld"><span>Сарлавҳа</span><input type="text" placeholder="{{sel.label}}"></label>
+<label class="fld"><span>Матн</span><textarea rows="3" placeholder="[Матни муаллиф]"></textarea></label>
+</sc-if>
+
+<sc-if value="{{sel.isMedia}}" hint-placeholder-val="{{false}}">
+<div class="fld"><span>Файл</span><button type="button" class="tb" style="justify-content:center">Аз Media Library</button></div>
+<label class="fld"><span>Alt text</span><input type="text" placeholder="Тавсифи расм"></label>
+<label class="fld"><span>Caption</span><input type="text" placeholder="[Тавзеҳ]"></label>
+<div class="fld"><span>Layout</span><div style="display:flex;gap:6px"><span class="vchip on" style="display:inline-flex;align-items:center">Пурра</span><span class="vchip" style="display:inline-flex;align-items:center">Паҳлӯ ба паҳлӯ</span></div></div>
+</sc-if>
+
+<sc-if value="{{sel.isText}}" hint-placeholder-val="{{true}}">
+<div class="fld"><span>Ранги матн</span><div style="display:flex;gap:8px"><sc-for list="{{colors}}" as="c" hint-placeholder-count="6"><button type="button" class="{{c.cls}}" aria-label="{{c.name}}" onClick="{{c.pick}}" style="background:{{c.hex}}"></button></sc-for></div></div>
+</sc-if>
+
+<div>
+<div class="kv"><span style="color:#6B5A7B">Тартиб</span><b>{{sel.n}}</b></div>
+<div class="kv"><span style="color:#6B5A7B">Schema</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:12px">block.v1 · {{sel.type}}</span></div>
+</div>
+<div>
+<b style="font-size:13px">Тарҷумаҳо</b>
+<div class="kv"><span>Тоҷикӣ</span><span style="color:#2F5E40;font-weight:600">Тайёр</span></div>
+<div class="kv"><span>Русский</span><span style="color:#7A5A26;font-weight:600">Draft</span></div>
+<div class="kv" style="border-bottom:0"><span style="font-family:'Noto Naskh Arabic',serif">العربية</span><span style="color:#8A2E45;font-weight:600">Нест</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showHistory}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<b style="font-size:15px">Таърихи версияҳо</b>
+<sc-for list="{{revisions}}" as="r" hint-placeholder-count="4">
+<div class="rev"><div style="display:flex;justify-content:space-between"><b>{{r.v}}</b><span style="font-size:12px;color:#6B5A7B">{{r.state}}</span></div><span style="font-size:12px;color:#6B5A7B">{{r.who}} · {{r.when}}</span><sc-if value="{{r.canRestore}}" hint-placeholder-val="{{true}}"><button type="button" class="tb" style="align-self:flex-start;height:28px;margin-top:6px;font-size:12px" onClick="{{r.restore}}">Барқарор</button></sc-if></div>
+</sc-for>
+</div>
+</sc-if>
+</aside>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.nextId = 100;
+    const seed = ['heading', 'lead', 'image', 'paragraph', 'important', 'video', 'paragraph', 'audio', 'note', 'source'];
+    this.state = {
+      blocks: seed.map((type, i) => ({ id: i + 1, type, fmt: {}, color: null, align: 'left', level: 1, hl: false, link: false })),
+      selected: 5,
+      lang: 'tg',
+      preview: false,
+      panel: 'props',
+      status: 'Draft',
+      savedText: 'Autosave · [вақт]'
+    };
+  }
+  meta() {
+    return {
+      heading: { label: 'Сарлавҳа', g: 'text', glyph: 'H', text: '[Сарлавҳаи дарс]' },
+      lead: { label: 'Lead Text', g: 'text', glyph: 'L', text: '[Муқаддимаи кӯтоҳ — Lead Text]' },
+      paragraph: { label: 'Параграф', g: 'text', glyph: '¶', text: '[Матни параграф аз муаллиф]' },
+      list: { label: 'Рӯйхат', g: 'text', glyph: '•', text: '• [Банди 1]\n• [Банди 2]\n• [Банди 3]' },
+      quote: { label: 'Иқтибос', g: 'text', glyph: '“', text: '“[Иқтибос]” — [Манбаъ]' },
+      source: { label: 'Манбаъ', g: 'text', glyph: '§', text: 'Манбаъ: [Номи манбаъ, сол, саҳифа]' },
+      image: { label: 'Расм', g: 'media', glyph: '▣', text: '[Расм аз Media Library]' },
+      gallery: { label: 'Галерея', g: 'media', glyph: '▦', text: '[Галереяи расмҳо]' },
+      video: { label: 'Видео', g: 'media', glyph: '▶', text: '[Видео · HLS · субтитр]' },
+      audio: { label: 'Аудио', g: 'media', glyph: '♪', text: '[Аудио · транскрипт]' },
+      file: { label: 'Файл', g: 'media', glyph: '⇩', text: '[Файли боргирифтанӣ]' },
+      important: { label: 'Муҳим', g: 'callout', glyph: '!', text: '[Матни муаллиф]', c: 'background:#F6EEDF;border:1px solid #E8D7B9;color:#7A5A26' },
+      warning: { label: 'Огоҳӣ', g: 'callout', glyph: '!', text: '[Матни муаллиф]', c: 'background:#F8E5EA;border:1px solid #D48A9C;color:#8A2E45' },
+      note: { label: 'Эзоҳ', g: 'callout', glyph: 'i', text: '[Матни муаллиф]', c: 'background:#F3EEF9;border:1px solid #DCCCEB;color:#6B4F8F' },
+      tip: { label: 'Маслиҳат', g: 'callout', glyph: '✓', text: '[Матни муаллиф]', c: 'background:#EAF3EC;border:1px solid #A9C9B2;color:#2F5E40' },
+      table: { label: 'Ҷадвал', g: 'other', glyph: '⊞', text: '[Ҷадвал]' },
+      quiz: { label: 'Тест', g: 'other', glyph: '?', text: '[Тест аз Quiz Builder]' },
+      divider: { label: 'Ҷудокунанда', g: 'divider', glyph: '—', text: '' }
+    };
+  }
+  update(id, patch) {
+    this.setState({ blocks: this.state.blocks.map((b) => (b.id === id ? { ...b, ...patch } : b)) });
+  }
+  renderVals() {
+    const M = this.meta();
+    const st = this.state;
+    const blocks = st.blocks;
+    const selBlock = blocks.find((b) => b.id === st.selected) || blocks[0] || null;
+    const selId = selBlock ? selBlock.id : null;
+    const stop = (e) => { if (e && e.stopPropagation) e.stopPropagation(); };
+    const move = (idx, dir) => {
+      const arr = blocks.slice();
+      const j = idx + dir;
+      if (j < 0 || j >= arr.length) return;
+      const t = arr[idx]; arr[idx] = arr[j]; arr[j] = t;
+      this.setState({ blocks: arr });
+    };
+    const sizes = { 1: 28, 2: 22, 3: 18 };
+    const textStyle = (b) => {
+      let s = '';
+      if (b.type === 'heading') s += "font-family:'Lora',serif;font-size:" + sizes[b.level || 1] + 'px;font-weight:600;line-height:1.25;color:#59446E;';
+      else if (b.type === 'lead') s += 'font-size:17px;line-height:1.55;color:#6B5A7B;';
+      else if (b.type === 'quote') s += "font-family:'Lora',serif;font-style:italic;font-size:17px;line-height:1.5;color:#59446E;";
+      else if (b.type === 'source') s += 'font-size:12px;color:#6B5A7B;';
+      else s += 'font-size:15px;line-height:1.65;color:#2E2338;';
+      const f = b.fmt || {};
+      if (f.b) s += 'font-weight:700;';
+      if (f.i) s += 'font-style:italic;';
+      const deco = [];
+      if (f.u || b.link) deco.push('underline');
+      if (f.s) deco.push('line-through');
+      if (deco.length) s += 'text-decoration:' + deco.join(' ') + ';';
+      if (b.color) s += 'color:' + b.color + ';';
+      else if (b.link) s += 'color:#6B4F8F;';
+      if (b.hl) s += 'background:#F6EEDF;border-radius:6px;padding:2px 4px;';
+      s += 'text-align:' + (b.align || 'left') + ';';
+      return s;
+    };
+    const view = blocks.map((b, idx) => {
+      const m = M[b.type];
+      return {
+        n: idx + 1,
+        label: m.label,
+        glyph: m.glyph,
+        text: m.text,
+        cls: 'blk' + (b.id === selId ? ' sel' : ''),
+        isText: m.g === 'text',
+        isCallout: m.g === 'callout',
+        isMedia: m.g === 'media',
+        isDivider: m.g === 'divider',
+        isOther: m.g === 'other',
+        textStyle: textStyle(b),
+        calloutStyle: m.c || '',
+        first: idx === 0,
+        last: idx === blocks.length - 1,
+        select: () => this.setState({ selected: b.id }),
+        up: (e) => { stop(e); move(idx, -1); },
+        down: (e) => { stop(e); move(idx, 1); },
+        dup: (e) => {
+          stop(e);
+          const copy = { ...b, fmt: { ...(b.fmt || {}) }, id: this.nextId++ };
+          const arr = blocks.slice(); arr.splice(idx + 1, 0, copy);
+          this.setState({ blocks: arr, selected: copy.id });
+        },
+        del: (e) => {
+          stop(e);
+          const arr = blocks.filter((x) => x.id !== b.id);
+          this.setState({ blocks: arr, selected: arr[Math.max(0, idx - 1)] ? arr[Math.max(0, idx - 1)].id : null });
+        }
+      };
+    });
+    const add = (type) => () => {
+      const nb = { id: this.nextId++, type, fmt: {}, color: null, align: 'left', level: 1, hl: false, link: false };
+      const idx = blocks.findIndex((x) => x.id === selId);
+      const arr = blocks.slice(); arr.splice(idx < 0 ? arr.length : idx + 1, 0, nb);
+      this.setState({ blocks: arr, selected: nb.id });
+    };
+    const pal = (types) => types.map((t) => ({ label: M[t].label, glyph: M[t].glyph, add: add(t), swatch: M[t].c ? M[t].c.replace(/border:[^;]+;?/, '') : '' }));
+    const sm = selBlock ? M[selBlock.type] : null;
+    const selIsText = !!(sm && sm.g === 'text');
+    const f = (selBlock && selBlock.fmt) || {};
+    const fc = (on) => (on ? 'fmt on' : 'fmt');
+    const tog = (k) => () => { if (selIsText) this.update(selId, { fmt: { ...f, [k]: !f[k] } }); };
+    const setAlign = (a) => () => { if (selIsText) this.update(selId, { align: a }); };
+    const setLevel = (l) => () => { if (selBlock) this.update(selId, selBlock.type === 'heading' ? { level: l } : { type: 'heading', level: l }); };
+    const align = selBlock ? selBlock.align : 'left';
+    const lvl = selBlock && selBlock.type === 'heading' ? selBlock.level : 0;
+    const palette = [
+      { name: 'Пешфарз', hex: '#2E2338', v: null },
+      { name: 'Deep Plum', hex: '#59446E', v: '#59446E' },
+      { name: 'Lavender', hex: '#6B4F8F', v: '#6B4F8F' },
+      { name: 'Rose', hex: '#8A4F6B', v: '#8A4F6B' },
+      { name: 'Champagne', hex: '#7A5A26', v: '#7A5A26' },
+      { name: 'Sage', hex: '#2F5E40', v: '#2F5E40' }
+    ];
+    const colors = palette.map((c) => ({
+      ...c,
+      cls: 'swc' + (selBlock && (selBlock.color || null) === c.v ? ' on' : ''),
+      pick: () => { if (selIsText) this.update(selId, { color: c.v }); }
+    }));
+    const calloutTypes = ['important', 'warning', 'note', 'tip'];
+    const variants = calloutTypes.map((t) => ({
+      label: M[t].label,
+      cls: 'vchip' + (selBlock && selBlock.type === t ? ' on' : ''),
+      pick: () => this.update(selId, { type: t })
+    }));
+    const langList = [
+      { id: 'tg', label: 'Тоҷикӣ', dot: '#3F7A57' },
+      { id: 'ru', label: 'Русский', dot: '#C9A06A' },
+      { id: 'ar', label: 'العربية', dot: '#B9AEC6' }
+    ];
+    const langs = langList.map((l) => ({
+      ...l,
+      cls: 'lang' + (st.lang === l.id ? ' on' : ''),
+      sel: st.lang === l.id ? 'true' : 'false',
+      font: l.id === 'ar' ? "font-family:'Noto Naskh Arabic',serif;font-size:15px" : '',
+      pick: () => this.setState({ lang: l.id })
+    }));
+    const statusColors = { Draft: ['#EEE7F6', '#59446E'], 'In Review': ['#F6EEDF', '#7A5A26'] };
+    const sc = statusColors[st.status] || statusColors.Draft;
+    const revisions = [
+      { v: 'v4 · ҷорӣ', state: st.status, who: '[Муаллиф]', when: 'ҳозир', canRestore: false },
+      { v: 'v3', state: 'Approved', who: '[Reviewer]', when: '[сана]', canRestore: true },
+      { v: 'v2', state: 'Changes Requested', who: '[Reviewer]', when: '[сана]', canRestore: true },
+      { v: 'v1', state: 'Draft', who: '[Муаллиф]', when: '[сана]', canRestore: true }
+    ].map((r) => ({ ...r, restore: () => this.setState({ status: 'Draft', savedText: r.v + ' барқарор шуд · Draft', panel: 'props' }) }));
+    const pv = st.preview;
+    return {
+      langs,
+      dir: st.lang === 'ar' ? 'rtl' : 'ltr',
+      banner: st.lang !== 'tg',
+      bannerText: st.lang === 'ru' ? 'Русский: тарҷума Draft аст. Нашри тоҷикӣ интизори он нест.' : 'العربية: тарҷума ҳанӯз нест. Блокҳо RTL намоиш дода мешаванд.',
+      status: st.status,
+      statusBg: sc[0],
+      statusInk: sc[1],
+      inReview: st.status === 'In Review',
+      savedText: st.savedText,
+      saveDraft: () => this.setState({ savedText: 'Draft нигоҳ дошта шуд' }),
+      sendReview: () => this.setState({ status: 'In Review', savedText: 'Ба Reviewer фиристода шуд' }),
+      togglePreview: () => this.setState({ preview: !pv }),
+      previewCls: pv ? 'tb on' : 'tb',
+      previewPressed: pv ? 'true' : 'false',
+      previewOn: pv,
+      toggleHistory: () => this.setState({ panel: st.panel === 'history' ? 'props' : 'history' }),
+      historyCls: st.panel === 'history' ? 'tb on' : 'tb',
+      historyPressed: st.panel === 'history' ? 'true' : 'false',
+      showProps: st.panel !== 'history' && !!selBlock,
+      showHistory: st.panel === 'history',
+      revisions,
+      canvasCls: pv ? 'prev' : '',
+      canvasW: pv ? '390px' : '720px',
+      canvasPad: pv ? '20px 18px' : '0',
+      canvasRadius: pv ? '36px' : '0',
+      canvasBg: pv ? '#FBF9FD' : 'transparent',
+      canvasShadow: pv ? '0 0 0 8px #FFFFFF, 0 30px 60px -30px rgba(89,68,110,.5)' : 'none',
+      blocks: view,
+      palText: pal(['heading', 'lead', 'paragraph', 'list', 'quote', 'source']),
+      palMedia: pal(['image', 'gallery', 'video', 'audio', 'file']),
+      palCallout: pal(calloutTypes),
+      palOther: pal(['table', 'quiz', 'divider']),
+      colors,
+      variants,
+      sel: {
+        label: sm ? sm.label : '',
+        type: selBlock ? selBlock.type : '',
+        n: selBlock ? blocks.indexOf(selBlock) + 1 : 0,
+        isText: selIsText,
+        isCallout: !!(sm && sm.g === 'callout'),
+        isMedia: !!(sm && sm.g === 'media')
+      },
+      f: {
+        b: fc(f.b), bP: f.b ? 'true' : 'false',
+        i: fc(f.i), iP: f.i ? 'true' : 'false',
+        u: fc(f.u), uP: f.u ? 'true' : 'false',
+        s: fc(f.s), sP: f.s ? 'true' : 'false',
+        al: fc(align === 'left'), ac: fc(align === 'center'), ar: fc(align === 'right'),
+        h1: fc(lvl === 1), h2: fc(lvl === 2), h3: fc(lvl === 3),
+        hl: fc(selBlock && selBlock.hl), hlP: selBlock && selBlock.hl ? 'true' : 'false',
+        ln: fc(selBlock && selBlock.link), lnP: selBlock && selBlock.link ? 'true' : 'false'
+      },
+      fx: {
+        b: tog('b'), i: tog('i'), u: tog('u'), s: tog('s'),
+        al: setAlign('left'), ac: setAlign('center'), ar: setAlign('right'),
+        h1: setLevel(1), h2: setLevel(2), h3: setLevel(3),
+        hl: () => { if (selIsText) this.update(selId, { hl: !selBlock.hl }); },
+        ln: () => { if (selIsText) this.update(selId, { link: !selBlock.link }); },
+        clear: () => { if (selIsText) this.update(selId, { fmt: {}, color: null, align: 'left', hl: false, link: false }); }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

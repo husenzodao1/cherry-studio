@@ -1,0 +1,8 @@
+[
+ { "name": "w-clock", "kind": "clock3", "matte": true, "tone": "none", "hdri": "room", "envIntensity": 1.0, "keyIntensity": 1.6, "shadowOpacity": 0.14, "size": 900,
+   "rims": [{ "color": "#ffd6c8", "intensity": 4, "dir": [0.6, 0.6, -1] }, { "color": "#e3ccff", "intensity": 3, "dir": [-0.8, 0.4, -0.6] }], "pitch": 10, "azimuth": 0, "zoom": 0.86 },
+ { "name": "w-girl", "kind": "girl3", "matte": true, "tone": "none", "hdri": "room", "envIntensity": 1.0, "keyIntensity": 1.6, "shadowOpacity": 0.14, "size": 900,
+   "rims": [{ "color": "#ffd6f0", "intensity": 4, "dir": [0.6, 0.6, -1] }, { "color": "#e3ccff", "intensity": 3, "dir": [-0.8, 0.4, -0.6] }], "pitch": 8, "azimuth": 0, "zoom": 0.84 },
+ { "name": "w-track", "kind": "track3", "matte": true, "tone": "none", "hdri": "room", "envIntensity": 1.0, "keyIntensity": 1.6, "shadowOpacity": 0.14, "size": 900,
+   "rims": [{ "color": "#ffd6c8", "intensity": 4, "dir": [0.6, 0.6, -1] }, { "color": "#e3ccff", "intensity": 3, "dir": [-0.8, 0.4, -0.6] }], "pitch": 10, "azimuth": 0, "zoom": 0.86 }
+]

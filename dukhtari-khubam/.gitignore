@@ -1,0 +1,13 @@
+node_modules
+.next
+next-env.d.ts
+*.tsbuildinfo
+.env*
+!.env.example
+.vercel
+out
+tools/render-assets/three
+
+# end-to-end test output
+/test-results/
+/playwright-report/

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="tg">
+<head>
+<meta charset="utf-8">
+<title>Glass Dock</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.nb{--d-top:rgba(255,255,255,.66);--d-bot:rgba(255,255,255,.26);--d-edge:rgba(255,255,255,.95);--d-low:rgba(167,139,203,.38);--d-shadow:rgba(89,68,110,.34);--d-ink:#59446E;--d-ink2:#6B5A7B;--b-a:#FFFFFF;--b-b:#E4D6F3;--b-c:#B79AD8;--b-ink:#3F2F52;font-family:'Onest',system-ui,sans-serif}
+.nb.dark{--d-top:rgba(64,52,78,.66);--d-bot:rgba(33,27,42,.42);--d-edge:rgba(216,200,234,.32);--d-low:rgba(0,0,0,.4);--d-shadow:rgba(0,0,0,.6);--d-ink:#F4EFF8;--d-ink2:#CFC4DC;--b-a:#F4EFF8;--b-b:#D8C8EA;--b-c:#9F86C2;--b-ink:#17131E}
+.dock{position:absolute;left:16px;right:16px;bottom:18px;height:76px;border-radius:34px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;padding:0 6px;box-sizing:border-box;overflow:hidden;
+background:linear-gradient(165deg,var(--d-top),var(--d-bot));border:1px solid var(--d-edge);
+box-shadow:inset 0 1.5px 0 var(--d-edge),inset 0 -12px 20px -12px var(--d-low),inset 14px 0 20px -18px var(--d-edge),inset -14px 0 20px -18px var(--d-edge),0 20px 40px -16px var(--d-shadow),0 2px 6px rgba(89,68,110,.08);
+-webkit-backdrop-filter:blur(14px) saturate(1.6);backdrop-filter:blur(14px) saturate(1.6);backdrop-filter:url(#dk-refract) saturate(1.5) brightness(1.04)}
+.dock::before{content:"";position:absolute;left:10px;right:10px;top:1px;height:30px;border-radius:30px 30px 60% 60%;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0));pointer-events:none}
+.dock::after{content:"";position:absolute;right:-20px;bottom:-30px;width:160px;height:60px;border-radius:50%;background:radial-gradient(closest-side,rgba(232,215,185,.35),rgba(232,215,185,0));pointer-events:none}
+.it{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:62px;margin:0 3px;border-radius:31px;color:var(--d-ink2);text-decoration:none;font-size:11px;font-weight:500;line-height:14px;transition:background .25s,color .25s,transform .2s}
+.it:active{transform:scale(.96)}
+.it.on{color:var(--b-ink);font-weight:600;background:radial-gradient(120% 120% at 32% 22%,var(--b-a) 0%,var(--b-b) 52%,var(--b-c) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -6px 12px -6px rgba(89,68,110,.35),0 8px 16px -8px rgba(89,68,110,.45)}
+.it:focus-visible{outline:2px solid #A78BCB;outline-offset:2px}
+.it svg{width:22px;height:22px}
+</style>
+</helmet>
+<div class="{{rootClass}}" style="width:390px;height:120px;position:relative;overflow:hidden">
+<sc-if value="{{standalone}}" hint-placeholder-val="{{true}}">
+<div aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(120deg,#EEE7F6,#EBDCE4)">
+<div style="position:absolute;left:40px;top:40px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFFFFF,#B79AD8)"></div>
+<div style="position:absolute;left:210px;top:56px;width:150px;height:14px;border-radius:7px;background:#59446E"></div>
+<div style="position:absolute;left:210px;top:80px;width:110px;height:10px;border-radius:5px;background:#A78BCB"></div>
+<div style="position:absolute;left:0;right:0;top:98px;height:4px;background:repeating-linear-gradient(90deg,#59446E 0 8px,transparent 8px 16px)"></div>
+</div>
+</sc-if>
+<svg aria-hidden="true" width="0" height="0" style="position:absolute">
+<filter id="dk-refract" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="0.006 0.022" numOctaves="2" seed="11" result="noise"></feTurbulence>
+<feGaussianBlur in="noise" stdDeviation="2.5" result="soft"></feGaussianBlur>
+<feDisplacementMap in="SourceGraphic" in2="soft" scale="34" xChannelSelector="R" yChannelSelector="G" result="bent"></feDisplacementMap>
+<feGaussianBlur in="bent" stdDeviation="1.6"></feGaussianBlur>
+</filter>
+</svg>
+<nav class="dock" aria-label="Навигатсия">
+<a href="Home.dc.html" class="{{c.home}}" aria-current="{{cur.home}}">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5"></path><path d="M5 9.5V20h14V9.5"></path><path d="M10 20v-6h4v6"></path></svg>
+<span>Асосӣ</span></a>
+<a href="Schools.dc.html" class="{{c.schools}}" aria-current="{{cur.schools}}">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 4.5-9 4.5-9-4.5z"></path><path d="M3 12l9 4.5 9-4.5"></path><path d="M3 16.5l9 4.5 9-4.5"></path></svg>
+<span>Мактабҳо</span></a>
+<a href="Profile.dc.html" class="{{c.saved}}" aria-current="{{cur.saved}}">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>
+<span>Захираҳо</span></a>
+<a href="Profile.dc.html" class="{{c.profile}}" aria-current="{{cur.profile}}">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>
+<span>Профил</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["home","schools","saved","profile"],"default":"home"},"dark":{"editor":"boolean","default":false,"section":"Theme"},"embedded":{"editor":null},"$preview":{"width":390,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active || 'home';
+    const dark = this.props.dark === true || this.props.dark === 'true';
+    const keys = ['home', 'schools', 'saved', 'profile'];
+    const c = {};
+    const cur = {};
+    keys.forEach((k) => {
+      c[k] = k === active ? 'it on' : 'it';
+      cur[k] = k === active ? 'page' : 'false';
+    });
+    return {
+      rootClass: dark ? 'nb dark' : 'nb',
+      standalone: !this.props.embedded,
+      c,
+      cur
+    };
+  }
+}
+</script>
+</body>
+</html>

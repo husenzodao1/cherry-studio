@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 4×2 (and smaller): Mahliyo herself — a different face and colour each day, and what she says to you today -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/widget_bg_d0" android:gravity="center_vertical" android:orientation="horizontal"
+    android:paddingStart="10dp" android:paddingEnd="16dp" android:paddingTop="10dp" android:paddingBottom="10dp">
+    <ImageView android:id="@+id/w_face" android:layout_width="96dp" android:layout_height="match_parent" android:adjustViewBounds="true"
+        android:scaleType="fitEnd" android:src="@drawable/widget_m0" android:contentDescription="@null" />
+    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="8dp"
+        android:gravity="center_vertical" android:orientation="vertical">
+        <TextView android:id="@+id/w_say" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/widget_bubble" android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingTop="8dp" android:paddingBottom="8dp"
+            android:text="Салом! Имрӯз чӣ меомӯзем?" android:textColor="#FF3F1F1A" android:textSize="13sp" android:maxLines="3" android:ellipsize="end" android:lineSpacingMultiplier="1.05" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center_vertical" android:orientation="horizontal">
+            <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/widget_flame" android:contentDescription="@null" />
+            <TextView android:id="@+id/w_streak" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="4dp"
+                android:text="0" android:textColor="#FF3F1F1A" android:textSize="14sp" android:textStyle="bold" />
+            <TextView android:id="@+id/w_go" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:background="@drawable/widget_pill" android:paddingStart="14dp" android:paddingEnd="14dp" android:paddingTop="6dp" android:paddingBottom="6dp"
+                android:text="Оғоз" android:textColor="#FFFFFFFF" android:textSize="12sp" android:textStyle="bold" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,85 @@
+import type { Metadata, Viewport } from 'next'
+import { Caveat, Cormorant, Great_Vibes, Geologica, Lora, Monsieur_La_Doulaise, Noto_Naskh_Arabic, Pacifico } from 'next/font/google'
+import type { ReactNode } from 'react'
+
+import { Backdrop } from '@/web/components/Backdrop'
+import { Providers } from '@/web/components/Providers'
+
+import './globals.css'
+
+// Glyph coverage for ӣ қ ғ ҳ ҷ ӯ verified for these families (Manrope lacks them).
+const geologica = Geologica({ subsets: ['latin', 'cyrillic', 'cyrillic-ext'], variable: '--font-geologica', display: 'swap' })
+const lora = Lora({ subsets: ['latin', 'cyrillic', 'cyrillic-ext'], style: ['normal', 'italic'], variable: '--font-lora', display: 'swap' })
+// Brush script for the name "Гулдухтар"; covers ӣ қ ғ ҳ ҷ ӯ (checked against its cmap).
+// handwriting for the words of the day
+const caveat = Caveat({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], weight: ['500', '700'], variable: '--font-hand', display: 'swap' })
+const pacifico = Pacifico({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], weight: '400', variable: '--font-pacifico', display: 'swap' })
+// the studio's signature over the profile photo: a fine, hard-to-read copperplate (Latin only)
+const studio = Monsieur_La_Doulaise({ subsets: ['latin'], weight: '400', variable: '--font-studio', display: 'swap', preload: false })
+// the name on the opening screen: a fine, flowing calligraphy
+const script = Great_Vibes({ subsets: ['cyrillic', 'latin'], weight: '400', variable: '--font-script', display: 'block' })
+// poems in the "Garden of verse" tile: a literary italic with the Tajik letters
+const verse = Cormorant({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], style: ['italic'], weight: ['500', '600'], variable: '--font-verse', display: 'swap', preload: false })
+// Persian and Dari script is only needed when those languages are chosen: do not preload it for everyone.
+const naskh = Noto_Naskh_Arabic({ subsets: ['arabic'], variable: '--font-naskh', display: 'swap', preload: false })
+
+const FIRST_ART = ['glass-flower', 'glass-flower-open', 'glass-lotus', 'glass-bubble', 'glass-leaves', 'glass-tulip', 'book-open', 'words-band']
+  .map((n) => `/assets/3d/${n}.webp`)
+
+
+export const metadata: Metadata = {
+  title: { default: 'Гулдухтар', template: '%s · Гулдухтар' },
+  description: 'Платформаи таълимӣ: 7 оинаи духтар.',
+  applicationName: 'Гулдухтар',
+  // Google Search Console: proves the site belongs to the app's Google Cloud project (sign-in branding)
+  verification: { google: 'GCrXzaS2lJNx1EPFUQtASSA8FMKHMsISwpLLApPDYf8' }
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fff1ea' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1333' }
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  // an app, not a page: no pinch zoom (text size is a setting)
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover'
+}
+
+// Before the first paint: hides the app behind the PIN screen when a PIN is set, hides it entirely for
+// a first visit on its way to /start (no flash of the home screen), and applies the saved
+// theme, text size and language (no flash).
+// Light mode for weaker phones (up to 4 GB of memory or 4 cores, or found slow by PerfProbe and kept
+// as dk.lite=1), and always in the phone app (its WebView redraws live blur on every frame): no live blur,
+// so scrolling and opening stay smooth.
+const boot = `try{var dm=navigator.deviceMemory,hc=navigator.hardwareConcurrency,lt=localStorage.getItem('dk.lite');if(lt==='1'||(lt!=='0'&&(window.androidBridge||(dm&&dm<=4)||(hc&&hc<=4))))document.documentElement.classList.add('lite')}catch(e){}try{if(localStorage.getItem('dk.pin'))document.documentElement.classList.add('locked');if(!localStorage.getItem('dk.learner')&&!/^\\/(start|admin|page|support)(\\/|$)/.test(location.pathname))document.documentElement.classList.add('gated')}catch(e){}try{var p=JSON.parse(localStorage.getItem('dk.prefs')||'{}'),r=document.documentElement,t=['light','dark','sakura','peach','mint','dusk'].indexOf(p.theme)<0||(p.theme==='light'&&!(p.v>=3))?'peach':p.theme;r.dataset.theme=t==='dark'||t==='dusk'?'dark':'light';if(t!=='light'&&t!=='dark')r.dataset.palette=t;else delete r.dataset.palette;var s=p.v>=2?p.textScale:(p.textScale&&p.textScale!==1?p.textScale:0.9);r.style.setProperty('--text-scale',String(s||0.9));if(p.locale){r.lang=p.locale;r.dir=p.locale==='fa'||p.locale==='prs'?'rtl':'ltr'}}catch(e){}`
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="ru" data-theme="light" data-palette="peach" className={`${geologica.variable} ${lora.variable} ${pacifico.variable} ${caveat.variable} ${naskh.variable} ${studio.variable} ${verse.variable} ${script.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: boot }} />
+        {/* the home screen's art is on the phone: ask for it at once, so nothing appears late */}
+        <link rel="preload" as="image" href="/assets/3d/splash-moon.webp" />
+        {FIRST_ART.map((src) => <link key={src} rel="preload" as="image" href={src} />)}
+      </head>
+      <body>
+        {/* from the first paint until the screen is ready: 3D glass pieces circling the name, a filling
+            bar below (CSS only, so it shows before any script); Splash.tsx takes it away */}
+        {/* from the first paint until the screen is ready: a glass moon over the name and a filling bar
+            (CSS only, so it shows before any script); Splash.tsx takes it away */}
+        <div id="splash" className="splash" aria-hidden="true">
+          <img className="sp-moon" src="/assets/3d/splash-moon.webp" alt="" />
+          <span className="sp-name">Гулдухтар</span>
+          <span className="sp-bar"><i /></span>
+        </div>
+        <Providers>
+          <Backdrop />
+          <main className="app">{children}</main>
+        </Providers>
+      </body>
+    </html>
+  )
+}

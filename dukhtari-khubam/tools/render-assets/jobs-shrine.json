@@ -1,0 +1,69 @@
+[
+ {
+  "name": "shrine",
+  "kind": "shrine",
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 20,
+  "azimuth": -16,
+  "zoom": 0.7,
+  "fov": 30,
+  "size": 1300,
+  "envIntensity": 0.85,
+  "keyIntensity": 1.7,
+  "shadowOpacity": 0.2,
+  "rims": [
+   {
+    "color": "#e3ccff",
+    "intensity": 5,
+    "dir": [
+     -0.7,
+     0.6,
+     -1
+    ]
+   }
+  ],
+  "lanternPos": [
+   1.18,
+   1.32,
+   -0.2
+  ],
+  "lanternScale": 3.2
+ },
+ {
+  "name": "book-open",
+  "kind": "shrine",
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 34,
+  "azimuth": -10,
+  "zoom": 1.0,
+  "fov": 30,
+  "size": 900,
+  "envIntensity": 0.85,
+  "keyIntensity": 1.7,
+  "shadowOpacity": 0.16,
+  "rims": [
+   {
+    "color": "#e3ccff",
+    "intensity": 5,
+    "dir": [
+     -0.7,
+     0.6,
+     -1
+    ]
+   }
+  ],
+  "lanternPos": [
+   1.18,
+   1.32,
+   -0.2
+  ],
+  "lanternScale": 3.2,
+  "arch": false,
+  "lantern": false,
+  "petals": false
+ }
+]

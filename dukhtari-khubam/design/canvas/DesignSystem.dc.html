@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="tg">
+<head>
+<meta charset="utf-8">
+<title>Design System</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Lora:ital,wght@0,500;0,600;0,700;1,500&amp;family=Noto+Naskh+Arabic:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+.ds{font-family:'Onest',system-ui,sans-serif;color:#2E2338;background:#FBF9FD}
+.serif{font-family:'Lora',Georgia,serif}
+.h2{margin:0 0 16px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6B4F8F}
+.sw{display:flex;flex-direction:column;gap:6px;font-size:12px;line-height:16px}
+.sw i{display:block;height:64px;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(46,35,56,.08)}
+.sw b{font-weight:600}
+.sw span{color:#6B5A7B;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.dark .sw b{color:#F4EFF8}
+.dark .sw span{color:#BDB1CB}
+.dark .sw i{box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.panel{border-radius:28px;padding:24px;background:#FFFFFF;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 14px 34px -18px rgba(89,68,110,.25);border:1px solid #EEE7F6}
+.glass{background:linear-gradient(140deg,rgba(255,255,255,.8),rgba(255,255,255,.5));border:1px solid rgba(255,255,255,.92);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(167,139,203,.24),0 14px 34px -12px rgba(89,68,110,.2);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)}
+.trow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid #EEE7F6}
+.trow small{font-size:11px;color:#6B5A7B;font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 28px;border-radius:26px;border:0;background:linear-gradient(180deg,#7C61A3,#59446E);color:#FFFFFF;font-family:inherit;font-size:15px;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 6px rgba(0,0,0,.14),0 14px 26px -12px rgba(89,68,110,.3)}
+.btn2{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 24px;border-radius:26px;color:#59446E;font-family:inherit;font-size:15px;font-weight:600}
+.chip{height:36px;padding:0 14px;border-radius:18px;border:1px solid #DCCCEB;background:#FFFFFF;font-family:inherit;font-size:13px;font-weight:500;color:#2E2338}
+.chip.on{background:#59446E;color:#FBF9FD;border-color:transparent}
+.help{width:22px;height:22px;border-radius:50%;border:1px solid #DCCCEB;background:#FFFFFF;color:#6B4F8F;font-family:inherit;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.callout{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:16px;font-size:13px;line-height:1.45}
+.callout b{font-size:13px}
+.lvl{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #EEE7F6;font-size:13px}
+.lvl i{display:block;width:44px;height:30px;border-radius:12px;flex:none}
+.lvl span{flex:1}
+.lvl small{color:#6B5A7B;font-size:12px}
+.art{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:#6B5A7B}
+</style>
+</helmet>
+<div class="ds" style="width:1280px;height:1560px;box-sizing:border-box;padding:64px;display:flex;flex-direction:column;gap:44px;position:relative;overflow:hidden">
+
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:40px">
+<div style="display:flex;flex-direction:column;gap:8px;max-width:520px">
+<span class="h2" style="margin:0">Design System · v0.1 · PoC</span>
+<h1 class="serif" style="margin:0;font-size:48px;line-height:1.05;font-weight:600;color:#59446E">Духтари хубам</h1>
+<p style="margin:0;font-size:15px;line-height:1.5;color:#6B5A7B">Premium Feminine Minimalism · Realistic 3D · Physical Liquid Glass</p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px 18px">
+<div class="art"><dc-import name="Art" kind="religion" size="56" hint-size="56px,56px"></dc-import>religion</div>
+<div class="art"><dc-import name="Art" kind="ethics" size="56" hint-size="56px,56px"></dc-import>ethics</div>
+<div class="art"><dc-import name="Art" kind="culture" size="56" hint-size="56px,56px"></dc-import>culture</div>
+<div class="art"><dc-import name="Art" kind="family" size="56" hint-size="56px,56px"></dc-import>family</div>
+<div class="art"><dc-import name="Art" kind="health" size="56" hint-size="56px,56px"></dc-import>health</div>
+<div class="art"><dc-import name="Art" kind="growth" size="56" hint-size="56px,56px"></dc-import>growth</div>
+<div class="art"><dc-import name="Art" kind="modern" size="56" hint-size="56px,56px"></dc-import>modern</div>
+<div class="art"><dc-import name="Art" kind="lotus" size="56" hint-size="56px,56px"></dc-import>lotus</div>
+<div class="art"><dc-import name="Art" kind="crystal" size="56" hint-size="56px,56px"></dc-import>crystal</div>
+<div class="art"><dc-import name="Art" kind="trophy" size="56" hint-size="56px,56px"></dc-import>trophy</div>
+</div>
+</div>
+
+<section>
+<h2 class="h2">Рангҳо · Light</h2>
+<div style="display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:14px">
+<div class="sw"><i style="background:#FBF9FD"></i><b>Background</b><span>#FBF9FD</span></div>
+<div class="sw"><i style="background:#FFFFFF"></i><b>Surface</b><span>#FFFFFF</span></div>
+<div class="sw"><i style="background:#EEE7F6"></i><b>Lavender</b><span>#EEE7F6</span></div>
+<div class="sw"><i style="background:#DCCCEB"></i><b>Lilac</b><span>#DCCCEB</span></div>
+<div class="sw"><i style="background:#A78BCB"></i><b>Primary</b><span>#A78BCB</span></div>
+<div class="sw"><i style="background:#59446E"></i><b>Deep Plum</b><span>#59446E</span></div>
+<div class="sw"><i style="background:#EBDCE4"></i><b>Dusty Rose</b><span>#EBDCE4</span></div>
+<div class="sw"><i style="background:#E8D7B9"></i><b>Champagne</b><span>#E8D7B9</span></div>
+<div class="sw"><i style="background:#DDE9DF"></i><b>Soft Sage</b><span>#DDE9DF</span></div>
+</div>
+<div class="dark" style="margin-top:18px;padding:18px;border-radius:24px;background:#17131E;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:14px">
+<div class="sw"><i style="background:#17131E"></i><b>Background</b><span>#17131E</span></div>
+<div class="sw"><i style="background:#211B2A"></i><b>Surface</b><span>#211B2A</span></div>
+<div class="sw"><i style="background:#30263B"></i><b>Elevated</b><span>#30263B</span></div>
+<div class="sw"><i style="background:#B7A0D3"></i><b>Primary</b><span>#B7A0D3</span></div>
+<div class="sw"><i style="background:#D8C8EA"></i><b>Lilac</b><span>#D8C8EA</span></div>
+<div class="sw"><i style="background:#F4EFF8"></i><b>Text</b><span>#F4EFF8</span></div>
+<div class="sw"><i style="background:#B78FA4"></i><b>Dusty Rose</b><span>#B78FA4</span></div>
+<div class="sw"><i style="background:#CBB58F"></i><b>Champagne</b><span>#CBB58F</span></div>
+<div class="sw" style="justify-content:center"><b style="font-size:11px;font-weight:500;color:#BDB1CB">Dark Mode</b></div>
+</div>
+</section>
+
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+<section class="panel">
+<h2 class="h2">Typography</h2>
+<div class="trow"><span class="serif" style="font-size:32px;font-weight:600;color:#59446E;line-height:1.1">Hero</span><small>Lora 600 · 28–34</small></div>
+<div class="trow"><span class="serif" style="font-size:26px;font-weight:600;color:#59446E">Page Heading</span><small>Lora · 24–28</small></div>
+<div class="trow"><span style="font-size:20px;font-weight:600">Section</span><small>Onest 600 · 18–22</small></div>
+<div class="trow"><span style="font-size:16px;font-weight:600">Card Heading</span><small>Onest · 16–18</small></div>
+<div class="trow"><span style="font-size:16px">Body text</span><small>Onest 400 · 15–17</small></div>
+<div class="trow"><span style="font-size:13px;color:#6B5A7B">Secondary</span><small>Onest · 12–14</small></div>
+<div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;font-size:20px">
+<span>ӣ қ ғ ҳ ҷ ӯ · Ӣ Қ Ғ Ҳ Ҷ Ӯ</span>
+<span class="serif">ӣ қ ғ ҳ ҷ ӯ · Ӣ Қ Ғ Ҳ Ҷ Ӯ</span>
+<span dir="rtl" style="font-family:'Noto Naskh Arabic',serif;font-size:22px;text-align:right">العربية</span>
+</div>
+<p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:#6B5A7B">Manrope дар санҷиш ҳарфҳои тоҷикиро надошт → Onest. Lora пурра.</p>
+</section>
+
+<section class="panel">
+<h2 class="h2">Spacing · Radius</h2>
+<div style="display:flex;align-items:flex-end;gap:10px;height:56px">
+<div style="width:4px;height:4px;background:#A78BCB;border-radius:1px"></div>
+<div style="width:8px;height:8px;background:#A78BCB;border-radius:2px"></div>
+<div style="width:12px;height:12px;background:#A78BCB;border-radius:3px"></div>
+<div style="width:16px;height:16px;background:#A78BCB;border-radius:4px"></div>
+<div style="width:24px;height:24px;background:#A78BCB;border-radius:5px"></div>
+<div style="width:32px;height:32px;background:#A78BCB;border-radius:6px"></div>
+<div style="width:40px;height:40px;background:#A78BCB;border-radius:7px"></div>
+</div>
+<p style="margin:8px 0 20px;font-size:12px;color:#6B5A7B;font-family:ui-monospace,Menlo,monospace">4 · 8 · 12 · 16 · 24 · 32 · 40</p>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;font-size:11px;color:#6B5A7B;text-align:center">
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:12px;background:#EEE7F6;border:1px solid #DCCCEB"></div>12 Small</div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:20px;background:#EEE7F6;border:1px solid #DCCCEB"></div>20 Card</div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:28px;background:#EEE7F6;border:1px solid #DCCCEB"></div>28 Hero</div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="height:64px;border-radius:34px;background:#EEE7F6;border:1px solid #DCCCEB"></div>34 Dock</div>
+</div>
+<h2 class="h2" style="margin-top:28px">Motion</h2>
+<div class="trow"><span style="font-size:13px">Micro interaction</span><small>150–250ms</small></div>
+<div class="trow"><span style="font-size:13px">Card transition</span><small>250–350ms</small></div>
+<div class="trow"><span style="font-size:13px">Page transition</span><small>300–450ms</small></div>
+<div class="trow"><span style="font-size:13px">Hero transition</span><small>600–900ms</small></div>
+<div class="trow" style="border-bottom:0"><span style="font-size:13px">Decorative loop · Reduce Motion → off</span><small>3–6s</small></div>
+</section>
+
+<section class="panel" style="background:linear-gradient(160deg,#EEE7F6,#EBDCE4);position:relative;overflow:hidden">
+<h2 class="h2">Glass levels</h2>
+<div aria-hidden="true" style="position:absolute;right:-30px;top:-20px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFFFFF,#B79AD8)"></div>
+<div class="glass" style="position:relative;border-radius:22px;padding:6px 16px">
+<div class="lvl"><i style="background:linear-gradient(165deg,rgba(255,255,255,.7),rgba(255,255,255,.25));border:1px solid #FFFFFF"></i><span>Bottom Navigation</span><small>Premium</small></div>
+<div class="lvl"><i style="background:linear-gradient(165deg,rgba(255,255,255,.75),rgba(255,255,255,.4));border:1px solid #FFFFFF"></i><span>Floating controls</span><small>Real</small></div>
+<div class="lvl"><i style="background:linear-gradient(135deg,#FFFFFF,#D9C8EE 60%,#A88ACF)"></i><span>Hero decoration</span><small>Crystal</small></div>
+<div class="lvl"><i style="background:rgba(255,255,255,.85);border:1px solid #FFFFFF"></i><span>Dialog</span><small>Light</small></div>
+<div class="lvl"><i style="background:#FFFFFF;border:1px solid #DCCCEB"></i><span>Lesson text</span><small>Opaque</small></div>
+<div class="lvl" style="border-bottom:0"><i style="background:#FFFFFF;border:1.5px solid #59446E"></i><span>Quiz options</span><small>High contrast</small></div>
+</div>
+<p style="position:relative;margin:14px 0 0;font-size:12px;line-height:1.5;color:#59446E">Ин ҷо CSS + SVG displacement (fallback). Real 3D Glass — WebGL PoC-и алоҳида (§8).</p>
+</section>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+<section class="panel">
+<h2 class="h2">Components</h2>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<button type="button" class="btn">Оғози курс</button>
+<button type="button" class="glass btn2">Идома</button>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center">
+<button type="button" class="chip on">Тоҷикӣ</button>
+<button type="button" class="chip">Русский</button>
+<button type="button" class="chip" style="font-family:'Noto Naskh Arabic',serif;font-size:15px">العربية</button>
+</div>
+<div style="display:flex;gap:16px;margin-top:18px;align-items:center;font-size:15px;font-weight:500">
+<span style="display:inline-flex;align-items:center;gap:8px">Огоҳиҳо <button type="button" class="help" aria-label="Шарҳ">!</button></span>
+<span role="img" aria-label="Switch" style="position:relative;width:52px;height:32px;border-radius:16px;background:linear-gradient(180deg,#8A6FB0,#59446E)"><span style="position:absolute;top:3px;left:23px;width:26px;height:26px;border-radius:50%;background:#FFFFFF;box-shadow:0 2px 6px rgba(0,0,0,.25)"></span></span>
+</div>
+<div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
+<div style="height:6px;border-radius:3px;background:#DCCCEB;overflow:hidden"><div style="width:62%;height:100%;background:linear-gradient(90deg,#A78BCB,#59446E)"></div></div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;border-radius:20px;background:#EEE7F6;font-size:13px;text-align:center">
+<span style="padding:8px 0;border-radius:16px;background:#FFFFFF;font-weight:600;box-shadow:0 4px 12px -6px rgba(89,68,110,.3)">Равшан</span><span style="padding:8px 0;color:#6B5A7B">Торик</span><span style="padding:8px 0;color:#6B5A7B">Система</span>
+</div>
+</div>
+</section>
+
+<section class="panel">
+<h2 class="h2">Callout blocks</h2>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div class="callout" style="background:#F6EEDF;border:1px solid #E8D7B9;color:#7A5A26"><b>Муҳим · Gold</b>Маълумоти муҳим</div>
+<div class="callout" style="background:#F8E5EA;border:1px solid #D48A9C;color:#8A2E45"><b>Огоҳӣ · Red</b>Огоҳии воқеӣ</div>
+<div class="callout" style="background:#F3EEF9;border:1px solid #DCCCEB;color:#6B4F8F"><b>Эзоҳ · Lavender</b>Эзоҳ</div>
+<div class="callout" style="background:#EAF3EC;border:1px solid #A9C9B2;color:#2F5E40"><b>Маслиҳат · Sage</b>Маслиҳати амалӣ</div>
+<div class="callout serif" style="background:#FFFFFF;border:1px solid #EEE7F6;color:#59446E;font-style:italic;font-size:15px"><b style="font-size:28px;line-height:18px;font-style:normal">“</b>Иқтибос · Elegant</div>
+</div>
+</section>
+
+<section class="panel">
+<h2 class="h2">UI text · кӯтоҳ ва дақиқ</h2>
+<div class="trow"><span style="font-size:13px">Сарлавҳа</span><small>1–5 калима</small></div>
+<div class="trow"><span style="font-size:13px">Тугма</span><small>1–3 калима</small></div>
+<div class="trow"><span style="font-size:13px">Label</span><small>1–4 калима</small></div>
+<div class="trow"><span style="font-size:13px">Тавсифи корт</span><small>1 ҷумла</small></div>
+<p style="margin:14px 0 6px;font-size:12px;color:#6B5A7B">Намунаҳо</p>
+<div style="display:flex;flex-wrap:wrap;gap:6px;font-size:12px">
+<span class="chip" style="display:inline-flex;align-items:center;height:28px">Асосӣ</span><span class="chip" style="display:inline-flex;align-items:center;height:28px">Мактабҳо</span><span class="chip" style="display:inline-flex;align-items:center;height:28px">Захираҳо</span><span class="chip" style="display:inline-flex;align-items:center;height:28px">Профил</span><span class="chip" style="display:inline-flex;align-items:center;height:28px">Идома</span><span class="chip" style="display:inline-flex;align-items:center;height:28px">Оғози курс</span><span class="chip" style="display:inline-flex;align-items:center;height:28px">Пешрафт</span><span class="chip" style="display:inline-flex;align-items:center;height:28px">Натиҷаҳо</span><span class="chip" style="display:inline-flex;align-items:center;height:28px">Танзимот</span><span class="chip" style="display:inline-flex;align-items:center;height:28px">Махфият</span>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

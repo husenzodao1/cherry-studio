@@ -1,0 +1,280 @@
+[
+ {
+  "name": "bloom-single",
+  "kind": "bloom",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 28,
+  "azimuth": 0,
+  "zoom": 0.78,
+  "size": 1200,
+  "noShadow": true,
+  "exposure": 1.0,
+  "rims": [
+   {
+    "color": "#f0d6ff",
+    "intensity": 10,
+    "dir": [
+     0.5,
+     0.6,
+     -1
+    ]
+   },
+   {
+    "color": "#ffc6e6",
+    "intensity": 6,
+    "dir": [
+     -1,
+     0.4,
+     -0.6
+    ]
+   }
+  ],
+  "flowers": [
+   {
+    "pos": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0.15,
+     0,
+     0.05
+    ],
+    "seed": 7
+   }
+  ],
+  "tone": "neutral",
+  "envIntensity": 0.75,
+  "keyIntensity": 2.2
+ },
+ {
+  "name": "bloom-cluster",
+  "kind": "bloom",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 28,
+  "azimuth": 0,
+  "zoom": 0.78,
+  "size": 1300,
+  "noShadow": true,
+  "exposure": 1.0,
+  "rims": [
+   {
+    "color": "#f0d6ff",
+    "intensity": 10,
+    "dir": [
+     0.5,
+     0.6,
+     -1
+    ]
+   },
+   {
+    "color": "#ffc6e6",
+    "intensity": 6,
+    "dir": [
+     -1,
+     0.4,
+     -0.6
+    ]
+   }
+  ],
+  "flowers": [
+   {
+    "pos": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0.38,
+     0.2,
+     0.18
+    ],
+    "seed": 11
+   },
+   {
+    "pos": [
+     1.55,
+     0.28,
+     -0.6
+    ],
+    "rot": [
+     0.25,
+     -0.3,
+     -0.35
+    ],
+    "scale": 0.68,
+    "seed": 23,
+    "palette": [
+     "#fff6fb",
+     "#f0c4e3",
+     "#c06bb3"
+    ]
+   },
+   {
+    "pos": [
+     -1.05,
+     0.95,
+     -0.7
+    ],
+    "rot": [
+     0.1,
+     0,
+     0.45
+    ],
+    "scale": 0.62,
+    "bud": true,
+    "seed": 5
+   }
+  ],
+  "crystals": [
+   {
+    "pos": [
+     -1.25,
+     -0.55,
+     0.35
+    ],
+    "rot": [
+     0.15,
+     0.4,
+     0.35
+    ],
+    "scale": 0.96,
+    "h": 1.0,
+    "tint": "#c39af0",
+    "absorb": 0.45
+   },
+   {
+    "pos": [
+     -0.95,
+     -0.6,
+     0.6
+    ],
+    "rot": [
+     -0.2,
+     0.1,
+     -0.25
+    ],
+    "scale": 0.66,
+    "h": 0.8,
+    "tint": "#c39af0",
+    "absorb": 0.45
+   }
+  ],
+  "tone": "neutral",
+  "envIntensity": 0.75,
+  "keyIntensity": 2.2
+ },
+ {
+  "name": "bloom-small",
+  "kind": "bloom",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "pitch": 34,
+  "azimuth": 0,
+  "zoom": 0.8,
+  "size": 900,
+  "noShadow": true,
+  "exposure": 1.0,
+  "rims": [
+   {
+    "color": "#f0d6ff",
+    "intensity": 10,
+    "dir": [
+     0.5,
+     0.6,
+     -1
+    ]
+   },
+   {
+    "color": "#ffc6e6",
+    "intensity": 6,
+    "dir": [
+     -1,
+     0.4,
+     -0.6
+    ]
+   }
+  ],
+  "flowers": [
+   {
+    "pos": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0.2,
+     0.6,
+     -0.1
+    ],
+    "seed": 31,
+    "palette": [
+     "#fffafd",
+     "#e6c7f5",
+     "#a46ad8"
+    ]
+   }
+  ],
+  "tone": "neutral",
+  "envIntensity": 0.75,
+  "keyIntensity": 2.2
+ },
+ {
+  "name": "rose-single",
+  "kind": "bloom",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "tone": "neutral",
+  "exposure": 1.0,
+  "envIntensity": 0.65,
+  "keyIntensity": 2.4,
+  "pitch": 34,
+  "azimuth": 0,
+  "zoom": 0.78,
+  "size": 1200,
+  "noShadow": true,
+  "rims": [
+   {
+    "color": "#ffe2d6",
+    "intensity": 9,
+    "dir": [
+     0.6,
+     0.7,
+     -1
+    ]
+   },
+   {
+    "color": "#dcc8ff",
+    "intensity": 7,
+    "dir": [
+     -1,
+     0.3,
+     -0.7
+    ]
+   }
+  ],
+  "flowers": [
+   {
+    "pos": [
+     0,
+     0,
+     0
+    ],
+    "rot": [
+     0.2,
+     0,
+     0.04
+    ],
+    "seed": 17,
+    "style": "rose",
+    "palette": [
+     "#fff4ee",
+     "#f3a2ae",
+     "#c3425c"
+    ],
+    "glow": "#a8304d",
+    "glowIntensity": 0.22,
+    "sheen": "#ffe6e6"
+   }
+  ]
+ }
+]
