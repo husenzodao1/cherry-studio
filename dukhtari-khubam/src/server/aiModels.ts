@@ -13,7 +13,7 @@ import { call } from './util'
  * server (the same secret). Without the secret, she answers as before (the keys of the environment).
  */
 
-const secret = () => process.env.MAHLIYO_SERVER_SECRET?.trim() || ''
+export const secret = () => process.env.MAHLIYO_SERVER_SECRET?.trim() || ''
 export const serverReady = () => secret().length >= 32
 const keyOf = () => createHash('sha256').update(`${secret()}:mahliyo-keys`).digest()
 

@@ -86,8 +86,10 @@ export function buildDisplacementMap(w: number, h: number, radius: number, bezel
 function supportsSvgBackdrop(): boolean {
   if (typeof navigator === 'undefined' || typeof CSS === 'undefined') return false
   const ua = navigator.userAgent
-  // light mode (weaker phones): no bending of the backdrop, which is redrawn on every frame
+  // light mode (weaker phones), and the phone app (its WebView redraws the bent backdrop on the GPU every
+  // frame, which makes scrolling stutter): frosted glass instead of bending
   if (document.documentElement.classList.contains('lite')) return false
+  if ((window as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()) return false
   const chromium = /Chrome\/|Chromium\//.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)
   return chromium && CSS.supports('backdrop-filter', 'url(#a)')
 }

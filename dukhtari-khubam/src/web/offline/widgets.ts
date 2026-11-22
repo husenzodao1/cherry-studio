@@ -9,13 +9,19 @@ const WEEK: Record<string, string[]> = {
   ar: ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح']
 }
 
-export interface WidgetTexts { brand: string; streak: string; done: string; continueFallback: string; words: string; quote: string }
+export interface WidgetTexts {
+  brand: string; streak: string; done: string; continueFallback: string; words: string; quote: string
+  /** what Mahliyo says on her widget (one a day, by state): lines each */
+  sayTodo?: string; sayDone?: string; sayLate?: string; go?: string
+}
 
 /**
  * The summary the home-screen widgets show: the streak, the last seven days (today last), the lessons
  * finished out of all published ones, where "continue" leads, and today's words (one of the newest
  * inspirations, a different one each day).
  */
+const lines = (text?: string) => (text ?? '').split('\n').map((l) => l.trim()).filter(Boolean)
+
 export function widgetSummary(bundle: Bundle | null, progress: ProgressData, t: WidgetTexts, locale: string, now = new Date()) {
   const days = new Set(progress.days)
   const week: boolean[] = []
@@ -48,6 +54,10 @@ export function widgetSummary(bundle: Bundle | null, progress: ProgressData, t: 
     nextPath: next ? `/lesson?id=${next.id}` : '/schools',
     wordsLabel: t.words.toLocaleUpperCase(),
     quote: quote?.body ?? t.quote,
-    author: quote?.author_name ? `— ${quote.author_name}` : ''
+    author: quote?.author_name ? `— ${quote.author_name}` : '',
+    // the Mahliyo widget: the last day she learnt (has she learnt today?), and what she says, one a day
+    lastDay: [...progress.days].sort().pop() ?? '',
+    say: { todo: lines(t.sayTodo), done: lines(t.sayDone), late: lines(t.sayLate) },
+    goText: t.go ?? t.continueFallback
   }
 }

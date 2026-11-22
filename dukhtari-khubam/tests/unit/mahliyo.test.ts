@@ -211,7 +211,7 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     expect(configured()).toBe(false)
   })
 
-  it('asks the best free model with the same rules and blocks; her name, age and birthday stay with the app', async () => {
+  it('asks the best free model with the same rules and blocks; she knows the learner\'s name, not her age or birthday', async () => {
     generate.mockResolvedValue(ok([{ type: 'text', text: 'Ба «Танзимот» дароед.' }, { type: 'screen', spot: 'settings.pin', caption: 'Инҷо' }]))
     const a = await answer(turns, 'Гулдухтар', 'ДОНИШ', me)
     expect(a).toMatchObject({ tajik: true, blocks: [{ type: 'text', text: 'Ба «Танзимот» дароед.' }, { type: 'screen', spot: 'settings.pin', caption: 'Инҷо' }] })
@@ -226,8 +226,10 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     expect(req.config).toMatchObject({ responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'MINIMAL' } })
     expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(5)
     const system = req.config.systemInstruction as string
-    for (const s of ['«Гулдухтар»', 'Gratorslab', 'BE BRIEF', 'ДОНИШ', 'Study days: 5', 'HER CURRENT TIME: 2026-11-21T14:00:00+05:00']) expect(system).toContain(s)
-    for (const s of ['Малика', 'age 17', '03-01', '{ENGINE}', 'runs on']) expect(system).not.toContain(s)
+    for (const s of ['«Гулдухтар»', 'Gratorslab', 'AS LONG AS THE QUESTION NEEDS', 'ДОНИШ', 'Study days: 5', 'HER CURRENT TIME: 2026-11-21T14:00:00+05:00']) expect(system).toContain(s)
+    // her name: she is greeted by it; her age and birthday stay with the app
+    expect(system).toContain('HER NAME: Малика')
+    for (const s of ['age 17', '03-01', '{ENGINE}', 'runs on']) expect(system).not.toContain(s)
     expect(create).not.toHaveBeenCalled()
   })
 

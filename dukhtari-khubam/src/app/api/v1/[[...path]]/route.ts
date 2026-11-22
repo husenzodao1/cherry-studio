@@ -3,6 +3,8 @@ import { dispatch } from '@/lib/router'
 import { routes } from '@/server/routes'
 
 export const dynamic = 'force-dynamic'
+// her answers and the catalogue's translations go on after the reply (after()): time for them
+export const maxDuration = 300
 
 type Params = { params: Promise<{ path?: string[] }> }
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- the words widget: the day's deeper colour (5 of 7) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient android:angle="315" android:startColor="#FFF58CB5" android:endColor="#FFD9527F" />
+    <corners android:radius="26dp" />
+</shape>

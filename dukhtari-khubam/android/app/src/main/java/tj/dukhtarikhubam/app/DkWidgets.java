@@ -12,10 +12,17 @@ import android.widget.RemoteViews;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 /**
  * Home-screen widgets. The app writes a small summary (WidgetsPlugin → SharedPreferences "dk_widgets")
  * whenever progress or the words of the day change; each widget draws itself from it. A tap opens the
  * app on the matching screen (custom-scheme link handled by the web layer).
+ * Every day looks different (also with the app closed: the widgets redraw every hour): a soft colour of
+ * seven, and on the Mahliyo widget one of her seven faces and what she says to you today — praise when
+ * today's lesson is done, a nudge when not yet, and in the evening a gentle "keep your streak".
  */
 public final class DkWidgets {
     static final String PREFS = "dk_widgets";
@@ -38,9 +45,28 @@ public final class DkWidgets {
         return PendingIntent.getActivity(ctx, code, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
+    private static final int[] LIGHT = { R.drawable.widget_bg_d0, R.drawable.widget_bg_d1, R.drawable.widget_bg_d2, R.drawable.widget_bg_d3, R.drawable.widget_bg_d4, R.drawable.widget_bg_d5, R.drawable.widget_bg_d6 };
+    private static final int[] DEEP = { R.drawable.widget_acc_d0, R.drawable.widget_acc_d1, R.drawable.widget_acc_d2, R.drawable.widget_acc_d3, R.drawable.widget_acc_d4, R.drawable.widget_acc_d5, R.drawable.widget_acc_d6 };
+    private static final int[] FACES = { R.drawable.widget_m0, R.drawable.widget_m1, R.drawable.widget_m2, R.drawable.widget_m3, R.drawable.widget_m4, R.drawable.widget_m5, R.drawable.widget_m6 };
+
+    /** today's number (days since 1970 on the phone's clock): what changes each day */
+    static int dayNo() {
+        Calendar c = Calendar.getInstance();
+        long local = c.getTimeInMillis() + c.get(Calendar.ZONE_OFFSET) + c.get(Calendar.DST_OFFSET);
+        return (int) (local / 86_400_000L);
+    }
+
+    /** one of a list, the day's own */
+    static String ofDay(JSONArray list, int day, String fallback) {
+        if (list == null || list.length() == 0) return fallback;
+        return list.optString(Math.floorMod(day, list.length()), fallback);
+    }
+
     static RemoteViews build(Context ctx, int layout) {
         JSONObject d = data(ctx);
         RemoteViews v = new RemoteViews(ctx.getPackageName(), layout);
+        int day = dayNo();
+        v.setInt(R.id.w_root, "setBackgroundResource", layout == R.layout.widget_words ? DEEP[day % 7] : LIGHT[day % 7]);
         int streak = d.optInt("streak", 0);
         String streakText = d.optString("streakText", "рӯзи пайдарпай");
         v.setTextViewText(R.id.w_streak, String.valueOf(streak));
@@ -61,6 +87,19 @@ public final class DkWidgets {
             v.setTextViewText(R.id.w_quote, d.optString("quote", "Зебоӣ дар дониш аст."));
             v.setTextViewText(R.id.w_author, d.optString("author", ""));
             v.setOnClickPendingIntent(R.id.w_root, open(ctx, "/", 4));
+        } else if (layout == R.layout.widget_mahliyo) {
+            // has she learnt today? (the app's last day of learning, on this phone's calendar)
+            String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Calendar.getInstance().getTime());
+            boolean done = today.equals(d.optString("lastDay", ""));
+            boolean evening = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) >= 18;
+            JSONObject say = d.optJSONObject("say");
+            JSONArray lines = say == null ? null : say.optJSONArray(done ? "done" : evening && streak > 0 ? "late" : "todo");
+            v.setImageViewResource(R.id.w_face, FACES[day % 7]);
+            v.setTextViewText(R.id.w_say, ofDay(lines, day, "Салом! Имрӯз чӣ меомӯзем?"));
+            v.setTextViewText(R.id.w_streak, String.valueOf(streak));
+            v.setTextViewText(R.id.w_go, d.optString("goText", "Оғоз"));
+            v.setOnClickPendingIntent(R.id.w_root, open(ctx, "/mahliyo", 6));
+            v.setOnClickPendingIntent(R.id.w_go, open(ctx, d.optString("nextPath", "/schools"), 7));
         } else if (layout == R.layout.widget_week) {
             JSONArray week = d.optJSONArray("week");
             JSONArray labels = d.optJSONArray("weekLabels");
@@ -82,6 +121,7 @@ public final class DkWidgets {
         update(ctx, m, ProgressWidget.class, R.layout.widget_progress);
         update(ctx, m, WordsWidget.class, R.layout.widget_words);
         update(ctx, m, WeekWidget.class, R.layout.widget_week);
+        update(ctx, m, MahliyoWidget.class, R.layout.widget_mahliyo);
     }
 
     private static void update(Context ctx, AppWidgetManager m, Class<?> cls, int layout) {
@@ -102,4 +142,5 @@ public final class DkWidgets {
     public static class ProgressWidget extends Base { int layout() { return R.layout.widget_progress; } }
     public static class WordsWidget extends Base { int layout() { return R.layout.widget_words; } }
     public static class WeekWidget extends Base { int layout() { return R.layout.widget_week; } }
+    public static class MahliyoWidget extends Base { int layout() { return R.layout.widget_mahliyo; } }
 }

@@ -5,7 +5,6 @@ import 'katex/dist/katex.min.css'
 import type { Element, ElementContent, Root } from 'hast'
 import Link from 'next/link'
 import { Fragment, useState, type CSSProperties, type ReactNode } from 'react'
-import { createPortal } from 'react-dom'
 import ReactMarkdown, { type Components } from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import remarkBreaks from 'remark-breaks'
@@ -108,34 +107,26 @@ const textOf = (n: { type: string; value?: string; children?: unknown[] }): stri
 
 /**
  * A piece of code: its language, "copy" and — for a web page or a drawing (HTML, SVG) — "preview", which
- * shows it working in a sealed frame (its scripts run there, apart from the app).
+ * shows it working inside the same box, in a sealed frame (its scripts run there, apart from the app).
  */
 function CodeBlock({ code, lang, className, style }: { code: string; lang: string; className?: string; style?: CSSProperties }) {
   const { t } = usePrefs()
-  const [open, setOpen] = useState(false)
+  const [view, setView] = useState<'code' | 'preview'>('code')
   const page = /^(html|svg|xml)$/i.test(lang) || (!lang && /^\s*<(!doctype|html|svg|div|body)/i.test(code))
   const copy = async () => showToast(t((await copyText(code)) ? 'ai.copied' : 'ai.unavailable'), 'copy')
   return (
-    <div className={['ai-code', className].filter(Boolean).join(' ')} style={style}>
+    <div className={['ai-code', className, view === 'preview' ? 'is-preview' : ''].filter(Boolean).join(' ')} style={style}>
       <div className="ai-code-head">
         <span>{lang || 'code'}</span>
         <span className="grow" />
-        {page ? <button type="button" className="ai-code-btn" onClick={() => setOpen(true)} aria-label={t('ai.preview')}><Icon name="eye" size={15} /></button> : null}
+        {page ? (
+          <button type="button" className={`ai-code-btn${view === 'preview' ? ' is-on' : ''}`} aria-pressed={view === 'preview'}
+            onClick={() => setView(view === 'preview' ? 'code' : 'preview')} aria-label={t('ai.preview')}><Icon name="eye" size={15} /></button>
+        ) : null}
         <button type="button" className="ai-code-btn" onClick={copy} aria-label={t('ai.copy')}><Icon name="copy" size={15} /></button>
       </div>
-      <pre><code>{code}</code></pre>
-      {open ? createPortal(
-        <div className="ai-preview" role="dialog" aria-modal="true" aria-label={t('ai.preview')}>
-          <div className="ai-preview-head">
-            <b>{t('ai.preview')}</b>
-            <span className="grow" />
-            <button type="button" className="ai-code-btn" onClick={copy} aria-label={t('ai.copy')}><Icon name="copy" size={16} /></button>
-            <button type="button" className="ai-code-btn" onClick={() => setOpen(false)} aria-label={t('action.close')}><Icon name="x" size={16} /></button>
-          </div>
-          <iframe title={t('ai.preview')} sandbox="allow-scripts" srcDoc={code} />
-        </div>,
-        document.body
-      ) : null}
+      {/* the page she wrote, working, in the same box (a sealed frame: its scripts run apart from the app) */}
+      {view === 'preview' ? <iframe className="ai-code-frame" title={t('ai.preview')} sandbox="allow-scripts" srcDoc={code} /> : <pre><code>{code}</code></pre>}
     </div>
   )
 }

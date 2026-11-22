@@ -17,7 +17,7 @@ import { useAuth } from '@/web/auth'
 import { useLearner } from '@/web/offline/learner'
 import { useApi } from '@/web/useApi'
 import {
-  aboutMe, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, rate, removeChat, retry, stop,
+  aboutMe, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
   useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { usePrefs } from '@/web/prefs'
@@ -69,6 +69,8 @@ export default function MahliyoPage() {
   const { learner, progress } = useLearner()
   const { session } = useAuth()
   const me = useApi<{ premium?: boolean }>(session ? '/me' : null)
+  // a Premium account keeps its chats; the others, a week
+  useEffect(() => { if (me.data || !session) keepChatsForever(!!me.data?.premium) }, [me.data, session])
   const { bundle } = useContent()
   const { chat, chats, turns, pending, problem, fresh, online } = useMahliyo()
   const [history, setHistory] = useState(false)
@@ -97,6 +99,8 @@ export default function MahliyoPage() {
   // opened from her circle in the tab bar: the chat pours out of it
   const [genie, setGenie] = useState(false)
   useLayoutEffect(() => {
+    // opened from the tab bar with a view transition: the new screen is there, it may pour out now
+    window.dispatchEvent(new Event('dk:ai-shown'))
     let from = false
     try {
       from = sessionStorage.getItem('dk.ai-genie') === '1'
@@ -169,7 +173,7 @@ export default function MahliyoPage() {
   hasTurns.current = turns.length > 0 && !pending
 
   // only the conversation moves; at its ends it stretches like rubber and springs back. Pulled far enough
-  // down at its top, it lets go into a new chat (the sign above it fills as it is pulled).
+  // up at its end, it lets go into a new chat (the sign below it fills as it is pulled).
   useEffect(() => {
     const el = scroller.current
     const body = inner.current
@@ -179,7 +183,7 @@ export default function MahliyoPage() {
     let d = 0
     let ready = false
     const show = () => {
-      const p = hasTurns.current && d > 0 ? Math.min(d / NEW_AT, 1) : 0
+      const p = hasTurns.current && d < 0 ? Math.min(-d / NEW_AT, 1) : 0
       sign.style.setProperty('--p', String(p))
       if (p >= 1 !== ready) {
         ready = p >= 1
@@ -210,14 +214,14 @@ export default function MahliyoPage() {
     const end = () => {
       if (!d) return
       if (ready) {
-        // let go: the old chat slides away, the new one comes in
+        // let go: the old chat slides up and away, the new one rises from below
         body.style.transition = 'transform 0.32s ease-in, opacity 0.32s ease-in'
-        body.style.transform = `translateY(${STRETCH * 2}px)`
+        body.style.transform = `translateY(${-STRETCH * 2}px)`
         body.style.opacity = '0'
         setTimeout(() => {
           startNewRef.current()
           body.style.transition = 'none'
-          body.style.transform = 'translateY(-24px)'
+          body.style.transform = 'translateY(24px)'
           requestAnimationFrame(() => {
             body.style.transition = 'transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.45s ease-out'
             body.style.transform = ''
@@ -430,7 +434,7 @@ export default function MahliyoPage() {
           <div className="ai-thinking" aria-label={t('ai.thinking')}>
             <span className="ai-orb ai-orb-xs" aria-hidden="true"><span className="ai-orb-ring" /><img src={FACE_THINK} alt="" /></span>
             <span className="grow">
-              <span className="ai-thinking-row"><span className="ai-thinking-text">{t('ai.thinking')}</span><span className="mi-dots"><i /><i /><i /></span></span>
+              <span className="ai-thinking-row"><ThinkingWords /><span className="mi-dots"><i /><i /><i /></span></span>
               {pending?.books ? <BooksHint since={pending.since} /> : null}
             </span>
           </div>
@@ -498,6 +502,19 @@ export default function MahliyoPage() {
       )}
     </div>
   )
+}
+
+/** while she thinks: "Маҳлиё фикр мекунад…", then every few seconds the next line, round and round */
+const THINKING_LINES = ['ai.thinking', 'ai.thinking_2', 'ai.thinking_3'] as const
+const THINKING_MS = 4000
+function ThinkingWords() {
+  const { t } = usePrefs()
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    const next = setInterval(() => setN((x) => (x + 1) % THINKING_LINES.length), THINKING_MS)
+    return () => clearInterval(next)
+  }, [])
+  return <span key={n} className="ai-thinking-text" aria-live="polite">{t(THINKING_LINES[n])}</span>
 }
 
 /** a wait this long, with books: she is searching the company's own sources */
@@ -620,22 +637,13 @@ function History({ chats, open, onClose, onOpen, onNew, onRemove, onArchive }: {
                   <span className="ai-history-title">{c.title || '…'}</span>
                   <span className="ai-history-when">{when(c.at)}</span>
                 </button>
-                <button type="button" className="ai-act ai-history-dots" aria-label={`${t('ai.chat_actions')}: ${c.title}`} aria-expanded={acts === c.id}
-                  onClick={() => setActs(acts === c.id ? null : c.id)}><Icon name="more" size={18} /></button>
-                {acts === c.id ? (
-                  <div className="ai-history-menu" role="menu">
-                    <button type="button" role="menuitem" onClick={() => { onArchive(c.id, !c.archived); setActs(null) }}>
-                      <Icon name="archive" size={17} />{c.archived ? t('ai.unarchive') : t('ai.archive')}
-                    </button>
-                    <button type="button" role="menuitem" className="is-danger" onClick={() => { onRemove(c.id); setActs(null) }}>
-                      <Icon name="trash" size={17} />{t('ai.delete_full')}
-                    </button>
-                  </div>
-                ) : null}
+                <button type="button" className="ai-act ai-history-dots" aria-label={`${t('ai.chat_actions')}: ${c.title}`} aria-haspopup="dialog"
+                  onClick={() => setActs(c.id)}><Icon name="more" size={18} /></button>
               </li>
             ))}
           </ul>
         ) : <p className="ai-history-none">{t('ai.no_chats')}</p>}
+        <p className="ai-history-keep">{t('ai.keep_week')}</p>
         <footer className="ai-history-foot">
           <label className="ai-history-search">
             <Icon name="search" size={19} />
@@ -647,8 +655,91 @@ function History({ chats, open, onClose, onOpen, onNew, onRemove, onArchive }: {
           <button type="button" className="ai-history-round" aria-label={t('ai.clear')} onClick={onNew}><Icon name="edit" size={20} /></button>
         </footer>
       </aside>
+      {acts ? (() => {
+        const c = chats.find((x) => x.id === acts)
+        return c ? <ChatActions chat={c} onClose={() => setActs(null)} onArchive={() => onArchive(c.id, !c.archived)} onRemove={() => onRemove(c.id)} /> : null
+      })() : null}
     </div>,
     document.body
+  )
+}
+
+/**
+ * A chat's actions, over the whole screen in the app's look: its name, then a choice (one at a time, as
+ * radio buttons) — to the archive (or back), share as a link, delete for good — and "Минбаъд" at the
+ * bottom. Shared, the link is shown with "copy" and the phone's share sheet.
+ */
+function ChatActions({ chat, onClose, onArchive, onRemove }: { chat: AiChatMeta; onClose: () => void; onArchive: () => void; onRemove: () => void }) {
+  const { t } = usePrefs()
+  const [pick, setPick] = useState<'archive' | 'share' | 'delete' | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [link, setLink] = useState<string | null>(null)
+  const options = [
+    { id: 'archive' as const, icon: 'archive' as const, label: chat.archived ? t('ai.unarchive') : t('ai.archive'), hint: t('ai.archive_hint') },
+    { id: 'share' as const, icon: 'share' as const, label: t('ai.share_link'), hint: t('ai.share_hint') },
+    { id: 'delete' as const, icon: 'trash' as const, label: t('ai.delete_full'), hint: t('ai.delete_hint') }
+  ]
+  const next = async () => {
+    if (pick === 'archive') { onArchive(); return onClose() }
+    if (pick === 'delete') { onRemove(); return onClose() }
+    if (pick === 'share') {
+      setBusy(true)
+      try {
+        setLink(await shareChat(chat.id))
+      } catch {
+        showToast(t('ai.unavailable'), 'alert')
+      } finally {
+        setBusy(false)
+      }
+    }
+  }
+  const send = async () => {
+    if (!link) return
+    if (Capacitor.isNativePlatform()) {
+      const { Share } = await import('@capacitor/share')
+      return void Share.share({ title: chat.title, url: link, dialogTitle: t('ai.share_link') }).catch(() => undefined)
+    }
+    if (navigator.share) return void navigator.share({ title: chat.title, url: link }).catch(() => undefined)
+    showToast(t((await copyText(link)) ? 'ai.copied' : 'ai.unavailable'), 'copy')
+  }
+  return (
+    <div className="ai-actions" role="dialog" aria-modal="true" aria-label={t('ai.chat_actions')} onClick={(e) => e.stopPropagation()}>
+      <header className="ai-actions-head">
+        <button type="button" className="ai-history-round" aria-label={t('action.close')} onClick={onClose}><Icon name="x" size={20} /></button>
+      </header>
+      <div className="ai-actions-body">
+        <span className="ai-actions-icon" aria-hidden="true"><Icon name="menu" size={22} /></span>
+        <h2 className="ai-actions-title">{emojify(chat.title || '…')}</h2>
+        {link ? (
+          <div className="ai-actions-link">
+            <b>{t('ai.link_ready')}</b>
+            <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+            <div className="ai-actions-link-btns">
+              <button type="button" className="btn btn-soft" onClick={async () => showToast(t((await copyText(link)) ? 'ai.copied' : 'ai.unavailable'), 'copy')}><Icon name="copy" size={16} /> {t('ai.copy_link')}</button>
+              <button type="button" className="btn" onClick={() => void send()}><Icon name="share" size={16} /> {t('ai.share_link')}</button>
+            </div>
+          </div>
+        ) : (
+          <div className="ai-actions-list" role="radiogroup" aria-label={t('ai.chat_actions')}>
+            {options.map((o) => (
+              <label key={o.id} className={`ai-actions-option${pick === o.id ? ' is-on' : ''}${o.id === 'delete' ? ' is-danger' : ''}`}>
+                <input type="radio" name="chat-action" value={o.id} checked={pick === o.id} onChange={() => setPick(o.id)} />
+                <span className="ai-actions-option-icon"><Icon name={o.icon} size={19} /></span>
+                <span className="grow"><b>{o.label}</b><span>{o.hint}</span></span>
+                <i className="ai-actions-radio" aria-hidden="true" />
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+      {link ? null : (
+        <footer className="ai-actions-foot">
+          <button type="button" className={`btn btn-block${pick === 'delete' ? ' btn-danger' : ''}`} disabled={!pick || busy} onClick={() => void next()}>
+            {busy ? t('ai.sending') : t('ai.next')}
+          </button>
+        </footer>
+      )}
+    </div>
   )
 }
 
@@ -685,14 +776,35 @@ function Attached({ files }: { files: AiFileView[] }) {
   )
 }
 
-/** Her greeting over the conversation's start: one of many, a different one each time her chat opens. */
+/**
+ * Her greeting's letters, rising one after another and settling, again and again (each word kept whole on
+ * its line; an emoji moves as one letter).
+ */
+function Wave({ text }: { text: string }) {
+  const words = text.split(/(\s+)/)
+  const n = [...text.replace(/\s+/g, '')].length
+  let at = 0
+  return (
+    <span className="ai-wave" style={{ ['--n' as string]: n }} aria-label={text}>
+      {words.map((w, wi) => (/^\s+$/.test(w) ? w : (
+        <span key={wi} className="ai-wave-word" aria-hidden="true">
+          {(w.match(/\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*|./gsu) ?? []).map((ch, ci) => (
+            <span key={ci} className="ai-wave-ch" style={{ ['--i' as string]: at++ }}>{emojify(ch)}</span>
+          ))}
+        </span>
+      )))}
+    </span>
+  )
+}
+
+/** Her greeting over the conversation's start: one of many, a different one each time her chat opens; it stays until she writes. */
 function Taglines({ lines }: { lines: string[] }) {
   // one greeting of many, chosen anew each time her chat opens (after the first paint: no mismatch)
   const [i, setI] = useState<number | null>(null)
   useEffect(() => { setI(Math.floor(Math.random() * lines.length)) }, [lines.length])
   return (
     <h2 className="ai-greet" aria-live="polite">
-      {i === null ? '\u00a0' : <span key={i} className="ai-greet-line">{emojify(lines[i])}</span>}
+      {i === null ? '\u00a0' : <span key={i} className="ai-greet-line"><Wave text={lines[i]} /></span>}
     </h2>
   )
 }

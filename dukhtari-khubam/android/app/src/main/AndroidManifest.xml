@@ -53,8 +53,12 @@
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_week" />
         </receiver>
+        <receiver android:name=".DkWidgets$MahliyoWidget" android:exported="false" android:label="@string/widget_mahliyo">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_mahliyo" />
+        </receiver>
 
-        <!-- launcher icon: the glass flower by day, the crescent moon at night (AppIconPlugin.java switches them) -->
+        <!-- launcher icon: by day one of seven glass icons (a new one each day), the crescent moon at night (AppIconPlugin.java switches them) -->
         <activity-alias
             android:name=".IconDefault"
             android:enabled="true"
@@ -74,6 +78,84 @@
             android:exported="true"
             android:icon="@mipmap/ic_moon"
             android:roundIcon="@mipmap/ic_moon"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconTulip"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_tulip"
+            android:roundIcon="@mipmap/ic_tulip"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconLotus"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_lotus"
+            android:roundIcon="@mipmap/ic_lotus"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconCrown"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_crown"
+            android:roundIcon="@mipmap/ic_crown"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconCrystals"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_crystals"
+            android:roundIcon="@mipmap/ic_crystals"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconBook"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_book"
+            android:roundIcon="@mipmap/ic_book"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".IconMahliyo"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_mahliyo"
+            android:roundIcon="@mipmap/ic_mahliyo"
             android:label="@string/title_activity_main"
             android:targetActivity=".MainActivity">
                 <intent-filter>

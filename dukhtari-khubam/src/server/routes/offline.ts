@@ -1,14 +1,15 @@
 import { createHash } from 'node:crypto'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { after } from 'next/server'
 import { z } from 'zod'
 
 import { ApiError } from '@/lib/http'
 import { emptyProgress, isCode, mergeProgress, ProgressData } from '@/lib/progress'
 import { unpack } from '@/lib/progressWire'
 import { route, type AnyRoute } from '@/lib/router'
-import { LocaleQuery } from '@/lib/schemas'
 
+import { fillTranslations, MT_LOCALES, translateBundle, type MtLocale } from '../translate'
 import { call, withMediaUrls } from '../util'
 
 /**
@@ -133,15 +134,32 @@ export const offlineRoutes: AnyRoute[] = [
     summary: 'Whole published catalogue for offline use (lessons, quizzes with answer keys, texts); send If-None-Match',
     // `v` is the live content stamp the app saw (GET /rest/v1/rpc/api_content_stamp): every stamp is its
     // own cache entry, so a change made in the panel is never answered from an older cached copy.
-    query: LocaleQuery.extend({ v: z.string().regex(/^[0-9T.]{1,40}$/).optional() }), cache: 20,
+    // every interface language: Tajik and Russian as written; the others (and Russian left in Tajik)
+    // translated by the AI (translate.ts) — not yet translated texts are translated right after, and the
+    // bundle says `translating` (not kept long by the cache; the app asks again until it is all there)
+    query: z.object({ locale: z.enum(['tg', 'ru', 'ar', 'en', 'uz', 'tr', 'fa', 'prs']).default('tg'), v: z.string().regex(/^[0-9T.]{1,40}$/).optional() }), cache: 20,
     handler: async ({ sb, query, req }) => {
-      const bundle = await buildBundle(sb(), query.locale)
+      const source = query.locale === 'ru' || query.locale === 'ar' ? query.locale : 'tg'
+      let bundle = await buildBundle(sb(), source)
+      let translating = false
+      if ((MT_LOCALES as readonly string[]).includes(query.locale)) {
+        const locale = query.locale as MtLocale
+        const client = sb()
+        const t = await translateBundle(client, bundle, locale)
+        const version = createHash('sha256').update(`${bundle.version}:${locale}:${t.missing.length}:${JSON.stringify(t.bundle).length}`).digest('hex').slice(0, 16)
+        bundle = { ...t.bundle, locale: query.locale, version }
+        if (t.missing.length) {
+          translating = true
+          after(() => fillTranslations(client, locale, t.missing).catch((e) => console.warn('[translate] failed', e)))
+        }
+      }
+      const out = translating ? { ...bundle, translating: true } : bundle
       const etag = `"${bundle.version}"`
-      const cache = query.v ? 'public, s-maxage=86400' : 'public, s-maxage=20, stale-while-revalidate=40'
+      const cache = translating ? 'no-store' : query.v ? 'public, s-maxage=86400' : 'public, s-maxage=20, stale-while-revalidate=40'
       if (req.headers.get('if-none-match') === etag) {
         return new Response(null, { status: 304, headers: { etag, 'cache-control': cache } })
       }
-      return new Response(JSON.stringify(bundle), {
+      return new Response(JSON.stringify(out), {
         headers: { 'content-type': 'application/json; charset=utf-8', etag, 'cache-control': cache }
       })
     }

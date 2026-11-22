@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState, type MouseEvent } from 'react'
 
 import { LiquidGlass } from '../glass/LiquidGlass'
 import { useMahliyo } from '../offline/mahliyo'
@@ -28,6 +28,7 @@ export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|ad
  */
 export function Dock() {
   const path = usePathname() ?? '/'
+  const router = useRouter()
   const { t } = usePrefs()
   const hidden = noDock(path)
   const { pending, unseen } = useMahliyo()
@@ -51,11 +52,24 @@ export function Dock() {
     )
   }
   // her chat opens full screen (in the browser too, where it allows); "✕" brings the learner back here
-  const toFull = () => {
-    // and the chat pours out of her circle (mahliyo/page.tsx)
-    try { sessionStorage.setItem('dk.ai-from', path); sessionStorage.setItem('dk.ai-genie', '1') } catch { /* home */ }
+  const toFull = (e: MouseEvent) => {
+    try { sessionStorage.setItem('dk.ai-from', path) } catch { /* home */ }
     const root = document.documentElement
     if (!document.fullscreenElement && root.requestFullscreen) void root.requestFullscreen({ navigationUI: 'hide' }).catch(() => undefined)
+    // the chat pours out of her circle, slowly, over the screen she was on (which stays as it is meanwhile)
+    const doc = document as Document & { startViewTransition?: (update: () => Promise<void>) => { finished: Promise<void> } }
+    if (!doc.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      try { sessionStorage.setItem('dk.ai-genie', '1') } catch { /* no animation */ }
+      return
+    }
+    e.preventDefault()
+    root.classList.add('genie-open')
+    const t = doc.startViewTransition(() => new Promise<void>((shown) => {
+      window.addEventListener('dk:ai-shown', () => shown(), { once: true })
+      setTimeout(shown, 1500)
+      router.push('/mahliyo')
+    }))
+    void t.finished.catch(() => undefined).finally(() => root.classList.remove('genie-open'))
   }
   return (
     <div className="dock-wrap">

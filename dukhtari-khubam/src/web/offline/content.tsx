@@ -4,7 +4,6 @@ import { get, set } from 'idb-keyval'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import type { Asset, Block } from '../components/Blocks'
-import { contentLocale } from '../i18n'
 import { usePrefs } from '../prefs'
 import { filterBundleForAge } from './age'
 import { apiUrl } from './base'
@@ -66,6 +65,8 @@ export interface OfflineQuiz {
 }
 export interface Achievement { id: string; key: string; title: string; description?: string | null; rule: Record<string, any>; icon?: { url: string | null } | null }
 export interface Bundle {
+  /** some texts are still being translated into this language (the app asks again soon) */
+  translating?: boolean
   v: 1; locale: string; version: string; generated_at: string
   schools: SchoolSummary[]
   schoolDetails: Record<string, SchoolDetail>
@@ -117,8 +118,9 @@ function writeLocal(k: string, v: string) {
 }
 
 export function ContentProvider({ children }: { children: ReactNode }) {
-  // lessons exist in Tajik and Russian; other interface languages read the Tajik ones
-  const locale = contentLocale(usePrefs().locale)
+  // lessons are written in Tajik and Russian; the other interface languages get them translated by the
+  // server's AI (a bundle still `translating` is asked for again until all its texts are there)
+  const locale = usePrefs().locale
   const [bundle, setBundle] = useState<Bundle | null>(null)
   const [loading, setLoading] = useState(true)
   const [offlineEmpty, setOfflineEmpty] = useState(false)
@@ -163,7 +165,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     try {
       const stamp = await readStamp()
       live.current = stamp !== null
-      if (stamp && stamp === readLocal(stampKey(locale)) && current.current) return
+      if (stamp && stamp === readLocal(stampKey(locale)) && current.current && !current.current.translating) return
       if (await fetchBundle(stamp)) {
         if (stamp) writeLocal(stampKey(locale), stamp)
       }

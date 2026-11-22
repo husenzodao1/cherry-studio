@@ -883,14 +883,16 @@ html.ai-full, html.ai-full body { overflow: hidden; overscroll-behavior: none; }
 
 .ai-top { flex: none; display: flex; align-items: center; gap: 12px; width: min(100%, 560px); margin: 0 auto;
   padding: max(12px, env(safe-area-inset-top)) 16px 8px; animation: rise 0.4s var(--ease) both; }
-.ai-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: none; scrollbar-width: none;
-  /* her words fade softly at the edges, so they never seem stuck to the header or the box to write in */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 34px), transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 34px), transparent 100%); }
+.ai-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: none; scrollbar-width: none; }
+/* her words fade softly at the edges, so they never seem stuck to the header or the box to write in:
+   two thin veils of the scene's colour that stay at the edges (cheaper to draw than a mask while scrolling) */
+.ai-chat::before, .ai-chat::after { content: ''; position: sticky; z-index: 2; display: block; flex: none; pointer-events: none; }
+.ai-chat::before { top: 0; height: 18px; margin: -12px -18px -6px; background: linear-gradient(var(--ai-bg), transparent); }
+.ai-chat::after { bottom: 0; height: 36px; margin: auto -18px -44px; background: linear-gradient(transparent, var(--ai-bg)); }
 .ai-scroll::-webkit-scrollbar { display: none; }
 .ai-scroll { position: relative; }
 /* above the chat's top, pulled down: a ring that fills, then "new chat" */
-.ai-pull { position: absolute; top: 14px; left: 50%; z-index: 0; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 8px; border-radius: 999px;
+.ai-pull { position: absolute; bottom: 18px; left: 50%; z-index: 0; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 8px; border-radius: 999px;
   transform: translateX(-50%) scale(calc(0.85 + var(--p, 0) * 0.15)); opacity: var(--p, 0); pointer-events: none;
   font-size: 0.82rem; font-weight: 600; color: var(--ink-2); background: color-mix(in srgb, var(--bg) 80%, #fff); border: 1px solid var(--glass-edge);
   box-shadow: 0 8px 20px -12px rgba(40, 20, 90, 0.4); transition: color 0.2s, background 0.2s; }
@@ -902,12 +904,18 @@ html.ai-full, html.ai-full body { overflow: hidden; overscroll-behavior: none; }
 .ai-pull.is-ready > svg + svg { color: #fff; }
 .ai-chat { position: relative; z-index: 1; }
 /* opened from her circle in the tab bar: the chat pours out of it, like a window from the dock */
-.ai-scene.is-genie { animation: ai-genie 0.62s cubic-bezier(0.3, 0.8, 0.25, 1) both; transform-origin: 50% calc(100% - 68px); }
+.ai-scene.is-genie { animation: ai-genie 0.8s cubic-bezier(0.22, 0.85, 0.25, 1) both; transform-origin: 50% calc(100% - 68px); }
+/* the same, as a view transition: the screen she was on stays still underneath while the chat pours out */
+html.genie-open::view-transition-old(root) { animation: none; }
+html.genie-open::view-transition-new(root) { animation: ai-genie 0.8s cubic-bezier(0.22, 0.85, 0.25, 1) both; transform-origin: 50% calc(100% - 68px); }
+html.genie-open .ai-scene, html.genie-open .ai-top { animation: none; }
 @keyframes ai-genie {
-  0% { opacity: 0.4; transform: scale(0.2, 0.06);
+  0% { opacity: 0.3; transform: scale(0.16, 0.05); border-radius: 50%;
     clip-path: polygon(42% calc(100% - 110px), 58% calc(100% - 110px), 54% calc(100% - 40px), 46% calc(100% - 40px)); }
-  45% { opacity: 1; transform: scale(0.82, 0.7);
-    clip-path: polygon(10% 18%, 90% 18%, 62% 100%, 38% 100%); }
+  35% { opacity: 1; transform: scale(0.66, 0.52);
+    clip-path: polygon(18% 30%, 82% 30%, 60% 100%, 40% 100%); }
+  70% { transform: scale(0.97, 0.95);
+    clip-path: polygon(2% 3%, 98% 3%, 91% 100%, 9% 100%); }
   100% { opacity: 1; transform: none; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
 }
 @media (prefers-reduced-motion: reduce) { .ai-scene.is-genie { animation: fade-in 0.2s both; } }
@@ -921,12 +929,7 @@ html.ai-full, html.ai-full body { overflow: hidden; overscroll-behavior: none; }
 .ai-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding-top: 6px; }
 .ai-greet { position: relative; display: grid; place-items: center; min-height: 2.5em; margin: 16px 0 0; font-size: 1.45rem; font-weight: 700; line-height: 1.25; color: var(--ink); }
 /* each line comes in from a soft blur and leaves the same way */
-.ai-greet-line { display: block; max-width: 22ch; animation: ai-line 3.6s var(--ease) both; }
-@keyframes ai-line {
-  0% { opacity: 0; transform: translateY(10px); filter: blur(6px); }
-  14%, 84% { opacity: 1; transform: none; filter: blur(0); }
-  100% { opacity: 0; transform: translateY(-8px); filter: blur(6px); }
-}
+.ai-greet-line { display: block; max-width: 22ch; animation: ai-line-in 0.7s var(--ease) both; }
 .ai-hello { margin: 0 0 4px; max-width: 30ch; font-size: 0.92rem; line-height: 1.45; color: var(--ink-2); animation: rise 0.5s 0.16s var(--ease) both; }
 /* two rows of short questions laid like bricks, gliding past in opposite ways, fading in and out at the edges */
 .ai-marquee { display: flex; flex-direction: column; gap: 2px; width: calc(100% + 36px); margin: 6px -18px 0; animation: fade-in 0.8s 0.3s both;
@@ -973,11 +976,8 @@ html.ai-full, html.ai-full body { overflow: hidden; overscroll-behavior: none; }
 .ai-code-btn { width: 32px; height: 32px; border: 0; padding: 0; display: grid; place-items: center; border-radius: 10px; background: none; color: var(--ink-2); cursor: pointer; }
 .ai-code-btn:active { transform: scale(0.9); background: color-mix(in srgb, var(--ink) 8%, transparent); }
 .ai-md pre { margin: 0; padding: 12px 14px; overflow-x: auto; white-space: pre; font-size: 0.84rem; line-height: 1.5; }
-/* a web page or drawing she wrote, shown working: a sheet over everything, a sealed frame */
-.ai-preview { position: fixed; inset: 0; z-index: 140; display: flex; flex-direction: column; background: var(--bg); animation: rise 0.3s var(--ease) both; }
-.ai-preview-head { display: flex; align-items: center; gap: 4px; padding: max(10px, env(safe-area-inset-top)) 10px 8px 18px; border-bottom: 1px solid var(--glass-edge); color: var(--ink); }
-.ai-preview-head .grow { flex: 1; }
-.ai-preview iframe { flex: 1; width: 100%; border: 0; background: #fff; }
+.ai-code-frame { display: block; width: 100%; height: 340px; border: 0; background: #fff; }
+.ai-code-btn.is-on { color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
 .ai-md pre code { padding: 0; background: none; font-size: inherit; }
 .ai-table { margin: 0.4em 0 0.8em; overflow-x: auto; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); }
 .ai-md table { border-collapse: collapse; min-width: 100%; font-size: 0.9rem; line-height: 1.4; }
@@ -2277,3 +2277,53 @@ html.no-capture.is-away main { filter: blur(22px); }
 .ai-limit-new { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 16px; border: 1px solid var(--glass-edge); border-radius: 999px; cursor: pointer;
   font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--ink); background: color-mix(in srgb, var(--bg) 80%, #fff); box-shadow: 0 6px 16px -10px rgba(40, 20, 90, 0.45); }
 .ai-limit-new:active { transform: scale(0.95); }
+
+/* a shared chat (read-only page) */
+.ai-shared { width: min(100%, 600px); margin: 0 auto; padding: max(14px, env(safe-area-inset-top)) 0 32px; display: flex; flex-direction: column; gap: 6px; }
+.ai-shared-head { display: flex; align-items: center; gap: 12px; padding: 0 18px 8px; }
+.ai-shared-chat { min-height: 0; padding-bottom: 12px; }
+.ai-shared .ai-said .ai-card { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.ai-shared .ai-text { font-size: 1.02rem; line-height: 1.68; color: var(--ink); }
+.ai-shared-cta { align-self: center; margin-top: 8px; }
+
+/* under the history: how long it is kept — small, plain */
+.ai-history-keep { margin: auto 18px 8px; padding-top: 10px; font-size: 0.68rem; line-height: 1.45; color: var(--ink-2); opacity: 0.85; text-align: center; }
+/* a chat's actions: the whole screen, the app's look — its name, a choice as radio buttons, "Минбаъд" at the bottom */
+.ai-actions { position: fixed; inset: 0; z-index: 135; display: flex; flex-direction: column; background: var(--bg); animation: rise 0.3s var(--ease) both; }
+.ai-actions-head { display: flex; justify-content: flex-end; padding: max(12px, env(safe-area-inset-top)) 14px 0; }
+.ai-actions-body { flex: 1; overflow-y: auto; width: min(100%, 520px); margin: 0 auto; padding: 8px 20px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.ai-actions-icon { width: 54px; height: 54px; border-radius: 18px; display: grid; place-items: center; color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent); margin-top: 6vh; }
+.ai-actions-title { margin: 0 0 8px; max-width: 26ch; text-align: center; font-size: 1.25rem; font-weight: 700; line-height: 1.3; color: var(--ink); overflow-wrap: anywhere; }
+.ai-actions-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.ai-actions-option { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 20px; cursor: pointer;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 9%, transparent); background: color-mix(in srgb, var(--bg) 70%, #fff); transition: border-color 0.2s, background 0.2s, transform 0.15s; }
+.ai-actions-option:active { transform: scale(0.985); }
+.ai-actions-option input { position: absolute; opacity: 0; pointer-events: none; }
+.ai-actions-option .grow { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ai-actions-option b { font-size: 0.98rem; color: var(--ink); }
+.ai-actions-option .grow > span { font-size: 0.78rem; line-height: 1.35; color: var(--ink-2); }
+.ai-actions-option-icon { flex: none; width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.ai-actions-option.is-danger .ai-actions-option-icon, .ai-actions-option.is-danger b { color: #d23b4a; }
+.ai-actions-radio { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--ink) 25%, transparent); position: relative; transition: border-color 0.2s; }
+.ai-actions-option.is-on { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 7%, var(--bg)); }
+.ai-actions-option.is-on .ai-actions-radio { border-color: var(--primary); }
+.ai-actions-option.is-on .ai-actions-radio::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: var(--primary); animation: pop 0.25s var(--ease) both; }
+.ai-actions-option:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
+.ai-actions-foot { width: min(100%, 520px); margin: 0 auto; padding: 10px 20px max(18px, env(safe-area-inset-bottom)); }
+.btn-danger { background: #d23b4a; color: #fff; }
+.ai-actions-link { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.ai-actions-link a { color: var(--link); font-size: 0.85rem; overflow-wrap: anywhere; }
+.ai-actions-link-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+/* her greeting: its letters rise one after another and settle, again and again */
+.ai-wave-word { display: inline-block; white-space: nowrap; }
+.ai-wave-ch { display: inline-block; animation: ai-ch 3.6s cubic-bezier(0.3, 0.7, 0.3, 1) infinite; animation-delay: calc(var(--i) * 70ms); }
+@keyframes ai-ch { 0% { transform: none; } 6% { transform: translateY(-0.32em); } 13%, 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ai-wave-ch { animation: none; } }
+
+/* scrolling: the endless decorative animations rest a moment (AppFeel) */
+html.is-scrolling *, html.is-scrolling *::before, html.is-scrolling *::after { animation-play-state: paused !important; }
+
+/* her thinking lines come in one after another */
+.ai-thinking .ai-thinking-text { animation: ai-line-in 0.45s var(--ease) both; }

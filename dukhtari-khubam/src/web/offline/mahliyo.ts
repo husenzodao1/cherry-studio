@@ -1,9 +1,10 @@
+import { compressToUTF16, decompressFromUTF16 } from 'lz-string'
 import { useSyncExternalStore } from 'react'
 
 import type { AiBlock } from '@/lib/aiCatalog'
 import { ageOf, streak, type ProgressData } from '@/lib/progress'
 
-import { apiUrl } from './base'
+import { apiUrl, SITE } from './base'
 import type { Bundle } from './content'
 import { journeyOf } from './journey'
 import { hasPin } from './pin'
@@ -49,10 +50,30 @@ const newId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? c
 /** a chat's name: its first question */
 const titleOf = (turns: AiTurn[]) => (turns.find((t) => t.role === 'user')?.content ?? '').replace(/\s+/g, ' ').trim().slice(0, 80)
 
+/**
+ * The chats are kept compressed (lz-string: a few times smaller), and only for a week after their last
+ * message — a Premium account keeps them (FOREVER_KEY, set by her chat when the account is Premium).
+ */
+const PACKED = 'lz:'
+const FOREVER_KEY = 'dk.ai.forever'
+const KEEP_DAYS = 7
+const forever = () => {
+  try { return localStorage.getItem(FOREVER_KEY) === '1' } catch { return false }
+}
+/** a chat whose last message is older than a week is let go (not for Premium) */
+const fresh = (c: AiChat, now = Date.now()) => forever() || now - Date.parse(c.at) < KEEP_DAYS * 86_400_000
+export function keepChatsForever(on: boolean) {
+  try {
+    if (on) localStorage.setItem(FOREVER_KEY, '1')
+    else localStorage.removeItem(FOREVER_KEY)
+  } catch { /* storage blocked */ }
+}
+
 function readChats(): AiChat[] {
   try {
-    const list = JSON.parse(localStorage.getItem(CHATS_KEY) || 'null') as AiChat[] | null
-    if (Array.isArray(list)) return list.filter((c) => c && typeof c.id === 'string' && Array.isArray(c.turns))
+    const raw = localStorage.getItem(CHATS_KEY)
+    const list = JSON.parse((raw?.startsWith(PACKED) ? decompressFromUTF16(raw.slice(PACKED.length)) : raw) || 'null') as AiChat[] | null
+    if (Array.isArray(list)) return list.filter((c) => c && typeof c.id === 'string' && Array.isArray(c.turns) && fresh(c))
     // the one chat of earlier versions becomes the first in the history
     const old = JSON.parse(localStorage.getItem(OLD_KEY) || '[]') as AiTurn[]
     return Array.isArray(old) && old.length ? [{ id: newId(), title: titleOf(old), at: old[old.length - 1].at ?? new Date().toISOString(), turns: old }] : []
@@ -62,7 +83,7 @@ function readChats(): AiChat[] {
 }
 function writeChats(list: AiChat[]) {
   try {
-    localStorage.setItem(CHATS_KEY, JSON.stringify(list.slice(0, MAX_CHATS)))
+    localStorage.setItem(CHATS_KEY, PACKED + compressToUTF16(JSON.stringify(list.filter((c) => fresh(c)).slice(0, MAX_CHATS))))
     localStorage.removeItem(OLD_KEY)
   } catch { /* storage blocked: the chats are not kept */ }
 }
@@ -419,6 +440,20 @@ export function newChat() {
 }
 
 /** Puts a chat in the archive, or takes it out (the one open, archived: a new one opens). */
+/**
+ * A chat shared as a link: its words (her questions, Mahliyo's answers as blocks; no pictures or files) go
+ * to the server, and the link shows them to anyone who has it. Resolves to the link.
+ */
+export async function shareChat(id: string): Promise<string> {
+  const chat = chats.find((c) => c.id === id)
+  if (!chat?.turns.length) throw new AiError(404)
+  const turns = chat.turns.slice(-60).map((t) => (t.role === 'user'
+    ? { role: 'user', content: t.content.slice(0, QUESTION_CAP) }
+    : { role: 'assistant', content: t.content.slice(0, 6000), ...(t.blocks?.length ? { blocks: t.blocks.filter((b) => b.type !== 'reminder') } : {}) }))
+  const { id: shared } = await post<{ id: string }>('/mahliyo/share', { token: supportToken(), title: chat.title.slice(0, 200), turns })
+  return `${SITE}/share?id=${shared}`
+}
+
 /** The learner marks her answer (turn `i` of the open chat) 👍 or 👎; the same again takes it back. The staff see it. */
 export function rate(i: number, rating: 1 | -1) {
   const turn = state.turns[i]

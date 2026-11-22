@@ -86,6 +86,19 @@ function AppFeel() {
       document.removeEventListener('dragstart', block)
     }
   }, [])
+  // while anything scrolls, the endless decorative animations rest (html.is-scrolling): the phone's GPU
+  // draws only the moving page, so scrolling stays smooth; they go on a moment after it stops
+  useEffect(() => {
+    const root = document.documentElement
+    let rest = 0
+    const moving = () => {
+      if (!rest) root.classList.add('is-scrolling')
+      clearTimeout(rest)
+      rest = window.setTimeout(() => { rest = 0; root.classList.remove('is-scrolling') }, 180)
+    }
+    document.addEventListener('scroll', moving, { capture: true, passive: true })
+    return () => { document.removeEventListener('scroll', moving, { capture: true }); clearTimeout(rest) }
+  }, [])
   return null
 }
 

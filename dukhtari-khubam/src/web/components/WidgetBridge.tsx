@@ -32,7 +32,8 @@ export function WidgetBridge() {
 
   const data = useMemo(() => (learner ? widgetSummary(bundle, progress, {
     brand: t('app.name'), streak: t('profile.streak'), done: t('widget.done'), continueFallback: t('home.start_learning'),
-    words: t('home.words'), quote: t('home.quote')
+    words: t('home.words'), quote: t('home.quote'),
+    sayTodo: t('widget.say_todo'), sayDone: t('widget.say_done'), sayLate: t('widget.say_late'), go: t('widget.go')
   }, locale) : null), [bundle, progress, learner, t, locale])
 
   useEffect(() => {

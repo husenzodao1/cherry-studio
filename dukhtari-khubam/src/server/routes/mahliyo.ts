@@ -144,6 +144,19 @@ export const mahliyoRoutes: AnyRoute[] = [
       return { ok: true }
     }
   }),
+  route({
+    method: 'POST', path: '/mahliyo/share', access: 'public', tag: 'Mahliyo AI', summary: 'A chat shared as a read-only link (its words only)',
+    body: z.strictObject({
+      token: Token, title: z.string().trim().min(1).max(200),
+      turns: z.array(z.strictObject({ role: z.enum(['user', 'assistant']), content: z.string().max(QUESTION_CAP > 6000 ? QUESTION_CAP : 6000), blocks: z.array(z.record(z.string(), z.unknown())).max(16).optional() })).min(1).max(60)
+    }),
+    handler: async ({ sb, body }) => ({ id: await call<string>(sb(), 'api_mahliyo_share', { p_token_hash: codeHash(body.token), p_title: body.title, p_turns: body.turns }) })
+  }),
+  route({
+    method: 'GET', path: '/mahliyo/shared', access: 'public', tag: 'Mahliyo AI', summary: 'A shared chat, by its link', cache: 300,
+    query: z.object({ id: z.uuid() }),
+    handler: async ({ sb, query }) => call(sb(), 'api_mahliyo_shared', { p_id: query.id })
+  }),
   // ── the staff: who answers (provider keys, a model), and her books ──
   route({
     method: 'GET', path: '/admin/ai', access: 'staff', tag: 'Admin · Mahliyo AI', summary: 'Which providers have a key (its last characters only) and which model answers',

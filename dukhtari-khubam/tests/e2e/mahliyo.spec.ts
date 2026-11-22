@@ -65,11 +65,17 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   const her = (await tab.boundingBox())!
   expect(her.y).toBeLessThan(bar.y - 20)
   expect(her.y + her.height).toBeGreaterThan(bar.y)
+  // opened from her circle: the chat pours out of it over the screen she was on (a view transition)
+  await page.evaluate(() => {
+    const doc = document as Document & { startViewTransition: (f: () => Promise<void>) => unknown }
+    const real = doc.startViewTransition.bind(doc)
+    ;(window as unknown as { __vt: number }).__vt = 0
+    doc.startViewTransition = (f) => { (window as unknown as { __vt: number }).__vt++; return real(f) }
+  })
   await tab.click()
   await expect(page).toHaveURL(/\/mahliyo\/?$/)
-  // opened from her circle: the chat pours out of it, like a window from the dock
-  await expect(page.locator('.ai-scene.is-genie')).toHaveCount(1)
-  await expect(page.locator('.ai-scene.is-genie')).toHaveCount(0, { timeout: 3000 })
+  expect(await page.evaluate(() => (window as unknown as { __vt: number }).__vt)).toBe(1)
+  await expect(page.locator('html')).not.toHaveClass(/genie-open/, { timeout: 3000 })
   // full screen: no tab bar; a plain header — her name, "Дугонаи донои шумо", a new chat, the menu (☰) and, at the far right, leaving (✕)
   await expect(page.locator('.dock')).toHaveCount(0)
   await expect(page.locator('.ai-status')).toHaveText('Дугонаи донои шумо')
@@ -196,21 +202,35 @@ test('her full screen: a soft plain colour, words without boxes; only the chat m
   await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи якум»')
   await menu.click()
   await expect(rows).toHaveCount(2)
-  // "⋮" → to the archive: out of the list; the archive (at the bottom) shows it; and back
+  // under the list: how long the history is kept, small
+  await expect(page.locator('.ai-history-keep')).toContainText('танҳо як ҳафта')
+  // "⋮" → the whole screen: the chat's name, a choice as radio buttons, "Минбаъд" (off until one is chosen)
+  const act = async (title: string, choice: string) => {
+    await rows.filter({ hasText: title }).getByRole('button', { name: /^Амалҳо/ }).click()
+    const sheet = page.locator('.ai-actions')
+    await expect(sheet.locator('.ai-actions-title')).toHaveText(title)
+    await expect(sheet.getByRole('button', { name: 'Минбаъд' })).toBeDisabled()
+    await sheet.locator('.ai-actions-option', { hasText: choice }).click()
+    await expect(sheet.getByRole('radio', { name: new RegExp(choice) })).toBeChecked()
+    await sheet.getByRole('button', { name: 'Минбаъд' }).click()
+    await expect(sheet).toHaveCount(0)
+  }
   await rows.filter({ hasText: 'Саволи дуюм' }).getByRole('button', { name: /^Амалҳо/ }).click()
-  await page.getByRole('menuitem', { name: 'Ба архив партофтан' }).click()
+  await expect(page.getByRole('radiogroup')).toBeVisible()
+  await page.screenshot({ path: 'test-results/mahliyo-chat-actions.png' })
+  await page.locator('.ai-actions').getByRole('button', { name: 'Пӯшидан' }).click()
+  // to the archive: out of the list; the archive (at the bottom) shows it; and back
+  await act('Саволи дуюм', 'Ба архив партофтан')
   await expect(rows).toHaveCount(1)
   await page.locator('.ai-history-foot').getByRole('button', { name: 'Архив' }).click()
   await expect(rows).toHaveCount(1)
   await expect(rows.first()).toContainText('Саволи дуюм')
-  await rows.first().getByRole('button', { name: /^Амалҳо/ }).click()
-  await page.getByRole('menuitem', { name: 'Аз архив баровардан' }).click()
+  await act('Саволи дуюм', 'Аз архив баровардан')
   await expect(rows).toHaveCount(0)
   await page.locator('.ai-history-foot').getByRole('button', { name: 'Архив' }).click()
   await expect(rows).toHaveCount(2)
   // "⋮" → deleted for good
-  await rows.filter({ hasText: 'Саволи дуюм' }).getByRole('button', { name: /^Амалҳо/ }).click()
-  await page.getByRole('menuitem', { name: 'Пурра нест кардан' }).click()
+  await act('Саволи дуюм', 'Пурра нест кардан')
   await expect(rows).toHaveCount(1)
   // back closes the history first
   await page.goBack()
@@ -482,7 +502,7 @@ test('a worked answer: formulas, a table and code drawn; a long question folds, 
   expect(errors).toEqual([])
 })
 
-test('code: copy, and a web page previewed in a sealed frame; pulled down at its top, the chat lets go into a new one', async ({ page, server: _, errors }) => {
+test('code: copy, and a web page previewed in its own box; a chat shared as a link; pulled up at its end, the chat lets go into a new one', async ({ page, server: _, errors }) => {
   await signedIn(page)
   const CODE = 'Ин саҳифа 😊\n\n```html\n<h1 id="hi">Салом!</h1>\n```'
   await fakeMahliyo(page, () => ({ tajik: true, reply: CODE, blocks: [{ type: 'text', text: CODE }] }), 200)
@@ -496,19 +516,31 @@ test('code: copy, and a web page previewed in a sealed frame; pulled down at its
   await expect(code.locator('pre code')).toHaveText('<h1 id="hi">Салом!</h1>')
   await code.getByRole('button', { name: 'Нусха' }).click()
   await expect(page.locator('.toast').filter({ hasText: /Нусха гирифта шуд|дастрас нест/ })).toBeVisible()
+  // the preview: inside the same box, not over the whole screen
   await code.getByRole('button', { name: 'Пешнамоиш' }).click()
-  const preview = page.getByRole('dialog', { name: 'Пешнамоиш' })
-  await expect(preview.locator('iframe')).toHaveAttribute('sandbox', 'allow-scripts')
-  await expect(preview.frameLocator('iframe').locator('#hi')).toHaveText('Салом!')
+  const frame = code.locator('iframe.ai-code-frame')
+  await expect(frame).toHaveAttribute('sandbox', 'allow-scripts')
+  await expect(code.frameLocator('iframe').locator('#hi')).toHaveText('Салом!')
+  expect((await frame.boundingBox())!.width).toBeLessThan(390)
   await page.screenshot({ path: 'test-results/mahliyo-code-preview.png' })
-  await preview.getByRole('button', { name: 'Пӯшидан' }).click()
-  await expect(preview).toHaveCount(0)
-  // pulled down at the top: the sign fills, and let go, a new chat
+  await code.getByRole('button', { name: 'Пешнамоиш' }).click()
+  await expect(frame).toHaveCount(0)
+  await expect(code.locator('pre code')).toBeVisible()
+  // a chat shared as a link (⋮ → "Мубодила кардан"): the link is made and shown
+  await page.route('**/api/v1/mahliyo/share', (r) => r.fulfill(json({ id: '00000000-0000-4000-8000-0000000000c1' })))
+  await page.getByRole('button', { name: 'Таърихи чатҳо' }).click()
+  await page.locator('.ai-history-row').first().getByRole('button', { name: /^Амалҳо/ }).click()
+  await page.locator('.ai-actions-option', { hasText: 'Мубодила кардан' }).click()
+  await page.locator('.ai-actions').getByRole('button', { name: 'Минбаъд' }).click()
+  await expect(page.locator('.ai-actions-link a')).toHaveText(/\/share\?id=00000000-0000-4000-8000-0000000000c1$/)
+  await page.locator('.ai-actions').getByRole('button', { name: 'Пӯшидан' }).click()
+  await page.locator('.ai-history').getByRole('button', { name: 'Пӯшидан' }).click()
+  // pulled up at the end: the sign fills, and let go, a new chat
   await page.locator('.ai-scroll').evaluate((el) => {
     const touch = (y: number) => new Touch({ identifier: 1, target: el, clientX: 200, clientY: y })
     const fire = (type: string, y: number) => el.dispatchEvent(new TouchEvent(type, { bubbles: true, cancelable: true, touches: type === 'touchend' ? [] : [touch(y)], changedTouches: [touch(y)] }))
-    fire('touchstart', 200)
-    for (let y = 220; y <= 760; y += 30) fire('touchmove', y)
+    fire('touchstart', 760)
+    for (let y = 740; y >= 200; y -= 30) fire('touchmove', y)
   })
   await expect(page.locator('.ai-pull')).toHaveClass(/is-ready/)
   await page.locator('.ai-scroll').evaluate((el) => el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [] })))

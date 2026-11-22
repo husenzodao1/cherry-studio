@@ -15,14 +15,16 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import java.util.Calendar;
 
 /**
- * The launcher icon follows the time of day: the glass flower by day (06:00–17:59), the crescent moon
- * in the evening and at night. Two activity aliases in AndroidManifest.xml (IconDefault, IconMoon).
+ * The launcher icon changes by itself: by day (06:00–17:59) one of seven glass icons, a different one each
+ * day — the flower, the tulip, the lotus, the crown, the crystals, the book and Mahliyo herself — and the
+ * crescent moon in the evening and at night. One activity alias each in AndroidManifest.xml.
  * The switch happens by itself at 06:00 and 18:00 (an alarm, also after the phone restarts), and when
  * the app goes to the background; never while the app is on screen (switching then could close it).
  */
 @CapacitorPlugin(name = "AppIcon")
 public class AppIconPlugin extends Plugin {
-    private static final String DAY = "IconDefault";
+    /** the day's icons, in turn (the first is the one the app is installed with) */
+    private static final String[] DAYS = { "IconDefault", "IconTulip", "IconLotus", "IconCrown", "IconCrystals", "IconBook", "IconMahliyo" };
     private static final String NIGHT = "IconMoon";
     private static final String ACTION = "tj.dukhtarikhubam.app.ICON_SWITCH";
     /** the app's screen is showing (set by the plugin; false whenever the process was not running) */
@@ -40,18 +42,27 @@ public class AppIconPlugin extends Plugin {
         return st == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT ? byDefault : st == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
     }
 
+    /** the icon for now: the moon at night, else the day's one (the day of the year, in turn) */
+    static String current() {
+        if (night()) return NIGHT;
+        return DAYS[Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % DAYS.length];
+    }
+
     static void apply(Context ctx) {
         PackageManager pm = ctx.getPackageManager();
         String pkg = ctx.getPackageName();
-        boolean nightNow = night();
-        ComponentName day = new ComponentName(pkg, pkg + "." + DAY);
-        ComponentName moon = new ComponentName(pkg, pkg + "." + NIGHT);
-        ComponentName on = nightNow ? moon : day;
-        ComponentName off = nightNow ? day : moon;
-        if (enabled(pm, on, !nightNow) && !enabled(pm, off, nightNow)) return; // already right
-        // first the new one on, then the other off, so there is always one entry in the launcher
-        pm.setComponentEnabledSetting(on, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        pm.setComponentEnabledSetting(off, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        String want = current();
+        ComponentName on = new ComponentName(pkg, pkg + "." + want);
+        // first the new one on, then the others off, so there is always one entry in the launcher
+        if (!enabled(pm, on, want.equals(DAYS[0]))) pm.setComponentEnabledSetting(on, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        String[] all = new String[DAYS.length + 1];
+        System.arraycopy(DAYS, 0, all, 0, DAYS.length);
+        all[DAYS.length] = NIGHT;
+        for (String name : all) {
+            if (name.equals(want)) continue;
+            ComponentName c = new ComponentName(pkg, pkg + "." + name);
+            if (enabled(pm, c, name.equals(DAYS[0]))) pm.setComponentEnabledSetting(c, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        }
     }
 
     /** The next 06:00 or 18:00 (a minute after, so the hour has surely turned). */
@@ -78,7 +89,7 @@ public class AppIconPlugin extends Plugin {
         else am.set(AlarmManager.RTC_WAKEUP, nextSwitch(), pi);
     }
 
-    /** The alarm at 06:00 / 18:00 and the phone's restart: switch now (unless the app is showing), plan the next. */
+    /** The alarm at 06:00 (a new day's icon) / 18:00 and the phone's restart: switch now (unless the app is showing), plan the next. */
     public static class Switch extends BroadcastReceiver {
         @Override
         public void onReceive(Context ctx, Intent intent) {
