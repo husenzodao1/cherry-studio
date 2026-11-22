@@ -273,3 +273,16 @@ test('after 22:00 a sleepy Mahliyo asks her to sleep: the time in the words, "cl
   await expect(page.locator('.night')).toHaveCount(0)
   expect(errors).toEqual([])
 })
+
+test('from 5:00 to 7:40 a morning scene: the phone first thing harms the mind; "Барномаро пӯшидан" as a button and a quiet "Давом додан"', async ({ page, server: _, errors }) => {
+  await page.clock.install({ time: new Date('2026-11-23T06:15:00') })
+  await signedIn(page, { night: true })
+  await page.goto('/')
+  await expect(page.locator('.scene-morning')).toBeVisible({ timeout: 10_000 })
+  await expect(page.locator('.night-text')).toContainText('06:15')
+  await expect(page.locator('.night-sleep')).toHaveText('Барномаро пӯшидан')
+  await page.screenshot({ path: 'test-results/morning.png' })
+  await page.locator('.night-refuse', { hasText: 'Давом додан' }).click()
+  await expect(page.locator('.night')).toHaveCount(0)
+  expect(errors).toEqual([])
+})

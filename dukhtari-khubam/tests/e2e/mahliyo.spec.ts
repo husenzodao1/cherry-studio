@@ -84,8 +84,8 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   await expect(page.locator('.ai-status')).toHaveText('Дугонаи донои шумо')
   await expect(page.locator('.ai-top button')).toHaveCount(4)
   await expect(page.locator('.ai-top button').first()).toHaveAccessibleName('Сӯҳбати нав')
-  await expect(page.locator('.ai-top button').nth(1)).toHaveAccessibleName('Чати муваққатӣ')
-  await expect(page.locator('.ai-top button').nth(2)).toHaveAccessibleName('Таърихи чатҳо')
+  await expect(page.locator('.ai-top button').nth(1)).toHaveAccessibleName('Таърихи чатҳо')
+  await expect(page.locator('.ai-top button').nth(2)).toHaveAccessibleName('Чати муваққатӣ')
   const leaveBox = (await page.getByRole('button', { name: 'Баромадан' }).boundingBox())!
   expect(leaveBox.x + leaveBox.width).toBeGreaterThan(390 - 24)
   await expect(page.locator('.ai-hello')).toHaveCount(0)

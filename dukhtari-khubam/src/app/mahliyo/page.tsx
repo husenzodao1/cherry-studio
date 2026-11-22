@@ -404,9 +404,9 @@ export default function MahliyoPage() {
           <span className={`ai-status${busy ? ' is-busy' : ''}`} aria-live="polite">{sending ? t('ai.sending') : busy ? t('ai.thinking') : t('ai.subtitle')}</span>
         </div>
         <button type="button" className="ai-menu" aria-label={t('ai.clear')} onClick={startNew} disabled={!turns.length && !temp}><Icon name="compose" size={21} /></button>
+        <button type="button" className="ai-menu" aria-label={t('ai.history')} aria-haspopup="dialog" onClick={() => { leaveTemp(); setHistory(true) }}><Icon name="menu" size={22} /></button>
         <button type="button" className={`ai-menu ai-temp${temp ? ' is-on' : ''}`} aria-label={t('ai.temp')} aria-pressed={!!temp}
           onClick={() => { if (temp) startNew(); else { tempChat(); setFiles([]) } }}><Icon name="ghostChat" size={21} /></button>
-        <button type="button" className="ai-menu" aria-label={t('ai.history')} aria-haspopup="dialog" onClick={() => { leaveTemp(); setHistory(true) }}><Icon name="menu" size={22} /></button>
         <button type="button" className="ai-menu ai-leave" aria-label={t('ai.leave')} onClick={leave}><Icon name="x" size={20} /></button>
       </header>
       {selecting !== null ? <SelectText text={selecting} onClose={() => setSelecting(null)} /> : null}

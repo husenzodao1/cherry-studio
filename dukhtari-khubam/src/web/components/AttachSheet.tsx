@@ -102,24 +102,6 @@ export function AttachSheet({ max, mode, onMode, onFiles, onClose }: {
         style={drag ? { transform: `translateY(${Math.max(drag, -80)}px)`, transition: 'none' } : undefined} onClick={(e) => e.stopPropagation()}>
         <div className="attach-handle" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}><span /></div>
 
-        <div className="attach-photos">
-          <button type="button" className="attach-cam" onClick={() => setCamera(true)} aria-label={t('ai.camera')}>
-            <Icon name="camera" size={30} /><span>{t('ai.camera')}</span>
-          </button>
-          {(photos ?? []).map((p) => {
-            const n = picked.indexOf(p.id)
-            return (
-              <button key={p.id} type="button" className={`attach-photo${n >= 0 ? ' is-on' : ''}`} onClick={() => toggle(p.id)} aria-pressed={n >= 0}>
-                <img src={p.thumb} alt="" loading="lazy" />
-                <i aria-hidden="true">{n >= 0 ? n + 1 : ''}</i>
-              </button>
-            )
-          })}
-          {photos && !photos.length ? (
-            <button type="button" className="attach-cam attach-more" onClick={() => gallery.current?.click()}><Icon name="image" size={28} /><span>{t('ai.gallery')}</span></button>
-          ) : null}
-        </div>
-
         {picked.length ? (
           <button type="button" className="btn attach-send" onClick={() => void sendPicked()}><Icon name="up" size={18} />{t('ai.attach_send').replace('{n}', String(picked.length))}</button>
         ) : (
@@ -133,6 +115,25 @@ export function AttachSheet({ max, mode, onMode, onFiles, onClose }: {
             ))}
           </div>
         )}
+
+        {/* below: the camera first, then the newest photos, all in the same square tiles */}
+        <div className="attach-photos">
+          <button type="button" className="attach-tile attach-cam" onClick={() => setCamera(true)} aria-label={t('ai.camera')}>
+            <Icon name="camera" size={30} /><span>{t('ai.camera')}</span>
+          </button>
+          {(photos ?? []).map((p) => {
+            const n = picked.indexOf(p.id)
+            return (
+              <button key={p.id} type="button" className={`attach-tile attach-photo${n >= 0 ? ' is-on' : ''}`} onClick={() => toggle(p.id)} aria-pressed={n >= 0}>
+                <img src={p.thumb} alt="" loading="lazy" />
+                <i aria-hidden="true">{n >= 0 ? n + 1 : ''}</i>
+              </button>
+            )
+          })}
+          {photos && !photos.length ? (
+            <button type="button" className="attach-tile attach-more" onClick={() => gallery.current?.click()}><Icon name="image" size={28} /><span>{t('ai.gallery')}</span></button>
+          ) : null}
+        </div>
         <input ref={docs} type="file" hidden multiple accept="application/pdf,text/plain" onChange={(e) => fromInput(e.target.files)} />
         <input ref={gallery} type="file" hidden multiple accept="image/*" onChange={(e) => fromInput(e.target.files)} />
       </section>

@@ -2656,26 +2656,24 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
 
 /* ---------------------------------------------------------------- the paperclip's sheet (AttachSheet.tsx) */
 .attach-veil { position: fixed; inset: 0; z-index: 80; background: rgba(20, 10, 40, 0.28); animation: fade-in 0.2s both; display: flex; align-items: flex-end; }
-.attach { width: 100%; max-width: 560px; margin: 0 auto; max-height: 62vh; display: flex; flex-direction: column; gap: 12px; padding: 0 14px max(16px, env(safe-area-inset-bottom));
+.attach { width: 100%; max-width: 560px; margin: 0 auto; max-height: 78vh; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 0 14px max(16px, env(safe-area-inset-bottom));
   border-radius: 26px 26px 0 0; background: var(--bg); box-shadow: 0 -18px 40px -20px rgba(40, 20, 90, 0.4);
   transition: max-height 0.35s var(--ease), transform 0.3s var(--ease); animation: attach-up 0.32s var(--ease) both; }
 .attach.is-tall { max-height: 92vh; }
 @keyframes attach-up { from { transform: translateY(100%); } to { transform: none; } }
 .attach-handle { padding: 10px 0 2px; display: flex; justify-content: center; cursor: grab; touch-action: none; }
 .attach-handle span { width: 42px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 22%, transparent); }
-.attach-photos { display: grid; grid-auto-flow: column; grid-auto-columns: 92px; grid-template-rows: repeat(2, 92px); gap: 4px; overflow-x: auto; scrollbar-width: none;
-  border-radius: 14px; }
+.attach-photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin: 0 -14px; overflow-y: auto; max-height: 34vh; scrollbar-width: none; }
 .attach-photos::-webkit-scrollbar { display: none; }
-.attach.is-tall .attach-photos { grid-auto-flow: row; grid-template-columns: repeat(3, 1fr); grid-template-rows: none; grid-auto-rows: 31vw; max-height: 100%; overflow-y: auto; overflow-x: hidden; flex: 1; }
-.attach-cam { grid-row: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 12px; cursor: pointer;
-  font: inherit; font-size: 0.8rem; color: #fff; background: linear-gradient(160deg, #2a2140, #120d22); }
-.attach.is-tall .attach-cam { grid-row: auto; }
-.attach-more { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
-.attach-photo { position: relative; padding: 0; border: 0; border-radius: 8px; overflow: hidden; cursor: pointer; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.attach.is-tall .attach-photos { max-height: none; flex: 1; }
+.attach-tile { position: relative; aspect-ratio: 1; padding: 0; border: 0; overflow: hidden; cursor: pointer; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.attach-cam, .attach-more { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: inherit; font-size: 0.74rem; }
+.attach-cam { color: #fff; background: linear-gradient(160deg, #2a2140, #120d22); }
+.attach-more { color: var(--ink); }
 .attach-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s; }
 .attach-photo i { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; font-style: normal; font-size: 0.72rem; font-weight: 700;
   display: grid; place-items: center; color: #fff; border: 2px solid #fff; background: rgba(0, 0, 0, 0.18); }
-.attach-photo.is-on img { transform: scale(0.88); border-radius: 8px; }
+.attach-photo.is-on img { transform: scale(0.86); border-radius: 6px; }
 .attach-photo.is-on i { background: var(--primary); }
 .attach-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 6px; padding: 4px 0 2px; }
 .attach-actions button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 2px; border: 0; background: none; font: inherit; font-size: 0.78rem;
@@ -2705,3 +2703,17 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
   transition: transform 0.12s; }
 .cam-shoot:active { transform: scale(0.9); }
 .cam-shoot:disabled { opacity: 0.4; }
+/* day scenes: their own skies (the night keeps its moon and stars) */
+.scene-morning, .scene-breakfast, .scene-lunch, .scene-dinner { color: #fffaf3; }
+.scene-morning { background: radial-gradient(70% 45% at 70% 18%, rgba(255, 214, 140, 0.55), transparent 70%), linear-gradient(180deg, #2a1f5c 0%, #7b4a8e 38%, #e88f7a 72%, #f7c98b 100%); }
+.scene-breakfast { background: radial-gradient(70% 45% at 30% 15%, rgba(255, 236, 170, 0.5), transparent 70%), linear-gradient(170deg, #5b3a8e 0%, #c46a8a 45%, #f2a477 80%, #f8d39a 100%); }
+.scene-lunch { background: radial-gradient(60% 40% at 50% 10%, rgba(255, 250, 200, 0.45), transparent 70%), linear-gradient(170deg, #3e5b9e 0%, #6f8fd0 40%, #e9a07a 85%, #f6c48c 100%); }
+.scene-dinner { background: radial-gradient(70% 45% at 75% 14%, rgba(255, 170, 120, 0.45), transparent 70%), linear-gradient(180deg, #1c1440 0%, #4b2a6e 40%, #b5527a 75%, #f08a6a 100%); }
+.scene-morning .night-moon, .scene-breakfast .night-moon, .scene-lunch .night-moon { width: 70px; height: 70px; box-shadow: none; transform: none;
+  background: radial-gradient(circle, #fff6d6 0 42%, rgba(255, 220, 140, 0.6) 46%, transparent 70%); }
+.scene-morning .night-stars, .scene-breakfast .night-stars, .scene-lunch .night-stars, .scene-morning .night-shoot, .scene-breakfast .night-shoot, .scene-lunch .night-shoot,
+.scene-dinner .night-shoot { display: none; }
+.scene-dinner .night-stars { opacity: 0.4; }
+.night-art.is-portrait { width: min(62vw, 260px); aspect-ratio: auto; margin: 0; -webkit-mask: none; mask: none; }
+.night-art.is-portrait img { height: auto; border-radius: 50%; }
+.scene-morning .night-z, .scene-breakfast .night-z, .scene-lunch .night-z, .scene-dinner .night-z { left: 64%; top: 8%; font-family: inherit; }
