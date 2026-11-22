@@ -23,6 +23,9 @@ export function widgetPath(url: string): string | null {
  * Android app: keeps the home-screen widgets up to date (streak, week, lessons, words of the day) and
  * opens the screen a widget was tapped for.
  */
+/** the Mahliyo widget's scenes (DkWidgets.java) */
+const WIDGET_SCENES = ['morning', 'win', 'fire', 'wait', 'worry', 'last', 'sad', 'sleep', 'party', 'cold'] as const
+
 export function WidgetBridge() {
   const { t, locale } = usePrefs()
   const { bundle } = useContent()
@@ -33,7 +36,7 @@ export function WidgetBridge() {
   const data = useMemo(() => (learner ? widgetSummary(bundle, progress, {
     brand: t('app.name'), streak: t('profile.streak'), done: t('widget.done'), continueFallback: t('home.start_learning'),
     words: t('home.words'), quote: t('home.quote'),
-    sayTodo: t('widget.say_todo'), sayDone: t('widget.say_done'), sayLate: t('widget.say_late'), go: t('widget.go')
+    scenes: Object.fromEntries(WIDGET_SCENES.map((id) => [id, t(`widget.s_${id}`)])), go: t('widget.go')
   }, locale) : null), [bundle, progress, learner, t, locale])
 
   useEffect(() => {

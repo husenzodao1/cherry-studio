@@ -11,8 +11,8 @@ const WEEK: Record<string, string[]> = {
 
 export interface WidgetTexts {
   brand: string; streak: string; done: string; continueFallback: string; words: string; quote: string
-  /** what Mahliyo says on her widget (one a day, by state): lines each */
-  sayTodo?: string; sayDone?: string; sayLate?: string; go?: string
+  /** what Mahliyo says in each of her widget's scenes: lines of "title|line under it" */
+  scenes?: Record<string, string>; go?: string
 }
 
 /**
@@ -55,9 +55,11 @@ export function widgetSummary(bundle: Bundle | null, progress: ProgressData, t: 
     wordsLabel: t.words.toLocaleUpperCase(),
     quote: quote?.body ?? t.quote,
     author: quote?.author_name ? `— ${quote.author_name}` : '',
-    // the Mahliyo widget: the last day she learnt (has she learnt today?), and what she says, one a day
+    // the Mahliyo widget: the last day she learnt, the day the app was last open (three days away: "cold"),
+    // and her words in each scene (the widget picks the scene by the hour)
     lastDay: [...progress.days].sort().pop() ?? '',
-    say: { todo: lines(t.sayTodo), done: lines(t.sayDone), late: lines(t.sayLate) },
+    opened: localDay(now),
+    scenes: Object.fromEntries(Object.entries(t.scenes ?? {}).map(([id, text]) => [id, lines(text)])),
     goText: t.go ?? t.continueFallback
   }
 }

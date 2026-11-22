@@ -20,9 +20,9 @@ import java.util.Locale;
  * Home-screen widgets. The app writes a small summary (WidgetsPlugin → SharedPreferences "dk_widgets")
  * whenever progress or the words of the day change; each widget draws itself from it. A tap opens the
  * app on the matching screen (custom-scheme link handled by the web layer).
- * Every day looks different (also with the app closed: the widgets redraw every hour): a soft colour of
- * seven, and on the Mahliyo widget one of her seven faces and what she says to you today — praise when
- * today's lesson is done, a nudge when not yet, and in the evening a gentle "keep your streak".
+ * Every day looks different (also with the app closed: the widgets redraw every hour, Mahliyo's every half
+ * hour): a soft colour of seven, and on the Mahliyo widget one of her ten scenes (mahliyoScene) — her
+ * emotion, its own background and a few short words.
  */
 public final class DkWidgets {
     static final String PREFS = "dk_widgets";
@@ -47,7 +47,59 @@ public final class DkWidgets {
 
     private static final int[] LIGHT = { R.drawable.widget_bg_d0, R.drawable.widget_bg_d1, R.drawable.widget_bg_d2, R.drawable.widget_bg_d3, R.drawable.widget_bg_d4, R.drawable.widget_bg_d5, R.drawable.widget_bg_d6 };
     private static final int[] DEEP = { R.drawable.widget_acc_d0, R.drawable.widget_acc_d1, R.drawable.widget_acc_d2, R.drawable.widget_acc_d3, R.drawable.widget_acc_d4, R.drawable.widget_acc_d5, R.drawable.widget_acc_d6 };
-    private static final int[] FACES = { R.drawable.widget_m0, R.drawable.widget_m1, R.drawable.widget_m2, R.drawable.widget_m3, R.drawable.widget_m4, R.drawable.widget_m5, R.drawable.widget_m6 };
+
+    /**
+     * Mahliyo's ten scenes (docs/mahliyo-widget.md): her picture(s), the background, and whether it is deep
+     * (light words on it). The words come from the app ("scenes"), several to each, one a day.
+     */
+    static final class Scene {
+        final String id; final int[] faces; final int bg; final boolean deep;
+        Scene(String id, int[] faces, int bg, boolean deep) { this.id = id; this.faces = faces; this.bg = bg; this.deep = deep; }
+    }
+    static final Scene MORNING = new Scene("morning", new int[] { R.drawable.widget_e01 }, R.drawable.widget_s_morning, false);
+    static final Scene WIN = new Scene("win", new int[] { R.drawable.widget_e02 }, R.drawable.widget_s_win, false);
+    static final Scene FIRE = new Scene("fire", new int[] { R.drawable.widget_e03 }, R.drawable.widget_s_fire, true);
+    static final Scene WAIT = new Scene("wait", new int[] { R.drawable.widget_e04 }, R.drawable.widget_s_wait, false);
+    static final Scene WORRY = new Scene("worry", new int[] { R.drawable.widget_e05 }, R.drawable.widget_s_worry, true);
+    static final Scene LAST = new Scene("last", new int[] { R.drawable.widget_e06, R.drawable.widget_e07 }, R.drawable.widget_s_last, true);
+    static final Scene SAD = new Scene("sad", new int[] { R.drawable.widget_e08 }, R.drawable.widget_s_sad, false);
+    static final Scene SLEEP = new Scene("sleep", new int[] { R.drawable.widget_e09 }, R.drawable.widget_s_sleep, true);
+    static final Scene PARTY = new Scene("party", new int[] { R.drawable.widget_e10, R.drawable.widget_e11 }, R.drawable.widget_s_party, true);
+    static final Scene COLD = new Scene("cold", new int[] { R.drawable.widget_e12 }, R.drawable.widget_s_cold, false);
+    private static final int[] MILESTONES = { 3, 7, 14, 30, 50, 100, 150, 200, 365, 500, 1000 };
+
+    /** days between two "yyyy-MM-dd" days on this phone's calendar (a large number when one is missing) */
+    static int daysBetween(String from, String to) {
+        try {
+            SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            return (int) Math.round((f.parse(to).getTime() - f.parse(from).getTime()) / 86_400_000.0);
+        } catch (Exception e) {
+            return 9999;
+        }
+    }
+
+    /**
+     * Which scene: a record day; today's lesson done (with a streak of 3+, the flame); the night; three days
+     * without the app (cold); the streak lost; then by the hour while today's lesson waits — the last
+     * chance after 21:00, worry after 18:00, waiting after noon, and the morning.
+     * `streak` is the app's count when it last wrote; a day missed since then has put it out.
+     */
+    static Scene mahliyoScene(int streak, String lastDay, String opened, String today, int hour) {
+        boolean done = today.equals(lastDay);
+        int gap = daysBetween(lastDay, today);
+        int live = gap <= 1 ? streak : 0;
+        if (done) {
+            for (int m : MILESTONES) if (live == m) return PARTY;
+            return live >= 3 ? FIRE : WIN;
+        }
+        if (hour < 6) return SLEEP;
+        if (daysBetween(opened, today) >= 3) return COLD;
+        if (live == 0 && !lastDay.isEmpty() && gap < 9999) return hour >= 21 ? LAST : SAD;
+        if (hour >= 21) return live > 0 ? LAST : WAIT;
+        if (hour >= 18) return live > 0 ? WORRY : WAIT;
+        if (hour >= 12) return WAIT;
+        return MORNING;
+    }
 
     /** today's number (days since 1970 on the phone's clock): what changes each day */
     static int dayNo() {
@@ -69,7 +121,8 @@ public final class DkWidgets {
         v.setInt(R.id.w_root, "setBackgroundResource", layout == R.layout.widget_words ? DEEP[day % 7] : LIGHT[day % 7]);
         int streak = d.optInt("streak", 0);
         String streakText = d.optString("streakText", "рӯзи пайдарпай");
-        v.setTextViewText(R.id.w_streak, String.valueOf(streak));
+        // (the Mahliyo widget writes its streak in its own line)
+        if (layout != R.layout.widget_mahliyo) v.setTextViewText(R.id.w_streak, String.valueOf(streak));
         if (layout == R.layout.widget_streak) {
             v.setTextViewText(R.id.w_streak_label, streakText);
             v.setOnClickPendingIntent(R.id.w_root, open(ctx, "/profile", 1));
@@ -88,16 +141,26 @@ public final class DkWidgets {
             v.setTextViewText(R.id.w_author, d.optString("author", ""));
             v.setOnClickPendingIntent(R.id.w_root, open(ctx, "/", 4));
         } else if (layout == R.layout.widget_mahliyo) {
-            // has she learnt today? (the app's last day of learning, on this phone's calendar)
+            // her scene for this moment (the phone's calendar and clock)
             String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Calendar.getInstance().getTime());
-            boolean done = today.equals(d.optString("lastDay", ""));
-            boolean evening = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) >= 18;
-            JSONObject say = d.optJSONObject("say");
-            JSONArray lines = say == null ? null : say.optJSONArray(done ? "done" : evening && streak > 0 ? "late" : "todo");
-            v.setImageViewResource(R.id.w_face, FACES[day % 7]);
-            v.setTextViewText(R.id.w_say, ofDay(lines, day, "Салом! Имрӯз чӣ меомӯзем?"));
-            v.setTextViewText(R.id.w_streak, String.valueOf(streak));
+            String lastDay = d.optString("lastDay", "");
+            Scene sc = mahliyoScene(streak, lastDay, d.optString("opened", today), today, Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
+            int live = daysBetween(lastDay, today) <= 1 ? streak : 0;
+            JSONObject scenes = d.optJSONObject("scenes");
+            String said = ofDay(scenes == null ? null : scenes.optJSONArray(sc.id), day, "Салом!|Имрӯз чӣ меомӯзем?").replace("{n}", String.valueOf(live));
+            int bar = said.indexOf('|');
+            int ink = sc.deep ? 0xFFFFFFFF : 0xFF2A1D4A;
+            v.setInt(R.id.w_root, "setBackgroundResource", sc.bg);
+            v.setImageViewResource(R.id.w_face, sc.faces[Math.floorMod(day, sc.faces.length)]);
+            v.setTextViewText(R.id.w_kicker, "🔥 " + live);
+            v.setTextColor(R.id.w_kicker, (ink & 0x00FFFFFF) | 0xB3000000);
+            v.setTextViewText(R.id.w_title, bar < 0 ? said : said.substring(0, bar).trim());
+            v.setTextColor(R.id.w_title, ink);
+            v.setTextViewText(R.id.w_sub, bar < 0 ? "" : said.substring(bar + 1).trim());
+            v.setTextColor(R.id.w_sub, (ink & 0x00FFFFFF) | 0xD9000000);
             v.setTextViewText(R.id.w_go, d.optString("goText", "Оғоз"));
+            v.setInt(R.id.w_go, "setBackgroundResource", sc.deep ? R.drawable.widget_go_dark : R.drawable.widget_go_light);
+            v.setTextColor(R.id.w_go, sc.deep ? 0xFF2A1D4A : 0xFFFFFFFF);
             v.setOnClickPendingIntent(R.id.w_root, open(ctx, "/mahliyo", 6));
             v.setOnClickPendingIntent(R.id.w_go, open(ctx, d.optString("nextPath", "/schools"), 7));
         } else if (layout == R.layout.widget_week) {
