@@ -27,6 +27,7 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
         registerPlugin(StreakAlarm.StreakPlugin.class);
         registerPlugin(MahliyoCall.CallPlugin.class);
         registerPlugin(ScreenGuard.class);
+        registerPlugin(PlayBilling.class);
         super.onCreate(savedInstanceState);
         // her words play as soon as her call is answered (also when answered from the notification)
         if (getBridge() != null && getBridge().getWebView() != null) getBridge().getWebView().getSettings().setMediaPlaybackRequiresUserGesture(false);
