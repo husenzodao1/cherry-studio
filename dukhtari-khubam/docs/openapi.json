@@ -2546,7 +2546,7 @@
                   },
                   "turns": {
                     "minItems": 1,
-                    "maxItems": 12,
+                    "maxItems": 40,
                     "type": "array",
                     "items": {
                       "type": "object",
@@ -2623,6 +2623,10 @@
                       ],
                       "additionalProperties": false
                     }
+                  },
+                  "session": {
+                    "type": "string",
+                    "maxLength": 4000
                   }
                 },
                 "required": [
@@ -3482,6 +3486,474 @@
           }
         ],
         "description": "Requires a staff role; permissions are enforced in the database."
+      }
+    },
+    "/billing/play/account": {
+      "get": {
+        "tags": [
+          "Premium"
+        ],
+        "summary": "What the app needs before a Google Play purchase: the account the purchase is bound to, and the products sold",
+        "operationId": "getBillingPlayAccount",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/billing/play/verify": {
+      "post": {
+        "tags": [
+          "Premium"
+        ],
+        "summary": "A Google Play purchase made in the app: checked with Google, then Premium is given until its paid time ends",
+        "operationId": "postBillingPlayVerify",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "purchase_token": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "purchase_token"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/billing/play/rtdn": {
+      "post": {
+        "tags": [
+          "Premium"
+        ],
+        "summary": "Google Play's push notification (Pub/Sub, ?key=…): a subscription renewed, was cancelled, refunded or expired",
+        "operationId": "postBillingPlayRtdn",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "string",
+                        "maxLength": 20000
+                      }
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "additionalProperties": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/premium": {
+      "get": {
+        "tags": [
+          "Premium"
+        ],
+        "summary": "My Premium: whether, until when, and how it was given",
+        "operationId": "getMePremium",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/me/delete": {
+      "post": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Deletes my account and what is kept about it (a Google Play subscription is cancelled in Google Play itself)",
+        "operationId": "postMeDelete",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/bundle/premium": {
+      "get": {
+        "tags": [
+          "Premium"
+        ],
+        "summary": "Premium courses, lessons and their tests for a Premium learner (the public bundle leaves them out)",
+        "operationId": "getBundlePremium",
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "tg",
+              "type": "string",
+              "enum": [
+                "tg",
+                "ru",
+                "ar",
+                "en",
+                "uz",
+                "tr",
+                "fa",
+                "prs"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/admin/premium": {
+      "get": {
+        "tags": [
+          "Admin · Premium"
+        ],
+        "summary": "Schools and courses with their tiers, who has Premium now, and the Premium settings",
+        "operationId": "getAdminPremium",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database."
+      }
+    },
+    "/admin/premium/tier": {
+      "post": {
+        "tags": [
+          "Admin · Premium"
+        ],
+        "summary": "A school or course made free or Premium",
+        "operationId": "postAdminPremiumTier",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "school",
+                      "course"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "tier": {
+                    "type": "string",
+                    "enum": [
+                      "free",
+                      "premium"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "id",
+                  "tier"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/premium/grant": {
+      "post": {
+        "tags": [
+          "Admin · Premium"
+        ],
+        "summary": "Premium for an account by its e-mail, for some months (0: for ever) — bought through a consultant",
+        "operationId": "postAdminPremiumGrant",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "months": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 60
+                  },
+                  "note": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "email",
+                  "months"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/premium/setting": {
+      "post": {
+        "tags": [
+          "Admin · Premium"
+        ],
+        "summary": "A Premium setting (the consultant link on the Premium screen)",
+        "operationId": "postAdminPremiumSetting",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "enum": [
+                      "premium_consultant"
+                    ]
+                  },
+                  "value": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "key",
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
       }
     },
     "/admin/schools": {
