@@ -149,6 +149,25 @@ describe('asking Mahliyo', () => {
     expect(create.mock.calls[0][0].system[0].text).toContain('Answer in the language of her LAST message')
   })
 
+  it('red replies: a staff word in her message is answered with their words at once; a word the model matched by meaning gets its reply', async () => {
+    const warnings = [{ word: 'аблаҳ', reply: 'Маро аблаҳ нагӯ, вагарна блок меравӣ' }, { word: 'беақл', reply: 'Ман беақл нестам' }, { word: '', reply: 'Бас кунед' }]
+    const red = (text: string) => ({ tajik: true, blocks: [{ type: 'warning', text }], reply: text })
+    create.mockClear()
+    expect(await answer([{ role: 'user', content: 'Ту аблаҳи бесаводӣ!' }], 'Г', '', {}, [], { warnings })).toEqual(red('Маро аблаҳ нагӯ, вагарна блок меравӣ'))
+    // {ном}: her name in the staff's words
+    const named = [{ word: 'аблаҳ', reply: 'Ман аблаҳ нестам {ном}' }, { word: 'беақл', reply: '{ном}-и азиз, бас кун' }]
+    expect(await answer([{ role: 'user', content: 'Ту аблаҳ!' }], 'Г', '', { me: 'Name: Малика' }, [], { warnings: named })).toEqual(red('Ман аблаҳ нестам Малика'))
+    expect(await answer([{ role: 'user', content: 'беақл' }], 'Г', '', { me: 'Name: Малика' }, [], { warnings: named })).toEqual(red('Маликаи азиз, бас кун'))
+    expect(create).not.toHaveBeenCalled()
+    // in Latin letters: the model knows it is word 2
+    create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{"tajik":true,"blocks":[{"type":"warning","text":"","rule":2}]}' }] })
+    expect(await answer([{ role: 'user', content: 'tu beaql!' }], 'Г', '', {}, [], { warnings })).toEqual(red('Ман беақл нестам'))
+    expect(create.mock.calls[0][0].system[1].text).toContain('RED REPLIES')
+    // another insult: a general one
+    create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{"tajik":true,"blocks":[{"type":"warning","text":"","rule":0}]}' }] })
+    expect(await answer([{ role: 'user', content: 'ту бад' }], 'Г', '', {}, [], { warnings })).toEqual(red('Бас кунед'))
+  })
+
   it('declined, unreadable or empty: a kind Tajik apology that points to the consultant', async () => {
     const sorry = { tajik: true, blocks: [{ type: 'text', text: SORRY }], reply: SORRY }
     create.mockResolvedValue({ stop_reason: 'refusal', content: [] })

@@ -256,7 +256,7 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz }: { blocks: AiBlock[];
             return null
           case 'warning':
             // insults or pressure: only this, in red
-            return <p key={i} className="ai-card ai-warning" role="alert" style={style}>{t('ai.warning')}</p>
+            return <p key={i} className="ai-card ai-warning" role="alert" style={style}>{emojify(b.text || t('ai.warning'))}</p>
           case 'sources':
             // shown small at the end of her answer's row (Sources)
             return null

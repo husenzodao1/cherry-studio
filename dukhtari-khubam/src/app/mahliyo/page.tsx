@@ -17,7 +17,7 @@ import { useAuth } from '@/web/auth'
 import { useLearner } from '@/web/offline/learner'
 import { useApi } from '@/web/useApi'
 import {
-  aboutMe, accountChanged, aiReady, chatClosed, warnOnce, WARNINGS_ALLOWED, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
+  aboutMe, accountChanged, aiReady, archiveChat, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
   useMahliyo, watch, type AiChatMeta, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { alphaVideo, CLIPS } from '@/web/mahliyo'
@@ -66,7 +66,7 @@ const keepDraft = (chat: string, text: string) => {
  */
 export default function MahliyoPage() {
   const { t } = usePrefs()
-  const { learner, progress, signOut } = useLearner()
+  const { learner, progress } = useLearner()
   const { session } = useAuth()
   const me = useApi<{ premium?: boolean }>(session ? '/me' : null)
   // a Premium account keeps its chats; the others, a week
@@ -194,20 +194,6 @@ export default function MahliyoPage() {
   }, [])
   // her rough place, looked at again when a day old (only if she allowed it)
   useEffect(() => { void refreshPlace() }, [])
-  // insults or pressure: each warning counts for this account; after three, the next one closes the chat for
-  // good and signs her out (signing in again does not open it)
-  const account = learner?.code || learner?.email || undefined
-  const closed = chatClosed(account)
-  useEffect(() => {
-    const warned = () => {
-      if (warnOnce(account) <= WARNINGS_ALLOWED) return
-      showToast(t('ai.closed'), 'lock', 6000)
-      signOut()
-      router.replace('/start')
-    }
-    window.addEventListener('dk-ai-warning', warned)
-    return () => window.removeEventListener('dk-ai-warning', warned)
-  }, [account, signOut, router, t])
   const startNewRef = useRef(startNew)
   startNewRef.current = startNew
   const hasTurns = useRef(false)
@@ -514,11 +500,7 @@ export default function MahliyoPage() {
       </div>
       </div>
 
-      {closed ? (
-        <div className="ai-limit ai-closed" role="status">
-          <p>{t('ai.closed')}</p>
-        </div>
-      ) : full ? (
+      {full ? (
         <div className="ai-limit" role="status">
           <p>{t('ai.limit_reached')}</p>
           <button type="button" className="ai-limit-new" onClick={startNew}><Icon name="compose" size={14} />{t('ai.clear')}</button>

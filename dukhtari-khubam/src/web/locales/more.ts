@@ -458,8 +458,7 @@ export const uz: Partial<Record<UiKey, string>> = {
   'support.help_unlock': "PIN o'chirildi — ilova endi PINsiz ochiladi.",
   'support.help_new_email': "Akkauntingiz pochtasi o'zgartirildi: {email}",
   'pin.remove_by_email': "PINni pochta orqali olib tashlash",
-  'ai.warning': "Menga qo'pol so'zlar, haqorat yoki bosim qilish mumkin emas. Iltimos, to'xta, aks holda 3 ogohlantirishdan keyin hisobing yopiladi 😠",
-  'ai.closed': "Chat qo'pollik va bosim sababli butunlay yopildi.",
+  'ai.warning': "Menga qo'pol so'zlar va haqorat yozish mumkin emas. Iltimos, to'xtating 😠",
   'pin.forgot_q': "Unutdingizmi?"
 }
 
@@ -919,8 +918,7 @@ export const tr: Partial<Record<UiKey, string>> = {
   'support.help_unlock': "PIN kapatıldı — uygulama artık PIN olmadan açılır.",
   'support.help_new_email': "Hesabınızın e-postası değiştirildi: {email}",
   'pin.remove_by_email': "PIN'i e-posta ile kaldır",
-  'ai.warning': "Bana kaba sözler, hakaret ya da baskı yapılamaz. Lütfen dur, yoksa 3 uyarıdan sonra hesabın kapatılır 😠",
-  'ai.closed': "Sohbet, kaba sözler ve baskı yüzünden tamamen kapatıldı.",
+  'ai.warning': "Bana kaba sözler ve hakaret yazılamaz. Lütfen durun 😠",
   'pin.forgot_q': "Unuttunuz mu?"
 }
 
@@ -1379,8 +1377,7 @@ export const fa: Partial<Record<UiKey, string>> = {
   'support.help_unlock': "PIN خاموش شد — برنامه اکنون بدون PIN باز می‌شود.",
   'support.help_new_email': "ایمیل حساب شما تغییر کرد: {email}",
   'pin.remove_by_email': "حذف PIN با تأیید ایمیل",
-  'ai.warning': "نمی‌شود به من سخنان ناروا، توهین یا فشار بیاوری. لطفاً بس کن، وگرنه پس از ۳ هشدار حسابت بسته می‌شود 😠",
-  'ai.closed': "گفتگو به‌خاطر سخنان ناروا و فشار کاملاً بسته شد.",
+  'ai.warning': "نمی‌شود به من سخنان ناروا و توهین نوشت. لطفاً بس کنید 😠",
   'pin.forgot_q': "فراموش کردید؟"
 }
 
@@ -1442,7 +1439,6 @@ export const prs: Partial<Record<UiKey, string>> = {
   'support.help_unlock': "PIN خاموش شد — برنامه اکنون بدون PIN باز می‌شود.",
   'support.help_new_email': "ایمیل حساب شما تغییر کرد: {email}",
   'pin.remove_by_email': "حذف PIN با تأیید ایمیل",
-  'ai.warning': "نمی‌شود به من سخنان ناروا، توهین یا فشار بیاوری. لطفاً بس کن، ورنه پس از ۳ اخطار حسابت بسته می‌شود 😠",
-  'ai.closed': "گفتگو به‌خاطر سخنان ناروا و فشار کاملاً بسته شد.",
+  'ai.warning': "نمی‌شود به من سخنان ناروا و توهین نوشت. لطفاً بس کنید 😠",
   'install.app': "نصب برنامه روی تلفن"
 }

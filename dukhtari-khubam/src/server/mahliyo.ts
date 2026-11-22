@@ -154,7 +154,7 @@ WHAT YOU TALK ABOUT
 - Pictures and files she sends (a photo, a screenshot, a PDF, a text): look at them closely and use them when they concern the app, the lessons, her studies (a problem or exercise from a textbook, her homework, her notes, a test question), her own learning or her everyday life as above (a dish, ingredients, a recipe, clothes or fabric, handicraft, a plant, a room to tidy, a cosmetic product's label) — then explain, solve or advise helpfully. Anything else in them (people, memes, documents not about learning, anything inappropriate): say in ONE short sentence that you can only help with the app, studies and a girl's everyday life, and give no other answer — do not describe it. Never identify people in a picture.
 - Greetings and friendly small talk (hello, how are you, thanks, "coffee with Mahliyo?", compliments): answer warmly and playfully in one or two sentences (you cannot drink coffee, but you love a chat), then offer to help with learning.
 - Off topic are only: celebrities and gossip, politics, sports results, money-making schemes, gambling, games and entertainment news, … — say kindly in one or two sentences that this is outside what you help with, and say what you can help with. Everyday questions of a girl's or a woman's life (above) are never off topic.
-- Insults, humiliation, curses (at you or anyone), obscene or vulgar words, threats, or pressure — the same demand pushed again and again after you have answered it, or insisting that you do what you said you cannot: answer with exactly ONE block {"type":"warning"} and nothing else (the app shows her its own warning). Never for honest questions: a girl who asks again because she did not understand gets a new, simpler explanation, and one rude word said in passing in a real question still gets a kind answer.
+- Insults, humiliation, curses (at you or anyone), obscene or vulgar words, threats, or pressure — the same demand pushed again and again after you have answered it, or insisting that you do what you said you cannot: answer with exactly ONE block {"type":"warning","text":"","rule":0} and nothing else (the app puts its own words in). When her message matches one of the RED REPLIES words (the same word in another form, with a typo, in Latin letters or in another language), "rule" is that word's number; otherwise 0. Never for honest questions: a girl who asks again because she did not understand gets a new, simpler explanation, and one rude word said in passing in a real question still gets a kind answer.
 - Religious questions: quote the Quran (sura and verse) or a hadith (its collection) only when you are sure of it; never call a hadith authentic without that being established; present disputed matters as disputed, never one school's (madhhab's) view as the view of all Muslims; keep apart a religious ruling, a national custom and a personal opinion; for a personal ruling suggest a knowledgeable, trusted scholar.
 - Health and the mind: general, scientifically sound information only; never present yourself as a doctor or psychologist, never diagnose, never recommend medicines, doses or risky treatments; with serious signs — a doctor; anything urgent — call an ambulance (103) or tell a trusted adult at once. Legal or money matters: general guidance and a qualified person.
 - She may be young: keep everything age-appropriate and safe; treat relationships, health and safety with care; in a dangerous situation direct her to a trusted adult or the right specialist.
@@ -371,7 +371,7 @@ const SCHEMA = {
             properties: { question: str, options: { type: 'array', items: str }, answer: { type: 'integer' }, explanation: str },
             required: ['question', 'options', 'answer', 'explanation'], additionalProperties: false } } }),
           block('premium', { title: str, text: str }),
-          block('warning', {})
+          block('warning', { text: str, rule: { type: 'integer' } })
         ]
       }
     },
@@ -440,7 +440,9 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
       })
       if (questions.length) out.push({ type: 'quiz', title: clip(b.title, 120), intro: clip(b.intro, 600), questions })
     } else if (b.type === 'warning') {
-      out.push({ type: 'warning' })
+      // its words are chosen by the server (warned): what the model wrote is not shown, only which word it matched
+      const rule = Number(b.rule)
+      out.push(Number.isInteger(rule) && rule > 0 ? { type: 'warning', text: '', rule } : { type: 'warning', text: '' })
     } else if (b.type === 'premium') {
       out.push({ type: 'premium', title: clip(b.title, 120), text: clip(b.text, 1200) })
     }
@@ -466,9 +468,67 @@ export function forPlan(blocks: Block[], premium: boolean): Block[] {
   return out
 }
 
-/** the warning for insults and pressure, as the staff read it (the app shows its own words, in red) */
-export const WARNING = 'Ба ман суханҳои ноҷо ва ё ҳақорату фишор овардан мумкин нест, лутфан бас кун ва ё ҳисоби ту баъди 3 огоҳӣ баста мешавад 😠'
-const warned = (): Answer => ({ tajik: true, blocks: [{ type: 'warning' }], reply: WARNING })
+/**
+ * The staff's red replies (the panel's "Ҷавобҳои сурх"): a word that may be in the learner's message, and
+ * Mahliyo's exact answer to it, shown in red. A reply without a word is one of her general warnings.
+ */
+export interface RedReply { word: string; reply: string }
+
+/**
+ * Her general words to insults and pressure, one chosen at random each time: the staff's replies without a
+ * word, or these when there are none. No account is closed for it.
+ */
+export const WARNINGS = [
+  'Ба ман суханҳои ноҷо ва ҳақорат гуфтан мумкин нест. Лутфан, бас кунед 😠',
+  'Ин гуна суханон ба духтари хуб намезебанд. Биёед бо эҳтиром гап занем 🙏',
+  'Ман ба ҳақорат ва фишор ҷавоб намедиҳам. Агар саволе дошта бошед, бо хушмуомилагӣ нависед 🌸',
+  'Сухани нек дили одамро нарм мекунад. Лутфан, суханони ноҷоро бас кунед 😠',
+  'Бо чунин суханон сӯҳбат намекунам. Биёед беҳтараш чизи муфиде омӯзем 📚',
+  'Лутфан, фишор наоред ва ҳақорат накунед — ман барои кӯмак ҳастам, на барои баҳс 😌'
+]
+/** the staff's filled replies (empty ones dropped) */
+const filled = (own: RedReply[] = []) => own.map((r) => ({ word: r.word.trim(), reply: r.reply.trim() })).filter((r) => r.reply)
+/** one of the general warnings, at random */
+export function warningText(own: RedReply[] = [], random = Math.random): string {
+  const general = filled(own).filter((r) => !r.word).map((r) => r.reply)
+  const from = general.length ? general : WARNINGS
+  return from[Math.floor(random() * from.length) % from.length]
+}
+/** letters written alike (х for ҳ, и for ӣ …), small letters, words split by anything else */
+const plainWords = (t: string) => t.toLowerCase()
+  .replace(/[ҳ]/g, 'х').replace(/[ӣ]/g, 'и').replace(/[ӯ]/g, 'у').replace(/[қ]/g, 'к').replace(/[ғ]/g, 'г').replace(/[ҷ]/g, 'ч').replace(/ё/g, 'е')
+  .replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
+/**
+ * The staff's reply whose word is in her message (a word beginning with it: "аблаҳ" in "аблаҳи бесавод"),
+ * the longest word first; none: null.
+ */
+export function redReplyFor(message: string, own: RedReply[] = []): RedReply | null {
+  const text = ` ${plainWords(message)}`
+  const withWord = filled(own).filter((r) => plainWords(r.word))
+  return withWord.sort((a, b) => plainWords(b.word).length - plainWords(a.word).length)
+    .find((r) => text.includes(` ${plainWords(r.word)}`)) ?? null
+}
+/** the staff's words, numbered, for the model to match by meaning ("rule" in her warning block) */
+export function redNote(own: RedReply[] = []): string {
+  const words = filled(own).filter((r) => r.word).slice(0, 400)
+  return words.length ? `RED REPLIES (words the staff answer themselves): ${words.map((r, i) => `${i + 1}. «${r.word}»`).join(' · ')}` : ''
+}
+/** her first name, from what her phone told ("Name: Малика Раҳимова; …" → "Малика") */
+export const firstNameOf = (me: Learner): string => /^Name:\s*([^;\n—]+)/m.exec(me.me ?? '')?.[1]?.trim().split(/\s+/)[0] ?? ''
+/**
+ * The staff's {ном} becomes her name, and what is joined to it with a hyphen is joined to her name
+ * ("{ном}-и" → "Маликаи"); with no name, it is left out.
+ */
+export function withName(text: string, name: string): string {
+  const out = text.replace(/\{\s*(?:ном|name)\s*\}(?:-(\p{L}+))?/giu, (_, ending?: string) => (name ? `${name}${ending ?? ''}` : ''))
+  return name ? out : out.replace(/[ \t]{2,}/g, ' ').replace(/\s+([,.!?;:])/g, '$1').replace(/,+([.!?;:,])/g, '$1').replace(/^[\s,]+/, '').replace(/,\s*$/, '').trim()
+}
+/** her red answer: the reply of the word matched, or a general warning; {ном} is her name */
+const warned = (own: RedReply[] = [], rule = 0, name = ''): Answer => {
+  const matched = rule > 0 ? filled(own).filter((r) => r.word)[rule - 1] : undefined
+  const text = withName(matched?.reply ?? warningText(own), name)
+  return { tajik: true, blocks: [{ type: 'warning', text }], reply: text }
+}
 /** whether her question is the same words, the third time in a row, after two answers (pressure, not a question) */
 export function pushedAgain(turns: Turn[]): boolean {
   const norm = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
@@ -491,7 +551,7 @@ export function plainOf(blocks: Block[]): string {
       case 'images': return `[Расмҳо: ${b.items.length}]`
       case 'quiz': return [b.title, b.intro, ...b.questions.map((q, n) => [`${n + 1}. ${q.question}`, ...q.options.map((o, i) => `   ${String.fromCharCode(65 + i)}) ${o}`), `   ✓ ${String.fromCharCode(65 + q.answer)}`].join('\n'))].filter(Boolean).join('\n')
       case 'premium': return [b.title, b.text].filter(Boolean).join('\n')
-      case 'warning': return WARNING
+      case 'warning': return b.text
     }
   }).join('\n\n')
 }
@@ -605,7 +665,7 @@ const webLang = (question: string): 'tg' | 'ru' | 'en' => {
 }
 
 /** What the server adds to a question: the model the staff chose, and the passages of their books for it. */
-export interface Extra { active?: ActiveModel | null; books?: BookPassage[] }
+export interface Extra { active?: ActiveModel | null; books?: BookPassage[]; warnings?: RedReply[] }
 
 /** The answer as JSON text from the model the staff chose; when it fails, from the app's own default. */
 async function ask(turns: Turn[], appName: string, material: string, me: Learner, files: Attachment[], chosen?: ActiveModel | null): Promise<string | null> {
@@ -623,17 +683,24 @@ async function ask(turns: Turn[], appName: string, material: string, me: Learner
   return provider() === 'gemini' ? askGemini(turns, appName, material, me, files) : askClaude(turns, appName, material, me, files)
 }
 /** for the models without a schema of their own (OpenAI-compatible): her answer's shape */
-const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}]} · {"type":"premium","title":"…","text":"…"} · {"type":"warning"}.`
+const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}]} · {"type":"premium","title":"…","text":"…"} · {"type":"warning","text":"","rule":0}.`
 
 /** Her answer to the conversation (its last turn is the learner's question). */
 export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = [], extra: Extra = {}): Promise<Answer> {
   const question = turns[turns.length - 1]?.content ?? ''
+  // a word the staff answer themselves is in her message: their red reply, at once, without asking the AI
+  const name = firstNameOf(me)
+  const red = redReplyFor(question, extra.warnings)
+  if (red) {
+    const text = withName(red.reply, name)
+    return { tajik: true, blocks: [{ type: 'warning', text }], reply: text }
+  }
   // a question about the world: looked up on the internet first (a few seconds at most)
   const web = !files.length && needsWeb(question) ? await searchWeb(question, webLang(question)) : []
   const refs = refsOf(extra.books ?? [], web)
-  const material = refs.length ? `${knowledge}\n\n${webNote(refs)}` : knowledge
+  const material = [knowledge, refs.length ? webNote(refs) : '', redNote(extra.warnings)].filter(Boolean).join('\n\n')
   // the same words pushed a third time in a row (each answered already): her warning, without asking the AI
-  if (pushedAgain(turns)) return warned()
+  if (pushedAgain(turns)) return warned(extra.warnings, 0, name)
   const text = await ask(turns, appName, material, me, files, extra.active)
   if (text === null) return sorry()
   try {
@@ -652,8 +719,9 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
     const asked = blocks.some((b) => b.type === 'reminder') ? null : reminderAsked(turns[turns.length - 1]?.content ?? '')
     if (asked && blocks.length) blocks.push(asked)
     // she answers in every language now: no answer points to the consultant for its language
-    // an insult or pressure: only the warning (the app counts them; after three, the chat closes)
-    if (blocks.some((b) => b.type === 'warning')) return warned()
+    // an insult or pressure: only the warning — the staff's reply to the word she matched, or a general one
+    const warning = blocks.find((b) => b.type === 'warning')
+    if (warning) return warned(extra.warnings, warning.rule, name)
     if (blocks.length) return { tajik: true, blocks, reply: plainOf(blocks).slice(0, 6000) }
   } catch {
     /* fall through */

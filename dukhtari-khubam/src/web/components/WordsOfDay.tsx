@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
-import { fitQuote, type Fit, LINE_HEIGHT, LINES, SIZES } from '@/lib/wordsFit'
+import { fitQuote, type Fit, SIZES, windowRem } from '@/lib/wordsFit'
 import { useContent } from '../offline/content'
 import { usePrefs } from '../prefs'
 
@@ -127,7 +127,7 @@ function Quote({ body, author, source, active, onTime }: { body: string; author:
   return (
     <>
       <div ref={box} className={`words-text${fit.rise ? ' is-rising at-top' : ''}`}
-        style={fit.rise ? { height: `${LINES * LINE_HEIGHT * fit.size}rem` } : undefined}>
+        style={fit.rise ? { height: `${windowRem(fit.size)}rem` } : undefined}>
         <blockquote ref={text} className={body.includes('\n') ? 'is-poem' : undefined} style={{ fontSize: `${fit.size}rem` }}>
           {body.trim()}
         </blockquote>

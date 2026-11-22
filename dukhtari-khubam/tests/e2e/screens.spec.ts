@@ -207,6 +207,23 @@ test('words of the day: a long poem keeps its lines, shows four and scrolls upwa
   expect(errors).toEqual([])
 })
 
+test('words of the day are big: a usual saying at 1.4rem or more, a long one never under 1.12rem', async ({ page, server: _, errors }) => {
+  const usual = 'Илм ганҷест, ки дуздон онро намедузданд ва ҳар қадар хароҷ кунӣ, зиёдтар мешавад.'
+  const long = 'Донишро аз гаҳвора то гӯр биҷӯед, зеро ҳар рӯзе, ки чизи наве намеомӯзед, рӯзи гумшуда аст; ва касе, ки меомӯзад, ҳеҷ гоҳ пир намешавад, гарчанде ки мӯяш сафед шавад.'
+  await page.route('**/api/v1/bundle**', (r) => r.fulfill({ contentType: 'application/json',
+    body: JSON.stringify({ ...BUNDLE, inspirations: [{ id: 'usual', body: usual, author_name: 'Саъдӣ', source_title: 'Гулистон' }, { id: 'long', body: long, author_name: 'Ҳикмат', source_title: null }] }) }))
+  await signedIn(page)
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await page.waitForTimeout(800)
+  const sizes = await page.locator('.words-item blockquote').evaluateAll((qs) => qs.map((q) => parseFloat(getComputedStyle(q).fontSize) / 16))
+  // four lines with the quote's own padding fit (that padding once made it drop to a smaller size)
+  expect(sizes[0]).toBeGreaterThanOrEqual(1.4)
+  expect(sizes[1]).toBeGreaterThanOrEqual(1.12)
+  await page.locator('.words').screenshot({ path: 'test-results/words-big.png' })
+  expect(errors).toEqual([])
+})
+
 test('the "new version" note stays inside the screen, centred (it used to slide half off to the left)', async ({ page, server: _, errors }) => {
   await signedIn(page)
   await page.goto('/')

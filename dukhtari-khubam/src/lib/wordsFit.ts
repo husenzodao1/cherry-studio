@@ -1,15 +1,19 @@
 /** Sizing of the "Words of the day" card (WordsOfDay.tsx). */
 
 /** Font sizes tried, largest first; at the smallest, words longer than four lines scroll upward. */
-export const SIZES = [1.2, 1.1, 1.0, 0.92]
+export const SIZES = [1.5, 1.4, 1.3, 1.2, 1.12]
 /** The card shows at most this many lines at once. */
 export const LINES = 4
 export const LINE_HEIGHT = 1.32
+/** the quote's own padding above and below its lines (0.08em each, globals.css) */
+export const PAD = 0.16
+/** the height of four lines at a size, in rem (with the quote's padding) */
+export const windowRem = (size: number) => (LINES * LINE_HEIGHT + PAD) * size
 
 export interface Fit { size: number; rise: number }
 
 /** the smallest a poem's line may get so that it stays on one line */
-export const MIN_SIZE = 0.7
+export const MIN_SIZE = 0.8
 
 /**
  * Which size a quote takes: the largest at which all of it fits in four lines (and in the room above the
@@ -26,10 +30,10 @@ export function fitQuote(heightAt: (size: number) => number, room: number, rem: 
     sizes = [Math.max(size, MIN_SIZE)]
   }
   for (const size of sizes) {
-    const window = Math.min(room, LINES * LINE_HEIGHT * size * rem)
+    const window = Math.min(room, windowRem(size) * rem)
     if (heightAt(size) <= window + 1) return { size, rise: 0 }
   }
   const size = sizes[sizes.length - 1]
-  const window = Math.min(room, LINES * LINE_HEIGHT * size * rem)
+  const window = Math.min(room, windowRem(size) * rem)
   return { size, rise: Math.max(0, Math.ceil(heightAt(size) - window)) }
 }

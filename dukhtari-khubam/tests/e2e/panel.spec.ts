@@ -117,3 +117,39 @@ test('panel → Маҳлиё AI: a key saved in a model\'s box makes it answer; 
   expect(chunks.every((c) => c.text.length <= 1100)).toBe(true)
   expect(errors).toEqual([])
 })
+
+test('panel → Матнҳо → Ҷавобҳои сурх: "+ Ҷавоби сурх" adds a word and its reply, as many as wanted; ✕ removes one', async ({ page, server: _, errors }) => {
+  await page.route('**/auth/v1/token?grant_type=password', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ access_token: token(), token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'r', user: USER }) }))
+  await page.route('**/auth/v1/user**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(USER) }))
+  await page.route('**/api/v1/admin/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '{"items":[]}' }))
+  await page.route('**/api/v1/me', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ roles: ['super_admin'] }) }))
+  await page.route('**/api/v1/admin/dashboard', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ counts: {}, status: {}, pending_quiz_reviews: 0, storage_bytes: 0, recent_activity: [] }) }))
+  let kept: unknown[] = [{ word: '', reply: 'Бас кунед' }]
+  const saved: unknown[] = []
+  await page.route('**/api/v1/admin/ai/warnings', (r) => {
+    if (r.request().method() === 'POST') { kept = r.request().postDataJSON().items; saved.push(kept) }
+    return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(r.request().method() === 'POST' ? { ok: true } : { items: kept }) })
+  })
+  await signedIn(page)
+  await page.goto('/search')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await page.locator('input[type=search]').fill(PASS)
+  await expect(page).toHaveURL(/\/admin\/?$/, { timeout: 8000 })
+  await page.getByRole('tab', { name: 'Матнҳо' }).click()
+  await page.getByRole('tab', { name: 'Ҷавобҳои сурх' }).click()
+  await expect(page.locator('.red-reply')).toHaveCount(1)
+  for (const [word, reply] of [['Аблаҳ', 'Маро аблаҳ нагӯ, вагарна блок меравӣ'], ['беақл', 'Ман беақл нестам'], ['хато', 'нест мешавад']]) {
+    await page.getByRole('button', { name: '+ Ҷавоби сурх' }).click()
+    const row = page.locator('.red-reply').last()
+    await row.getByPlaceholder('Калима дар паёми корбар').fill(word)
+    await row.getByPlaceholder('Ҷавоби сурхи Маҳлиё').fill(reply)
+  }
+  await expect(page.locator('.red-reply')).toHaveCount(4)
+  await page.getByRole('button', { name: 'Нест кардани 4' }).click()
+  await page.getByRole('button', { name: 'Сабт кардан' }).click()
+  await expect.poll(() => saved.length).toBe(1)
+  expect(saved[0]).toEqual([{ word: '', reply: 'Бас кунед' }, { word: 'Аблаҳ', reply: 'Маро аблаҳ нагӯ, вагарна блок меравӣ' }, { word: 'беақл', reply: 'Ман беақл нестам' }])
+  await expect(page.locator('.red-reply')).toHaveCount(3)
+  await page.screenshot({ path: 'test-results/red-replies.png' })
+  expect(errors).toEqual([])
+})

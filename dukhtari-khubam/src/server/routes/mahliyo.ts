@@ -7,7 +7,7 @@ import { ApiError } from '@/lib/http'
 import { route, type AnyRoute } from '@/lib/router'
 import { supabaseFor } from '@/lib/supabase'
 
-import { answer, ATTACHMENT_MIMES, premiumLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type Turn } from '../mahliyo'
+import { answer, ATTACHMENT_MIMES, premiumLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type RedReply, type Turn } from '../mahliyo'
 import { activeModel, bookPassages, forgetActive, hasBooks, sealKey, serverReady } from '../aiModels'
 import { call } from '../util'
 import { buildBundle, Code, codeHash, Token } from './offline'
@@ -52,10 +52,31 @@ const Turns = z.array(z.strictObject({ role: z.enum(['user', 'assistant']), cont
 /** Her answer to a recorded question, kept with it (or why there is none). */
 /** what the server adds to a question: the staff's chosen model, and their books' passages for it */
 /** the chosen model, and — for a Premium learner only — the passages of the official books near her question */
+/** the staff's red replies (the panel's "Ҷавобҳои сурх"), read again at most every minute */
+let redReplies: { at: number; list: RedReply[] } | null = null
+/** what is kept in app_settings.ai_warnings: {word, reply} pairs (once, plain texts: replies without a word) */
+export function redRepliesOf(value: unknown): RedReply[] {
+  if (!Array.isArray(value)) return []
+  return value.flatMap((v): RedReply[] => {
+    if (typeof v === 'string') return v.trim() ? [{ word: '', reply: v }] : []
+    if (v && typeof v === 'object' && typeof (v as RedReply).reply === 'string') {
+      const r = v as RedReply
+      return [{ word: typeof r.word === 'string' ? r.word : '', reply: r.reply }]
+    }
+    return []
+  })
+}
+async function warningsOf(sb: SupabaseClient): Promise<RedReply[]> {
+  if (redReplies && Date.now() - redReplies.at < 60_000) return redReplies.list
+  const settings = await call<Record<string, unknown>>(sb, 'api_app_settings').catch(() => ({} as Record<string, unknown>))
+  const list = redRepliesOf(settings.ai_warnings)
+  redReplies = { at: Date.now(), list }
+  return list
+}
 async function extraFor(sb: SupabaseClient, turns: Turn[], premium = false) {
   // before Premium is sold, the books answer everyone (as they always did)
-  const [active, books] = await Promise.all([activeModel(sb), premium || !premiumLive() ? bookPassages(sb, turns[turns.length - 1].content) : Promise.resolve([])])
-  return { active, books }
+  const [active, books, warnings] = await Promise.all([activeModel(sb), premium || !premiumLive() ? bookPassages(sb, turns[turns.length - 1].content) : Promise.resolve([]), warningsOf(sb)])
+  return { active, books, warnings }
 }
 /** whether the learner who asks has Premium (her session, checked by the database; never what the phone says) */
 async function premiumOf(session: string | undefined): Promise<boolean> {
@@ -74,6 +95,8 @@ export function turnsFor(turns: Turn[], premium: boolean): Turn[] {
   while (recent.length > 1 && recent[0].role !== 'user') recent = recent.slice(1)
   return recent
 }
+/** at most this many red replies are kept */
+const RED_REPLIES_MAX = 1000
 /** whether anyone can answer: the staff chose a model, or the server has a key of its own */
 const anyone = async (sb: SupabaseClient) => configured() || !!(await activeModel(sb))
 
@@ -97,6 +120,23 @@ const Files = z.array(z.strictObject({ mime: z.enum(ATTACHMENT_MIMES), name: z.s
   .refine((f) => f.reduce((n, x) => n + x.data.length, 0) <= FILES_CAP, 'files_too_big')
 
 export const mahliyoRoutes: AnyRoute[] = [
+  route({
+    method: 'GET', path: '/admin/ai/warnings', access: 'staff', tag: 'Admin · Mahliyo',
+    summary: "Mahliyo's red replies: a word in the learner's message and her exact answer to it (no word: a general warning)",
+    handler: async ({ sb }) => {
+      const settings = await call<Record<string, unknown>>(sb(), 'api_app_settings')
+      return { items: redRepliesOf(settings.ai_warnings) }
+    }
+  }),
+  route({
+    method: 'POST', path: '/admin/ai/warnings', access: 'staff', tag: 'Admin · Mahliyo', summary: "Saves Mahliyo's red replies",
+    body: z.strictObject({ items: z.array(z.strictObject({ word: z.string().trim().max(100), reply: z.string().trim().max(400) })).max(RED_REPLIES_MAX) }),
+    handler: async ({ sb, body }) => {
+      await call(sb(), 'admin_set_setting', { p_key: 'ai_warnings', p_value: body.items.filter((r) => r.reply) })
+      redReplies = null
+      return { ok: true }
+    }
+  }),
   route({
     method: 'GET', path: '/mahliyo/status', access: 'public', tag: 'Mahliyo AI', cache: 300,
     summary: 'Whether Mahliyo AI can answer (the AI is set up on the server)',

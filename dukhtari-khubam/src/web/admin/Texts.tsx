@@ -9,7 +9,7 @@ import { Field, LocaleTabs, NEXT_STATUS, Note, send, StatusBadge, titleOf, useAc
 
 /** Texts managed without a release: interface strings, Daily Inspiration and the “!” help texts. */
 export function Texts() {
-  const [tab, setTab] = useState<'inspiration' | 'poem' | 'ui' | 'help' | 'welcome'>('inspiration')
+  const [tab, setTab] = useState<'inspiration' | 'poem' | 'ui' | 'help' | 'welcome' | 'warnings'>('inspiration')
   return (
     <div className="stack">
       <div className="segmented" role="tablist">
@@ -18,8 +18,9 @@ export function Texts() {
         <button type="button" role="tab" aria-selected={tab === 'ui'} onClick={() => setTab('ui')}>Матнҳои интерфейс</button>
         <button type="button" role="tab" aria-selected={tab === 'help'} onClick={() => setTab('help')}>Кӯмак «!»</button>
         <button type="button" role="tab" aria-selected={tab === 'welcome'} onClick={() => setTab('welcome')}>Саволнома</button>
+        <button type="button" role="tab" aria-selected={tab === 'warnings'} onClick={() => setTab('warnings')}>Ҷавобҳои сурх</button>
       </div>
-      {tab === 'inspiration' ? <Inspirations key="i" /> : tab === 'poem' ? <Inspirations key="p" verse /> : tab === 'ui' ? <UiStrings /> : tab === 'help' ? <HelpTexts /> : <Welcome />}
+      {tab === 'inspiration' ? <Inspirations key="i" /> : tab === 'poem' ? <Inspirations key="p" verse /> : tab === 'ui' ? <UiStrings /> : tab === 'help' ? <HelpTexts /> : tab === 'welcome' ? <Welcome /> : <Warnings />}
     </div>
   )
 }
@@ -230,6 +231,48 @@ function HelpRow({ k, loc, enabled, icon, tr, onSaved }: { k: string; loc: Loc; 
       <input className="input" placeholder="Сарлавҳа" value={title} onChange={(e) => setTitle(e.target.value)} />
       <textarea className="input" placeholder="Шарҳ (то 600 аломат)" maxLength={600} value={body} onChange={(e) => setBody(e.target.value)} style={{ minHeight: 70 }} />
       <button type="button" className="btn btn-soft" onClick={save} disabled={act.busy || !body.trim()}>Захира</button>
+      <Note message={act.message} />
+    </div>
+  )
+}
+
+interface RedReply { word: string; reply: string }
+
+/**
+ * Mahliyo's red replies: as many as the staff like, each a word that may be in the learner's message and
+ * her exact answer to it, in red ("Аблаҳ" → "Маро аблаҳ нагӯ …"). A reply without a word is a general
+ * warning, chosen at random for other insults. No account is closed for it.
+ */
+function Warnings() {
+  const list = useApi<{ items: RedReply[] }>('/admin/ai/warnings')
+  const [items, setItems] = useState<RedReply[] | null>(null)
+  const act = useAction()
+  const shown = items ?? list.data?.items ?? []
+  const change = (i: number, part: Partial<RedReply>) => setItems(shown.map((r, k) => (k === i ? { ...r, ...part } : r)))
+  const save = async () => {
+    const clean = shown.map((r) => ({ word: r.word.trim(), reply: r.reply.trim() })).filter((r) => r.reply)
+    if (await act.run(() => send('/admin/ai/warnings', 'POST', { items: clean }), 'Сабт шуд')) { setItems(null); list.reload() }
+  }
+  if (list.error) return <ErrorState error={list.error} onRetry={list.reload} />
+  if (!list.data) return <Loading />
+  return (
+    <div className="stack" style={{ gap: 10 }}>
+      <p className="muted" style={{ margin: 0 }}>
+        Агар дар паёми корбар калима бошад (ё шакли дигари он: «аблаҳ» дар «Ту аблаҳи бесаводӣ!»), Маҳлиё айнан ҷавоби ҳамон калимаро бо ранги сурх медиҳад.
+        Ҷавоби бе калима — огоҳии умумӣ: барои ҳақорату фишори дигар яке аз онҳо тасодуфӣ меояд.
+        <b> {'{ном}'}</b> — номи корбар: «Ман аблаҳ нестам, {'{ном}'}» → «Ман аблаҳ нестам, Малика»; <b>{'{ном}'}-и</b> → «Маликаи».
+      </p>
+      {shown.map((r, i) => (
+        <div key={i} className="red-reply">
+          <input className="input" value={r.word} maxLength={100} placeholder="Калима дар паёми корбар" aria-label={`Калимаи ${i + 1}`}
+            onChange={(e) => change(i, { word: e.target.value })} />
+          <textarea className="input" rows={2} value={r.reply} maxLength={400} placeholder="Ҷавоби сурхи Маҳлиё" aria-label={`Ҷавоби ${i + 1}`}
+            onChange={(e) => change(i, { reply: e.target.value })} />
+          <button type="button" className="btn btn-soft" aria-label={`Нест кардани ${i + 1}`} onClick={() => setItems(shown.filter((_, k) => k !== i))}>✕</button>
+        </div>
+      ))}
+      <button type="button" className="btn btn-soft" onClick={() => setItems([...shown, { word: '', reply: '' }])}>+ Ҷавоби сурх</button>
+      <button type="button" className="btn" onClick={save} disabled={act.busy}>Сабт кардан</button>
       <Note message={act.message} />
     </div>
   )

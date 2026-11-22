@@ -349,7 +349,6 @@ export const en: Partial<Record<UiKey, string>> = {
   'support.help_unlock': "The PIN is off — the app now opens without it.",
   'support.help_new_email': "Your account's e-mail is now {email}",
   'pin.remove_by_email': "Remove the PIN by e-mail",
-  'ai.warning': "You can't write rude words, insults or pressure to me. Please stop, or your account will be closed after 3 warnings 😠",
-  'ai.closed': "The chat is closed for good because of insults and pressure.",
+  'ai.warning': "Please don't write rude words or insults to me. Please stop 😠",
   'pin.forgot_q': "Forgot it?"
 }

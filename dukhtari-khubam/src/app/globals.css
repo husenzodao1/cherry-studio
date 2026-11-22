@@ -1586,7 +1586,7 @@ html.still .app { height: 100dvh; overflow: hidden; padding-bottom: 0; }
 .words-text { flex: 0 1 auto; min-height: 0; max-height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 /* the quote in the middle of the room it has; who said it and where at the very bottom of the card */
 .words-item > .words-text { margin-block: auto; }
-.words-item blockquote { margin: 0; font-family: var(--font-ui); font-weight: 500; font-size: 1.2rem; line-height: 1.32; letter-spacing: -0.01em; color: var(--ink);
+.words-item blockquote { margin: 0; font-family: var(--font-ui); font-weight: 500; font-size: 1.5rem; line-height: 1.32; letter-spacing: -0.01em; color: var(--ink);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55); overflow-wrap: anywhere; white-space: pre-line; text-wrap: balance; padding: 0.08em 0.3em; }
 /* longer than four lines: four lines show and the rest scrolls up — by itself, slowly, or by finger.
    Once the beginning has moved up, the top line is shaded (and the bottom one while more is below) */
@@ -2489,4 +2489,8 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
 
 /* insults or pressure: her answer is only this warning, in red */
 .ai-scene .ai-said .ai-warning, .ai-warning { margin: 0; color: #d8343e; font-weight: 600; font-size: 1rem; line-height: 1.55; }
-.ai-closed p { color: #d8343e; font-weight: 600; }
+
+/* the panel's red replies: the word on the left, Mahliyo's reply on the right, ✕ at the end */
+.red-reply { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto; gap: 8px; align-items: start; }
+.red-reply textarea { resize: vertical; color: #c62828; min-height: 0; height: auto; padding-block: 10px; line-height: 1.35; }
+@media (max-width: 560px) { .red-reply { grid-template-columns: minmax(0, 1fr) auto; } .red-reply textarea { grid-column: 1 / -1; grid-row: 2; } }

@@ -136,10 +136,55 @@ describe('insults and pressure', () => {
     expect(pushedAgain([turn('user', q), turn('assistant', 'не'), turn('user', q)])).toBe(false)
     expect(pushedAgain([turn('user', 'а'), turn('assistant', 'б'), turn('user', q), turn('assistant', 'в'), turn('user', q)])).toBe(false)
   })
-  it('her warning is a block of its own; the rules say when (and that a girl who did not understand is not warned)', async () => {
-    expect(cleanBlocks([{ type: 'warning' }])).toEqual([{ type: 'warning' }])
+  it('her warning is a block of its own; a general one is chosen at random from the staff\'s replies without a word (or the app\'s own); no account is closed', async () => {
+    const { warningText, WARNINGS } = await import('@/server/mahliyo')
+    expect(cleanBlocks([{ type: 'warning', text: 'what the model wrote' }])).toEqual([{ type: 'warning', text: '' }])
+    expect(cleanBlocks([{ type: 'warning', text: '', rule: 2 }])).toEqual([{ type: 'warning', text: '', rule: 2 }])
+    const general = (reply: string) => ({ word: '', reply })
+    expect(warningText([general(''), general('Бас кунед!'), { word: 'аблаҳ', reply: 'Маро аблаҳ нагӯ' }], () => 0.99)).toBe('Бас кунед!')
+    expect(warningText([general('Як'), general('Ду')], () => 0)).toBe('Як')
+    expect(warningText([general('Як'), general('Ду')], () => 0.6)).toBe('Ду')
+    expect(WARNINGS).toContain(warningText([], () => 0.3))
+    expect(WARNINGS).toContain(warningText([{ word: 'аблаҳ', reply: 'Маро аблаҳ нагӯ' }], () => 0.3))
+    expect(WARNINGS.every((w) => !/баста мешавад|блок/.test(w))).toBe(true)
     const src = (await import('node:fs')).readFileSync('src/server/mahliyo.ts', 'utf8')
-    expect(src).toContain('answer with exactly ONE block {"type":"warning"}')
+    expect(src).toContain('answer with exactly ONE block {"type":"warning","text":"","rule":0}')
     expect(src).toContain('a girl who asks again because she did not understand gets a new, simpler explanation')
+  })
+
+  it('a word of the staff\'s in her message (in any of its forms) gets their exact red reply; the longest word first', async () => {
+    const { redReplyFor } = await import('@/server/mahliyo')
+    const rules = [{ word: 'Аблаҳ', reply: 'Маро аблаҳ нагӯ, вагарна блок меравӣ' }, { word: 'беақл', reply: 'Ман беақл нестам' }, { word: 'аблаҳи бесавод', reply: 'Ҳар ду бад аст' }, { word: '', reply: 'Бас кунед' }]
+    expect(redReplyFor('Ту аблаҳӣ!', rules)?.reply).toBe('Маро аблаҳ нагӯ, вагарна блок меравӣ')
+    // х for ҳ, capitals, punctuation
+    expect(redReplyFor('ТУ АБЛАХ!!!', rules)?.reply).toBe('Маро аблаҳ нагӯ, вагарна блок меравӣ')
+    expect(redReplyFor('Ту аблаҳи бесаводӣ!', rules)?.reply).toBe('Ҳар ду бад аст')
+    expect(redReplyFor('ту беақлӣ', rules)?.reply).toBe('Ман беақл нестам')
+    // inside another word it is not that word; a reply without a word never matches by itself
+    expect(redReplyFor('Ман саблаҳо дорам', rules)).toBeNull()
+    expect(redReplyFor('Салом, Маҳлиё!', rules)).toBeNull()
+  })
+
+  it('{ном} in a reply is her name; what is joined with a hyphen is joined to it; no name — it is left out', async () => {
+    const { withName, firstNameOf } = await import('@/server/mahliyo')
+    expect(withName('Ман аблаҳ нестам {ном}', 'Малика')).toBe('Ман аблаҳ нестам Малика')
+    expect(withName('{ном}-и азиз, бас кун', 'Малика')).toBe('Маликаи азиз, бас кун')
+    expect(withName('{Ном}-ҷон, {name}', 'Малика')).toBe('Маликаҷон, Малика')
+    expect(withName('Ман аблаҳ нестам, {ном}!', '')).toBe('Ман аблаҳ нестам!')
+    expect(withName('{ном}-и азиз, бас кун', '')).toBe('азиз, бас кун')
+    expect(firstNameOf({ me: 'Name: Малика Раҳимова; age 15' })).toBe('Малика')
+    expect(firstNameOf({})).toBe('')
+  })
+
+  it('the model is told the words by number and matches one by meaning; the server puts in that reply', async () => {
+    const { redNote } = await import('@/server/mahliyo')
+    const { redRepliesOf } = await import('@/server/routes/mahliyo')
+    const note = redNote([{ word: 'аблаҳ', reply: 'A' }, { word: '', reply: 'B' }, { word: 'беақл', reply: 'C' }])
+    expect(note).toContain('1. «аблаҳ»')
+    expect(note).toContain('2. «беақл»')
+    expect(note).not.toContain('A')
+    expect(redNote([])).toBe('')
+    // what the panel kept before (plain texts) are general replies
+    expect(redRepliesOf(['Бас кунед', '', { word: 'аблаҳ', reply: 'Маро аблаҳ нагӯ' }, 5])).toEqual([{ word: '', reply: 'Бас кунед' }, { word: 'аблаҳ', reply: 'Маро аблаҳ нагӯ' }])
   })
 })
