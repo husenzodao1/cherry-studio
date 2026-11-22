@@ -545,7 +545,7 @@ export async function shareChat(id: string): Promise<string> {
   if (!chat?.turns.length) throw new AiError(404)
   const turns = chat.turns.slice(-60).map((t) => (t.role === 'user'
     ? { role: 'user', content: t.content.slice(0, QUESTION_CAP) }
-    : { role: 'assistant', content: t.content.slice(0, 6000), ...(t.blocks?.length ? { blocks: t.blocks.filter((b) => b.type !== 'reminder') } : {}) }))
+    : { role: 'assistant', content: t.content.slice(0, 6000), ...(t.blocks?.length ? { blocks: t.blocks.filter((b) => b.type !== 'reminder').map((b) => (b.type === 'file' ? { ...b, content: b.content.slice(0, 20_000) } : b)) } : {}) }))
   const { id: shared } = await post<{ id: string }>('/mahliyo/share', { token: supportToken(), title: chat.title.slice(0, 200), turns })
   return `${SITE}/share?id=${shared}`
 }

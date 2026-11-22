@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { AiBlock } from '@/lib/aiCatalog'
+import { extOf, fileType } from '@/lib/aiFiles'
 import SPOTS from '@/lib/aiSpots.json'
 
 import { allowLockScreen, lockScreenAllowed } from '../offline/call'
@@ -14,6 +15,7 @@ import { usePrefs } from '../prefs'
 import { AiMarkdown, isMarkdown } from './AiMarkdown'
 import { emojify } from './Emoji'
 import { Icon } from './Icon'
+import { showToast } from './Toast'
 
 /**
  * Mahliyo's answer, drawn block by block (each rises in turn): a paragraph, numbered steps, a screenshot
@@ -295,6 +297,56 @@ function ClarifyCard({ block, onAsk, style }: { block: Extract<AiBlock, { type: 
 }
 
 /** Questions to go on with, under her answer: a tap asks one. */
+/** the label on a file's icon */
+const FILE_BADGE: Record<string, string> = { pdf: 'PDF', docx: 'W', pptx: 'P' }
+
+/**
+ * A file she made: a bright icon (PDF red, Word blue, PowerPoint orange, code violet), its name and what it
+ * is for; "Боргирӣ" builds the file on the phone and saves or shares it, "Дидан" shows what is inside.
+ */
+function FileCard({ block, style }: { block: Extract<AiBlock, { type: 'file' }>; style: CSSProperties }) {
+  const { t } = usePrefs()
+  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const type = fileType(block.name)
+  const kind = type?.kind ?? 'text'
+  const ext = extOf(block.name)
+  const hint = kind === 'pdf' ? t('ai.file_pdf') : kind === 'docx' ? t('ai.file_docx') : kind === 'pptx' ? t('ai.file_pptx') : t('ai.file_text').replace('{type}', type?.label ?? ext.toUpperCase())
+  const save = async () => {
+    setBusy(true)
+    try {
+      const { buildFile, saveFile } = await import('../files/build')
+      await saveFile(block.name, await buildFile(block), block.title)
+    } catch {
+      showToast(t('ai.file_failed'), 'alert')
+    } finally {
+      setBusy(false)
+    }
+  }
+  // what is inside: a document as it reads, code as code
+  const shown = kind === 'text' && type?.lang !== 'markdown' ? `\`\`\`${type?.lang ?? ''}\n${block.content}\n\`\`\`` : block.content.replace(/^\s*---+\s*$/gm, '\n---\n')
+  return (
+    <div className={`ai-card ai-file kind-${kind}`} style={style}>
+      <div className="ai-file-row">
+        <span className={`ai-file-ico kind-${kind}`} aria-hidden="true">
+          {FILE_BADGE[kind] ? <b>{FILE_BADGE[kind]}</b> : <b className="is-ext">{ext.slice(0, 4).toUpperCase()}</b>}
+        </span>
+        <div className="grow">
+          <b className="ai-file-name">{block.name}</b>
+          <span className="ai-file-hint">{block.about || hint}</span>
+        </div>
+      </div>
+      <div className="ai-file-acts">
+        <button type="button" className="ai-file-get" onClick={() => void save()} disabled={busy}>
+          <Icon name={busy ? 'refresh' : 'arrow-down'} size={16} />{busy ? t('ai.file_making') : t('ai.file_download')}
+        </button>
+        <button type="button" className="ai-file-see" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? t('ai.file_hide') : t('ai.file_preview')}</button>
+      </div>
+      {open ? <div className="ai-file-body ai-md"><AiMarkdown text={shown} /></div> : null}
+    </div>
+  )
+}
+
 function FollowList({ block, onAsk, style }: { block: Extract<AiBlock, { type: 'follow' }>; onAsk?: (text: string) => void; style: CSSProperties }) {
   if (!onAsk) return null
   return (
@@ -415,6 +467,8 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk }: { blocks: AiB
             return <CalcCard key={i} block={b} style={style} />
           case 'clarify':
             return <ClarifyCard key={i} block={b} onAsk={onAsk} style={style} />
+          case 'file':
+            return <FileCard key={i} block={b} style={style} />
           case 'follow':
             return <FollowList key={i} block={b} onAsk={onAsk} style={style} />
           case 'premium':

@@ -1,7 +1,13 @@
 package tj.dukhtarikhubam.app;
 
 import android.app.Activity;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.MediaStore;
 import android.view.WindowManager;
 
 import com.getcapacitor.JSObject;
@@ -17,12 +23,17 @@ import java.util.function.Consumer;
  * secure — screenshots and screen recordings show it black, and it is hidden in the list of recent apps.
  * When the phone tells the app a screenshot was taken (Android 14+) or the screen is being recorded
  * (Android 15+), the web layer says it is forbidden. The web layer turns the guard on and off by screen.
+ * On Mahliyo's chat (`shots`), a screenshot is told to the web layer too ("shot"), which offers to share
+ * the whole chat; before Android 14 it is seen as a new picture in the Screenshots folder.
  */
 @CapacitorPlugin(name = "ScreenGuard")
 public class ScreenGuard extends Plugin {
     static volatile ScreenGuard plugin;
     /** the guard is on (a lesson is on the screen) */
     static volatile boolean on;
+    /** her chat is on the screen: a screenshot is offered to be shared */
+    static volatile boolean shots;
+    private ContentObserver pictures;
 
     private Object captured;
     private Consumer<Integer> recorded;
@@ -45,11 +56,55 @@ public class ScreenGuard extends Plugin {
         call.resolve();
     }
 
+    /** Screenshots of her chat told to the web layer, or not. */
+    @PluginMethod
+    public void watchShots(PluginCall call) {
+        shots = Boolean.TRUE.equals(call.getBoolean("on", false));
+        Activity a = getActivity();
+        if (Build.VERSION.SDK_INT < 34) a.runOnUiThread(() -> { if (shots) observe(a); else unobserve(a); });
+        call.resolve();
+    }
+
     private void tell(String kind) {
-        if (!on) return;
         JSObject what = new JSObject();
         what.put("kind", kind);
-        notifyListeners("capture", what);
+        if (on) notifyListeners("capture", what);
+        if (shots && "screenshot".equals(kind)) notifyListeners("shot", what);
+    }
+
+    /** Before Android 14: a new picture in a Screenshots folder (seen only with the gallery allowed). */
+    private void observe(Activity a) {
+        if (pictures != null) return;
+        pictures = new ContentObserver(new Handler(Looper.getMainLooper())) {
+            private long last;
+            @Override
+            public void onChange(boolean self, Uri uri) {
+                long now = System.currentTimeMillis();
+                if (now - last < 3000 || !newestIsScreenshot(a)) return;
+                last = now;
+                tell("screenshot");
+            }
+        };
+        a.getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true, pictures);
+    }
+
+    private void unobserve(Activity a) {
+        if (pictures == null) return;
+        a.getContentResolver().unregisterContentObserver(pictures);
+        pictures = null;
+    }
+
+    private static boolean newestIsScreenshot(Activity a) {
+        String[] cols = { MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_ADDED };
+        try (Cursor c = a.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cols, null, null, MediaStore.Images.Media.DATE_ADDED + " DESC")) {
+            if (c == null || !c.moveToFirst()) return false;
+            String path = c.getString(0);
+            long added = c.getLong(1);
+            return path != null && path.toLowerCase().contains("screenshot") && System.currentTimeMillis() / 1000 - added < 15;
+        } catch (SecurityException e) {
+            // the gallery is not allowed: nothing to see
+            return false;
+        }
     }
 
     /** MainActivity.onStart: the phone tells when a screenshot is taken, or the screen is recorded. */

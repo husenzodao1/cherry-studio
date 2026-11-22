@@ -2,7 +2,7 @@
 
 import { Capacitor, registerPlugin, type PluginListenerHandle } from '@capacitor/core'
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { usePrefs } from '../prefs'
 import { showToast } from './Toast'
@@ -18,7 +18,8 @@ import { showToast } from './Toast'
 
 interface NativeGuard {
   secure(o: { on: boolean }): Promise<void>
-  addListener(event: 'capture', f: (e: { kind: string }) => void): Promise<PluginListenerHandle>
+  addListener(event: 'capture' | 'shot', f: (e: { kind: string }) => void): Promise<PluginListenerHandle>
+  watchShots(o: { on: boolean }): Promise<void>
 }
 const Native = registerPlugin<NativeGuard>('ScreenGuard')
 
@@ -72,4 +73,30 @@ export function ScreenGuard() {
     }
   }, [on, t])
   return null
+}
+
+/**
+ * A screenshot of the screen this is used on (Mahliyo's chat): in the phone app the phone tells of it
+ * (Android 14+, or a new picture in the Screenshots folder before); in the browser, the PrintScreen key.
+ */
+export function useScreenshot(on: boolean, onShot: () => void) {
+  const shot = useRef(onShot)
+  shot.current = onShot
+  useEffect(() => {
+    if (!on) return
+    if (Capacitor.isNativePlatform()) {
+      let handle: PluginListenerHandle | null = null
+      let live = true
+      void Native.watchShots({ on: true }).catch(() => undefined)
+      void Native.addListener('shot', () => shot.current()).then((h) => { if (live) handle = h; else void h.remove() })
+      return () => {
+        live = false
+        void Native.watchShots({ on: false }).catch(() => undefined)
+        void handle?.remove()
+      }
+    }
+    const key = (e: KeyboardEvent) => { if (e.key === 'PrintScreen') shot.current() }
+    window.addEventListener('keyup', key)
+    return () => window.removeEventListener('keyup', key)
+  }, [on])
 }

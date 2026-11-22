@@ -3,6 +3,8 @@ import { GoogleGenAI, ThinkingLevel } from '@google/genai'
 
 import { linkAllowed, ROUTES, SPOT_IDS, SPOTS, type AiBlock, type CalcInput, type CalcOutput, type SpotId, type Tone } from '@/lib/aiCatalog'
 import { commandNote, splitCommand } from '@/lib/aiCommands'
+import { FILE_CAP, FILES_MAX, fileType, safeFileName, type FileKind } from '@/lib/aiFiles'
+import { styleIn } from '@/lib/slideStyles'
 import { evaluate, formatNumber } from '@/lib/calc'
 
 import { ABOUT } from './mahliyoAbout'
@@ -194,6 +196,7 @@ HOW YOU ANSWER — as blocks (the app draws each one)
 - Group long answers clearly: a short text with the point, then the blocks that carry the details (choices, steps, a table, a calc), a danger or tip callout where it matters, and a one-line conclusion in **bold**.
 - "clarify": when her message is unclear, could mean very different things, or you still do not understand it after she said it again — do not guess: ONE clarify block only (no other blocks): "question" kindly says you did not quite understand and asks what she means; "options" — 2–4 short, concrete guesses of what she may want (she can also write her own). Never for a clear question.
 - "follow": at the end of every real answer (not greetings, warnings or clarify), 2–3 short questions she may ask next on the same topic, in her language, written as she would ask them (e.g. «Техникаҳои ранг ва соя»). No question marks needed; each under 60 characters.
+- "file": when she asks for a FILE or a ready document to keep or send — PDF, Word (docx), a presentation (PowerPoint, pptx), a text, table or Markdown file, or code as a file (py, html, js, css, java, cpp, …): one file block per file she wants (at most 3; "PDF and Word" is two blocks of the same document). "name": a short file name in her language with the right extension (e.g. «Модар.pdf», «Модар.docx», «Фотосинтез.pptx», «hisobkunak.py», «index.html»); the extensions: pdf, docx, pptx, txt, md, csv, tsv, json, xml, yaml, html, css, js, ts, jsx, tsx, py, ipynb, java, kt, swift, c, cpp, h, cs, go, rs, php, rb, dart, lua, r, scala, sql, sh, bat, ps1, tex, svg. A presentation or slides: pptx. "title": the document's title; "about": one line of what it will hold (e.g. «иншо бо 5 бахш ва як шеър»). Do NOT write the file's content here: it is written right after, in full, in a separate deep step. Put one short text block before the files saying what you are making, and the follow block after them. A small code question with no file asked for: a code block in a text, as before.
 - Tests ("quiz"): for knowledge, "answer" is the right option's number; for a test about HER (character, interests, style, what suits her) there is no right answer — "answer": -1 and "explanation": "". "comment": the question of a small box at the end where she adds words of her own, fitted to the test (e.g. «Дар бораи худ каме нақл кунед, то дақиқтар фаҳмам…»), or "" when not needed. When she sends a test's result, read her picks and her comment and answer them warmly and exactly.
 - "screen": a screenshot of an app screen with a pulsing pointer on a place, from the list of SPOTS below, with a one-line caption saying what to tap. Add one (or two) when she says she did not understand, asks "where", asks again about the same thing, or the steps are hard to find; put them after the steps.
 - "link": a button to a page: one of the app pages below, "/lesson?id=<id>" or "/course?id=<id>" for a lesson or course from the course material, or an https address from the material (sources). Give one when it saves her looking.
@@ -393,6 +396,7 @@ const SCHEMA = {
             required: ['question', 'options', 'answer', 'explanation'], additionalProperties: false } }, comment: str }),
           block('clarify', { question: str, options: { type: 'array', items: str } }),
           block('follow', { items: { type: 'array', items: str } }),
+          block('file', { name: str, title: str, about: str }),
           block('choices', { title: str, intro: str, items: { type: 'array', items: {
             type: 'object',
             properties: { name: str, badge: str, tone: TONE, points: { type: 'array', items: str }, note: str },
@@ -513,6 +517,10 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
       const options = (Array.isArray(b.options) ? b.options : []).map((o) => clip(o, 160)).filter(Boolean).slice(0, 4)
       const question = clip(b.question, 300)
       if (question && options.length >= 2) out.push({ type: 'clarify', question, options })
+    } else if (b.type === 'file') {
+      // a file to make: only its name and what it holds now; its content is written next (writeFiles)
+      const name = safeFileName(clip(b.name, 120))
+      if (name && out.filter((x) => x.type === 'file').length < FILES_MAX) out.push({ type: 'file', name, title: clip(b.title, 160) || name, about: clip(b.about, 300), content: '' })
     } else if (b.type === 'follow') {
       const items = (Array.isArray(b.items) ? b.items : []).map((o) => clip(o, 120)).filter(Boolean).slice(0, 3)
       if (items.length) out.push({ type: 'follow', items })
@@ -649,6 +657,7 @@ export function plainOf(blocks: Block[]): string {
       case 'callout': return [b.title, b.text].filter(Boolean).join(': ')
       case 'clarify': return [b.question, ...b.options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`)].join('\n')
       case 'follow': return ''
+      case 'file': return `[Файл: ${b.name} — ${b.title}]`
       case 'calc': {
         const values = Object.fromEntries(b.inputs.map((i) => [i.id, i.value]))
         return [b.title, ...b.inputs.map((i) => `${i.label}: ${i.value} ${i.unit}`.trim()), ...b.outputs.map((o) => `${o.label}: ${formatNumber(evaluate(o.formula, values) ?? 0)} ${o.unit}`.trim()), b.note].filter(Boolean).join('\n')
@@ -791,7 +800,7 @@ async function ask(turns: Turn[], appName: string, material: string, me: Learner
   return provider() === 'gemini' ? askGemini(turns, appName, material, me, files) : askClaude(turns, appName, material, me, files)
 }
 /** for the models without a schema of their own (OpenAI-compatible): her answer's shape */
-const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}],"comment":"…"} · {"type":"choices","title":"…","intro":"…","items":[{"name":"…","badge":"…","tone":"best|good|risk|neutral","points":["…"],"note":"…"}]} · {"type":"callout","tone":"danger|warning|tip|info","title":"…","text":"…"} · {"type":"calc","title":"…","note":"…","inputs":[{"id":"price","label":"…","value":40,"min":0,"max":100,"step":5,"unit":"…","options":[]}],"outputs":[{"label":"…","formula":"price*2","unit":"…","tone":"best","big":true}]} · {"type":"clarify","question":"…","options":["…","…"]} · {"type":"follow","items":["…","…"]} · {"type":"premium","title":"…","text":"…"} · {"type":"warning","text":"","rule":0}.`
+const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}],"comment":"…"} · {"type":"choices","title":"…","intro":"…","items":[{"name":"…","badge":"…","tone":"best|good|risk|neutral","points":["…"],"note":"…"}]} · {"type":"callout","tone":"danger|warning|tip|info","title":"…","text":"…"} · {"type":"calc","title":"…","note":"…","inputs":[{"id":"price","label":"…","value":40,"min":0,"max":100,"step":5,"unit":"…","options":[]}],"outputs":[{"label":"…","formula":"price*2","unit":"…","tone":"best","big":true}]} · {"type":"clarify","question":"…","options":["…","…"]} · {"type":"follow","items":["…","…"]} · {"type":"file","name":"Модар.pdf","title":"…","about":"…"} · {"type":"premium","title":"…","text":"…"} · {"type":"warning","text":"","rule":0}.`
 
 /** Her answer to the conversation (its last turn is the learner's question). */
 export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = [], extra: Extra = {}): Promise<Answer> {
@@ -830,6 +839,16 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
     // an insult or pressure: only the warning — the staff's reply to the word she matched, or a general one
     const warning = blocks.find((b) => b.type === 'warning')
     if (warning) return warned(extra.warnings, warning.rule, name)
+    // the files she is making: their content written now, deeply and in full
+    if (blocks.some((b) => b.type === 'file')) {
+      // a presentation in the style she chose ("#s07")
+      const style = styleIn(question)
+      for (const b of blocks) if (b.type === 'file' && style && fileType(b.name)?.kind === 'pptx') b.style = style
+      await writeFiles(blocks, turns, me, extra.active)
+      const made = blocks.filter((b) => b.type !== 'file' || b.content)
+      if (!made.some((b) => b.type === 'file')) return sorry()
+      blocks.splice(0, blocks.length, ...made)
+    }
     if (blocks.length) return { tajik: true, blocks, reply: plainOf(blocks).slice(0, 6000) }
   } catch {
     /* fall through */
@@ -869,6 +888,139 @@ async function askClaude(turns: Turn[], appName: string, knowledge: string, me: 
   })
   if (response.stop_reason === 'refusal') return null
   return response.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('')
+}
+
+/**
+ * Her files: each written in a request of its own, with deep thinking and room for a long text, as plain
+ * content (not JSON). When the model stops at its length, it is asked to go on from the very place, again
+ * and again, until the file is whole or the time is up (the route has five minutes; she answered first).
+ */
+const FILE_TIME_MS = 225_000
+const FILE_ROUND_TOKENS = 32_000
+const FILE_ROUNDS = 5
+const FILE_WRITER = `You are Mahliyo, writing a FILE the learner asked for in the chat (the conversation is below; her last message asked for it). Think deeply and plan the whole file before you write. Then write its fullest, most accurate and most beautiful version — as long as the task truly deserves: a school essay 1000–2500 words, a report, project or research paper 2500–6000 words, a presentation of the slides she asked for (at most 12), a program complete and working. Never a sketch or a plan instead of the file (unless she asked for one), never "and so on", "…" or placeholders, never cut it short. Facts must be true and checked; never invent quotations, numbers, names or sources. Write in a clear, warm, well-crafted style in her language (see REPLY LANGUAGE), with correct spelling (Tajik: ӣ ӯ ҳ қ ҷ ғ). Output ONLY the file's content: nothing before or after it, no \`\`\` fences around it.`
+const FILE_RULES: Record<FileKind, string> = {
+  pdf: 'FORMAT: Markdown. Start with "# Title", then a subtitle line in *italics*; then sections with "## " (and "### "): an introduction, the main parts, a conclusion. Paragraphs of 3–6 sentences; "- " and "1. " lists; GitHub tables with a header row; "> " for quotations and sayings; **bold** for key terms. Formulas in plain Unicode (x², √, π, ≤, →, H₂O), not LaTeX. No HTML, no images, no code fences.',
+  docx: '',
+  pptx: 'FORMAT: Markdown slides, separated by a line with only "---". Slide 1: "# Title" and one subtitle line. Every other slide: "# Slide title", then 3–6 "- " points, each at most about 15 words ("  - " for a sub-point), or a small GitHub table; at the end of the slide "> " lines with the speaker\'s notes (what to say, 2–4 sentences). When she gave the number of slides, exactly that many (the title slide counts); otherwise 10–12. The topic in a logical order, definitions, examples, facts and numbers, a summary slide and a "Questions" slide. Formulas in plain Unicode (x², √, π, H₂O), not LaTeX. No HTML, no images.',
+  text: 'FORMAT: the exact content of the file, complete and working. Code: the whole program with every import, a clear structure, comments in her language, checks of the input and an example of use; it must run as it is. HTML: one self-contained, modern, responsive and beautiful page with its CSS and JavaScript inside. CSV/TSV: a header row. JSON: valid JSON only. Markdown: well formatted. No explanations outside the file (comments inside code are fine).'
+}
+FILE_RULES.docx = FILE_RULES.pdf
+const FILE_GO_ON = 'Your file was cut off by the length limit. Continue it EXACTLY from the last character you wrote — no repetition, no greeting, no explanation, no fences; the same format to the end.'
+
+/** One part of a file: what was written, and whether the model stopped at its length (more to come). */
+interface FilePart { text: string; more: boolean }
+
+/** Writes every file block's content (in place), all at once. */
+async function writeFiles(blocks: Block[], turns: Turn[], me: Learner, chosen?: ActiveModel | null) {
+  const until = Date.now() + FILE_TIME_MS
+  await Promise.all(blocks.map(async (b) => {
+    if (b.type !== 'file') return
+    try {
+      b.content = await writeFile(b, turns, me, until, chosen)
+    } catch (e) {
+      console.warn('[mahliyo] the file', b.name, 'was not written:', e instanceof Error ? e.message.slice(0, 200) : String(e))
+    }
+  }))
+}
+
+async function writeFile(file: { name: string; title: string; about: string }, turns: Turn[], me: Learner, until: number, chosen?: ActiveModel | null): Promise<string> {
+  const kind = fileType(file.name)?.kind ?? 'text'
+  const system = [FILE_WRITER, FILE_RULES[kind], learnerNote(me, new Date(), { private: true }), languageNote(turns)].join('\n\n')
+  const task = `Write the complete file «${file.name}» — ${file.title}${file.about ? ` (${file.about})` : ''}.`
+  const last = turns[turns.length - 1]
+  const asked: Turn[] = [...turns.slice(0, -1), { role: 'user', content: `${last?.content ?? ''}\n\n— ${task}` }]
+  let text = ''
+  for (let round = 0; round < FILE_ROUNDS && Date.now() < until - 15_000; round++) {
+    const messages: Turn[] = text ? [...asked, { role: 'assistant', content: text }, { role: 'user', content: FILE_GO_ON }] : asked
+    const part = await fileRound(system, messages, until, chosen)
+    text += part.text
+    if (!part.more || !part.text || text.length >= FILE_CAP) break
+  }
+  return cleanFileText(text)
+}
+
+/** A file's text without fences around the whole of it, at most FILE_CAP long. */
+export function cleanFileText(text: string): string {
+  let t = text.replace(/^﻿/, '').trim()
+  const fenced = /^```[\w+#.-]*\n([\s\S]*?)\n?```$/.exec(t)
+  if (fenced) t = fenced[1]
+  return t.slice(0, FILE_CAP)
+}
+
+/** One request for a file's text, streamed (what came before the time ran out is kept). */
+async function fileRound(system: string, messages: Turn[], until: number, chosen?: ActiveModel | null): Promise<FilePart> {
+  // the chosen model's maker; another maker (no file writing of its own): the app's default
+  const google = chosen?.provider === 'google' || (chosen?.provider !== 'anthropic' && provider() === 'gemini')
+  const over = chosen?.provider === 'anthropic' ? { key: chosen.key, model: chosen.model } : undefined
+  return google
+    ? fileRoundGemini(system, messages, until, chosen?.provider === 'google' ? { keys: [chosen.key], models: [chosen.model] } : undefined)
+    : fileRoundClaude(system, messages, until, over)
+}
+
+async function fileRoundClaude(system: string, messages: Turn[], until: number, over?: { key: string; model: string }): Promise<FilePart> {
+  const c = over ? new Anthropic({ apiKey: over.key }) : (client ??= new Anthropic())
+  const stop = new AbortController()
+  const timer = setTimeout(() => stop.abort(), Math.max(1000, until - Date.now()))
+  let text = ''
+  try {
+    const stream = c.beta.messages.stream({
+      model: over?.model ?? MODEL,
+      max_tokens: FILE_ROUND_TOKENS,
+      ...(over ? {} : { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const }),
+      // a file: her deepest thinking
+      output_config: { effort: 'high' },
+      system,
+      messages
+    }, { signal: stop.signal })
+    stream.on('text', (d) => { text += d })
+    const final = await stream.finalMessage()
+    if (final.stop_reason === 'refusal') return { text: '', more: false }
+    return { text, more: final.stop_reason === 'max_tokens' }
+  } catch (e) {
+    // the time ran out while she wrote: what she wrote stays
+    if (stop.signal.aborted) return { text, more: false }
+    throw e
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+async function fileRoundGemini(system: string, messages: Turn[], until: number, over?: { keys: string[]; models: string[] }): Promise<FilePart> {
+  const keys = over?.keys ?? geminiKeys()
+  // the deeper models first
+  const models = over?.models ?? [...GEMINI_MODELS.filter((m) => !m.includes('lite')), ...GEMINI_MODELS.filter((m) => m.includes('lite'))]
+  const contents = messages.map((t) => ({ role: t.role === 'assistant' ? 'model' : 'user', parts: [{ text: t.content }] }))
+  let failure: unknown = new Error('no Gemini model')
+  for (let i = 0; i < models.length * keys.length && Date.now() < until - 5_000; i++) {
+    const model = models[i % models.length]
+    const stop = new AbortController()
+    const timer = setTimeout(() => stop.abort(), Math.max(1000, until - Date.now()))
+    let text = ''
+    try {
+      const stream = await clientOf(keys[(nextKey++) % keys.length]).models.generateContentStream({
+        model, contents,
+        config: {
+          systemInstruction: system,
+          thinkingConfig: { thinkingLevel: model.includes('lite') ? ThinkingLevel.MEDIUM : ThinkingLevel.HIGH },
+          maxOutputTokens: FILE_ROUND_TOKENS,
+          abortSignal: stop.signal
+        }
+      })
+      let reason: string | undefined
+      for await (const chunk of stream) {
+        text += chunk.text ?? ''
+        reason = chunk.candidates?.[0]?.finishReason ?? reason
+      }
+      if (text) return { text, more: reason === 'MAX_TOKENS' }
+    } catch (e) {
+      if (stop.signal.aborted && text) return { text, more: false }
+      failure = e
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+  throw failure
 }
 
 /** One way to ask Gemini: a model with a key (`i`: its place in the order). */

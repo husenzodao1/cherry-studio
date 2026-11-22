@@ -80,6 +80,10 @@ export type AiBlock =
   | { type: 'callout'; tone: 'danger' | 'warning' | 'tip' | 'info'; title: string; text: string }
   /** a live calculator: values she changes with − / + or a choice, results worked out by their formulas */
   | { type: 'calc'; title: string; inputs: CalcInput[]; outputs: CalcOutput[]; note: string }
+  /** a file she made: its name (the extension says what it is: pdf, docx, pptx, or a text file), title, what it
+   *  holds, and its content (Markdown for documents and slides, the file itself for text); the app builds it;
+   *  `style`: a presentation's style (slideStyles.ts) */
+  | { type: 'file'; name: string; title: string; about: string; content: string; style?: string }
   /** the card that opens the Premium screen (a free learner asked for a Premium part) */
   | { type: 'premium'; title: string; text: string }
   /** insults or pressure: only this, in red — one of the staff's words, chosen at random */

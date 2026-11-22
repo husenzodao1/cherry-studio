@@ -1,7 +1,7 @@
 'use client'
 
 import { Capacitor } from '@capacitor/core'
-import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react'
+import { useEffect, useRef, useState, type PointerEvent as RPointerEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { AiMode } from '../offline/mahliyo'
@@ -48,10 +48,19 @@ async function photoFile(p: Photo): Promise<File | null> {
   }
 }
 
-export function AttachSheet({ max, mode, onMode, onFiles, onClose }: {
+/** the files she can ask Mahliyo to make: each opens its ready command ("/pdf") in the box */
+const MAKE: { command: string; tone: string; key: 'ai.make_slides' | 'ai.make_pdf' | 'ai.make_word'; glyph: () => ReactNode }[] = [
+  { command: 'презентатсия', tone: 'slides', key: 'ai.make_slides', glyph: SlidesGlyph },
+  { command: 'pdf', tone: 'pdf', key: 'ai.make_pdf', glyph: PdfGlyph },
+  { command: 'word', tone: 'word', key: 'ai.make_word', glyph: WordGlyph }
+]
+
+export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: {
   max: number
   mode: AiMode | null
   onMode: (m: AiMode | null) => void
+  /** a file to make was chosen: its ready command */
+  onCommand: (title: string) => void
   onFiles: (files: File[]) => void
   onClose: () => void
 }) {
@@ -105,15 +114,24 @@ export function AttachSheet({ max, mode, onMode, onFiles, onClose }: {
         {picked.length ? (
           <button type="button" className="btn attach-send" onClick={() => void sendPicked()}><Icon name="up" size={18} />{t('ai.attach_send').replace('{n}', String(picked.length))}</button>
         ) : (
-          <div className="attach-actions">
-            <button type="button" onClick={() => docs.current?.click()}><span className="attach-ico tone-doc"><Icon name="file" size={22} /></span>{t('ai.document')}</button>
-            <button type="button" onClick={() => gallery.current?.click()}><span className="attach-ico tone-gallery"><Icon name="image" size={22} /></span>{t('ai.gallery')}</button>
-            {MODES.map((m) => (
-              <button key={m.id} type="button" aria-pressed={mode === m.id} className={mode === m.id ? 'is-on' : ''} onClick={() => onMode(mode === m.id ? null : m.id)}>
-                <span className={`attach-ico tone-${m.id}`}><Icon name={m.icon} size={22} /></span>{t(m.key)}
-              </button>
-            ))}
-          </div>
+          <>
+            {/* what to add, and what she can make: bright little app icons */}
+            <div className="attach-actions">
+              <button type="button" onClick={() => gallery.current?.click()}><span className="attach-ico tone-gallery"><Icon name="image" size={24} /></span>{t('ai.gallery')}</button>
+              <button type="button" onClick={() => docs.current?.click()}><span className="attach-ico tone-doc"><Icon name="file" size={24} /></span>{t('ai.document')}</button>
+              {MAKE.map((m) => (
+                <button key={m.command} type="button" onClick={() => onCommand(m.command)}><span className={`attach-ico tone-${m.tone}`}>{m.glyph()}</span>{t(m.key)}</button>
+              ))}
+            </div>
+            {/* how she answers: quiet chips in a row */}
+            <div className="attach-modes" role="group" aria-label={t('ai.modes')}>
+              {MODES.map((m) => (
+                <button key={m.id} type="button" aria-pressed={mode === m.id} className={`tone-${m.id}${mode === m.id ? ' is-on' : ''}`} onClick={() => onMode(mode === m.id ? null : m.id)}>
+                  <Icon name={m.icon} size={15} />{t(m.key)}
+                </button>
+              ))}
+            </div>
+          </>
         )}
 
         {/* below: the camera first, then the newest photos, all in the same square tiles */}
@@ -211,5 +229,37 @@ function InAppCamera({ onShot, onClose, onGallery }: { onShot: (f: File) => void
       </div>
     </div>,
     document.body
+  )
+}
+
+/** a slide on its stand, with a small rising chart */
+function SlidesGlyph() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3.5" width="18" height="12.5" rx="2" />
+      <path d="M12 16v3.5M8.5 20.5h7" />
+      <path d="M7.5 12.5v-2M11 12.5V8M14.5 12.5V9.5" strokeWidth="2.2" />
+      <circle cx="17.5" cy="7" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+/** a page with its corner folded and "PDF" across it */
+function PdfGlyph() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M6.5 2.5h8l4.5 4.5v13a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V4a1.5 1.5 0 0 1 1.5-1.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M14.5 2.5V7H19" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <text x="12" y="17.2" textAnchor="middle" fill="currentColor" fontSize="6.4" fontWeight="800" fontFamily="system-ui, sans-serif" letterSpacing="0.2">PDF</text>
+    </svg>
+  )
+}
+/** a page with a bold "W" */
+function WordGlyph() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M6.5 2.5h8l4.5 4.5v13a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V4a1.5 1.5 0 0 1 1.5-1.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M14.5 2.5V7H19" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M8 10.5l1.4 6 2.6-5.2 2.6 5.2 1.4-6" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   )
 }

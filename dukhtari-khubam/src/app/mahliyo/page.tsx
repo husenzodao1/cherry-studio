@@ -3,7 +3,7 @@
 import { Capacitor } from '@capacitor/core'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Fragment, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 import { findCommands, splitCommand, withCommand } from '@/lib/aiCommands'
@@ -11,6 +11,8 @@ import { onBack } from '@/web/components/BackButton'
 
 import { AttachSheet } from '@/web/components/AttachSheet'
 import { SlashMenu } from '@/web/components/SlashMenu'
+import { SlidesSetup } from '@/web/components/SlidesSetup'
+import { useScreenshot } from '@/web/components/ScreenGuard'
 import { Icon } from '@/web/components/Icon'
 import { emojify } from '@/web/components/Emoji'
 import { AnswerBlocks, Sources, timingOf } from '@/web/components/MahliyoBlocks'
@@ -88,11 +90,20 @@ export default function MahliyoPage() {
   // the paperclip's sheet, and the way she asked to be answered (kept on the phone)
   const [sheet, setSheet] = useState(false)
   const [mode, setModeState] = useState<AiMode | null>(null)
+  /** a screenshot of this chat was just taken: the card that offers to share it */
+  const [shot, setShot] = useState(false)
+  const current = chats.find((c) => c.id === chat)
+  // a temporary chat is not shared (it is kept nowhere)
+  useScreenshot(!!current && !temp && turns.length > 0, () => setShot(true))
+  const closeShot = useCallback(() => setShot(false), [])
   /** the ready command chosen after "/" (a grey chip in the box; it goes first in the question) */
   const [command, setCommand] = useState<string | null>(null)
   /** "/" typed at the start: the list of ready commands, for the words after it */
   const slash = command === null && /^\/[^\n]*$/.test(text) ? text.slice(1) : null
+  /** "Презентатсия": its setup (style, slides) before asking */
+  const [slides, setSlides] = useState(false)
   const pickCommand = (title: string) => {
+    if (title === 'презентатсия') { write(''); setSlides(true); return }
     setCommand(title)
     write('')
     box.current?.focus()
@@ -435,6 +446,7 @@ export default function MahliyoPage() {
           onRemove={removeChat} onArchive={archiveChat} />
       ) : null}
 
+      {shot && current && !temp ? <ShotShare chat={current} onClose={closeShot} /> : null}
       {temp ? <p className="ai-temp-note" role="status"><Icon name="ghostChat" size={16} /><span>{t('ai.temp_on')}</span></p> : null}
       {online ? null : (
         <p className="ai-offline" role="status"><Icon name="globe" size={18} /><span>{t('ai.offline')}{busy ? ` ${t('ai.offline_wait')}` : ''}</span></p>
@@ -569,7 +581,8 @@ export default function MahliyoPage() {
             <button type="button" aria-label={t('ai.remove')} onClick={() => { setCommand(null); box.current?.focus() }}><Icon name="x" size={12} /></button></span>
         ) : null}
         {slash !== null ? <SlashMenu query={slash} onPick={pickCommand} /> : null}
-        {sheet ? <AttachSheet max={MAX_FILES - files.length} mode={mode} onMode={(m) => { setMode(m); setSheet(false) }} onFiles={(f) => void pick(f)} onClose={() => setSheet(false)} /> : null}
+        {slides ? <SlidesSetup onClose={() => setSlides(false)} onSend={(q) => { setSlides(false); send(q) }} /> : null}
+        {sheet ? <AttachSheet max={MAX_FILES - files.length} mode={mode} onMode={(m) => { setMode(m); setSheet(false) }} onCommand={(c) => { setSheet(false); pickCommand(c) }} onFiles={(f) => void pick(f)} onClose={() => setSheet(false)} /> : null}
         <div className="ai-composer-row">
           <input ref={picker} type="file" hidden multiple accept="image/*,application/pdf,text/plain" onChange={(e) => void pick(e.target.files)} />
           <button type="button" className="ai-attach" aria-label={t('ai.attach')} disabled={ready === false || !!pending || files.length >= MAX_FILES}
@@ -773,6 +786,51 @@ function History({ chats, open, onClose, onOpen, onNew, onRemove, onArchive }: {
   )
 }
 
+/** A chat's link to the phone's share sheet (the browser's, or copied where there is none). */
+async function sendLink(title: string, link: string, t: ReturnType<typeof usePrefs>['t']) {
+  if (Capacitor.isNativePlatform()) {
+    const { Share } = await import('@capacitor/share')
+    return void Share.share({ title, url: link, dialogTitle: t('ai.share_link') }).catch(() => undefined)
+  }
+  if (navigator.share) return void navigator.share({ title, url: link }).catch(() => undefined)
+  showToast(t((await copyText(link)) ? 'ai.copied' : 'ai.unavailable'), 'copy')
+}
+
+/**
+ * The chat was screenshotted: a card slides down from the top — "you took a screenshot; share the whole
+ * chat?" — the share icon makes its link and opens the share sheet, ✕ (or a while) puts it away.
+ */
+const SHOT_MS = 9000
+function ShotShare({ chat, onClose }: { chat: AiChatMeta; onClose: () => void }) {
+  const { t } = usePrefs()
+  const [busy, setBusy] = useState(false)
+  useEffect(() => {
+    const away = setTimeout(onClose, SHOT_MS)
+    return () => clearTimeout(away)
+  }, [onClose])
+  const share = async () => {
+    setBusy(true)
+    try {
+      await sendLink(chat.title, await shareChat(chat.id), t)
+      onClose()
+    } catch {
+      showToast(t('ai.unavailable'), 'alert')
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <div className="ai-shot" role="status">
+      <div className="grow">
+        <b>{t('ai.shot_title')}</b>
+        <span>{t('ai.shot_text')}</span>
+      </div>
+      <button type="button" className="ai-shot-share" aria-label={t('ai.share_link')} disabled={busy} onClick={() => void share()}><Icon name="share" size={26} /></button>
+      <button type="button" className="ai-shot-x" aria-label={t('action.close')} onClick={onClose}><Icon name="x" size={16} /></button>
+    </div>
+  )
+}
+
 /**
  * A chat's actions, over the whole screen in the app's look: its name, then a choice (one at a time, as
  * radio buttons) — to the archive (or back), share as a link, delete for good — and "Минбаъд" at the
@@ -802,15 +860,7 @@ function ChatActions({ chat, onClose, onArchive, onRemove }: { chat: AiChatMeta;
       }
     }
   }
-  const send = async () => {
-    if (!link) return
-    if (Capacitor.isNativePlatform()) {
-      const { Share } = await import('@capacitor/share')
-      return void Share.share({ title: chat.title, url: link, dialogTitle: t('ai.share_link') }).catch(() => undefined)
-    }
-    if (navigator.share) return void navigator.share({ title: chat.title, url: link }).catch(() => undefined)
-    showToast(t((await copyText(link)) ? 'ai.copied' : 'ai.unavailable'), 'copy')
-  }
+  const send = async () => { if (link) await sendLink(chat.title, link, t) }
   return (
     <div className="ai-actions" role="dialog" aria-modal="true" aria-label={t('ai.chat_actions')} onClick={(e) => e.stopPropagation()}>
       <header className="ai-actions-head">
