@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { setDefaultResultOrder } from 'node:dns'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -17,6 +18,9 @@ import { call } from './util'
  * A chat keeps its last 16 turns. The answers are plain text (Telegram's own formatting is not used).
  */
 
+// Telegram's servers by their IPv4 address first: a serverless function without IPv6 waits on them otherwise
+try { setDefaultResultOrder('ipv4first') } catch { /* an older runtime */ }
+
 export const tgReady = () => !!process.env.TELEGRAM_BOT_TOKEN?.trim() && serverReady()
 
 /** the secret Telegram sends with every update (made from the server's own secret: nothing more to set) */
@@ -24,6 +28,7 @@ export const webhookSecret = () => createHash('sha256').update(`telegram:${secre
 
 type Fetch = typeof fetch
 export async function tg<T = unknown>(method: string, body: unknown, fetcher: Fetch = fetch, again = true): Promise<T> {
+  const began = Date.now()
   const res = await fetcher(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/${method}`, {
     method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(30_000)
   })
@@ -34,7 +39,7 @@ export async function tg<T = unknown>(method: string, body: unknown, fetcher: Fe
     await new Promise((r) => setTimeout(r, (wait + 1) * 1000))
     return tg<T>(method, body, fetcher, false)
   }
-  if (!data.ok) throw new Error(`telegram ${method}: ${data.description ?? res.status}`)
+  if (!data.ok) throw new Error(`telegram ${method}: ${data.description ?? res.status} (${Date.now() - began} ms)`)
   return data.result as T
 }
 
@@ -67,6 +72,7 @@ export async function ensureWebhook(url = webhookUrl(), fetcher: Fetch = fetch):
     await pointNow(url, fetcher)
   } catch (e) {
     failedAt = Date.now()
+    console.warn('[telegram] the bot could not be pointed at the site:', e instanceof Error ? e.message : String(e))
     throw e
   }
   pointed = true

@@ -46,7 +46,14 @@ export const telegramRoutes: AnyRoute[] = [
       if (!tgReady()) return { ready: false, bot: null, problem: process.env.TELEGRAM_BOT_TOKEN ? 'server_secret' : 'no_token' }
       let problem: string | null = null
       const webhook = await ensureWebhook().catch((e: unknown) => { problem = e instanceof Error ? e.message.slice(0, 200) : 'failed'; return null })
-      return { ready: !!webhook, bot: await botOf(), problem }
+      // whether Telegram can be reached from here at all (its front page, without the token), and how fast
+      let reach: string | null = null
+      if (!webhook) {
+        const t0 = Date.now()
+        reach = await fetch('https://api.telegram.org/', { signal: AbortSignal.timeout(10_000) }).then((r) => `${r.status} in ${Date.now() - t0} ms`)
+          .catch((e: unknown) => `${e instanceof Error ? e.message : 'failed'} after ${Date.now() - t0} ms`)
+      }
+      return { ready: !!webhook, bot: webhook ? await botOf() : null, problem, reach }
     }
   }),
   route({
