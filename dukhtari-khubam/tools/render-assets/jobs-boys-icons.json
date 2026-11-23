@@ -95,9 +95,9 @@
    }
   ],
   "name": "school-b-culture",
-  "kind": "b-crown",
+  "kind": "b-emblem",
   "pitch": 6,
-  "azimuth": 0
+  "azimuth": -18
  },
  {
   "matte": true,
@@ -170,8 +170,8 @@
    }
   ],
   "name": "school-b-hardship",
-  "kind": "b-mountain",
-  "pitch": 16,
+  "kind": "b-lighthouse",
+  "pitch": 12,
   "azimuth": 10
  }
 ]

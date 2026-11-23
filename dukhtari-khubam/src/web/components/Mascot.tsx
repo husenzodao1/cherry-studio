@@ -18,7 +18,8 @@ import { Icon } from './Icon'
  * and after a lesson. A tap closes it; it also leaves by itself once read.
  */
 
-const poseUrl = (pose: string) => `/assets/mascot/${pose}.webp`
+/** her picture; in boys' mode the boy's own picture of the same emotion (public/assets/boy) */
+const poseUrl = (pose: string, boy = false) => (boy ? `/assets/boy/${pose}.webp` : `/assets/mascot/${pose}.webp`)
 const loaded = new Map<string, Promise<void>>()
 /** Loads (and decodes) one picture once; later calls get the same promise. */
 function loadImage(src: string): Promise<void> {
@@ -31,9 +32,9 @@ function loadImage(src: string): Promise<void> {
   }
   return p
 }
-const loadPose = (pose: string) => loadImage(poseUrl(pose))
+const loadPose = (pose: string, boy = false) => loadImage(poseUrl(pose, boy))
 /** All her pictures and her first look on the sign-in screen, loaded while the opening screen is up (Splash waits for them, briefly). */
-export const preloadMascot = () => Promise.all([...ALL_POSES.map(loadPose), loadImage(CLIPS.signin.still)]).then(() => undefined)
+export const preloadMascot = () => Promise.all([...ALL_POSES.map((p) => loadPose(p)), loadImage(CLIPS.signin.still)]).then(() => undefined)
 const within = (p: Promise<void>, ms: number) => Promise.race([p, new Promise<void>((r) => setTimeout(r, ms))])
 
 const listeners = new Set<(m: Moment) => void>()
@@ -77,7 +78,7 @@ export function Mascot() {
       const pose = poses[Math.floor(Math.random() * poses.length)]
       const id = ++n
       // she appears with her picture already drawn, never as an empty card
-      void within(loadPose(pose), 1500).then(() => {
+      void within(loadPose(pose, prefs.mode === 'boy'), 1500).then(() => {
         if (id !== n) return
         setNoGirl(false)
         setLeaving(false)
@@ -130,7 +131,7 @@ export function Mascot() {
       role="status" aria-live="polite" onClick={() => setLeaving(true)}>
       {noGirl ? null : (
         <span className="mascot-girl" aria-hidden="true">
-          <img src={poseUrl(card.pose)} alt="" decoding="sync" onError={() => setNoGirl(true)} />
+          <img src={poseUrl(card.pose, prefs.mode === 'boy')} alt="" decoding="sync" onError={() => setNoGirl(true)} />
         </span>
       )}
       <p className="mascot-text">{card.text}</p>

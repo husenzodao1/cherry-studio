@@ -232,7 +232,80 @@ function planCrown(kind) {
   return g
 }
 
+/**
+ * Фарҳанги тоҷик: the State emblem of Tajikistan itself (emblem-tj.svg, from Wikimedia Commons), raised in
+ * relief: each of its shapes cut out and given depth, one over another as they are drawn — the gold in metal,
+ * the flag's ribbons and the cotton in enamel.
+ */
+async function emblem() {
+  const { SVGLoader } = await import('three/addons/loaders/SVGLoader.js')
+  const data = new SVGLoader().parse(await (await fetch('./emblem-tj.svg')).text())
+  const g = new THREE.Group()
+  const gold = new THREE.MeshPhysicalMaterial({ color: C('#ffc928'), metalness: 0.35, roughness: 0.26, clearcoat: 0.8, envMapIntensity: 2.2, emissive: C('#7a4a00'), emissiveIntensity: 0.25 })
+  const amber = new THREE.MeshPhysicalMaterial({ color: C('#e0843e'), metalness: 0.35, roughness: 0.3, envMapIntensity: 1.8 })
+  const pale = new THREE.MeshPhysicalMaterial({ color: C('#ffe27a'), metalness: 0.35, roughness: 0.22, clearcoat: 0.8, envMapIntensity: 2.2, emissive: C('#7a5a00'), emissiveIntensity: 0.25 })
+  const enamel = (c) => new THREE.MeshPhysicalMaterial({ color: C(c), roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 })
+  const of = {
+    '#d67144': [amber, 6], '#f7bf00': [gold, 10], '#f3c843': [pale, 10],
+    '#dc161d': [enamel('#d3121b'), 12], '#197b30': [enamel('#108a3a'), 12], '#fefefe': [enamel('#ffffff'), 12], '#adb3b5': [enamel('#c4cbd0'), 8]
+  }
+  const S = 2.5 / 1200
+  data.paths.forEach((path, i) => {
+    const fill = path.userData.style.fill
+    const key = !fill || fill === 'none' ? '#f7bf00' : '#' + new THREE.Color(fill).getHexString()
+    const [mat, depth] = of[key] ?? [gold, 10]
+    for (const shape of SVGLoader.createShapes(path)) {
+      const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: 2.2, bevelSize: 1.4, bevelSegments: 3, curveSegments: 10 })
+      const m = new THREE.Mesh(geo, mat)
+      m.position.z = i * 0.35
+      g.add(m)
+    }
+  })
+  g.scale.set(S, -S, S)
+  const box = new THREE.Box3().setFromObject(g), mid = box.getCenter(new THREE.Vector3())
+  g.position.sub(mid)
+  const out = new THREE.Group(); out.add(g)
+  return out
+}
+
+/** Сахтиҳои ҳаёт: a lighthouse on its rock — a light that shows the way through any storm */
+function lighthouse() {
+  const g = new THREE.Group()
+  const rock = new THREE.DodecahedronGeometry(0.75, 1)
+  g.add(mesh(rock, glossy('#64748b', { flat: true, roughness: 0.55 }), [0, -0.05, 0], [0, 0.4, 0], [1.25, 0.42, 1.05]))
+  // the tower: white with navy bands, narrowing as it rises
+  const H = 1.7
+  for (let i = 0; i < 4; i++) {
+    const y0 = 0.15 + (i * H) / 4, y1 = y0 + H / 4
+    const r0 = 0.42 - (i * 0.1), r1 = r0 - 0.1
+    g.add(mesh(new THREE.CylinderGeometry(r1, r0, H / 4, 64), glossy(i % 2 ? NAVY : WHITE, { roughness: 0.25 }), [0, (y0 + y1) / 2, 0]))
+  }
+  const top = 0.15 + H
+  g.add(mesh(new THREE.CylinderGeometry(0.34, 0.3, 0.07, 48), glossy(NAVY), [0, top + 0.03, 0]))
+  // the gallery's rail
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2
+    g.add(mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.16, 8), metal('#d9e2ef', 0.2), [Math.cos(a) * 0.31, top + 0.14, Math.sin(a) * 0.31]))
+  }
+  g.add(mesh(new THREE.TorusGeometry(0.31, 0.014, 8, 48), metal('#d9e2ef', 0.2), [0, top + 0.22, 0], [Math.PI / 2, 0, 0]))
+  // the lamp: glowing glass, its roof and the light's beams
+  g.add(mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.26, 32), glossy('#ffe27a', { emissive: '#ffcc33', emissiveIntensity: 2.2, roughness: 0.1 }), [0, top + 0.2, 0]))
+  g.add(mesh(new THREE.ConeGeometry(0.24, 0.24, 32), glossy(NAVY), [0, top + 0.45, 0]))
+  g.add(mesh(new THREE.SphereGeometry(0.04, 16, 12), metal(), [0, top + 0.6, 0]))
+  const beam = new THREE.MeshBasicMaterial({ color: C('#fff3b0'), transparent: true, opacity: 0.42, depthWrite: false })
+  for (const s of [-1, 1]) {
+    const geo = new THREE.ConeGeometry(0.42, 1.6, 32, 1, true); geo.translate(0, -0.8, 0)
+    const m = new THREE.Mesh(geo, beam); m.position.set(0, top + 0.2, 0); m.rotation.z = s * Math.PI / 2; m.rotation.x = 0.15; g.add(m)
+  }
+  // waves at its foot
+  for (let i = 0; i < 3; i++) g.add(mesh(new THREE.TorusGeometry(0.95 + i * 0.12, 0.03, 8, 64, Math.PI * 1.2), glossy(SKY, { roughness: 0.2 }), [0, -0.12 - i * 0.02, 0], [Math.PI / 2, 0, 0.4 + i]))
+  g.rotation.y = 0.3
+  return g
+}
+
 export function buildKind3(job) {
+  if (job.kind === 'b-emblem') return emblem()  // a promise: awaited where it is built
+  if (job.kind === 'b-lighthouse') return lighthouse()
   if (job.kind === 'plan-crown') return planCrown(job.plan)
   switch (job.kind) {
     case 'b-books': return books()

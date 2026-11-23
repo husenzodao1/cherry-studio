@@ -15,10 +15,10 @@ export const SCHOOL_ART: Record<string, Art> = {
   'odobi-umumi': a('school-b-ethics', 480, 334),
   'pisar-dar-jamiyat': a('school-b-society', 480, 338),
   'khislathoi-mardona': a('school-b-character', 452, 480),
-  'farhangi-tojik-pisaron': a('school-b-culture', 480, 431),
+  'farhangi-tojik-pisaron': a('school-b-culture', 480, 492),
   'zamoni-muosir': a('school-b-modern', 465, 480),
   'odobi-oiladori': a('school-b-family', 480, 408),
-  'sakhtihoi-hayot': a('school-b-hardship', 480, 472)
+  'sakhtihoi-hayot': a('school-b-hardship', 480, 451)
 }
 
 export const ART = {

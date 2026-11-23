@@ -64,7 +64,7 @@ function Choice({ options, value, onChange, custom, onCustom, hours = false }: {
  * Every text and option comes from the panel (Матнҳо → Саволнома).
  */
 export default function Welcome() {
-  const { t } = usePrefs()
+  const { t, mode } = usePrefs()
   const router = useRouter()
   const { bundle } = useContent()
   const { learner, progress, answerWelcome } = useLearner()
@@ -154,9 +154,10 @@ export default function Welcome() {
     )
   }
 
-  if (!met) return <MahliyoIntro onDone={() => setMet(true)} />
+  // a boy goes straight to the questions (her greeting clip is a girl's)
+  if (!met && mode !== 'boy') return <MahliyoIntro onDone={() => setMet(true)} />
 
-  const art = ['/assets/3d/welcome-clock.webp', '/assets/3d/welcome-girl.webp', '/assets/3d/welcome-track.webp'][step]
+  const art = ['/assets/3d/welcome-clock.webp', mode === 'boy' ? '/assets/boy/think.webp' : '/assets/3d/welcome-girl.webp', '/assets/3d/welcome-track.webp'][step]
   const question = t(step === 0 ? 'welcome.time.q' : step === 1 ? 'welcome.schools.q' : 'welcome.source.q')
   return (
     <div className="wl">

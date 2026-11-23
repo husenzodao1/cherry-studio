@@ -3080,7 +3080,7 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 
 /* boys' mode: a diamond turning slowly on the home screen (36 rendered frames of a 1/8 turn: the stone and
    its studio repeat every 45°, so the loop has no seam), floating a little, with a soft blue glow under it */
-.hello-diamond { position: absolute; z-index: 1; right: 6px; top: 4px; width: min(34vw, 140px); aspect-ratio: 260 / 142; pointer-events: none;
+.hello-diamond { position: absolute; z-index: 1; right: 2px; top: -2px; width: min(42vw, 170px); aspect-ratio: 260 / 178; pointer-events: none;
   animation: diamond-float 5.5s ease-in-out infinite; }
 .hello-diamond::after { content: ''; position: absolute; left: 18%; right: 18%; bottom: -14%; height: 18%; border-radius: 50%;
   background: radial-gradient(closest-side, rgba(37, 99, 235, 0.28), transparent); filter: blur(4px); animation: diamond-shadow 5.5s ease-in-out infinite; }

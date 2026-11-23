@@ -242,10 +242,10 @@
       "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-character)"
     },
     "school-b-culture.webp": {
-      "model": "The crown and seven stars of the Tajik flag on a navy disc",
-      "author": "Dukhtari Khubam project",
-      "license": "project-owned",
-      "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-culture)"
+      "model": "The State emblem of the Republic of Tajikistan raised in 3D relief (each shape of the SVG extruded: gold in metal, ribbons and cotton in enamel)",
+      "author": "Emblem SVG: Wikimedia Commons (File:Emblem_of_Tajikistan.svg; a state emblem, public domain); 3D relief: Dukhtari Khubam project",
+      "license": "public domain (state symbol)",
+      "source": "tools/render-assets (emblem-tj.svg, kit3.js emblem(), jobs-boys-icons.json: school-b-culture)"
     },
     "school-b-modern.webp": {
       "model": "A rocket rising",
@@ -260,13 +260,13 @@
       "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-family)"
     },
     "school-b-hardship.webp": {
-      "model": "A snowy mountain with a flag on its peak",
+      "model": "A lighthouse on its rock, its lamp lit and beams shining, waves at its foot",
       "author": "Dukhtari Khubam project",
       "license": "project-owned",
       "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-hardship)"
     },
     "boy-diamond-spin.webp": {
-      "model": "A round brilliant diamond turning 1/8 of a turn in 36 frames (spectral refraction shader, 8-fold studio)",
+      "model": "A tall round brilliant diamond (deep pavilion) turning 1/8 of a turn in 36 frames (spectral refraction shader, 8-fold studio)",
       "author": "Dukhtari Khubam project",
       "license": "project-owned",
       "source": "tools/render-assets (jobs-boys.json: boy-diamond)"

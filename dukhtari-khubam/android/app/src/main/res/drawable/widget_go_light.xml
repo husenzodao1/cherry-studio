@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- the Mahliyo widget's button on a light scene -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="#E62A1D4A" />
-    <corners android:radius="999dp" />
-</shape>
+<!-- the Mahliyo widget's button on a light scene: a violet-to-pink gradient pill with a light rim -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:top="2dp">
+        <shape android:shape="rectangle"><solid android:color="#33000000" /><corners android:radius="999dp" /></shape>
+    </item>
+    <item android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <gradient android:angle="0" android:startColor="#FF7C3AED" android:centerColor="#FFC026D3" android:endColor="#FFF43F5E" />
+            <stroke android:width="1dp" android:color="#66FFFFFF" />
+            <corners android:radius="999dp" />
+        </shape>
+    </item>
+</layer-list>

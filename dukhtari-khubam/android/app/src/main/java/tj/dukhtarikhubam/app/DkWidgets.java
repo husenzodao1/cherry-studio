@@ -161,14 +161,16 @@ public final class DkWidgets {
             int[] faces = boy && sc.boyFaces != null ? sc.boyFaces : sc.faces;
             v.setInt(R.id.w_root, "setBackgroundResource", boy && sc.boyBg != 0 ? sc.boyBg : sc.bg);
             v.setImageViewResource(R.id.w_face, faces[Math.floorMod(day, faces.length)]);
-            v.setTextViewText(R.id.w_kicker, "🔥 " + live);
-            v.setTextColor(R.id.w_kicker, (ink & 0x00FFFFFF) | 0xB3000000);
+            // the streak: its flame and the days, in a capsule that suits the scene
+            v.setTextViewText(R.id.w_kicker, live + "  " + d.optString("streakText", "").toLowerCase(Locale.ROOT));
+            v.setTextColor(R.id.w_kicker, sc.deep ? 0xFFFFFFFF : 0xFF2A1D4A);
+            v.setInt(R.id.w_streak_box, "setBackgroundResource", sc.deep ? R.drawable.widget_streak_dark : R.drawable.widget_streak_light);
             v.setTextViewText(R.id.w_title, bar < 0 ? said : said.substring(0, bar).trim());
             v.setTextColor(R.id.w_title, ink);
             v.setTextViewText(R.id.w_sub, bar < 0 ? "" : said.substring(bar + 1).trim());
             v.setTextColor(R.id.w_sub, (ink & 0x00FFFFFF) | 0xD9000000);
-            v.setTextViewText(R.id.w_go, d.optString("goText", "Оғоз"));
-            v.setInt(R.id.w_go, "setBackgroundResource", sc.deep ? R.drawable.widget_go_dark : R.drawable.widget_go_light);
+            v.setTextViewText(R.id.w_go, d.optString("goText", "Оғоз") + "  ➜");
+            v.setInt(R.id.w_go, "setBackgroundResource", sc.deep ? R.drawable.widget_go_dark : boy ? R.drawable.widget_go_light_b : R.drawable.widget_go_light);
             v.setTextColor(R.id.w_go, sc.deep ? 0xFF2A1D4A : 0xFFFFFFFF);
             v.setOnClickPendingIntent(R.id.w_root, open(ctx, "/mahliyo", 6));
             v.setOnClickPendingIntent(R.id.w_go, open(ctx, d.optString("nextPath", "/schools"), 7));

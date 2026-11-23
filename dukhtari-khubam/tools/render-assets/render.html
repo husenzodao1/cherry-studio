@@ -91,9 +91,9 @@ function stepCut(w = 1, d = 0.68, corner = 0.2) {
   pts.push(new THREE.Vector3(-0.3 * w, -0.56, 0), new THREE.Vector3(0.3 * w, -0.56, 0))
   return pts
 }
-function gemGeo(cut) {
+function gemGeo(cut, depth) {
   const pts = cut === 'emerald' ? stepCut(1, 0.68, 0.2) : cut === 'baguette' ? stepCut(1, 0.34, 0.04)
-    : brilliantCut(OUTLINES[cut], cut === 'round' ? 16 : 24, cut === 'princess' ? 0.92 : 1)
+    : brilliantCut(OUTLINES[cut], cut === 'round' ? 16 : 24, depth ?? (cut === 'princess' ? 0.92 : 1))
   const g = new ConvexGeometry(pts)
   g.center()
   return g
@@ -416,7 +416,7 @@ window.renderJob = async (job) => {
   scene.environmentIntensity = job.envIntensity ?? 1
   scene.environmentRotation = new THREE.Euler(0, job.envRotation ?? 0, 0)
 
-  let object = (await buildKind(job)) ?? buildKind2(job) ?? buildKind3(job)
+  let object = (await buildKind(job)) ?? buildKind2(job) ?? (await buildKind3(job))
   if (object) {
     // built by kit.js
   } else if (job.kind === 'bloom') {
@@ -458,7 +458,7 @@ window.renderJob = async (job) => {
     }
   } else if (job.kind === 'gem') {
     object = new THREE.Group()
-    const geo = gemGeo(job.cut)
+    const geo = gemGeo(job.cut, job.depth)
     const m = new THREE.Mesh(geo, diamondMaterial(geo, job.studio ? studioRing(job.studio) : hdr, job.tint ?? '#ffffff', job.absorb ?? 0))
     if (job.ior) m.material.uniforms.uIors.value.set(job.ior - 0.02, job.ior, job.ior + 0.03)
     m.onBeforeRender = () => m.material.uniforms.uRot.value.setFromMatrix4(m.matrixWorld)

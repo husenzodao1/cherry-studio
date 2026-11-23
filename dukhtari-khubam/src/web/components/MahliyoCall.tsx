@@ -24,10 +24,11 @@ import { Icon } from './Icon'
  * the call the app was opened by — answered on the lock screen, the call is on at once.
  */
 
-type Clip = { src: string; lines: [number, string][] }
+/** `girls`: said to a girl ("Эй духтарак"), never in boys' mode */
+type Clip = { src: string; lines: [number, string][]; girls?: boolean }
 /** her recorded lines, with when each sentence starts (seconds) */
 const VOICES: Clip[] = [
-  { src: '/assets/call/voice-1.mp3', lines: [[0, 'Ау! Эй духтарак, шумо ҳамин ҷоед?'], [4.2, 'Лутфан баргардед, дарсҳо шуморо интизоранд.']] },
+  { src: '/assets/call/voice-1.mp3', girls: true, lines: [[0, 'Ау! Эй духтарак, шумо ҳамин ҷоед?'], [4.2, 'Лутфан баргардед, дарсҳо шуморо интизоранд.']] },
   { src: '/assets/call/voice-2.mp3', lines: [[0, 'Салом, дӯстам! Шумо маро водор карда будед, ки занг занам.'], [4.1, 'Лутфан ба дарс баргардед.'], [6.1, 'Шуморо мавзӯъҳои нав интизоранд.']] },
   { src: '/assets/call/voice-3.mp3', lines: [[0, 'Салом, дӯстам! Шумо маро водор карда будед, ки занг занам.'], [4.1, 'Лутфан ба дарс баргардед, шуморо мавзӯъҳои нав интизоранд.']] }
 ]
@@ -112,7 +113,7 @@ function beep(key: string) {
 }
 
 function CallScreen({ info }: { info: CallInfo }) {
-  const { t } = usePrefs()
+  const { t, mode } = usePrefs()
   const router = useRouter()
   const { bundle } = useContent()
   const { progress } = useLearner()
@@ -123,7 +124,9 @@ function CallScreen({ info }: { info: CallInfo }) {
   const [muted, setMuted] = useState(false)
   const [keypad, setKeypad] = useState(false)
   const [typed, setTyped] = useState('')
-  const voice = useRef(VOICES[Math.floor(Math.random() * VOICES.length)])
+  // a boy never hears the line said to a girl
+  const voices = VOICES.filter((v) => !(mode === 'boy' && v.girls))
+  const voice = useRef(voices[Math.floor(Math.random() * voices.length)])
   const sound = useRef<CallLine | null>(null)
   /** the waits of the talk (before she speaks, between clips) and the subtitles' clock */
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
