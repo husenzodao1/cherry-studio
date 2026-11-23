@@ -28,7 +28,14 @@ export function placeNote(): string | undefined {
 }
 
 const native = async () => (await import('@capacitor/core')).Capacitor.isNativePlatform()
-const plugin = async () => (await import('@capacitor/geolocation')).Geolocation
+/**
+ * The Geolocation plugin, wrapped: a Capacitor plugin is a proxy that turns any property into a native call,
+ * so it must never be what a promise resolves with (awaiting it would call a native "then").
+ */
+const plugin = async () => {
+  const { Geolocation } = await import('@capacitor/geolocation')
+  return { geo: Geolocation }
+}
 
 /** keeps her place, rounded (about 10 km) */
 function keep(lat: number, lon: number) {
@@ -44,7 +51,8 @@ function keep(lat: number, lon: number) {
 export async function placeAllowed(): Promise<boolean> {
   if (await native()) {
     try {
-      const st = await (await plugin()).checkPermissions()
+      const { geo } = await plugin()
+      const st = await geo.checkPermissions()
       return st.location === 'granted' || st.coarseLocation === 'granted'
     } catch {
       return read() !== null
@@ -63,7 +71,8 @@ export async function placeAllowed(): Promise<boolean> {
 async function locate(timeout: number): Promise<boolean> {
   if (await native()) {
     try {
-      const pos = await (await plugin()).getCurrentPosition({ enableHighAccuracy: false, maximumAge: FRESH_MS, timeout })
+      const { geo } = await plugin()
+      const pos = await geo.getCurrentPosition({ enableHighAccuracy: false, maximumAge: FRESH_MS, timeout })
       keep(pos.coords.latitude, pos.coords.longitude)
       return true
     } catch {
@@ -86,7 +95,7 @@ async function locate(timeout: number): Promise<boolean> {
 export async function askPlace(timeout = 15_000): Promise<boolean> {
   if (await native()) {
     try {
-      const geo = await plugin()
+      const { geo } = await plugin()
       let st = await geo.checkPermissions()
       if (st.location !== 'granted' && st.coarseLocation !== 'granted') st = await geo.requestPermissions({ permissions: ['coarseLocation'] })
       const ok = st.location === 'granted' || st.coarseLocation === 'granted'

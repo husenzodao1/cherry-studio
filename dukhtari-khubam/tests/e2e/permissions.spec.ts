@@ -40,6 +40,10 @@ async function asPhone(page: Page, phone: Phone) {
           if (state.notify === 'prompt') state.notify = state.refuse ? 'denied' : 'granted'
           return { display: state.notify }
         }
+        // her place: Android's own permission (the app's Geolocation plugin)
+        if (key === 'Geolocation.checkPermissions') return { location: state.place ? 'granted' : 'prompt', coarseLocation: state.place ? 'granted' : 'prompt' }
+        if (key === 'Geolocation.requestPermissions') { state.asked = [...state.asked, 'place']; state.place = true; return { location: 'granted', coarseLocation: 'granted' } }
+        if (key === 'Geolocation.getCurrentPosition') return { coords: { latitude: 38.5598, longitude: 68.7870 }, timestamp: Date.now() }
         if (key === 'MahliyoCall.canFullScreen') return { granted: state.call }
         if (key === 'MahliyoCall.askFullScreen') { state.asked = [...state.asked, 'call-settings']; state.call = true; return {} }
         if (key === 'MahliyoCall.notifySettings') { state.asked = [...state.asked, 'notify-settings']; return {} }

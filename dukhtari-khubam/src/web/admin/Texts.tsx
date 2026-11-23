@@ -255,7 +255,10 @@ function Warnings() {
   const changePair = (i: number, part: Partial<RedReply>) => setPairs(shownPairs.map((r, k) => (k === i ? { ...r, ...part } : r)))
   const save = async () => {
     const clean = [
-      ...shownPairs.map((r) => ({ word: r.word.trim(), reply: r.reply.trim(), more: (r.more ?? []).map((m) => m.trim()).filter(Boolean) })),
+      ...shownPairs.map((r) => {
+        const more = (r.more ?? []).map((m) => m.trim()).filter(Boolean)
+        return { word: r.word.trim(), reply: r.reply.trim(), ...(more.length ? { more } : {}) }
+      }),
       ...shownGeneral.map((reply) => ({ word: '', reply: reply.trim() }))
     ].filter((r) => r.reply)
     if (await act.run(() => send('/admin/ai/warnings', 'POST', { items: clean }), 'Сабт шуд')) {
