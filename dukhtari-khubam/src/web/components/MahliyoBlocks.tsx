@@ -12,7 +12,7 @@ import { lookStyle, slideStyle } from '@/lib/slideStyles'
 import SPOTS from '@/lib/aiSpots.json'
 
 import { allowLockScreen, lockScreenAllowed } from '../offline/call'
-import { cancelReminder, reminderId, setReminder, type AiUpload } from '../offline/mahliyo'
+import { cancelReminder, makeSong, reminderId, setReminder, type AiUpload, type MadeSong, type SongProblem } from '../offline/mahliyo'
 import { usePrefs } from '../prefs'
 import { AiMarkdown, isMarkdown } from './AiMarkdown'
 import { DocViewer, OpenChoice } from './DocViewer'
@@ -310,6 +310,104 @@ const FILE_BADGE: Record<string, string> = { pdf: 'PDF', docx: 'W', pptx: 'P' }
  * is for; "Боргирӣ" builds the file on the phone and saves or shares it; "Дидан" opens a document (PDF,
  * Word, PowerPoint) in an app the phone asks for, and shows text and code right here.
  */
+const time = (s: number) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}` : '0:00')
+
+/**
+ * A song she made (music maker): its record turning while it plays, the name and genre, her own player
+ * (play, a bar to move through it, the time), "save" to keep the MP3, and the words, folded. The music is
+ * made at once by Lyria (kept on the phone afterwards); while it is made, three lines with a light sweeping
+ * over them say what is happening.
+ */
+function MusicCard({ block, style }: { block: Extract<AiBlock, { type: 'music' }>; style: CSSProperties }) {
+  const { t } = usePrefs()
+  const [song, setSong] = useState<MadeSong | SongProblem | null>(null)
+  const [step, setStep] = useState(0)
+  const [playing, setPlaying] = useState(false)
+  const [at, setAt] = useState(0)
+  const [length, setLength] = useState(0)
+  const [open, setOpen] = useState(false)
+  const audio = useRef<HTMLAudioElement>(null)
+  const [url, setUrl] = useState<string | null>(null)
+  const make = () => {
+    setSong(null)
+    void makeSong(block).then(setSong)
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(make, [block.title, block.prompt, block.lyrics])
+  useEffect(() => {
+    if (song !== null) return
+    const timer = setInterval(() => setStep((n) => (n + 1) % 3), 5000)
+    return () => clearInterval(timer)
+  }, [song])
+  const made = song && typeof song === 'object' ? song : null
+  useEffect(() => {
+    if (!made) return
+    const bytes = Uint8Array.from(atob(made.audio), (c) => c.charCodeAt(0))
+    const u = URL.createObjectURL(new Blob([bytes], { type: made.mime || 'audio/mpeg' }))
+    setUrl(u)
+    return () => URL.revokeObjectURL(u)
+  }, [made])
+  const toggle = () => {
+    const a = audio.current
+    if (!a) return
+    if (a.paused) void a.play().catch(() => undefined)
+    else a.pause()
+  }
+  const save = async () => {
+    if (!made) return
+    const bytes = Uint8Array.from(atob(made.audio), (c) => c.charCodeAt(0))
+    const { saveFile } = await import('../files/build')
+    await saveFile(`${block.title.replace(/[\\/:*?"<>|]+/g, ' ').trim() || 'song'}.mp3`, new Blob([bytes], { type: made.mime || 'audio/mpeg' }), block.title)
+  }
+  const lines = block.lyrics.trim().split('\n')
+  const problem = typeof song === 'string' ? song : null
+  return (
+    <div className={`ai-card ai-song${playing ? ' is-playing' : ''}`} style={style}>
+      <div className="ai-song-head">
+        <span className="ai-song-disc" aria-hidden="true"><i /></span>
+        <span className="ai-song-name">
+          <b>{emojify(block.title)}</b>
+          <span className="ai-song-tags">
+            {block.genre ? <span>{block.genre}</span> : null}
+            {block.instrumental ? <span>{t('ai.song_instrumental')}</span> : null}
+          </span>
+        </span>
+        {made ? <button type="button" className="ai-song-play" aria-label={playing ? t('doc.pause') : t('doc.play')} onClick={toggle}><Icon name={playing ? 'pause' : 'play'} size={22} fill="currentColor" /></button> : null}
+      </div>
+      {song === null ? (
+        <div className="ai-song-making" aria-live="polite">
+          <span className="ai-song-wave" aria-hidden="true">{Array.from({ length: 14 }, (_, k) => <i key={k} style={{ ['--k' as string]: k }} />)}</span>
+          <span className="ai-books-hint ai-file-step">{t(`ai.song_step_${step + 1}` as 'ai.song_step_1')}</span>
+        </div>
+      ) : null}
+      {made && url ? (
+        <div className="ai-song-player">
+          <audio ref={audio} src={url} preload="metadata" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => { setPlaying(false); setAt(0) }}
+            onTimeUpdate={(e) => setAt(e.currentTarget.currentTime)} onLoadedMetadata={(e) => setLength(e.currentTarget.duration)} />
+          <input type="range" className="ai-song-bar" min={0} max={length || 1} step={0.1} value={at} aria-label={block.title}
+            style={{ ['--p' as string]: `${length ? (at / length) * 100 : 0}%` }}
+            onChange={(e) => { const a = audio.current; if (a) a.currentTime = Number(e.target.value); setAt(Number(e.target.value)) }} />
+          <span className="ai-song-time">{time(at)} / {time(length)}</span>
+          <button type="button" className="ai-song-save" onClick={() => void save()}><Icon name="install" size={16} />{t('ai.song_save')}</button>
+        </div>
+      ) : null}
+      {problem ? (
+        <p className="ai-song-note">
+          {t(problem === 'not_configured' ? 'ai.song_soon' : problem === 'refused' ? 'ai.song_refused' : problem === 'offline' ? 'ai.song_offline' : 'ai.song_failed')}
+          {problem === 'failed' || problem === 'offline' ? <button type="button" className="link-btn" onClick={make}>{t('ai.song_retry')}</button> : null}
+        </p>
+      ) : null}
+      {lines.length && block.lyrics.trim() ? (
+        <div className="ai-song-lyrics">
+          <span className="eyebrow">{t('ai.song_lyrics')}</span>
+          <p>{emojify((open ? lines : lines.slice(0, 6)).join('\n'))}</p>
+          {lines.length > 6 ? <button type="button" className="link-btn" onClick={() => setOpen(!open)}>{t(open ? 'ai.song_less' : 'ai.song_more')}</button> : null}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function FileCard({ block, style, onSend }: { block: Extract<AiBlock, { type: 'file' }>; style: CSSProperties; onSend?: (text: string, files: AiUpload[]) => void }) {
   const { t } = usePrefs()
   const [open, setOpen] = useState(false)
@@ -511,6 +609,8 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk, onSend }: {
             return <CalcCard key={i} block={b} style={style} />
           case 'clarify':
             return <ClarifyCard key={i} block={b} onAsk={onAsk} style={style} />
+          case 'music':
+            return <MusicCard key={i} block={b} style={style} />
           case 'file':
             return <FileCard key={i} block={b} style={style} onSend={onSend} />
           case 'follow':

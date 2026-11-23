@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { AiMode } from '../offline/mahliyo'
+import { AI_MODES } from '../aiModes'
 import { usePrefs } from '../prefs'
 import { Icon, type IconName } from './Icon'
 
@@ -16,16 +17,6 @@ import { Icon, type IconName } from './Icon'
  */
 
 interface Photo { id: string; thumb: string; name?: string }
-const MODES: { id: AiMode; icon: IconName; key: `ai.mode_${AiMode}` }[] = [
-  { id: 'precise', icon: 'target', key: 'ai.mode_precise' },
-  { id: 'science', icon: 'flask', key: 'ai.mode_science' },
-  { id: 'friendly', icon: 'smile', key: 'ai.mode_friendly' },
-  { id: 'girly', icon: 'heart', key: 'ai.mode_girly' },
-  // skills: exams, the ММТ (from the staff's books), interesting facts
-  { id: 'exam', icon: 'cap', key: 'ai.mode_exam' },
-  { id: 'mmt', icon: 'book', key: 'ai.mode_mmt' },
-  { id: 'facts', icon: 'sparkle', key: 'ai.mode_facts' }
-]
 
 /** the app's own gallery reader (android RecentPhotosPlugin.java) */
 interface NativePhotos {
@@ -240,9 +231,9 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
         </div>
         {/* how she answers: quiet chips in a row */}
         <div className="attach-modes" role="group" aria-label={t('ai.modes')}>
-          {MODES.map((m) => (
-            <button key={m.id} type="button" aria-pressed={mode === m.id} className={`tone-${m.id}${mode === m.id ? ' is-on' : ''}`} onClick={() => onMode(mode === m.id ? null : m.id)}>
-              <Icon name={m.icon} size={15} />{t(m.key)}
+          {AI_MODES.map((m) => (
+            <button key={m.id} type="button" aria-pressed={mode === m.id} className={`tone-${m.id}${mode === m.id ? ' is-on' : ''}`} style={{ ['--c' as string]: m.color }} onClick={() => onMode(mode === m.id ? null : m.id)}>
+              <Icon name={m.icon} size={15} />{t(`ai.mode_${m.id}`)}
             </button>
           ))}
         </div>

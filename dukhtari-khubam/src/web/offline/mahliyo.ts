@@ -256,7 +256,8 @@ export interface AiState {
 }
 export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string; mode?: AiMode; gender?: 'girl' | 'boy' }
 /** how she asks to be answered (the attach sheet's modes) */
-export type AiMode = 'precise' | 'science' | 'friendly' | 'girly' | 'exam' | 'mmt' | 'facts'
+export type AiMode = 'precise' | 'science' | 'friendly' | 'girly' | 'exam' | 'mmt' | 'facts' | 'lawyer' | 'music' | 'math' | 'translate'
+  | 'writer' | 'nutrition' | 'career' | 'code' | 'history' | 'calm' | 'language' | 'factcheck'
 
 const PENDING_KEY = 'dk.ai-pending'
 /** how long she may take before the question counts as unanswered (the server gives up after 5 minutes) */
@@ -707,4 +708,48 @@ export async function prepareFile(file: File): Promise<AiUpload> {
   if (file.type !== 'application/pdf' && file.type !== 'text/plain') throw new FileProblem('type')
   if (file.size > FILE_BYTES) throw new FileProblem('big')
   return { mime: file.type, name, data: await base64Of(file) }
+}
+
+/* ---------------------------------------------------------------- her songs (Lyria 3) */
+
+/** her sign-in, when she has an account (a whole song is for Premium) */
+async function sessionToken(): Promise<string | undefined> {
+  try {
+    const { browserSupabase } = await import('../supabase-browser')
+    const { data } = await browserSupabase()?.auth.getSession() ?? { data: { session: null } }
+    return data.session?.access_token ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
+export interface MadeSong { audio: string; mime: string; text: string }
+export type SongProblem = 'not_configured' | 'refused' | 'failed' | 'offline'
+
+/**
+ * The song she planned, made into music: kept on this phone (the same song is never made twice), so it
+ * plays again without the internet. Resolves the song, or why it could not be made.
+ */
+export async function makeSong(b: { title: string; genre: string; prompt: string; lyrics: string; instrumental: boolean }, long = false): Promise<MadeSong | SongProblem> {
+  const key = `aisong:${b.title}:${b.prompt.length}:${b.lyrics.length}:${long ? 1 : 0}`
+  try {
+    const { get } = await import('idb-keyval')
+    const kept = await get<MadeSong>(key)
+    if (kept) return kept
+  } catch { /* nothing kept */ }
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'offline'
+  try {
+    const res = await fetch(apiUrl('/mahliyo/music'), {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token: supportToken(), session: await sessionToken(), title: b.title, prompt: b.prompt, genre: b.genre || undefined, lyrics: b.lyrics || undefined, instrumental: b.instrumental, long })
+    })
+    if (res.status === 503) return 'not_configured'
+    if (res.status === 422) return 'refused'
+    if (!res.ok) return 'failed'
+    const song = (await res.json()) as MadeSong
+    try { (await import('idb-keyval')).set(key, song) } catch { /* not kept */ }
+    return song
+  } catch {
+    return 'failed'
+  }
 }

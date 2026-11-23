@@ -9,6 +9,7 @@ import { supabaseFor } from '@/lib/supabase'
 
 import { answer, ATTACHMENT_MIMES, premiumLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type RedReply, type Turn } from '../mahliyo'
 import { activeModel, bookPassages, forgetActive, hasBooks, sealKey, serverReady } from '../aiModels'
+import { makeSong } from '../music'
 import { call } from '../util'
 import { buildBundle, Code, codeHash, Token } from './offline'
 
@@ -158,7 +159,7 @@ export const mahliyoRoutes: AnyRoute[] = [
       // her rough place, only when she allowed it ("38.6, 68.8": one decimal, about 10 km)
       place: z.string().regex(/^-?\d{1,2}(\.\d)?, -?\d{1,3}(\.\d)?$/).optional(),
       // the way she asked to be answered (the attach sheet's modes)
-      mode: z.enum(['precise', 'science', 'friendly', 'girly', 'exam', 'mmt', 'facts']).optional(),
+      mode: z.enum(['precise', 'science', 'friendly', 'girly', 'exam', 'mmt', 'facts', 'lawyer', 'music', 'math', 'translate', 'writer', 'nutrition', 'career', 'code', 'history', 'calm', 'language', 'factcheck']).optional(),
       // a girl or a boy (the app's mode): a boy is spoken to as a young man
       gender: z.enum(['girl', 'boy']).optional()
     }),
@@ -192,6 +193,21 @@ export const mahliyoRoutes: AnyRoute[] = [
       }
       await call(sb(), 'api_mahliyo_answer', { p_id: id, p_answer: a.reply, p_tajik: a.tajik, p_blocks: a.blocks }).catch(() => undefined)
       return a
+    }
+  }),
+  route({
+    method: 'POST', path: '/mahliyo/music', access: 'public', tag: 'Mahliyo AI',
+    summary: "A song Mahliyo planned (title, sound, lyrics) made into music by Lyria 3: the audio (base64 MP3) and its words",
+    body: z.strictObject({
+      token: Token, code: Code.optional(), session: z.string().max(4000).optional(),
+      title: z.string().trim().min(1).max(120), prompt: z.string().trim().min(3).max(1500), genre: z.string().trim().max(80).optional(),
+      lyrics: z.string().max(3000).optional(), instrumental: z.boolean().optional(), long: z.boolean().optional()
+    }),
+    handler: async ({ body }) => {
+      // a whole song only with Premium; a 30-second clip for the others
+      const premium = await premiumOf(body.session)
+      const song = await makeSong({ title: body.title, prompt: body.prompt, genre: body.genre, lyrics: body.lyrics, instrumental: body.instrumental, long: !!body.long && premium })
+      return new Response(JSON.stringify(song), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' } })
     }
   }),
   route({

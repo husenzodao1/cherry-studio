@@ -13,6 +13,7 @@ import { AttachSheet } from '@/web/components/AttachSheet'
 import { SlashMenu } from '@/web/components/SlashMenu'
 import { SlidesSetup } from '@/web/components/SlidesSetup'
 import { DocViewer, type DocSource } from '@/web/components/DocViewer'
+import { MODE_ICON } from '@/web/aiModes'
 import { PhotoMarker } from '@/web/components/PhotoMarker'
 import { useScreenshot } from '@/web/components/ScreenGuard'
 import { Icon } from '@/web/components/Icon'
@@ -1027,7 +1028,6 @@ function Wave({ text }: { text: string }) {
   )
 }
 
-const MODE_ICON = { precise: 'target', science: 'flask', friendly: 'smile', girly: 'heart', exam: 'cap', mmt: 'book', facts: 'sparkle' } as const
 
 /** Her greetings fit the hour: the night (22–5), the morning (5–11), the evening (17–22), or any time. */
 export const taglinesKey = (h: number) =>

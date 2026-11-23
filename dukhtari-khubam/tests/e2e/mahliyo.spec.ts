@@ -887,7 +887,7 @@ test('the paperclip opens a sheet: camera, gallery, document and four ways of an
   await page.locator('.ai-attach').click()
   await expect(page.locator('.attach')).toBeVisible()
   await expect(page.locator('.attach-actions button')).toHaveCount(5)
-  await expect(page.locator('.attach-modes button')).toHaveCount(7)
+  await expect(page.locator('.attach-modes button')).toHaveCount(19)
   // the tiles are squares side by side, never over each other
   const rects = await page.locator('.attach-tile').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height })))
   for (const r of rects) expect(Math.abs(r.w - r.h)).toBeLessThan(2)

@@ -248,7 +248,7 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
       { role: 'user', parts: [{ text: 'Нафаҳмидам' }] }
     ])
     expect(req.config).toMatchObject({ responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'MINIMAL' } })
-    expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(14)
+    expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(15)
     // a test question (Premium) and the card that opens the Premium screen are among her blocks
     expect(req.config.responseJsonSchema.properties.blocks.items.anyOf.map((b: { properties: { type: { enum: string[] } } }) => b.properties.type.enum[0])).toEqual(expect.arrayContaining(['quiz', 'premium', 'warning']))
     const system = req.config.systemInstruction as string
@@ -435,5 +435,20 @@ describe('red replies with several answers', () => {
     const all = [...once, { role: 'assistant' as const, content: 'Ҷавоби дуюм' }, { role: 'assistant' as const, content: 'Ҷавоби сеюм' }]
     for (const k of [0, 0.5, 0.99]) expect(pickReply(r, 'Малика', all, () => k)).not.toBe('Ҷавоби сеюм')
     expect(pickReply({ reply: 'Танҳо як' }, '', once, () => 0.3)).toBe('Танҳо як')
+  })
+})
+
+describe('songs (Lyria 3)', () => {
+  it('a song block is kept with its name, sound and words; Lyria\'s answer gives the audio and the words', async () => {
+    const { cleanBlocks } = await import('@/server/mahliyo')
+    const out = cleanBlocks([{ type: 'music', title: 'Ватан', genre: 'Tajik pop', prompt: 'Warm ballad, 90 BPM, rubob and piano, female voice', lyrics: '[Verse 1]\nВатан, эй Ватан', instrumental: false }])
+    expect(out).toEqual([{ type: 'music', title: 'Ватан', genre: 'Tajik pop', prompt: 'Warm ballad, 90 BPM, rubob and piano, female voice', lyrics: '[Verse 1]\nВатан, эй Ватан', instrumental: false }])
+    expect(cleanBlocks([{ type: 'music', title: '', prompt: 'x' }])).toEqual([])
+    const { songOf, songPrompt } = await import('@/server/music')
+    expect(songOf({ steps: [{ type: 'user_input' }, { type: 'model_output', content: [{ type: 'text', text: 'lyrics' }, { type: 'audio', data: 'QUJD', mime_type: 'audio/mpeg' }] }] }))
+      .toEqual({ audio: 'QUJD', mime: 'audio/mpeg', text: 'lyrics' })
+    expect(songOf({ steps: [] })).toBeNull()
+    expect(songPrompt({ title: 'T', prompt: 'calm', instrumental: true })).toContain('Instrumental only, no vocals.')
+    expect(songPrompt({ title: 'T', prompt: 'calm', lyrics: '[Chorus]\nla' })).toContain('Sing exactly these lyrics:\n[Chorus]\nla')
   })
 })

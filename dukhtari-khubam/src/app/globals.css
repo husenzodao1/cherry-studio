@@ -3111,3 +3111,44 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .red-reply-alt { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
 .red-reply-alt textarea { color: #c62828; resize: vertical; padding-block: 8px; line-height: 1.35; }
 .red-reply-more .link-btn { align-self: flex-start; font-size: 0.84em; color: #c62828; }
+
+/* ---------------------------------------------------------------- her song (MusicCard) */
+.ai-song { display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 22px; color: #fff; overflow: hidden; position: relative; isolation: isolate;
+  background: radial-gradient(120% 90% at 0% 0%, #f472b6 0%, transparent 55%), radial-gradient(120% 120% at 100% 100%, #6366f1 0%, transparent 60%), linear-gradient(135deg, #a21caf, #4338ca);
+  box-shadow: 0 18px 36px -20px rgba(120, 40, 200, 0.75); }
+.ai-song-head { display: flex; align-items: center; gap: 12px; }
+.ai-song-disc { flex: none; position: relative; width: 58px; height: 58px; border-radius: 50%;
+  background: repeating-radial-gradient(circle, #1b1530 0 2px, #2a2145 2px 4px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  animation: song-spin 3.2s linear infinite; animation-play-state: paused; }
+.ai-song-disc i { position: absolute; inset: 34%; border-radius: 50%; background: radial-gradient(circle, #fff 0 14%, #f0abfc 15% 100%); }
+.ai-song.is-playing .ai-song-disc { animation-play-state: running; }
+@keyframes song-spin { to { transform: rotate(360deg); } }
+.ai-song-name { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.ai-song-name b { font-size: 1.06rem; line-height: 1.25; }
+.ai-song-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.ai-song-tags span { font-size: 0.72rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); }
+.ai-song-play { flex: none; width: 50px; height: 50px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer; color: #6d28d9; background: #fff;
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5); }
+.ai-song-play:active { transform: scale(0.92); }
+.ai-song-making { display: flex; flex-direction: column; gap: 8px; }
+.ai-song-making .ai-file-step { color: #fff; -webkit-text-fill-color: currentColor; background: none; opacity: 0.9; }
+.ai-song-wave { display: flex; align-items: center; gap: 4px; height: 30px; }
+.ai-song-wave i { flex: 1; height: 100%; border-radius: 3px; background: rgba(255, 255, 255, 0.85); transform-origin: center; animation: song-wave 1.1s ease-in-out infinite;
+  animation-delay: calc(var(--k) * -0.09s); }
+@keyframes song-wave { 0%, 100% { transform: scaleY(0.2); } 50% { transform: scaleY(1); } }
+.ai-song-player { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 10px; }
+.ai-song-bar { grid-column: 1 / -1; width: 100%; height: 6px; -webkit-appearance: none; appearance: none; border-radius: 3px; cursor: pointer;
+  background: linear-gradient(90deg, #fff var(--p), rgba(255, 255, 255, 0.28) var(--p)); }
+.ai-song-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.ai-song-time { font-size: 0.78rem; font-variant-numeric: tabular-nums; opacity: 0.85; }
+.ai-song-save { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; padding: 7px 13px; font: inherit; font-size: 0.8rem; font-weight: 700;
+  color: #fff; background: rgba(255, 255, 255, 0.2); cursor: pointer; }
+.ai-song-note { margin: 0; font-size: 0.86rem; line-height: 1.45; opacity: 0.95; }
+.ai-song-note .link-btn { color: #fff; text-decoration: underline; margin-inline-start: 6px; }
+.ai-song-lyrics { padding: 10px 12px; border-radius: 14px; background: rgba(0, 0, 0, 0.18); }
+.ai-song-lyrics .eyebrow { color: rgba(255, 255, 255, 0.75); }
+.ai-song-lyrics p { margin: 6px 0 0; white-space: pre-wrap; font-size: 0.92rem; line-height: 1.55; }
+.ai-song-lyrics .link-btn { color: #fff; margin-top: 4px; }
+/* the skills' chips take their own colour */
+.attach-modes button[style] svg { color: var(--c); }
+@media (prefers-reduced-motion: reduce) { .ai-song-disc, .ai-song-wave i { animation: none; } }

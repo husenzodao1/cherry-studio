@@ -86,6 +86,7 @@ export type AiBlock =
    *  `style`: a presentation's style (slideStyles.ts); `look`: the look read from her sample picture */
   | { type: 'file'; name: string; title: string; about: string; content: string; style?: string; look?: SlideLook }
   /** the card that opens the Premium screen (a free learner asked for a Premium part) */
+  | { type: 'music'; title: string; genre: string; prompt: string; lyrics: string; instrumental: boolean }
   | { type: 'premium'; title: string; text: string }
   /** insults or pressure: only this, in red — one of the staff's words, chosen at random */
   /** `rule`: which of the staff's red replies the model matched (1, 2 …; 0 none) — the server's only */
