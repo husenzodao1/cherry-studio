@@ -1,6 +1,6 @@
 'use client'
 
-import { Capacitor } from '@capacitor/core'
+import { Capacitor, registerPlugin } from '@capacitor/core'
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -15,7 +15,7 @@ import { Icon, type IconName } from './Icon'
  * photos; pulled down, it closes. On the website the photos come from the browser's own picker.
  */
 
-interface Photo { id: string; thumb: string }
+interface Photo { id: string; thumb: string; name?: string }
 const MODES: { id: AiMode; icon: IconName; key: 'ai.mode_precise' | 'ai.mode_science' | 'ai.mode_friendly' | 'ai.mode_girly' }[] = [
   { id: 'precise', icon: 'target', key: 'ai.mode_precise' },
   { id: 'science', icon: 'flask', key: 'ai.mode_science' },
@@ -23,26 +23,29 @@ const MODES: { id: AiMode; icon: IconName; key: 'ai.mode_precise' | 'ai.mode_sci
   { id: 'girly', icon: 'heart', key: 'ai.mode_girly' }
 ]
 
+/** the app's own gallery reader (android RecentPhotosPlugin.java) */
+interface NativePhotos {
+  recent(o: { limit: number; thumb: number }): Promise<{ photos: { id: string; name: string; thumb: string }[]; denied?: boolean }>
+  read(o: { id: string }): Promise<{ data: string; mime: string }>
+}
+const Photos = registerPlugin<NativePhotos>('RecentPhotos')
+
 /** the phone's newest photos (the app asks for the gallery first); none on the website or when refused */
 async function recentPhotos(count: number): Promise<Photo[]> {
   if (!Capacitor.isNativePlatform()) return []
   try {
-    const { Camera } = await import('@capacitor/camera')
-    const allowed = await Camera.requestPermissions({ permissions: ['photos'] })
-    if (allowed.photos === 'denied') return []
-    const { Media } = await import('@capacitor-community/media')
-    const { medias } = await Media.getMedias({ quantity: count, types: 'photos', thumbnailWidth: 256, thumbnailHeight: 256, thumbnailQuality: 70 })
-    return medias.map((m) => ({ id: m.identifier, thumb: `data:image/jpeg;base64,${m.data}` }))
+    const { photos } = await Photos.recent({ limit: count, thumb: 256 })
+    return photos.map((p) => ({ id: p.id, thumb: p.thumb, name: p.name }))
   } catch {
     return []
   }
 }
-/** a gallery photo as a file to send (on Android its identifier is its path) */
+/** a gallery photo as a file to send (a JPEG, at most 2048 px on its long side) */
 async function photoFile(p: Photo): Promise<File | null> {
   try {
-    const res = await fetch(Capacitor.convertFileSrc(p.id))
-    const blob = await res.blob()
-    return new File([blob], p.id.split('/').pop() || 'photo.jpg', { type: blob.type || 'image/jpeg' })
+    const { data, mime } = await Photos.read({ id: p.id })
+    const bytes = Uint8Array.from(atob(data), (ch) => ch.charCodeAt(0))
+    return new File([bytes], (p.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg', { type: mime })
   } catch {
     return null
   }
@@ -69,8 +72,10 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
   const [picked, setPicked] = useState<string[]>([])
   const [tall, setTall] = useState(false)
   const [camera, setCamera] = useState(false)
-  const [drag, setDrag] = useState(0)
-  const start = useRef<number | null>(null)
+  /** while the handle is held: the sheet's height following the finger (px), else null */
+  const [drag, setDrag] = useState<number | null>(null)
+  const start = useRef<{ y: number; h: number } | null>(null)
+  const sheet = useRef<HTMLElement>(null)
   const docs = useRef<HTMLInputElement>(null)
   const gallery = useRef<HTMLInputElement>(null)
 
@@ -92,23 +97,32 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
     if (files.length) onFiles(files)
     onClose()
   }
-  // the handle: pulled up it grows, pulled down it closes
-  const down = (e: RPointerEvent) => { start.current = e.clientY; (e.target as Element).setPointerCapture?.(e.pointerId) }
-  const move = (e: RPointerEvent) => { if (start.current !== null) setDrag(e.clientY - start.current) }
+  // the handle: the sheet follows the finger up and down; let go, it settles — tall, as it was, or closed
+  const down = (e: RPointerEvent) => {
+    start.current = { y: e.clientY, h: sheet.current?.offsetHeight ?? 0 }
+    ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+  }
+  const move = (e: RPointerEvent) => {
+    if (!start.current) return
+    const max = window.innerHeight * 0.92
+    setDrag(Math.max(80, Math.min(max, start.current.h - (e.clientY - start.current.y))))
+  }
   const up = () => {
-    if (start.current === null) return
-    if (drag < -60) setTall(true)
-    else if (drag > 80) (tall ? setTall(false) : onClose())
+    const from = start.current
     start.current = null
-    setDrag(0)
+    if (!from || drag === null) return setDrag(null)
+    const vh = window.innerHeight
+    if (drag < from.h * 0.6 && drag < vh * 0.35) onClose()
+    else setTall(drag > Math.max(from.h, vh * 0.55) || (tall && drag > vh * 0.62))
+    setDrag(null)
   }
 
   if (camera) return <InAppCamera onShot={(f) => { onFiles([f]); onClose() }} onClose={() => setCamera(false)} onGallery={() => { setCamera(false); setTall(true) }} />
   if (typeof document === 'undefined') return null
   return createPortal(
     <div className="attach-veil" onClick={onClose}>
-      <section className={`attach${tall ? ' is-tall' : ''}`} role="dialog" aria-modal="true" aria-label={t('ai.attach')}
-        style={drag ? { transform: `translateY(${Math.max(drag, -80)}px)`, transition: 'none' } : undefined} onClick={(e) => e.stopPropagation()}>
+      <section ref={sheet} className={`attach${tall ? ' is-tall' : ''}${drag !== null ? ' is-dragging' : ''}`} role="dialog" aria-modal="true" aria-label={t('ai.attach')}
+        style={drag !== null ? { height: drag, maxHeight: 'none' } : undefined} onClick={(e) => e.stopPropagation()}>
         <div className="attach-handle" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}><span /></div>
 
         {picked.length ? (
@@ -160,6 +174,9 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
   )
 }
 
+/** a transparent pixel: the video's poster until the camera's picture comes */
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+
 /**
  * The camera inside the app: the picture fills the screen; the flash (where the phone has a torch), the
  * front or back camera, close, the gallery, and the round button that takes the photo.
@@ -171,6 +188,7 @@ function InAppCamera({ onShot, onClose, onGallery }: { onShot: (f: File) => void
   const [torch, setTorch] = useState(false)
   const [canTorch, setCanTorch] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [live, setLive] = useState(false)
   const stream = useRef<MediaStream | null>(null)
 
   useEffect(() => {
@@ -181,6 +199,7 @@ function InAppCamera({ onShot, onClose, onGallery }: { onShot: (f: File) => void
         const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: front ? 'user' : 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false })
         if (!live) return s.getTracks().forEach((tr) => tr.stop())
         stream.current = s
+        setLive(false)
         if (video.current) { video.current.srcObject = s; await video.current.play().catch(() => undefined) }
         const caps = (s.getVideoTracks()[0]?.getCapabilities?.() ?? {}) as { torch?: boolean }
         setCanTorch(!!caps.torch)
@@ -216,7 +235,8 @@ function InAppCamera({ onShot, onClose, onGallery }: { onShot: (f: File) => void
   if (typeof document === 'undefined') return null
   return createPortal(
     <div className="cam" role="dialog" aria-modal="true" aria-label={t('ai.camera')}>
-      <video ref={video} className={front ? 'is-front' : ''} playsInline muted />
+      {/* black until the picture comes (no grey "play" poster of the phone's own), then it fades in */}
+      <video ref={video} className={`${front ? 'is-front' : ''}${live ? ' is-live' : ''}`} playsInline muted poster={BLANK} onPlaying={() => setLive(true)} />
       {failed ? <p className="cam-fail">{t('ai.camera_denied')}</p> : null}
       <div className="cam-side">
         {canTorch ? <button type="button" aria-pressed={torch} aria-label={t('ai.flash')} onClick={() => void flash()}><Icon name={torch ? 'flash' : 'flashOff'} size={24} /></button> : null}

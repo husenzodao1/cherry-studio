@@ -71,6 +71,8 @@ function entityRoutes(name: EntityName): AnyRoute[] {
       method: 'GET', path: base, access: 'staff', tag, summary: `List ${name} (all statuses) with translations`,
       query: Paging.extend({
         status: Status.optional(),
+        // the schools of the panel's girls' or boys' mode
+        ...(name === 'schools' ? { audience: z.enum(['girls', 'boys']).optional() } : {}),
         ...(cfg.parents ? Object.fromEntries(cfg.parents.map((p) => [p, z.string().max(80).optional()])) : {})
       }),
       handler: async ({ sb, query }) => {
@@ -78,6 +80,7 @@ function entityRoutes(name: EntityName): AnyRoute[] {
         const filters = query as Record<string, unknown>
         for (const p of cfg.parents ?? []) if (typeof filters[p] === 'string') q = q.eq(p, filters[p] as string)
         if (query.status) q = q.eq('status', query.status)
+        if (name === 'schools' && typeof filters.audience === 'string') q = q.eq('audience', filters.audience)
         const { data, error, count } = await q
           .order(cfg.order, { ascending: cfg.order !== 'created_at' })
           .range(query.offset, query.offset + query.limit - 1)

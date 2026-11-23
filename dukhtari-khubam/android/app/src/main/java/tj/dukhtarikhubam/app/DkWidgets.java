@@ -54,18 +54,21 @@ public final class DkWidgets {
      */
     static final class Scene {
         final String id; final int[] faces; final int bg; final boolean deep;
+        /** boys' mode: the boy's pictures, and its own background where the girls' one is pink or lilac (0: the same) */
+        int[] boyFaces; int boyBg;
         Scene(String id, int[] faces, int bg, boolean deep) { this.id = id; this.faces = faces; this.bg = bg; this.deep = deep; }
+        Scene boy(int bg, int... faces) { this.boyBg = bg; this.boyFaces = faces; return this; }
     }
-    static final Scene MORNING = new Scene("morning", new int[] { R.drawable.widget_e01 }, R.drawable.widget_s_morning, false);
-    static final Scene WIN = new Scene("win", new int[] { R.drawable.widget_e02 }, R.drawable.widget_s_win, false);
-    static final Scene FIRE = new Scene("fire", new int[] { R.drawable.widget_e03 }, R.drawable.widget_s_fire, true);
-    static final Scene WAIT = new Scene("wait", new int[] { R.drawable.widget_e04 }, R.drawable.widget_s_wait, false);
-    static final Scene WORRY = new Scene("worry", new int[] { R.drawable.widget_e05 }, R.drawable.widget_s_worry, true);
-    static final Scene LAST = new Scene("last", new int[] { R.drawable.widget_e06, R.drawable.widget_e07 }, R.drawable.widget_s_last, true);
-    static final Scene SAD = new Scene("sad", new int[] { R.drawable.widget_e08 }, R.drawable.widget_s_sad, false);
-    static final Scene SLEEP = new Scene("sleep", new int[] { R.drawable.widget_e09 }, R.drawable.widget_s_sleep, true);
-    static final Scene PARTY = new Scene("party", new int[] { R.drawable.widget_e10, R.drawable.widget_e11 }, R.drawable.widget_s_party, true);
-    static final Scene COLD = new Scene("cold", new int[] { R.drawable.widget_e12 }, R.drawable.widget_s_cold, false);
+    static final Scene MORNING = new Scene("morning", new int[] { R.drawable.widget_e01 }, R.drawable.widget_s_morning, false).boy(0, R.drawable.widget_b01);
+    static final Scene WIN = new Scene("win", new int[] { R.drawable.widget_e02 }, R.drawable.widget_s_win, false).boy(0, R.drawable.widget_b02, R.drawable.widget_b12);
+    static final Scene FIRE = new Scene("fire", new int[] { R.drawable.widget_e03 }, R.drawable.widget_s_fire, true).boy(0, R.drawable.widget_b03);
+    static final Scene WAIT = new Scene("wait", new int[] { R.drawable.widget_e04 }, R.drawable.widget_s_wait, false).boy(R.drawable.widget_s_wait_b, R.drawable.widget_b04, R.drawable.widget_b11);
+    static final Scene WORRY = new Scene("worry", new int[] { R.drawable.widget_e05 }, R.drawable.widget_s_worry, true).boy(0, R.drawable.widget_b05);
+    static final Scene LAST = new Scene("last", new int[] { R.drawable.widget_e06, R.drawable.widget_e07 }, R.drawable.widget_s_last, true).boy(0, R.drawable.widget_b06);
+    static final Scene SAD = new Scene("sad", new int[] { R.drawable.widget_e08 }, R.drawable.widget_s_sad, false).boy(0, R.drawable.widget_b07);
+    static final Scene SLEEP = new Scene("sleep", new int[] { R.drawable.widget_e09 }, R.drawable.widget_s_sleep, true).boy(0, R.drawable.widget_b08);
+    static final Scene PARTY = new Scene("party", new int[] { R.drawable.widget_e10, R.drawable.widget_e11 }, R.drawable.widget_s_party, true).boy(R.drawable.widget_s_party_b, R.drawable.widget_b09);
+    static final Scene COLD = new Scene("cold", new int[] { R.drawable.widget_e12 }, R.drawable.widget_s_cold, false).boy(0, R.drawable.widget_b10);
     private static final int[] MILESTONES = { 3, 7, 14, 30, 50, 100, 150, 200, 365, 500, 1000 };
 
     /** days between two "yyyy-MM-dd" days on this phone's calendar (a large number when one is missing) */
@@ -150,8 +153,11 @@ public final class DkWidgets {
             String said = ofDay(scenes == null ? null : scenes.optJSONArray(sc.id), day, "Салом!|Имрӯз чӣ меомӯзем?").replace("{n}", String.valueOf(live));
             int bar = said.indexOf('|');
             int ink = sc.deep ? 0xFFFFFFFF : 0xFF2A1D4A;
-            v.setInt(R.id.w_root, "setBackgroundResource", sc.bg);
-            v.setImageViewResource(R.id.w_face, sc.faces[Math.floorMod(day, sc.faces.length)]);
+            // boys' mode: the boy's pictures (and a blue background where the girls' one is pink or lilac)
+            boolean boy = "boy".equals(d.optString("gender", "girl"));
+            int[] faces = boy && sc.boyFaces != null ? sc.boyFaces : sc.faces;
+            v.setInt(R.id.w_root, "setBackgroundResource", boy && sc.boyBg != 0 ? sc.boyBg : sc.bg);
+            v.setImageViewResource(R.id.w_face, faces[Math.floorMod(day, faces.length)]);
             v.setTextViewText(R.id.w_kicker, "🔥 " + live);
             v.setTextColor(R.id.w_kicker, (ink & 0x00FFFFFF) | 0xB3000000);
             v.setTextViewText(R.id.w_title, bar < 0 ? said : said.substring(0, bar).trim());

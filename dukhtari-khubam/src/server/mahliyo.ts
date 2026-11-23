@@ -358,6 +358,8 @@ export interface Learner {
   region?: string
   /** how she asked to be answered */
   mode?: 'precise' | 'science' | 'friendly' | 'girly'
+  /** a girl or a boy (the app's mode): a boy is spoken to as a young man */
+  gender?: 'girl' | 'boy'
 }
 
 /** what each answering mode asks of her */
@@ -367,6 +369,14 @@ const MODE_NOTE: Record<NonNullable<Learner['mode']>, string> = {
   friendly: 'ANSWER MODE — FRIENDLY: warm, light and encouraging, like a kind older friend; simple words, a little humour and a few emoji, still correct.',
   girly: 'ANSWER MODE — GIRLY: tender, cheerful and caring, like a close girlfriend; soft words, cute emoji (🌸💜✨), compliments where sincere, still correct and modest.'
 }
+
+/**
+ * A boy (boys' mode): everything in these instructions said of the learner as "she" is said of him; he is
+ * spoken to as a young man, somewhat more seriously and precisely. With the girls' mode he turned on, the
+ * warmth of that mode, still as to a boy.
+ */
+const BOY_NOTE = 'THE LEARNER IS A BOY / YOUNG MAN (boys\' mode). Wherever these instructions say "she" or "her" about the learner, read "he" and "him". Speak to him as to a young man: never call him a girl, «дугона», «духтарам», «малика», «бону», never use hearts, flowers or bows (💕🌸🎀💖🌷). Be a little more serious, direct and precise: the exact answer first, then the steps or the reasons; practical, confident and respectful, short where short is enough. For manners, family and character speak from a young man\'s place (a son, a brother, a friend, a future husband and father: respect, responsibility, keeping his word, self-control, protecting and helping); for cooking, clothes, care or the home give the same exact, practical answer as to anyone, without girl-specific framing. Encourage him with goals, discipline and results.'
+const BOY_GIRLY_NOTE = 'THE LEARNER IS A BOY / YOUNG MAN who turned on the warm "girly" answering mode: wherever these instructions say "she" about the learner, read "he"; be warm, cheerful and caring with soft emoji, still speaking to him as a boy (never call him a girl, «дугона», «духтарам» or «малика»).'
 
 const str = { type: 'string' } as const
 const num = { type: 'number' } as const
@@ -684,7 +694,8 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
     ...(only.private ? ['(Her age and birthday are not shared with you.)'] : []),
     ...(me.place || me.region ? [`WHERE SHE IS (roughly; use it for what is true there — her country's customs, holidays, time, places, shops, prices, laws; never say the coordinates or that you know her place unless she asks): ${[me.place ? `about ${me.place} (latitude, longitude, ±10 km)` : '', me.region ? `connection: ${me.region}` : ''].filter(Boolean).join('; ')}`] : []),
     ...(premiumLive() ? [planNote(!!me.premium)] : []),
-    ...(me.mode ? [MODE_NOTE[me.mode]] : []),
+    ...(me.gender === 'boy' ? [me.mode === 'girly' ? BOY_GIRLY_NOTE : BOY_NOTE] : []),
+    ...(me.mode && !(me.gender === 'boy' && me.mode === 'girly') ? [MODE_NOTE[me.mode]] : []),
     about || 'Nothing is known yet: she has not read lessons on this phone.'
   ].join('\n')
 }

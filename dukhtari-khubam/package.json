@@ -19,10 +19,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.12.0",
-    "@capacitor-community/media": "9.1.0",
     "@capacitor/android": "^8.6.2",
     "@capacitor/app": "8.1.2",
-    "@capacitor/camera": "8.2.6",
     "@capacitor/core": "^8.6.2",
     "@capacitor/filesystem": "8.1.5",
     "@capacitor/local-notifications": "8.3.1",

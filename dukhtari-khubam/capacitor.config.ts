@@ -15,7 +15,6 @@ const config: CapacitorConfig = {
     LocalNotifications: { smallIcon: 'ic_stat_notify', iconColor: '#7A4FD8' },
     // Google sign-in only (src/web/offline/google.ts): other providers' SDKs stay out of the APK
     // the attach sheet in Mahliyo's chat shows the phone's newest photos (src/web/components/AttachSheet.tsx)
-    Media: { androidGalleryMode: true },
     SocialLogin: { providers: { google: true, facebook: false, apple: false, twitter: false }, logLevel: 1 }
   }
 }

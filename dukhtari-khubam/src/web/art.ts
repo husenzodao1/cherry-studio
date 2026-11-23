@@ -10,7 +10,15 @@ export const SCHOOL_ART: Record<string, Art> = {
   'oila-va-munosibatho': a('school-family', 480, 472),
   'ilm-va-salomati': a('school-health', 480, 369),
   'rushdi-shakhsiyat': a('school-growth', 414, 480),
-  'zindagii-muosir': a('school-modern', 378, 326)
+  'zindagii-muosir': a('school-modern', 378, 326),
+  // the boys' schools, until the panel gives them their own pictures
+  'odobi-umumi': a('school-ethics', 458, 387),
+  'pisar-dar-jamiyat': a('school-family', 480, 472),
+  'khislathoi-mardona': a('school-growth', 414, 480),
+  'farhangi-tojik-pisaron': a('school-culture', 342, 412),
+  'zamoni-muosir': a('school-modern', 378, 326),
+  'odobi-oiladori': a('school-family', 480, 472),
+  'sakhtihoi-hayot': a('school-growth', 414, 480)
 }
 
 export const ART = {

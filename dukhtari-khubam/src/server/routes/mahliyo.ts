@@ -157,7 +157,9 @@ export const mahliyoRoutes: AnyRoute[] = [
       // her rough place, only when she allowed it ("38.6, 68.8": one decimal, about 10 km)
       place: z.string().regex(/^-?\d{1,2}(\.\d)?, -?\d{1,3}(\.\d)?$/).optional(),
       // the way she asked to be answered (the attach sheet's modes)
-      mode: z.enum(['precise', 'science', 'friendly', 'girly']).optional()
+      mode: z.enum(['precise', 'science', 'friendly', 'girly']).optional(),
+      // a girl or a boy (the app's mode): a boy is spoken to as a young man
+      gender: z.enum(['girl', 'boy']).optional()
     }),
     handler: async ({ sb, body, req }) => {
       if (!(await anyone(sb()))) throw new ApiError(503, 'not_configured', 'Маҳлиё ҳоло дастрас нест.')
@@ -172,7 +174,7 @@ export const mahliyoRoutes: AnyRoute[] = [
       })
       // where she is: her rough place if she allowed it; her country and city as her connection shows them
       const ipPlace = [req.headers.get('x-vercel-ip-city'), req.headers.get('x-vercel-ip-country')].filter(Boolean).map((v) => decodeURIComponent(v!)).join(', ')
-      const me = { me: body.me, now: body.now, tz: body.tz, premium, place: body.place, region: ipPlace || undefined, mode: body.mode }
+      const me = { me: body.me, now: body.now, tz: body.tz, premium, place: body.place, region: ipPlace || undefined, mode: body.mode, gender: body.gender }
       if (body.background) {
         const client = sb()
         after(() => answerInto(client, id, turns, me, files))

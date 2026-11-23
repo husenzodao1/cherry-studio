@@ -22,7 +22,7 @@ import { useAuth } from '@/web/auth'
 import { useLearner } from '@/web/offline/learner'
 import { useApi } from '@/web/useApi'
 import {
-  aboutMe, accountChanged, aiReady, archiveChat, tempChat, leaveTemp, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
+  aboutMe, accountChanged, girlyChanged, aiReady, archiveChat, tempChat, leaveTemp, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
   useMahliyo, watch, type AiChatMeta, type AiMode, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { alphaVideo, CLIPS } from '@/web/mahliyo'
@@ -70,7 +70,7 @@ const keepDraft = (chat: string, text: string) => {
  * reaches the staff.
  */
 export default function MahliyoPage() {
-  const { t } = usePrefs()
+  const { t, mode: appMode } = usePrefs()
   const { learner, progress } = useLearner()
   const { session } = useAuth()
   const me = useApi<{ premium?: boolean }>(session ? '/me' : null)
@@ -355,7 +355,7 @@ export default function MahliyoPage() {
     el.style.height = `${Math.min(el.scrollHeight, 132)}px`
   }, [text])
 
-  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email, place: placeNote(), ...(mode ? { mode } : {}) })
+  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email, place: placeNote(), ...(mode ? { mode } : {}), ...(appMode === 'boy' ? { gender: 'boy' as const } : {}) })
   const send = (question: string, withFiles: AiUpload[] = []) => {
     // a picture alone asks her to look at it
     const said = question.trim() || (withFiles.length ? t('ai.look') : '')
@@ -477,6 +477,8 @@ export default function MahliyoPage() {
           <Fragment key={i}>
           {/* the account on this phone was changed: what follows is the new one's */}
           {accountChanged(turns, i) ? <div className="ai-switched" role="separator"><span>{t('ai.account_switched')}</span></div> : null}
+          {/* a boy's chat: a thin line where the girls' mode was turned on or off */}
+          {appMode === 'boy' && girlyChanged(turns, i) !== null ? <div className="ai-switched is-mode" role="separator"><span>{t(girlyChanged(turns, i) ? 'ai.girly_on' : 'ai.girly_off')}</span></div> : null}
           <div className={`ai-asked${editing === i ? ' is-editing' : ''}`}>
             {m.files?.length ? <Attached files={m.files} /> : null}
             <button type="button" className="bubble" onClick={() => setOpened(opened === i ? null : i)} aria-expanded={opened === i || i === lastQuestion}>

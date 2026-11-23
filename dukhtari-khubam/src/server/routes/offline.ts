@@ -45,10 +45,13 @@ const logged = <T>(what: string) => async (p: Promise<T>): Promise<T | null> => 
   return null
 })
 
-export async function buildBundle(sb: SupabaseClient, locale: string) {
+/** The catalogue for girls or for boys (their own schools, and so their own courses and lessons). */
+export type Audience = 'girls' | 'boys'
+
+export async function buildBundle(sb: SupabaseClient, locale: string, audience: Audience = 'girls') {
   const L = { p_locale: locale }
   const [schools, ui, inspiration, inspirations, achievements, poems, stories] = await Promise.all([
-    call<Json[]>(sb, 'api_schools', L),
+    call<Json[]>(sb, 'api_schools', { ...L, p_audience: audience }),
     call<Json>(sb, 'api_ui_bundle', L),
     optional(call<Json | null>(sb, 'api_inspiration', L)),
     optional(call<Json[]>(sb, 'api_inspirations', L)),
@@ -108,7 +111,7 @@ export async function buildBundle(sb: SupabaseClient, locale: string) {
     achievements: achievements ?? []
   })
   const version = createHash('sha256').update(JSON.stringify(content)).digest('hex').slice(0, 16)
-  return { v: 1, locale, version, generated_at: new Date().toISOString(), ...content }
+  return { v: 1, locale, audience, version, generated_at: new Date().toISOString(), ...content }
 }
 
 export const codeHash = (code: string) => createHash('sha256').update(code).digest('hex')
@@ -142,10 +145,11 @@ export const offlineRoutes: AnyRoute[] = [
     // every interface language: Tajik and Russian as written; the others (and Russian left in Tajik)
     // translated by the AI (translate.ts) — not yet translated texts are translated right after, and the
     // bundle says `translating` (not kept long by the cache; the app asks again until it is all there)
-    query: z.object({ locale: z.enum(['tg', 'ru', 'ar', 'en', 'uz', 'tr', 'fa', 'prs']).default('tg'), v: z.string().regex(/^[0-9T.]{1,40}$/).optional() }), cache: 20,
+    // `audience`: the girls' or the boys' catalogue
+    query: z.object({ locale: z.enum(['tg', 'ru', 'ar', 'en', 'uz', 'tr', 'fa', 'prs']).default('tg'), audience: z.enum(['girls', 'boys']).default('girls'), v: z.string().regex(/^[0-9T.]{1,40}$/).optional() }), cache: 20,
     handler: async ({ sb, query, req }) => {
       const source = query.locale === 'ru' || query.locale === 'ar' ? query.locale : 'tg'
-      let bundle = await buildBundle(sb(), source)
+      let bundle = await buildBundle(sb(), source, query.audience)
       let translating = false
       if ((MT_LOCALES as readonly string[]).includes(query.locale)) {
         const locale = query.locale as MtLocale

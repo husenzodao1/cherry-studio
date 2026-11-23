@@ -182,6 +182,8 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Android 14+: the learner may let the app see only the photos she picks -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <!-- her rough place (Mahliyo answers with what is true where she lives); the precise one only if she chooses it -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />

@@ -129,6 +129,19 @@
                 "ar"
               ]
             }
+          },
+          {
+            "name": "audience",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "girls",
+              "type": "string",
+              "enum": [
+                "girls",
+                "boys"
+              ]
+            }
           }
         ],
         "responses": {
@@ -333,6 +346,19 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 50
+            }
+          },
+          {
+            "name": "audience",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "girls",
+              "type": "string",
+              "enum": [
+                "girls",
+                "boys"
+              ]
             }
           }
         ],
@@ -1672,6 +1698,19 @@
             }
           },
           {
+            "name": "audience",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "girls",
+              "type": "string",
+              "enum": [
+                "girls",
+                "boys"
+              ]
+            }
+          },
+          {
             "name": "v",
             "in": "query",
             "required": false,
@@ -2750,6 +2789,13 @@
                       "science",
                       "friendly",
                       "girly"
+                    ]
+                  },
+                  "gender": {
+                    "type": "string",
+                    "enum": [
+                      "girl",
+                      "boy"
                     ]
                   }
                 },
@@ -4126,6 +4172,18 @@
                 "archived"
               ]
             }
+          },
+          {
+            "name": "audience",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "girls",
+                "boys"
+              ]
+            }
           }
         ],
         "responses": {
@@ -4235,6 +4293,13 @@
                     "enum": [
                       "free",
                       "premium"
+                    ]
+                  },
+                  "audience": {
+                    "type": "string",
+                    "enum": [
+                      "girls",
+                      "boys"
                     ]
                   },
                   "translations": {
@@ -4420,6 +4485,13 @@
                     "enum": [
                       "free",
                       "premium"
+                    ]
+                  },
+                  "audience": {
+                    "type": "string",
+                    "enum": [
+                      "girls",
+                      "boys"
                     ]
                   }
                 },

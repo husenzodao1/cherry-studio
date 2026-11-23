@@ -68,6 +68,8 @@ export interface Bundle {
   /** some texts are still being translated into this language (the app asks again soon) */
   translating?: boolean
   v: 1; locale: string; version: string; generated_at: string
+  /** the girls' or the boys' catalogue (older bundles: girls') */
+  audience?: 'girls' | 'boys'
   schools: SchoolSummary[]
   schoolDetails: Record<string, SchoolDetail>
   courses: Record<string, Course>
@@ -95,8 +97,9 @@ interface ContentState {
 }
 
 const ContentContext = createContext<ContentState>({ bundle: null, loading: true, offlineEmpty: false, refresh: () => undefined })
-const key = (locale: string) => `bundle:${locale}`
-const stampKey = (locale: string) => `dk.stamp:${locale}`
+// the girls' catalogue keeps its old names on the phone; the boys' has its own
+const key = (locale: string, aud: string) => (aud === 'boys' ? `bundle:${locale}:boys` : `bundle:${locale}`)
+const stampKey = (locale: string, aud: string) => (aud === 'boys' ? `dk.stamp:${locale}:boys` : `dk.stamp:${locale}`)
 // a cheap look at the live stamp while the screen is shown (Realtime normally answers first)
 const STAMP_MS = 20 * 1000
 // without the stamp (older database): ask for the content itself, answered from a 20-second cache
@@ -120,7 +123,9 @@ function writeLocal(k: string, v: string) {
 export function ContentProvider({ children }: { children: ReactNode }) {
   // lessons are written in Tajik and Russian; the other interface languages get them translated by the
   // server's AI (a bundle still `translating` is asked for again until all its texts are there)
-  const locale = usePrefs().locale
+  const { locale, mode } = usePrefs()
+  // the girls' or the boys' catalogue, by the mode chosen at sign-up
+  const aud = mode === 'boy' ? 'boys' : 'girls'
   const [bundle, setBundle] = useState<Bundle | null>(null)
   const [loading, setLoading] = useState(true)
   const [offlineEmpty, setOfflineEmpty] = useState(false)
@@ -132,7 +137,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
   const fetchBundle = useCallback(async (stamp: string | null) => {
     try {
       const headers: Record<string, string> = current.current ? { 'if-none-match': `"${current.current.version}"` } : {}
-      const url = `/bundle?locale=${locale}${stamp ? `&v=${encodeURIComponent(stamp)}` : ''}`
+      const url = `/bundle?locale=${locale}${aud === 'boys' ? '&audience=boys' : ''}${stamp ? `&v=${encodeURIComponent(stamp)}` : ''}`
       const res = await fetch(apiUrl(url), { headers, cache: 'no-cache' })
       if (res.status === 304) return true
       if (!res.ok) {
@@ -144,7 +149,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         current.current = next
         setBundle(next)
         setOfflineEmpty(false)
-        await set(key(locale), next).catch(() => undefined)
+        await set(key(locale, aud), next).catch(() => undefined)
         keepImages(next)
       }
       return true
@@ -152,7 +157,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       if (!current.current) setOfflineEmpty(true)
       return false
     }
-  }, [locale])
+  }, [locale, aud])
 
   /** Compares the live stamp with the one this copy was made at and fetches only when it moved. */
   const refresh = useCallback(async () => {
@@ -165,23 +170,23 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     try {
       const stamp = await readStamp()
       live.current = stamp !== null
-      if (stamp && stamp === readLocal(stampKey(locale)) && current.current && !current.current.translating) return
+      if (stamp && stamp === readLocal(stampKey(locale, aud)) && current.current && !current.current.translating) return
       if (await fetchBundle(stamp)) {
-        if (stamp) writeLocal(stampKey(locale), stamp)
+        if (stamp) writeLocal(stampKey(locale, aud), stamp)
       }
     } finally {
       busy.current = false
     }
-  }, [locale, fetchBundle])
+  }, [locale, aud, fetchBundle])
 
   useEffect(() => {
     let alive = true
     setLoading(true)
     ;(async () => {
-      let stored = (await get<Bundle>(key(locale)).catch(() => undefined)) ?? null
+      let stored = (await get<Bundle>(key(locale, aud)).catch(() => undefined)) ?? null
       if (!stored) {
         // the copy shipped inside the app, for a first launch without a connection
-        stored = await fetch(`/offline/bundle-${locale}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+        stored = await fetch(`/offline/bundle-${locale}${aud === 'boys' ? '-boys' : ''}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null)
       }
       if (!alive) return
       current.current = stored
@@ -213,7 +218,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       stop()
       clearInterval(timer)
     }
-  }, [locale, refresh])
+  }, [locale, aud, refresh])
 
   const value = useMemo(() => ({ bundle, loading, offlineEmpty, refresh: () => void refresh() }), [bundle, loading, offlineEmpty, refresh])
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>

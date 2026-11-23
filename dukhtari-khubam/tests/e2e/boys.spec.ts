@@ -1,0 +1,48 @@
+import { expect, signedIn, test } from './fixtures'
+
+test('a new phone asks "a boy or a girl"; a boy gets the boys\' look, words and catalogue', async ({ page, server: _, errors }) => {
+  const asked: string[] = []
+  page.on('request', (r) => { if (r.url().includes('/api/v1/bundle')) asked.push(r.url()) })
+  // a phone that never chose (the fixture's girls' mode is taken away before the first page)
+  await page.addInitScript(() => { if (!sessionStorage.getItem('fresh')) { sessionStorage.setItem('fresh', '1'); localStorage.setItem('dk.prefs', JSON.stringify({ locale: 'tg' })) } })
+  await page.goto('/start')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.getByRole('heading', { name: 'Ҷинси худро ворид кунед' })).toBeVisible()
+  await expect(page.locator('.gender-card.is-boy')).toContainText('Ман писар')
+  await expect(page.locator('.gender-card.is-girl')).toContainText('Ман духтар')
+  await page.waitForTimeout(700)
+  await page.screenshot({ path: 'test-results/gender-pick.png' })
+  await page.locator('.gender-card.is-boy').click()
+  await expect(page.locator('html')).toHaveAttribute('data-mode', 'boy')
+  await expect(page.locator('.google-btn')).toBeVisible()
+  await expect(page.locator('.start-title')).toContainText('Қувват дар дониш аст')
+  // no flowers or butterflies: the logo's mosaic
+  await expect(page.locator('.bd-mosaic')).toHaveCount(1)
+  await expect(page.locator('.bd-tulip, .bd-lotus, .bd-crocus, .bd-petals')).toHaveCount(0)
+  await expect.poll(() => asked.some((u) => u.includes('audience=boys'))).toBe(true)
+  await page.screenshot({ path: 'test-results/boy-start.png' })
+  expect(errors).toEqual([])
+})
+
+test('a boy\'s profile keeps boys\' mode; the settings switch it back to girls\'', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  // the profile says a boy (it came with the account)
+  await page.addInitScript(() => {
+    const p = JSON.parse(localStorage.getItem('dk.progress') ?? '{}')
+    localStorage.setItem('dk.progress', JSON.stringify({ ...p, gender: 'boy' }))
+  })
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('html')).toHaveAttribute('data-mode', 'boy')
+  await expect(page.locator('.motto')).toContainText('Қувват')
+  await expect(page.locator('.hello-flower.is-crystal')).toBeVisible()
+  await expect(page.locator('.bf-layer')).toHaveCount(0)
+  await page.waitForTimeout(900)
+  await page.screenshot({ path: 'test-results/boy-home.png' })
+  await page.goto('/settings')
+  await expect(page.locator('.mode-seg [aria-checked="true"]')).toContainText('Писарона')
+  await page.locator('.mode-seg button', { hasText: 'Духтарона' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-mode', 'girl')
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dk.progress') ?? '{}').gender)).toBe('girl')
+  expect(errors).toEqual([])
+})

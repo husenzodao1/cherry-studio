@@ -27,7 +27,7 @@ export function widgetPath(url: string): string | null {
 const WIDGET_SCENES = ['morning', 'win', 'fire', 'wait', 'worry', 'last', 'sad', 'sleep', 'party', 'cold'] as const
 
 export function WidgetBridge() {
-  const { t, locale } = usePrefs()
+  const { t, locale, mode } = usePrefs()
   const { bundle } = useContent()
   const { learner, progress } = useLearner()
   const router = useRouter()
@@ -36,8 +36,8 @@ export function WidgetBridge() {
   const data = useMemo(() => (learner ? widgetSummary(bundle, progress, {
     brand: t('app.name'), streak: t('profile.streak'), done: t('widget.done'), continueFallback: t('home.start_learning'),
     words: t('home.words'), quote: t('home.quote'),
-    scenes: Object.fromEntries(WIDGET_SCENES.map((id) => [id, t(`widget.s_${id}`)])), go: t('widget.go')
-  }, locale) : null), [bundle, progress, learner, t, locale])
+    scenes: Object.fromEntries(WIDGET_SCENES.map((id) => [id, t(`widget.s_${id}`)])), go: t('widget.go'), gender: mode ?? 'girl'
+  }, locale) : null), [bundle, progress, learner, t, locale, mode])
 
   useEffect(() => {
     if (!native || !data) return

@@ -8,13 +8,17 @@ await rm('out/download', { recursive: true, force: true })
 
 const api = process.env.NEXT_PUBLIC_API_BASE ?? 'https://dukhtari-khubam.vercel.app'
 await mkdir('out/offline', { recursive: true })
+// the girls' catalogue, and the boys' (bundle-<locale>-boys.json)
 for (const locale of ['tg', 'ru', 'ar']) {
-  try {
-    const res = await fetch(`${api}/api/v1/bundle?locale=${locale}`)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    await writeFile(`out/offline/bundle-${locale}.json`, await res.text())
-    console.log(`embedded bundle-${locale}.json`)
-  } catch (e) {
-    console.warn(`bundle-${locale} not embedded (${e.message}); the app will download it on first connection`)
+  for (const audience of ['girls', 'boys']) {
+    const name = `bundle-${locale}${audience === 'boys' ? '-boys' : ''}.json`
+    try {
+      const res = await fetch(`${api}/api/v1/bundle?locale=${locale}&audience=${audience}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      await writeFile(`out/offline/${name}`, await res.text())
+      console.log(`embedded ${name}`)
+    } catch (e) {
+      console.warn(`${name} not embedded (${e.message}); the app will download it on first connection`)
+    }
   }
 }

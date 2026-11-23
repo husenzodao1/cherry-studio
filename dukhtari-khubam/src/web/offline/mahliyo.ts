@@ -27,12 +27,23 @@ export interface AiTurn {
   id?: string; rating?: 1 | -1
   /** the account a question was asked from (its answer belongs to the same) */
   account?: string
+  /** a question asked in the girls' mode (a boy's chat marks where it was turned on and off) */
+  girly?: boolean
 }
 
 /** whose each turn is: a question's account, and its answer's the same */
 const ownersOf = (turns: AiTurn[]) => {
   let owner: string | undefined
   return turns.map((t) => (t.role === 'user' ? (owner = t.account) : owner))
+}
+/**
+ * Whether question `i` turned the girls' mode on (true) or off (false) against the question before it;
+ * null when it did not change (or it is the first question and the mode is off).
+ */
+export function girlyChanged(turns: AiTurn[], i: number): boolean | null {
+  const now = !!turns[i]?.girly
+  for (let j = i - 1; j >= 0; j--) if (turns[j].role === 'user') return !!turns[j].girly === now ? null : now
+  return now ? true : null
 }
 /** Whether question `i` is the first one asked after the account on this phone was changed. */
 export function accountChanged(turns: AiTurn[], i: number): boolean {
@@ -242,7 +253,7 @@ export interface AiState {
   /** the open chat is temporary: never kept in the history, gone after a new chat or another one is opened */
   temp?: boolean
 }
-export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string; mode?: AiMode }
+export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string; mode?: AiMode; gender?: 'girl' | 'boy' }
 /** how she asks to be answered (the attach sheet's modes) */
 export type AiMode = 'precise' | 'science' | 'friendly' | 'girly'
 
@@ -362,7 +373,7 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
   lastFiles = files
   const views = files.map(({ mime, name, thumb }) => ({ mime, name, thumb }))
   const turns: AiTurn[] = [...(editFrom === undefined ? state.turns : state.turns.slice(0, editFrom)),
-    { role: 'user', content: q, at: new Date().toISOString(), ...(views.length ? { files: views } : {}), ...(who.account ? { account: who.account } : {}) }]
+    { role: 'user', content: q, at: new Date().toISOString(), ...(views.length ? { files: views } : {}), ...(who.account ? { account: who.account } : {}), ...(who.mode === 'girly' ? { girly: true } : {}) }]
   const my = ++run
   const chat = state.chat
   const pending = { id: null, since: Date.now(), chat }

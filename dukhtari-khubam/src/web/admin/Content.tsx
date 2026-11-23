@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Icon } from '../components/Icon'
 import { ErrorState, Loading } from '../components/States'
@@ -33,8 +33,13 @@ export function slugify(title: string): string {
 
 interface Crumb { level: Level; parentId: string | null; title: string }
 
-export function Content() {
-  const [trail, setTrail] = useState<Crumb[]>([{ level: 'schools', parentId: null, title: 'Мактабҳо' }])
+/** The panel's mode: the girls' or the boys' schools (and everything in them) are shown and made. */
+export type Audience = 'girls' | 'boys'
+
+export function Content({ audience }: { audience: Audience }) {
+  const [trail, setTrail] = useState<Crumb[]>([{ level: 'schools', parentId: null, title: audience === 'boys' ? 'Мактабҳои писарон' : 'Мактабҳои духтарон' }])
+  // another mode: back to its schools
+  useEffect(() => { setTrail([{ level: 'schools', parentId: null, title: audience === 'boys' ? 'Мактабҳои писарон' : 'Мактабҳои духтарон' }]); setEditing(null) }, [audience])
   const [editing, setEditing] = useState<{ level: Level; id: string } | null>(null)
   const here = trail[trail.length - 1]
 
@@ -49,7 +54,7 @@ export function Content() {
             onClick={() => setTrail(trail.slice(0, i + 1))}>{c.title}</button>
         ))}
       </nav>
-      <Level level={here.level} parentId={here.parentId}
+      <Level level={here.level} parentId={here.parentId} audience={audience}
         onOpen={(e) => {
           const child = CHILD[here.level]
           if (child) setTrail([...trail, { level: child, parentId: e.id, title: titleOf(e) }])
@@ -59,9 +64,9 @@ export function Content() {
   )
 }
 
-function Level({ level, parentId, onOpen, onEdit }: { level: Level; parentId: string | null; onOpen: (e: Entity) => void; onEdit: (e: Entity) => void }) {
+function Level({ level, parentId, audience, onOpen, onEdit }: { level: Level; parentId: string | null; audience: Audience; onOpen: (e: Entity) => void; onEdit: (e: Entity) => void }) {
   const key = PARENT_KEY[level]
-  const list = useApi<{ items: Entity[] }>(`/admin/${level}?limit=200${key && parentId ? `&${key}=${parentId}` : ''}`)
+  const list = useApi<{ items: Entity[] }>(`/admin/${level}?limit=200${key && parentId ? `&${key}=${parentId}` : ''}${level === 'schools' ? `&audience=${audience}` : ''}`)
   const [title, setTitle] = useState('')
   const act = useAction()
   const items = list.data?.items ?? []
@@ -71,6 +76,7 @@ function Level({ level, parentId, onOpen, onEdit }: { level: Level; parentId: st
     const body: Record<string, unknown> = { translations: { tg: { title: title.trim(), ready: true } }, position: items.length }
     if (key && parentId) body[key] = parentId
     if (level === 'schools' || level === 'courses') body.slug = slugify(title)
+    if (level === 'schools') body.audience = audience
     const r = await act.run(() => sendNow(`/admin/${level}`, 'POST', body), 'Илова шуд')
     if (r) {
       setTitle('')

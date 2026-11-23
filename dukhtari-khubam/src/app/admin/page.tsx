@@ -35,6 +35,13 @@ export default function AdminPage() {
   const me = useApi<{ roles: string[] }>(session ? '/me' : null)
   // the app's "Саволҳои корбарон" opens the panel straight on support
   const [tab, setTab] = useState<Tab>('home')
+  // the panel's girls' or boys' mode, kept on this device
+  const [audience, setAudienceState] = useState<'girls' | 'boys'>('girls')
+  useEffect(() => { try { if (localStorage.getItem('dk.admin.audience') === 'boys') setAudienceState('boys') } catch { /* none */ } }, [])
+  const setAudience = (a: 'girls' | 'boys') => {
+    setAudienceState(a)
+    try { localStorage.setItem('dk.admin.audience', a) } catch { /* only for now */ }
+  }
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('tab') === 'support') setTab('support')
   }, [])
@@ -60,12 +67,20 @@ export default function AdminPage() {
         <span className="muted" style={{ fontSize: '0.8em' }}>{me.data.roles.join(', ')}</span>
       </header>
       <OutboxNote />
+      {/* the panel's mode: everything made and listed is for girls or for boys */}
+      <div className="segmented admin-audience" role="radiogroup" aria-label="Режим">
+        {(['girls', 'boys'] as const).map((a) => (
+          <button key={a} type="button" role="radio" aria-checked={audience === a} onClick={() => setAudience(a)}>
+            <Icon name={a === 'boys' ? 'male' : 'female'} size={16} /> {a === 'boys' ? 'Режими писарона' : 'Режими духтарона'}
+          </button>
+        ))}
+      </div>
       <nav className="scroller" role="tablist" style={{ gap: 6 }}>
         {TABS.map((t) => (
           <button key={t.id} type="button" role="tab" className="chip" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </nav>
-      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'ai' ? <AiAdmin /> : tab === 'content' ? <Content /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
+      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'ai' ? <AiAdmin /> : tab === 'content' ? <Content audience={audience} /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
     </div>
   )
 }

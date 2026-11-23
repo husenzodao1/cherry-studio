@@ -1,5 +1,8 @@
 import { expect, signedIn, test } from './fixtures'
 
+// sign-up runs at any hour: the time-of-day scenes (night, meals) stay off here
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => localStorage.setItem('dk.scene', 'off')) })
+
 test.describe('sign-in with e-mail', () => {
   test('a new address: wrong code, right code, name and birthday, then the welcome questions', async ({ page, server, errors }) => {
     await page.goto('/start')
@@ -130,6 +133,9 @@ test('a new phone starts in Russian; the language icon opens a centred list and 
   await page.goto('/start')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   await expect(page.locator('html')).toHaveAttribute('lang', 'ru')
+  // a new phone is first asked whether a boy or a girl uses it
+  await expect(page.locator('.gender-card')).toHaveCount(2)
+  await page.locator('.gender-card.is-girl').click()
   await expect(page.locator('.google-btn')).toContainText('Google')
   await expect(page.locator('form .btn-lg')).toHaveText(/Далее/)
   await page.locator('.start-lang').click()

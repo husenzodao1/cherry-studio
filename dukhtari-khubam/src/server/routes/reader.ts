@@ -29,8 +29,8 @@ export const readerRoutes: AnyRoute[] = [
   }),
   route({
     method: 'GET', path: '/schools', access: 'public', tag: 'Catalog', summary: 'The seven schools in CMS order',
-    query: LocaleQuery, cache: 60,
-    handler: async ({ sb, query }) => withMediaUrls(await call(sb(), 'api_schools', { p_locale: query.locale }))
+    query: LocaleQuery.extend({ audience: z.enum(['girls', 'boys']).default('girls') }), cache: 60,
+    handler: async ({ sb, query }) => withMediaUrls(await call(sb(), 'api_schools', { p_locale: query.locale, p_audience: query.audience }))
   }),
   route({
     method: 'GET', path: '/schools/:key', access: 'public', tag: 'Catalog', summary: 'School by id or slug, with its courses and progress',
@@ -52,9 +52,9 @@ export const readerRoutes: AnyRoute[] = [
   }),
   route({
     method: 'GET', path: '/search', access: 'public', tag: 'Catalog', summary: 'Search schools, courses, modules, topics and lessons',
-    query: z.object({ q: z.string().max(100).default(''), locale: Locale.default('tg'), limit: z.coerce.number().int().min(1).max(50).default(20) }),
+    query: z.object({ q: z.string().max(100).default(''), locale: Locale.default('tg'), limit: z.coerce.number().int().min(1).max(50).default(20), audience: z.enum(['girls', 'boys']).default('girls') }),
     cache: 30,
-    handler: async ({ sb, query }) => call(sb(), 'api_search', { p_q: query.q, p_locale: query.locale, p_limit: query.limit })
+    handler: async ({ sb, query }) => call(sb(), 'api_search', { p_q: query.q, p_locale: query.locale, p_limit: query.limit, p_audience: query.audience })
   }),
   route({
     method: 'GET', path: '/inspiration', access: 'public', tag: 'Catalog', summary: 'Current Daily Inspiration (null when none is published)',

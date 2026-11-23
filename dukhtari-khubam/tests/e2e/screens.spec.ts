@@ -292,7 +292,7 @@ test.describe('meal scenes in Dushanbe', () => {
   test.use({ timezoneId: 'Asia/Dushanbe' })
   for (const [scene, at] of [['breakfast', '08:05'], ['lunch', '12:50'], ['dinner', '17:40']] as const) {
   test(`a meal scene (${scene}): her picture, the time, "close and eat"`, async ({ page, server: _, errors }) => {
-    await page.clock.install({ time: new Date(`2026-11-23T${at}:00`) })
+    await page.clock.install({ time: new Date(`2026-11-23T${at}:00+05:00`) })
     await signedIn(page, { night: true })
     await page.goto('/')
     await expect(page.locator(`.scene-${scene}`)).toBeVisible({ timeout: 10_000 })

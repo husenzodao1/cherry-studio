@@ -97,8 +97,8 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   await page.waitForTimeout(4200)
   await expect(greet).toHaveText(said!)
   // the box to write in is one line, its hint never wraps
-  await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toBeVisible()
-  expect((await page.getByPlaceholder('Паём ба Mahliyo AI…').boundingBox())!.height).toBeLessThan(50)
+  await expect(page.locator('textarea.ai-input')).toBeVisible()
+  expect((await page.locator('textarea.ai-input').boundingBox())!.height).toBeLessThan(50)
   // the short questions glide past in two rows
   await expect(page.locator('.ai-row')).toHaveCount(2)
   const x0 = (await page.locator('.ai-row').first().locator('.ai-chip').first().boundingBox())!.x
@@ -130,7 +130,7 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   await page.screenshot({ path: 'test-results/mahliyo-ai.png' })
 
   // a reminder: on the website it cannot ring, and says so
-  await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('Соати 20:00 ёдам деҳ')
+  await page.locator('textarea.ai-input').fill('Соати 20:00 ёдам деҳ')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   await expect(page.locator('.ai-reminder-state')).toHaveText('Ёдраскунӣ танҳо дар барномаи телефон занг мезанад.')
   // the call card: its name, its time and taking it back — not the words of the notification
@@ -139,7 +139,7 @@ test('Mahliyo AI: her persona rises from the tab bar; her scene greets; she answ
   expect(asked[1].turns[1].content).toContain('1. «Профил»-ро кушоед')
 
   // another language: she answers in it
-  await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('Как поменять язык?')
+  await page.locator('textarea.ai-input').fill('Как поменять язык?')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   await expect(page.locator('.ai-said').last()).toContainText('Язык меняется')
   await expect(page.locator('.ai-said').last().getByRole('link', { name: 'Ба мушовир нависед' })).toHaveCount(0)
@@ -164,7 +164,7 @@ test('her full screen: a soft plain colour, words without boxes; only the chat m
   // a soft plain colour (no gradient, no picture); her answer is plain text on it
   const scene = page.locator('.ai-scene')
   expect(await scene.evaluate((e) => getComputedStyle(e).backgroundImage)).toBe('none')
-  const box = page.getByPlaceholder('Паём ба Mahliyo AI…')
+  const box = page.locator('textarea.ai-input')
   await box.fill('Саволи якум')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   await expect(page.locator('.ai-text')).toHaveText('Ҷавоб ба «Саволи якум»', { timeout: 10_000 })
@@ -257,7 +257,7 @@ test('in the background: she goes on answering while the learner is elsewhere (t
   await signedIn(page)
   await fakeMahliyo(page, () => PIN, 2500)
   await page.goto('/mahliyo')
-  await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('PIN-ро чӣ тавр иваз кунам?')
+  await page.locator('textarea.ai-input').fill('PIN-ро чӣ тавр иваз кунам?')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   await expect(page.locator('.ai-thinking')).toBeVisible()
   // away (✕): she keeps thinking
@@ -272,7 +272,7 @@ test('in the background: she goes on answering while the learner is elsewhere (t
   await expect(page.locator('.dock-ai-news')).toHaveCount(0)
 
   // asked, then the app closed and opened again: her answer is fetched by the question's id
-  await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('Боз як савол')
+  await page.locator('textarea.ai-input').fill('Боз як савол')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   await expect(page.locator('.ai-thinking')).toBeVisible()
   await page.waitForTimeout(500)
@@ -288,7 +288,7 @@ test('stop, edit, copy; she cannot answer: a card with "try again"; no internet:
   const { asked, stopped } = await fakeMahliyo(page, (q) => (q === 'Савол' && fail ? null : PIN), 1500)
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.goto('/mahliyo')
-  const box = page.getByPlaceholder('Паём ба Mahliyo AI…')
+  const box = page.locator('textarea.ai-input')
 
   // stopped while she thinks: the question stays, with "try again" and "edit"
   await box.fill('Пин-кодро чӣ тавр иваз кунам')
@@ -338,7 +338,7 @@ test('without the AI set up on the server, her scene says she is coming soon and
   await page.goto('/mahliyo')
   await expect(page.locator('.ai-hello')).toContainText('ба наздикӣ омода мешавад')
   await expect(page.locator('.ai-hero').getByRole('link', { name: 'Ба мушовир нависед' })).toHaveAttribute('href', '/support')
-  await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toBeDisabled()
+  await expect(page.locator('textarea.ai-input')).toBeDisabled()
   await expect(page.locator('.ai-marquee')).toHaveCount(0)
   expect(errors).toEqual([])
 })
@@ -347,7 +347,7 @@ test('a slow connection: "sending…" until the question arrived, then she think
   await signedIn(page)
   const { asked } = await fakeMahliyo(page, () => ({ tajik: true, reply: 'Дар расм…', blocks: [{ type: 'text', text: 'Дар расм тугмаи «Танзимот» аст.' }] }), 800, 1500)
   await page.goto('/mahliyo')
-  const box = page.getByPlaceholder('Паём ба Mahliyo AI…')
+  const box = page.locator('textarea.ai-input')
   await box.fill('Салом!')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   // on its way: no thinking yet
@@ -466,7 +466,7 @@ test('a worked answer: formulas, a table and code drawn; a long question folds, 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/mahliyo')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  const box = page.getByPlaceholder('Паём ба Mahliyo AI…')
+  const box = page.locator('textarea.ai-input')
   const long = Array.from({ length: 14 }, (_, i) => `Сатри ${i + 1}: шарти масъала`).join('\n')
   await box.fill(long)
   await page.getByRole('button', { name: 'Фиристодан' }).click()
@@ -513,7 +513,7 @@ test('code: copy, and a web page previewed in its own box; a chat shared as a li
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/mahliyo')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  await page.getByPlaceholder('Паём ба Mahliyo AI…').fill('Коди HTML нависед')
+  await page.locator('textarea.ai-input').fill('Коди HTML нависед')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   const code = page.locator('.ai-code')
   await expect(code.locator('.ai-code-head')).toContainText('html', { timeout: 10_000 })
@@ -580,7 +580,7 @@ test('her sources small at the end of the row (a list of blue links), pictures, 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/mahliyo')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  const box = page.getByPlaceholder('Паём ба Mahliyo AI…')
+  const box = page.locator('textarea.ai-input')
   await box.fill('Расмҳои оҳу бо манбаъ')
   await page.getByRole('button', { name: 'Фиристодан' }).click()
   const said = page.locator('.ai-said').last()
@@ -633,11 +633,11 @@ test('a chat holds twenty questions: then a quiet note where the box was, and a 
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   const note = page.locator('.ai-limit')
   await expect(note).toContainText('Контексти ин сӯҳбат ба поён расид')
-  await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toHaveCount(0)
+  await expect(page.locator('textarea.ai-input')).toHaveCount(0)
   expect(await note.locator('p').evaluate((e) => parseFloat(getComputedStyle(e).fontSize))).toBeLessThan(13)
   await page.screenshot({ path: 'test-results/mahliyo-limit.png' })
   await note.getByRole('button', { name: 'Сӯҳбати нав' }).click()
-  await expect(page.getByPlaceholder('Паём ба Mahliyo AI…')).toBeVisible()
+  await expect(page.locator('textarea.ai-input')).toBeVisible()
   await expect(note).toHaveCount(0)
   expect(errors).toEqual([])
 })
@@ -651,7 +651,7 @@ test('another account on the same phone: a thin line "Шумо аккаунтр�
   const { asked, server } = await fakeMahliyo(page, (q) => ({ tajik: true, reply: `Ҷавоб: ${q}`, blocks: [{ type: 'text', text: `Ҷавоб: ${q}` }] }), 1500)
   await page.goto('/mahliyo')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  const box = page.locator('.ai-input')
+  const box = page.locator('textarea.ai-input')
   await box.fill('Саволи Малика')
   await box.press('Enter')
   // while she answers, a light runs round the box
@@ -695,7 +695,7 @@ test('a new chat: her sign-in clip, silent and once, in her circle with her head
   // "not ready yet" at first, then she is there by herself
   await expect(page.locator('.ai-hello')).toBeVisible()
   await expect(page.locator('.ai-hello')).toHaveCount(0, { timeout: 9000 })
-  await expect(page.locator('.ai-input')).toBeEnabled()
+  await expect(page.locator('textarea.ai-input')).toBeEnabled()
   expect(errors).toEqual([])
 })
 
@@ -720,8 +720,8 @@ test('a test in the chat: questions to answer, "Санҷидан" marks them and
         { type: 'images', items: [{ src: 'https://pictures.example/ok.png', title: 'Расм', url: 'https://example.org' }, { src: 'https://pictures.example/broken.png', title: 'Нест', url: 'https://example.org' }] }] }))
   await page.goto('/mahliyo')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  await page.locator('.ai-input').fill('Ба ман тест деҳ')
-  await page.locator('.ai-input').press('Enter')
+  await page.locator('textarea.ai-input').fill('Ба ман тест деҳ')
+  await page.locator('textarea.ai-input').press('Enter')
   const card = page.locator('.ai-quiz')
   await expect(card).toBeVisible()
   await expect(card.locator('.ai-quiz-count')).toHaveText('2 савол')
@@ -764,7 +764,7 @@ test('insults or pressure: only a red warning, in words that change each time; t
   await fakeMahliyo(page, () => ({ tajik: true, reply: 'warning', blocks: [{ type: 'warning', text: words[n++ % words.length] }] }), 300)
   await page.goto('/mahliyo')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  const box = page.locator('.ai-input')
+  const box = page.locator('textarea.ai-input')
   for (let k = 1; k <= 4; k++) {
     await box.fill(`Суханони бад ${k}`)
     await box.press('Enter')
@@ -822,7 +822,7 @@ test('her richer answers: choices with a first pick, a red danger, a live calcul
   const { asked } = await fakeMahliyo(page, (q) => (q.includes('тест') ? quiz : rich), 200)
   await page.goto('/mahliyo')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  const box = page.locator('.ai-input')
+  const box = page.locator('textarea.ai-input')
   await box.fill('Кадом провайдер беҳтар аст?')
   await box.press('Enter')
   await expect(page.locator('.ai-choice')).toHaveCount(3)
@@ -873,11 +873,12 @@ test('the paperclip opens a sheet: camera, gallery, document and four ways of an
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   await page.locator('.ai-attach').click()
   await expect(page.locator('.attach')).toBeVisible()
-  await expect(page.locator('.attach-actions button')).toHaveCount(6)
+  await expect(page.locator('.attach-actions button')).toHaveCount(5)
+  await expect(page.locator('.attach-modes button')).toHaveCount(4)
   await page.screenshot({ path: 'test-results/attach-sheet.png' })
-  await page.locator('.attach-actions button', { hasText: 'Режими илмӣ' }).click()
+  await page.locator('.attach-modes button', { hasText: 'Режими илмӣ' }).click()
   await expect(page.locator('.ai-mode-chip')).toContainText('Режими илмӣ')
-  const box = page.locator('.ai-input')
+  const box = page.locator('textarea.ai-input')
   await box.fill('Фотосинтез чист?')
   await box.press('Enter')
   await expect.poll(() => asked.length).toBe(1)
@@ -893,7 +894,7 @@ test('the empty box changes its hint every few seconds; "/" opens the ready comm
   const hint = page.locator('.ai-hint')
   await expect(hint).toHaveText('Паём ба Mahliyo AI…')
   await expect(hint).not.toHaveText('Паём ба Mahliyo AI…', { timeout: 5000 })
-  const box = page.locator('.ai-input')
+  const box = page.locator('textarea.ai-input')
   await box.fill('/')
   await expect(page.locator('.slash')).toBeVisible()
   await expect(page.locator('.slash-head small')).toHaveText(/^1\d{3}$/)
@@ -901,7 +902,7 @@ test('the empty box changes its hint every few seconds; "/" opens the ready comm
   // pulled up: every command, by group
   await page.locator('.slash-handle').click()
   await expect(page.locator('.slash.is-tall')).toBeVisible()
-  await expect(page.locator('.slash-list h4').first()).toHaveText('Корҳои тайёр')
+  await expect(page.locator('.slash-list h4').first()).toHaveText('Файлҳо')
   await page.screenshot({ path: 'test-results/slash-tall.png' })
   await box.fill('/ман')
   await expect(page.locator('.slash-row').first()).toContainText('/манту')

@@ -63,7 +63,9 @@ export const EntityFields = {
     theme_color: HexColor.nullable().optional(),
     icon_asset_id: AssetRef,
     hero_asset_id: AssetRef,
-    access_tier: Tier.optional()
+    access_tier: Tier.optional(),
+    /** for girls or for boys (its courses and lessons follow it) */
+    audience: z.enum(['girls', 'boys']).optional()
   }),
   courses: z.strictObject({
     school_id: Uuid,

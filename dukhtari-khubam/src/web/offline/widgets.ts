@@ -13,6 +13,8 @@ export interface WidgetTexts {
   brand: string; streak: string; done: string; continueFallback: string; words: string; quote: string
   /** what Mahliyo says in each of her widget's scenes: lines of "title|line under it" */
   scenes?: Record<string, string>; go?: string
+  /** girls' or boys' mode: the widget shows Mahliyo or the boy */
+  gender?: 'girl' | 'boy'
 }
 
 /**
@@ -59,6 +61,7 @@ export function widgetSummary(bundle: Bundle | null, progress: ProgressData, t: 
     // and her words in each scene (the widget picks the scene by the hour)
     lastDay: [...progress.days].sort().pop() ?? '',
     opened: localDay(now),
+    gender: t.gender ?? 'girl',
     scenes: Object.fromEntries(Object.entries(t.scenes ?? {}).map(([id, text]) => [id, lines(text)])),
     goText: t.go ?? t.continueFallback
   }
