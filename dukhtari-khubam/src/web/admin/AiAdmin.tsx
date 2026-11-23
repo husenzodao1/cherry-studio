@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react'
 import { PROVIDERS, type ProviderId } from '@/lib/aiProviders'
 
 import { api } from '../api'
+import { pagesOf, passagesOf } from '../files/bookText'
 import { ErrorState, Loading } from '../components/States'
 import { useApi } from '../useApi'
 import { MahliyoLog } from './MahliyoLog'
@@ -113,51 +114,6 @@ function ModelBox({ provider, model, note, hasKey, on, onSaved, onUse }: {
 }
 
 interface Book { id: string; title: string; file: string | null; pages: number | null; chunks: number; status: 'loading' | 'ready'; at: string }
-
-/** a book's passages: about a thousand characters each, cut at a sentence, a little of the one before kept */
-const PASSAGE = 1100
-const OVERLAP = 150
-export function passagesOf(pages: string[]): { n: number; page: number | null; text: string }[] {
-  const out: { n: number; page: number | null; text: string }[] = []
-  pages.forEach((raw, p) => {
-    const text = raw.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim()
-    let at = 0
-    while (at < text.length) {
-      let end = Math.min(text.length, at + PASSAGE)
-      if (end < text.length) {
-        const stop = Math.max(text.lastIndexOf('. ', end), text.lastIndexOf('\n', end), text.lastIndexOf('! ', end), text.lastIndexOf('? ', end))
-        if (stop > at + PASSAGE / 2) end = stop + 1
-      }
-      const piece = text.slice(at, end).trim()
-      if (piece.length > 20) out.push({ n: out.length, page: pages.length > 1 ? p + 1 : null, text: piece })
-      if (end >= text.length) break
-      at = Math.max(end - OVERLAP, at + 1)
-    }
-  })
-  return out
-}
-
-/** a book's text, page by page, read here in the browser (PDF, Word, text) */
-async function pagesOf(file: File): Promise<string[]> {
-  const name = file.name.toLowerCase()
-  if (name.endsWith('.pdf') || file.type === 'application/pdf') {
-    const pdfjs = await import('pdfjs-dist')
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
-    const doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise
-    const pages: string[] = []
-    for (let i = 1; i <= doc.numPages; i++) {
-      const content = await (await doc.getPage(i)).getTextContent()
-      pages.push(content.items.map((it) => ('str' in it ? `${it.str}${it.hasEOL ? '\n' : ' '}` : '')).join(''))
-    }
-    return pages
-  }
-  if (name.endsWith('.docx')) {
-    const mammoth = await import('mammoth')
-    const r = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })
-    return [r.value]
-  }
-  return [await file.text()]
-}
 
 function Books() {
   const list = useApi<Book[]>('/admin/books')

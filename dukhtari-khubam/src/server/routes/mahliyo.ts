@@ -7,7 +7,7 @@ import { ApiError } from '@/lib/http'
 import { route, type AnyRoute } from '@/lib/router'
 
 import { answer, ATTACHMENT_MIMES, premiumLive, setPlansLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type RedReply, type Turn } from '../mahliyo'
-import { activeModel, bookPassages, forgetActive, searchesBooks, sealKey, serverReady } from '../aiModels'
+import { activeModel, bookPassages, forgetActive, minePassages, searchesBooks, sealKey, serverReady } from '../aiModels'
 import { makeSong } from '../music'
 import { limitReached, MODE_LIMIT, planOf, planSettings, use, whoOf, withinPlan, type PlanCtx } from '../plans'
 import { call } from '../util'
@@ -75,10 +75,13 @@ async function warningsOf(sb: SupabaseClient): Promise<RedReply[]> {
   redReplies = { at: Date.now(), list }
   return list
 }
-async function extraFor(sb: SupabaseClient, turns: Turn[], premium = false) {
-  // before Premium is sold, the books answer everyone (as they always did)
-  const [active, books, warnings] = await Promise.all([activeModel(sb), premium || !premiumLive() ? bookPassages(sb, turns[turns.length - 1].content) : Promise.resolve([]), warningsOf(sb)])
-  return { active, books, warnings }
+async function extraFor(sb: SupabaseClient, turns: Turn[], premium = false, session?: string) {
+  const question = turns[turns.length - 1].content
+  // before Premium is sold, the books answer everyone (as they always did); her own Workspace: the database
+  // gives its passages only to her, and only with Premium
+  const [active, books, warnings, mine] = await Promise.all([activeModel(sb), premium || !premiumLive() ? bookPassages(sb, question) : Promise.resolve([]),
+    warningsOf(sb), minePassages(session, question)])
+  return { active, books, warnings, mine }
 }
 /** whether the learner who asks has Premium (her session, checked by the database; never what the phone says) */
 /** how much of the conversation she reads: a free learner's last 12 turns, a Premium learner's last 40 */
@@ -94,9 +97,9 @@ const RED_REPLIES_MAX = 1000
 /** whether anyone can answer: the staff chose a model, or the server has a key of its own */
 const anyone = async (sb: SupabaseClient) => configured() || !!(await activeModel(sb))
 
-async function answerInto(sb: SupabaseClient, id: string, turns: Turn[], me: Learner, files: Attachment[], plan: PlanCtx) {
+async function answerInto(sb: SupabaseClient, id: string, turns: Turn[], me: Learner, files: Attachment[], plan: PlanCtx, session?: string) {
   try {
-    const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns, !!me.premium)])
+    const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns, !!me.premium, session)])
     const a = await answer(turns, k.app, materialFor(k.parts, turns), me, files, extra)
     a.blocks = await withinPlan(a.blocks, plan)
     await call(sb, 'api_mahliyo_answer', { p_id: id, p_answer: a.reply, p_tajik: a.tajik, p_blocks: a.blocks })
@@ -180,11 +183,11 @@ export const mahliyoRoutes: AnyRoute[] = [
       const me = { me: body.me, now: body.now, tz: body.tz, premium, plan, place: body.place, region: ipPlace || undefined, mode: body.mode, gender: body.gender }
       if (body.background) {
         const client = sb()
-        after(() => answerInto(client, id, turns, me, files, { ...ctx, sb: client }))
+        after(() => answerInto(client, id, turns, me, files, { ...ctx, sb: client }, body.session))
         // her books have something on this question: when her answer takes a while, the app says she searches them
         return { id, books: (premium || !premiumLive()) && await searchesBooks(client, question) }
       }
-      const [k, extra] = await Promise.all([knowledge(sb()), extraFor(sb(), turns, premium)])
+      const [k, extra] = await Promise.all([knowledge(sb()), extraFor(sb(), turns, premium, body.session)])
       let a
       try {
         a = await answer(turns, k.app, materialFor(k.parts, turns), me, files, extra)

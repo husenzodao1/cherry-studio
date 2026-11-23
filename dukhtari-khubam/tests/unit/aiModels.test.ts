@@ -7,7 +7,7 @@ vi.mock('@anthropic-ai/sdk', () => ({ default: class { constructor(public o?: { 
 
 const { bookQuery, openKey, sealKey } = await import('@/server/aiModels')
 const { answer } = await import('@/server/mahliyo')
-const { passagesOf } = await import('@/web/admin/AiAdmin')
+const { passagesOf } = await import('@/web/files/bookText')
 
 const ok = (blocks: unknown[], sources?: number[]) => ({ text: JSON.stringify({ tajik: true, blocks, ...(sources ? { sources } : {}) }), candidates: [{ finishReason: 'STOP' }] })
 const turns = [{ role: 'user' as const, content: 'Одоби меҳмондорӣ чист?' }]

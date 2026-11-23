@@ -843,16 +843,22 @@ export function reminderAsked(question: string, now = Date.now()): Extract<Block
 /** What she may cite: the staff's books' passages first, then the internet's results, numbered together. */
 interface Ref { title: string; url: string; site: string; text: string; image?: string }
 export const BOOK_SITE = 'Китоби расмӣ'
-export function refsOf(books: BookPassage[], web: WebSource[]): Ref[] {
-  return [...books.map((b) => ({ title: b.page ? `${b.book}, саҳ. ${b.page}` : b.book, url: '', site: BOOK_SITE, text: b.text })), ...web]
+/** her own materials in her Workspace */
+export const MINE_SITE = 'Маводи ман'
+export function refsOf(books: BookPassage[], web: WebSource[], mine: BookPassage[] = []): Ref[] {
+  const page = (b: BookPassage) => (b.page ? `${b.book}, саҳ. ${b.page}` : b.book)
+  return [...mine.map((b) => ({ title: page(b), url: '', site: MINE_SITE, text: b.text })),
+    ...books.map((b) => ({ title: page(b), url: '', site: BOOK_SITE, text: b.text })), ...web]
 }
 export function webNote(refs: Ref[]): string {
   if (!refs.length) return ''
   const part = (title: string, from: Ref[], at: number) => (from.length ? [title, ...from.map((r, i) => `[${at + i + 1}] ${r.title}${r.url ? ` — ${r.url}` : ''}\n${r.text}`)] : [])
-  const books = refs.filter((r) => !r.url)
+  const mine = refs.filter((r) => r.site === MINE_SITE)
+  const books = refs.filter((r) => !r.url && r.site !== MINE_SITE)
   return [
-    ...part('OFFICIAL BOOKS (the company\'s own materials for her question; cite the numbers you use in "sources"):', books, 0),
-    ...part('WEB RESULTS (an internet search for her question; cite the numbers you use in "sources"):', refs.filter((r) => r.url), books.length)
+    ...part('HER OWN MATERIALS (what she uploaded to her Workspace — her lectures, textbooks, assignments and notes; when her question is about her studies, answer and solve FROM THESE first, exactly as her teachers teach it, and cite the numbers you use in "sources"):', mine, 0),
+    ...part('OFFICIAL BOOKS (the company\'s own materials for her question; cite the numbers you use in "sources"):', books, mine.length),
+    ...part('WEB RESULTS (an internet search for her question; cite the numbers you use in "sources"):', refs.filter((r) => r.url), mine.length + books.length)
   ].join('\n\n')
 }
 /** which Wikipedia to look in: the question's language */
@@ -862,7 +868,7 @@ const webLang = (question: string): 'tg' | 'ru' | 'en' => {
 }
 
 /** What the server adds to a question: the model the staff chose, and the passages of their books for it. */
-export interface Extra { active?: ActiveModel | null; books?: BookPassage[]; warnings?: RedReply[] }
+export interface Extra { active?: ActiveModel | null; books?: BookPassage[]; warnings?: RedReply[]; mine?: BookPassage[] }
 
 /** The answer as JSON text from the model the staff chose; when it fails, from the app's own default. */
 async function ask(turns: Turn[], appName: string, material: string, me: Learner, files: Attachment[], chosen?: ActiveModel | null): Promise<string | null> {
@@ -894,7 +900,7 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
   }
   // a question about the world: looked up on the internet first (a few seconds at most)
   const web = !files.length && needsWeb(question) ? await searchWeb(question, webLang(question)) : []
-  const refs = refsOf(extra.books ?? [], web)
+  const refs = refsOf(extra.books ?? [], web, extra.mine ?? [])
   const material = [knowledge, refs.length ? webNote(refs) : '', redNote(extra.warnings)].filter(Boolean).join('\n\n')
   // the same words pushed a third time in a row (each answered already): her warning, without asking the AI
   if (pushedAgain(turns)) return warned(extra.warnings, 0, name, turns)

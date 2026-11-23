@@ -653,7 +653,7 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk, onSend }: {
 }
 
 /** the sites, by their first letter (W for Wikipedia), each a little circle */
-const siteMark = (site: string) => (/wikipedia/.test(site) ? 'W' : site === 'Китоби расмӣ' ? '📖' : site.replace(/^www\./, '')[0]?.toUpperCase() ?? '•')
+const siteMark = (site: string) => (/wikipedia/.test(site) ? 'W' : site === 'Китоби расмӣ' ? '📖' : site === 'Маводи ман' ? '🎓' : site.replace(/^www\./, '')[0]?.toUpperCase() ?? '•')
 
 /**
  * Where her answer came from, small at the end of its row (as a messenger shows it): the sites' marks, one

@@ -87,6 +87,18 @@ export async function searchesBooks(sb: SupabaseClient, question: string): Promi
   return (await bookPassages(sb, question, 1)).length > 0
 }
 
+/** the passages of her own Workspace materials nearest a question (her session: only hers; none without Premium) */
+export async function minePassages(session: string | undefined, question: string, limit = 5): Promise<BookPassage[]> {
+  const q = bookQuery(question)
+  if (!session || !q) return []
+  try {
+    const { supabaseFor } = await import('@/lib/supabase')
+    return await call<BookPassage[]>(supabaseFor(session), 'api_ws_search', { p_query: q, p_limit: limit })
+  } catch {
+    return []
+  }
+}
+
 /** whether the staff gave her any books */
 let booksCount: { at: number; n: number } | null = null
 export async function hasBooks(sb: SupabaseClient): Promise<boolean> {
