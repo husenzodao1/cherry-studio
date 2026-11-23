@@ -10,6 +10,7 @@ import { Empty } from '@/web/components/States'
 import { useContent, type Bundle } from '@/web/offline/content'
 import { usePrefs } from '@/web/prefs'
 import { browserSupabase } from '@/web/supabase-browser'
+import { emojify } from '@/web/components/Emoji'
 
 interface Hit { type: 'school' | 'course' | 'lesson'; id: string; title: string; snippet?: string | null }
 
@@ -137,7 +138,7 @@ export default function SearchPage() {
           <Link key={`${h.type}-${h.id}`} href={HREF[h.type](h.id)} className="glass list-row">
             <span className="row-icon"><Icon name={h.type === 'school' ? 'cap' : h.type === 'course' ? 'layers' : 'book'} /></span>
             <span className="row-main">
-              <b>{h.title}</b>
+              <b>{emojify(h.title)}</b>
               <span className="row-sub">{h.snippet ?? (h.type === 'school' ? t('nav.schools') : h.type === 'course' ? t('section.courses') : t('section.lessons'))}</span>
             </span>
           </Link>

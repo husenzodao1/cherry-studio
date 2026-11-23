@@ -13,6 +13,7 @@ import { usePrefs } from '../prefs'
 import { Icon, type IconName } from './Icon'
 import { SourceChip } from './SourceChip'
 import { YouTube } from './YouTube'
+import { emojify } from './Emoji'
 
 /** Renderer for CMS content blocks (schema v1) — the same structure Android renders natively. */
 
@@ -245,7 +246,7 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return typeof p.video_id === 'string' ? (
         <div className="media-block stack" style={{ gap: 8 }}>
           <YouTube id={p.video_id} start={p.start} title={c.title} />
-          {c.caption ? <p className="muted" style={{ fontSize: '0.88em' }}>{c.caption}</p> : null}
+          {c.caption ? <p className="muted" style={{ fontSize: '0.88em' }}>{emojify(c.caption)}</p> : null}
           {chip}
         </div>
       ) : null
@@ -266,14 +267,14 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return (
         <aside className={`callout callout-${CALLOUTS.includes(p.variant) ? p.variant : 'note'}`}>
           <BlockLabel icon={CALLOUT_ICON[p.variant] ?? 'book'} kind={CALLOUTS.includes(p.variant) ? p.variant : 'note'} />
-          <div>{c.title ? <b>{c.title}</b> : null}<RichText value={c.body} as="div" /></div>
+          <div>{c.title ? <b>{emojify(c.title)}</b> : null}<RichText value={c.body} as="div" /></div>
         </aside>
       )
     case 'table':
       return (
         <div style={{ overflowX: 'auto' }}>
           <table>
-            {c.caption ? <caption className="muted">{c.caption}</caption> : null}
+            {c.caption ? <caption className="muted">{emojify(c.caption)}</caption> : null}
             <tbody>
               {(c.rows ?? []).map((row: Rich[], i: number) => (
                 <tr key={i}>{row.map((cell, j) => (i === 0 && p.header_row !== false
@@ -303,19 +304,19 @@ export function BlockView({ block, assets }: { block: Block; assets: Record<stri
       return (
         <div className="callout callout-task">
           <BlockLabel icon="check" kind="task" />
-          <div>{c.title ? <b>{c.title}</b> : null}<RichText value={c.body} as="div" /></div>
+          <div>{c.title ? <b>{emojify(c.title)}</b> : null}<RichText value={c.body} as="div" /></div>
         </div>
       )
     case 'quiz':
       return block.ref ? (
         <Link href={`/quiz?id=${block.ref.id}`} className="glass list-row">
           <span className="row-icon"><Icon name="check" /></span>
-          <span className="row-main"><b>{block.ref.title}</b><span className="row-sub">{block.ref.question_count} {t('quiz.question').toLowerCase()}</span></span>
+          <span className="row-main"><b>{emojify(block.ref.title)}</b><span className="row-sub">{block.ref.question_count} {t('quiz.question').toLowerCase()}</span></span>
           <Icon name="forward" />
         </Link>
       ) : null
     case 'related_lesson':
-      return block.ref ? <Link href={`/lesson?id=${block.ref.id}`} className="chip"><Icon name="book" size={16} />{block.ref.title}</Link> : null
+      return block.ref ? <Link href={`/lesson?id=${block.ref.id}`} className="chip"><Icon name="book" size={16} />{emojify(block.ref.title)}</Link> : null
     case 'model3d': {
       const m = a(p.asset_id)
       return m?.url ? <a className="chip" href={m.url} download><Icon name="sparkle" size={16} />3D · {m.title ?? 'GLB'}</a> : null

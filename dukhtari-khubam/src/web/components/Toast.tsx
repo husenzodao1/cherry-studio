@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { Icon, type IconName } from './Icon'
+import { emojify } from './Emoji'
 
 const EVENT = 'dk-toast'
 interface Note { id: number; text: string; icon: IconName; ms: number }
@@ -34,7 +35,7 @@ export function Toaster() {
   return (
     <div key={note.id} className="toast glass" role="status" aria-live="polite">
       <Icon name={note.icon} size={18} />
-      <span>{note.text}</span>
+      <span>{emojify(note.text)}</span>
     </div>
   )
 }

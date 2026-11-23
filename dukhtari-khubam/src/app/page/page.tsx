@@ -8,6 +8,7 @@ import { Empty, Loading } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
 import { usePrefs } from '@/web/prefs'
 import { useQueryParam } from '@/web/useQueryParam'
+import { emojify } from '@/web/components/Emoji'
 
 /** Document pages (about, privacy, terms), entered in the panel; shown plainly, like a printed document. */
 export default function CmsPage() {
@@ -26,7 +27,7 @@ function Page() {
         <article className="doc">
           <header className="doc-head">
             <span className="doc-brand">{t('app.name')} · {t('settings.version')} {process.env.NEXT_PUBLIC_APP_VERSION_NAME ?? ''}</span>
-            <h1>{page.title}</h1>
+            <h1>{emojify(page.title)}</h1>
           </header>
           <div className="doc-body">{page.body.map((b, i) => <BlockView key={i} block={{ ...b, id: String(i) }} assets={page.assets ?? {}} />)}</div>
         </article>

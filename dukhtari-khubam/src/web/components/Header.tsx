@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import { usePhoto } from '../offline/photo'
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
+import { emojify } from './Emoji'
 
 /**
  * Detail-screen header: round glass back button, centred title, optional action on the right. `onBack`
@@ -17,7 +18,7 @@ export function Header({ back, onBack, title, end }: { back?: string; onBack?: (
     <header className="topbar">
       {onBack ? <button type="button" className="icon-btn" aria-label={t('action.back')} onClick={onBack}><Icon name="back" /></button>
         : back ? <Link href={back} className="icon-btn" aria-label={t('action.back')}><Icon name="back" /></Link> : <span className="icon-spacer" />}
-      <h1 className="topbar-title">{title}</h1>
+      <h1 className="topbar-title">{typeof title === 'string' ? emojify(title) : title}</h1>
       {end ?? <span className="icon-spacer" />}
     </header>
   )

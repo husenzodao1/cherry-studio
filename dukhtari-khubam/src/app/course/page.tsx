@@ -13,6 +13,7 @@ import { useContent, type QuizCard } from '@/web/offline/content'
 import { courseLessonIds, courseProgress, useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
 import { useQueryParam } from '@/web/useQueryParam'
+import { emojify } from '@/web/components/Emoji'
 
 function QuizRow({ q }: { q: QuizCard }) {
   const { t } = usePrefs()
@@ -21,7 +22,7 @@ function QuizRow({ q }: { q: QuizCard }) {
   return (
     <Link href={`/quiz?id=${q.id}`} className="glass list-row">
       <span className="row-icon"><Icon name="check" /></span>
-      <span className="row-main"><b>{q.title}</b><span className="row-sub">{q.question_count} {t('quiz.question').toLowerCase()}</span></span>
+      <span className="row-main"><b>{emojify(q.title)}</b><span className="row-sub">{q.question_count} {t('quiz.question').toLowerCase()}</span></span>
       <span className="row-end">{best != null ? `${Math.round(best)}%` : <Icon name="forward" size={18} />}</span>
     </Link>
   )
@@ -62,8 +63,8 @@ function Course() {
         <img className="scene bloom-in" src={ART.book.src} alt="" decoding="async" />
       </div>
       <div className="stack" style={{ gap: 8, textAlign: 'center', alignItems: 'center' }}>
-        <h1 className="h-page">{c.title}</h1>
-        {c.description ? <p className="muted" style={{ margin: 0 }}>{c.description}</p> : null}
+        <h1 className="h-page">{emojify(c.title)}</h1>
+        {c.description ? <p className="muted" style={{ margin: 0 }}>{emojify(c.description)}</p> : null}
         <div className="row" style={{ flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
           {c.level ? <span className="chip">{c.level}</span> : null}
           {c.estimated_minutes ? <span className="chip">{c.estimated_minutes} {t('lesson.minutes')}</span> : null}
@@ -111,7 +112,7 @@ function Course() {
         <div className="row" style={{ flexWrap: 'wrap', marginTop: 14 }}>
           {c.prerequisites.map((p) => (
             <Link key={p.id} href={`/course?id=${p.id}`} className="chip">
-              {courseProgress(bundle, learnerProgress, p.id).percent === 100 ? <Icon name="check" size={14} /> : null}{p.title}
+              {courseProgress(bundle, learnerProgress, p.id).percent === 100 ? <Icon name="check" size={14} /> : null}{emojify(p.title)}
             </Link>
           ))}
         </div>
@@ -122,12 +123,12 @@ function Course() {
           <section key={m.id} className="glass module" aria-labelledby={`m-${m.id}`}>
             <div className="module-head">
               <span className="module-num">{String(mi + 1).padStart(2, '0')}</span>
-              <h2 id={`m-${m.id}`} className="h-section">{m.title}</h2>
+              <h2 id={`m-${m.id}`} className="h-section">{emojify(m.title)}</h2>
             </div>
-            {m.description ? <p className="muted" style={{ margin: 0 }}>{m.description}</p> : null}
+            {m.description ? <p className="muted" style={{ margin: 0 }}>{emojify(m.description)}</p> : null}
             {m.topics.map((tp) => (
               <div key={tp.id} className="stack" style={{ gap: 8 }}>
-                <span className="eyebrow">{tp.title}</span>
+                <span className="eyebrow">{emojify(tp.title)}</span>
                 {tp.lessons.map((l) => {
                   const done = !!learnerProgress.lessons[l.id]?.done
                   return (
@@ -135,7 +136,7 @@ function Course() {
                       <span className="row-icon" style={{ width: 38, height: 38 }}>
                         {l.locked ? <Icon name="lock" size={16} /> : done ? <Icon name="check" size={16} /> : <Icon name="play" size={16} />}
                       </span>
-                      <span className="row-main"><b style={{ fontSize: '0.95em' }}>{l.title}</b></span>
+                      <span className="row-main"><b style={{ fontSize: '0.95em' }}>{emojify(l.title)}</b></span>
                       {l.estimated_minutes ? <span className="row-end">{l.estimated_minutes} {t('lesson.minutes')}</span> : null}
                     </Link>
                   )

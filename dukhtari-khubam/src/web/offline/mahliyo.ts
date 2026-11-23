@@ -53,7 +53,8 @@ export function accountChanged(turns: AiTurn[], i: number): boolean {
   return false
 }
 /** A picture or a file sent with a question, as the chat keeps it (a small picture, no data). */
-export interface AiFileView { mime: string; name: string; thumb?: string }
+/** `key`: a document kept on this phone (IndexedDB) so it can be opened again from the chat */
+export interface AiFileView { mime: string; name: string; thumb?: string; key?: string }
 /** …and as it goes to her (base64). */
 export interface AiUpload extends AiFileView { data: string }
 
@@ -212,7 +213,7 @@ export const reminderId = (at: string) => 300_000 + (Math.floor(Date.parse(at) /
  */
 export async function setReminder(b: Extract<AiBlock, { type: 'reminder' }>): Promise<'set' | 'denied' | 'past' | 'web'> {
   const when = new Date(b.at)
-  if (!(when.getTime() > Date.now() + 30_000)) return 'past'
+  if (!(when.getTime() > Date.now() + 5_000)) return 'past'
   const { allowNotifications, canNotify } = await import('./notify')
   const native = canNotify()
   const allowed = native && (await allowNotifications())
@@ -255,7 +256,7 @@ export interface AiState {
 }
 export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string; mode?: AiMode; gender?: 'girl' | 'boy' }
 /** how she asks to be answered (the attach sheet's modes) */
-export type AiMode = 'precise' | 'science' | 'friendly' | 'girly'
+export type AiMode = 'precise' | 'science' | 'friendly' | 'girly' | 'exam' | 'mmt' | 'facts'
 
 const PENDING_KEY = 'dk.ai-pending'
 /** how long she may take before the question counts as unanswered (the server gives up after 5 minutes) */
@@ -362,6 +363,29 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 /** the longest question (a whole problem may be pasted in) */
 export const QUESTION_CAP = 4000
 
+/** A sent document kept on this phone; its key (none when the phone cannot keep it). */
+async function keepFile(f: { mime: string; name: string; data: string }): Promise<string | undefined> {
+  try {
+    const { set } = await import('idb-keyval')
+    const key = `aifile:${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+    await set(key, f)
+    return key
+  } catch {
+    return undefined
+  }
+}
+/** A sent document kept on this phone, as a file again (null when it is no longer there). */
+export async function keptFile(key: string): Promise<Blob | null> {
+  try {
+    const { get } = await import('idb-keyval')
+    const f = await get<{ mime: string; name: string; data: string }>(key)
+    if (!f) return null
+    return new Blob([Uint8Array.from(atob(f.data), (c) => c.charCodeAt(0))], { type: f.mime })
+  } catch {
+    return null
+  }
+}
+
 /**
  * Asks her: the conversation so far (from `editFrom` on, when a question is edited, the rest is left out)
  * and the new question. She answers in the background.
@@ -371,7 +395,8 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
   if (!q || state.pending) return
   if (offline()) return set({ problem: 'offline', online: false })
   lastFiles = files
-  const views = files.map(({ mime, name, thumb }) => ({ mime, name, thumb }))
+  // documents (not pictures) are kept on the phone, to open them again from the chat
+  const views = await Promise.all(files.map(async ({ mime, name, thumb, data }) => ({ mime, name, thumb, ...(thumb ? {} : { key: await keepFile({ mime, name, data }) }) })))
   const turns: AiTurn[] = [...(editFrom === undefined ? state.turns : state.turns.slice(0, editFrom)),
     { role: 'user', content: q, at: new Date().toISOString(), ...(views.length ? { files: views } : {}), ...(who.account ? { account: who.account } : {}), ...(who.mode === 'girly' ? { girly: true } : {}) }]
   const my = ++run

@@ -6,13 +6,16 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { AiBlock } from '@/lib/aiCatalog'
+import { withCommand } from '@/lib/aiCommands'
 import { extOf, fileType } from '@/lib/aiFiles'
+import { lookStyle, slideStyle } from '@/lib/slideStyles'
 import SPOTS from '@/lib/aiSpots.json'
 
 import { allowLockScreen, lockScreenAllowed } from '../offline/call'
-import { cancelReminder, reminderId, setReminder } from '../offline/mahliyo'
+import { cancelReminder, reminderId, setReminder, type AiUpload } from '../offline/mahliyo'
 import { usePrefs } from '../prefs'
 import { AiMarkdown, isMarkdown } from './AiMarkdown'
+import { DocViewer, OpenChoice } from './DocViewer'
 import { emojify } from './Emoji'
 import { Icon } from './Icon'
 import { showToast } from './Toast'
@@ -107,7 +110,8 @@ function QuizCard({ block, id, onQuiz, style }: { block: Extract<AiBlock, { type
     if (answered < total) return
     setChecked(true)
     if (id) keepQuiz(id, { picked, checked: true })
-    const words = comment.trim() ? `${t('ai.quiz_comment_mine')}: ${comment.trim()}` : ''
+    // her own words; with an open task, the task and her answer to it
+    const words = !comment.trim() ? '' : block.task ? `${t('ai.quiz_task')}: ${block.task}\n${t('ai.quiz_task_answer')}: ${comment.trim()}` : `${t('ai.quiz_comment_mine')}: ${comment.trim()}`
     if (personal) {
       // her picks, one per question, and her own words
       onQuiz?.([
@@ -154,6 +158,7 @@ function QuizCard({ block, id, onQuiz, style }: { block: Extract<AiBlock, { type
           </li>
         ))}
       </ol>
+      {block.comment && block.task ? <p className="ai-quiz-task"><Icon name="edit" size={15} aria-hidden="true" /><span><Rich text={block.task} /></span></p> : null}
       {block.comment ? (
         <label className="ai-quiz-comment">
           <Icon name="edit" size={16} aria-hidden="true" />
@@ -302,11 +307,15 @@ const FILE_BADGE: Record<string, string> = { pdf: 'PDF', docx: 'W', pptx: 'P' }
 
 /**
  * A file she made: a bright icon (PDF red, Word blue, PowerPoint orange, code violet), its name and what it
- * is for; "Боргирӣ" builds the file on the phone and saves or shares it, "Дидан" shows what is inside.
+ * is for; "Боргирӣ" builds the file on the phone and saves or shares it; "Дидан" opens a document (PDF,
+ * Word, PowerPoint) in an app the phone asks for, and shows text and code right here.
  */
-function FileCard({ block, style }: { block: Extract<AiBlock, { type: 'file' }>; style: CSSProperties }) {
+function FileCard({ block, style, onSend }: { block: Extract<AiBlock, { type: 'file' }>; style: CSSProperties; onSend?: (text: string, files: AiUpload[]) => void }) {
   const { t } = usePrefs()
   const [open, setOpen] = useState(false)
+  // "Дидан" on a document: first, where to open it; then the viewer inside the app
+  const [choosing, setChoosing] = useState(false)
+  const [viewing, setViewing] = useState(false)
   const [busy, setBusy] = useState(false)
   const type = fileType(block.name)
   const kind = type?.kind ?? 'text'
@@ -317,6 +326,32 @@ function FileCard({ block, style }: { block: Extract<AiBlock, { type: 'file' }>;
     try {
       const { buildFile, saveFile } = await import('../files/build')
       await saveFile(block.name, await buildFile(block), block.title)
+    } catch {
+      showToast(t('ai.file_failed'), 'alert')
+    } finally {
+      setBusy(false)
+    }
+  }
+  /** a document: where to open it (here, or another app of the phone); text and code: shown here */
+  const see = () => (kind === 'text' ? setOpen(!open) : setChoosing(true))
+  const build = async () => (await import('../files/build')).buildFile(block)
+  /** a presentation's fix: her words, and the presentation itself (as a text file) for Mahliyo to change */
+  const edit = (change: string) => {
+    if (!onSend) return
+    // the presentation itself, its sample's look (if any) on its first line, so the fixed one keeps it
+    const bytes = new TextEncoder().encode(`${block.look ? `<!-- look: ${JSON.stringify(block.look)} -->\n` : ''}${block.content}`)
+    let bin = ''
+    for (const b of bytes) bin += String.fromCharCode(b)
+    const style = block.style ? `\n#${block.style}` : ''
+    onSend(withCommand('презентатсия', `${change}${style}`), [{ mime: 'text/plain', name: block.name.replace(/\.[^.]+$/, '') + '.md', data: btoa(bin) }])
+    setViewing(false)
+  }
+  const other = async () => {
+    setBusy(true)
+    try {
+      const { buildFile, openFile } = await import('../files/build')
+      // no app on the phone opens it: here, in the app
+      if ((await openFile(block.name, await buildFile(block), block.title)) === 'no_app') setViewing(true)
     } catch {
       showToast(t('ai.file_failed'), 'alert')
     } finally {
@@ -340,9 +375,14 @@ function FileCard({ block, style }: { block: Extract<AiBlock, { type: 'file' }>;
         <button type="button" className="ai-file-get" onClick={() => void save()} disabled={busy}>
           <Icon name={busy ? 'refresh' : 'arrow-down'} size={16} />{busy ? t('ai.file_making') : t('ai.file_download')}
         </button>
-        <button type="button" className="ai-file-see" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? t('ai.file_hide') : t('ai.file_preview')}</button>
+        <button type="button" className="ai-file-see" aria-expanded={kind === 'text' ? open : undefined} disabled={busy} onClick={() => void see()}>{open ? t('ai.file_hide') : t('ai.file_preview')}</button>
       </div>
       {open ? <div className="ai-file-body ai-md"><AiMarkdown text={shown} /></div> : null}
+      {choosing ? <OpenChoice name={block.name} onClose={() => setChoosing(false)} onInside={() => { setChoosing(false); setViewing(true) }} onOther={() => { setChoosing(false); void other() }} /> : null}
+      {viewing ? (
+        <DocViewer doc={{ name: block.name, file: build, kind: kind === 'pdf' ? 'pdf' : kind === 'pptx' ? 'slides' : 'markdown', content: block.content, style: kind === 'pptx' ? (block.look ? lookStyle(block.look) : slideStyle(block.style)) : undefined }}
+          onClose={() => setViewing(false)} onEdit={kind === 'pptx' && onSend ? edit : undefined} />
+      ) : null}
     </div>
   )
 }
@@ -409,7 +449,11 @@ function PictureTile({ picture, onOpen, onFail }: { picture: Picture; onOpen: ()
   )
 }
 
-export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk }: { blocks: AiBlock[]; fresh: boolean; id?: string; onQuiz?: (result: string) => void; onAsk?: (text: string) => void }) {
+export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk, onSend }: {
+  blocks: AiBlock[]; fresh: boolean; id?: string; onQuiz?: (result: string) => void; onAsk?: (text: string) => void
+  /** a question with files, from any answer (a presentation's fix, with the presentation itself) */
+  onSend?: (text: string, files: AiUpload[]) => void
+}) {
   const { t } = usePrefs()
   const [zoom, setZoom] = useState<Extract<AiBlock, { type: 'screen' }> | null>(null)
   const { starts } = timingOf(blocks)
@@ -468,7 +512,7 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk }: { blocks: AiB
           case 'clarify':
             return <ClarifyCard key={i} block={b} onAsk={onAsk} style={style} />
           case 'file':
-            return <FileCard key={i} block={b} style={style} />
+            return <FileCard key={i} block={b} style={style} onSend={onSend} />
           case 'follow':
             return <FollowList key={i} block={b} onAsk={onAsk} style={style} />
           case 'premium':

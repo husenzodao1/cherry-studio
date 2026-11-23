@@ -4,7 +4,7 @@ import { GoogleGenAI, ThinkingLevel } from '@google/genai'
 import { linkAllowed, ROUTES, SPOT_IDS, SPOTS, type AiBlock, type CalcInput, type CalcOutput, type SpotId, type Tone } from '@/lib/aiCatalog'
 import { commandNote, splitCommand } from '@/lib/aiCommands'
 import { FILE_CAP, FILES_MAX, fileType, safeFileName, type FileKind } from '@/lib/aiFiles'
-import { slideStyle, styleIn, styleNote } from '@/lib/slideStyles'
+import { cleanLook, lookStyle, SLIDE_FONTS, slideStyle, styleIn, styleNote, type SlideLook } from '@/lib/slideStyles'
 import { evaluate, formatNumber } from '@/lib/calc'
 
 import { ABOUT } from './mahliyoAbout'
@@ -156,8 +156,9 @@ WHAT YOU TALK ABOUT
 - The everyday life of girls and young women — the app is made for them, so help gladly, fully and practically, as a caring, knowledgeable older sister: cooking and recipes (Tajik and other dishes, pastries, preserves: ingredients with amounts, the steps in order, timings and tips), the home (cleaning, order, laundry, saving time and money, hosting guests, dastarkhan), sewing, embroidery, knitting and other handicraft, beauty and personal care (skin, hair, hands, hygiene, simple home care, make-up, choosing gentle products — no medicines), clothes and style (modest and elegant, colours, what suits an occasion), a girl's and a woman's health in general, scientifically sound terms (growing up, periods, hygiene, nutrition, sleep, sport, pregnancy and caring for a baby — with a doctor for any problem or worry), family, marriage and relationships, raising children, friendships and feelings, confidence, etiquette, customs and holidays (weddings, Navruz, guests), choosing a profession, work and a household budget. Give a real, complete answer (steps, amounts, examples) — never refuse such a question as "outside your lessons". Keep it age-appropriate and decent.
 - The learner herself: her lessons, results, weak and strong points, what to do next, a study plan — from "ABOUT THE LEARNER" below. Be specific and encouraging (name the lessons and scores), and suggest concrete next steps (repeat a red lesson, the day's review, the next lesson).
 - Pictures and files she sends (a photo, a screenshot, a PDF, a text): look at them closely and use them when they concern the app, the lessons, her studies (a problem or exercise from a textbook, her homework, her notes, a test question), her own learning or her everyday life as above (a dish, ingredients, a recipe, clothes or fabric, handicraft, a plant, a room to tidy, a cosmetic product's label) — then explain, solve or advise helpfully. Anything else in them (people, memes, documents not about learning, anything inappropriate): say in ONE short sentence that you can only help with the app, studies and a girl's everyday life, and give no other answer — do not describe it. Never identify people in a picture.
+- Red pen strokes on a picture (circles, underlines, arrows, ticks in bright red) were drawn by HER in the app to point at what she means: look first and most closely at the marked places and answer about exactly them ("the circled problem", "the underlined word"); do not treat the red marks as part of the original or as mistakes in it.
 - Greetings and friendly small talk (hello, how are you, thanks, "coffee with Mahliyo?", compliments): answer warmly and playfully in one or two sentences (you cannot drink coffee, but you love a chat), then offer to help with learning.
-- Off topic are only: celebrities and gossip, politics, sports results, money-making schemes, gambling, games and entertainment news, … — say kindly in one or two sentences that this is outside what you help with, and say what you can help with. Everyday questions of a girl's or a woman's life (above) are never off topic.
+- Every other topic too: you may talk about anything she asks — films, music, games, sport, famous people, travel, technology, news, money, careers, hobbies — openly, helpfully and with care: facts first and checked; politics, religion and disputed matters neutral, showing the main views without taking a side; no gossip or rumours about real people's private lives; nothing illegal, dangerous, hateful or adult; no help with gambling, cheating, hacking or get-rich-quick schemes (say kindly why); always age-appropriate. Everyday questions of a girl's or a woman's life (above) are never off topic.
 - Insults, humiliation, curses (at you or anyone), obscene or vulgar words, threats, or pressure — the same demand pushed again and again after you have answered it, or insisting that you do what you said you cannot: answer with exactly ONE block {"type":"warning","text":"","rule":0} and nothing else (the app puts its own words in). When her message matches one of the RED REPLIES words (the same word in another form, with a typo, in Latin letters or in another language), "rule" is that word's number; otherwise 0. Never for honest questions: a girl who asks again because she did not understand gets a new, simpler explanation, and one rude word said in passing in a real question still gets a kind answer.
 - Religious questions: quote the Quran (sura and verse) or a hadith (its collection) only when you are sure of it; never call a hadith authentic without that being established; present disputed matters as disputed, never one school's (madhhab's) view as the view of all Muslims; keep apart a religious ruling, a national custom and a personal opinion; for a personal ruling suggest a knowledgeable, trusted scholar.
 - Health and the mind: general, scientifically sound information only; never present yourself as a doctor or psychologist, never diagnose, never recommend medicines, doses or risky treatments; with serious signs — a doctor; anything urgent — call an ambulance (103) or tell a trusted adult at once. Legal or money matters: general guidance and a qualified person.
@@ -196,11 +197,11 @@ HOW YOU ANSWER — as blocks (the app draws each one)
 - Group long answers clearly: a short text with the point, then the blocks that carry the details (choices, steps, a table, a calc), a danger or tip callout where it matters, and a one-line conclusion in **bold**.
 - "clarify": when her message is unclear, could mean very different things, or you still do not understand it after she said it again — do not guess: ONE clarify block only (no other blocks): "question" kindly says you did not quite understand and asks what she means; "options" — 2–4 short, concrete guesses of what she may want (she can also write her own). Never for a clear question.
 - "follow": at the end of every real answer (not greetings, warnings or clarify), 2–3 short questions she may ask next on the same topic, in her language, written as she would ask them (e.g. «Техникаҳои ранг ва соя»). No question marks needed; each under 60 characters.
-- "file": when she asks for a FILE or a ready document to keep or send — PDF, Word (docx), a presentation (PowerPoint, pptx), a text, table or Markdown file, or code as a file (py, html, js, css, java, cpp, …): one file block per file she wants (at most 3; "PDF and Word" is two blocks of the same document). "name": a short file name in her language with the right extension (e.g. «Модар.pdf», «Модар.docx», «Фотосинтез.pptx», «hisobkunak.py», «index.html»); the extensions: pdf, docx, pptx, txt, md, csv, tsv, json, xml, yaml, html, css, js, ts, jsx, tsx, py, ipynb, java, kt, swift, c, cpp, h, cs, go, rs, php, rb, dart, lua, r, scala, sql, sh, bat, ps1, tex, svg. A presentation or slides: pptx. "title": the document's title; "about": one line of what it will hold (e.g. «иншо бо 5 бахш ва як шеър»). Do NOT write the file's content here: it is written right after, in full, in a separate deep step. Put one short text block before the files saying what you are making, and the follow block after them. A small code question with no file asked for: a code block in a text, as before.
-- Tests ("quiz"): for knowledge, "answer" is the right option's number; for a test about HER (character, interests, style, what suits her) there is no right answer — "answer": -1 and "explanation": "". "comment": the question of a small box at the end where she adds words of her own, fitted to the test (e.g. «Дар бораи худ каме нақл кунед, то дақиқтар фаҳмам…»), or "" when not needed. When she sends a test's result, read her picks and her comment and answer them warmly and exactly.
+- "file": when she asks for a FILE or a ready document to keep or send — PDF, Word (docx), a presentation (PowerPoint, pptx), a text, table or Markdown file, or code as a file (py, html, js, css, java, cpp, …): one file block per file she wants (at most 3; "PDF and Word" is two blocks of the same document). "name": a short file name in her language with the right extension (e.g. «Модар.pdf», «Модар.docx», «Фотосинтез.pptx», «hisobkunak.py», «index.html»); the extensions: pdf, docx, pptx, txt, md, csv, tsv, json, xml, yaml, html, css, js, ts, jsx, tsx, py, ipynb, java, kt, swift, c, cpp, h, cs, go, rs, php, rb, dart, lua, r, scala, sql, sh, bat, ps1, tex, svg. A presentation or slides: pptx. "title": the document's title; "about": one line of what it will hold (e.g. «иншо бо 5 бахш ва як шеър»). Do NOT write the file's content here: it is written right after, in full, in a separate deep step. Put one short text block before the files saying what you are making, and the follow block after them. A small code question with no file asked for: a code block in a text, as before. "look": for a presentation she wants LIKE A SAMPLE PICTURE she sent (a screenshot of a slide, a design she likes), read its look from the picture as exactly as you can: "bg" its main background colour, "fg" its title text colour, "accent" its accent colour (all "#rrggbb"); "layout" the closest cover layout of: left, center, bottom, band, split, frame, diagonal, circle, card, underline, corner, stripe; "motif" its decoration closest to: none, circles, dots, grid, stripes, waves, triangles, rings, blobs, stars, confetti, lines, leaves; "font" the closest of: ${SLIDE_FONTS.join(', ')}. Otherwise (no sample, or not a presentation) every "look" field is "".
+- Tests ("quiz"): for knowledge, "answer" is the right option's number; for a test about HER (character, interests, style, what suits her) there is no right answer — "answer": -1 and "explanation": "". A small box for her own words at the end — ONLY when an answer of her own really adds something, never by habit (most knowledge tests have none: "comment": "" and "task": ""). Two good uses: (1) a test about HER: "task": "" and "comment" is the box's hint fitted to the test (e.g. «Дар бораи худ каме нақл кунед, то дақиқтар фаҳмам…»); (2) a subject test that ends with one open task to solve or write in her own words — "task" is that task itself, exact and complete, shown above the box (maths: a problem, e.g. «Масъала: 3x + 7 = 22. x-ро ёбед ва роҳи ҳалро нависед»; language: a sentence to translate or correct; literature: a short question to answer in two sentences), and "comment" is the box's hint for it (e.g. «Ҷавоби худро ворид кунед…», «Тарҷумаи худро нависед…»). Never a vague box like «натиҷаи худро ба ман бигӯед»; when she sends it, check her answer to the task exactly. When she sends a test's result, read her picks and her comment and answer them warmly and exactly.
 - "screen": a screenshot of an app screen with a pulsing pointer on a place, from the list of SPOTS below, with a one-line caption saying what to tap. Add one (or two) when she says she did not understand, asks "where", asks again about the same thing, or the steps are hard to find; put them after the steps.
 - "link": a button to a page: one of the app pages below, "/lesson?id=<id>" or "/course?id=<id>" for a lesson or course from the course material, or an https address from the material (sources). Give one when it saves her looking.
-- "reminder": when she asks to be reminded, notified or CALLED at some time ("соати 6 ёдам деҳ", "пагоҳ субҳ огоҳ кун", "баъд аз 2 соат", "баъди 4 дақиқа ба ман занг зан"), set it: "at" is that moment as ISO 8601 with her UTC offset, worked out from HER CURRENT TIME below; "title" is short; "text" is what the notification says (kind, in her language). Only a future time within 30 days; otherwise explain kindly. Confirm it in a short, cheerful text block too. The reminder block is what sets it: never confirm a reminder or a call without adding the reminder block.
+- "reminder": when she asks to be reminded, notified or CALLED at some time ("соати 6 ёдам деҳ", "пагоҳ субҳ огоҳ кун", "баъд аз 2 соат", "баъди 4 дақиқа ба ман занг зан", "баъди 1 минут телефон кун", "позвони через минуту") — even "in 1 minute" (then "at" is exactly one minute after HER CURRENT TIME, with seconds), set it: "at" is that moment as ISO 8601 with her UTC offset, worked out from HER CURRENT TIME below; "title" is short; "text" is what the notification says (kind, in her language). Only a future time within 30 days; otherwise explain kindly. Confirm it in a short, cheerful text block too. The reminder block is what sets it: never confirm a reminder or a call without adding the reminder block.
 - You CAN phone her: at a reminder's time the app rings like a real phone call from you (your face, a ringtone, your voice) — even when the phone is locked. So when she asks you to call her, never say you cannot call; set the reminder and say you will call, e.g. "Хуб, баъди 4 дақиқа ба шумо занг мезанам 🙂📞".
 - Keep the whole answer short and clear. Steps, captions, titles and labels are plain words (inline $math$ allowed in steps).
 
@@ -357,7 +358,7 @@ export interface Learner {
   /** her city and country as her connection shows them */
   region?: string
   /** how she asked to be answered */
-  mode?: 'precise' | 'science' | 'friendly' | 'girly'
+  mode?: 'precise' | 'science' | 'friendly' | 'girly' | 'exam' | 'mmt' | 'facts'
   /** a girl or a boy (the app's mode): a boy is spoken to as a young man */
   gender?: 'girl' | 'boy'
 }
@@ -367,7 +368,10 @@ const MODE_NOTE: Record<NonNullable<Learner['mode']>, string> = {
   precise: 'ANSWER MODE — PRECISE ADVICE: be exact and practical: the concrete recommendation first, then the reasons; numbers, names, steps; use choices, callout and calc blocks where they help; no small talk.',
   science: 'ANSWER MODE — SCIENTIFIC: explain like a good scientist and teacher: precise terms (explained), how and why it works, formulas in LaTeX, evidence and its limits, sources where you have them.',
   friendly: 'ANSWER MODE — FRIENDLY: warm, light and encouraging, like a kind older friend; simple words, a little humour and a few emoji, still correct.',
-  girly: 'ANSWER MODE — GIRLY: tender, cheerful and caring, like a close girlfriend; soft words, cute emoji (🌸💜✨), compliments where sincere, still correct and modest.'
+  girly: 'ANSWER MODE — GIRLY: tender, cheerful and caring, like a close girlfriend; soft words, cute emoji (🌸💜✨), compliments where sincere, still correct and modest.',
+  exam: 'ANSWER MODE — EXAM PREPARATION (school, university and other general exams): first find in the OFFICIAL BOOKS passages below the real exam her question is about — its subjects, format, kinds of questions, timing and scoring — and follow exactly that (say it comes from the official material and put the numbers in "sources"); when the books do not have it, prepare her from sound knowledge of how such exams are usually set, and say so plainly. Teach to the exam: the key rules and formulas, typical questions with worked solutions, common traps (a callout), a short practice test (a quiz block) in the exam\'s own style, and a concrete study plan (a calc or steps block) up to the exam day.',
+  mmt: 'ANSWER MODE — ММТ PREPARATION (Маркази миллии тестӣ, the national entrance tests of Tajikistan): teach from the OFFICIAL BOOKS passages below first — they are the ММТ textbooks and test books the staff gave; keep to their content, terms and question formats exactly, quote them where it matters and put their numbers in "sources". Explain each topic as the ММТ asks it: the rule, a worked example, the usual distractors among the answers, and practice questions in the ММТ format (a quiz block, 4 options, one right) with explanations. When the books do not cover the question, answer from sound knowledge of the school programme and say that it is not from the ММТ books. Never invent ММТ rules, cluster requirements, dates or scores: for those, point to the official ММТ site.',
+  facts: 'ANSWER MODE — INTERESTING FACTS: make every answer vivid with surprising, true and checked facts — numbers, records, origins of things, "did you know…" — each fact exact, with where it comes from when you know it (a scientist, a book, an organisation); never a myth or a doubtful fact presented as true (if a popular "fact" is a myth, say so). Keep the facts on her topic and end with one striking fact as a takeaway.'
 }
 
 /**
@@ -403,10 +407,10 @@ const SCHEMA = {
           block('quiz', { title: str, intro: str, questions: { type: 'array', items: {
             type: 'object',
             properties: { question: str, options: { type: 'array', items: str }, answer: { type: 'integer' }, explanation: str },
-            required: ['question', 'options', 'answer', 'explanation'], additionalProperties: false } }, comment: str }),
+            required: ['question', 'options', 'answer', 'explanation'], additionalProperties: false } }, comment: str, task: str }),
           block('clarify', { question: str, options: { type: 'array', items: str } }),
           block('follow', { items: { type: 'array', items: str } }),
-          block('file', { name: str, title: str, about: str }),
+          block('file', { name: str, title: str, about: str, look: { type: 'object', properties: { bg: str, fg: str, accent: str, layout: str, motif: str, font: str }, required: ['bg', 'fg', 'accent', 'layout', 'motif', 'font'], additionalProperties: false } }),
           block('choices', { title: str, intro: str, items: { type: 'array', items: {
             type: 'object',
             properties: { name: str, badge: str, tone: TONE, points: { type: 'array', items: str }, note: str },
@@ -438,7 +442,8 @@ export const SORRY = 'Бубахшед, ба ин савол ҷавоб дода
 const sorry = (): Answer => ({ tajik: true, blocks: [{ type: 'text', text: SORRY }], reply: SORRY })
 
 /** A reminder may be set from a minute ahead to 31 days ahead. */
-const REMIND_MIN = 60_000
+/** a reminder this soon is still set ("in a minute": her answer itself takes some seconds) */
+const REMIND_MIN = 15_000
 const REMIND_MAX = 31 * 86_400_000
 
 const clip = (x: unknown, n: number) => (typeof x === 'string' ? x.trim().slice(0, n) : '')
@@ -506,8 +511,10 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
       const label = clip(b.label, 120)
       if (to && label && linkAllowed(to)) out.push({ type: 'link', to, label })
     } else if (b.type === 'reminder') {
-      const at = Date.parse(clip(b.at, 40))
+      let at = Date.parse(clip(b.at, 40))
       const title = clip(b.title, 80)
+      // "in a minute" rounded down to the minute she worked from: a minute from now
+      if (at - now < REMIND_MIN && at - now > -2 * 60_000) at = now + 60_000
       if (Number.isFinite(at) && at - now >= REMIND_MIN && at - now <= REMIND_MAX && title) {
         out.push({ type: 'reminder', at: new Date(at).toISOString(), title, text: clip(b.text, 300), ...(b.daily === true ? { daily: true } : {}) })
       }
@@ -522,7 +529,9 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
           ? [{ question, options, answer, explanation: clip(q.explanation, 1200) }] : []
       })
       const comment = clip(b.comment, 200)
-      if (questions.length) out.push({ type: 'quiz', title: clip(b.title, 120), intro: clip(b.intro, 600), questions, ...(comment ? { comment } : {}) })
+      // an open task above her box (a problem to solve, a sentence to translate): only with a box
+      const task = comment ? clip(b.task, 800) : ''
+      if (questions.length) out.push({ type: 'quiz', title: clip(b.title, 120), intro: clip(b.intro, 600), questions, ...(comment ? { comment } : {}), ...(task ? { task } : {}) })
     } else if (b.type === 'clarify') {
       const options = (Array.isArray(b.options) ? b.options : []).map((o) => clip(o, 160)).filter(Boolean).slice(0, 4)
       const question = clip(b.question, 300)
@@ -530,7 +539,9 @@ export function cleanBlocks(raw: unknown, now = Date.now()): Block[] {
     } else if (b.type === 'file') {
       // a file to make: only its name and what it holds now; its content is written next (writeFiles)
       const name = safeFileName(clip(b.name, 120))
-      if (name && out.filter((x) => x.type === 'file').length < FILES_MAX) out.push({ type: 'file', name, title: clip(b.title, 160) || name, about: clip(b.about, 300), content: '' })
+      // a presentation in the look of her sample picture (colours, cover, pattern, font), when one was read
+      const look = name && fileType(name)?.kind === 'pptx' ? cleanLook(b.look) : null
+      if (name && out.filter((x) => x.type === 'file').length < FILES_MAX) out.push({ type: 'file', name, title: clip(b.title, 160) || name, about: clip(b.about, 300), content: '', ...(look ? { look } : {}) })
     } else if (b.type === 'follow') {
       const items = (Array.isArray(b.items) ? b.items : []).map((o) => clip(o, 120)).filter(Boolean).slice(0, 3)
       if (items.length) out.push({ type: 'follow', items })
@@ -761,14 +772,23 @@ const rules = (appName: string) => RULES
  */
 export function reminderAsked(question: string, now = Date.now()): Extract<Block, { type: 'reminder' }> | null {
   const q = question.toLowerCase()
-  if (!/(занг|ёд|огоҳ|хабар|позвон|напомн|call|remind|qo‘ng‘iroq|eslat|ara|hatırlat)/.test(q)) return null
-  const m = q.match(/(\d{1,3})\s*(дақиқа|дакика|daqiqa|мин|min|dk|соат|час|hour|hr|soat|saat)/)
-  if (!m) return null
-  const n = Number(m[1])
-  const ms = /^(дақиқа|дакика|daqiqa|мин|min|dk)/.test(m[2]) ? n * 60_000 : n * 3_600_000
+  const call = /(занг|телефон|звон|позвон|call|phone|ring|qo‘ng‘iroq|telefon|ara)/.test(q)
+  if (!call && !/(ёд|огоҳ|хабар|напомн|remind|eslat|hatırlat)/.test(q)) return null
+  // the number in words too: "як дақиқа", "одну минуту", "a minute", "ним соат"
+  const words = q
+    .replace(/(ним|пол|half an?|yarim|yarım)\s*(соат|часа?|hour|soat|saat)/, '30 дақиқа')
+    .replace(/(^|[^\p{L}])(як|бир|bir|один|одну|одна|an?|one)\s+(?=\p{L})/gu, '$11 ')
+    .replace(/(^|[^\p{L}])(ду|два|две|two|ikki|iki)\s+(?=\p{L})/gu, '$12 ')
+    .replace(/(^|[^\p{L}])(се|три|three|uch|üç)\s+(?=\p{L})/gu, '$13 ')
+    .replace(/(^|[^\p{L}])(панҷ|пять|five|besh|beş)\s+(?=\p{L})/gu, '$15 ')
+    .replace(/(^|[^\p{L}])(даҳ|десять|ten|o‘n|on)\s+(?=\p{L})/gu, '$110 ')
+  const m = words.match(/(\d{1,3})\s*(дақиқа|дакика|daqiqa|мин|min|dk|dakika|соат|час|hour|hr|soat|saat)/)
+  // "in a minute" without a number: one
+  const n = m ? Number(m[1]) : /(минуту|minute|дақиқа)/.test(q) && !/\d/.test(q) ? 1 : 0
+  if (!n) return null
+  const ms = !m || /^(дақиқа|дакика|daqiqa|мин|min|dk|dakika)/.test(m[2]) ? n * 60_000 : n * 3_600_000
   if (ms < REMIND_MIN || ms > REMIND_MAX) return null
-  const call = /(занг|позвон|call|qo‘ng‘iroq|ara)/.test(q)
-  return { type: 'reminder', at: new Date(now + ms).toISOString(), title: call ? 'Занги Маҳлиё' : 'Ёдраскунии Маҳлиё', text: 'Вақти дарс расид! 📚' }
+  return { type: 'reminder', at: new Date(now + ms).toISOString(), title: call ? 'Занги Маҳлиё' : 'Ёдраскунии Маҳлиё', text: call ? 'Маҳлиё ба шумо занг мезанад 📞' : 'Вақти дарс расид! 📚' }
 }
 
 /** What she may cite: the staff's books' passages first, then the internet's results, numbered together. */
@@ -811,7 +831,7 @@ async function ask(turns: Turn[], appName: string, material: string, me: Learner
   return provider() === 'gemini' ? askGemini(turns, appName, material, me, files) : askClaude(turns, appName, material, me, files)
 }
 /** for the models without a schema of their own (OpenAI-compatible): her answer's shape */
-const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}],"comment":"…"} · {"type":"choices","title":"…","intro":"…","items":[{"name":"…","badge":"…","tone":"best|good|risk|neutral","points":["…"],"note":"…"}]} · {"type":"callout","tone":"danger|warning|tip|info","title":"…","text":"…"} · {"type":"calc","title":"…","note":"…","inputs":[{"id":"price","label":"…","value":40,"min":0,"max":100,"step":5,"unit":"…","options":[]}],"outputs":[{"label":"…","formula":"price*2","unit":"…","tone":"best","big":true}]} · {"type":"clarify","question":"…","options":["…","…"]} · {"type":"follow","items":["…","…"]} · {"type":"file","name":"Модар.pdf","title":"…","about":"…"} · {"type":"premium","title":"…","text":"…"} · {"type":"warning","text":"","rule":0}.`
+const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}],"comment":"","task":""} · {"type":"choices","title":"…","intro":"…","items":[{"name":"…","badge":"…","tone":"best|good|risk|neutral","points":["…"],"note":"…"}]} · {"type":"callout","tone":"danger|warning|tip|info","title":"…","text":"…"} · {"type":"calc","title":"…","note":"…","inputs":[{"id":"price","label":"…","value":40,"min":0,"max":100,"step":5,"unit":"…","options":[]}],"outputs":[{"label":"…","formula":"price*2","unit":"…","tone":"best","big":true}]} · {"type":"clarify","question":"…","options":["…","…"]} · {"type":"follow","items":["…","…"]} · {"type":"file","name":"Модар.pdf","title":"…","about":"…","look":{"bg":"","fg":"","accent":"","layout":"","motif":"","font":""}} · {"type":"premium","title":"…","text":"…"} · {"type":"warning","text":"","rule":0}.`
 
 /** Her answer to the conversation (its last turn is the learner's question). */
 export async function answer(turns: Turn[], appName: string, knowledge: string, me: Learner = {}, files: Attachment[] = [], extra: Extra = {}): Promise<Answer> {
@@ -854,8 +874,16 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
     if (blocks.some((b) => b.type === 'file')) {
       // a presentation in the style she chose ("#s07")
       const style = styleIn(question)
-      for (const b of blocks) if (b.type === 'file' && style && fileType(b.name)?.kind === 'pptx') b.style = style
-      await writeFiles(blocks, turns, me, extra.active)
+      // a presentation being fixed keeps the look of its sample (written on the attached file's first line)
+      const lookLine = /<!-- look: (\{[^\n]*\}) -->/.exec(files.filter((f) => f.mime === 'text/plain').map((f) => Buffer.from(f.data, 'base64').toString('utf8')).join('\n'))?.[1]
+      let kept: SlideLook | null = null
+      try { kept = lookLine ? cleanLook(JSON.parse(lookLine)) : null } catch { /* not a look */ }
+      for (const b of blocks) {
+        if (b.type !== 'file' || fileType(b.name)?.kind !== 'pptx') continue
+        if (style) b.style = style
+        if (!b.look && kept) b.look = kept
+      }
+      await writeFiles(blocks, turns, me, extra.active, files)
       const made = blocks.filter((b) => b.type !== 'file' || b.content)
       if (!made.some((b) => b.type === 'file')) return sorry()
       blocks.splice(0, blocks.length, ...made)
@@ -911,7 +939,7 @@ const FILE_ROUND_TOKENS = 32_000
 const FILE_ROUNDS = 5
 const FILE_WRITER = `You are Mahliyo, writing a FILE the learner asked for in the chat (the conversation is below; her last message asked for it). Think deeply and plan the whole file before you write. Then write its fullest, most accurate and most beautiful version — as long as the task truly deserves: a school essay 1000–2500 words, a report, project or research paper 2500–6000 words, a presentation of the slides she asked for (at most 12), a program complete and working. Never a sketch or a plan instead of the file (unless she asked for one), never "and so on", "…" or placeholders, never cut it short. Facts must be true and checked; never invent quotations, numbers, names or sources. Write in a clear, warm, well-crafted style in her language (see REPLY LANGUAGE), with correct spelling (Tajik: ӣ ӯ ҳ қ ҷ ғ). Output ONLY the file's content: nothing before or after it, no \`\`\` fences around it.`
 const FILE_RULES: Record<FileKind, string> = {
-  pdf: 'FORMAT: Markdown. Start with "# Title", then a subtitle line in *italics*; then sections with "## " (and "### "): an introduction, the main parts, a conclusion. Paragraphs of 3–6 sentences; "- " and "1. " lists; GitHub tables with a header row; "> " for quotations and sayings; **bold** for key terms. Formulas in plain Unicode (x², √, π, ≤, →, H₂O), not LaTeX. No HTML, no images, no code fences.',
+  pdf: 'THIS IS A DOCUMENT TO READ (an essay, report, article, letter…), NOT A PRESENTATION: write flowing, connected prose — every section is made of real paragraphs of 3–6 sentences that lead into each other; use a list only where a list is natural (steps, items), never pages of short bullet points, never "---" slide separators, never speaker notes. An essay («иншо», «эссе») is prose from start to end: an introduction, the body in several paragraphs, a conclusion — no lists at all. FORMAT: Markdown. Start with "# Title", then a subtitle line in *italics*; then sections with "## " (and "### "): an introduction, the main parts, a conclusion. Paragraphs of 3–6 sentences; "- " and "1. " lists; GitHub tables with a header row; "> " for quotations and sayings; **bold** for key terms. Formulas in plain Unicode (x², √, π, ≤, →, H₂O), not LaTeX. No HTML, no images, no code fences.',
   docx: '',
   pptx: 'FORMAT: Markdown slides, separated by a line with only "---". Slide 1: "# Title" and one subtitle line. Every other slide: "# Slide title", then 3–6 "- " points, each at most about 15 words ("  - " for a sub-point), or a small GitHub table; at the end of the slide "> " lines with the speaker\'s notes (what to say, 2–4 sentences). When she gave the number of slides, exactly that many (the title slide counts); otherwise 10–12. The topic in a logical order, definitions, examples, facts and numbers, a summary slide and a "Questions" slide. Formulas in plain Unicode (x², √, π, H₂O), not LaTeX. No HTML, no images.',
   text: 'FORMAT: the exact content of the file, complete and working. Code: the whole program with every import, a clear structure, comments in her language, checks of the input and an example of use; it must run as it is. HTML: one self-contained, modern, responsive and beautiful page with its CSS and JavaScript inside. CSV/TSV: a header row. JSON: valid JSON only. Markdown: well formatted. No explanations outside the file (comments inside code are fine).'
@@ -923,26 +951,30 @@ const FILE_GO_ON = 'Your file was cut off by the length limit. Continue it EXACT
 interface FilePart { text: string; more: boolean }
 
 /** Writes every file block's content (in place), all at once. */
-async function writeFiles(blocks: Block[], turns: Turn[], me: Learner, chosen?: ActiveModel | null) {
+async function writeFiles(blocks: Block[], turns: Turn[], me: Learner, chosen?: ActiveModel | null, files: Attachment[] = []) {
   const until = Date.now() + FILE_TIME_MS
+  // a text sent with the question (e.g. the presentation she wants fixed) goes to the writer too
+  const attached = files.filter((f) => f.mime === 'text/plain').map(textOf).join('\n\n')
   await Promise.all(blocks.map(async (b) => {
     if (b.type !== 'file') return
     try {
-      b.content = await writeFile(b, turns, me, until, chosen)
+      b.content = await writeFile(b, turns, me, until, chosen, attached)
     } catch (e) {
       console.warn('[mahliyo] the file', b.name, 'was not written:', e instanceof Error ? e.message.slice(0, 200) : String(e))
     }
   }))
 }
 
-async function writeFile(file: { name: string; title: string; about: string; style?: string }, turns: Turn[], me: Learner, until: number, chosen?: ActiveModel | null): Promise<string> {
+async function writeFile(file: { name: string; title: string; about: string; style?: string; look?: SlideLook }, turns: Turn[], me: Learner, until: number,
+  chosen?: ActiveModel | null, attached = ''): Promise<string> {
   const kind = fileType(file.name)?.kind ?? 'text'
-  // a presentation's style: its look and how to write for it
-  const look = kind === 'pptx' && file.style ? styleNote(slideStyle(file.style)) : ''
+  // a presentation's style (one of the hundred, or read from her sample): its look and how to write for it
+  const look = kind !== 'pptx' ? '' : file.look ? styleNote(lookStyle(file.look)) : file.style ? styleNote(slideStyle(file.style)) : ''
   const system = [FILE_WRITER, FILE_RULES[kind], look, learnerNote(me, new Date(), { private: true }), languageNote(turns)].filter(Boolean).join('\n\n')
   const task = `Write the complete file «${file.name}» — ${file.title}${file.about ? ` (${file.about})` : ''}.`
   const last = turns[turns.length - 1]
-  const asked: Turn[] = [...turns.slice(0, -1), { role: 'user', content: `${last?.content ?? ''}\n\n— ${task}` }]
+  const fix = attached ? `\n\n${attached}\n\n(When her message asks to fix or change this attached file, write it whole again with exactly her change applied and everything else kept as it was.)` : ''
+  const asked: Turn[] = [...turns.slice(0, -1), { role: 'user', content: `${last?.content ?? ''}${fix}\n\n— ${task}` }]
   let text = ''
   for (let round = 0; round < FILE_ROUNDS && Date.now() < until - 15_000; round++) {
     const messages: Turn[] = text ? [...asked, { role: 'assistant', content: text }, { role: 'user', content: FILE_GO_ON }] : asked
@@ -955,7 +987,8 @@ async function writeFile(file: { name: string; title: string; about: string; sty
 
 /** A file's text without fences around the whole of it, at most FILE_CAP long. */
 export function cleanFileText(text: string): string {
-  let t = text.replace(/^﻿/, '').trim()
+  // (a presentation's look note, carried with a fix, never goes into the file)
+  let t = text.replace(/^﻿/, '').replace(/^<!-- look: .* -->\n?/gm, '').trim()
   const fenced = /^```[\w+#.-]*\n([\s\S]*?)\n?```$/.exec(t)
   if (fenced) t = fenced[1]
   return t.slice(0, FILE_CAP)

@@ -10,6 +10,7 @@ import { alphaVideo, CLIPS } from '../mahliyo'
 import { placeNote } from '../offline/place'
 import { usePrefs } from '../prefs'
 import type { UiKey } from '../i18n'
+import { emojify } from './Emoji'
 
 /**
  * Mahliyo's scenes for the time of day, once in each period (docs/mahliyo-scenes.md):
@@ -111,7 +112,7 @@ export function NightGuard() {
   return (
     <div className={`night scene-${scene.id}`} role="dialog" aria-modal="true" aria-label={t(`scene.${scene.id}_title`)}>
       <div className="night-sky" aria-hidden="true"><i className="night-moon" /><i className="night-stars" /><i className="night-stars night-stars-2" /><i className="night-shoot" /></div>
-      <h2 className="night-title">{t(`scene.${scene.id}_title`)}</h2>
+      <h2 className="night-title">{emojify(t(`scene.${scene.id}_title`))}</h2>
       <div className={`night-art${scene.clip ? '' : scene.art ? ' is-art' : ' is-portrait'}`} aria-hidden="true">
         {still
           ? <img className="night-breathe" src={picture} alt="" />
@@ -122,7 +123,7 @@ export function NightGuard() {
         <p className="night-text">{t(scene.id === 'night' ? 'night.bye' : 'scene.bye')}</p>
       ) : (
         <>
-          <p className="night-text">{t(`scene.${scene.id}_text`).replace('{соат}', hhmm(now))}</p>
+          <p className="night-text">{emojify(t(`scene.${scene.id}_text`).replace('{соат}', hhmm(now)))}</p>
           <div className="night-actions">
             <button type="button" className="night-sleep" onClick={() => void close()}>{t(scene.close)}</button>
             <button type="button" className="night-refuse" onClick={stay}>{t(scene.stay)}</button>

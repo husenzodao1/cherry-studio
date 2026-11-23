@@ -12,6 +12,8 @@ import { onBack } from '@/web/components/BackButton'
 import { AttachSheet } from '@/web/components/AttachSheet'
 import { SlashMenu } from '@/web/components/SlashMenu'
 import { SlidesSetup } from '@/web/components/SlidesSetup'
+import { DocViewer, type DocSource } from '@/web/components/DocViewer'
+import { PhotoMarker } from '@/web/components/PhotoMarker'
 import { useScreenshot } from '@/web/components/ScreenGuard'
 import { Icon } from '@/web/components/Icon'
 import { emojify } from '@/web/components/Emoji'
@@ -22,7 +24,7 @@ import { useAuth } from '@/web/auth'
 import { useLearner } from '@/web/offline/learner'
 import { useApi } from '@/web/useApi'
 import {
-  aboutMe, accountChanged, girlyChanged, aiReady, archiveChat, tempChat, leaveTemp, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
+  aboutMe, accountChanged, girlyChanged, keptFile, aiReady, archiveChat, tempChat, leaveTemp, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
   useMahliyo, watch, type AiChatMeta, type AiMode, type AiFileView, type AiTurn, type AiUpload
 } from '@/web/offline/mahliyo'
 import { alphaVideo, CLIPS } from '@/web/mahliyo'
@@ -87,6 +89,8 @@ export default function MahliyoPage() {
   const [opened, setOpened] = useState<number | null>(null)
   /** pictures and files chosen for the next question */
   const [files, setFiles] = useState<AiUpload[]>([])
+  /** the picture opened to mark with the red pen */
+  const [marking, setMarking] = useState<number | null>(null)
   // the paperclip's sheet, and the way she asked to be answered (kept on the phone)
   const [sheet, setSheet] = useState(false)
   const [mode, setModeState] = useState<AiMode | null>(null)
@@ -420,6 +424,7 @@ export default function MahliyoPage() {
   const [selecting, setSelecting] = useState<string | null>(null)
   const last = turns[turns.length - 1]
   const lastQuestion = turns.map((m) => m.role).lastIndexOf('user')
+  const lastAsked = lastQuestion >= 0 ? turns[lastQuestion].content : ''
   const first = learner?.name?.split(/\s+/)[0]
   /** the empty box shows a hint that changes every few seconds */
   const hinting = online && !text && command === null && ready !== false
@@ -500,7 +505,7 @@ export default function MahliyoPage() {
           <div key={i} className="ai-said">
             <div className="grow">
               <AnswerBlocks blocks={m.blocks?.length ? m.blocks : [{ type: 'text', text: m.content }]} fresh={i === fresh}
-                id={m.id ?? m.at} onQuiz={(result) => send(result)} onAsk={i === turns.length - 1 ? (text) => send(text) : undefined} />
+                id={m.id ?? m.at} onQuiz={(result) => send(result)} onAsk={i === turns.length - 1 ? (text) => send(text) : undefined} onSend={(text, f) => send(text, f)} />
               {m.tajik === false ? <Link href="/support" className="btn btn-soft ai-consultant"><Icon name="bell" size={16} /> {t('ai.to_consultant')}</Link> : null}
               <div className="ai-acts ai-acts-start">
                 <button type="button" className="ai-act" onClick={() => copy(m)} aria-label={t('ai.copy')}><Icon name="copy" size={16} /></button>
@@ -525,6 +530,7 @@ export default function MahliyoPage() {
             <span className="grow">
               <span className="ai-thinking-row"><ThinkingWords /><span className="mi-dots"><i /><i /><i /></span></span>
               {pending?.books ? <BooksHint since={pending.since} /> : null}
+              {makingFile(lastAsked) ? <FileSteps /> : null}
             </span>
           </div>
         ) : busy ? null : problem && last?.role === 'user' ? (
@@ -567,12 +573,20 @@ export default function MahliyoPage() {
         {files.length ? (
           <div className="ai-files" role="list">
             {files.map((f, i) => (
-              <span key={i} className="ai-file" role="listitem">
-                {f.thumb ? <img src={f.thumb} alt="" /> : <span className="ai-file-doc"><Icon name="file" size={18} /><span>{f.name}</span></span>}
+              <span key={i} className={`ai-file${f.thumb ? ' is-photo' : ''}`} role="listitem">
+                {f.thumb ? (
+                  <button type="button" className="ai-file-photo" aria-label={t('ai.mark_title')} onClick={() => setMarking(i)}>
+                    <img src={f.thumb} alt="" /><span className="ai-file-pen"><Icon name="edit" size={12} /></span>
+                  </button>
+                ) : <span className="ai-file-doc"><Icon name="file" size={18} /><span>{f.name}</span></span>}
                 <button type="button" className="ai-file-x" aria-label={t('ai.remove')} onClick={() => setFiles(files.filter((_, n) => n !== i))}><Icon name="x" size={12} /></button>
               </span>
             ))}
           </div>
+        ) : null}
+        {marking !== null && files[marking] ? (
+          <PhotoMarker file={files[marking]} onClose={() => setMarking(null)}
+            onDone={(f) => { setFiles(files.map((x, n) => (n === marking ? f : x))); setMarking(null) }} />
         ) : null}
         {mode ? (
           <span className="ai-mode-chip"><Icon name={MODE_ICON[mode]} size={14} />{t(`ai.mode_${mode}`)}
@@ -637,6 +651,29 @@ function RotatingHint({ lines }: { lines: string[] }) {
     return () => clearInterval(next)
   }, [lines.length])
   return <span key={n} className="ai-hint" aria-hidden="true">{lines[n % Math.max(lines.length, 1)]}</span>
+}
+
+/** whether a question asks her to make a file (a ready file command, or the words of one) */
+function makingFile(q: string) {
+  const { command } = splitCommand(q)
+  if (command?.group.id === 'files') return true
+  return /\b(pdf|docx?|pptx?|word|powerpoint|txt|html|py)\b|пдф|ворд|презент|файл|иншо.*(соз|навис)|эссе/i.test(q)
+}
+
+/**
+ * Under "she is thinking", while she makes a file: small lines one after another, a light sweeping over
+ * each — the file is being prepared, the topics go in, the last point is written…
+ */
+const FILE_STEPS = ['ai.file_step_1', 'ai.file_step_2', 'ai.file_step_3', 'ai.file_step_4', 'ai.file_step_5'] as const
+function FileSteps() {
+  const { t } = usePrefs()
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    // the last line stays until the file is ready
+    const next = setInterval(() => setN((x) => Math.min(x + 1, FILE_STEPS.length - 1)), 6000)
+    return () => clearInterval(next)
+  }, [])
+  return <span key={n} className="ai-books-hint ai-file-step" role="status">{t(FILE_STEPS[n])}</span>
 }
 
 /** a wait this long, with books: she is searching the company's own sources */
@@ -947,12 +984,24 @@ function SelectText({ text, onClose }: { text: string; onClose: () => void }) {
 }
 
 /** The pictures (small) and files (by name) sent with a question. */
+/**
+ * The pictures and documents sent with a question; a document opens inside the app (a PDF page by page, a
+ * text as it is), with "open in an app" for another app of the phone.
+ */
 function Attached({ files }: { files: AiFileView[] }) {
+  const { t } = usePrefs()
+  const [doc, setDoc] = useState<DocSource | null>(null)
+  const open = async (f: AiFileView) => {
+    const blob = f.key ? await keptFile(f.key) : null
+    if (!blob) return showToast(t('doc.not_kept'), 'info')
+    setDoc({ name: f.name, file: async () => blob, kind: f.mime === 'application/pdf' ? 'pdf' : 'text' })
+  }
   return (
     <div className="ai-attached">
       {files.map((f, i) => (f.thumb ? <img key={i} src={f.thumb} alt={f.name} /> : (
-        <span key={i} className="ai-file-doc"><Icon name="file" size={16} /><span>{f.name}</span></span>
+        <button key={i} type="button" className="ai-file-doc" onClick={() => void open(f)}><Icon name="file" size={16} /><span>{f.name}</span></button>
       )))}
+      {doc ? <DocViewer doc={doc} onClose={() => setDoc(null)} /> : null}
     </div>
   )
 }
@@ -978,7 +1027,7 @@ function Wave({ text }: { text: string }) {
   )
 }
 
-const MODE_ICON = { precise: 'target', science: 'flask', friendly: 'smile', girly: 'heart' } as const
+const MODE_ICON = { precise: 'target', science: 'flask', friendly: 'smile', girly: 'heart', exam: 'cap', mmt: 'book', facts: 'sparkle' } as const
 
 /** Her greetings fit the hour: the night (22–5), the morning (5–11), the evening (17–22), or any time. */
 export const taglinesKey = (h: number) =>

@@ -11,6 +11,7 @@ import { useContent } from '@/web/offline/content'
 import { courseLessonIds, courseProgress, useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
 import { useQueryParam } from '@/web/useQueryParam'
+import { emojify } from '@/web/components/Emoji'
 
 export default function SchoolPage() {
   return <Suspense fallback={<Loading />}><School /></Suspense>
@@ -78,7 +79,7 @@ function School() {
                 {c.progress.percent === 100 ? <Icon name="check" /> : <Icon name="play" size={20} />}
               </span>
               <span className="row-main">
-                <b>{c.title}</b>
+                <b>{emojify(c.title)}</b>
                 <span className="row-sub">{t('course.modules_n').replace('{n}', String(c.module_count))}{c.progress.total ? ` · ${t('course.lessons_n').replace('{n}', String(c.progress.total))}` : ''}</span>
               </span>
               <span className="row-end">
@@ -87,7 +88,7 @@ function School() {
             </Link>
           ))
         ) : tab === 'about' ? (
-          s.description ? <div className="glass card-pad"><p style={{ margin: 0, lineHeight: 1.65 }}>{s.description}</p></div> : <Empty title="—" />
+          s.description ? <div className="glass card-pad"><p style={{ margin: 0, lineHeight: 1.65 }}>{emojify(s.description)}</p></div> : <Empty title="—" />
         ) : (
           totals.completed === 0 ? <Empty icon="chart" title={t('state.empty_results')} /> : (
             <div className="glass card-pad row">

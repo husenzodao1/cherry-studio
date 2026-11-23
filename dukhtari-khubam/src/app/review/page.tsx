@@ -12,6 +12,7 @@ import { gradeQuestion, shuffled, type Answer } from '@/web/offline/grade'
 import { useLearner } from '@/web/offline/learner'
 import { dueToday, reviewStats, type ReviewItem } from '@/web/offline/review'
 import { usePrefs } from '@/web/prefs'
+import { emojify } from '@/web/components/Emoji'
 
 /** "Такрори рӯз": today's spaced-repetition questions, one at a time, with instant feedback. */
 export default function ReviewPage() {
@@ -88,7 +89,7 @@ export default function ReviewPage() {
         </div>
       </header>
       <div className="glass question" key={question.id} style={{ animation: 'rise 0.5s var(--ease) both' }}>
-        <div className="eyebrow" style={{ marginBottom: 6 }}>{t('review.title')} · {quiz.quiz.title}</div>
+        <div className="eyebrow" style={{ marginBottom: 6 }}>{t('review.title')} · {emojify(quiz.quiz.title)}</div>
         <h1 id={`q-${question.id}`}>{question.prompt}</h1>
       </div>
       <div role={multi ? 'group' : 'radiogroup'} aria-labelledby={`q-${question.id}`} className="stack stagger" style={{ gap: 10 }} key={`o-${question.id}`}>
@@ -99,7 +100,7 @@ export default function ReviewPage() {
             <button key={o.id} type="button" role={multi ? 'checkbox' : 'radio'} aria-checked={on} className={`option ${state}`} disabled={checked !== null}
               onClick={() => setAnswer(multi ? { option_ids: on ? (answer?.option_ids ?? []).filter((x) => x !== o.id) : [...(answer?.option_ids ?? []), o.id] } : { option_id: o.id })}>
               <span className={`radio${multi ? ' square' : ''}`} aria-hidden="true" />
-              <span>{o.text}</span>
+              <span>{emojify(o.text)}</span>
             </button>
           )
         })}

@@ -14,6 +14,7 @@ import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
 import { useQueryParam } from '@/web/useQueryParam'
+import { emojify } from '@/web/components/Emoji'
 
 // the same two sizes as in the settings: small and medium
 const SCALES = [0.9, 1]
@@ -95,10 +96,10 @@ function Lesson() {
       </header>
 
       <div className="eyebrow" style={{ marginTop: 14 }}>
-        {l.context.course.title}
+        {emojify(l.context.course.title)}
         {l.position.index ? ` · ${t('lesson.lesson')} ${l.position.index} ${t('lesson.of')} ${l.position.total}` : ''}
       </div>
-      <h1>{l.title}</h1>
+      <h1>{emojify(l.title)}</h1>
       {l.summary ? <p className="lead">{l.summary}</p> : null}
 
       {l.locked ? (

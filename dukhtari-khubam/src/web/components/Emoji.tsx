@@ -29,8 +29,8 @@ export function emojiName(emoji: string): string | null {
 export const emojiSrc = (name: string) => `/assets/emoji/${name}.webp`
 
 /** Text with its emoji as the chat's own pictures (the emoji stays its alt text: copied, it is the emoji). */
-export function emojify(text: string): ReactNode {
-  if (!text || !/\p{Extended_Pictographic}|\p{Regional_Indicator}|⃣/u.test(text)) return text
+export function emojify(text: string | null | undefined): ReactNode {
+  if (!text || !/\p{Extended_Pictographic}|\p{Regional_Indicator}|⃣/u.test(text)) return text ?? null
   const out: ReactNode[] = []
   let last = 0
   for (const m of text.matchAll(EMOJI_RE)) {

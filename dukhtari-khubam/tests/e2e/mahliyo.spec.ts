@@ -368,6 +368,19 @@ test('a slow connection: "sending…" until the question arrived, then she think
   ])
   await expect(page.locator('.ai-files .ai-file')).toHaveCount(2)
   await expect(page.locator('.ai-files img')).toHaveCount(1)
+  // the picture, tapped, opens big: she circles a place with the red pen, and the picture keeps her mark
+  const before = await page.locator('.ai-files img').getAttribute('src')
+  await page.locator('.ai-file-photo').click()
+  const canvas = page.locator('.pmark-canvas')
+  await expect(canvas).toBeVisible()
+  const area = (await canvas.boundingBox())!
+  await page.mouse.move(area.x + area.width / 2 - 20, area.y + area.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(area.x + area.width / 2 + 20, area.y + area.height / 2 + 10, { steps: 5 })
+  await page.mouse.up()
+  await page.getByRole('button', { name: 'Тайёр' }).click()
+  await expect(page.locator('.pmark')).toHaveCount(0)
+  expect(await page.locator('.ai-files img').getAttribute('src')).not.toBe(before)
   // one can be taken out again, and put back
   await page.locator('.ai-file').nth(1).getByRole('button', { name: 'Нест кардан' }).click()
   await expect(page.locator('.ai-files .ai-file')).toHaveCount(1)
@@ -874,7 +887,7 @@ test('the paperclip opens a sheet: camera, gallery, document and four ways of an
   await page.locator('.ai-attach').click()
   await expect(page.locator('.attach')).toBeVisible()
   await expect(page.locator('.attach-actions button')).toHaveCount(5)
-  await expect(page.locator('.attach-modes button')).toHaveCount(4)
+  await expect(page.locator('.attach-modes button')).toHaveCount(7)
   await page.screenshot({ path: 'test-results/attach-sheet.png' })
   await page.locator('.attach-modes button', { hasText: 'Режими илмӣ' }).click()
   await expect(page.locator('.ai-mode-chip')).toContainText('Режими илмӣ')

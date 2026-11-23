@@ -295,3 +295,28 @@ export function paint(p: Paint, s: SlideStyle): string {
 
 /** The Google Fonts address that loads every style's font (for the previews). */
 export const FONTS_URL = `https://fonts.googleapis.com/css2?${SLIDE_FONTS.map((f) => `family=${f.replace(/ /g, '+')}${DISPLAY.has(f) && !['Unbounded', 'Tektur', 'Montserrat Alternates', 'Comfortaa', 'Philosopher', 'Caveat', 'Kurale'].includes(f) ? '' : ':wght@700'}`).join('&')}&display=swap`
+
+/* ---- a presentation in the look of a sample picture she sent ---- */
+
+/** the look Mahliyo read from a sample: colours, cover layout, pattern and font */
+export interface SlideLook { bg: string; fg: string; accent: string; layout: CoverLayout; motif: Motif; font: string }
+
+const LAYOUTS: CoverLayout[] = ['left', 'center', 'bottom', 'band', 'split', 'frame', 'diagonal', 'circle', 'card', 'underline', 'corner', 'stripe']
+const MOTIFS: Motif[] = ['none', 'circles', 'dots', 'grid', 'stripes', 'waves', 'triangles', 'rings', 'blobs', 'stars', 'confetti', 'lines', 'leaves']
+const hexOf = (x: unknown) => (typeof x === 'string' && /^#[0-9a-f]{6}$/i.test(x.trim()) ? x.trim().toLowerCase() : null)
+
+/** A look as the model gave it, when it is a real one (its colours, a known layout, pattern and font); else null. */
+export function cleanLook(raw: unknown): SlideLook | null {
+  const o = (raw ?? {}) as Record<string, unknown>
+  const bg = hexOf(o.bg)
+  if (!bg) return null
+  const fg = hexOf(o.fg) ?? (lightness(bg) > 0.4 ? '#111111' : '#ffffff')
+  const accent = hexOf(o.accent) ?? fg
+  const layout = LAYOUTS.includes(o.layout as CoverLayout) ? (o.layout as CoverLayout) : 'left'
+  const motif = MOTIFS.includes(o.motif as Motif) ? (o.motif as Motif) : 'none'
+  const font = SLIDE_FONTS.find((f) => f.toLowerCase() === String(o.font ?? '').trim().toLowerCase()) ?? 'Montserrat'
+  return { bg, fg, accent, layout, motif, font }
+}
+
+/** The style a sample's look makes (drawn and written like the hundred, as a clear lesson). */
+export const lookStyle = (l: SlideLook): SlideStyle => ({ id: 's00', name: 'Намуна', genre: 'lesson', ...l })

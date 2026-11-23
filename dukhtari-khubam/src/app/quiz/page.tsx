@@ -16,6 +16,7 @@ import { gradeQuestion, gradeQuiz, shuffled, type Answer, type QuestionResult } 
 import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
 import { useQueryParam } from '@/web/useQueryParam'
+import { emojify } from '@/web/components/Emoji'
 
 /** Quiz played and graded on the phone (works offline); the best result is saved with the learner's progress. */
 
@@ -134,7 +135,7 @@ function Player({ quiz, lessonId, finalOf }: { quiz: OfflineQuiz; lessonId: stri
         <Header back={back} />
         <div className="glass card-pad stack question" style={{ textAlign: 'center', alignItems: 'center', marginTop: 24 }}>
           <span className="note-icon"><Icon name="check" size={26} /></span>
-          <h1 className="h-page" style={{ margin: 0 }}>{policy.title}</h1>
+          <h1 className="h-page" style={{ margin: 0 }}>{emojify(policy.title)}</h1>
           {policy.instructions ? <p className="muted" style={{ margin: 0 }}>{policy.instructions}</p> : null}
           {finalOf ? <p className="muted" style={{ margin: 0 }}>{t('final.hint').replace('{n}', String(PER_LESSON)).replace('{p}', String(FINAL_PASS))}</p> : null}
           <span className="muted">{questions.length} {t('quiz.question').toLowerCase()}</span>
@@ -224,7 +225,7 @@ function Player({ quiz, lessonId, finalOf }: { quiz: OfflineQuiz; lessonId: stri
                   ? { option_ids: on ? (answer?.option_ids ?? []).filter((x) => x !== o.id) : [...(answer?.option_ids ?? []), o.id] }
                   : { option_id: o.id })}>
                 <span className={`radio${multi ? ' square' : ''}`} aria-hidden="true" />
-                <span>{o.text}</span>
+                <span>{emojify(o.text)}</span>
               </button>
             )
           })}
@@ -235,11 +236,11 @@ function Player({ quiz, lessonId, finalOf }: { quiz: OfflineQuiz; lessonId: stri
         <div className="stack" style={{ gap: 10 }}>
           {left.map((l) => (
             <label key={l.id} className="glass card-pad row" style={{ gap: 10 }}>
-              <span style={{ flex: 1 }}>{l.text}</span>
+              <span style={{ flex: 1 }}>{emojify(l.text)}</span>
               <select className="input" style={{ maxWidth: '55%' }} value={answer?.pairs?.[l.id] ?? ''}
                 onChange={(e) => setAnswer({ pairs: { ...(answer?.pairs ?? {}), [l.id]: e.target.value } })}>
                 <option value="">{t('quiz.match_pick')}</option>
-                {right.map((r) => <option key={r.id} value={r.id}>{r.text}</option>)}
+                {right.map((r) => <option key={r.id} value={r.id}>{emojify(r.text)}</option>)}
               </select>
             </label>
           ))}

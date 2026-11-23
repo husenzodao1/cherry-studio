@@ -38,6 +38,8 @@ const snapScale = (x: number) => (Number(x) >= 0.95 ? 1 : 0.9)
 const DEFAULTS: Prefs = { locale: 'ru', theme: 'peach', textScale: MIN_TEXT_SCALE, mode: null }
 const VERSION = 3
 const KEY = 'dk.prefs'
+/** letters only Tajik has (a Tajik text, not a Russian one) */
+const TAJIK_LETTERS = /[ҳқҷғӣӯҲҚҶҒӢӮ]/
 const PrefsContext = createContext<PrefsApi | null>(null)
 
 function read(): Prefs {
@@ -107,7 +109,9 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       if (own) return own
       // texts edited in the panel come with the catalogue of the content language (Tajik or Russian)
       // and win over the built-in ones in that language
-      if ((prefs.locale === 'tg' || prefs.locale === 'ru') && cms.strings[key]) return cms.strings[key]
+      // (a text changed only in Tajik comes in the Russian catalogue too, still in Tajik: not shown in Russian)
+      const edited = cms.strings[key]
+      if (edited && (prefs.locale === 'tg' || (prefs.locale === 'ru' && !TAJIK_LETTERS.test(edited)))) return edited
       // Uzbek, Turkish, Persian and Dari cover the main screens; the rest comes in English
       const wide = prefs.locale !== 'tg' && prefs.locale !== 'ru' ? DEFAULT_STRINGS.en[key] : undefined
       return local[key] ?? wide ?? cms.strings[key] ?? DEFAULT_STRINGS.tg[key] ?? key

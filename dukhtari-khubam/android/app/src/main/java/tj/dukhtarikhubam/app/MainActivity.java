@@ -23,6 +23,7 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(GallerySaverPlugin.class);
         registerPlugin(RecentPhotosPlugin.class);
+        registerPlugin(FileOpenerPlugin.class);
         registerPlugin(AppIconPlugin.class);
         registerPlugin(WidgetsPlugin.class);
         registerPlugin(StreakAlarm.StreakPlugin.class);

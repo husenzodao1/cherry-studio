@@ -16,11 +16,15 @@ import { Icon, type IconName } from './Icon'
  */
 
 interface Photo { id: string; thumb: string; name?: string }
-const MODES: { id: AiMode; icon: IconName; key: 'ai.mode_precise' | 'ai.mode_science' | 'ai.mode_friendly' | 'ai.mode_girly' }[] = [
+const MODES: { id: AiMode; icon: IconName; key: `ai.mode_${AiMode}` }[] = [
   { id: 'precise', icon: 'target', key: 'ai.mode_precise' },
   { id: 'science', icon: 'flask', key: 'ai.mode_science' },
   { id: 'friendly', icon: 'smile', key: 'ai.mode_friendly' },
-  { id: 'girly', icon: 'heart', key: 'ai.mode_girly' }
+  { id: 'girly', icon: 'heart', key: 'ai.mode_girly' },
+  // skills: exams, the ММТ (from the staff's books), interesting facts
+  { id: 'exam', icon: 'cap', key: 'ai.mode_exam' },
+  { id: 'mmt', icon: 'book', key: 'ai.mode_mmt' },
+  { id: 'facts', icon: 'sparkle', key: 'ai.mode_facts' }
 ]
 
 /** the app's own gallery reader (android RecentPhotosPlugin.java) */

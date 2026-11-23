@@ -9,6 +9,7 @@ import { LiquidGlass } from '../glass/LiquidGlass'
 import type { SchoolSummary } from '../offline/content'
 import { usePrefs } from '../prefs'
 import { PoemTile } from './PoemTile'
+import { emojify } from './Emoji'
 
 /**
  * School tile in clear, refracting glass with its 3D icon. `count` adds the number of courses
@@ -23,7 +24,7 @@ export function SchoolTile({ school, count = false, long = false }: { school: Sc
       <LiquidGlass radius={24} bezel={count ? 22 : 14} refract={count} className={`tile${count ? ' tile-wide tile-clear' : ''}`}>
         {art ? <img className="tile-art" src={art.src} alt="" aria-hidden="true" decoding="async" /> : <span className="tile-art" />}
         <span className="tile-text">
-          <span className="tile-title">{school.title}</span>
+          <span className="tile-title">{emojify(school.title)}</span>
           {count ? <span className="tile-meta">{t('school.courses_n').replace('{n}', String(school.course_count))}</span> : null}
         </span>
       </LiquidGlass>

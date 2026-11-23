@@ -7,7 +7,7 @@
  */
 import PptxGenJS from 'pptxgenjs'
 
-import { bodyFont, coverShapes, innerColours, innerHeader, innerShapes, lightness, paint, slideStyle, type Shape, type SlideStyle } from '@/lib/slideStyles'
+import { bodyFont, coverShapes, innerColours, innerHeader, innerShapes, lightness, lookStyle, paint, slideStyle, type Shape, type SlideStyle } from '@/lib/slideStyles'
 
 import type { FileSpec } from './build'
 import { parseSlides } from './markdown'
@@ -49,9 +49,10 @@ function cover(pres: PptxGenJS, slide: Slide, st: SlideStyle, title: string, sub
   ], { ...box, y: t.y * U, h: t.h * U, valign: t.valign, fit: 'shrink', lineSpacingMultiple: 1.05 })
 }
 
-export async function makePptx(f: FileSpec & { style?: string }): Promise<Blob> {
+export async function makePptx(f: FileSpec): Promise<Blob> {
   const slides = parseSlides(f.content)
-  const st = slideStyle(f.style)
+  // the look read from her sample picture, else one of the hundred styles
+  const st = f.look ? lookStyle(f.look) : slideStyle(f.style)
   const c = innerColours(st)
   const light = lightness(c.paper) > 0.5
   const soft = light ? 'F3F0FA' : '2A2A3A'

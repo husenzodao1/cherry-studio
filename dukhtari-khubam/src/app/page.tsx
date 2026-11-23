@@ -17,6 +17,7 @@ import { useLearner } from '@/web/offline/learner'
 import { reviewStats } from '@/web/offline/review'
 import { usePrefs } from '@/web/prefs'
 import type { UiKey } from '@/web/i18n'
+import { emojify } from '@/web/components/Emoji'
 
 /** Greeting by the phone's clock: morning, day, evening, night. */
 function greetingKey(h: number): UiKey {
@@ -126,7 +127,7 @@ export default function Home() {
           <img src={ART.book.src} alt="" aria-hidden="true" />
           <span style={{ flex: 1, minWidth: 0 }}>
             <b>{t('home.continue_course')}</b>
-            <span className="sub">{cont.context.course.title} · {cont.title}</span>
+            <span className="sub">{emojify(cont.context.course.title)} · {emojify(cont.title)}</span>
           </span>
           <span className="play-btn play-nudge" aria-hidden="true"><Icon name="play" size={20} fill="currentColor" /></span>
         </Link>

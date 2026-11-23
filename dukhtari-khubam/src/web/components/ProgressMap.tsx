@@ -5,6 +5,7 @@ import Link from 'next/link'
 import type { Leg } from '../offline/journey'
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
+import { emojify } from './Emoji'
 
 /** The drawing's width (it scales to the screen), the step between stops and the sway. */
 const W = 360
@@ -38,7 +39,7 @@ function MapLeg({ leg }: { leg: Leg }) {
     <section className="map-leg">
       <header className="map-head">
         {leg.icon ? <img src={leg.icon.src} alt="" aria-hidden="true" /> : null}
-        <b>{leg.title}</b>
+        <b>{emojify(leg.title)}</b>
         <span className="map-count">{leg.done}/{n}</span>
       </header>
       <div className="map-road" style={{ aspectRatio: `${W} / ${H}` }}>
@@ -65,7 +66,7 @@ function MapLeg({ leg }: { leg: Leg }) {
               {s.grade ? (s.score !== null ? `${Math.round(s.score)}%` : <Icon name="check" size={22} strokeWidth={2.4} />)
                 : s.next ? <Icon name="play" size={20} fill="currentColor" /> : i + 1}
             </span>
-            <span className="map-label">{s.title}</span>
+            <span className="map-label">{emojify(s.title)}</span>
           </Link>
         ))}
         <span className={`map-goal${finished ? ' is-done' : ''}`} style={pct(pts[pts.length - 1])} aria-label={t('map.finish')}>

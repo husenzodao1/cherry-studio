@@ -14,6 +14,7 @@ import { courseProgress, useLearner } from '@/web/offline/learner'
 import { usePhoto } from '@/web/offline/photo'
 import { PhotoSheet } from '@/web/components/PhotoEditor'
 import { isDarkTheme, usePrefs } from '@/web/prefs'
+import { emojify } from '@/web/components/Emoji'
 
 /** Small filled glyphs for the three numbers, drawn white on a coloured orb. */
 function StatGlyph({ kind }: { kind: 'courses' | 'achievements' | 'streak' }) {
@@ -102,7 +103,7 @@ export default function Profile() {
         {/* the studio's signature, large and faint in the background behind the head */}
         <span className="studio-ghost" aria-hidden="true">Gratorslab</span>
         <ProfilePhoto name={learner.name} />
-        <h1 className="h-page" style={{ marginTop: 10 }}>{learner.name}</h1>
+        <h1 className="h-page" style={{ marginTop: 10 }}>{emojify(learner.name)}</h1>
         <span className="tag">{t('profile.tagline')}</span>
       </div>
 
@@ -136,7 +137,7 @@ export default function Profile() {
           <h2 className="h-section">{t('section.progress')}</h2>
           {schools.map((s) => (
             <Link key={s.id} href={`/school?key=${encodeURIComponent(s.slug)}`} className="glass card-pad">
-              <div className="row"><span style={{ flex: 1 }}>{s.title}</span><span className="muted">{s.percent}%</span></div>
+              <div className="row"><span style={{ flex: 1 }}>{emojify(s.title)}</span><span className="muted">{s.percent}%</span></div>
               <div className="progress" style={{ marginTop: 10 }}><span style={{ width: `${s.percent}%` }} /></div>
             </Link>
           ))}
@@ -149,7 +150,7 @@ export default function Profile() {
           {finished.map((c) => (
             <div key={c.id} className="glass list-row">
               <span className="row-icon"><Icon name="trophy" /></span>
-              <span className="row-main"><b>{c.title}</b><span className="row-sub">{c.school}</span></span>
+              <span className="row-main"><b>{emojify(c.title)}</b><span className="row-sub">{c.school}</span></span>
               <CertificateButton course={c.title} school={c.school} date={c.date} className="chip" />
             </div>
           ))}
@@ -165,7 +166,7 @@ export default function Profile() {
               return (
                 <div key={a.id} className="glass stat" style={{ opacity: got ? 1 : 0.55 }}>
                   {a.icon?.url ? <img src={a.icon.url} alt="" width={48} height={48} /> : <span className="stat-icon"><Icon name={got ? 'star' : 'lock'} size={18} /></span>}
-                  <span style={{ fontSize: '0.8rem', color: 'var(--ink)' }}>{a.title}</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--ink)' }}>{emojify(a.title)}</span>
                 </div>
               )
             })}

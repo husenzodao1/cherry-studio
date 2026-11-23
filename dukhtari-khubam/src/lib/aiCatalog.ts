@@ -1,3 +1,4 @@
+import type { SlideLook } from './slideStyles'
 /**
  * What Mahliyo AI can point to (server/mahliyo.ts tells her; MahliyoBlocks.tsx shows it):
  * - SPOTS: places on the app's screens. She shows one as a screenshot of that screen with a pulsing
@@ -69,7 +70,7 @@ export type AiBlock =
   /** a test in the chat: up to ten questions; the app checks the answers and sends her result to Mahliyo */
   /** `answer` −1: a question about herself, with no right answer (a character test); `comment`: the question of the
    *  comment box at its end ("" none), sent with her result */
-  | { type: 'quiz'; title: string; intro: string; questions: { question: string; options: string[]; answer: number; explanation: string }[]; comment?: string }
+  | { type: 'quiz'; title: string; intro: string; questions: { question: string; options: string[]; answer: number; explanation: string }[]; comment?: string; task?: string }
   /** she did not understand: what she asks, and choices to tap (or her own words) */
   | { type: 'clarify'; question: string; options: string[] }
   /** questions to go on with, shown under her answer; a tap asks one */
@@ -82,8 +83,8 @@ export type AiBlock =
   | { type: 'calc'; title: string; inputs: CalcInput[]; outputs: CalcOutput[]; note: string }
   /** a file she made: its name (the extension says what it is: pdf, docx, pptx, or a text file), title, what it
    *  holds, and its content (Markdown for documents and slides, the file itself for text); the app builds it;
-   *  `style`: a presentation's style (slideStyles.ts) */
-  | { type: 'file'; name: string; title: string; about: string; content: string; style?: string }
+   *  `style`: a presentation's style (slideStyles.ts); `look`: the look read from her sample picture */
+  | { type: 'file'; name: string; title: string; about: string; content: string; style?: string; look?: SlideLook }
   /** the card that opens the Premium screen (a free learner asked for a Premium part) */
   | { type: 'premium'; title: string; text: string }
   /** insults or pressure: only this, in red — one of the staff's words, chosen at random */

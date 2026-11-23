@@ -13,6 +13,7 @@ import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
 import { allowNotifications, canNotify, lines, readNotify, writeNotify } from '@/web/offline/notify'
 import { usePrefs } from '@/web/prefs'
+import { emojify } from '@/web/components/Emoji'
 
 const CUSTOM = '\u0000custom'
 const PREPARE_MS = 4600
@@ -182,7 +183,7 @@ export default function Welcome() {
                   <button key={s.id} type="button" aria-pressed={on} className="wl-school" style={{ ['--i' as string]: i }}
                     onClick={() => setSchools(on ? schools.filter((x) => x !== s.slug) : [...schools, s.slug])}>
                     {icon ? <img src={icon} alt="" aria-hidden="true" /> : null}
-                    <span>{s.title}</span>
+                    <span>{emojify(s.title)}</span>
                     <span className="wl-check" aria-hidden="true"><Icon name="check" size={14} strokeWidth={2.4} /></span>
                   </button>
                 )
