@@ -111,7 +111,8 @@ export const usePlan = () => useContext(PlanContext)
 let nudged = false
 /**
  * On a free plan, while the plans are on: the plans' screen once each time the app is opened (on the home
- * screen, a moment after it shows, never over the permissions' question or the sign-in), and after each test.
+ * screen, a moment after it shows, never over the permissions' question, the sign-in or Mahliyo's call), and
+ * after each test.
  */
 export function PlanNudge() {
   const { live, plan, me, open } = usePlan()
@@ -119,7 +120,7 @@ export function PlanNudge() {
   useEffect(() => {
     if (nudged || !live || plan !== 'free' || me?.staff || path !== '/') return
     const timer = setTimeout(function tryNow() {
-      if (document.querySelector('.perm, .night, .lock-screen, #splash:not([hidden])') || document.documentElement.classList.contains('locked')) return void setTimeout(tryNow, 4000)
+      if (document.querySelector('.perm, .night, .lock-screen, .call, #splash:not([hidden])') || document.documentElement.classList.contains('locked')) return void setTimeout(tryNow, 4000)
       nudged = true
       open('open')
     }, 3500)

@@ -393,6 +393,14 @@ test('a slow connection: "sending…" until the question arrived, then she think
   expect(sent.turns[sent.turns.length - 1].content).toBe('Ба ин нигаред, лутфан.')
   expect(sent.files?.map((f) => [f.mime, f.name])).toEqual([['image/jpeg', 'screen.png'], ['text/plain', 'notes.txt']])
   expect(Buffer.from(sent.files![1].data, 'base64').toString('utf8')).toBe('Ёддошти ман')
+  // the sent picture, tapped: the whole picture (kept on the phone) over the screen, closed by a tap
+  const pic = page.locator('.ai-asked').last().locator('.ai-attached-pic')
+  await pic.click()
+  const whole = page.locator('.lightbox img')
+  await expect(whole).toBeVisible()
+  expect(await whole.getAttribute('src')).toMatch(/^blob:/)
+  await page.locator('.lightbox').click()
+  await expect(page.locator('.lightbox')).toHaveCount(0)
   // a type she cannot read
   await page.locator('input[type="file"]').setInputFiles([{ name: 'a.zip', mimeType: 'application/zip', buffer: Buffer.from('PK') }])
   await expect(page.locator('.toast').filter({ hasText: 'Ин навъи файл дастгирӣ намешавад' })).toBeVisible()

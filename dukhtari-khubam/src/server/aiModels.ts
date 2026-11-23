@@ -76,7 +76,18 @@ export async function bookPassages(sb: SupabaseClient, question: string, limit =
   }
 }
 
-/** whether the staff gave her any books (the app then says, when an answer takes a while, that she searches them) */
+/**
+ * Whether she will look into the books for this question (the app then says, when her answer takes a while,
+ * that she searches them): a real question — not a greeting or a word or two — that the books have
+ * something on.
+ */
+export async function searchesBooks(sb: SupabaseClient, question: string): Promise<boolean> {
+  const words = question.trim().split(/\s+/).filter((w) => /[\p{L}\p{N}]{2,}/u.test(w))
+  if (words.length < 3 || !(await hasBooks(sb))) return false
+  return (await bookPassages(sb, question, 1)).length > 0
+}
+
+/** whether the staff gave her any books */
 let booksCount: { at: number; n: number } | null = null
 export async function hasBooks(sb: SupabaseClient): Promise<boolean> {
   if (booksCount && Date.now() - booksCount.at < 60_000) return booksCount.n > 0

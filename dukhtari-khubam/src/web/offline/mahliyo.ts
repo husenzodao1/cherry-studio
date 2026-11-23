@@ -396,8 +396,8 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
   if (!q || state.pending) return
   if (offline()) return set({ problem: 'offline', online: false })
   lastFiles = files
-  // documents (not pictures) are kept on the phone, to open them again from the chat
-  const views = await Promise.all(files.map(async ({ mime, name, thumb, data }) => ({ mime, name, thumb, ...(thumb ? {} : { key: await keepFile({ mime, name, data }) }) })))
+  // what she sent is kept on the phone, to open it again from the chat (a picture whole, a document as it is)
+  const views = await Promise.all(files.map(async ({ mime, name, thumb, data }) => ({ mime, name, thumb, key: await keepFile({ mime, name, data }) })))
   const turns: AiTurn[] = [...(editFrom === undefined ? state.turns : state.turns.slice(0, editFrom)),
     { role: 'user', content: q, at: new Date().toISOString(), ...(views.length ? { files: views } : {}), ...(who.account ? { account: who.account } : {}), ...(who.mode === 'girly' ? { girly: true } : {}) }]
   const my = ++run
@@ -660,7 +660,8 @@ export const MAX_FILES = 3
 /** what may be sent: pictures (made smaller, as JPEG), PDF and text files up to 3 MB */
 const FILE_BYTES = 3 * 1024 * 1024
 const PICTURE_SIDE = 1600
-const THUMB_SIDE = 180
+/** sharp on the phone's screen (a square of 92 points, three pixels to a point) */
+const THUMB_SIDE = 360
 /** all of a question's files together (base64), under the server's request limit */
 export const FILES_CAP = 4_200_000
 

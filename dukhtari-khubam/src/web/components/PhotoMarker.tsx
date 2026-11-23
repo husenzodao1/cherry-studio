@@ -16,7 +16,7 @@ import { Icon } from './Icon'
 type Stroke = { x: number; y: number }[]
 const RED = '#ff2d2d'
 /** the small copy's longest side, as when the picture was chosen */
-const THUMB_SIDE = 180
+const THUMB_SIDE = 360
 
 export function PhotoMarker({ file, onDone, onClose }: { file: AiUpload; onDone: (f: AiUpload) => void; onClose: () => void }) {
   const { t } = usePrefs()

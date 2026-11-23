@@ -48,11 +48,23 @@ const logged = <T>(what: string) => async (p: Promise<T>): Promise<T | null> => 
 /** The catalogue for girls or for boys (their own schools, and so their own courses and lessons). */
 export type Audience = 'girls' | 'boys'
 
+/**
+ * The panel's texts in this language only: the database fills a language's catalogue with the Tajik texts it
+ * lacks, and those would win over the app's own words in that language. (Edited only in Tajik: shown only in Tajik.)
+ */
+export async function uiOf(sb: SupabaseClient, locale: string): Promise<Json> {
+  const ui = await call<Json>(sb, 'api_ui_bundle', { p_locale: locale })
+  if (locale === 'tg' || !ui?.strings) return ui
+  const tg = await call<Json>(sb, 'api_ui_bundle', { p_locale: 'tg' })
+  const strings = Object.fromEntries(Object.entries(ui.strings as Record<string, string>).filter(([k, v]) => tg?.strings?.[k] !== v))
+  return { ...ui, strings }
+}
+
 export async function buildBundle(sb: SupabaseClient, locale: string, audience: Audience = 'girls') {
   const L = { p_locale: locale }
   const [schools, ui, inspiration, inspirations, achievements, poems, stories] = await Promise.all([
     call<Json[]>(sb, 'api_schools', { ...L, p_audience: audience }),
-    call<Json>(sb, 'api_ui_bundle', L),
+    uiOf(sb, locale),
     optional(call<Json | null>(sb, 'api_inspiration', L)),
     optional(call<Json[]>(sb, 'api_inspirations', L)),
     optional(call<Json[]>(sb, 'api_achievements', L)),

@@ -59,3 +59,17 @@ export const pendingHelp = (thread: SupportThread | null): SupportMessage[] =>
 export function markDone(id: string) {
   try { localStorage.setItem(DONE_KEY, JSON.stringify([...doneIds(), id].slice(-100))) } catch { /* carried out again next time: harmless */ }
 }
+
+/**
+ * Her messages not yet on the server, kept on the phone in the order she wrote them: `sending` on its way,
+ * `waiting` for the internet (sent by itself once it is back), `failed` the server did not take it (sent
+ * again when she taps it). Gone from here once the server has it.
+ */
+export interface OutMessage { id: string; body: string; at: string; state: 'sending' | 'waiting' | 'failed' }
+const OUT_KEY = 'dk.support.out'
+export function outbox(): OutMessage[] {
+  try { return JSON.parse(localStorage.getItem(OUT_KEY) || '[]') as OutMessage[] } catch { return [] }
+}
+export function saveOutbox(list: OutMessage[]) {
+  try { localStorage.setItem(OUT_KEY, JSON.stringify(list)) } catch { /* kept in memory only */ }
+}

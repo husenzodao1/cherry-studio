@@ -3,7 +3,7 @@ import { expect, signedIn, test } from './fixtures'
 const at = new Date().toISOString()
 const json = (body: unknown) => ({ contentType: 'application/json', body: JSON.stringify(body) })
 
-test('support: a consultant joins (her name in a fair hand); leaving a closed conversation asks to rate her, once', async ({ page, server: _, errors }) => {
+test('support: a consultant joins (without her name); leaving a closed conversation asks to rate her, once', async ({ page, server: _, errors }) => {
   await signedIn(page)
   await page.addInitScript(() => localStorage.setItem('dk.support', 'a'.repeat(64)))
   const rated: unknown[] = []
@@ -18,8 +18,10 @@ test('support: a consultant joins (her name in a fair hand); leaving a closed co
   await page.goto('/support')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   const joined = page.locator('.chat-joined')
-  await expect(joined).toContainText('Мушовир «Руслан Ҳусейнзода» бо шумо пайваст шуд, ҷавобро интизор бошед.')
-  expect(await joined.locator('.chat-joined-name').evaluate((e) => getComputedStyle(e).fontFamily)).not.toBe(await page.locator('body').evaluate((e) => getComputedStyle(e).fontFamily))
+  await expect(joined).toHaveText('Мушовир бо шумо пайваст шуд, ҷавобро интизор бошед.')
+  await expect(joined).not.toContainText('Руслан')
+  // her message on the server: sent
+  await expect(page.locator('.bubble').first().locator('.msg-state.is-sent')).toBeVisible()
   await expect(page.locator('.bubble-bot img')).toHaveAttribute('src', '/assets/mascot/salom.webp')
   // the consultant closes it: leaving now asks for a rating
   closed = true
@@ -104,5 +106,44 @@ test('progress map: a begun course is a road; finished lessons green, yellow or 
   await page.screenshot({ path: 'test-results/progress-map.png', fullPage: true })
   await page.locator('.map-stop.is-next').click()
   await expect(page).toHaveURL(/\/lesson\?id=l4$/)
+  expect(errors).toEqual([])
+})
+
+test('support: each message says where it is — on its way, waiting for the internet (sent by itself), sent, or not sent (tap: again)', async ({ page, context, server: _, errors }) => {
+  await signedIn(page)
+  await page.addInitScript(() => localStorage.setItem('dk.support', 'b'.repeat(64)))
+  const got: string[] = []
+  let refuse = false
+  const thread = () => ({ id: 't2', status: 'open', needs_rating: false, messages: got.map((body, i) => ({ id: `m${i}`, from_staff: false, kind: 'text', body, at })) })
+  await page.route('**/api/v1/support/thread', (r) => r.fulfill(json({ thread: got.length ? thread() : null })))
+  await page.route('**/api/v1/support/send', (r) => {
+    if (refuse) return r.fulfill({ status: 500, contentType: 'application/json', body: '{}' })
+    got.push((r.request().postDataJSON() as { body: string }).body)
+    return r.fulfill(json(thread()))
+  })
+  await page.goto('/support')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const box = page.getByPlaceholder('Паём…')
+  const send = page.getByRole('button', { name: 'Фиристодан' })
+  // without the internet: the button still works, the message waits and goes by itself
+  await context.setOffline(true)
+  await box.fill('Салом, ёрӣ лозим')
+  await send.click()
+  await expect(page.locator('.bubble-out.is-waiting')).toContainText('Салом, ёрӣ лозим')
+  await expect(page.locator('.bubble-out .msg-state')).toContainText('Интернет пайдо шавад, худаш фиристода мешавад')
+  await context.setOffline(false)
+  await expect.poll(() => got).toEqual(['Салом, ёрӣ лозим'])
+  await expect(page.locator('.bubble-out')).toHaveCount(0)
+  await expect(page.locator('.bubble .msg-state.is-sent').last()).toContainText('Фиристода шуд')
+  // the server says no: not sent; tapped, it goes again
+  refuse = true
+  await box.fill('Паёми дуюм')
+  await send.click()
+  const failed = page.locator('.bubble-out.is-failed')
+  await expect(failed).toContainText('Фиристода нашуд')
+  refuse = false
+  await failed.getByRole('button').click()
+  await expect.poll(() => got).toEqual(['Салом, ёрӣ лозим', 'Паёми дуюм'])
+  await expect(page.locator('.bubble-out')).toHaveCount(0)
   expect(errors).toEqual([])
 })

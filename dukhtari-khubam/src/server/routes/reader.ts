@@ -7,6 +7,7 @@ import { Answers, AnswerValue, LocaleQuery, Uuid } from '@/lib/schemas'
 import { unwrap } from '@/lib/supabase'
 
 import { call, withMediaUrls } from '../util'
+import { uiOf } from './offline'
 
 const idParam = (value: string, name = 'id') => {
   const parsed = Uuid.safeParse(value)
@@ -25,7 +26,7 @@ export const readerRoutes: AnyRoute[] = [
   route({
     method: 'GET', path: '/ui', access: 'public', tag: 'Catalog', summary: 'CMS-managed UI strings and help texts (the “!” popovers)',
     query: LocaleQuery, cache: 60,
-    handler: async ({ sb, query }) => call(sb(), 'api_ui_bundle', { p_locale: query.locale })
+    handler: async ({ sb, query }) => uiOf(sb(), query.locale)
   }),
   route({
     method: 'GET', path: '/schools', access: 'public', tag: 'Catalog', summary: 'The seven schools in CMS order',

@@ -18,6 +18,9 @@ describe('the catalogue in every language', () => {
   it('finds the words for people (not ids, links, kinds or the interface strings); Russian only where Tajik was left', () => {
     expect([...stringsOf(bundle, 'en')].sort()).toEqual(['Масҷид', 'Маърифати динӣ', 'Намоз', 'Намоз сутуни дин аст.'].sort())
     expect([...stringsOf({ a: { title: 'Молитва' }, b: { title: 'Намози субҳ' } }, 'ru')]).toEqual(['Намози субҳ'])
+    // Tajik without letters of its own is Tajik too; Russian is left as it is
+    expect([...stringsOf({ a: 'Рушди шахсият', b: 'Массовая доля', c: 'Воспитание и этика', d: 'Зебоии аслии шумо дар дасти мост!' }, 'ru')])
+      .toEqual(['Рушди шахсият', 'Зебоии аслии шумо дар дасти мост!'])
     const out = replaced(bundle, new Map([['Намоз', 'Prayer'], ['Масҷид', 'Mosque']]))
     expect(out.lessons.l1.title).toBe('Prayer')
     expect(out.lessons.l1.blocks[1].content).toEqual({ url: 'https://x/y.png', caption: 'Mosque' })

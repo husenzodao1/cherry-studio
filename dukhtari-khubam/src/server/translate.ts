@@ -26,8 +26,16 @@ const SKIP = new Set(['id', 'url', 'href', 'src', 'asset_id', 'mime_type', 'buck
   'at', 'schema_version', 'status', 'tier', 'icon', 'color', 'version', 'generated_at', 'created_at', 'updated_at', 'published_at', 'starts_at', 'ends_at',
   'lang', 'language', 'code', 'key', 'side', 'show_explanations', 'show_correct_answers', 'placement', 'ui', 'media', 'thumb', 'poster', 'provider', 'role'])
 
-/** what is to be translated: Tajik words (for Russian, only texts still left in Tajik) */
-const wants = (text: string, locale: MtLocale) => (locale === 'ru' ? /[ӣӯқҳҷғ]/i.test(text) : /[а-яёӣӯқҳҷғ]/i.test(text))
+/**
+ * what is to be translated: Tajik words. For Russian, only texts still left in Tajik: with a letter of Tajik's
+ * own, or two Cyrillic words and more with nothing of Russian's own (ы ь ъ щ, endings like -ие -ая -ого) — «Рушди шахсият» has no
+ * ӣ ӯ қ ҳ ҷ ғ, yet is Tajik (a Russian text taken for Tajik only comes back the same).
+ */
+/** Russian's own letters, or its usual word endings */
+const RUSSIAN = /[ыьъщ]|[а-яё](ие|ия|ая|ое|ий|ые|ого|ому)(?![а-яё])/i
+export const wants = (text: string, locale: MtLocale) => (locale === 'ru'
+  ? /[ӣӯқҳҷғ]/i.test(text) || (/[а-яё]{2,}[\s,-]+[а-яё]{2,}/i.test(text) && !RUSSIAN.test(text))
+  : /[а-яёӣӯқҳҷғ]/i.test(text))
 export const hashOf = (text: string) => createHash('sha256').update(text).digest('hex').slice(0, 32)
 
 type Json = unknown

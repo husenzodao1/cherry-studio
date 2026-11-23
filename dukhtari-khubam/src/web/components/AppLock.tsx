@@ -146,6 +146,8 @@ export function AppLock() {
   const path = usePathname() ?? '/'
   const [locked, setLocked] = useState(false)
   const [stage, setStage] = useState<Stage>('pin')
+  /** "Don't remember the answers either?": two ways open under it — a code by e-mail, or support */
+  const [ways, setWays] = useState(false)
   const [hint, setHint] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
   const [password, setPassword] = useState('')
@@ -219,8 +221,6 @@ export function AppLock() {
     setStage('pin')
     router.push(`/support?help=${help}`)
   }
-  /** "Don't remember the answers either?": the code by e-mail when she has one, else support. */
-  const noAnswers = () => (email ? forgot() : toSupport('answers'))
   /** "Forgot it?": the life questions first when she chose them; otherwise straight to the e-mail way. */
   const forgotAsk = () => {
     setHint(null)
@@ -284,8 +284,19 @@ export function AppLock() {
         )}
         <div className="pin-foot recovery-foot">
           {stage === 'questions' ? <button type="button" className="link-btn" onClick={() => setStage('pin')}>{t('pin.cancel')}</button> : null}
-          {/* the other way, small, below the questions: a code sent to her e-mail (or support, without one) */}
-          {stage === 'questions' ? <button type="button" className="link-btn pin-small" onClick={noAnswers}>{t('pin.no_answers')}</button> : null}
+          {/* the other ways, small, below the questions: a code sent to her e-mail, or the support chat */}
+          {stage === 'questions' ? <button type="button" className="link-btn pin-small" aria-expanded={ways} onClick={() => setWays((w) => !w)}>{t('pin.no_answers')}</button> : null}
+          {stage === 'questions' && ways ? (
+            <div className="pin-ways">
+              <button type="button" className="btn btn-soft" disabled={!email} onClick={() => void forgot()}>
+                <Icon name="mail" size={17} /> {t('pin.via_email')}
+              </button>
+              <button type="button" className="btn btn-soft" onClick={() => toSupport('answers')}>
+                <Icon name="speech" size={17} /> {t('pin.via_support')}
+              </button>
+              {!email ? <span className="row-sub">{t('pin.via_email_none')}</span> : null}
+            </div>
+          ) : null}
         </div>
       </div>,
       document.body
@@ -316,9 +327,6 @@ export function AppLock() {
           <span className="row-sub">{t('pin.too_many_sub')}</span>
           <button type="button" className="btn btn-block" onClick={forgotAsk}>{t('pin.reset')}</button>
         </div>
-      ) : email ? (
-        // the PIN off (or a new one) with a code sent to her e-mail: always in sight, small
-        <button type="button" className="link-btn pin-small pin-by-email" onClick={() => void forgot()}>{t('pin.remove_by_email')}</button>
       ) : null}
     </PinPad>
   )

@@ -1005,17 +1005,34 @@ function SelectText({ text, onClose }: { text: string; onClose: () => void }) {
 function Attached({ files }: { files: AiFileView[] }) {
   const { t } = usePrefs()
   const [doc, setDoc] = useState<DocSource | null>(null)
+  const [pic, setPic] = useState<{ url: string; name: string } | null>(null)
+  useEffect(() => (pic ? onBack(() => setPic(null)) : undefined), [pic])
+  // the whole picture's address is let go when it closes
+  useEffect(() => () => { if (pic?.url.startsWith('blob:')) URL.revokeObjectURL(pic.url) }, [pic])
   const open = async (f: AiFileView) => {
     const blob = f.key ? await keptFile(f.key) : null
+    // a picture: whole, over the screen (sent before it was kept: its small copy)
+    if (f.thumb) return setPic({ url: blob ? URL.createObjectURL(blob) : f.thumb, name: f.name })
     if (!blob) return showToast(t('doc.not_kept'), 'info')
     setDoc({ name: f.name, file: async () => blob, kind: f.mime === 'application/pdf' ? 'pdf' : 'text' })
   }
   return (
     <div className="ai-attached">
-      {files.map((f, i) => (f.thumb ? <img key={i} src={f.thumb} alt={f.name} /> : (
+      {files.map((f, i) => (f.thumb ? (
+        <button key={i} type="button" className="ai-attached-pic" aria-label={`${t('image.open')}: ${f.name}`} onClick={() => void open(f)}>
+          <img src={f.thumb} alt={f.name} decoding="async" />
+        </button>
+      ) : (
         <button key={i} type="button" className="ai-file-doc" onClick={() => void open(f)}><Icon name="file" size={16} /><span>{f.name}</span></button>
       )))}
       {doc ? <DocViewer doc={doc} onClose={() => setDoc(null)} /> : null}
+      {pic ? createPortal(
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label={pic.name} onClick={() => setPic(null)}>
+          <img src={pic.url} alt={pic.name} />
+          <button type="button" className="lightbox-x" aria-label={t('action.close')}><Icon name="x" size={20} /></button>
+        </div>,
+        document.body
+      ) : null}
     </div>
   )
 }

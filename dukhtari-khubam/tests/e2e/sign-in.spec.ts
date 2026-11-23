@@ -173,7 +173,7 @@ test('PIN recovery by e-mail: the six code boxes keep their size (they used to s
   expect(errors).toEqual([])
 })
 
-test('PIN pad: "Фаромӯш кардед?" opens the life questions; "Ҷавобҳоро низ дар хотир надоред?" the e-mail code; "Ба почта низ дастрасӣ нест?" support', async ({ page, server: _, errors }) => {
+test('PIN pad: "Фаромӯш кардед?" opens the life questions; "Ҷавобҳоро низ дар хотир надоред?" two ways, the e-mail code or support; "Ба почта низ дастрасӣ нест?" support', async ({ page, server: _, errors }) => {
   const sent: string[] = []
   const thread = (body: string) => ({ id: 't1', status: 'open', needs_rating: false, messages: [
     { id: 'm1', from_staff: false, kind: 'text', body, at: new Date().toISOString() },
@@ -195,10 +195,15 @@ test('PIN pad: "Фаромӯш кардед?" opens the life questions; "Ҷав�
   await expect(page.getByRole('button', { name: 'Тасдиқ бо почта' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Фаромӯш кардед?' }).click()
   await expect(page.getByRole('heading', { name: 'Саволҳои ҳаётӣ' })).toBeVisible()
-  // the e-mail way: small, below the questions
+  // nothing about the e-mail under the pad any more
+  await expect(page.locator('.pin-by-email')).toHaveCount(0)
+  // the other ways: small, below the questions — two of them open under it
   const small = page.locator('.recovery-foot .pin-small')
   await expect(small).toHaveText('Ҷавобҳоро низ дар хотир надоред?')
   await small.click()
+  const ways = page.locator('.pin-ways')
+  await expect(ways.getByRole('button', { name: 'Тавассути дастгирӣ' })).toBeVisible()
+  await ways.getByRole('button', { name: 'Бо почтаи электронӣ' }).click()
   await expect(page.getByRole('heading', { name: 'Тасдиқ бо почтаи электронӣ' })).toBeVisible()
   await expect(page.locator('.recovery .otp-boxes span')).toHaveCount(6)
   // no access to the e-mail either: support opens with her request already sent, and Mahliyo answers
@@ -217,14 +222,14 @@ test('PIN pad: "Фаромӯш кардед?" opens the life questions; "Ҷав�
   expect(errors).toEqual([])
 })
 
-test('PIN pad: "Нест кардан бо тасдиқи почта" in sight for an account signed in with Google too; it opens the e-mail code', async ({ page, server: _, errors }) => {
+test('PIN pad: no e-mail link under the pad; "Фаромӯш кардед?" opens the e-mail code for an account signed in with Google too', async ({ page, server: _, errors }) => {
   // signed in with Google: her address is her Google account's
   await signedIn(page, { email: null, google: 'malika@gmail.com' })
   await page.addInitScript(() => localStorage.setItem('dk.pin', JSON.stringify({ salt: '00', hash: 'x', fails: 0, until: 0 })))
   await page.goto('/')
-  const byEmail = page.getByRole('button', { name: 'Нест кардан бо тасдиқи почта' })
-  await expect(byEmail).toBeVisible()
-  await byEmail.click()
+  await expect(page.getByRole('button', { name: 'Фаромӯш кардед?' })).toBeVisible()
+  await expect(page.locator('.pin-by-email')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Фаромӯш кардед?' }).click()
   await expect(page.locator('.recovery .otp-boxes span')).toHaveCount(6)
   await expect(page.locator('.pin-screen')).toContainText('malika@gmail.com')
   expect(errors).toEqual([])

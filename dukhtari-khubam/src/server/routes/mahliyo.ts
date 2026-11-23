@@ -7,7 +7,7 @@ import { ApiError } from '@/lib/http'
 import { route, type AnyRoute } from '@/lib/router'
 
 import { answer, ATTACHMENT_MIMES, premiumLive, setPlansLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type RedReply, type Turn } from '../mahliyo'
-import { activeModel, bookPassages, forgetActive, hasBooks, sealKey, serverReady } from '../aiModels'
+import { activeModel, bookPassages, forgetActive, searchesBooks, sealKey, serverReady } from '../aiModels'
 import { makeSong } from '../music'
 import { limitReached, MODE_LIMIT, planOf, planSettings, use, whoOf, withinPlan, type PlanCtx } from '../plans'
 import { call } from '../util'
@@ -181,8 +181,8 @@ export const mahliyoRoutes: AnyRoute[] = [
       if (body.background) {
         const client = sb()
         after(() => answerInto(client, id, turns, me, files, { ...ctx, sb: client }))
-        // the staff gave her books: when her answer takes a while, the app says she searches them
-        return { id, books: (premium || !premiumLive()) && await hasBooks(client) }
+        // her books have something on this question: when her answer takes a while, the app says she searches them
+        return { id, books: (premium || !premiumLive()) && await searchesBooks(client, question) }
       }
       const [k, extra] = await Promise.all([knowledge(sb()), extraFor(sb(), turns, premium)])
       let a

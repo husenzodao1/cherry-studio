@@ -40,6 +40,9 @@ export const test = base.extend<{ server: Server; errors: string[] }>({
     await page.route('**/api/v1/mahliyo/status', (r) => r.fulfill(json({ ready: false })))
     // not a consultant (tests that need one say so)
     await page.route('**/api/v1/consultant', (r) => r.fulfill(json({ consultant: false })))
+    // the plans are off unless a test turns them on (its own route wins)
+    await page.route('**/api/v1/plans', (r) => r.fulfill(json({ live: false })))
+    await page.route('**/api/v1/me/plan', (r) => r.fulfill(json({ plan: 'free' })))
     await page.route('**/auth/v1/otp**', (r) => r.fulfill(json({})))
     await page.route('**/auth/v1/verify**', (r) => {
       const token = (r.request().postDataJSON() as { token?: string }).token ?? ''

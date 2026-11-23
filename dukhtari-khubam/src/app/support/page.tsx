@@ -9,12 +9,13 @@ import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { useLearner } from '@/web/offline/learner'
 import { clearPin, setPin } from '@/web/offline/pin'
-import { loadThread, markDone, pendingHelp, rateThread, sendMessage, supportToken, type SupportMessage, type SupportThread } from '@/web/offline/support'
+import { loadThread, markDone, outbox, pendingHelp, rateThread, saveOutbox, sendMessage, supportToken, type OutMessage, type SupportMessage, type SupportThread } from '@/web/offline/support'
 import { usePrefs } from '@/web/prefs'
 
 /** Why she came from the PIN screen: no e-mail access, or neither the answers nor an e-mail. */
 type Help = 'email' | 'answers'
 const SENT = 'dk.help-sent'
+const isOffline = () => navigator.onLine === false
 
 /** "Баҳодиҳии мушовир": five stars and a note, after a conversation the consultant has closed. */
 function RateConsultant({ onDone }: { onDone: (rating?: number, note?: string) => Promise<void> | void }) {
@@ -48,7 +49,9 @@ function RateConsultant({ onDone }: { onDone: (rating?: number, note?: string) =
 /**
  * Small support chat: the learner writes, consultants answer in the panel; works without an account.
  * While no consultant is there, Mahliyo answers at once that they will write soon; when a consultant
- * opens the conversation, "Мушовир «…» бо шумо пайваст шуд" appears at its bottom in a fair hand. Coming
+ * opens the conversation, "Мушовир бо шумо пайваст шуд" appears at its bottom in a fair hand. Each of her
+ * messages says where it is: on its way, sent, waiting for the internet (it goes by itself), or not sent
+ * (tap to send it again); written without the internet, it is kept and sent once it is back. Coming
  * from the PIN screen (?help=email|answers) her request is written and sent for her. When a consultant
  * has closed the conversation, leaving it asks her to rate the consultant, once.
  */
@@ -60,7 +63,7 @@ export default function SupportPage() {
   const [text, setText] = useState('')
   const [name, setName] = useState('')
   const [username, setUsername] = useState('')
-  const [state, setState] = useState<'idle' | 'sending' | 'offline' | 'error'>('idle')
+  const [out, setOut] = useState<OutMessage[]>([])
   const [rating, setRating] = useState(false)
   const [help, setHelp] = useState<Help | null>(null)
   const end = useRef<HTMLDivElement>(null)
@@ -83,7 +86,7 @@ export default function SupportPage() {
   }, [refresh])
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'end' })
-  }, [thread?.messages.length])
+  }, [thread?.messages.length, out.length])
   // the consultant's help, carried out here at once: a new PIN, the PIN off, the account's new e-mail
   useEffect(() => {
     for (const m of pendingHelp(thread)) {
@@ -96,22 +99,57 @@ export default function SupportPage() {
     }
   }, [thread, confirmEmail])
 
-  const post = useCallback(async (body: string) => {
-    if (navigator.onLine === false) return setState('offline')
-    setState('sending')
+  // her messages not on the server yet: shown at once, each with its state, sent in the order written
+  const outRef = useRef<OutMessage[]>([])
+  const putOut = useCallback((list: OutMessage[]) => { outRef.current = list; saveOutbox(list); setOut(list) }, [])
+  const flushing = useRef(false)
+  const flush = useCallback(async () => {
+    if (flushing.current) return
+    flushing.current = true
     try {
-      const token = supportToken()!
-      setThread(await sendMessage(token, body, {
-        name: learner?.name ?? (name.trim() || undefined), username: learner?.username ?? (username.trim() || undefined),
-        // the account she writes for, so the consultant can help with it (change its e-mail)
-        email: learner?.email ?? learner?.google ?? undefined
-      }))
-      setText('')
-      setState('idle')
-    } catch {
-      setState('error')
+      for (;;) {
+        const next = outRef.current.find((m) => m.state !== 'failed')
+        if (!next) break
+        if (isOffline()) { putOut(outRef.current.map((m) => (m.state === 'sending' ? { ...m, state: 'waiting' as const } : m))); break }
+        putOut(outRef.current.map((m) => (m.id === next.id ? { ...m, state: 'sending' as const } : m)))
+        try {
+          const token = supportToken()!
+          const sent = await sendMessage(token, next.body, {
+            name: learner?.name ?? (name.trim() || undefined), username: learner?.username ?? (username.trim() || undefined),
+            // the account she writes for, so the consultant can help with it (change its e-mail)
+            email: learner?.email ?? learner?.google ?? undefined
+          })
+          setThread(sent)
+          putOut(outRef.current.filter((m) => m.id !== next.id))
+        } catch {
+          // no connection after all: it waits; the server said no: not sent, she can send it again
+          const state = isOffline() ? 'waiting' as const : 'failed' as const
+          putOut(outRef.current.map((m) => (m.id === next.id ? { ...m, state } : m)))
+          if (state === 'waiting') break
+        }
+      }
+    } finally {
+      flushing.current = false
     }
-  }, [learner, name, username])
+  }, [learner, name, username, putOut])
+  const post = useCallback((body: string) => {
+    const m: OutMessage = { id: `out-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, body, at: new Date().toISOString(), state: navigator.onLine === false ? 'waiting' : 'sending' }
+    putOut([...outRef.current, m])
+    setText('')
+    void flush()
+  }, [flush, putOut])
+  const retry = (id: string) => {
+    putOut(outRef.current.map((m) => (m.id === id ? { ...m, state: 'sending' as const } : m)))
+    void flush()
+  }
+  // what was left unsent: shown again, and sent once the internet is there
+  useEffect(() => {
+    putOut(outbox())
+    void flush()
+    const online = () => void flush()
+    window.addEventListener('online', online)
+    return () => window.removeEventListener('online', online)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // from the PIN screen: her request goes at once (once, even if the page is opened again)
   useEffect(() => {
@@ -162,18 +200,12 @@ export default function SupportPage() {
   }
 
   const when = (m: SupportMessage) => `${formatDay(m.at, locale)} · ${new Date(m.at).toLocaleTimeString(locale === 'tg' ? 'ru' : locale, { hour: '2-digit', minute: '2-digit' })}`
-  const joined = (m: SupportMessage) => {
-    const [before, after] = t('support.joined').split('{name}')
-    return (
-      <div key={m.id} className="chat-joined" role="status">
-        {/* the name with its quotes kept together on one line */}
-        <span>{before.replace(/[«"“]$/, '')}</span>
-        <span className="chat-joined-who">{before.match(/[«"“]$/)?.[0]}<b className="chat-joined-name">{m.body}</b>{after.match(/^[»"”]/)?.[0]}</span>
-        <span>{after.replace(/^[»"”]/, '')}</span>
-      </div>
-    )
-  }
-  const first = !thread?.messages.length
+  // "a consultant has joined" — without her name (a panel text with «{name}» loses it)
+  const joined = (m: SupportMessage) => (
+    <div key={m.id} className="chat-joined" role="status"><span>{t('support.joined').replace(/\s*[«"“]?\{name\}[»"”]?/, '')}</span></div>
+  )
+  const first = !thread?.messages.length && !out.length
+  const mineLast = [...(thread?.messages ?? [])].reverse().find((m) => !m.from_staff && m.kind === 'text')?.id
   return (
     <>
       <Header onBack={leave} title={t('support.title')} />
@@ -193,7 +225,21 @@ export default function SupportPage() {
               : m.action === 'unlock' ? <span>{t('support.help_unlock')}</span>
               : m.action === 'email' ? <span>{t('support.help_new_email').replace('{email}', m.body)}</span>
               : <span style={{ whiteSpace: 'pre-wrap' }}>{m.body}</span>}
-            <time>{when(m)}</time>
+            <time>{when(m)}{!m.from_staff ? <span className="msg-state is-sent" aria-label={t('support.msg_sent')}><Icon name="check" size={13} />{m.id === mineLast && !out.length ? ` ${t('support.msg_sent')}` : ''}</span> : null}</time>
+          </div>
+        ))}
+        {out.map((m) => (
+          <div key={m.id} className={`bubble bubble-out is-${m.state}`}>
+            <span style={{ whiteSpace: 'pre-wrap' }}>{m.body}</span>
+            {m.state === 'failed' ? (
+              <button type="button" className="msg-state is-failed" onClick={() => retry(m.id)}>
+                <Icon name="alert" size={13} /> {t('support.msg_failed')} · <u>{t('support.msg_retry')}</u>
+              </button>
+            ) : (
+              <span className={`msg-state is-${m.state}`} role="status">
+                <Icon name={m.state === 'waiting' ? 'globe' : 'refresh'} size={13} /> {t(m.state === 'waiting' ? 'support.msg_waiting' : 'support.msg_sending')}
+              </span>
+            )}
           </div>
         ))}
         {thread?.status === 'closed' ? <p className="muted" style={{ textAlign: 'center', fontSize: '0.85em' }}>{t('support.closed')}</p> : null}
@@ -210,9 +256,8 @@ export default function SupportPage() {
           <textarea className="input" rows={1} placeholder={t('support.placeholder')} value={text} maxLength={2000}
             onChange={(e) => setText(e.target.value)} style={{ minHeight: 52, resize: 'none' }} />
           <button className="play-btn" style={{ border: 0, cursor: 'pointer', width: 52, height: 52 }} aria-label={t('support.send')}
-            disabled={state === 'sending' || !text.trim()}><Icon name="arrow" size={20} /></button>
+            disabled={!text.trim()}><Icon name="arrow" size={20} /></button>
         </div>
-        {state === 'offline' || state === 'error' ? <span className="muted" role="status" style={{ fontSize: '0.85em' }}>{t(state === 'offline' ? 'support.offline' : 'state.error')}</span> : null}
       </form>
       {rating ? <RateConsultant onDone={rated} /> : null}
     </>
