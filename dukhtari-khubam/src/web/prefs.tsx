@@ -3,16 +3,22 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import { DEFAULT_STRINGS, isRtl, LOCALES, type Locale, type UiKey } from './i18n'
+import { BOY_STRINGS } from './locales/boy'
 
 /** Peach (the default), white, dark and three more colour themes; "dusk" is a dark one. */
 export const THEMES = ['peach', 'light', 'dark', 'sakura', 'mint', 'dusk'] as const
 export type Theme = (typeof THEMES)[number]
 export const isDarkTheme = (t: Theme) => t === 'dark' || t === 'dusk'
 
+/** whom the app is for on this phone: a girl or a boy (null: not chosen yet) */
+export type Mode = 'girl' | 'boy'
+
 export interface Prefs {
   locale: Locale
   theme: Theme
   textScale: number
+  /** girls' or boys' mode: their schools, look and words (chosen at sign-up, changed in the settings) */
+  mode: Mode | null
 }
 
 interface PrefsApi extends Prefs {
@@ -29,7 +35,7 @@ export const MIN_TEXT_SCALE = 0.9
 export const TEXT_SIZES = [{ key: 'small', scale: 0.9 }, { key: 'medium', scale: 1 }] as const
 const snapScale = (x: number) => (Number(x) >= 0.95 ? 1 : 0.9)
 // a new phone starts in Russian; Tajik and the other languages are one tap away (sign-in screen, settings)
-const DEFAULTS: Prefs = { locale: 'ru', theme: 'peach', textScale: MIN_TEXT_SCALE }
+const DEFAULTS: Prefs = { locale: 'ru', theme: 'peach', textScale: MIN_TEXT_SCALE, mode: null }
 const VERSION = 3
 const KEY = 'dk.prefs'
 const PrefsContext = createContext<PrefsApi | null>(null)
@@ -37,7 +43,7 @@ const PrefsContext = createContext<PrefsApi | null>(null)
 function read(): Prefs {
   try {
     const stored = JSON.parse(localStorage.getItem(KEY) ?? '{}')
-    const { locale, theme, textScale } = { ...DEFAULTS, ...stored }
+    const { locale, theme, textScale, mode } = { ...DEFAULTS, ...stored }
     return {
       // Arabic was removed: such settings (and any unknown one) return to the default language
       locale: LOCALES.includes(locale) ? locale : DEFAULTS.locale,
@@ -45,7 +51,8 @@ function read(): Prefs {
       theme: (THEMES as readonly string[]).includes(theme) && !(theme === 'light' && (stored.v ?? 0) < VERSION) ? theme : DEFAULTS.theme,
       // settings saved before version 2 carried the old default size (1): move it to the new default
       // only two sizes now: any older value goes to the nearer one
-      textScale: snapScale((stored.v ?? 0) >= 2 ? textScale : textScale === 1 ? DEFAULTS.textScale : textScale)
+      textScale: snapScale((stored.v ?? 0) >= 2 ? textScale : textScale === 1 ? DEFAULTS.textScale : textScale),
+      mode: mode === 'girl' || mode === 'boy' ? mode : null
     }
   } catch {
     return DEFAULTS
@@ -70,6 +77,8 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
     root.lang = prefs.locale
     root.dir = isRtl(prefs.locale) ? 'rtl' : 'ltr'
     root.style.setProperty('--text-scale', String(prefs.textScale))
+    // boys' mode: its own colours, backdrop and type (globals.css, html[data-mode='boy'])
+    root.dataset.mode = prefs.mode ?? 'girl'
   }, [prefs])
 
   const applyCms = useCallback((c: { strings?: Record<string, string>; help?: PrefsApi['help'] }) => {
@@ -90,7 +99,12 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<PrefsApi>(() => {
     const local = DEFAULT_STRINGS[prefs.locale]
+    // boys' mode: the words written for boys win (in this language, else in English for the other languages)
+    const boy = prefs.mode === 'boy' ? BOY_STRINGS[prefs.locale] : null
+    const boyWide = prefs.mode === 'boy' && prefs.locale !== 'tg' && prefs.locale !== 'ru' ? BOY_STRINGS.en : null
     const t = (key: UiKey) => {
+      const own = boy?.[key] ?? (local[key] === undefined ? boyWide?.[key] : undefined)
+      if (own) return own
       // texts edited in the panel come with the catalogue of the content language (Tajik or Russian)
       // and win over the built-in ones in that language
       if ((prefs.locale === 'tg' || prefs.locale === 'ru') && cms.strings[key]) return cms.strings[key]

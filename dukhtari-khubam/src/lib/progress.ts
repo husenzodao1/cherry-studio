@@ -28,6 +28,8 @@ export const ProgressData = z.strictObject({
   last: z.strictObject({ lesson: Id, at: Iso }).optional(),
   /** year of birth, from the age given at registration (so the age stays current over the years) */
   born: z.number().int().min(1900).max(2100).optional(),
+  /** a girl or a boy, asked at sign-up: which schools, look and words the app has for this learner */
+  gender: z.enum(['girl', 'boy']).optional(),
   /** birthday (YYYY-MM-DD), asked at registration: a greeting comes on the day */
   birthday: Day.optional(),
   /** local dates (YYYY-MM-DD) on which the learner studied, for the day streak */
@@ -132,6 +134,8 @@ export function mergeProgress(a: ProgressData, b: ProgressData): ProgressData {
   }
   const born = a.born ?? b.born
   if (born !== undefined) out.born = born
+  const gender = a.gender ?? b.gender
+  if (gender) out.gender = gender
   const birthday = a.birthday ?? b.birthday
   if (birthday) out.birthday = birthday
   const about = !a.about ? b.about : !b.about ? a.about : a.about.at >= b.about.at ? a.about : b.about

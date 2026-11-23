@@ -69,7 +69,8 @@ function ThemePicker() {
       </button>
       <div className="theme-drawer">
         <div className="themes" role="radiogroup" aria-label={t('settings.theme')}>
-          {THEMES.map((m, i) => (
+          {/* boys' mode has its own colours: only light or dark */}
+          {THEMES.filter((m) => prefs.mode !== 'boy' || m === 'light' || m === 'dark').map((m, i) => (
             <button key={m} type="button" role="radio" aria-checked={prefs.theme === m} className="theme-pick" style={{ ['--i' as string]: i }}
               onClick={() => { prefs.set({ theme: m }); setTimeout(() => setOpen(false), 260) }}>
               <span className={`theme-swatch swatch-${m}`} aria-hidden="true" />
@@ -77,6 +78,24 @@ function ThemePicker() {
             </button>
           ))}
         </div>
+      </div>
+    </div>
+  )
+}
+
+/** Girls' or boys' mode: its schools, look and words (kept with the profile). */
+function ModePicker() {
+  const { t, mode } = usePrefs()
+  const { setGender } = useLearner()
+  return (
+    <div className="glass mode-box">
+      <span className="eyebrow">{t('settings.mode')}</span>
+      <div className="segmented mode-seg" role="radiogroup" aria-label={t('settings.mode')}>
+        {(['girl', 'boy'] as const).map((m) => (
+          <button key={m} type="button" role="radio" aria-checked={(mode ?? 'girl') === m} className={(mode ?? 'girl') === m ? 'is-on' : ''} onClick={() => setGender(m)}>
+            <Icon name={m === 'boy' ? 'male' : 'female'} size={16} />{t(m === 'boy' ? 'settings.mode_boy' : 'settings.mode_girl')}
+          </button>
+        ))}
       </div>
     </div>
   )
@@ -129,6 +148,7 @@ export default function Settings() {
       <div className="section stagger solid-glass">
         {native ? <Notifications /> : null}
         <LanguagePicker />
+        <ModePicker />
         <ThemePicker />
         <div className="glass card-pad stack" style={{ gap: 10 }}>
           <span className="eyebrow">{t('settings.text_size')}</span>

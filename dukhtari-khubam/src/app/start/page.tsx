@@ -16,7 +16,8 @@ import { isEmail, normalizeEmail, sendEmailCode, verifyEmailCode } from '@/web/o
 import { endGoogle, googlePhotoFile, lastGoogleStep, linkGoogle, signInWithGoogle, warmGoogle, type GoogleAccount } from '@/web/offline/google'
 import { savePhoto } from '@/web/offline/photo'
 import { useLearner, type AccountLink } from '@/web/offline/learner'
-import { usePrefs } from '@/web/prefs'
+import { Icon } from '@/web/components/Icon'
+import { usePrefs, type Mode } from '@/web/prefs'
 
 /**
  * First launch and sign-in, one screen: Google, or her e-mail and the 6-digit code sent to it.
@@ -148,13 +149,38 @@ function CodeStep({ email, onBack, onResend, onVerified }: {
   )
 }
 
+/**
+ * The very first question: a boy or a girl. Two bright cards with their picture; the choice sets the app's
+ * schools, look and words at once (changed later in the settings).
+ */
+function GenderPick({ onPick }: { onPick: (m: Mode) => void }) {
+  const { t } = usePrefs()
+  return (
+    <div className="start gender-start">
+      <StartLanguage />
+      <div className="gender-head">
+        <h1 className="h-page">{t('gender.title')}</h1>
+        <p className="muted">{t('gender.hint')}</p>
+      </div>
+      <div className="gender-cards">
+        {(['boy', 'girl'] as const).map((m) => (
+          <button key={m} type="button" className={`gender-card is-${m}`} onClick={() => onPick(m)}>
+            <img src={`/assets/mascot/pick-${m}.webp`} alt="" aria-hidden="true" />
+            <span className="gender-label"><Icon name={m === 'boy' ? 'male' : 'female'} size={18} />{t(m === 'boy' ? 'gender.boy' : 'gender.girl')}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 type Step =
   | { at: 'start' }
   | { at: 'code'; email: string; purpose: 'sign_in' | 'confirm' }
   | { at: 'about'; account: AccountLink; google?: GoogleAccount }
 
 export default function StartPage() {
-  const { t } = usePrefs()
+  const { t, mode, set: setPrefs } = usePrefs()
   const router = useRouter()
   const { learner, progress, register, adopt, backupNow, confirmEmail, setBirthday, pendingLogin } = useLearner()
   const [step, setStep] = useState<Step>({ at: 'start' })
@@ -288,6 +314,9 @@ export default function StartPage() {
         placeholder="name@gmail.com" onChange={(e) => setEmail(e.target.value.replace(/\s/g, ''))} />
     </Field>
   )
+
+  // a new phone: first, a boy or a girl
+  if (!learner && !mode) return <GenderPick onPick={(m) => setPrefs({ mode: m })} />
 
   if (step.at === 'code') {
     return (

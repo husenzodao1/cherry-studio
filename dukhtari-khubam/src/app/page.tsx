@@ -62,7 +62,7 @@ function WaveText({ text }: { text: string }) {
 }
 
 export default function Home() {
-  const { t } = usePrefs()
+  const { t, mode } = usePrefs()
   const { bundle, loading, offlineEmpty } = useContent()
   const { learner, progress } = useLearner()
   const [hour, setHour] = useState<number | null>(null)
@@ -102,7 +102,8 @@ export default function Home() {
 
   return (
     <div ref={home} className="home">
-      <RainDrop flower={flower} />
+      {/* boys' mode: a glass crystal instead of the flower, and no raindrop on it */}
+      {mode === 'boy' ? null : <RainDrop flower={flower} />}
       <header className="home-top">
         <Link href="/profile" className="home-avatar" aria-label={t('nav.profile')}><Avatar name={name} /></Link>
         <StreakBadge />
@@ -117,7 +118,7 @@ export default function Home() {
           <p className="greet">{hour === null ? ' ' : `${t(greetingKey(hour))}${name ? `, ${name}` : ''}!`}</p>
           <h1 className="h-hero motto"><WaveText text={t('home.motto')} />{'\u00a0'}<span className="bf-anchor" aria-hidden="true" /></h1>
         </div>
-        <img ref={flower} className="hello-flower bloom-in" src={ART.flower.src} alt="" aria-hidden="true" decoding="async" />
+        <img ref={flower} className={`hello-flower bloom-in${mode === 'boy' ? ' is-crystal' : ''}`} src={mode === 'boy' ? ART.crystals.src : ART.flower.src} alt="" aria-hidden="true" decoding="async" />
       </section>
 
       {cont ? (

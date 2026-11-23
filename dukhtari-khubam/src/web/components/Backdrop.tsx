@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
 import { ART, type Art } from '../art'
+import { usePrefs } from '../prefs'
 
 /**
  * Fixed page backdrop: a lavender sky with rendered glass pieces resting at the screen edges — a crocus,
@@ -29,8 +30,13 @@ const QUIZ: Piece[] = [[ART.bubble, 'bd-bubble'], [ART.crystals, 'bd-crystals'],
 const CALM: Piece[] = [[ART.bubble, 'bd-bubble'], [ART.leaves, 'bd-calm-leaves']]
 const START: Piece[] = [[ART.bubble, 'bd-bubble'], [ART.leaves, 'bd-leaves'], [ART.crystals, 'bd-crystals'], [ART.lens, 'bd-lens'], [ART.petals, 'bd-petals']]
 
+/** boys' mode: no flowers or petals — glass bubbles, crystals and lenses over a moving mosaic of the logo */
+const BOY: Piece[] = [[ART.bubble, 'bd-bubble'], [ART.crystals, 'bd-crystals'], [ART.lens, 'bd-lens']]
+const BOY_CALM: Piece[] = [[ART.bubble, 'bd-bubble']]
+
 export function Backdrop() {
   const path = usePathname() ?? '/'
+  const { mode } = usePrefs()
   // <html class="scrolling"> while the page moves: the swaying stops for that time
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
@@ -59,10 +65,14 @@ export function Backdrop() {
   if (/^\/page(\/|$)/.test(path)) return <div className="backdrop backdrop-paper" aria-hidden="true" />
   // inside the topics (courses and lessons): a soft white page to read on
   if (/^\/(lesson|course)(\/|$)/.test(path)) return <div className="backdrop backdrop-lesson" aria-hidden="true" />
-  const set = /^\/admin(\/|$)/.test(path) ? [] : /^\/(lesson|garden|support)(\/|$)/.test(path) ? CALM : /^\/(quiz|review)(\/|$)/.test(path) ? QUIZ
+  const admin = /^\/admin(\/|$)/.test(path)
+  const calm = /^\/(lesson|garden|support|quiz|review)(\/|$)/.test(path)
+  const set = admin ? [] : mode === 'boy' ? (calm ? BOY_CALM : BOY)
+    : /^\/(lesson|garden|support)(\/|$)/.test(path) ? CALM : /^\/(quiz|review)(\/|$)/.test(path) ? QUIZ
     : /^\/(start|welcome)(\/|$)/.test(path) ? START : FULL
   return (
     <div className="backdrop" aria-hidden="true">
+      {mode === 'boy' && !admin ? <div className={`bd-mosaic${calm ? ' is-calm' : ''}`} /> : null}
       {set.map(([art, cls]) => (
         <img key={cls} className={`bd ${cls}`} src={art.src} alt="" decoding="async" />
       ))}

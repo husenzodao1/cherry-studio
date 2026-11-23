@@ -124,10 +124,30 @@ function OfflineNote() {
   return null
 }
 
-/** Butterflies for the page being shown (a new set on every page). */
+/** Butterflies for the page being shown (a new set on every page); none in boys' mode. */
 function PageButterflies() {
   const path = usePathname() ?? '/'
-  return <Butterflies key={path} path={path} />
+  const { mode } = usePrefs()
+  return mode === 'boy' ? null : <Butterflies key={path} path={path} />
+}
+
+/**
+ * Girls' or boys' mode follows the profile: the profile's choice (kept with the account) is the phone's;
+ * a profile without one takes the phone's (chosen at sign-up) — or girls', as every profile was before.
+ */
+function GenderSync() {
+  const { ready, learner, progress, setGender } = useLearner()
+  const { mode, set } = usePrefs()
+  useEffect(() => {
+    if (!ready || !learner) return
+    if (progress.gender) {
+      if (progress.gender !== mode) set({ mode: progress.gender })
+    } else {
+      setGender(mode ?? 'girl')
+      if (!mode) set({ mode: 'girl' })
+    }
+  }, [ready, learner, progress.gender, mode, set, setGender])
+  return null
 }
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -139,6 +159,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <AppFeel />
           <LearnerProvider>
             <ForAge>
+              <GenderSync />
               <Gate>{children}</Gate>
               <PageButterflies />
               <Dock />

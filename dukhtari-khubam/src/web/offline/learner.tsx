@@ -47,6 +47,8 @@ interface LearnerApi {
   /** marks her e-mail as confirmed and tied to the profile */
   confirmEmail: (email: string) => void
   setBirthday: (birthday: string) => void
+  /** a girl or a boy (kept with the profile, so it comes back with the account) */
+  setGender: (gender: 'girl' | 'boy') => void
   /** takes over the profile an account (Google or e-mail) already keeps, as the server gave it */
   adopt: (profile: { code: string; name: string; data?: unknown }, account?: AccountLink) => void
   /** backs the profile up now (it must exist on the server before a login or Google is tied to it) */
@@ -246,6 +248,7 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       return l
     },
     setBirthday: (birthday) => update((p) => ({ ...p, birthday, born: Number(birthday.slice(0, 4)) })),
+    setGender: (gender) => update((p) => (p.gender === gender ? p : { ...p, gender })),
     backupNow: pushNow,
     confirmEmail: (email) => {
       const cur = latest.current.learner
