@@ -67,7 +67,7 @@ export async function translateBundle<T extends object>(sb: SupabaseClient, bund
   return { bundle: replaced(bundle, done), missing: texts.filter((t) => !done.has(t)) }
 }
 
-const RULES = (lang: string) => `You translate the texts of «Гулдухтар», an educational app for girls and young women in Tajikistan (seven schools: religious knowledge, manners and ethics, Tajik culture, family and relationships, science and health, personal growth, modern life), from Tajik into ${lang}.
+const RULES = (lang: string) => `You translate the texts of «LifeHub», an educational app for girls and boys in Tajikistan (seven schools: religious knowledge, manners and ethics, Tajik culture, family and relationships, science and health, personal growth, modern life), from Tajik into ${lang}.
 - Translate exactly and faithfully: keep the full meaning, tone and every detail; add nothing, leave nothing out, do not explain or comment.
 - Natural, correct, educated ${lang}, warm and respectful, as a careful human translator would write for young readers.
 - Keep names of people, places and books (transliterate them in the usual way of ${lang}); keep Quran and hadith references (sura:verse, collections) exactly; Islamic terms in the forms usual in ${lang}.

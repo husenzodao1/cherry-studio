@@ -10,7 +10,7 @@ import './globals.css'
 // Glyph coverage for ӣ қ ғ ҳ ҷ ӯ verified for these families (Manrope lacks them).
 const geologica = Geologica({ subsets: ['latin', 'cyrillic', 'cyrillic-ext'], variable: '--font-geologica', display: 'swap' })
 const lora = Lora({ subsets: ['latin', 'cyrillic', 'cyrillic-ext'], style: ['normal', 'italic'], variable: '--font-lora', display: 'swap' })
-// Brush script for the name "Гулдухтар"; covers ӣ қ ғ ҳ ҷ ӯ (checked against its cmap).
+// Brush script for the name "LifeHub"; covers ӣ қ ғ ҳ ҷ ӯ (checked against its cmap).
 // handwriting for the words of the day
 const caveat = Caveat({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], weight: ['500', '700'], variable: '--font-hand', display: 'swap' })
 const pacifico = Pacifico({ subsets: ['cyrillic', 'cyrillic-ext', 'latin'], weight: '400', variable: '--font-pacifico', display: 'swap' })
@@ -28,9 +28,9 @@ const FIRST_ART = ['glass-flower', 'glass-flower-open', 'glass-lotus', 'glass-bu
 
 
 export const metadata: Metadata = {
-  title: { default: 'Гулдухтар', template: '%s · Гулдухтар' },
+  title: { default: 'LifeHub', template: '%s · LifeHub' },
   description: 'Платформаи таълимӣ: 7 оинаи духтар.',
-  applicationName: 'Гулдухтар',
+  applicationName: 'LifeHub',
   // Google Search Console: proves the site belongs to the app's Google Cloud project (sign-in branding)
   verification: { google: 'GCrXzaS2lJNx1EPFUQtASSA8FMKHMsISwpLLApPDYf8' }
 }
@@ -72,7 +72,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             (CSS only, so it shows before any script); Splash.tsx takes it away */}
         <div id="splash" className="splash" aria-hidden="true">
           <img className="sp-moon" src="/assets/3d/splash-moon.webp" alt="" />
-          <span className="sp-name">Гулдухтар</span>
+          <span className="sp-name">LifeHub</span>
           <span className="sp-bar"><i /></span>
         </div>
         <Providers>

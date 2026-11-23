@@ -40,7 +40,7 @@ export function buildOpenApi(routes: AnyRoute[], serverUrl = '/api/v1') {
   return {
     openapi: '3.1.0',
     info: {
-      title: 'Гулдухтар API',
+      title: 'LifeHub API',
       version: '1.0.0',
       description:
         'One backend for Android, Web and the Admin Panel. Authenticate with Supabase Auth and send the access token as a Bearer token.'

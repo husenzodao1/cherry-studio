@@ -6,7 +6,7 @@ vi.mock('@google/genai', () => ({ GoogleGenAI: class { models = { generateConten
 const { fillTranslations, hashOf, replaced, stringsOf, translateBundle } = await import('@/server/translate')
 
 const bundle = {
-  version: 'v1', locale: 'tg', ui: { 'app.name': 'Гулдухтар' },
+  version: 'v1', locale: 'tg', ui: { 'app.name': 'LifeHub' },
   schools: [{ id: 's1', slug: 'din', title: 'Маърифати динӣ', icon: 'mosque' }],
   lessons: { l1: { id: 'l1', title: 'Намоз', blocks: [{ id: 'b1', type: 'paragraph', content: { spans: [{ text: 'Намоз сутуни дин аст.' }] } }, { id: 'b2', type: 'image', props: { asset_id: 'a1' }, content: { url: 'https://x/y.png', caption: 'Масҷид' } }] } }
 }

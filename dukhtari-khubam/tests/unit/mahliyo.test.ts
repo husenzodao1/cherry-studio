@@ -13,7 +13,7 @@ vi.mock('@google/genai', () => ({ GoogleGenAI: class { models = { generateConten
 const { answer, cleanBlocks, configured, fixLatex, GEMINI_MODELS, isProblem, knowledgeOf, knowledgePartsOf, knowledgeText, KNOWLEDGE_CAP, languageOf, learnerNote, MODEL, plainOf, provider, quizText, reminderAsked, SORRY } = await import('@/server/mahliyo')
 
 const bundle = {
-  ui: { 'app.name': 'Гулдухтар' },
+  ui: { 'app.name': 'LifeHub' },
   pages: { privacy: { title: 'Сиёсати махфият', body: [{ type: 'paragraph', content: { spans: [{ text: 'Мо маълумоти шуморо ба касе намедиҳем.' }] } }] } },
   schools: [{ slug: 's1', title: 'Маърифати динӣ' }],
   schoolDetails: { s1: { courses: [{ id: 'c1', title: 'Асосҳо' }] } },
@@ -115,15 +115,15 @@ describe('asking Mahliyo', () => {
 
   it('asks the most capable model with fallbacks, cached guide and material, the learner after the cache; reads her blocks', async () => {
     create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'thinking', thinking: '' }, { type: 'text', text: JSON.stringify({ tajik: true, blocks: [{ type: 'text', text: 'Тести охири марҳила…' }, { type: 'link', to: '/garden', label: 'Харита' }] }) }] })
-    const a = await answer(turns, 'Гулдухтар', 'ДОНИШ', { me: 'Name: Малика', now: '2026-11-21T20:00:00+05:00' })
+    const a = await answer(turns, 'LifeHub', 'ДОНИШ', { me: 'Name: Малика', now: '2026-11-21T20:00:00+05:00' })
     expect(a.blocks).toEqual([{ type: 'text', text: 'Тести охири марҳила…' }, { type: 'link', to: '/garden', label: 'Харита' }])
     expect(a).toMatchObject({ tajik: true, reply: 'Тести охири марҳила…\n\n[Пайванд: Харита → /garden]' })
     const req = create.mock.calls[0][0]
     expect(MODEL).toBe('claude-fable-5-2')
     expect(req).toMatchObject({ model: MODEL, fallbacks: 'default', betas: ['server-side-fallback-2026-07-01'], output_config: { effort: 'low', format: { type: 'json_schema' } } })
     expect(req.thinking).toBeUndefined()
-    expect(req.system[0].text).toContain('«Гулдухтар»')
-    expect(req.system[0].text).toContain('It was earlier called «Духтари хубам»')
+    expect(req.system[0].text).toContain('«LifeHub»')
+    expect(req.system[0].text).toContain('It was earlier called «Гулдухтар»')
     expect(req.system[0].text).toContain('Gratorslab')
     // she is only Mahliyo AI: the model behind her is not named to her learners
     expect(req.system[0].text).toContain('Never name or hint at the technology')
@@ -237,7 +237,7 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
 
   it('asks the best free model with the same rules and blocks; she knows the learner\'s name, not her age or birthday', async () => {
     generate.mockResolvedValue(ok([{ type: 'text', text: 'Ба «Танзимот» дароед.' }, { type: 'screen', spot: 'settings.pin', caption: 'Инҷо' }]))
-    const a = await answer(turns, 'Гулдухтар', 'ДОНИШ', me)
+    const a = await answer(turns, 'LifeHub', 'ДОНИШ', me)
     expect(a).toMatchObject({ tajik: true, blocks: [{ type: 'text', text: 'Ба «Танзимот» дароед.' }, { type: 'screen', spot: 'settings.pin', caption: 'Инҷо' }] })
     const req = generate.mock.calls[0][0]
     expect(GEMINI_MODELS[0]).toBe('gemini-3.1-flash-lite')
@@ -252,7 +252,7 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     // a test question (Premium) and the card that opens the Premium screen are among her blocks
     expect(req.config.responseJsonSchema.properties.blocks.items.anyOf.map((b: { properties: { type: { enum: string[] } } }) => b.properties.type.enum[0])).toEqual(expect.arrayContaining(['quiz', 'premium', 'warning']))
     const system = req.config.systemInstruction as string
-    for (const s of ['«Гулдухтар»', 'Gratorslab', 'AS LONG AS THE QUESTION NEEDS', 'ДОНИШ', 'Study days: 5', 'HER CURRENT TIME: 2026-11-21T14:00:00+05:00']) expect(system).toContain(s)
+    for (const s of ['«LifeHub»', 'Gratorslab', 'AS LONG AS THE QUESTION NEEDS', 'ДОНИШ', 'Study days: 5', 'HER CURRENT TIME: 2026-11-21T14:00:00+05:00']) expect(system).toContain(s)
     // her name: she is greeted by it; her age and birthday stay with the app
     expect(system).toContain('HER NAME: Малика')
     for (const s of ['age 17', '03-01', '{ENGINE}', 'runs on']) expect(system).not.toContain(s)

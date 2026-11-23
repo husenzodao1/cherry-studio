@@ -6,7 +6,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
  */
 const config: CapacitorConfig = {
   appId: 'tj.dukhtarikhubam.app',
-  appName: 'Гулдухтар',
+  appName: 'LifeHub',
   webDir: 'out',
   server: { androidScheme: 'https' },
   android: { backgroundColor: '#fff1ea' },

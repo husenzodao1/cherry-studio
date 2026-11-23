@@ -2,7 +2,7 @@ import type { UiKey } from '../i18n'
 
 /** English. Keys missing here fall back to Tajik. */
 export const en: Partial<Record<UiKey, string>> = {
-  'app.name': 'Guldukhtar',
+  'app.name': 'LifeHub',
   'nav.home': 'Home', 'nav.schools': 'Schools', 'nav.saved': 'Saved', 'nav.profile': 'Profile',
   'home.greeting': 'Hello', 'home.continue_learning': 'Continue', 'home.seven_schools': '7 mirrors of a girl', 'home.all_schools': 'All schools',
   'app.update': 'A new version is available', 'app.update_action': 'Update', 'app.exit_again': 'Press again to exit',
@@ -113,7 +113,7 @@ export const en: Partial<Record<UiKey, string>> = {
   'profile.courses': "Courses",
   'profile.quizzes': "Tests",
   'profile.badges': "Badges",
-  'profile.tagline': "Guldukhtar",
+  'profile.tagline': "LifeHub",
   'settings.code_hint': "A confirmation code for signing in on another phone.",
   'settings.unlock_title': "Confirm it is you",
   'settings.unlock_reason': "Unlock your phone to see the code",
@@ -178,7 +178,7 @@ export const en: Partial<Record<UiKey, string>> = {
   'install.done_before': "The latest lessons are already installed",
   'install.partly': "Some files were not installed — tap again later",
   'rate.soon': "Rating will be available once the app is published on Google Play",
-  'share.text': "“Guldukhtar” — a learning app for girls. Beauty lies in knowledge:",
+  'share.text': "“LifeHub” — a learning app for girls and boys. Beauty lies in knowledge:",
   'email.later_offline': "Your e-mail will be confirmed when the internet is back.",
   'email.no_profile': "No profile was found with this e-mail. Please sign up.",
   'email.by_code': "Sign in with the 15-digit code",
