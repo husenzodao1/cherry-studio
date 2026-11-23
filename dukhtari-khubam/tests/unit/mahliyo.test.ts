@@ -424,3 +424,16 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     expect(learnerNote(me, new Date(), { private: true })).toContain('not shared with you')
   })
 })
+
+describe('red replies with several answers', () => {
+  it('the same word said again gets another answer, never the last one twice in a row', async () => {
+    const { pickReply } = await import('@/server/mahliyo')
+    const r = { reply: 'Ҷавоби якум, {ном}', more: ['Ҷавоби дуюм', 'Ҷавоби сеюм'] }
+    expect(pickReply(r, 'Малика', [], () => 0)).toBe('Ҷавоби якум, Малика')
+    const once = [{ role: 'user' as const, content: 'x' }, { role: 'assistant' as const, content: 'Ҷавоби якум, Малика' }]
+    for (const k of [0, 0.5, 0.99]) expect(pickReply(r, 'Малика', once, () => k)).not.toBe('Ҷавоби якум, Малика')
+    const all = [...once, { role: 'assistant' as const, content: 'Ҷавоби дуюм' }, { role: 'assistant' as const, content: 'Ҷавоби сеюм' }]
+    for (const k of [0, 0.5, 0.99]) expect(pickReply(r, 'Малика', all, () => k)).not.toBe('Ҷавоби сеюм')
+    expect(pickReply({ reply: 'Танҳо як' }, '', once, () => 0.3)).toBe('Танҳо як')
+  })
+})

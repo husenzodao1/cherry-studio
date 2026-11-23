@@ -150,7 +150,10 @@ public final class DkWidgets {
             Scene sc = mahliyoScene(streak, lastDay, d.optString("opened", today), today, Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
             int live = daysBetween(lastDay, today) <= 1 ? streak : 0;
             JSONObject scenes = d.optJSONObject("scenes");
-            String said = ofDay(scenes == null ? null : scenes.optJSONArray(sc.id), day, "Салом!|Имрӯз чӣ меомӯзем?").replace("{n}", String.valueOf(live));
+            // her words change every half hour (the widget is redrawn then), not once a day
+            Calendar now = Calendar.getInstance();
+            int slot = day * 48 + now.get(Calendar.HOUR_OF_DAY) * 2 + now.get(Calendar.MINUTE) / 30;
+            String said = ofDay(scenes == null ? null : scenes.optJSONArray(sc.id), slot, "Салом!|Имрӯз чӣ меомӯзем?").replace("{n}", String.valueOf(live));
             int bar = said.indexOf('|');
             int ink = sc.deep ? 0xFFFFFFFF : 0xFF2A1D4A;
             // boys' mode: the boy's pictures (and a blue background where the girls' one is pink or lilac)
@@ -198,12 +201,37 @@ public final class DkWidgets {
         if (ids.length > 0) m.updateAppWidget(ids, build(ctx, layout));
     }
 
+    /** the app's own half-hourly tick: Android's update period alone is not kept on many phones */
+    static final String TICK = "tj.dukhtarikhubam.app.WIDGET_TICK";
+
+    /** Redraws every widget every half hour from the next half hour on (inexact: no special permission). */
+    static void schedule(Context ctx) {
+        android.app.AlarmManager am = (android.app.AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        if (am == null) return;
+        Intent i = new Intent(ctx, MahliyoWidget.class).setAction(TICK);
+        android.app.PendingIntent pi = android.app.PendingIntent.getBroadcast(ctx, 41, i,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.SECOND, 5);
+        c.set(Calendar.MILLISECOND, 0);
+        c.set(Calendar.MINUTE, c.get(Calendar.MINUTE) < 30 ? 30 : 0);
+        if (c.get(Calendar.MINUTE) == 0) c.add(Calendar.HOUR_OF_DAY, 1);
+        am.setInexactRepeating(android.app.AlarmManager.RTC, c.getTimeInMillis(), android.app.AlarmManager.INTERVAL_HALF_HOUR, pi);
+    }
+
     abstract static class Base extends AppWidgetProvider {
         abstract int layout();
 
         @Override
         public void onUpdate(Context ctx, AppWidgetManager m, int[] ids) {
             m.updateAppWidget(ids, build(ctx, layout()));
+            schedule(ctx);
+        }
+
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            if (TICK.equals(intent.getAction())) { updateAll(ctx); return; }
+            super.onReceive(ctx, intent);
         }
     }
 

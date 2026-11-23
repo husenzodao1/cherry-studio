@@ -236,7 +236,7 @@ function HelpRow({ k, loc, enabled, icon, tr, onSaved }: { k: string; loc: Loc; 
   )
 }
 
-interface RedReply { word: string; reply: string }
+interface RedReply { word: string; reply: string; more?: string[] }
 
 /**
  * Mahliyo's red replies. Above: as many word → reply pairs as the staff like ("+ Ҷавоби сурх"): a word that may
@@ -255,7 +255,7 @@ function Warnings() {
   const changePair = (i: number, part: Partial<RedReply>) => setPairs(shownPairs.map((r, k) => (k === i ? { ...r, ...part } : r)))
   const save = async () => {
     const clean = [
-      ...shownPairs.map((r) => ({ word: r.word.trim(), reply: r.reply.trim() })),
+      ...shownPairs.map((r) => ({ word: r.word.trim(), reply: r.reply.trim(), more: (r.more ?? []).map((m) => m.trim()).filter(Boolean) })),
       ...shownGeneral.map((reply) => ({ word: '', reply: reply.trim() }))
     ].filter((r) => r.reply)
     if (await act.run(() => send('/admin/ai/warnings', 'POST', { items: clean }), 'Сабт шуд')) {
@@ -280,6 +280,19 @@ function Warnings() {
           <textarea className="input" rows={2} value={r.reply} maxLength={400} placeholder="Ҷавоби сурхи Маҳлиё" aria-label={`Ҷавоби ${i + 1}`}
             onChange={(e) => changePair(i, { reply: e.target.value })} />
           <button type="button" className="btn btn-soft" aria-label={`Нест кардани ${i + 1}`} onClick={() => setPairs(shownPairs.filter((_, k) => k !== i))}>✕</button>
+          {/* more replies to the same word: said again, Mahliyo gives another one (never the same twice in a row) */}
+          <div className="red-reply-more">
+            {(r.more ?? []).map((m, j) => (
+              <div key={j} className="red-reply-alt">
+                <textarea className="input" rows={2} value={m} maxLength={400} placeholder="Варианти дигари ҷавоб" aria-label={`Варианти ${j + 2} барои калимаи ${i + 1}`}
+                  onChange={(e) => changePair(i, { more: (r.more ?? []).map((x, k) => (k === j ? e.target.value : x)) })} />
+                <button type="button" className="btn btn-soft" aria-label={`Нест кардани варианти ${j + 2}`} onClick={() => changePair(i, { more: (r.more ?? []).filter((_, k) => k !== j) })}>✕</button>
+              </div>
+            ))}
+            {(r.more ?? []).length < 12 ? (
+              <button type="button" className="link-btn" onClick={() => changePair(i, { more: [...(r.more ?? []), ''] })}>+ Варианти дигари ҷавоб (агар боз ҳамин калимаро гӯяд)</button>
+            ) : null}
+          </div>
         </div>
       ))}
       <button type="button" className="btn btn-soft" onClick={() => setPairs([...shownPairs, { word: '', reply: '' }])}>+ Ҷавоби сурх</button>

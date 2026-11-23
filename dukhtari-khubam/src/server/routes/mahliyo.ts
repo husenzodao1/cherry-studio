@@ -61,7 +61,8 @@ export function redRepliesOf(value: unknown): RedReply[] {
     if (typeof v === 'string') return v.trim() ? [{ word: '', reply: v }] : []
     if (v && typeof v === 'object' && typeof (v as RedReply).reply === 'string') {
       const r = v as RedReply
-      return [{ word: typeof r.word === 'string' ? r.word : '', reply: r.reply }]
+      const more = Array.isArray(r.more) ? r.more.filter((m): m is string => typeof m === 'string' && !!m.trim()) : []
+      return [{ word: typeof r.word === 'string' ? r.word : '', reply: r.reply, ...(more.length ? { more } : {}) }]
     }
     return []
   })
@@ -130,9 +131,9 @@ export const mahliyoRoutes: AnyRoute[] = [
   }),
   route({
     method: 'POST', path: '/admin/ai/warnings', access: 'staff', tag: 'Admin · Mahliyo', summary: "Saves Mahliyo's red replies",
-    body: z.strictObject({ items: z.array(z.strictObject({ word: z.string().trim().max(100), reply: z.string().trim().max(400) })).max(RED_REPLIES_MAX) }),
+    body: z.strictObject({ items: z.array(z.strictObject({ word: z.string().trim().max(100), reply: z.string().trim().max(400), more: z.array(z.string().trim().max(400)).max(12).optional() })).max(RED_REPLIES_MAX) }),
     handler: async ({ sb, body }) => {
-      await call(sb(), 'admin_set_setting', { p_key: 'ai_warnings', p_value: body.items.filter((r) => r.reply) })
+      await call(sb(), 'admin_set_setting', { p_key: 'ai_warnings', p_value: body.items.filter((r) => r.reply).map((r) => (r.more?.some(Boolean) ? { ...r, more: r.more.filter(Boolean) } : { word: r.word, reply: r.reply })) })
       redReplies = null
       return { ok: true }
     }

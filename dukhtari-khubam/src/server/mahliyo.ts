@@ -596,7 +596,8 @@ export function forPlan(blocks: Block[], premium: boolean): Block[] {
  * The staff's red replies (the panel's "Ҷавобҳои сурх"): a word that may be in the learner's message, and
  * Mahliyo's exact answer to it, shown in red. A reply without a word is one of her general warnings.
  */
-export interface RedReply { word: string; reply: string }
+/** a word the staff answer themselves, their reply, and more replies to it (said again, another one is given) */
+export interface RedReply { word: string; reply: string; more?: string[] }
 
 /**
  * Her general words to insults and pressure, one chosen at random each time: the staff's replies without a
@@ -611,7 +612,19 @@ export const WARNINGS = [
   'Лутфан, фишор наоред ва ҳақорат накунед — ман барои кӯмак ҳастам, на барои баҳс 😌'
 ]
 /** the staff's filled replies (empty ones dropped) */
-const filled = (own: RedReply[] = []) => own.map((r) => ({ word: r.word.trim(), reply: r.reply.trim() })).filter((r) => r.reply)
+const filled = (own: RedReply[] = []) => own.map((r) => ({ word: r.word.trim(), reply: r.reply.trim(), more: (r.more ?? []).map((m) => m.trim()).filter(Boolean) })).filter((r) => r.reply)
+/**
+ * One of a word's replies, with her name in it: one she has not given lately in this chat (the same word
+ * said again is answered differently), at random among those; all given already — any but the last one.
+ */
+export function pickReply(r: Pick<RedReply, 'reply' | 'more'>, name: string, turns: Turn[] = [], random = Math.random): string {
+  const all = [...new Set([r.reply, ...(r.more ?? [])].map((x) => x.trim()).filter(Boolean))].map((x) => withName(x, name))
+  const said = turns.filter((t) => t.role === 'assistant').slice(-12).map((t) => t.content.trim())
+  const fresh = all.filter((x) => !said.includes(x.trim()))
+  const last = said[said.length - 1]
+  const from = fresh.length ? fresh : all.length > 1 ? all.filter((x) => x.trim() !== last) : all
+  return from[Math.floor(random() * from.length) % from.length]
+}
 /** one of the general warnings, at random */
 export function warningText(own: RedReply[] = [], random = Math.random): string {
   const general = filled(own).filter((r) => !r.word).map((r) => r.reply)
@@ -648,9 +661,9 @@ export function withName(text: string, name: string): string {
   return name ? out : out.replace(/[ \t]{2,}/g, ' ').replace(/\s+([,.!?;:])/g, '$1').replace(/,+([.!?;:,])/g, '$1').replace(/^[\s,]+/, '').replace(/,\s*$/, '').trim()
 }
 /** her red answer: the reply of the word matched, or a general warning; {ном} is her name */
-const warned = (own: RedReply[] = [], rule = 0, name = ''): Answer => {
+const warned = (own: RedReply[] = [], rule = 0, name = '', turns: Turn[] = []): Answer => {
   const matched = rule > 0 ? filled(own).filter((r) => r.word)[rule - 1] : undefined
-  const text = withName(matched?.reply ?? warningText(own), name)
+  const text = matched ? pickReply(matched, name, turns) : withName(warningText(own), name)
   return { tajik: true, blocks: [{ type: 'warning', text }], reply: text }
 }
 /** whether her question is the same words, the third time in a row, after two answers (pressure, not a question) */
@@ -840,7 +853,7 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
   const name = firstNameOf(me)
   const red = redReplyFor(question, extra.warnings)
   if (red) {
-    const text = withName(red.reply, name)
+    const text = pickReply(red, name, turns)
     return { tajik: true, blocks: [{ type: 'warning', text }], reply: text }
   }
   // a question about the world: looked up on the internet first (a few seconds at most)
@@ -848,7 +861,7 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
   const refs = refsOf(extra.books ?? [], web)
   const material = [knowledge, refs.length ? webNote(refs) : '', redNote(extra.warnings)].filter(Boolean).join('\n\n')
   // the same words pushed a third time in a row (each answered already): her warning, without asking the AI
-  if (pushedAgain(turns)) return warned(extra.warnings, 0, name)
+  if (pushedAgain(turns)) return warned(extra.warnings, 0, name, turns)
   const text = await ask(turns, appName, material, me, files, extra.active)
   if (text === null) return sorry()
   try {
@@ -869,7 +882,7 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
     // she answers in every language now: no answer points to the consultant for its language
     // an insult or pressure: only the warning — the staff's reply to the word she matched, or a general one
     const warning = blocks.find((b) => b.type === 'warning')
-    if (warning) return warned(extra.warnings, warning.rule, name)
+    if (warning) return warned(extra.warnings, warning.rule, name, turns)
     // the files she is making: their content written now, deeply and in full
     if (blocks.some((b) => b.type === 'file')) {
       // a presentation in the style she chose ("#s07")

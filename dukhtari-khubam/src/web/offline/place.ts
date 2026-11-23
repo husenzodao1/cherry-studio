@@ -27,8 +27,29 @@ export function placeNote(): string | undefined {
   return p ? `${p.lat.toFixed(1)}, ${p.lon.toFixed(1)}` : undefined
 }
 
-/** whether she allowed it (the browser says so, or a place was found before) */
+const native = async () => (await import('@capacitor/core')).Capacitor.isNativePlatform()
+const plugin = async () => (await import('@capacitor/geolocation')).Geolocation
+
+/** keeps her place, rounded (about 10 km) */
+function keep(lat: number, lon: number) {
+  const round = (x: number) => Math.round(x * 10) / 10
+  try { localStorage.setItem(KEY, JSON.stringify({ lat: round(lat), lon: round(lon), at: Date.now() })) } catch { /* not kept */ }
+}
+
+/**
+ * Whether she allowed it. In the phone app: Android's own permission (the web view's answer is no use
+ * there — it says "ask" even after the permission was given in the settings); in a browser: its answer,
+ * or a place found before.
+ */
 export async function placeAllowed(): Promise<boolean> {
+  if (await native()) {
+    try {
+      const st = await (await plugin()).checkPermissions()
+      return st.location === 'granted' || st.coarseLocation === 'granted'
+    } catch {
+      return read() !== null
+    }
+  }
   if (typeof navigator === 'undefined' || !navigator.geolocation) return true
   try {
     const st = await navigator.permissions?.query({ name: 'geolocation' as PermissionName })
@@ -38,23 +59,46 @@ export async function placeAllowed(): Promise<boolean> {
   return read() !== null
 }
 
-/**
- * Asks for her rough place (the phone shows its own question the first time) and keeps it, rounded.
- * Resolves whether it was given.
- */
-export function askPlace(timeout = 15_000): Promise<boolean> {
-  if (typeof navigator === 'undefined' || !navigator.geolocation) return Promise.resolve(false)
+/** her place now, kept rounded (in the background: the permission is what counts) */
+async function locate(timeout: number): Promise<boolean> {
+  if (await native()) {
+    try {
+      const pos = await (await plugin()).getCurrentPosition({ enableHighAccuracy: false, maximumAge: FRESH_MS, timeout })
+      keep(pos.coords.latitude, pos.coords.longitude)
+      return true
+    } catch {
+      return false
+    }
+  }
   return new Promise((done) => {
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const round = (x: number) => Math.round(x * 10) / 10
-        try { localStorage.setItem(KEY, JSON.stringify({ lat: round(pos.coords.latitude), lon: round(pos.coords.longitude), at: Date.now() })) } catch { /* not kept */ }
-        done(true)
-      },
+      (pos) => { keep(pos.coords.latitude, pos.coords.longitude); done(true) },
       () => done(false),
       { enableHighAccuracy: false, maximumAge: FRESH_MS, timeout }
     )
   })
+}
+
+/**
+ * Asks for her rough place: the phone's own question the first time. Resolves whether it is allowed now
+ * (once she said "no for ever", Android asks no more: false, and the app's settings are opened instead).
+ */
+export async function askPlace(timeout = 15_000): Promise<boolean> {
+  if (await native()) {
+    try {
+      const geo = await plugin()
+      let st = await geo.checkPermissions()
+      if (st.location !== 'granted' && st.coarseLocation !== 'granted') st = await geo.requestPermissions({ permissions: ['coarseLocation'] })
+      const ok = st.location === 'granted' || st.coarseLocation === 'granted'
+      // allowed: her place is found in the background (location may be off; the permission is given all the same)
+      if (ok) void locate(timeout)
+      return ok
+    } catch {
+      return false
+    }
+  }
+  if (typeof navigator === 'undefined' || !navigator.geolocation) return false
+  return locate(timeout)
 }
 
 /** Once she allowed it: her rough place is looked at again when it is a day old (never asks anew). */

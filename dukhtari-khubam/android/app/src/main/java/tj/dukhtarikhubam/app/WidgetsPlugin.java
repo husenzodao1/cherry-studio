@@ -16,6 +16,7 @@ public class WidgetsPlugin extends Plugin {
         JSObject data = call.getData();
         getContext().getSharedPreferences(DkWidgets.PREFS, Context.MODE_PRIVATE).edit().putString("data", data.toString()).apply();
         DkWidgets.updateAll(getContext());
+        DkWidgets.schedule(getContext());
         call.resolve();
     }
 }

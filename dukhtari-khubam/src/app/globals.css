@@ -3000,9 +3000,14 @@ html.scrolling .bd-mosaic, html.is-scrolling .bd-mosaic { animation-play-state: 
 .sp-table.is-in { opacity: 1; transform: none; }
 .sp-table th, .sp-table td { border: 0.15cqw solid color-mix(in srgb, currentColor 15%, transparent); padding: 0.8cqw 1.2cqw; text-align: start; }
 .sp-table th { color: var(--ac); background: color-mix(in srgb, var(--ac) 10%, transparent); }
-.sp-bar { display: flex; align-items: center; justify-content: center; gap: 10px; }
-.sp-bar .docv-btn { color: #fff; background: rgba(255, 255, 255, 0.12); }
-.sp-count { min-width: 64px; text-align: center; color: rgba(255, 255, 255, 0.8); font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+/* the player's controls (not .sp-bar: that is the splash screen's progress line) — big, easy to hit */
+.sp-ctl { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 12px 4px; flex-wrap: wrap; }
+.sp-ctl .docv-btn { width: 50px; height: 50px; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.16); }
+.sp-ctl .docv-btn:disabled { opacity: 0.35; }
+.sp-ctl .docv-btn.sp-play { width: 62px; height: 62px; background: var(--pill); border: 0; box-shadow: 0 10px 24px -10px rgba(80, 120, 255, 0.8); }
+.sp-ctl .docv-btn:active { transform: scale(0.92); }
+.sp-ctl .docv-open { min-height: 50px; }
+.sp-count { min-width: 64px; text-align: center; color: rgba(255, 255, 255, 0.88); font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .sp-pen-btn { margin-left: 8px; }
 .sp-notes { display: flex; gap: 8px; align-items: flex-start; margin: 0 auto; max-width: 760px; color: rgba(255, 255, 255, 0.7); font-size: 0.82rem; line-height: 1.45; }
 .sp-notes svg { flex: none; margin-top: 2px; }
@@ -3094,3 +3099,15 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 :root[data-theme='dark'] .bd-mosaic { opacity: 0.16; filter: brightness(2.2) saturate(0.8); }
 @keyframes bd-doodles { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(360px, 360px, 0); } }
 @media (prefers-reduced-motion: reduce) { .bd-mosaic { animation: none; } }
+
+/* the first question's two cards: lower cards, the boy's and the girl's heads rising a little over their top
+   edge (the card does not clip them), the label on the colour below */
+.gender-cards { gap: 16px; padding-top: 64px; }
+.gender-card { overflow: visible; height: min(44vw, 196px); padding-bottom: 12px; }
+.gender-card img { height: 116%; bottom: 52px; }
+.gender-card::before { border-radius: inherit; }
+/* a red word's other replies: under it, indented, a thin red line at the side */
+.red-reply-more { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; padding-inline-start: 14px; border-inline-start: 2px solid rgba(198, 40, 40, 0.25); }
+.red-reply-alt { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.red-reply-alt textarea { color: #c62828; resize: vertical; padding-block: 8px; line-height: 1.35; }
+.red-reply-more .link-btn { align-self: flex-start; font-size: 0.84em; color: #c62828; }

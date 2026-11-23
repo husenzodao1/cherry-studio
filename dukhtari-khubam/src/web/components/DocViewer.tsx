@@ -250,15 +250,15 @@ function SlidesPlayer({ content, style, onEdit }: { content: string; style?: Sli
         <SlideView key={at} slide={slide} n={at} style={style} shown={shown} />
         <canvas ref={canvas} className="sp-pen" style={{ pointerEvents: pen ? 'auto' : 'none' }} onPointerDown={penDown} onPointerMove={penMove} />
       </div>
-      <div className="sp-bar">
-        <button type="button" className="docv-btn" aria-label={t('doc.prev')} onClick={() => go(at - 1)} disabled={at === 0}><Icon name="back" size={18} /></button>
-        <button type="button" className="docv-btn" aria-label={playing ? t('doc.pause') : t('doc.play')} onClick={() => setPlaying(!playing)}><Icon name={playing ? 'pause' : 'play'} size={18} /></button>
+      <div className="sp-ctl">
+        <button type="button" className="docv-btn" aria-label={t('doc.prev')} onClick={() => go(at - 1)} disabled={at === 0}><Icon name="back" size={22} /></button>
+        <button type="button" className="docv-btn sp-play" aria-label={playing ? t('doc.pause') : t('doc.play')} onClick={() => setPlaying(!playing)}><Icon name={playing ? 'pause' : 'play'} size={24} fill="currentColor" /></button>
         <span className="sp-count">{at + 1} / {slides.length}</span>
-        <button type="button" className="docv-btn" aria-label={t('doc.next')} onClick={step} disabled={at === slides.length - 1 && shown >= parts}><Icon name="forward" size={18} /></button>
+        <button type="button" className="docv-btn" aria-label={t('doc.next')} onClick={step} disabled={at === slides.length - 1 && shown >= parts}><Icon name="forward" size={22} /></button>
         {onEdit ? (
           pen
             ? <button type="button" className="docv-open" onClick={finishPen}><Icon name="check" size={16} />{t('doc.pen_done')}</button>
-            : <button type="button" className="docv-btn sp-pen-btn" aria-label={t('doc.pen')} onClick={() => { setPen(true); setMarked(null); setShown(parts) }}><Icon name="edit" size={18} /></button>
+            : <button type="button" className="docv-btn sp-pen-btn" aria-label={t('doc.pen')} onClick={() => { setPen(true); setMarked(null); setShown(parts) }}><Icon name="edit" size={22} /></button>
         ) : null}
       </div>
       {slide.notes ? <p className="sp-notes"><Icon name="volume" size={14} />{slide.notes}</p> : null}
