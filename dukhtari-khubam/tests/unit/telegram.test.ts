@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { forBot, handleMessage, pieces, SAY, withoutMention, type TgMessage } from '@/server/telegram'
+import { ensureWebhook, forBot, handleMessage, pieces, SAY, webhookSecret, withoutMention, type TgMessage } from '@/server/telegram'
 
 const BOT = 'MahliyoBot'
 const msg = (text: string, o: Partial<TgMessage> = {}): TgMessage => ({ message_id: 9, text, chat: { id: 77, type: 'private' }, from: { id: 77, first_name: 'Малика', username: 'malika' }, ...o })
@@ -88,5 +88,23 @@ describe('Mahliyo in Telegram', () => {
     expect(p.length).toBeGreaterThan(1)
     expect(p.every((x) => x.length <= 4000)).toBe(true)
     expect(p.join('\n')).toBe(long)
+  })
+
+  it("points the bot at the site's own address with its secret and commands, once, and not again when it is already there", async () => {
+    const calls: { method: string; body: Record<string, unknown> }[] = []
+    let url = ''
+    const fetcher = (async (u: string, init?: RequestInit) => {
+      const method = u.split('/').pop()!
+      const body = JSON.parse(String(init?.body))
+      calls.push({ method, body })
+      if (method === 'setWebhook') url = body.url
+      return new Response(JSON.stringify({ ok: true, result: method === 'getWebhookInfo' ? { url } : true }))
+    }) as unknown as typeof fetch
+    expect(await ensureWebhook('https://dukhtari-khubam.vercel.app/api/v1/telegram/webhook', fetcher)).toBe('https://dukhtari-khubam.vercel.app/api/v1/telegram/webhook')
+    expect(calls.map((c) => c.method)).toEqual(['getWebhookInfo', 'setWebhook', 'setMyCommands'])
+    expect(calls[1].body).toMatchObject({ secret_token: webhookSecret(), allowed_updates: ['message'] })
+    // once per server instance
+    await ensureWebhook('https://dukhtari-khubam.vercel.app/api/v1/telegram/webhook', fetcher)
+    expect(calls).toHaveLength(3)
   })
 })

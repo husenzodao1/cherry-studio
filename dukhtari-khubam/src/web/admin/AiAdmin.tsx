@@ -138,7 +138,7 @@ function TelegramBot() {
     <div className="glass card-pad stack" style={{ gap: 8 }}>
       <b>Маҳлиё дар Telegram</b>
       <span className="muted" style={{ fontSize: '0.84em' }}>
-        1) Дар Telegram ба @BotFather → /newbot нависед ва бот созед. 2) Токени онро дар Vercel ҳамчун TELEGRAM_BOT_TOKEN гузоред ва сайтро аз нав нашр кунед.
+        1) Дар Telegram ба @BotFather → /newbot нависед ва бот созед. 2) Токени онро дар Vercel ҳамчун TELEGRAM_BOT_TOKEN гузоред ва сайтро аз нав нашр кунед (сайт ботро худаш пайваст мекунад).
         3) Ин тугмаро пахш кунед: бот ба сайт пайваст мешавад. Корбарони Premium онро аз Танзимот → «Маҳлиё дар Telegram» пайваст мекунанд.
       </span>
       <button type="button" className="btn" disabled={busy} aria-busy={busy} onClick={() => void setUp()}>Пайваст кардани бот</button>

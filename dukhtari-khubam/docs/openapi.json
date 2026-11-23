@@ -4976,7 +4976,7 @@
         "tags": [
           "Admin · Telegram"
         ],
-        "summary": "Points the bot's webhook here and keeps its name",
+        "summary": "Points the bot's webhook at this site",
         "operationId": "postAdminTelegramSetup",
         "parameters": [],
         "responses": {
@@ -5000,6 +5000,31 @@
           }
         ],
         "description": "Requires a staff role; permissions are enforced in the database."
+      }
+    },
+    "/telegram/status": {
+      "get": {
+        "tags": [
+          "Telegram"
+        ],
+        "summary": "Whether the bot is set up (and pointed at this site), and its name",
+        "operationId": "getTelegramStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/me/telegram": {

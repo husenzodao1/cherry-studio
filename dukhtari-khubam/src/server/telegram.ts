@@ -32,6 +32,41 @@ export async function tg<T = unknown>(method: string, body: unknown, fetcher: Fe
   return data.result as T
 }
 
+/** the bot's name (@…), asked of Telegram once per server instance */
+let botKnown: string | null = null
+export async function botName(fetcher: Fetch = fetch): Promise<string | null> {
+  if (!tgReady()) return null
+  botKnown ??= (await tg<{ username: string }>('getMe', {}, fetcher)).username
+  return botKnown
+}
+
+/** where Telegram sends the bot's updates: this site's own address (never one taken from a request) */
+export const webhookUrl = () => {
+  const site = process.env.SITE_HOST ?? process.env.VERCEL_PROJECT_PRODUCTION_URL
+  return site ? `https://${site.replace(/^https?:\/\//, '')}/api/v1/telegram/webhook` : null
+}
+
+/**
+ * The bot pointed at this site (once per server instance, only when it is not already): its webhook with the
+ * secret, and its commands. Returns the webhook's address.
+ */
+let pointed = false
+export async function ensureWebhook(url = webhookUrl(), fetcher: Fetch = fetch): Promise<string | null> {
+  if (!tgReady() || !url) return null
+  if (pointed) return url
+  const info = await tg<{ url?: string }>('getWebhookInfo', {}, fetcher)
+  if (info.url !== url) {
+    await tg('setWebhook', { url, secret_token: webhookSecret(), allowed_updates: ['message'], drop_pending_updates: true }, fetcher)
+    await tg('setMyCommands', { commands: [
+      { command: 'new', description: 'Суҳбати нав / Новый разговор' },
+      { command: 'on', description: 'Фаъол дар гурӯҳ / Включить в группе' },
+      { command: 'off', description: 'Хомӯш дар гурӯҳ / Выключить в группе' }
+    ] }, fetcher)
+  }
+  pointed = true
+  return url
+}
+
 /** a reply in pieces of at most 4000 characters (Telegram's limit is 4096), cut at a line where it can */
 export function pieces(text: string, size = 4000): string[] {
   const out: string[] = []
