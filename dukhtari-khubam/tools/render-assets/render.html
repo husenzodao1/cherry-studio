@@ -11,6 +11,7 @@ import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { buildKind } from './kit.js'
 import { buildKind2 } from './kit2.js'
+import { buildKind3 } from './kit3.js'
 
 // Brilliant-cut diamond: girdle 16, crown with table and star/kite facets, pavilion to culet.
 function brilliant() {
@@ -98,6 +99,31 @@ function gemGeo(cut) {
   return g
 }
 
+
+// A studio lit by `n` equal softboxes round the stone (an equirectangular picture): turned by 1/n of a turn
+// it is the same, so a stone of the same symmetry turning by that much makes a seamless loop.
+function studioRing({ n = 8, sky = '#f2f6ff', mid = '#7d93bf', floor = '#1c2742', box = '#ffffff', glow = '#4f9dff' }) {
+  const c = document.createElement('canvas'); c.width = 2048; c.height = 1024
+  const g = c.getContext('2d')
+  const grad = g.createLinearGradient(0, 0, 0, 1024)
+  grad.addColorStop(0, sky); grad.addColorStop(0.46, mid); grad.addColorStop(0.6, '#34466e'); grad.addColorStop(1, floor)
+  g.fillStyle = grad; g.fillRect(0, 0, 2048, 1024)
+  const W = 2048 / n
+  for (let i = 0; i < n; i++) {
+    const x = i * W
+    // a tall white softbox above, a blue light lower down between them
+    const sb = g.createLinearGradient(0, 150, 0, 420); sb.addColorStop(0, box); sb.addColorStop(1, 'rgba(255,255,255,0.75)')
+    g.fillStyle = sb; g.fillRect(x + W * 0.3, 130, W * 0.4, 330)
+    g.fillStyle = '#0a1226'; g.fillRect(x + W * 0.02, 160, W * 0.12, 340)
+    g.fillStyle = glow; g.globalAlpha = 0.85; g.fillRect(x + W * 0.86, 470, W * 0.22, 90); g.globalAlpha = 1
+    g.fillStyle = '#ffffff'; g.fillRect(x + W * 0.47, 40, W * 0.06, 60)
+  }
+  // the top of the studio: a broad soft light
+  const top = g.createRadialGradient(1024, -200, 10, 1024, -200, 700); top.addColorStop(0, 'rgba(255,255,255,0.9)'); top.addColorStop(1, 'rgba(255,255,255,0)')
+  g.fillStyle = top; g.fillRect(0, 0, 2048, 300)
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = THREE.RepeatWrapping
+  return t
+}
 
 // Convex facet planes (object space) of a geometry: dot(n, x) = w, n pointing outward.
 function facetPlanes(geo) {
@@ -384,7 +410,7 @@ window.renderJob = async (job) => {
   scene.environmentIntensity = job.envIntensity ?? 1
   scene.environmentRotation = new THREE.Euler(0, job.envRotation ?? 0, 0)
 
-  let object = (await buildKind(job)) ?? buildKind2(job)
+  let object = (await buildKind(job)) ?? buildKind2(job) ?? buildKind3(job)
   if (object) {
     // built by kit.js
   } else if (job.kind === 'bloom') {
@@ -427,7 +453,7 @@ window.renderJob = async (job) => {
   } else if (job.kind === 'gem') {
     object = new THREE.Group()
     const geo = gemGeo(job.cut)
-    const m = new THREE.Mesh(geo, diamondMaterial(geo, hdr, job.tint ?? '#ffffff', job.absorb ?? 0))
+    const m = new THREE.Mesh(geo, diamondMaterial(geo, job.studio ? studioRing(job.studio) : hdr, job.tint ?? '#ffffff', job.absorb ?? 0))
     if (job.ior) m.material.uniforms.uIors.value.set(job.ior - 0.02, job.ior, job.ior + 0.03)
     m.onBeforeRender = () => m.material.uniforms.uRot.value.setFromMatrix4(m.matrixWorld)
     m.rotation.fromArray(job.rot ?? [0, 0, 0])
@@ -520,6 +546,17 @@ window.renderJob = async (job) => {
     return { blackUrl, whiteUrl: renderer.domElement.toDataURL('image/png') }
   }
   renderer.setClearColor('#000000', 0)
+  if (job.frames) {
+    // a turn about the upright axis in so many frames (a loop: the last frame leads back into the first)
+    const frames = [], y0 = object.rotation.y
+    for (let i = 0; i < job.frames; i++) {
+      object.rotation.y = y0 + (i / job.frames) * (job.turn ?? Math.PI * 2)
+      object.updateMatrixWorld(true)
+      renderer.render(scene, camera)
+      frames.push(renderer.domElement.toDataURL('image/png'))
+    }
+    return { frames }
+  }
   renderer.render(scene, camera)
   return { colorUrl: renderer.domElement.toDataURL('image/png') }
 }

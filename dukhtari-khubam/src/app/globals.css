@@ -2658,7 +2658,7 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
 .attach-veil { position: fixed; inset: 0; z-index: 80; background: rgba(20, 10, 40, 0.28); animation: fade-in 0.2s both; display: flex; align-items: flex-end; }
 .attach { width: 100%; max-width: 560px; margin: 0 auto; max-height: 78vh; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 0 14px max(16px, env(safe-area-inset-bottom));
   border-radius: 26px 26px 0 0; background: var(--bg); box-shadow: 0 -18px 40px -20px rgba(40, 20, 90, 0.4);
-  transition: max-height 0.35s var(--ease), transform 0.3s var(--ease); animation: attach-up 0.32s var(--ease) both; }
+  transition: max-height 0.35s var(--ease), transform 0.3s var(--ease); animation: attach-up 0.32s var(--ease) backwards; }
 .attach.is-tall { max-height: 92vh; height: 92vh; }
 /* held by the handle: the height follows the finger at once; let go, it eases to where it settles */
 .attach { transition: max-height 0.35s var(--ease), height 0.35s var(--ease); }
@@ -3055,3 +3055,42 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .pmark-clear:disabled { opacity: 0.35; }
 .pmark-done { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 13px 24px; font: inherit; font-weight: 700; color: #fff; cursor: pointer;
   background: linear-gradient(135deg, #ff4d4d, #e0336b); box-shadow: 0 12px 26px -12px rgba(255, 60, 90, 0.8); }
+.words-item blockquote.is-poem.is-wrapped { white-space: pre-wrap; text-wrap: pretty; }
+
+/* the paperclip's photos: each row exactly as tall as a tile is wide (the tiles never stack over each
+   other, whatever the sheet's height), the grid scrolls by itself, and the sheet keeps its own place */
+.attach { will-change: transform, height; }
+.attach-photos { container-type: inline-size; grid-auto-rows: calc((100cqw - 9px) / 4); align-content: start; min-height: 0; flex: 0 1 auto;
+  overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+.attach-modes { touch-action: pan-x; }
+.attach-tile { aspect-ratio: auto; width: 100%; height: 100%; min-height: 0; }
+.attach-photo img { position: absolute; inset: 0; }
+.attach.is-tall .attach-photos { flex: 1 1 auto; }
+.attach { position: relative; }
+.attach-send-bar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; padding: 14px 14px max(14px, env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 92%, transparent) 38%); animation: attach-bar 0.24s var(--ease) both; }
+@keyframes attach-bar { from { transform: translateY(100%); opacity: 0; } }
+.attach-send-bar .attach-send { box-shadow: 0 12px 26px -12px rgba(30, 20, 80, 0.55); }
+.attach.has-picked .attach-photos { padding-bottom: 78px; }
+
+/* boys' mode: a diamond turning slowly on the home screen (36 rendered frames of a 1/8 turn: the stone and
+   its studio repeat every 45°, so the loop has no seam), floating a little, with a soft blue glow under it */
+.hello-diamond { position: absolute; z-index: 1; right: 6px; top: 4px; width: min(34vw, 140px); aspect-ratio: 260 / 142; pointer-events: none;
+  animation: diamond-float 5.5s ease-in-out infinite; }
+.hello-diamond::after { content: ''; position: absolute; left: 18%; right: 18%; bottom: -14%; height: 18%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(37, 99, 235, 0.28), transparent); filter: blur(4px); animation: diamond-shadow 5.5s ease-in-out infinite; }
+.hello-diamond i { position: absolute; inset: 0; background: url('/assets/3d/boy-diamond-spin.webp') 0 0 / 3600% 100% no-repeat;
+  animation: diamond-spin 4.8s steps(36) infinite; filter: drop-shadow(0 10px 16px rgba(30, 70, 180, 0.28)); }
+@keyframes diamond-spin { to { background-position: 102.857% 0; } }
+@keyframes diamond-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes diamond-shadow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.9); } }
+@media (prefers-reduced-motion: reduce) { .hello-diamond, .hello-diamond i, .hello-diamond::after { animation: none; } }
+
+/* boys' mode: a messenger-like wallpaper — a dense, faint pattern of a learner's things (books, pencils,
+   atoms, rockets, a ruler, a globe…) over the whole screen, drifting very slowly on a diagonal */
+.bd-mosaic { inset: -360px; opacity: 0.13; background-image: url('/assets/boy-doodles.svg'); background-size: 360px 360px;
+  animation: bd-doodles 140s linear infinite; -webkit-mask-image: none; mask-image: none; will-change: transform; }
+.bd-mosaic.is-calm { opacity: 0.07; animation-duration: 260s; }
+:root[data-theme='dark'] .bd-mosaic { opacity: 0.16; filter: brightness(2.2) saturate(0.8); }
+@keyframes bd-doodles { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(360px, 360px, 0); } }
+@media (prefers-reduced-motion: reduce) { .bd-mosaic { animation: none; } }

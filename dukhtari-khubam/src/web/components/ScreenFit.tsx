@@ -61,7 +61,7 @@ export function ScreenFit() {
     }
     const start = (e: TouchEvent) => {
       // Mahliyo's full screen stretches its own conversation (app/mahliyo/page.tsx)
-      const own = (e.target as HTMLElement | null)?.closest?.('.ai-scene, .ai-history')
+      const own = (e.target as HTMLElement | null)?.closest?.('.ai-scene, .ai-history, .attach-veil, .pmark, .docv, [role="dialog"]')
       pulling = !!app && !own && root.classList.contains('fits') && !root.classList.contains('locked') && !scrollableAbove(e.target)
       y0 = e.touches[0].clientY
       x0 = e.touches[0].clientX

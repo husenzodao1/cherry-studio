@@ -49,3 +49,19 @@ describe("boys' mode", () => {
     expect(girlyChanged([q(true)], 0)).toBe(true)
   })
 })
+
+describe('boys\' pictures and words of the day', () => {
+  it('every boys\' school has its own picture, none of the girls\'', async () => {
+    const { SCHOOL_ART } = await import('@/web/art')
+    for (const slug of ['odobi-umumi', 'pisar-dar-jamiyat', 'khislathoi-mardona', 'farhangi-tojik-pisaron', 'zamoni-muosir', 'odobi-oiladori', 'sakhtihoi-hayot']) {
+      expect(SCHOOL_ART[slug].src).toMatch(/\/school-b-/)
+    }
+  })
+  it('poems to girls are known as such; others are not', async () => {
+    const { GIRLS_WORDS } = await import('@/web/components/WordsOfDay')
+    expect(GIRLS_WORDS.test('Ты не из тех луноликих, что перед влюблённым кокетничают… Ты выше всех красавиц')).toBe(true)
+    expect(GIRLS_WORDS.test('Духтарам, дониш зевари туст')).toBe(true)
+    expect(GIRLS_WORDS.test('Знание — сила, которую никто у тебя не отнимет.')).toBe(false)
+    expect(GIRLS_WORDS.test('Дониш — нурест, ки роҳро равшан мекунад.')).toBe(false)
+  })
+})

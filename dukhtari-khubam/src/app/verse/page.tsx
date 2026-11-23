@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Header } from '@/web/components/Header'
 import { VERSE_ART } from '@/web/components/PoemTile'
 import { Empty } from '@/web/components/States'
+import { GIRLS_WORDS } from '@/web/components/WordsOfDay'
 import { useContent } from '@/web/offline/content'
 import { lines } from '@/web/offline/notify'
 import { usePrefs } from '@/web/prefs'
@@ -36,14 +37,15 @@ function WorkCard({ w, i }: { w: Work; i: number }) {
 
 /** "Гулбоғи эҷод": the poems and stories from the panel, newest first, with a filter by kind. */
 export default function Verse() {
-  const { t } = usePrefs()
+  const { t, mode } = usePrefs()
   const { bundle } = useContent()
   const [only, setOnly] = useState<'all' | 'poem' | 'story'>('all')
   const works: Work[] = [
     ...(bundle?.poems ?? []).map((p) => ({ ...p, kind: 'poem' as const })),
     ...(bundle?.stories ?? []).map((s) => ({ ...s, kind: 'story' as const }))
   ]
-  const shown = works.filter((w) => only === 'all' || w.kind === only)
+  // boys' mode: works written to or about girls are left out
+  const shown = works.filter((w) => (only === 'all' || w.kind === only) && (mode !== 'boy' || !GIRLS_WORDS.test(w.body)))
   return (
     <>
       <Header back="/schools" title={t('poem.title')} />

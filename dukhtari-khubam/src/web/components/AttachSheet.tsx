@@ -1,7 +1,7 @@
 'use client'
 
 import { Capacitor, registerPlugin } from '@capacitor/core'
-import { useEffect, useRef, useState, type PointerEvent as RPointerEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { AiMode } from '../offline/mahliyo'
@@ -76,9 +76,6 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
   const [picked, setPicked] = useState<string[]>([])
   const [tall, setTall] = useState(false)
   const [camera, setCamera] = useState(false)
-  /** while the handle is held: the sheet's height following the finger (px), else null */
-  const [drag, setDrag] = useState<number | null>(null)
-  const start = useRef<{ y: number; h: number } | null>(null)
   const sheet = useRef<HTMLElement>(null)
   const docs = useRef<HTMLInputElement>(null)
   const gallery = useRef<HTMLInputElement>(null)
@@ -101,57 +98,154 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
     if (files.length) onFiles(files)
     onClose()
   }
-  // the handle: the sheet follows the finger up and down; let go, it settles — tall, as it was, or closed
-  const down = (e: RPointerEvent) => {
-    start.current = { y: e.clientY, h: sheet.current?.offsetHeight ?? 0 }
-    ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+  // the sheet follows the finger — from anywhere on its top part, and from the photos when they are at
+  // their top (pulled down) or the sheet can still grow (pulled up); let go, it settles by where it is
+  // and how fast it was moving: tall, as it was, or closed. Moved straight on the page, frame by frame.
+  const closing = useRef(false)
+  const close = () => {
+    const el = sheet.current
+    if (!el || closing.current) return onClose()
+    closing.current = true
+    el.style.transition = 'transform 0.22s cubic-bezier(0.4, 0, 1, 1)'
+    el.style.transform = 'translateY(105%)'
+    setTimeout(onClose, 200)
   }
-  const move = (e: RPointerEvent) => {
-    if (!start.current) return
-    const max = window.innerHeight * 0.92
-    setDrag(Math.max(80, Math.min(max, start.current.h - (e.clientY - start.current.y))))
-  }
-  const up = () => {
-    const from = start.current
-    start.current = null
-    if (!from || drag === null) return setDrag(null)
-    const vh = window.innerHeight
-    if (drag < from.h * 0.6 && drag < vh * 0.35) onClose()
-    else setTall(drag > Math.max(from.h, vh * 0.55) || (tall && drag > vh * 0.62))
-    setDrag(null)
-  }
+  useEffect(() => {
+    const el = sheet.current
+    if (!el) return
+    let y0 = 0
+    let x0 = 0
+    let h0 = 0
+    let engaged = false
+    let ignored = false
+    let fromGrid = false
+    let height = 0
+    let frame = 0
+    let samples: { y: number; t: number }[] = []
+    const vh = () => window.innerHeight
+    const top = () => Math.min(vh() * 0.92, vh() - 24)
+    const paint = () => {
+      frame = 0
+      el.style.maxHeight = 'none'
+      if (height < h0) {
+        // pulled down: the sheet slides (cheap), its size stays
+        el.style.height = `${h0}px`
+        el.style.transform = `translateY(${h0 - height}px)`
+      } else {
+        el.style.transform = ''
+        el.style.height = `${height}px`
+      }
+    }
+    const start = (e: TouchEvent | PointerEvent) => {
+      if (closing.current) return
+      const p = 'touches' in e ? e.touches[0] : e
+      y0 = p.clientY
+      x0 = p.clientX
+      h0 = el.offsetHeight
+      height = h0
+      engaged = false
+      ignored = false
+      fromGrid = !!(e.target as HTMLElement).closest?.('.attach-photos')
+      samples = [{ y: y0, t: performance.now() }]
+      el.style.transition = 'none'
+    }
+    const move = (e: TouchEvent | PointerEvent) => {
+      if (ignored || closing.current || (!('touches' in e) && !(e.buttons & 1))) return
+      const p = 'touches' in e ? e.touches[0] : e
+      const dy = p.clientY - y0
+      if (!engaged) {
+        if (Math.abs(dy) < 6 && Math.abs(p.clientX - x0) < 6) return
+        // sideways (the row of modes): not the sheet's
+        if (Math.abs(p.clientX - x0) > Math.abs(dy)) { ignored = true; return }
+        if (fromGrid) {
+          const grid = el.querySelector<HTMLElement>('.attach-photos')
+          const atTop = !grid || grid.scrollTop <= 0
+          if (!((dy > 0 && atTop) || (dy < 0 && h0 < top() - 4))) { ignored = true; return }
+        }
+        engaged = true
+        y0 = p.clientY
+      }
+      if (e.cancelable) e.preventDefault()
+      const d = p.clientY - y0
+      // past the top it gives a little, like rubber
+      const raw = h0 - d
+      height = raw > top() ? top() + (raw - top()) * 0.15 : Math.max(0, raw)
+      samples.push({ y: p.clientY, t: performance.now() })
+      if (samples.length > 6) samples.shift()
+      if (!frame) frame = requestAnimationFrame(paint)
+    }
+    const end = () => {
+      if (!engaged) return
+      engaged = false
+      cancelAnimationFrame(frame)
+      frame = 0
+      const first = samples[0]
+      const last = samples[samples.length - 1]
+      // px per ms, downwards positive
+      const v = last.t > first.t ? (last.y - first.y) / (last.t - first.t) : 0
+      const ease = 'cubic-bezier(0.22, 1, 0.36, 1)'
+      if (v > 0.55 || (v > -0.2 && height < h0 * 0.6 && height < vh() * 0.4)) return close()
+      const wantTall = v < -0.45 || height > Math.max(h0, vh() * 0.55) + 24 || (tall && height > vh() * 0.62)
+      const target = wantTall ? top() : Math.min(el.scrollHeight, vh() * 0.78)
+      el.style.transition = `transform 0.32s ${ease}, height 0.32s ${ease}`
+      el.style.transform = ''
+      el.style.height = `${wantTall || tall ? target : h0}px`
+      setTimeout(() => {
+        if (closing.current) return
+        el.style.transition = ''
+        el.style.height = ''
+        el.style.maxHeight = ''
+        setTall(wantTall)
+      }, 320)
+    }
+    el.addEventListener('touchstart', start, { passive: true })
+    el.addEventListener('touchmove', move, { passive: false })
+    el.addEventListener('touchend', end)
+    el.addEventListener('touchcancel', end)
+    // a mouse: by the handle only
+    const handle = el.querySelector<HTMLElement>('.attach-handle')
+    const pdown = (e: PointerEvent) => { if (e.pointerType === 'mouse') { handle?.setPointerCapture(e.pointerId); start(e) } }
+    const pmove = (e: PointerEvent) => { if (e.pointerType === 'mouse') move(e) }
+    const pup = (e: PointerEvent) => { if (e.pointerType === 'mouse') end() }
+    handle?.addEventListener('pointerdown', pdown)
+    handle?.addEventListener('pointermove', pmove)
+    handle?.addEventListener('pointerup', pup)
+    return () => {
+      cancelAnimationFrame(frame)
+      el.removeEventListener('touchstart', start)
+      el.removeEventListener('touchmove', move)
+      el.removeEventListener('touchend', end)
+      el.removeEventListener('touchcancel', end)
+      handle?.removeEventListener('pointerdown', pdown)
+      handle?.removeEventListener('pointermove', pmove)
+      handle?.removeEventListener('pointerup', pup)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tall, camera])
 
   if (camera) return <InAppCamera onShot={(f) => { onFiles([f]); onClose() }} onClose={() => setCamera(false)} onGallery={() => { setCamera(false); setTall(true) }} />
   if (typeof document === 'undefined') return null
   return createPortal(
-    <div className="attach-veil" onClick={onClose}>
-      <section ref={sheet} className={`attach${tall ? ' is-tall' : ''}${drag !== null ? ' is-dragging' : ''}`} role="dialog" aria-modal="true" aria-label={t('ai.attach')}
-        style={drag !== null ? { height: drag, maxHeight: 'none' } : undefined} onClick={(e) => e.stopPropagation()}>
-        <div className="attach-handle" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}><span /></div>
+    <div className="attach-veil" onClick={close}>
+      <section ref={sheet} className={`attach${tall ? ' is-tall' : ''}${picked.length ? ' has-picked' : ''}`} role="dialog" aria-modal="true" aria-label={t('ai.attach')} onClick={(e) => e.stopPropagation()}>
+        <div className="attach-handle"><span /></div>
 
-        {picked.length ? (
-          <button type="button" className="btn attach-send" onClick={() => void sendPicked()}><Icon name="up" size={18} />{t('ai.attach_send').replace('{n}', String(picked.length))}</button>
-        ) : (
-          <>
-            {/* what to add, and what she can make: bright little app icons */}
-            <div className="attach-actions">
-              <button type="button" onClick={() => gallery.current?.click()}><span className="attach-ico tone-gallery"><Icon name="image" size={24} /></span>{t('ai.gallery')}</button>
-              <button type="button" onClick={() => docs.current?.click()}><span className="attach-ico tone-doc"><Icon name="file" size={24} /></span>{t('ai.document')}</button>
-              {MAKE.map((m) => (
-                <button key={m.command} type="button" onClick={() => onCommand(m.command)}><span className={`attach-ico tone-${m.tone}`}>{m.glyph()}</span>{t(m.key)}</button>
-              ))}
-            </div>
-            {/* how she answers: quiet chips in a row */}
-            <div className="attach-modes" role="group" aria-label={t('ai.modes')}>
-              {MODES.map((m) => (
-                <button key={m.id} type="button" aria-pressed={mode === m.id} className={`tone-${m.id}${mode === m.id ? ' is-on' : ''}`} onClick={() => onMode(mode === m.id ? null : m.id)}>
-                  <Icon name={m.icon} size={15} />{t(m.key)}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
+        {/* what to add, and what she can make: bright little app icons */}
+        <div className="attach-actions">
+          <button type="button" onClick={() => gallery.current?.click()}><span className="attach-ico tone-gallery"><Icon name="image" size={24} /></span>{t('ai.gallery')}</button>
+          <button type="button" onClick={() => docs.current?.click()}><span className="attach-ico tone-doc"><Icon name="file" size={24} /></span>{t('ai.document')}</button>
+          {MAKE.map((m) => (
+            <button key={m.command} type="button" onClick={() => onCommand(m.command)}><span className={`attach-ico tone-${m.tone}`}>{m.glyph()}</span>{t(m.key)}</button>
+          ))}
+        </div>
+        {/* how she answers: quiet chips in a row */}
+        <div className="attach-modes" role="group" aria-label={t('ai.modes')}>
+          {MODES.map((m) => (
+            <button key={m.id} type="button" aria-pressed={mode === m.id} className={`tone-${m.id}${mode === m.id ? ' is-on' : ''}`} onClick={() => onMode(mode === m.id ? null : m.id)}>
+              <Icon name={m.icon} size={15} />{t(m.key)}
+            </button>
+          ))}
+        </div>
         {/* below: the camera first, then the newest photos, all in the same square tiles */}
         <div className="attach-photos">
           <button type="button" className="attach-tile attach-cam" onClick={() => setCamera(true)} aria-label={t('ai.camera')}>
@@ -170,6 +264,12 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
             <button type="button" className="attach-tile attach-more" onClick={() => gallery.current?.click()}><Icon name="image" size={28} /><span>{t('ai.gallery')}</span></button>
           ) : null}
         </div>
+        {/* chosen photos: a bar over the bottom of the sheet (what is above it never moves) */}
+        {picked.length ? (
+          <div className="attach-send-bar">
+            <button type="button" className="btn attach-send" onClick={() => void sendPicked()}><Icon name="up" size={18} />{t('ai.attach_send').replace('{n}', String(picked.length))}</button>
+          </div>
+        ) : null}
         <input ref={docs} type="file" hidden multiple accept="application/pdf,text/plain" onChange={(e) => fromInput(e.target.files)} />
         <input ref={gallery} type="file" hidden multiple accept="image/*" onChange={(e) => fromInput(e.target.files)} />
       </section>

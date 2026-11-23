@@ -888,7 +888,21 @@ test('the paperclip opens a sheet: camera, gallery, document and four ways of an
   await expect(page.locator('.attach')).toBeVisible()
   await expect(page.locator('.attach-actions button')).toHaveCount(5)
   await expect(page.locator('.attach-modes button')).toHaveCount(7)
+  // the tiles are squares side by side, never over each other
+  const rects = await page.locator('.attach-tile').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height })))
+  for (const r of rects) expect(Math.abs(r.w - r.h)).toBeLessThan(2)
+  for (let i = 1; i < rects.length; i++) expect(rects[i].x >= rects[i - 1].x + rects[i - 1].w - 1 || rects[i].y >= rects[i - 1].y + rects[i - 1].h - 1).toBe(true)
   await page.screenshot({ path: 'test-results/attach-sheet.png' })
+  // dragged down by its top part (not only the handle), it closes
+  const top = (await page.locator('.attach-actions').boundingBox())!
+  const cdp = await page.context().newCDPSession(page)
+  const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', y: number) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: top.x + 20, y }] })
+  await touch('touchStart', top.y + 10)
+  for (let k = 1; k <= 12; k++) await touch('touchMove', top.y + 10 + k * 30)
+  await touch('touchEnd', 0)
+  await expect(page.locator('.attach')).toHaveCount(0)
+  await page.locator('.ai-attach').click()
+  await expect(page.locator('.attach')).toBeVisible()
   await page.locator('.attach-modes button', { hasText: 'Режими илмӣ' }).click()
   await expect(page.locator('.ai-mode-chip')).toContainText('Режими илмӣ')
   const box = page.locator('textarea.ai-input')

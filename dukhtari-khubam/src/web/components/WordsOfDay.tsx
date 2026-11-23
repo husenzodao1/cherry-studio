@@ -6,6 +6,9 @@ import { fitQuote, type Fit, SIZES, windowRem } from '@/lib/wordsFit'
 import { useContent } from '../offline/content'
 import { usePrefs } from '../prefs'
 
+/** words meant for girls (Tajik, Russian, English): not shown to a boy */
+export const GIRLS_WORDS = /(духтар|дугона|малика|нозанин|зебоям|гулрӯ|моҳрӯ|бону|девуш|девоч|подруг|красав|лунолик|принцесс|невест|\bgirl|princess|💕|🌸|🎀|💖|🌷)/i
+
 /** How long words that fit stay before the next ones come in. */
 const STAY_MS = 4200
 /** Long words scroll upward slowly: a pause to read the first lines, the scroll, a pause at the end. */
@@ -41,9 +44,16 @@ function Quote({ body, author, source, active, onTime }: { body: string; author:
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
       const heightAt = (size: number) => { q.style.fontSize = `${size}rem`; return q.scrollHeight }
       // a poem (its own line breaks) keeps each line on one line: the size shrinks until the longest fits
+      q.classList.remove('is-wrapped')
       const poem = body.includes('\n')
       const fitsWidth = (size: number) => { q.style.fontSize = `${size}rem`; return !poem || q.scrollWidth <= q.clientWidth + 1 }
-      const next = fitQuote(heightAt, room, rem, fitsWidth)
+      let next = fitQuote(heightAt, room, rem, fitsWidth)
+      // a line too long even at the smallest size (a narrow phone, a long translation): the poem's lines
+      // may wrap, rather than be cut at the card's edge
+      if (poem && !fitsWidth(next.size)) {
+        q.classList.add('is-wrapped')
+        next = fitQuote(heightAt, room, rem)
+      }
       q.style.fontSize = `${next.size}rem`
       setFit((f) => (f.size === next.size && f.rise === next.rise ? f : next))
     }
@@ -145,10 +155,12 @@ function Quote({ body, author, source, active, onTime }: { body: string; author:
  * ones (a whole poem) scroll upward line by line until the end has been read. With none published yet, the app's own line is shown.
  */
 export function WordsOfDay() {
-  const { t } = usePrefs()
+  const { t, mode } = usePrefs()
   const { bundle } = useContent()
-  const items = bundle?.inspirations?.length ? bundle.inspirations
-    : bundle?.inspiration ? [bundle.inspiration] : [{ body: t('home.quote'), author_name: null, source_title: null }]
+  const all = bundle?.inspirations?.length ? bundle.inspirations : bundle?.inspiration ? [bundle.inspiration] : []
+  // boys' mode: words written to or about girls (beauties, moon-faced ones, flowers, a girl's pride) are left out
+  const shown = mode === 'boy' ? all.filter((q) => !GIRLS_WORDS.test(q.body)) : all
+  const items = shown.length ? shown : [{ body: t('home.quote'), author_name: null, source_title: null }]
   const [at, setAt] = useState(0)
   const [stay, setStay] = useState(STAY_MS)
   const count = items.length

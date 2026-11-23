@@ -26,6 +26,8 @@ test('a new phone asks "a boy or a girl"; a boy gets the boys\' look, words and 
 
 test('a boy\'s profile keeps boys\' mode; the settings switch it back to girls\'', async ({ page, server: _, errors }) => {
   await signedIn(page)
+  const asked: string[] = []
+  page.on('request', (r) => { if (r.url().includes('/api/v1/bundle')) asked.push(r.url()) })
   // the profile says a boy (it came with the account)
   await page.addInitScript(() => {
     const p = JSON.parse(localStorage.getItem('dk.progress') ?? '{}')
@@ -35,7 +37,14 @@ test('a boy\'s profile keeps boys\' mode; the settings switch it back to girls\'
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   await expect(page.locator('html')).toHaveAttribute('data-mode', 'boy')
   await expect(page.locator('.motto')).toContainText('Қувват')
-  await expect(page.locator('.hello-flower.is-crystal')).toBeVisible()
+  // a diamond turning where the girls' flower stands; the boys' schools in their own pictures
+  await expect(page.locator('.hello-diamond')).toBeVisible()
+  await expect(page.locator('.hello-flower')).toHaveCount(0)
+  await expect(page.locator('.bd-mosaic')).toHaveCount(1)
+  // the boys' catalogue is asked for (the girls' one this phone had before is not kept on)
+  await expect.poll(() => asked.some((u) => u.includes('audience=boys'))).toBe(true)
+  // nothing on the screen speaks to a girl
+  expect(await page.locator('main').innerText()).not.toMatch(/дугона|духтарам|🌸|💕/i)
   await expect(page.locator('.bf-layer')).toHaveCount(0)
   await page.waitForTimeout(900)
   await page.screenshot({ path: 'test-results/boy-home.png' })
@@ -44,5 +53,24 @@ test('a boy\'s profile keeps boys\' mode; the settings switch it back to girls\'
   await page.locator('.mode-seg button', { hasText: 'Духтарона' }).click()
   await expect(page.locator('html')).toHaveAttribute('data-mode', 'girl')
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dk.progress') ?? '{}').gender)).toBe('girl')
+  expect(errors).toEqual([])
+})
+
+test('a boy in Russian: the boys\' heading, no poems about beauties, the diamond and the doodles', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await page.addInitScript(() => {
+    const p = JSON.parse(localStorage.getItem('dk.progress') ?? '{}')
+    localStorage.setItem('dk.progress', JSON.stringify({ ...p, gender: 'boy' }))
+    localStorage.setItem('dk.prefs', JSON.stringify({ locale: 'ru', mode: 'boy' }))
+  })
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('html')).toHaveAttribute('data-mode', 'boy')
+  await expect(page.getByText('7 школ для юношей')).toBeVisible()
+  await expect(page.locator('.hello-diamond')).toBeVisible()
+  const text = await page.locator('main').innerText()
+  expect(text).not.toMatch(/девуш|подруг|красав|лунолик|принцесс/i)
+  await page.waitForTimeout(900)
+  await page.screenshot({ path: 'test-results/boy-home-ru.png' })
   expect(errors).toEqual([])
 })

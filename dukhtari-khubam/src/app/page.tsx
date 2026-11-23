@@ -103,7 +103,7 @@ export default function Home() {
 
   return (
     <div ref={home} className="home">
-      {/* boys' mode: a glass crystal instead of the flower, and no raindrop on it */}
+      {/* boys' mode: a diamond instead of the flower, and no raindrop on it */}
       {mode === 'boy' ? null : <RainDrop flower={flower} />}
       <header className="home-top">
         <Link href="/profile" className="home-avatar" aria-label={t('nav.profile')}><Avatar name={name} /></Link>
@@ -119,7 +119,10 @@ export default function Home() {
           <p className="greet">{hour === null ? ' ' : `${t(greetingKey(hour))}${name ? `, ${name}` : ''}!`}</p>
           <h1 className="h-hero motto"><WaveText text={t('home.motto')} />{'\u00a0'}<span className="bf-anchor" aria-hidden="true" /></h1>
         </div>
-        <img ref={flower} className={`hello-flower bloom-in${mode === 'boy' ? ' is-crystal' : ''}`} src={mode === 'boy' ? ART.crystals.src : ART.flower.src} alt="" aria-hidden="true" decoding="async" />
+        {mode === 'boy'
+          // boys' mode: a real diamond, turning slowly where the flower stands for girls
+          ? <span className="hello-diamond bloom-in" aria-hidden="true"><i /></span>
+          : <img ref={flower} className="hello-flower bloom-in" src={ART.flower.src} alt="" aria-hidden="true" decoding="async" />}
       </section>
 
       {cont ? (

@@ -22,7 +22,8 @@ const server = http.createServer((req, res) => {
     const t = Date.now()
     const out = await page.evaluate((j) => window.renderJob(j), job)
     fs.mkdirSync('out', { recursive: true })
-    if (out.blackUrl) {
+    if (out.frames) out.frames.forEach((u, i) => fs.writeFileSync(`out/${job.name}.f${String(i).padStart(2, '0')}.png`, Buffer.from(u.split(',')[1], 'base64')))
+    else if (out.blackUrl) {
       fs.writeFileSync(`out/${job.name}.b.png`, Buffer.from(out.blackUrl.split(',')[1], 'base64'))
       fs.writeFileSync(`out/${job.name}.w.png`, Buffer.from(out.whiteUrl.split(',')[1], 'base64'))
     } else fs.writeFileSync(`out/${job.name}.png`, Buffer.from(out.colorUrl.split(',')[1], 'base64'))

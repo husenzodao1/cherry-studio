@@ -1,0 +1,177 @@
+[
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "zoom": 0.86,
+  "size": 900,
+  "envIntensity": 0.9,
+  "keyIntensity": 1.8,
+  "shadowOpacity": 0.16,
+  "rims": [
+   {
+    "color": "#cfe3ff",
+    "intensity": 5,
+    "dir": [
+     0.6,
+     0.6,
+     -1
+    ]
+   }
+  ],
+  "name": "school-b-ethics",
+  "kind": "b-books",
+  "pitch": 22,
+  "azimuth": 20
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "zoom": 0.86,
+  "size": 900,
+  "envIntensity": 0.9,
+  "keyIntensity": 1.8,
+  "shadowOpacity": 0.16,
+  "rims": [
+   {
+    "color": "#cfe3ff",
+    "intensity": 5,
+    "dir": [
+     0.6,
+     0.6,
+     -1
+    ]
+   }
+  ],
+  "name": "school-b-society",
+  "kind": "b-society",
+  "pitch": 12,
+  "azimuth": 0
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "zoom": 0.86,
+  "size": 900,
+  "envIntensity": 0.9,
+  "keyIntensity": 1.8,
+  "shadowOpacity": 0.16,
+  "rims": [
+   {
+    "color": "#cfe3ff",
+    "intensity": 5,
+    "dir": [
+     0.6,
+     0.6,
+     -1
+    ]
+   }
+  ],
+  "name": "school-b-character",
+  "kind": "b-shield",
+  "pitch": 6,
+  "azimuth": 0
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "zoom": 0.86,
+  "size": 900,
+  "envIntensity": 0.9,
+  "keyIntensity": 1.8,
+  "shadowOpacity": 0.16,
+  "rims": [
+   {
+    "color": "#cfe3ff",
+    "intensity": 5,
+    "dir": [
+     0.6,
+     0.6,
+     -1
+    ]
+   }
+  ],
+  "name": "school-b-culture",
+  "kind": "b-crown",
+  "pitch": 6,
+  "azimuth": 0
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "zoom": 0.86,
+  "size": 900,
+  "envIntensity": 0.9,
+  "keyIntensity": 1.8,
+  "shadowOpacity": 0.16,
+  "rims": [
+   {
+    "color": "#cfe3ff",
+    "intensity": 5,
+    "dir": [
+     0.6,
+     0.6,
+     -1
+    ]
+   }
+  ],
+  "name": "school-b-modern",
+  "kind": "b-rocket",
+  "pitch": 8,
+  "azimuth": 0
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "zoom": 0.86,
+  "size": 900,
+  "envIntensity": 0.9,
+  "keyIntensity": 1.8,
+  "shadowOpacity": 0.16,
+  "rims": [
+   {
+    "color": "#cfe3ff",
+    "intensity": 5,
+    "dir": [
+     0.6,
+     0.6,
+     -1
+    ]
+   }
+  ],
+  "name": "school-b-family",
+  "kind": "b-house",
+  "pitch": 18,
+  "azimuth": 20
+ },
+ {
+  "matte": true,
+  "tone": "none",
+  "hdri": "hdri/studio_small_09_2k.hdr",
+  "zoom": 0.86,
+  "size": 900,
+  "envIntensity": 0.9,
+  "keyIntensity": 1.8,
+  "shadowOpacity": 0.16,
+  "rims": [
+   {
+    "color": "#cfe3ff",
+    "intensity": 5,
+    "dir": [
+     0.6,
+     0.6,
+     -1
+    ]
+   }
+  ],
+  "name": "school-b-hardship",
+  "kind": "b-mountain",
+  "pitch": 16,
+  "azimuth": 10
+ }
+]

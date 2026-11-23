@@ -9,6 +9,7 @@ type Words = Partial<Record<UiKey, string>>
 
 const tg: Words = {
   'home.seven_schools': '7 мактаби писар',
+  'home.quote': 'Дониш — қуввате, ки ҳеҷ кас аз ту гирифта наметавонад.',
   'welcome.schools.q': 'Кадом мактабҳоро омӯхтан мехоҳед?',
   'start.subtitle': 'Қувват дар дониш аст',
   'home.motto': 'Қувват дар дониш аст.',
@@ -31,7 +32,8 @@ const tg: Words = {
 }
 
 const ru: Words = {
-  'home.seven_schools': '7 школ юноши',
+  'home.seven_schools': '7 школ для юношей',
+  'home.quote': 'Знание — сила, которую никто у тебя не отнимет.',
   'welcome.schools.q': 'Какие школы вам интересны?',
   'start.subtitle': 'Сила — в знании',
   'home.motto': 'Сила — в знании.',
@@ -56,6 +58,7 @@ const ru: Words = {
 
 const en: Words = {
   'home.seven_schools': "7 schools for a young man",
+  'home.quote': 'Knowledge is a strength no one can take from you.',
   'welcome.schools.q': 'Which schools interest you?',
   'start.subtitle': 'Strength lies in knowledge',
   'home.motto': 'Strength lies in knowledge.',

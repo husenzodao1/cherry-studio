@@ -130,7 +130,10 @@ export function ContentProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [offlineEmpty, setOfflineEmpty] = useState(false)
   const current = useRef<Bundle | null>(null)
-  const busy = useRef(false)
+  /** the catalogue being fetched now (language and audience), and the one wanted: an answer for another
+   * (the mode changed while the girls' catalogue was still on its way) is dropped, never shown */
+  const busy = useRef('')
+  const wanted = useRef('')
   const live = useRef(true)
 
   /** Fetches the catalogue; with a stamp, from that stamp's own cache entry (never an older copy). */
@@ -145,6 +148,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         return false
       }
       const next = (await res.json()) as Bundle
+      if (wanted.current !== `${locale}:${aud}`) return false
       if (next.version !== current.current?.version) {
         current.current = next
         setBundle(next)
@@ -165,8 +169,9 @@ export function ContentProvider({ children }: { children: ReactNode }) {
       if (!current.current) setOfflineEmpty(true)
       return
     }
-    if (busy.current) return
-    busy.current = true
+    const k = `${locale}:${aud}`
+    if (busy.current === k) return
+    busy.current = k
     try {
       const stamp = await readStamp()
       live.current = stamp !== null
@@ -175,12 +180,13 @@ export function ContentProvider({ children }: { children: ReactNode }) {
         if (stamp) writeLocal(stampKey(locale, aud), stamp)
       }
     } finally {
-      busy.current = false
+      if (busy.current === k) busy.current = ''
     }
   }, [locale, aud, fetchBundle])
 
   useEffect(() => {
     let alive = true
+    wanted.current = `${locale}:${aud}`
     setLoading(true)
     ;(async () => {
       let stored = (await get<Bundle>(key(locale, aud)).catch(() => undefined)) ?? null

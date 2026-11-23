@@ -222,6 +222,54 @@
       "author": "Project owner (image AI)",
       "license": "project-owned",
       "source": "owner-supplied image, cut out with rembg BiRefNet"
+    },
+    "school-b-ethics.webp": {
+      "model": "Two hardcover books with a graduation cap",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-ethics)"
+    },
+    "school-b-society.webp": {
+      "model": "Three glossy figures side by side",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-society)"
+    },
+    "school-b-character.webp": {
+      "model": "A blue shield with a white star",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-character)"
+    },
+    "school-b-culture.webp": {
+      "model": "The crown and seven stars of the Tajik flag on a navy disc",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-culture)"
+    },
+    "school-b-modern.webp": {
+      "model": "A rocket rising",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-modern)"
+    },
+    "school-b-family.webp": {
+      "model": "A house with a navy roof and warm windows",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-family)"
+    },
+    "school-b-hardship.webp": {
+      "model": "A snowy mountain with a flag on its peak",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (kit3.js, jobs-boys-icons.json: school-b-hardship)"
+    },
+    "boy-diamond-spin.webp": {
+      "model": "A round brilliant diamond turning 1/8 of a turn in 36 frames (spectral refraction shader, 8-fold studio)",
+      "author": "Dukhtari Khubam project",
+      "license": "project-owned",
+      "source": "tools/render-assets (jobs-boys.json: boy-diamond)"
     }
   }
 }

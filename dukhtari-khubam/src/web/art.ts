@@ -11,14 +11,14 @@ export const SCHOOL_ART: Record<string, Art> = {
   'ilm-va-salomati': a('school-health', 480, 369),
   'rushdi-shakhsiyat': a('school-growth', 414, 480),
   'zindagii-muosir': a('school-modern', 378, 326),
-  // the boys' schools, until the panel gives them their own pictures
-  'odobi-umumi': a('school-ethics', 458, 387),
-  'pisar-dar-jamiyat': a('school-family', 480, 472),
-  'khislathoi-mardona': a('school-growth', 414, 480),
-  'farhangi-tojik-pisaron': a('school-culture', 342, 412),
-  'zamoni-muosir': a('school-modern', 378, 326),
-  'odobi-oiladori': a('school-family', 480, 472),
-  'sakhtihoi-hayot': a('school-growth', 414, 480)
+  // the boys' schools (until the panel gives them pictures of their own): navy, blue and gold
+  'odobi-umumi': a('school-b-ethics', 480, 334),
+  'pisar-dar-jamiyat': a('school-b-society', 480, 338),
+  'khislathoi-mardona': a('school-b-character', 452, 480),
+  'farhangi-tojik-pisaron': a('school-b-culture', 480, 431),
+  'zamoni-muosir': a('school-b-modern', 465, 480),
+  'odobi-oiladori': a('school-b-family', 480, 408),
+  'sakhtihoi-hayot': a('school-b-hardship', 480, 472)
 }
 
 export const ART = {

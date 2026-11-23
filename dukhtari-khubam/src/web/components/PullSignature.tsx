@@ -61,6 +61,10 @@ export function PullSignature() {
     let fullSince = 0
 
     const blocked = (el: EventTarget | null) => {
+      // never in Mahliyo's chat (its own pull makes a new chat) or over a sheet or a dialog: a pull there
+      // drags the sheet, chooses photos or scrolls — the signature must not take it
+      if (location.pathname.replace(/\/$/, '').endsWith('/mahliyo')) return true
+      if ((el as HTMLElement | null)?.closest?.('[role="dialog"], .attach-veil, .pmark, .docv, .open-choice')) return true
       for (let n = el as HTMLElement | null; n && n !== app; n = n.parentElement) {
         if (n.matches('input, textarea, select, [contenteditable="true"], .school-row, .scroller')) return true
         const s = getComputedStyle(n)
