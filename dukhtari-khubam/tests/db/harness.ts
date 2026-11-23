@@ -19,7 +19,8 @@ export async function createDb(): Promise<Db> {
   const dir = join(root, 'supabase', 'migrations')
   for (const file of readdirSync(dir).filter((f) => f.endsWith('.sql')).sort()) {
     try {
-      await db.exec(readFileSync(join(dir, file), 'utf8'))
+      // PGlite is built without lz4: column compression is only a storage setting, the default (pglz) is kept here
+      await db.exec(readFileSync(join(dir, file), 'utf8').replace(/set compression lz4/g, 'set compression pglz'))
     } catch (error) {
       throw new Error(`migration ${file} failed: ${(error as Error).message}`)
     }

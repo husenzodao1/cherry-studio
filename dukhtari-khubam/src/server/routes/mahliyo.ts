@@ -5,11 +5,11 @@ import { z } from 'zod'
 import { PROVIDER_IDS, providerOf, type ProviderId } from '@/lib/aiProviders'
 import { ApiError } from '@/lib/http'
 import { route, type AnyRoute } from '@/lib/router'
-import { supabaseFor } from '@/lib/supabase'
 
-import { answer, ATTACHMENT_MIMES, premiumLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type RedReply, type Turn } from '../mahliyo'
+import { answer, ATTACHMENT_MIMES, premiumLive, setPlansLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type RedReply, type Turn } from '../mahliyo'
 import { activeModel, bookPassages, forgetActive, hasBooks, sealKey, serverReady } from '../aiModels'
 import { makeSong } from '../music'
+import { limitReached, MODE_LIMIT, planOf, planSettings, use, whoOf, withinPlan, type PlanCtx } from '../plans'
 import { call } from '../util'
 import { buildBundle, Code, codeHash, Token } from './offline'
 
@@ -81,19 +81,11 @@ async function extraFor(sb: SupabaseClient, turns: Turn[], premium = false) {
   return { active, books, warnings }
 }
 /** whether the learner who asks has Premium (her session, checked by the database; never what the phone says) */
-async function premiumOf(session: string | undefined): Promise<boolean> {
-  if (!session) return false
-  try {
-    return !!(await call<{ premium?: boolean }>(supabaseFor(session), 'api_my_premium')).premium
-  } catch {
-    return false
-  }
-}
 /** how much of the conversation she reads: a free learner's last 12 turns, a Premium learner's last 40 */
 const FREE_TURNS = 12
-export function turnsFor(turns: Turn[], premium: boolean): Turn[] {
-  if (premium) return turns
-  let recent = turns.slice(-FREE_TURNS)
+export function turnsFor(turns: Turn[], premium: boolean, upTo = FREE_TURNS): Turn[] {
+  if (premium && upTo === FREE_TURNS) return turns
+  let recent = turns.slice(-upTo)
   while (recent.length > 1 && recent[0].role !== 'user') recent = recent.slice(1)
   return recent
 }
@@ -102,10 +94,11 @@ const RED_REPLIES_MAX = 1000
 /** whether anyone can answer: the staff chose a model, or the server has a key of its own */
 const anyone = async (sb: SupabaseClient) => configured() || !!(await activeModel(sb))
 
-async function answerInto(sb: SupabaseClient, id: string, turns: Turn[], me: Learner, files: Attachment[]) {
+async function answerInto(sb: SupabaseClient, id: string, turns: Turn[], me: Learner, files: Attachment[], plan: PlanCtx) {
   try {
     const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns, !!me.premium)])
     const a = await answer(turns, k.app, materialFor(k.parts, turns), me, files, extra)
+    a.blocks = await withinPlan(a.blocks, plan)
     await call(sb, 'api_mahliyo_answer', { p_id: id, p_answer: a.reply, p_tajik: a.tajik, p_blocks: a.blocks })
   } catch (e) {
     console.error('[mahliyo] the AI failed', e instanceof Error ? e.message : String(e))
@@ -165,8 +158,16 @@ export const mahliyoRoutes: AnyRoute[] = [
     }),
     handler: async ({ sb, body, req }) => {
       if (!(await anyone(sb()))) throw new ApiError(503, 'not_configured', 'Маҳлиё ҳоло дастрас нест.')
-      const premium = await premiumOf(body.session)
-      const turns = turnsFor(body.turns as Turn[], premium)
+      // her plan, and what it allows: a question a day, the skills with their own limits
+      const plan = await planOf(body.session)
+      const premium = plan === 'premium'
+      const settings = await planSettings(sb())
+      setPlansLive(settings.live)
+      const ctx: PlanCtx = { sb: sb(), who: whoOf(body.session, codeHash(body.token)), plan, ...settings }
+      if (!(await use(ctx, 'message'))) throw limitReached('message', plan)
+      const skill = body.mode ? MODE_LIMIT[body.mode] : undefined
+      if (skill && skill !== 'music' && !(await use(ctx, skill))) throw limitReached(skill, plan)
+      const turns = settings.live ? turnsFor(body.turns as Turn[], premium, settings.limits[plan].context) : turnsFor(body.turns as Turn[], premium)
       const files = (body.files ?? []) as Attachment[]
       const question = turns[turns.length - 1].content
       const id = await call<string>(sb(), 'api_mahliyo_ask', {
@@ -176,10 +177,10 @@ export const mahliyoRoutes: AnyRoute[] = [
       })
       // where she is: her rough place if she allowed it; her country and city as her connection shows them
       const ipPlace = [req.headers.get('x-vercel-ip-city'), req.headers.get('x-vercel-ip-country')].filter(Boolean).map((v) => decodeURIComponent(v!)).join(', ')
-      const me = { me: body.me, now: body.now, tz: body.tz, premium, place: body.place, region: ipPlace || undefined, mode: body.mode, gender: body.gender }
+      const me = { me: body.me, now: body.now, tz: body.tz, premium, plan, place: body.place, region: ipPlace || undefined, mode: body.mode, gender: body.gender }
       if (body.background) {
         const client = sb()
-        after(() => answerInto(client, id, turns, me, files))
+        after(() => answerInto(client, id, turns, me, files, { ...ctx, sb: client }))
         // the staff gave her books: when her answer takes a while, the app says she searches them
         return { id, books: (premium || !premiumLive()) && await hasBooks(client) }
       }
@@ -187,6 +188,7 @@ export const mahliyoRoutes: AnyRoute[] = [
       let a
       try {
         a = await answer(turns, k.app, materialFor(k.parts, turns), me, files, extra)
+        a.blocks = await withinPlan(a.blocks, ctx)
       } catch (e) {
         console.error('[mahliyo] the AI failed', e instanceof Error ? e.message : String(e))
         throw new ApiError(502, 'ai_unavailable', 'Маҳлиё ҳоло ҷавоб дода наметавонад. Каме дертар кӯшиш кунед.')
@@ -203,9 +205,12 @@ export const mahliyoRoutes: AnyRoute[] = [
       title: z.string().trim().min(1).max(120), prompt: z.string().trim().min(3).max(1500), genre: z.string().trim().max(80).optional(),
       lyrics: z.string().max(3000).optional(), instrumental: z.boolean().optional(), long: z.boolean().optional()
     }),
-    handler: async ({ body }) => {
-      // a whole song only with Premium; a 30-second clip for the others
-      const premium = await premiumOf(body.session)
+    handler: async ({ sb, body }) => {
+      // songs are counted by her plan (Premium's); a whole song only with Premium, a 30-second clip otherwise
+      const plan = await planOf(body.session)
+      const premium = plan === 'premium'
+      const settings = await planSettings(sb())
+      if (!(await use({ sb: sb(), who: whoOf(body.session, codeHash(body.token)), plan, ...settings }, 'music'))) throw limitReached('music', plan)
       const song = await makeSong({ title: body.title, prompt: body.prompt, genre: body.genre, lyrics: body.lyrics, instrumental: body.instrumental, long: !!body.long && premium })
       return new Response(JSON.stringify(song), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' } })
     }

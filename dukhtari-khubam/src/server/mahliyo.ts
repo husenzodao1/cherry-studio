@@ -359,6 +359,8 @@ export interface Learner {
   /** her city and country as her connection shows them */
   region?: string
   /** how she asked to be answered */
+  /** her plan (the server's answer by her sign-in) */
+  plan?: 'free' | 'standard' | 'premium'
   mode?: 'precise' | 'science' | 'friendly' | 'girly' | 'exam' | 'mmt' | 'facts' | 'lawyer' | 'music' | 'math' | 'translate' | 'writer'
     | 'nutrition' | 'career' | 'code' | 'history' | 'calm' | 'language' | 'factcheck'
   /** a girl or a boy (the app's mode): a boy is spoken to as a young man */
@@ -603,9 +605,10 @@ export function forPlan(blocks: Block[], premium: boolean): Block[] {
   // before Premium is sold, she answers as she always did, and tests are for everyone: no daily calls, no Premium card
   if (!premiumLive()) return blocks.filter((b) => b.type !== 'premium').map((b) => (b.type === 'reminder' && b.daily ? { ...b, daily: undefined } : b))
   if (premium) return blocks.filter((b) => b.type !== 'premium')
+  // tests are counted by her plan's limit (the server); a daily call is Premium's
   let held = false
   const out = blocks.filter((b) => {
-    if (b.type === 'quiz' || (b.type === 'reminder' && b.daily)) { held = true; return false }
+    if (b.type === 'reminder' && b.daily) { held = true; return false }
     return true
   })
   if (held && !out.some((b) => b.type === 'premium')) out.push({ type: 'premium', title: 'LifeHub Premium', text: '' })
@@ -738,7 +741,7 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
     ...(name ? [`HER NAME: ${name} — you know her: greet her by her name, and use it now and then, naturally (not in every sentence). When she asks her name, tell it.`] : []),
     ...(only.private ? ['(Her age and birthday are not shared with you.)'] : []),
     ...(me.place || me.region ? [`WHERE SHE IS (roughly; use it for what is true there — her country's customs, holidays, time, places, shops, prices, laws; never say the coordinates or that you know her place unless she asks): ${[me.place ? `about ${me.place} (latitude, longitude, ±10 km)` : '', me.region ? `connection: ${me.region}` : ''].filter(Boolean).join('; ')}`] : []),
-    ...(premiumLive() ? [planNote(!!me.premium)] : []),
+    ...(premiumLive() ? [planNote(!!me.premium, me.plan)] : []),
     ...(me.gender === 'boy' ? [me.mode === 'girly' ? BOY_GIRLY_NOTE : BOY_NOTE] : []),
     ...(me.mode && !(me.gender === 'boy' && me.mode === 'girly') ? [MODE_NOTE[me.mode]] : []),
     about || 'Nothing is known yet: she has not read lessons on this phone.'
@@ -750,7 +753,10 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
  * Premium, tells what Premium gives, and puts the card that opens the Premium screen.
  */
 /** whether Premium is sold yet (PREMIUM_LIVE=1, set once a payment way works): until then nothing is held back */
-export const premiumLive = () => process.env.PREMIUM_LIVE === '1'
+let livePlans = false
+/** the panel's switch (app_settings.plans_live), told by the routes each time they read the settings */
+export const setPlansLive = (on: boolean) => { livePlans = on }
+export const premiumLive = () => process.env.PREMIUM_LIVE === '1' || livePlans
 export const PREMIUM_PARTS = [
   'tests in the chat: test questions with answers to choose, checked at once, with explanations (the "quiz" block), and tests made from the official books',
   'preparing for the ММТ (the national entrance exam, Маркази миллии тестӣ): its subjects, its kind of test questions, a plan for it, answers from the official books and textbooks the staff gave you',
@@ -758,15 +764,21 @@ export const PREMIUM_PARTS = [
   'all schools and courses of the app (a free learner has only a few of them; Premium courses are marked with a lock)',
   'Mahliyo without limits: a far longer conversation (a free chat ends after 20 questions), a stronger, deeper mind for hard questions, and chats kept for ever (free: one week)'
 ]
-export function planNote(premium: boolean): string {
-  if (premium) {
-    return ['HER PLAN: Premium ✨ — everything is open to her, use it all gladly:',
+export function planNote(premium: boolean, plan: 'free' | 'standard' | 'premium' = premium ? 'premium' : 'free'): string {
+  const offer = 'When she asks for something her plan does not include, or its monthly limit is reached: warmly say so, then tell what Standard and Premium give — beautifully, exactly and attractively, like a good advertisement (2–4 short lines with emojis) — with the prices: Standard 45 somoni a month (the first month only 25), Premium 99 somoni a month (with Premium she can also gift a friend 3 days of Premium; Standard learners get one free week of Premium in their second month) — and add the block {"type":"premium","title":"LifeHub Premium","text":"<one inviting line>"}, which opens the plans screen. Everything else you answer fully as always.'
+  if (plan === 'premium') {
+    return ['HER PLAN: Premium 👑 (the strongest Mahliyo, "Tajthinker 4.5") — everything is open to her, use it all gladly:',
       ...PREMIUM_PARTS.map((p) => `- ${p}`),
+      '- songs (the music maker), the lawyer without limits, ММТ preparation with a 30–60-day course to her target score, preparation for university exams',
       'For a daily call use a reminder with "daily": true at her chosen time. Never show the "premium" block to her.'].join('\n')
   }
-  return ['HER PLAN: Free. These are PREMIUM — do NOT give her any of them, not even a part or a sample:',
+  if (plan === 'standard') {
+    return ['HER PLAN: Standard ⭐ ("Omuzgor 1.3"). Included, within monthly limits that the app counts: presentations, Word/PDF documents and other files, tests in the chat, ММТ practice tests from the official books, exam preparation, exact answers on Tajikistan\'s laws, the books\' material, a longer memory of the chat.',
+      'PREMIUM only (not for her): songs (music maker), daily calls from you ("daily" is always false), a personal ММТ course to a target score, unlimited use. ' + offer].join('\n')
+  }
+  return ['HER PLAN: Free. Included, a little each month (the app counts it): a few files, tests and answers in the skills. These are for Standard or Premium — never give her more than the app allows:',
     ...PREMIUM_PARTS.map((p) => `- ${p}`),
-    'Never use a "quiz" block for her and never write test questions for her to answer; never set a daily call ("daily" is always false); never answer from the official books or ММТ material. When she asks for one of these: warmly say that it is a Premium feature, then tell her what Premium gives — beautifully, exactly and attractively, like a good advertisement (2–4 short lines with emojis, the parts above), with the price: the first month 30 somoni, then 50 somoni a month, cancelled any time in Google Play — and add the block {"type":"premium","title":"LifeHub Premium","text":"<one inviting line>"}, which opens the Premium screen. Everything else (the app, school subjects, everyday life) you answer fully as always.'].join('\n')
+    'Never set a daily call ("daily" is always false); never answer from the official books or ММТ material. ' + offer].join('\n')
 }
 
 /**

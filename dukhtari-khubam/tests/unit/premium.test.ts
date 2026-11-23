@@ -19,11 +19,11 @@ describe('Premium in the chat', () => {
     expect(many.questions).toHaveLength(10)
   })
 
-  it("a free learner never gets Premium's parts: a test or a daily call is taken out and the Premium card put in", () => {
+  it("a free learner's daily call is Premium's: taken out and the plan card put in; tests are counted by the server", () => {
     const at = new Date(Date.now() + 3600_000).toISOString()
     const blocks = cleanBlocks([{ type: 'text', text: 'Мана тест:' }, QUIZ, { type: 'reminder', at, title: 'Дарс', text: '', daily: true }])
     const free = forPlan(blocks, false)
-    expect(free.map((b) => b.type)).toEqual(['text', 'premium'])
+    expect(free.map((b) => b.type)).toEqual(['text', 'quiz', 'premium'])
     // a Premium learner keeps them, and never sees the card
     const paid = forPlan([...blocks, { type: 'premium', title: 'x', text: '' }], true)
     expect(paid.map((b) => b.type)).toEqual(['text', 'quiz', 'reminder'])
@@ -31,11 +31,12 @@ describe('Premium in the chat', () => {
     expect(forPlan(cleanBlocks([{ type: 'reminder', at, title: 'Дарс', text: '', daily: false }]), false).map((b) => b.type)).toEqual(['reminder'])
   })
 
-  it('she is told her plan: free — what is Premium, never to give it, and to tell its price; Premium — to use it all', () => {
+  it('she is told her plan: free and Standard — what is theirs, the prices of the plans; Premium — to use it all', () => {
     const free = planNote(false)
     expect(free).toContain('HER PLAN: Free')
-    expect(free).toContain('Never use a "quiz" block')
-    expect(free).toContain('30 somoni, then 50 somoni')
+    expect(free).toContain('Standard 45 somoni a month (the first month only 25), Premium 99 somoni')
+    expect(planNote(false, 'standard')).toContain('HER PLAN: Standard')
+    expect(planNote(false, 'standard')).toContain('PREMIUM only (not for her): songs')
     expect(free).toContain('{"type":"premium"')
     expect(planNote(true)).toContain('HER PLAN: Premium')
     expect(learnerNote({ me: 'Name: Малика', premium: true })).toContain('HER PLAN: Premium')

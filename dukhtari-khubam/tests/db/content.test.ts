@@ -71,7 +71,7 @@ describe('catalog & RBAC', () => {
     await expectError(as(db, null, (tx) => rpc(tx, 'admin_dashboard')), /permission denied|forbidden/)
     await expectError(as(db, w.reader, (tx) => rpc(tx, 'admin_dashboard')), 'forbidden')
     const dash = await as(db, w.admin, (tx) => rpc(tx, 'admin_dashboard'))
-    expect(dash.counts.schools).toBe(7)
+    expect(dash.counts.schools).toBe(14)
   })
 })
 

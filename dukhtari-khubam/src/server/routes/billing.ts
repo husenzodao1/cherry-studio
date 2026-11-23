@@ -7,7 +7,10 @@ import { route, type AnyRoute } from '@/lib/router'
 import { secret, serverReady } from '../aiModels'
 import { acknowledgePlay, grantOf, notificationToken, PLAY_PRODUCTS, playAccountId, playReady, playSubscription, rtdnKeyOk, type PlaySubscription } from '../googlePlay'
 import { fillTranslations, MT_LOCALES, translateBundle, type MtLocale } from '../translate'
+import { grantFromEvent, paddleReady, paddleSigned, type PaddlePrices } from '../paddle'
+import { forgetPlanSettings, planSettings } from '../plans'
 import { call } from '../util'
+import { DEFAULT_LIMITS, GIFT_DAYS, PRICES } from '@/lib/plans'
 import { buildBundle } from './offline'
 
 type Json = Record<string, any>
@@ -116,8 +119,8 @@ export const billingRoutes: AnyRoute[] = [
     handler: async ({ sb }) => call<Json>(sb(), 'admin_premium_overview')
   }),
   route({
-    method: 'POST', path: '/admin/premium/tier', access: 'staff', tag: 'Admin · Premium', summary: 'A school or course made free or Premium',
-    body: z.strictObject({ kind: z.enum(['school', 'course']), id: z.uuid(), tier: z.enum(['free', 'premium']) }),
+    method: 'POST', path: '/admin/premium/tier', access: 'staff', tag: 'Admin · Premium', summary: 'A school, course, lesson or test made free, Standard or Premium',
+    body: z.strictObject({ kind: z.enum(['school', 'course', 'lesson', 'quiz']), id: z.uuid(), tier: z.enum(['free', 'standard', 'premium']) }),
     handler: async ({ sb, body }) => {
       await call(sb(), 'admin_set_tier', { p_kind: body.kind, p_id: body.id, p_tier: body.tier })
       return { ok: true }
@@ -125,15 +128,78 @@ export const billingRoutes: AnyRoute[] = [
   }),
   route({
     method: 'POST', path: '/admin/premium/grant', access: 'staff', tag: 'Admin · Premium',
-    summary: 'Premium for an account by its e-mail, for some months (0: for ever) — bought through a consultant',
-    body: z.strictObject({ email: z.email().max(200), months: z.number().int().min(0).max(60), note: z.string().trim().max(500).optional() }),
-    handler: async ({ sb, body }) => call<Json>(sb(), 'admin_grant_by_email', { p_email: body.email, p_months: body.months, p_note: body.note ?? null })
+    summary: 'Standard or Premium for an account by its e-mail, for some months (0: for ever) — bought through a consultant',
+    body: z.strictObject({ email: z.email().max(200), months: z.number().int().min(0).max(60), tier: z.enum(['standard', 'premium']).default('premium'), note: z.string().trim().max(500).optional() }),
+    handler: async ({ sb, body }) => call<Json>(sb(), 'admin_grant_plan', { p_email: body.email, p_tier: body.tier, p_months: body.months, p_note: body.note ?? null })
   }),
   route({
-    method: 'POST', path: '/admin/premium/setting', access: 'staff', tag: 'Admin · Premium', summary: 'A Premium setting (the consultant link on the Premium screen)',
-    body: z.strictObject({ key: z.enum(['premium_consultant']), value: z.boolean() }),
+    method: 'POST', path: '/admin/premium/setting', access: 'staff', tag: 'Admin · Premium',
+    summary: 'A plans setting: plans on or off, the consultant link, the limits of each plan, Paddle\'s price IDs',
+    body: z.discriminatedUnion('key', [
+      z.strictObject({ key: z.enum(['premium_consultant', 'plans_live']), value: z.boolean() }),
+      z.strictObject({ key: z.literal('plan_limits'), value: z.record(z.enum(['free', 'standard', 'premium']), z.record(z.string().max(20), z.number().int().min(-1).max(100_000))) }),
+      z.strictObject({ key: z.literal('paddle'), value: z.strictObject({ standard: z.string().max(80).optional(), premium: z.string().max(80).optional(), standard_discount: z.string().max(80).optional() }) })
+    ]),
     handler: async ({ sb, body }) => {
       await call(sb(), 'admin_set_setting', { p_key: body.key, p_value: body.value })
+      forgetPlanSettings()
+      return { ok: true }
+    }
+  }),
+  route({
+    method: 'POST', path: '/admin/premium/end', access: 'staff', tag: 'Admin · Premium', summary: 'A plan taken back: it ends now',
+    body: z.strictObject({ id: z.uuid() }),
+    handler: async ({ sb, body }) => {
+      await call(sb(), 'admin_end_entitlement', { p_id: body.id })
+      return { ok: true }
+    }
+  }),
+  route({
+    method: 'GET', path: '/plans', access: 'public', tag: 'Plans', cache: 60,
+    summary: 'The plans: whether they are on, their prices and limits, how to pay (Paddle) and the consultant link',
+    handler: async ({ sb }) => {
+      const settings = await call<Record<string, unknown>>(sb(), 'api_app_settings').catch(() => ({} as Record<string, unknown>))
+      const { live, limits } = await planSettings(sb())
+      const prices = (settings.paddle ?? {}) as PaddlePrices
+      return {
+        live, prices: PRICES, gift_days: GIFT_DAYS, limits: limits ?? DEFAULT_LIMITS,
+        consultant: settings.premium_consultant !== false,
+        paddle: process.env.PADDLE_CLIENT_TOKEN && prices.standard && prices.premium
+          ? { token: process.env.PADDLE_CLIENT_TOKEN, sandbox: process.env.PADDLE_ENV === 'sandbox', standard: prices.standard, premium: prices.premium, standard_discount: prices.standard_discount ?? null }
+          : null
+      }
+    }
+  }),
+  route({
+    method: 'GET', path: '/me/plan', access: 'user', tag: 'Plans', summary: 'My plan: which, until when, Standard\'s free week, my gifts for friends',
+    handler: async ({ sb }) => call<Json>(sb(), 'api_my_plan')
+  }),
+  route({
+    method: 'POST', path: '/me/plan/week', access: 'user', tag: 'Plans', summary: 'Standard\'s second month: one free week of Premium (once)',
+    handler: async ({ sb }) => call<Json>(sb(), 'api_claim_premium_week')
+  }),
+  route({
+    method: 'POST', path: '/me/gift', access: 'user', tag: 'Plans', summary: 'A friend\'s Premium gift taken (its code): Premium for its days',
+    body: z.strictObject({ code: z.string().trim().regex(/^[A-Za-z0-9]{8}$/) }),
+    handler: async ({ sb, body }) => call<Json>(sb(), 'api_redeem_gift', { p_code: body.code })
+  }),
+  route({
+    method: 'POST', path: '/billing/paddle/webhook', access: 'public', tag: 'Plans',
+    summary: "Paddle's webhook (signed): a subscription bought, renewed, changed, paused or cancelled",
+    handler: async ({ sb, req }) => {
+      const raw = await req.text()
+      if (!paddleReady() || !serverReady()) throw new ApiError(503, 'not_configured', 'Paddle is not set up.')
+      if (!paddleSigned(req.headers.get('paddle-signature'), raw)) throw new ApiError(403, 'forbidden', 'Bad signature.')
+      let event: unknown
+      try { event = JSON.parse(raw) } catch { throw new ApiError(400, 'bad_json', 'Bad JSON.') }
+      const settings = await call<Record<string, unknown>>(sb(), 'api_app_settings').catch(() => ({} as Record<string, unknown>))
+      const g = grantFromEvent(event, (settings.paddle ?? {}) as PaddlePrices)
+      if (!g) return { ok: true }
+      await call(sb(), 'api_paddle_entitlement', {
+        p_proof: secret(), p_user: g.user, p_subscription: g.subscription, p_tier: g.tier, p_starts: g.starts, p_ends: g.ends, p_auto_renew: g.autoRenew
+      })
+      // a Premium purchase: three days of Premium for a friend
+      if (g.created && g.tier === 'premium') await call(sb(), 'api_make_gift', { p_proof: secret(), p_user: g.user, p_days: GIFT_DAYS }).catch(() => undefined)
       return { ok: true }
     }
   })
