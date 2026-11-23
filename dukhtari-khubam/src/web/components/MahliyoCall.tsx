@@ -242,7 +242,7 @@ function CallScreen({ info }: { info: CallInfo }) {
     <div className={`call is-${phase}${keypad ? ' has-keypad' : ''}`} role="dialog" aria-modal="true" aria-label={`${t('ai.call_app')}: ${info.title}`}>
       <div className="call-top">
         <span className="call-kind"><Icon name="phone" size={13} />{t('ai.call_app')}</span>
-        <h2 className="call-name">Маҳлиё</h2>
+        <h2 className="call-name">{t('intro.name')}</h2>
         <span className="call-status" aria-live="polite">
           {phase === 'ringing' ? <>{t('ai.call_calling')}<i className="call-dots"><b /><b /><b /></i></> : phase === 'talking' ? mmss : t('ai.call_ended')}
         </span>

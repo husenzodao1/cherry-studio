@@ -19,7 +19,7 @@ import { usePrefs } from '../prefs'
  * has a plan sees it here too: until when, Standard's free Premium week, her gifts for friends.
  */
 
-/** the pictures at the top: the app at work (public/assets/paywall) */
+/** the pictures at the top: the app at work in her language (public/assets/paywall/<locale>) */
 const SHOTS = ['chat', 'slides', 'song', 'quiz', 'lawyer', 'mmt', 'call'] as const
 type Shot = (typeof SHOTS)[number]
 
@@ -202,7 +202,7 @@ export function PlansScreen({ onClose }: { onClose: () => void }) {
 
 /** The app at work: its pictures passing one after another, with a line under each; dots to choose one. */
 function Shots() {
-  const { t } = usePrefs()
+  const { t, locale } = usePrefs()
   const [at, setAt] = useState(0)
   const [held, setHeld] = useState(false)
   useEffect(() => {
@@ -224,7 +224,7 @@ function Shots() {
       <div className="pw-shots-track">
         {SHOTS.map((s: Shot, i) => (
           <figure key={s} className={`pw-shot${i === at ? ' is-on' : i === (at - 1 + SHOTS.length) % SHOTS.length ? ' is-prev' : i === (at + 1) % SHOTS.length ? ' is-next' : ''}`} aria-hidden={i !== at}>
-            <img src={`/assets/paywall/${s}.webp`} alt="" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+            <img src={`/assets/paywall/${locale}/${s}.webp`} alt="" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
             <figcaption>{t(`pw.shot_${s}` as 'pw.shot_chat')}</figcaption>
           </figure>
         ))}
