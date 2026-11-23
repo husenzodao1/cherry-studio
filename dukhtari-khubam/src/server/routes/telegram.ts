@@ -43,9 +43,10 @@ export const telegramRoutes: AnyRoute[] = [
   route({
     method: 'GET', path: '/telegram/status', access: 'public', tag: 'Telegram', summary: 'Whether the bot is set up (and pointed at this site), and its name',
     handler: async () => {
-      if (!tgReady()) return { ready: false, bot: null }
-      const webhook = await ensureWebhook().catch(() => null)
-      return { ready: !!webhook, bot: await botOf() }
+      if (!tgReady()) return { ready: false, bot: null, problem: process.env.TELEGRAM_BOT_TOKEN ? 'server_secret' : 'no_token' }
+      let problem: string | null = null
+      const webhook = await ensureWebhook().catch((e: unknown) => { problem = e instanceof Error ? e.message.slice(0, 200) : 'failed'; return null })
+      return { ready: !!webhook, bot: await botOf(), problem }
     }
   }),
   route({
