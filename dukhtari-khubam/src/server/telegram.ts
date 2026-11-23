@@ -62,12 +62,12 @@ export const webhookUrl = () => {
  * secret, and its commands. Returns the webhook's address.
  */
 let pointed = false
-/** after a failure, Telegram is left alone for two minutes (asking again and again only makes its limits worse) */
+/** after a failure, Telegram is left alone for ten minutes (asking again and again only makes its limits worse) */
 let failedAt = 0
 export async function ensureWebhook(url = webhookUrl(), fetcher: Fetch = fetch): Promise<string | null> {
   if (!tgReady() || !url) return null
   if (pointed) return url
-  if (Date.now() - failedAt < 120_000) throw new Error('telegram: waiting after the last failure')
+  if (Date.now() - failedAt < 600_000) throw new Error('telegram: waiting after the last failure')
   try {
     await pointNow(url, fetcher)
   } catch (e) {
