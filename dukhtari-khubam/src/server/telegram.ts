@@ -35,7 +35,7 @@ export async function tg<T = unknown>(method: string, body: unknown, fetcher: Fe
   const data = (await res.json().catch(() => ({}))) as { ok?: boolean; result?: T; description?: string; parameters?: { retry_after?: number } }
   // "too many requests": once more after the wait Telegram names (when it is short)
   const wait = data.parameters?.retry_after
-  if (!data.ok && again && wait !== undefined && wait <= 25) {
+  if (!data.ok && again && wait !== undefined && wait <= 60) {
     await new Promise((r) => setTimeout(r, (wait + 1) * 1000))
     return tg<T>(method, body, fetcher, false)
   }
