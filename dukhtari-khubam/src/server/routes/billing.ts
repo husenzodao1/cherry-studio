@@ -10,7 +10,7 @@ import { fillTranslations, MT_LOCALES, translateBundle, type MtLocale } from '..
 import { grantFromEvent, paddleReady, paddleSigned, type PaddlePrices } from '../paddle'
 import { forgetPlanSettings, planSettings } from '../plans'
 import { call } from '../util'
-import { DEFAULT_LIMITS, GIFT_DAYS, PRICES } from '@/lib/plans'
+import { DEFAULT_LIMITS, GIFT_DAYS, planRank, PRICES } from '@/lib/plans'
 import { buildBundle } from './offline'
 
 type Json = Record<string, any>
@@ -91,23 +91,25 @@ export const billingRoutes: AnyRoute[] = [
   }),
   route({
     method: 'GET', path: '/bundle/premium', access: 'user', tag: 'Premium',
-    summary: "Premium courses, lessons and their tests for a Premium learner (the public bundle leaves them out)",
-    query: z.object({ locale: z.enum(['tg', 'ru', 'ar', 'en', 'uz', 'tr', 'fa', 'prs']).default('tg') }),
+    summary: "The courses, lessons and tests of my plan (Standard, or Standard and Premium) that the public bundle leaves locked",
+    query: z.object({ locale: z.enum(['tg', 'ru', 'ar', 'en', 'uz', 'tr', 'fa', 'prs']).default('tg'), audience: z.enum(['girls', 'boys']).default('girls') }),
     handler: async ({ sb, query }) => {
       const client = sb()
-      const me = await call<{ premium: boolean }>(client, 'api_my_premium')
-      if (!me.premium) throw new ApiError(403, 'premium_required', 'Барои Premium.')
+      const me = await call<{ plan?: string; premium?: boolean }>(client, 'api_my_plan')
+      const rank = planRank(me.plan ?? (me.premium ? 'premium' : 'free'))
+      if (!rank) throw new ApiError(403, 'premium_required', 'Барои Standard ё Premium.')
       const source = query.locale === 'ru' || query.locale === 'ar' ? query.locale : 'tg'
-      let bundle: Json = await buildBundle(client, source)
+      let bundle: Json = await buildBundle(client, source, query.audience)
       if ((MT_LOCALES as readonly string[]).includes(query.locale)) {
         const t = await translateBundle(client, bundle as never, query.locale as MtLocale)
         bundle = t.bundle as Json
         if (t.missing.length) after(() => fillTranslations(client, query.locale as MtLocale, t.missing).catch(() => undefined))
       }
-      // only what the public bundle leaves out: Premium courses, their lessons and tests
-      const courses = Object.fromEntries(Object.entries((bundle.courses ?? {}) as Record<string, Json>).filter(([, c]) => c.access_tier === 'premium'))
-      const lessons = Object.fromEntries(Object.entries((bundle.lessons ?? {}) as Record<string, Json>).filter(([, l]) => l.access_tier === 'premium'))
-      const quizzes = Object.fromEntries(Object.entries((bundle.quizzes ?? {}) as Record<string, Json>).filter(([, q]) => q.access_tier === 'premium'))
+      // only what the public bundle leaves locked, within her plan: the paid courses, their lessons and tests
+      const mine = (x: Json) => planRank(x.access_tier) > 0 && planRank(x.access_tier) <= rank
+      const courses = Object.fromEntries(Object.entries((bundle.courses ?? {}) as Record<string, Json>).filter(([, c]) => mine(c)))
+      const lessons = Object.fromEntries(Object.entries((bundle.lessons ?? {}) as Record<string, Json>).filter(([, l]) => mine(l)))
+      const quizzes = Object.fromEntries(Object.entries((bundle.quizzes ?? {}) as Record<string, Json>).filter(([, q]) => mine(q) || mine(q.quiz ?? {})))
       return new Response(JSON.stringify({ version: bundle.version, courses, lessons, quizzes }), {
         headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' }
       })

@@ -10,6 +10,8 @@ import { Empty, Loading } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
 import { courseLessonIds, courseProgress, useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
+import { usePlan } from '@/web/plans'
+import { PlanLock } from '@/web/components/PlanLock'
 import { useQueryParam } from '@/web/useQueryParam'
 import { emojify } from '@/web/components/Emoji'
 
@@ -20,6 +22,7 @@ export default function SchoolPage() {
 function School() {
   const key = useQueryParam('key')
   const { t } = usePrefs()
+  const { open: openPlans } = usePlan()
   const { bundle, loading } = useContent()
   const { progress } = useLearner()
   const [tab, setTab] = useState<'courses' | 'about' | 'results'>('courses')
@@ -74,7 +77,8 @@ function School() {
       <div className="section stagger" role="tabpanel" key={tab} style={{ marginTop: 14 }}>
         {tab === 'courses' ? (
           courses.length === 0 ? <Empty title={t('state.school_soon')} /> : courses.map((c) => (
-            <Link key={c.id} href={`/course?id=${c.id}`} className="glass list-row">
+            <Link key={c.id} href={`/course?id=${c.id}`} className={`glass list-row${c.locked ? ' is-locked' : ''}`}
+              onClick={(e) => { if (c.locked) { e.preventDefault(); openPlans('course') } }}>
               <span className="row-icon">
                 {c.progress.percent === 100 ? <Icon name="check" /> : <Icon name="play" size={20} />}
               </span>
@@ -83,7 +87,7 @@ function School() {
                 <span className="row-sub">{t('course.modules_n').replace('{n}', String(c.module_count))}{c.progress.total ? ` · ${t('course.lessons_n').replace('{n}', String(c.progress.total))}` : ''}</span>
               </span>
               <span className="row-end">
-                {c.locked ? <Icon name="lock" size={18} /> : c.progress.percent > 0 ? `${c.progress.percent}%` : <Icon name="forward" size={18} />}
+                {c.locked ? <PlanLock /> : c.progress.percent > 0 ? `${c.progress.percent}%` : <Icon name="forward" size={18} />}
               </span>
             </Link>
           ))

@@ -2608,6 +2608,14 @@
                         "reply": {
                           "type": "string",
                           "maxLength": 400
+                        },
+                        "more": {
+                          "maxItems": 12,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 400
+                          }
                         }
                       },
                       "required": [
@@ -2791,7 +2799,19 @@
                       "girly",
                       "exam",
                       "mmt",
-                      "facts"
+                      "facts",
+                      "lawyer",
+                      "music",
+                      "math",
+                      "translate",
+                      "writer",
+                      "nutrition",
+                      "career",
+                      "code",
+                      "history",
+                      "calm",
+                      "language",
+                      "factcheck"
                     ]
                   },
                   "gender": {
@@ -2805,6 +2825,84 @@
                 "required": [
                   "token",
                   "turns"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mahliyo/music": {
+      "post": {
+        "tags": [
+          "Mahliyo AI"
+        ],
+        "summary": "A song Mahliyo planned (title, sound, lyrics) made into music by Lyria 3: the audio (base64 MP3) and its words",
+        "operationId": "postMahliyoMusic",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "session": {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 1500
+                  },
+                  "genre": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "lyrics": {
+                    "type": "string",
+                    "maxLength": 3000
+                  },
+                  "instrumental": {
+                    "type": "boolean"
+                  },
+                  "long": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "token",
+                  "title",
+                  "prompt"
                 ],
                 "additionalProperties": false
               }
@@ -3865,7 +3963,7 @@
         "tags": [
           "Premium"
         ],
-        "summary": "Premium courses, lessons and their tests for a Premium learner (the public bundle leaves them out)",
+        "summary": "The courses, lessons and tests of my plan (Standard, or Standard and Premium) that the public bundle leaves locked",
         "operationId": "getBundlePremium",
         "parameters": [
           {
@@ -3884,6 +3982,19 @@
                 "tr",
                 "fa",
                 "prs"
+              ]
+            }
+          },
+          {
+            "name": "audience",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "girls",
+              "type": "string",
+              "enum": [
+                "girls",
+                "boys"
               ]
             }
           }
@@ -3946,7 +4057,7 @@
         "tags": [
           "Admin · Premium"
         ],
-        "summary": "A school or course made free or Premium",
+        "summary": "A school, course, lesson or test made free, Standard or Premium",
         "operationId": "postAdminPremiumTier",
         "parameters": [],
         "responses": {
@@ -3981,7 +4092,9 @@
                     "type": "string",
                     "enum": [
                       "school",
-                      "course"
+                      "course",
+                      "lesson",
+                      "quiz"
                     ]
                   },
                   "id": {
@@ -3993,6 +4106,7 @@
                     "type": "string",
                     "enum": [
                       "free",
+                      "standard",
                       "premium"
                     ]
                   }
@@ -4014,7 +4128,7 @@
         "tags": [
           "Admin · Premium"
         ],
-        "summary": "Premium for an account by its e-mail, for some months (0: for ever) — bought through a consultant",
+        "summary": "Standard or Premium for an account by its e-mail, for some months (0: for ever) — bought through a consultant",
         "operationId": "postAdminPremiumGrant",
         "parameters": [],
         "responses": {
@@ -4056,6 +4170,14 @@
                     "minimum": 0,
                     "maximum": 60
                   },
+                  "tier": {
+                    "default": "premium",
+                    "type": "string",
+                    "enum": [
+                      "standard",
+                      "premium"
+                    ]
+                  },
                   "note": {
                     "type": "string",
                     "maxLength": 500
@@ -4077,8 +4199,144 @@
         "tags": [
           "Admin · Premium"
         ],
-        "summary": "A Premium setting (the consultant link on the Premium screen)",
+        "summary": "A plans setting: plans on or off, the consultant link, the limits of each plan, Paddle's price IDs",
         "operationId": "postAdminPremiumSetting",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "enum": [
+                          "premium_consultant",
+                          "plans_live"
+                        ]
+                      },
+                      "value": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "const": "plan_limits"
+                      },
+                      "value": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "enum": [
+                            "free",
+                            "standard",
+                            "premium"
+                          ]
+                        },
+                        "additionalProperties": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string",
+                            "maxLength": 20
+                          },
+                          "additionalProperties": {
+                            "type": "integer",
+                            "minimum": -1,
+                            "maximum": 100000
+                          }
+                        },
+                        "required": [
+                          "free",
+                          "standard",
+                          "premium"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "const": "paddle"
+                      },
+                      "value": {
+                        "type": "object",
+                        "properties": {
+                          "standard": {
+                            "type": "string",
+                            "maxLength": 80
+                          },
+                          "premium": {
+                            "type": "string",
+                            "maxLength": 80
+                          },
+                          "standard_discount": {
+                            "type": "string",
+                            "maxLength": 80
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/premium/end": {
+      "post": {
+        "tags": [
+          "Admin · Premium"
+        ],
+        "summary": "A plan taken back: it ends now",
+        "operationId": "postAdminPremiumEnd",
         "parameters": [],
         "responses": {
           "200": {
@@ -4108,21 +4366,176 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "key": {
+                  "id": {
                     "type": "string",
-                    "enum": [
-                      "premium_consultant"
-                    ]
-                  },
-                  "value": {
-                    "type": "boolean"
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   }
                 },
                 "required": [
-                  "key",
-                  "value"
+                  "id"
                 ],
                 "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plans": {
+      "get": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "The plans: whether they are on, their prices and limits, how to pay (Paddle) and the consultant link",
+        "operationId": "getPlans",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/plan": {
+      "get": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "My plan: which, until when, Standard's free week, my gifts for friends",
+        "operationId": "getMePlan",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/me/plan/week": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Standard's second month: one free week of Premium (once)",
+        "operationId": "postMePlanWeek",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/me/gift": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "A friend's Premium gift taken (its code): Premium for its days",
+        "operationId": "postMeGift",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9]{8}$"
+                  }
+                },
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/billing/paddle/webhook": {
+      "post": {
+        "tags": [
+          "Plans"
+        ],
+        "summary": "Paddle's webhook (signed): a subscription bought, renewed, changed, paused or cancelled",
+        "operationId": "postBillingPaddleWebhook",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
               }
             }
           }
@@ -4295,6 +4708,7 @@
                     "type": "string",
                     "enum": [
                       "free",
+                      "standard",
                       "premium"
                     ]
                   },
@@ -4487,6 +4901,7 @@
                     "type": "string",
                     "enum": [
                       "free",
+                      "standard",
                       "premium"
                     ]
                   },
@@ -5046,6 +5461,7 @@
                     "type": "string",
                     "enum": [
                       "free",
+                      "standard",
                       "premium"
                     ]
                   },
@@ -5261,6 +5677,7 @@
                     "type": "string",
                     "enum": [
                       "free",
+                      "standard",
                       "premium"
                     ]
                   },
@@ -7125,6 +7542,7 @@
                     "type": "string",
                     "enum": [
                       "free",
+                      "standard",
                       "premium"
                     ]
                   },
@@ -7287,6 +7705,7 @@
                     "type": "string",
                     "enum": [
                       "free",
+                      "standard",
                       "premium"
                     ]
                   },
@@ -7969,6 +8388,7 @@
                     "type": "string",
                     "enum": [
                       "free",
+                      "standard",
                       "premium"
                     ]
                   },
@@ -8267,6 +8687,7 @@
                     "type": "string",
                     "enum": [
                       "free",
+                      "standard",
                       "premium"
                     ]
                   },

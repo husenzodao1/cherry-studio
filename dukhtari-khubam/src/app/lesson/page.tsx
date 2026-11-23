@@ -13,6 +13,8 @@ import { Empty, Loading } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
 import { useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
+import { usePlan } from '@/web/plans'
+import { PlanLock } from '@/web/components/PlanLock'
 import { useQueryParam } from '@/web/useQueryParam'
 import { emojify } from '@/web/components/Emoji'
 
@@ -26,6 +28,7 @@ export default function LessonPage() {
 function Lesson() {
   const id = useQueryParam('id')
   const { t, textScale, set } = usePrefs()
+  const { open: openPlans } = usePlan()
   const { bundle, loading } = useContent()
   const { progress, readLesson, completeLesson, toggleBookmark } = useLearner()
   const l = bundle?.lessons[id]
@@ -103,9 +106,9 @@ function Lesson() {
       {l.summary ? <p className="lead">{l.summary}</p> : null}
 
       {l.locked ? (
-        <div className="glass card-pad row" style={{ marginTop: 24 }}>
-          <Icon name="lock" /> <b>{t('state.locked')}</b>
-        </div>
+        <button type="button" className="plan-locked-card" onClick={() => openPlans('lesson')}>
+          <PlanLock /><span><b>{t('pw.locked_title')}</b><span>{t('pw.locked_text')}</span></span><Icon name="forward" size={18} />
+        </button>
       ) : (
         <div className="blocks">{l.blocks.map((b) => <BlockView key={b.id} block={b} assets={l.assets} />)}</div>
       )}

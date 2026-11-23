@@ -19,6 +19,7 @@ import { Permissions } from './Permissions'
 import { Splash } from './Splash'
 import { Mascot } from './Mascot'
 import { PullSignature } from './PullSignature'
+import { PlanNudge, PlanProvider } from '../plans'
 import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
 import { Dock } from './Dock'
@@ -154,6 +155,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
       <PrefsProvider>
+        <PlanProvider>
         <ContentProvider>
           <CmsStrings />
           <AppFeel />
@@ -178,11 +180,13 @@ export function Providers({ children }: { children: ReactNode }) {
               <ScreenFit />
               <PullSignature />
               <WidgetBridge />
+              <PlanNudge />
               <Toaster />
               <Mascot />
             </ForAge>
           </LearnerProvider>
         </ContentProvider>
+        </PlanProvider>
       </PrefsProvider>
     </AuthProvider>
   )

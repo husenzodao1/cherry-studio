@@ -4,7 +4,7 @@ import { cleanText, Locale, SafeHref } from './blocks'
 
 export const Uuid = z.uuid()
 export const Slug = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'lowercase-latin-slug').max(80)
-export const Tier = z.enum(['free', 'premium'])
+export const Tier = z.enum(['free', 'standard', 'premium'])
 export const Status = z.enum(['draft', 'in_review', 'changes_requested', 'approved', 'scheduled', 'published', 'archived'])
 export const Role = z.enum(['super_admin', 'content_admin', 'author', 'editor', 'reviewer', 'media_manager', 'analytics_viewer'])
 export const HexColor = z.string().regex(/^#[0-9A-Fa-f]{6}$/)

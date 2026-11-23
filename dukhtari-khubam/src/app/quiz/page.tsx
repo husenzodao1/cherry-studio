@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 
 import { afterQuiz, duringQuiz } from '@/lib/mascot'
 import { courseOfLesson, FINAL_PASS, finalQuiz, PER_LESSON, stageState } from '@/lib/stage'
@@ -14,6 +14,7 @@ import { Empty, Loading } from '@/web/components/States'
 import { useContent, type OfflineOption as Option, type OfflineQuiz } from '@/web/offline/content'
 import { gradeQuestion, gradeQuiz, shuffled, type Answer, type QuestionResult } from '@/web/offline/grade'
 import { useLearner } from '@/web/offline/learner'
+import { usePlan } from '@/web/plans'
 import { usePrefs } from '@/web/prefs'
 import { useQueryParam } from '@/web/useQueryParam'
 import { emojify } from '@/web/components/Emoji'
@@ -81,6 +82,13 @@ function Player({ quiz, lessonId, finalOf }: { quiz: OfflineQuiz; lessonId: stri
   const [checked, setChecked] = useState<Record<string, Reveal>>({})
   const [index, setIndex] = useState(0)
   const [result, setResult] = useState<Result | null>(null)
+  // a test finished on a free plan: the plans open over its result a little later (once a test)
+  const { live, plan, me: myPlan, open: openPlans } = usePlan()
+  useEffect(() => {
+    if (!result || !live || plan !== 'free' || myPlan?.staff) return
+    const timer = setTimeout(() => openPlans('quiz'), 2800)
+    return () => clearTimeout(timer)
+  }, [result, live, plan, myPlan, openPlans])
   const policy = quiz.quiz
   const showAnswers = policy.show_correct_answers
   const showExpl = policy.show_explanations

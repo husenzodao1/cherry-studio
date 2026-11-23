@@ -23,7 +23,6 @@ import { showToast } from '@/web/components/Toast'
 import { useContent } from '@/web/offline/content'
 import { useAuth } from '@/web/auth'
 import { useLearner } from '@/web/offline/learner'
-import { useApi } from '@/web/useApi'
 import {
   aboutMe, accountChanged, girlyChanged, keptFile, aiReady, archiveChat, tempChat, leaveTemp, ask, copyOf, QUESTION_CAP, copyText, drawn, FileProblem, FILES_CAP, MAX_FILES, newChat, openChat, prepareFile, keepChatsForever, rate, removeChat, retry, shareChat, stop,
   useMahliyo, watch, type AiChatMeta, type AiMode, type AiFileView, type AiTurn, type AiUpload
@@ -31,6 +30,7 @@ import {
 import { alphaVideo, CLIPS } from '@/web/mahliyo'
 import { placeNote, refreshPlace } from '@/web/offline/place'
 import { usePrefs } from '@/web/prefs'
+import { usePlan } from '@/web/plans'
 
 const FACE = '/assets/mascot/face.webp'
 const FACE_THINK = '/assets/mascot/face-think.webp'
@@ -76,9 +76,10 @@ export default function MahliyoPage() {
   const { t, mode: appMode } = usePrefs()
   const { learner, progress } = useLearner()
   const { session } = useAuth()
-  const me = useApi<{ premium?: boolean }>(session ? '/me' : null)
-  // a Premium account keeps its chats; the others, a week
-  useEffect(() => { if (me.data || !session) keepChatsForever(!!me.data?.premium) }, [me.data, session])
+  // her plan: a paid plan keeps its chats and has no limit of questions in one chat
+  const { plan, me: myPlan, open: openPlans } = usePlan()
+  const paid = plan !== 'free'
+  useEffect(() => { if (myPlan || !session) keepChatsForever(paid) }, [myPlan, session, paid])
   const { bundle } = useContent()
   const { chat, chats, turns, pending, problem, fresh, online, temp } = useMahliyo()
   const [history, setHistory] = useState(false)
@@ -129,9 +130,19 @@ export default function MahliyoPage() {
   /** the question is still on its way (no id from the server yet) */
   const sending = busy && !pending.id
   /** this chat has held as many questions as it can (not for a Premium account): a new chat goes on */
-  const full = !me.data?.premium && turns.filter((m) => m.role === 'user').length >= CHAT_LIMIT && !busy
+  const full = !paid && turns.filter((m) => m.role === 'user').length >= CHAT_LIMIT && !busy
 
   useEffect(() => watch(), [])
+  // her plan's limit reached, or her newest answer says a skill is a higher plan's: the plans open (once each)
+  const shownPlans = useRef('')
+  useEffect(() => {
+    const last = turns[turns.length - 1]
+    const why = problem === 'plan' ? `limit:${turns.length}` : last?.role === 'assistant' && last.blocks?.some((b) => b.type === 'premium') && (last.at ?? '') > new Date(Date.now() - 60_000).toISOString() ? `card:${last.at}` : ''
+    if (!why || shownPlans.current === why) return
+    shownPlans.current = why
+    const timer = setTimeout(() => openPlans(problem === 'plan' ? 'limit' : 'mahliyo'), 1400)
+    return () => clearTimeout(timer)
+  }, [problem, turns, openPlans])
   // opened from her circle in the tab bar: the chat pours out of it
   const [genie, setGenie] = useState(false)
   useLayoutEffect(() => {
@@ -537,8 +548,10 @@ export default function MahliyoPage() {
         ) : busy ? null : problem && last?.role === 'user' ? (
           <div className={`ai-problem is-${problem}`} role="status">
             <div className="grow">
-              <p>{t(problem === 'limit' ? 'ai.limit' : problem === 'offline' ? 'ai.offline' : problem === 'stopped' ? 'ai.stopped' : 'ai.failed')}</p>
-              {problem === 'limit' ? null : (
+              <p>{t(problem === 'plan' ? 'ai.plan_limit' : problem === 'limit' ? 'ai.limit' : problem === 'offline' ? 'ai.offline' : problem === 'stopped' ? 'ai.stopped' : 'ai.failed')}</p>
+              {problem === 'plan' ? (
+                <button type="button" className="ai-chip ai-plan-chip" onClick={() => openPlans('limit')}><Icon name="crown" size={16} /><span>{t('pw.card_cta')}</span></button>
+              ) : problem === 'limit' ? null : (
                 <div className="ai-follow-in">
                   <button type="button" className="ai-chip" onClick={() => retry(who())} disabled={!online || !ready}><Icon name="refresh" size={16} /><span>{t('ai.retry')}</span></button>
                   {problem === 'stopped' ? <button type="button" className="ai-chip ai-chip-quiet" onClick={() => edit(turns.length - 1)}><Icon name="edit" size={16} /><span>{t('ai.edit')}</span></button> : null}

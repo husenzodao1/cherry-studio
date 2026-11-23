@@ -12,6 +12,8 @@ import { showToast } from '@/web/components/Toast'
 import { LOCALE_LABELS, LOCALES } from '@/web/i18n'
 import { useLearner } from '@/web/offline/learner'
 import { allowNotifications, canNotify, DEFAULT_NOTIFY, readNotify, writeNotify, type NotifyPrefs } from '@/web/offline/notify'
+import { usePlan } from '@/web/plans'
+import { CrownSpin } from '@/web/components/CrownSpin'
 import { TEXT_SIZES, THEMES, usePrefs } from '@/web/prefs'
 import { SITE } from '@/web/site'
 import { INBOX, useConsultant } from '@/web/components/SupportWatch'
@@ -127,6 +129,19 @@ function LanguagePicker() {
   )
 }
 
+/** Her plan, always at the top of the settings: its crown and name; tapped, the plans' screen. */
+function PlanRow() {
+  const { t } = usePrefs()
+  const { plan, open } = usePlan()
+  return (
+    <button type="button" className={`plan-row is-${plan}`} onClick={() => open('settings')}>
+      <CrownSpin plan={plan === 'standard' ? 'standard' : 'premium'} size={66} />
+      <span className="grow"><b>{t('pw.settings_title')}</b><span>{plan === 'premium' ? t('pw.you_premium') : plan === 'standard' ? t('pw.you_standard') : t('pw.settings_free')}</span></span>
+      <span className="plan-row-go">{t('pw.settings_cta')}<Icon name="forward" size={14} /></span>
+    </button>
+  )
+}
+
 export default function Settings() {
   const prefs = usePrefs()
   const { t } = prefs
@@ -146,6 +161,7 @@ export default function Settings() {
     <>
       <Header back="/profile" title={t('settings.title')} />
       <div className="section stagger solid-glass">
+        <PlanRow />
         {native ? <Notifications /> : null}
         <LanguagePicker />
         <ModePicker />

@@ -174,7 +174,66 @@ function mountain() {
   return g
 }
 
+/**
+ * The plans' crowns: Premium in polished yellow gold with rubies and amethysts and pearls on its points,
+ * Standard in platinum with sapphires. Six points: the gold one repeats every 120° (its jewels alternate),
+ * the platinum one every 60° — so a turn by that much is a seamless loop.
+ */
+function planCrown(kind) {
+  const gold = kind === 'premium'
+  const g = new THREE.Group()
+  const shine = new THREE.MeshPhysicalMaterial({ color: C(gold ? '#f7c548' : '#e6ebf2'), metalness: 1, roughness: gold ? 0.12 : 0.14, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 2.1, side: THREE.DoubleSide })
+  const inner = new THREE.MeshPhysicalMaterial({ color: C(gold ? '#c9861f' : '#9aa6b8'), metalness: 1, roughness: 0.32, envMapIntensity: 1.3, side: THREE.DoubleSide })
+  const velvet = new THREE.MeshPhysicalMaterial({ color: C(gold ? '#7a1d3b' : '#1e3a8a'), roughness: 0.75, sheen: 1, sheenColor: C(gold ? '#ff7aa8' : '#7fb2ff'), sheenRoughness: 0.4 })
+  const pearl = glossy('#fff7ef', { roughness: 0.16, sheen: 1, env: 1.5 })
+  const jewel = (color) => new THREE.MeshPhysicalMaterial({ color: C(color), roughness: 0.02, metalness: 0, transmission: 0.35, thickness: 0.2, ior: 1.77, clearcoat: 1, clearcoatRoughness: 0, envMapIntensity: 2.4, iridescence: 0.3, specularIntensity: 1 })
+  const colours = gold ? ['#e11d48', '#9333ea'] : ['#2563eb', '#2563eb']
+  // the velvet cap inside, the band, its rims
+  g.add(mesh(new THREE.SphereGeometry(0.98, 96, 48, 0, Math.PI * 2, 0, Math.PI / 2), velvet, [0, 0.18, 0], [0, 0, 0], [1, 0.62, 1]))
+  g.add(mesh(lathe([[0.97, 0], [1.04, 0], [1.11, 0.5], [1.04, 0.5], [0.97, 0]], 192), shine))
+  g.add(mesh(new THREE.CylinderGeometry(1.04, 0.97, 0.48, 192, 1, true), inner, [0, 0.25, 0]))
+  g.add(mesh(new THREE.TorusGeometry(1.01, 0.07, 28, 192), shine, [0, 0, 0], [Math.PI / 2, 0, 0]))
+  g.add(mesh(new THREE.TorusGeometry(1.09, 0.045, 24, 192), shine, [0, 0.5, 0], [Math.PI / 2, 0, 0]))
+  // a row of little beads round the band
+  for (let i = 0; i < 48; i++) {
+    const a = (i / 48) * Math.PI * 2
+    g.add(mesh(new THREE.SphereGeometry(0.03, 16, 10), shine, [Math.sin(a) * 1.075, 0.09, Math.cos(a) * 1.075]))
+  }
+  const N = 6
+  const tip = new THREE.Shape()
+  tip.moveTo(-0.38, 0)
+  tip.bezierCurveTo(-0.15, 0.07, -0.05, 0.34, 0, 0.82)
+  tip.bezierCurveTo(0.05, 0.34, 0.15, 0.07, 0.38, 0)
+  tip.lineTo(-0.38, 0)
+  const tipGeo = new THREE.ExtrudeGeometry(tip, { depth: 0.07, bevelEnabled: true, bevelThickness: 0.035, bevelSize: 0.03, bevelSegments: 6, curveSegments: 40 })
+  tipGeo.translate(0, 0, -0.035)
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * Math.PI * 2
+    const holder = new THREE.Group(); holder.rotation.y = a
+    const spike = new THREE.Group(); spike.position.set(0, 0.46, 1.08); spike.rotation.x = 0.16
+    spike.add(mesh(tipGeo, shine))
+    spike.add(mesh(new THREE.SphereGeometry(0.1, 48, 28), pearl, [0, 0.9, 0]))
+    spike.add(mesh(new THREE.OctahedronGeometry(0.09, 0), jewel(colours[i % 2]), [0, 0.24, 0.08], [0, Math.PI / 4, 0], [1, 1.35, 0.6]))
+    spike.add(mesh(new THREE.TorusGeometry(0.1, 0.02, 12, 48), shine, [0, 0.24, 0.07], [0, 0, 0], [1, 1.32, 1]))
+    holder.add(spike)
+    const between = new THREE.Group(); between.rotation.y = a + Math.PI / N
+    between.add(mesh(new THREE.OctahedronGeometry(0.12, 0), jewel(colours[(i + 1) % 2]), [0, 0.25, 1.09], [0, Math.PI / 4, 0], [1.3, 0.95, 0.5]))
+    between.add(mesh(new THREE.TorusGeometry(0.125, 0.024, 12, 48), shine, [0, 0.25, 1.085], [0, 0, 0], [1.3, 0.98, 1]))
+    g.add(holder, between)
+  }
+  // the orb and cross on top (gold) / a single sapphire (platinum)
+  if (gold) {
+    g.add(mesh(new THREE.SphereGeometry(0.16, 48, 28), shine, [0, 0.9, 0]))
+    g.add(mesh(new THREE.BoxGeometry(0.06, 0.28, 0.06), shine, [0, 1.15, 0]))
+    g.add(mesh(new THREE.BoxGeometry(0.2, 0.06, 0.06), shine, [0, 1.17, 0]))
+  } else {
+    g.add(mesh(new THREE.OctahedronGeometry(0.17, 0), jewel('#1d4ed8'), [0, 0.92, 0], [0, 0, 0], [1, 1.4, 1]))
+  }
+  return g
+}
+
 export function buildKind3(job) {
+  if (job.kind === 'plan-crown') return planCrown(job.plan)
   switch (job.kind) {
     case 'b-books': return books()
     case 'b-society': return society()

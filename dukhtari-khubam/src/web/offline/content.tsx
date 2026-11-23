@@ -4,6 +4,8 @@ import { get, set } from 'idb-keyval'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import type { Asset, Block } from '../components/Blocks'
+import { api } from '../api'
+import { planRank, usePlan } from '../plans'
 import { usePrefs } from '../prefs'
 import { filterBundleForAge } from './age'
 import { apiUrl } from './base'
@@ -27,6 +29,8 @@ export interface LessonRow { id: string; title: string; estimated_minutes?: numb
 export interface SchoolSummary {
   id: string; slug: string; title: string; description?: string | null; theme_color?: string | null; course_count: number
   icon?: { url: string | null; alt?: string | null } | null
+  /** free, standard or premium (set in the panel) */
+  access_tier?: string | null
 }
 export interface SchoolDetail extends SchoolSummary {
   courses: { id: string; title: string; description?: string | null; locked: boolean; module_count: number }[]
@@ -98,6 +102,20 @@ interface ContentState {
 
 const ContentContext = createContext<ContentState>({ bundle: null, loading: true, offlineEmpty: false, refresh: () => undefined })
 // the girls' catalogue keeps its old names on the phone; the boys' has its own
+/** the courses, lessons and tests of her plan that the public catalogue leaves locked */
+interface Paid { courses: Record<string, Course>; lessons: Record<string, Lesson>; quizzes: Record<string, OfflineQuiz> }
+/** the public catalogue with her plan's courses opened in it */
+export function withPaid(b: Bundle, paid: Paid | null): Bundle {
+  if (!paid || !Object.keys(paid.courses).length) return b
+  const open = new Set(Object.keys(paid.courses))
+  return {
+    ...b,
+    courses: { ...b.courses, ...paid.courses },
+    lessons: { ...b.lessons, ...paid.lessons },
+    quizzes: { ...b.quizzes, ...paid.quizzes },
+    schoolDetails: Object.fromEntries(Object.entries(b.schoolDetails).map(([slug, d]) => [slug, { ...d, courses: d.courses.map((c) => (open.has(c.id) ? { ...c, locked: false } : c)) }]))
+  }
+}
 const key = (locale: string, aud: string) => (aud === 'boys' ? `bundle:${locale}:boys` : `bundle:${locale}`)
 const stampKey = (locale: string, aud: string) => (aud === 'boys' ? `dk.stamp:${locale}:boys` : `dk.stamp:${locale}`)
 // a cheap look at the live stamp while the screen is shown (Realtime normally answers first)
@@ -226,7 +244,23 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     }
   }, [locale, aud, refresh])
 
-  const value = useMemo(() => ({ bundle, loading, offlineEmpty, refresh: () => void refresh() }), [bundle, loading, offlineEmpty, refresh])
+  // her plan's own courses (Standard or Premium), kept on the phone too
+  const { plan } = usePlan()
+  const [paid, setPaid] = useState<Paid | null>(null)
+  const paidKey = `paid:${locale}:${aud}`
+  useEffect(() => {
+    let alive = true
+    if (!planRank(plan)) { setPaid(null); return }
+    void get<Paid>(paidKey).then((kept) => { if (alive && kept) setPaid(kept) }).catch(() => undefined)
+    void api<Paid>(`/bundle/premium?locale=${locale}&audience=${aud}`).then((p) => {
+      if (!alive) return
+      setPaid(p)
+      void set(paidKey, p).catch(() => undefined)
+    }).catch(() => undefined)
+    return () => { alive = false }
+  }, [plan, locale, aud, paidKey, bundle?.version])
+  const shown = useMemo(() => (bundle ? withPaid(bundle, paid) : null), [bundle, paid])
+  const value = useMemo(() => ({ bundle: shown, loading, offlineEmpty, refresh: () => void refresh() }), [shown, loading, offlineEmpty, refresh])
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>
 }
 

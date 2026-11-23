@@ -12,6 +12,8 @@ import { Empty, Loading } from '@/web/components/States'
 import { useContent, type QuizCard } from '@/web/offline/content'
 import { courseLessonIds, courseProgress, useLearner } from '@/web/offline/learner'
 import { usePrefs } from '@/web/prefs'
+import { usePlan } from '@/web/plans'
+import { PlanLock } from '@/web/components/PlanLock'
 import { useQueryParam } from '@/web/useQueryParam'
 import { emojify } from '@/web/components/Emoji'
 
@@ -35,6 +37,7 @@ export default function CoursePage() {
 function Course() {
   const id = useQueryParam('id')
   const { t } = usePrefs()
+  const { open: openPlans } = usePlan()
   const { bundle, loading } = useContent()
   const { progress: learnerProgress } = useLearner()
   const known = !!bundle?.courses[id]
@@ -68,7 +71,7 @@ function Course() {
         <div className="row" style={{ flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
           {c.level ? <span className="chip">{c.level}</span> : null}
           {c.estimated_minutes ? <span className="chip">{c.estimated_minutes} {t('lesson.minutes')}</span> : null}
-          {c.locked ? <span className="chip"><Icon name="lock" size={14} /> {t('state.locked')}</span> : null}
+          {c.locked ? <button type="button" className="chip plan-chip" onClick={() => openPlans('course')}><PlanLock small /> {t('pw.unlock')}</button> : null}
         </div>
       </div>
 
@@ -132,9 +135,10 @@ function Course() {
                 {tp.lessons.map((l) => {
                   const done = !!learnerProgress.lessons[l.id]?.done
                   return (
-                    <Link key={l.id} href={`/lesson?id=${l.id}`} className="list-row press" style={{ padding: '8px 10px', background: 'var(--glass-flat)' }}>
+                    <Link key={l.id} href={`/lesson?id=${l.id}`} className={`list-row press${l.locked ? ' is-locked' : ''}`} style={{ padding: '8px 10px', background: 'var(--glass-flat)' }}
+                      onClick={(e) => { if (l.locked) { e.preventDefault(); openPlans('lesson') } }}>
                       <span className="row-icon" style={{ width: 38, height: 38 }}>
-                        {l.locked ? <Icon name="lock" size={16} /> : done ? <Icon name="check" size={16} /> : <Icon name="play" size={16} />}
+                        {l.locked ? <PlanLock small /> : done ? <Icon name="check" size={16} /> : <Icon name="play" size={16} />}
                       </span>
                       <span className="row-main"><b style={{ fontSize: '0.95em' }}>{emojify(l.title)}</b></span>
                       {l.estimated_minutes ? <span className="row-end">{l.estimated_minutes} {t('lesson.minutes')}</span> : null}

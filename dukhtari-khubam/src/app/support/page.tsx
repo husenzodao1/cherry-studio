@@ -116,6 +116,17 @@ export default function SupportPage() {
   // from the PIN screen: her request goes at once (once, even if the page is opened again)
   useEffect(() => {
     const h = new URLSearchParams(window.location.search).get('help')
+    // from the plans' screen: "I want to buy Standard / Premium through a consultant"
+    if (h === 'plan_standard' || h === 'plan_premium') {
+      router.replace('/support')
+      const body = t('support.help_plan').replace('{plan}', h === 'plan_premium' ? 'Premium' : 'Standard').replace('{email}', learner?.email ?? learner?.google ?? '—')
+      try {
+        if (sessionStorage.getItem(SENT) === body) return
+        sessionStorage.setItem(SENT, body)
+      } catch { /* storage blocked: send */ }
+      void post(body)
+      return
+    }
     if (h !== 'email' && h !== 'answers') return
     setHelp(h)
     router.replace('/support')

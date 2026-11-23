@@ -7,7 +7,9 @@ import { SCHOOL_ART } from '../art'
 import { introPlayed } from '../intro'
 import { LiquidGlass } from '../glass/LiquidGlass'
 import type { SchoolSummary } from '../offline/content'
+import { usePlan } from '../plans'
 import { usePrefs } from '../prefs'
+import { PlanLock } from './PlanLock'
 import { PoemTile } from './PoemTile'
 import { emojify } from './Emoji'
 
@@ -17,9 +19,14 @@ import { emojify } from './Emoji'
  */
 export function SchoolTile({ school, count = false, long = false }: { school: SchoolSummary; count?: boolean; long?: boolean }) {
   const { t } = usePrefs()
+  const { canOpen, open } = usePlan()
   const art = school.icon?.url ? { src: school.icon.url } : SCHOOL_ART[school.slug]
+  // a school of a higher plan: its crown, and a tap opens the plans
+  const locked = !canOpen(school.access_tier)
   return (
-    <Link href={`/school?key=${encodeURIComponent(school.slug)}`} className={`tile-link${long ? ' tile-long' : ''}`}>
+    <Link href={`/school?key=${encodeURIComponent(school.slug)}`} className={`tile-link${long ? ' tile-long' : ''}${locked ? ' is-locked' : ''}`}
+      onClick={(e) => { if (locked) { e.preventDefault(); open('school') } }}>
+      {locked ? <span className="tile-lock"><PlanLock /></span> : null}
       {/* the schools screen: thick, clear glass that bends the backdrop at its rim and corners */}
       <LiquidGlass radius={24} bezel={count ? 22 : 14} refract={count} className={`tile${count ? ' tile-wide tile-clear' : ''}`}>
         {art ? <img className="tile-art" src={art.src} alt="" aria-hidden="true" decoding="async" /> : <span className="tile-art" />}

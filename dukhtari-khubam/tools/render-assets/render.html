@@ -407,6 +407,12 @@ window.renderJob = async (job) => {
   const hdr = job.hdri === 'room' || job.hdri === 'none' ? null : await new HDRLoader().loadAsync(job.hdri)
   if (hdr) hdr.mapping = THREE.EquirectangularReflectionMapping
   scene.environment = job.hdri === 'none' ? null : hdr ? pmrem.fromEquirectangular(hdr).texture : pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+  // a studio of equal lights round the object (see studioRing): its turn by 1/n repeats exactly
+  if (job.studio && job.kind !== 'gem') {
+    const ring = studioRing(job.studio)
+    ring.mapping = THREE.EquirectangularReflectionMapping
+    scene.environment = pmrem.fromEquirectangular(ring).texture
+  }
   scene.environmentIntensity = job.envIntensity ?? 1
   scene.environmentRotation = new THREE.Euler(0, job.envRotation ?? 0, 0)
 

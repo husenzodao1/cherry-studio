@@ -7,6 +7,7 @@ import { Content } from '@/web/admin/Content'
 import { AiAdmin } from '@/web/admin/AiAdmin'
 import { MediaLibrary } from '@/web/admin/Media'
 import { Support } from '@/web/admin/Support'
+import { Plans } from '@/web/admin/Plans'
 import { Texts } from '@/web/admin/Texts'
 import { Pages } from '@/web/admin/Pages'
 import { STATUS_LABEL } from '@/web/admin/ui'
@@ -24,9 +25,9 @@ import { useApi } from '@/web/useApi'
  * as the apps; the database checks the signed-in user's role for each read and write.
  */
 
-type Tab = 'home' | 'support' | 'ai' | 'content' | 'media' | 'texts' | 'pages' | 'users'
+type Tab = 'home' | 'support' | 'ai' | 'content' | 'plans' | 'media' | 'texts' | 'pages' | 'users'
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'home', label: 'Панел' }, { id: 'support', label: 'Дастгирӣ' }, { id: 'ai', label: 'Маҳлиё AI' }, { id: 'content', label: 'Мундариҷа' }, { id: 'media', label: 'Медиа' },
+  { id: 'home', label: 'Панел' }, { id: 'support', label: 'Дастгирӣ' }, { id: 'ai', label: 'Маҳлиё AI' }, { id: 'content', label: 'Мундариҷа' }, { id: 'plans', label: '👑 Обунаҳо' }, { id: 'media', label: 'Медиа' },
   { id: 'texts', label: 'Матнҳо' }, { id: 'pages', label: 'Саҳифаҳо' }, { id: 'users', label: 'Корбарон' }
 ]
 
@@ -80,7 +81,7 @@ export default function AdminPage() {
           <button key={t.id} type="button" role="tab" className="chip" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </nav>
-      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'ai' ? <AiAdmin /> : tab === 'content' ? <Content audience={audience} /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
+      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'ai' ? <AiAdmin /> : tab === 'content' ? <Content audience={audience} /> : tab === 'plans' ? <Plans /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
     </div>
   )
 }

@@ -200,7 +200,8 @@ function FieldsForm({ level, entity, onSaved }: { level: Level; entity: Entity; 
       <Field label="Дастрасӣ">
         <div className="segmented" role="tablist">
           <button type="button" role="tab" aria-selected={tier === 'free'} onClick={() => setTier('free')}>Ройгон</button>
-          <button type="button" role="tab" aria-selected={tier === 'premium'} onClick={() => setTier('premium')}>Premium</button>
+          <button type="button" role="tab" aria-selected={tier === 'standard'} onClick={() => setTier('standard')}>⭐ Standard</button>
+          <button type="button" role="tab" aria-selected={tier === 'premium'} onClick={() => setTier('premium')}>👑 Premium</button>
         </div>
       </Field>
       <button type="button" className="btn btn-soft" onClick={save} disabled={act.busy}>Захираи танзимот</button>

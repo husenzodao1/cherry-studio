@@ -13,6 +13,7 @@ import SPOTS from '@/lib/aiSpots.json'
 
 import { allowLockScreen, lockScreenAllowed } from '../offline/call'
 import { cancelReminder, makeSong, reminderId, setReminder, type AiUpload, type MadeSong, type SongProblem } from '../offline/mahliyo'
+import { usePlan } from '../plans'
 import { usePrefs } from '../prefs'
 import { AiMarkdown, isMarkdown } from './AiMarkdown'
 import { DocViewer, OpenChoice } from './DocViewer'
@@ -408,6 +409,19 @@ function MusicCard({ block, style }: { block: Extract<AiBlock, { type: 'music' }
   )
 }
 
+/** A higher plan's card in her answer: its crown, one line, and the way to the plans. */
+function PlanCard({ style }: { style: CSSProperties }) {
+  const { t } = usePrefs()
+  const { open } = usePlan()
+  return (
+    <button type="button" className="ai-card ai-plan-card" style={style} onClick={() => open('mahliyo')}>
+      <span className="plan-lock"><Icon name="crown" size={18} /></span>
+      <span className="ai-plan-text"><b>{t('pw.card_title')}</b><span>{t('pw.card_text')}</span></span>
+      <span className="ai-plan-go">{t('pw.card_cta')}<Icon name="forward" size={14} /></span>
+    </button>
+  )
+}
+
 function FileCard({ block, style, onSend }: { block: Extract<AiBlock, { type: 'file' }>; style: CSSProperties; onSend?: (text: string, files: AiUpload[]) => void }) {
   const { t } = usePrefs()
   const [open, setOpen] = useState(false)
@@ -457,7 +471,7 @@ function FileCard({ block, style, onSend }: { block: Extract<AiBlock, { type: 'f
     }
   }
   // what is inside: a document as it reads, code as code
-  const shown = kind === 'text' && type?.lang !== 'markdown' ? `\`\`\`${type?.lang ?? ''}\n${block.content}\n\`\`\`` : block.content.replace(/^\s*---+\s*$/gm, '\n---\n')
+  const shown = kind === 'text' && type?.lang !== 'markdown' ? `\`\`\`${type?.lang ?? ''}\n${block.content}\n\`\`\`` : (block.content ?? '').replace(/^\s*---+\s*$/gm, '\n---\n')
   return (
     <div className={`ai-card ai-file kind-${kind}`} style={style}>
       <div className="ai-file-row">
@@ -616,7 +630,7 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk, onSend }: {
           case 'follow':
             return <FollowList key={i} block={b} onAsk={onAsk} style={style} />
           case 'premium':
-            return null
+            return <PlanCard key={i} style={style} />
           case 'warning':
             // insults or pressure: only this, in red
             return <p key={i} className="ai-card ai-warning" role="alert" style={style}>{emojify(b.text || t('ai.warning'))}</p>

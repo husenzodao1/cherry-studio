@@ -235,7 +235,7 @@ export async function cancelReminder(at: string): Promise<void> {
 /* ---------------------------------------------------------------- the conversation, kept by the app */
 
 /** Why there is no answer to the last question: no internet, too many questions, she could not, or stopped. */
-export type AiProblem = 'offline' | 'limit' | 'unavailable' | 'stopped'
+export type AiProblem = 'offline' | 'limit' | 'unavailable' | 'stopped' | 'plan'
 export interface AiState {
   /** the open chat, and its conversation */
   chat: string
@@ -415,7 +415,7 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
   try {
     const { account: _account, ...asker } = who
     const { id, books } = await post<{ id: string; books?: boolean }>('/mahliyo/ask', {
-      token: supportToken(), ...asker, now: localIso(), tz: tz?.slice(0, 64), background: true,
+      token: supportToken(), ...asker, session: await sessionToken(), now: localIso(), tz: tz?.slice(0, 64), background: true,
       // an earlier question's pictures are named, not sent again
       turns: recent.map((t, i) => ({
         role: t.role,
@@ -429,7 +429,8 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
     await wait(id, pending.since, my)
   } catch (e) {
     if (!current(my)) return
-    end(e instanceof AiError && e.status === 429 ? 'limit' : offline() ? 'offline' : 'unavailable')
+    // 402: her plan's limit is reached (the plans' screen opens)
+    end(e instanceof AiError && e.status === 402 ? 'plan' : e instanceof AiError && e.status === 429 ? 'limit' : offline() ? 'offline' : 'unavailable')
   }
 }
 
