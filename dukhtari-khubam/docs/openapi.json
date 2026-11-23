@@ -4946,6 +4946,152 @@
         ]
       }
     },
+    "/telegram/webhook": {
+      "post": {
+        "tags": [
+          "Telegram"
+        ],
+        "summary": "Telegram's updates for the bot (with its secret)",
+        "operationId": "postTelegramWebhook",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/telegram/setup": {
+      "post": {
+        "tags": [
+          "Admin · Telegram"
+        ],
+        "summary": "Points the bot's webhook here and keeps its name",
+        "operationId": "postAdminTelegramSetup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database."
+      }
+    },
+    "/me/telegram": {
+      "get": {
+        "tags": [
+          "Telegram"
+        ],
+        "summary": "Whether my Telegram is linked, and the bot",
+        "operationId": "getMeTelegram",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/me/telegram/code": {
+      "post": {
+        "tags": [
+          "Telegram"
+        ],
+        "summary": "A one-time link to the bot that links my Telegram (15 minutes)",
+        "operationId": "postMeTelegramCode",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/me/telegram/unlink": {
+      "post": {
+        "tags": [
+          "Telegram"
+        ],
+        "summary": "My Telegram unlinked (the bot no longer answers there)",
+        "operationId": "postMeTelegramUnlink",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/admin/schools": {
       "get": {
         "tags": [

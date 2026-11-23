@@ -28,7 +28,7 @@ export function AiAdmin() {
           <button key={id} type="button" role="tab" aria-selected={part === id} onClick={() => setPart(id)}>{label}</button>
         ))}
       </div>
-      {part === 'log' ? <MahliyoLog /> : part === 'models' ? <Models /> : <Books />}
+      {part === 'log' ? <MahliyoLog /> : part === 'models' ? <><Models /><TelegramBot /></> : <Books />}
     </div>
   )
 }
@@ -114,6 +114,38 @@ function ModelBox({ provider, model, note, hasKey, on, onSaved, onUse }: {
 }
 
 interface Book { id: string; title: string; file: string | null; pages: number | null; chunks: number; status: 'loading' | 'ready'; at: string }
+
+/**
+ * Mahliyo in Telegram: the bot made with @BotFather (its token is TELEGRAM_BOT_TOKEN on the server); this
+ * points its webhook at this site and keeps its name for the learners' links.
+ */
+function TelegramBot() {
+  const [busy, setBusy] = useState(false)
+  const [note, setNote] = useState<string | null>(null)
+  const setUp = async () => {
+    setBusy(true)
+    setNote(null)
+    try {
+      const r = await api<{ username: string; webhook: string }>('/admin/telegram/setup', { method: 'POST' })
+      setNote(`Тайёр: @${r.username} — ${r.webhook}`)
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : 'Хато')
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <div className="glass card-pad stack" style={{ gap: 8 }}>
+      <b>Маҳлиё дар Telegram</b>
+      <span className="muted" style={{ fontSize: '0.84em' }}>
+        1) Дар Telegram ба @BotFather → /newbot нависед ва бот созед. 2) Токени онро дар Vercel ҳамчун TELEGRAM_BOT_TOKEN гузоред ва сайтро аз нав нашр кунед.
+        3) Ин тугмаро пахш кунед: бот ба сайт пайваст мешавад. Корбарони Premium онро аз Танзимот → «Маҳлиё дар Telegram» пайваст мекунанд.
+      </span>
+      <button type="button" className="btn" disabled={busy} aria-busy={busy} onClick={() => void setUp()}>Пайваст кардани бот</button>
+      {note ? <span className="muted" role="status" style={{ fontSize: '0.84em', wordBreak: 'break-all' }}>{note}</span> : null}
+    </div>
+  )
+}
 
 function Books() {
   const list = useApi<Book[]>('/admin/books')

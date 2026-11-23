@@ -42,6 +42,12 @@ async function knowledge(sb: SupabaseClient): Promise<Known> {
 /** what she reads for this conversation: the material nearest her recent questions, when it is all too much */
 const materialFor = (k: Knowledge, turns: Turn[]) => knowledgeText(k, turns.filter((t) => t.role === 'user').slice(-3).map((t) => t.content).join(' '))
 
+/** Her answer to a conversation from outside the app (her Telegram bot): the same material, books and rules. */
+export async function answerTurns(sb: SupabaseClient, turns: Turn[], me: Learner) {
+  const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns, !!me.premium)])
+  return answer(turns, k.app, materialFor(k.parts, turns), me, [], extra)
+}
+
 /** a question may be long (a whole problem pasted in); the staff's list keeps its first 990 characters */
 const QUESTION_CAP = 4000
 // her own answers come back as she gave them (plain text of her blocks), so they may be longer
