@@ -901,10 +901,27 @@ test('the paperclip opens a sheet: camera, gallery, document and four ways of an
   for (const r of rects) expect(Math.abs(r.w - r.h)).toBeLessThan(2)
   for (let i = 1; i < rects.length; i++) expect(rects[i].x >= rects[i - 1].x + rects[i - 1].w - 1 || rects[i].y >= rects[i - 1].y + rects[i - 1].h - 1).toBe(true)
   await page.screenshot({ path: 'test-results/attach-sheet.png' })
-  // dragged down by its top part (not only the handle), it closes
-  const top = (await page.locator('.attach-actions').boundingBox())!
   const cdp = await page.context().newCDPSession(page)
+  let top = (await page.locator('.attach-actions').boundingBox())!
   const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', y: number) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: top.x + 20, y }] })
+  const modesHeight = (await page.locator('.attach-modes').boundingBox())!.height
+  // pulled up: tall — the row of ways keeps its size
+  await touch('touchStart', top.y + 10)
+  for (let k = 1; k <= 10; k++) await touch('touchMove', top.y + 10 - k * 40)
+  await touch('touchEnd', 0)
+  await expect(page.locator('.attach.is-tall')).toBeVisible()
+  await page.waitForTimeout(400)
+  expect(Math.abs((await page.locator('.attach-modes').boundingBox())!.height - modesHeight)).toBeLessThan(2)
+  // tall, pulled down: back to half, not closed
+  top = (await page.locator('.attach-actions').boundingBox())!
+  await touch('touchStart', top.y + 10)
+  for (let k = 1; k <= 12; k++) await touch('touchMove', top.y + 10 + k * 30)
+  await touch('touchEnd', 0)
+  await page.waitForTimeout(400)
+  await expect(page.locator('.attach')).toHaveCount(1)
+  await expect(page.locator('.attach.is-tall')).toHaveCount(0)
+  // half, dragged down by its top part (not only the handle): it closes
+  top = (await page.locator('.attach-actions').boundingBox())!
   await touch('touchStart', top.y + 10)
   for (let k = 1; k <= 12; k++) await touch('touchMove', top.y + 10 + k * 30)
   await touch('touchEnd', 0)

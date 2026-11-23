@@ -12,11 +12,12 @@ import type { LatLon } from '@/lib/navigation'
  * faces) and where she goes (a pin). While she goes, the map keeps her in its middle; before, it shows the
  * whole way.
  */
-export function NavMap({ line, me, heading, to, following }: { line: LatLon[] | null; me: LatLon | null; heading: number | null; to: LatLon | null; following: boolean }) {
+export function NavMap({ line, me, heading, to, following, recenter = 0 }: { line: LatLon[] | null; me: LatLon | null; heading: number | null; to: LatLon | null; following: boolean; recenter?: number }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<LeafletMap | null>(null)
   // the map's library arrives a moment later: what came before it is drawn then
   const [loaded, setLoaded] = useState(false)
+  const seen = useRef(false)
   const parts = useRef<{ way?: Polyline; under?: Polyline; me?: Marker; to?: Marker; L?: typeof import('leaflet') }>({})
 
   // the map, once
@@ -63,7 +64,15 @@ export function NavMap({ line, me, heading, to, following }: { line: LatLon[] | 
       parts.current.me.setIcon(L.divIcon({ className: 'nav-me', html, iconSize: [44, 44], iconAnchor: [22, 22] }))
     }
     if (following) map.current.setView(me, Math.max(map.current.getZoom(), 17), { animate: true })
-  }, [me, heading, following, loaded])
+    // her place found for the first time, no way drawn yet: the map goes to her
+    else if (!seen.current && !line?.length) map.current.setView(me, 16, { animate: true })
+    seen.current = true
+  }, [me, heading, following, loaded]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // "my place": the map back to her
+  useEffect(() => {
+    if (recenter && me && map.current) map.current.setView(me, Math.max(map.current.getZoom(), 16), { animate: true })
+  }, [recenter]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return <div ref={box} className="nav-map" role="img" aria-label="OpenStreetMap" />
 }

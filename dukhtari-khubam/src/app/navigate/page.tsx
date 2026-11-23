@@ -27,6 +27,11 @@ type Mode = 'foot' | 'car'
 /** the words of a turn are said again at these distances before it (metres) */
 const SAY_AT = [400, 150, 40]
 const ARRIVED_M = 25
+/** quick searches under the box, as a map app has them */
+const CATS = [
+  { key: 'nav.cat_uni', emoji: '🎓' }, { key: 'nav.cat_pharmacy', emoji: '💊' }, { key: 'nav.cat_food', emoji: '🍽️' },
+  { key: 'nav.cat_atm', emoji: '🏧' }, { key: 'nav.cat_fuel', emoji: '⛽' }, { key: 'nav.cat_hospital', emoji: '🏥' }
+]
 
 export default function NavigatePage() {
   const { t, locale } = usePrefs()
@@ -46,6 +51,7 @@ export default function NavigatePage() {
   const [next, setNext] = useState(1)
   const [heading, setHeading] = useState<number | null>(null)
   const [arrived, setArrived] = useState(false)
+  const [recenter, setRecenter] = useState(0)
   const said = useRef(new Set<string>())
   const offCount = useRef(0)
   const rerouting = useRef(0)
@@ -202,7 +208,10 @@ export default function NavigatePage() {
 
   return (
     <div className={`nav-screen${going ? ' is-going' : ''}`}>
-      <NavMap line={route?.line ?? null} me={here} heading={heading} to={to ? [to.lat, to.lon] : null} following={going} />
+      <NavMap line={route?.line ?? null} me={here} heading={heading} to={to ? [to.lat, to.lon] : null} following={going} recenter={recenter} />
+      {here ? (
+        <button type="button" className="nav-fab nav-me-btn" aria-label={t('nav.me')} onClick={() => setRecenter((n) => n + 1)}><Icon name="target" size={22} /></button>
+      ) : null}
 
       {going && step ? (
         <div className="nav-turn" role="status" aria-live="polite">
@@ -221,6 +230,15 @@ export default function NavigatePage() {
               onChange={(e) => { setQ(e.target.value); setTo(null); setRoute(null); setArrived(false) }} />
             {q ? <button type="button" className="nav-x" aria-label={t('action.close')} onClick={() => { setQ(''); setTo(null); setRoute(null) }}><Icon name="x" size={16} /></button> : null}
           </div>
+          {!q && !to ? (
+            <div className="nav-cats" role="group" aria-label={t('nav.where')}>
+              {CATS.map((c) => (
+                <button key={c.key} type="button" className="nav-cat glass" onClick={() => setQ(t(c.key as 'nav.cat_uni'))}>
+                  <span aria-hidden="true">{c.emoji}</span>{t(c.key as 'nav.cat_uni')}
+                </button>
+              ))}
+            </div>
+          ) : null}
           {places ? (
             <div className="nav-places glass" role="listbox" aria-label={t('nav.where')}>
               {places.length ? places.map((p) => (

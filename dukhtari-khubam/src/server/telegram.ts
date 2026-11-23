@@ -25,7 +25,7 @@ export const webhookSecret = () => createHash('sha256').update(`telegram:${secre
 type Fetch = typeof fetch
 export async function tg<T = unknown>(method: string, body: unknown, fetcher: Fetch = fetch, again = true): Promise<T> {
   const res = await fetcher(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/${method}`, {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(15_000)
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(30_000)
   })
   const data = (await res.json().catch(() => ({}))) as { ok?: boolean; result?: T; description?: string; parameters?: { retry_after?: number } }
   // "too many requests": once more after the wait Telegram names (when it is short)
@@ -57,9 +57,22 @@ export const webhookUrl = () => {
  * secret, and its commands. Returns the webhook's address.
  */
 let pointed = false
+/** after a failure, Telegram is left alone for two minutes (asking again and again only makes its limits worse) */
+let failedAt = 0
 export async function ensureWebhook(url = webhookUrl(), fetcher: Fetch = fetch): Promise<string | null> {
   if (!tgReady() || !url) return null
   if (pointed) return url
+  if (Date.now() - failedAt < 120_000) throw new Error('telegram: waiting after the last failure')
+  try {
+    await pointNow(url, fetcher)
+  } catch (e) {
+    failedAt = Date.now()
+    throw e
+  }
+  pointed = true
+  return url
+}
+async function pointNow(url: string, fetcher: Fetch) {
   // setting it again is harmless: no question asked first (one request less for Telegram's limits)
   await tg('setWebhook', { url, secret_token: webhookSecret(), allowed_updates: ['message'] }, fetcher)
   await tg('setMyCommands', { commands: [
@@ -67,8 +80,6 @@ export async function ensureWebhook(url = webhookUrl(), fetcher: Fetch = fetch):
     { command: 'on', description: 'Фаъол дар гурӯҳ / Включить в группе' },
     { command: 'off', description: 'Хомӯш дар гурӯҳ / Выключить в группе' }
   ] }, fetcher).catch(() => undefined)
-  pointed = true
-  return url
 }
 
 /** a reply in pieces of at most 4000 characters (Telegram's limit is 4096), cut at a line where it can */

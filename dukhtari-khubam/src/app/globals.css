@@ -3093,6 +3093,8 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .attach-tile { aspect-ratio: auto; width: 100%; height: 100%; min-height: 0; }
 .attach-photo img { position: absolute; inset: 0; }
 .attach.is-tall .attach-photos { flex: 1 1 auto; }
+/* tall: only the photos give way — the handle, the icons and the row of modes keep their size */
+.attach > .attach-handle, .attach > .attach-actions, .attach > .attach-modes, .attach > .attach-send-bar { flex: none; }
 .attach { position: relative; }
 .attach-send-bar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; padding: 14px 14px max(14px, env(safe-area-inset-bottom));
   background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 92%, transparent) 38%); animation: attach-bar 0.24s var(--ease) both; }
@@ -3436,3 +3438,20 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .tg-open { background: linear-gradient(135deg, #2aabee, #229ed9); gap: 8px; }
 .tg-ok { display: flex; align-items: center; gap: 8px; color: #0f9d58; font-weight: 700; }
 .tg-steps { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 6px; color: var(--ink-2); }
+
+/* settings: "More features", opening the rest of the Premium tools below it */
+.more-row { width: 100%; border: 0; font: inherit; text-align: start; cursor: pointer; }
+.ws-row-ico.is-more { background: linear-gradient(135deg, #f59e0b, #ef4444); box-shadow: 0 12px 26px -12px rgba(239, 68, 68, 0.7); }
+.more-chev { display: grid; place-items: center; transition: transform 0.25s var(--ease); color: var(--ink-2); }
+.more-chev.is-open { transform: rotate(180deg); }
+.more-list { display: flex; flex-direction: column; gap: 10px; animation: rise 0.25s ease both; }
+
+/* "Маро бубар" like a map app: quick searches under the box, "my place" floating on the right */
+.nav-cats { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -12px; padding: 0 12px 4px; }
+.nav-cats::-webkit-scrollbar { display: none; }
+.nav-cat { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 0; border-radius: 999px; font: inherit; font-size: 0.86rem; font-weight: 600; color: var(--ink); cursor: pointer; }
+.nav-fab { position: absolute; z-index: 2; width: 52px; height: 52px; border: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  background: var(--card, #fff); color: #2f6bff; box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.45); }
+.nav-me-btn { right: 14px; bottom: 180px; }
+.nav-screen.is-going .nav-me-btn { bottom: 120px; }
+.nav-fab:active { transform: scale(0.92); }

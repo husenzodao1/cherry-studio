@@ -53,6 +53,9 @@ const MAKE: { command: string; tone: string; key: 'ai.make_slides' | 'ai.make_pd
   { command: 'word', tone: 'word', key: 'ai.make_word', glyph: WordGlyph }
 ]
 
+/** the photos picked and not sent yet (kept while the app is open) */
+let keptPicks: string[] = []
+
 export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: {
   max: number
   mode: AiMode | null
@@ -64,14 +67,23 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
 }) {
   const { t } = usePrefs()
   const [photos, setPhotos] = useState<Photo[] | null>(null)
-  const [picked, setPicked] = useState<string[]>([])
+  // what she picked and has not sent yet stays picked, even when the sheet is closed and opened again
+  const [picked, setPickedNow] = useState<string[]>(() => keptPicks)
+  const setPicked = (next: string[] | ((was: string[]) => string[])) => setPickedNow((was) => {
+    const v = typeof next === 'function' ? next(was) : next
+    keptPicks = v
+    return v
+  })
   const [tall, setTall] = useState(false)
   const [camera, setCamera] = useState(false)
   const sheet = useRef<HTMLElement>(null)
   const docs = useRef<HTMLInputElement>(null)
   const gallery = useRef<HTMLInputElement>(null)
 
-  useEffect(() => { void recentPhotos(tall ? 90 : 30).then(setPhotos) }, [tall])
+  // once the sheet was tall, the longer list stays (her picks among them stay in sight)
+  const [many, setMany] = useState(() => keptPicks.length > 0)
+  useEffect(() => { if (tall) setMany(true) }, [tall])
+  useEffect(() => { void recentPhotos(many ? 90 : 30).then(setPhotos) }, [many])
   useEffect(() => {
     const back = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', back)
@@ -82,6 +94,8 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
   const sendPicked = async () => {
     const files = (await Promise.all((photos ?? []).filter((p) => picked.includes(p.id)).map(photoFile))).filter((f): f is File => !!f)
     if (files.length) onFiles(files)
+    // sent: nothing stays picked
+    keptPicks = []
     onClose()
   }
   const fromInput = (list: FileList | null) => {
@@ -93,6 +107,10 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
   // their top (pulled down) or the sheet can still grow (pulled up); let go, it settles by where it is
   // and how fast it was moving: tall, as it was, or closed. Moved straight on the page, frame by frame.
   const closing = useRef(false)
+  /** how tall it was when it opened (half), to come back to; and whether it is tall now (read in the touch handlers) */
+  const half = useRef(0)
+  const isTall = useRef(tall)
+  isTall.current = tall
   const close = () => {
     const el = sheet.current
     if (!el || closing.current) return onClose()
@@ -133,6 +151,7 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
       y0 = p.clientY
       x0 = p.clientX
       h0 = el.offsetHeight
+      if (!isTall.current) half.current = h0
       height = h0
       engaged = false
       ignored = false
@@ -175,12 +194,26 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
       // px per ms, downwards positive
       const v = last.t > first.t ? (last.y - first.y) / (last.t - first.t) : 0
       const ease = 'cubic-bezier(0.22, 1, 0.36, 1)'
+      // tall and pulled down: back to where it began (half), never closed at once
+      if (isTall.current && (v > 0.25 || height < h0 - 60)) {
+        el.style.transition = `transform 0.32s ${ease}, height 0.32s ${ease}`
+        el.style.transform = ''
+        el.style.height = `${half.current || Math.min(vh() * 0.62, h0)}px`
+        setTimeout(() => {
+          if (closing.current) return
+          el.style.transition = ''
+          el.style.height = ''
+          el.style.maxHeight = ''
+          setTall(false)
+        }, 320)
+        return
+      }
       if (v > 0.55 || (v > -0.2 && height < h0 * 0.6 && height < vh() * 0.4)) return close()
-      const wantTall = v < -0.45 || height > Math.max(h0, vh() * 0.55) + 24 || (tall && height > vh() * 0.62)
+      const wantTall = v < -0.45 || height > Math.max(h0, vh() * 0.55) + 24 || (isTall.current && height > vh() * 0.62)
       const target = wantTall ? top() : Math.min(el.scrollHeight, vh() * 0.78)
       el.style.transition = `transform 0.32s ${ease}, height 0.32s ${ease}`
       el.style.transform = ''
-      el.style.height = `${wantTall || tall ? target : h0}px`
+      el.style.height = `${wantTall || isTall.current ? target : h0}px`
       setTimeout(() => {
         if (closing.current) return
         el.style.transition = ''

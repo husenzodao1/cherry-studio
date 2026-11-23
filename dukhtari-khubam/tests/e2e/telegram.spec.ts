@@ -20,6 +20,10 @@ test('Mahliyo in Telegram: from the settings, "Connect" opens the bot with a one
 
   await page.goto('/settings')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  // "Маро бубар" waits under "More features", below Telegram
+  await expect(page.getByRole('link', { name: /Маро бубар/ })).toHaveCount(0)
+  await page.getByRole('button', { name: /Имкониятҳои бештар/ }).click()
+  await expect(page.getByRole('link', { name: /Маро бубар/ })).toBeVisible()
   await page.getByRole('link', { name: /Маҳлиё дар Telegram/ }).click()
   await expect(page).toHaveURL(/\/telegram\/?$/)
   await page.getByRole('button', { name: 'Пайваст кардан' }).click()

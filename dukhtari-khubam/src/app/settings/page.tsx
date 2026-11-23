@@ -129,6 +129,30 @@ function LanguagePicker() {
   )
 }
 
+/** "More features": a quiet row under the Premium tools; tapped, the rest of them open below it. */
+function MoreFeatures() {
+  const { t } = usePrefs()
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button type="button" className="glass ws-row more-row" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <span className="ws-row-ico is-more" aria-hidden="true"><Icon name="grid" size={22} /></span>
+        <span className="grow"><b>{t('set.more')}</b><span className="row-sub">{t('nav.title')}</span></span>
+        <span className={`more-chev${open ? ' is-open' : ''}`} aria-hidden="true"><Icon name="down" size={16} /></span>
+      </button>
+      {open ? (
+        <div className="more-list">
+          <Link className="glass ws-row" href="/navigate">
+            <span className="ws-row-ico is-nav" aria-hidden="true"><Icon name="compass" size={22} /></span>
+            <span className="grow"><b>{t('nav.title')}</b><span className="row-sub">{t('nav.foot')} · {t('nav.car')}</span></span>
+            <Icon name="forward" size={16} />
+          </Link>
+        </div>
+      ) : null}
+    </>
+  )
+}
+
 /** Her plan, always at the top of the settings: its crown and name; tapped, the plans' screen. */
 function PlanRow() {
   const { t } = usePrefs()
@@ -167,16 +191,12 @@ export default function Settings() {
           <span className="grow"><b>{t('ws.title')}</b><span className="row-sub">{t('ws.add')} · PDF · Word</span></span>
           <Icon name="forward" size={16} />
         </Link>
-        <Link className="glass ws-row" href="/navigate">
-          <span className="ws-row-ico is-nav" aria-hidden="true"><Icon name="compass" size={22} /></span>
-          <span className="grow"><b>{t('nav.title')}</b><span className="row-sub">{t('nav.foot')} · {t('nav.car')}</span></span>
-          <Icon name="forward" size={16} />
-        </Link>
         <Link className="glass ws-row" href="/telegram">
           <span className="ws-row-ico is-tg" aria-hidden="true"><Icon name="share" size={22} /></span>
           <span className="grow"><b>{t('tg.title')}</b><span className="row-sub">{t('tg.connect')}</span></span>
           <Icon name="forward" size={16} />
         </Link>
+        <MoreFeatures />
         {native ? <Notifications /> : null}
         <LanguagePicker />
         <ModePicker />
