@@ -4,7 +4,7 @@ import { Capacitor } from '@capacitor/core'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
-import { allowLockScreen, lockScreenAllowed, openAppSettings, openNotifySettings, useCall } from '../offline/call'
+import { allowLockScreen, lockScreenAllowed, openNotifySettings, useCall } from '../offline/call'
 import { useLearner } from '../offline/learner'
 import { allowNotifications, notificationsAllowed, readNotify, writeNotify } from '../offline/notify'
 import { askPlace, placeAllowed } from '../offline/place'
@@ -100,8 +100,8 @@ export function Permissions() {
       // the system's own question; once she said "no", Android asks no more: its settings open instead
       if (!(await allowNotifications().catch(() => false))) openNotifySettings()
     } else if (need === 'call') allowLockScreen()
-    // the phone's own question (once said "no", it asks no more: the app's settings open instead)
-    else if (!(await askPlace())) openAppSettings()
+    // the phone's own question (once she said "never", it asks no more: the app's settings open instead)
+    else await askPlace(15_000, true)
     await recheck()
   }
   const next: Need | null = !granted.notify ? 'notify' : !granted.call ? 'call' : !granted.place ? 'place' : null

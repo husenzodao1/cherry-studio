@@ -28,10 +28,19 @@ export function placeNote(): string | undefined {
 }
 
 const native = async () => (await import('@capacitor/core')).Capacitor.isNativePlatform()
+
 /**
- * The Geolocation plugin, wrapped: a Capacitor plugin is a proxy that turns any property into a native call,
- * so it must never be what a promise resolves with (awaiting it would call a native "then").
+ * The permission, read and asked by the app's own small plugin (DkPlace): the Geolocation plugin answers
+ * "location services are not enabled" instead whenever the phone's location switch is off, which the app
+ * took for "not allowed". `services`: the switch is on (only then can her place be found).
  */
+interface PlaceState { place: 'granted' | 'denied' | 'prompt' | 'prompt-with-rationale'; services: boolean }
+const dkPlace = async () => {
+  const { registerPlugin } = await import('@capacitor/core')
+  // wrapped: a plugin is a proxy that turns any property into a native call, so no promise may resolve with it
+  return { p: registerPlugin<{ state(): Promise<PlaceState>; ask(): Promise<PlaceState> }>('DkPlace') }
+}
+/** The Geolocation plugin (for her place itself), wrapped for the same reason */
 const plugin = async () => {
   const { Geolocation } = await import('@capacitor/geolocation')
   return { geo: Geolocation }
@@ -51,9 +60,8 @@ function keep(lat: number, lon: number) {
 export async function placeAllowed(): Promise<boolean> {
   if (await native()) {
     try {
-      const { geo } = await plugin()
-      const st = await geo.checkPermissions()
-      return st.location === 'granted' || st.coarseLocation === 'granted'
+      const { p } = await dkPlace()
+      return (await p.state()).place === 'granted'
     } catch {
       return read() !== null
     }
@@ -71,6 +79,9 @@ export async function placeAllowed(): Promise<boolean> {
 async function locate(timeout: number): Promise<boolean> {
   if (await native()) {
     try {
+      // the phone's location switched off: nothing to find now (looked at again another day)
+      const { p } = await dkPlace()
+      if (!(await p.state()).services) return false
       const { geo } = await plugin()
       const pos = await geo.getCurrentPosition({ enableHighAccuracy: false, maximumAge: FRESH_MS, timeout })
       keep(pos.coords.latitude, pos.coords.longitude)
@@ -89,17 +100,22 @@ async function locate(timeout: number): Promise<boolean> {
 }
 
 /**
- * Asks for her rough place: the phone's own question the first time. Resolves whether it is allowed now
- * (once she said "no for ever", Android asks no more: false, and the app's settings are opened instead).
+ * Asks for her rough place: the phone's own question. Resolves whether it is allowed now. Once she said
+ * "never", Android asks no more: with `settings`, the app's settings are opened then (only then — a "no" to
+ * the question just asked is her answer, and no settings open by themselves).
  */
-export async function askPlace(timeout = 15_000): Promise<boolean> {
+export async function askPlace(timeout = 15_000, settings = false): Promise<boolean> {
   if (await native()) {
     try {
-      const { geo } = await plugin()
-      let st = await geo.checkPermissions()
-      if (st.location !== 'granted' && st.coarseLocation !== 'granted') st = await geo.requestPermissions({ permissions: ['coarseLocation'] })
-      const ok = st.location === 'granted' || st.coarseLocation === 'granted'
-      // allowed: her place is found in the background (location may be off; the permission is given all the same)
+      const { p } = await dkPlace()
+      const before = await p.state()
+      const st = before.place === 'granted' ? before : before.place === 'denied' ? null : await p.ask()
+      if (!st) {
+        if (settings) (await import('./call')).openAppSettings()
+        return false
+      }
+      const ok = st.place === 'granted'
+      // allowed: her place is found in the background (when the location switch is on)
       if (ok) void locate(timeout)
       return ok
     } catch {

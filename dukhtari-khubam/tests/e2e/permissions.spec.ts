@@ -2,7 +2,11 @@ import type { Page } from '@playwright/test'
 
 import { expect, signedIn, test } from './fixtures'
 
-interface Phone { notify: 'prompt' | 'granted' | 'denied'; call: boolean; asked: string[]; refuse?: boolean; place?: boolean }
+interface Phone {
+  notify: 'prompt' | 'granted' | 'denied'; call: boolean; asked: string[]; refuse?: boolean; place?: boolean
+  /** the phone's location switch (on unless the test says otherwise); `never`: she said "never" to the place */
+  services?: boolean; never?: boolean
+}
 
 /**
  * The page as the Android app: every plugin method answers through a fake bridge; notifications and the
@@ -40,9 +44,14 @@ async function asPhone(page: Page, phone: Phone) {
           if (state.notify === 'prompt') state.notify = state.refuse ? 'denied' : 'granted'
           return { display: state.notify }
         }
-        // her place: Android's own permission (the app's Geolocation plugin)
-        if (key === 'Geolocation.checkPermissions') return { location: state.place ? 'granted' : 'prompt', coarseLocation: state.place ? 'granted' : 'prompt' }
-        if (key === 'Geolocation.requestPermissions') { state.asked = [...state.asked, 'place']; state.place = true; return { location: 'granted', coarseLocation: 'granted' } }
+        // her place: Android's own permission, through the app's DkPlace plugin, whatever the location switch
+        const services = state.services !== false
+        const place = () => ({ place: state.place ? 'granted' : state.never ? 'denied' : 'prompt', services })
+        if (key === 'DkPlace.state') return place()
+        if (key === 'DkPlace.ask') { state.asked = [...state.asked, 'place']; if (!state.never) state.place = true; return place() }
+        if (key === 'MahliyoCall.appSettings') { state.asked = [...state.asked, 'app-settings']; return {} }
+        // the Geolocation plugin, as it is: with the location switch off it answers nothing but an error
+        if (key.startsWith('Geolocation.') && !services) throw new Error('Location services are not enabled.')
         if (key === 'Geolocation.getCurrentPosition') return { coords: { latitude: 38.5598, longitude: 68.7870 }, timestamp: Date.now() }
         if (key === 'MahliyoCall.canFullScreen') return { granted: state.call }
         if (key === 'MahliyoCall.askFullScreen') { state.asked = [...state.asked, 'call-settings']; state.call = true; return {} }
@@ -130,5 +139,43 @@ test('in the browser, nothing is asked', async ({ page, server: _, errors }) => 
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   await page.waitForTimeout(2000)
   await expect(page.locator('.perm')).toHaveCount(0)
+  expect(errors).toEqual([])
+})
+
+test('her place with the phone\'s location switched off: allowed in the settings counts as allowed; asked, no settings open by themselves; "never" opens them', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await asPhone(page, { notify: 'granted', call: true, asked: [], place: false, services: false })
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const sheet = page.locator('.perm')
+  await expect(sheet.locator('.perm-row', { hasText: 'Ҷойгиршавӣ' })).not.toHaveClass(/is-on/)
+  // asked: Android's question, allowed — the screen goes, no settings opened, though the location is off
+  await sheet.getByRole('button', { name: 'Иҷозат додан' }).click()
+  await expect(sheet).toHaveCount(0)
+  expect(await page.evaluate(() => (window as unknown as { __phone: Phone }).__phone.asked)).toEqual(['place'])
+  // the next opening: allowed, nothing asked again
+  await page.reload()
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await page.waitForTimeout(2500)
+  await expect(sheet).toHaveCount(0)
+  expect(errors).toEqual([])
+})
+
+test('her place once refused for ever: the app\'s settings open; allowed there, back in the app it is seen at once', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await asPhone(page, { notify: 'granted', call: true, asked: [], place: false, never: true, services: false })
+  await page.goto('/')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  const sheet = page.locator('.perm')
+  await sheet.getByRole('button', { name: 'Иҷозат додан' }).click()
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __phone: Phone }).__phone.asked)).toEqual(['app-settings'])
+  await expect(sheet).toBeVisible()
+  await page.evaluate(() => {
+    const phone = (window as unknown as { __phone: Phone }).__phone
+    phone.place = true
+    phone.never = false
+    document.dispatchEvent(new Event('visibilitychange'))
+  })
+  await expect(sheet).toHaveCount(0)
   expect(errors).toEqual([])
 })

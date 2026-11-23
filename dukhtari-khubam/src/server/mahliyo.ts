@@ -50,6 +50,8 @@ export const isProblem = (text: string) => /\d\s*[=+\-*/^×÷<>]|[=+*/^×÷]\s*\
 /** how long one Gemini request may take, and all of them together */
 const WAIT_MS = 45_000
 const GEMINI_TOTAL = 150_000
+/** the shortest time Google lets a request be given */
+const MIN_WAIT_MS = 10_000
 /**
  * On the free tier a model is now and then "too busy" (it says so at once, or hangs for half a minute):
  * when a request has not answered in HEDGE_MS, another one starts beside it (the next model, with the next
@@ -1183,7 +1185,8 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
       clearTimeout(hedge)
       const left = GEMINI_TOTAL - (Date.now() - started)
       const t = triesOf(models, keys.length, first, spent, cursor)
-      if (!t || left < 3_000) {
+      // Google takes no request it must answer in under ten seconds: with less time left, none is sent
+      if (!t || left < MIN_WAIT_MS) {
         if (!live.size) finish(() => reject(failure))
         return
       }
@@ -1203,7 +1206,7 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
           thinkingConfig: { thinkingLevel: thinkingOf(t.model, problem || !!me.premium) },
           maxOutputTokens: 8000,
           abortSignal: stop.signal,
-          httpOptions: { timeout: Math.min(WAIT_MS, left) }
+          httpOptions: { timeout: Math.max(MIN_WAIT_MS, Math.min(WAIT_MS, left)) }
         }
       }).then((r) => {
         live.delete(stop)
@@ -1219,7 +1222,8 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
         failure = e
         const said = String(e instanceof Error ? e.message : e)
         if (/"code":\s*429/.test(said)) spent.add(`${t.key}|${t.model}`)
-        else if (/"code":\s*(404|400)/.test(said)) spent.add(`*|${t.model}`)
+        // a model unknown or refusing the request itself (not a deadline too short): not asked again this time
+        else if (/"code":\s*(404|400)/.test(said) && !/deadline/i.test(said)) spent.add(`*|${t.model}`)
         console.warn('[mahliyo] gemini', t.model, 'key', t.key + 1, 'failed after', Date.now() - begun, 'ms:', said.slice(0, 160))
         // nothing left to ask and no one still answering: she cannot answer now
         if (!live.size && !triesOf(models, keys.length, first, spent, cursor)) return finish(() => reject(failure))
