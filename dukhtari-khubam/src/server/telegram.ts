@@ -23,11 +23,17 @@ export const tgReady = () => !!process.env.TELEGRAM_BOT_TOKEN?.trim() && serverR
 export const webhookSecret = () => createHash('sha256').update(`telegram:${secret()}`).digest('hex').slice(0, 48)
 
 type Fetch = typeof fetch
-export async function tg<T = unknown>(method: string, body: unknown, fetcher: Fetch = fetch): Promise<T> {
+export async function tg<T = unknown>(method: string, body: unknown, fetcher: Fetch = fetch, again = true): Promise<T> {
   const res = await fetcher(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/${method}`, {
     method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(15_000)
   })
-  const data = (await res.json().catch(() => ({}))) as { ok?: boolean; result?: T; description?: string }
+  const data = (await res.json().catch(() => ({}))) as { ok?: boolean; result?: T; description?: string; parameters?: { retry_after?: number } }
+  // "too many requests": once more after the wait Telegram names (when it is short)
+  const wait = data.parameters?.retry_after
+  if (!data.ok && again && wait !== undefined && wait <= 25) {
+    await new Promise((r) => setTimeout(r, (wait + 1) * 1000))
+    return tg<T>(method, body, fetcher, false)
+  }
   if (!data.ok) throw new Error(`telegram ${method}: ${data.description ?? res.status}`)
   return data.result as T
 }
@@ -54,15 +60,13 @@ let pointed = false
 export async function ensureWebhook(url = webhookUrl(), fetcher: Fetch = fetch): Promise<string | null> {
   if (!tgReady() || !url) return null
   if (pointed) return url
-  const info = await tg<{ url?: string }>('getWebhookInfo', {}, fetcher)
-  if (info.url !== url) {
-    await tg('setWebhook', { url, secret_token: webhookSecret(), allowed_updates: ['message'], drop_pending_updates: true }, fetcher)
-    await tg('setMyCommands', { commands: [
-      { command: 'new', description: 'Суҳбати нав / Новый разговор' },
-      { command: 'on', description: 'Фаъол дар гурӯҳ / Включить в группе' },
-      { command: 'off', description: 'Хомӯш дар гурӯҳ / Выключить в группе' }
-    ] }, fetcher)
-  }
+  // setting it again is harmless: no question asked first (one request less for Telegram's limits)
+  await tg('setWebhook', { url, secret_token: webhookSecret(), allowed_updates: ['message'] }, fetcher)
+  await tg('setMyCommands', { commands: [
+    { command: 'new', description: 'Суҳбати нав / Новый разговор' },
+    { command: 'on', description: 'Фаъол дар гурӯҳ / Включить в группе' },
+    { command: 'off', description: 'Хомӯш дар гурӯҳ / Выключить в группе' }
+  ] }, fetcher).catch(() => undefined)
   pointed = true
   return url
 }

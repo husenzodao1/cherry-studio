@@ -101,10 +101,10 @@ describe('Mahliyo in Telegram', () => {
       return new Response(JSON.stringify({ ok: true, result: method === 'getWebhookInfo' ? { url } : true }))
     }) as unknown as typeof fetch
     expect(await ensureWebhook('https://dukhtari-khubam.vercel.app/api/v1/telegram/webhook', fetcher)).toBe('https://dukhtari-khubam.vercel.app/api/v1/telegram/webhook')
-    expect(calls.map((c) => c.method)).toEqual(['getWebhookInfo', 'setWebhook', 'setMyCommands'])
-    expect(calls[1].body).toMatchObject({ secret_token: webhookSecret(), allowed_updates: ['message'] })
+    expect(calls.map((c) => c.method)).toEqual(['setWebhook', 'setMyCommands'])
+    expect(calls[0].body).toMatchObject({ secret_token: webhookSecret(), allowed_updates: ['message'] })
     // once per server instance
     await ensureWebhook('https://dukhtari-khubam.vercel.app/api/v1/telegram/webhook', fetcher)
-    expect(calls).toHaveLength(3)
+    expect(calls).toHaveLength(2)
   })
 })
