@@ -3372,6 +3372,7 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
   background: linear-gradient(135deg, #7c5cff, #ff6fa8); box-shadow: 0 12px 26px -12px rgba(124, 92, 255, 0.8); }
 .ws-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 22px; color: var(--ink); text-decoration: none; }
 .ws-row-ico { width: 44px; height: 44px; border-radius: 14px; }
+.ws-row-ico.is-nav { background: linear-gradient(135deg, #0f9d58, #2f6bff); box-shadow: 0 12px 26px -12px rgba(15, 157, 88, 0.8); }
 .ws-row .grow { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .ws-locked { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
 .ws-room { height: 6px; border-radius: 99px; background: rgba(124, 92, 255, 0.14); overflow: hidden; }
@@ -3384,3 +3385,48 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .ws-doc-act { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; display: grid; place-items: center; color: var(--ink-2); background: transparent; cursor: pointer; }
 .ws-doc-act:active { transform: scale(0.9); background: rgba(124, 92, 255, 0.12); }
 .ws-ask { gap: 8px; }
+
+/* "Маро бубар": the map over the whole screen, the search on top, the next turn in a big banner, the way left at the bottom */
+.nav-screen { position: fixed; inset: 0; z-index: 30; background: #e8eef5; }
+.nav-map { position: absolute; inset: 0; z-index: 0; }
+.nav-map.skeleton { border-radius: 0; }
+.nav-top { position: absolute; left: 0; right: 0; top: 0; z-index: 2; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.nav-top > * { pointer-events: auto; }
+.nav-search { display: flex; align-items: center; gap: 10px; padding: 0 8px 0 16px; min-height: 54px; border-radius: 27px; }
+.nav-search input { border: 0; outline: 0; background: transparent; font: inherit; font-size: 1.02rem; color: var(--ink); min-width: 0; }
+.nav-x { width: 38px; height: 38px; border: 0; border-radius: 50%; display: grid; place-items: center; background: rgba(0, 0, 0, 0.06); color: var(--ink-2); cursor: pointer; }
+.nav-places { display: flex; flex-direction: column; border-radius: 22px; overflow: hidden auto; max-height: 46vh; padding: 4px; }
+.nav-place { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 0; background: transparent; text-align: start; font: inherit; color: var(--ink); border-radius: 16px; cursor: pointer; }
+.nav-place:active { background: rgba(109, 92, 255, 0.1); }
+.nav-place svg { flex: none; color: #6d5cff; }
+.nav-place .grow { display: flex; flex-direction: column; min-width: 0; }
+.nav-place .grow span { font-size: 0.82em; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-place-far { flex: none; font-size: 0.8em; color: var(--ink-2); }
+.nav-bottom { position: absolute; left: 12px; right: 12px; bottom: max(14px, env(safe-area-inset-bottom)); z-index: 2; padding: 14px 16px; border-radius: 26px; display: flex; flex-direction: column; gap: 12px; }
+.nav-left { display: flex; flex-direction: column; }
+.nav-left b { font-size: 1.5rem; color: #0f9d58; line-height: 1.1; }
+.nav-left span { font-size: 0.86em; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-go { background: linear-gradient(135deg, #6d5cff, #ff6fa8); gap: 8px; }
+.nav-stop { background: #e5484d; gap: 6px; }
+.nav-arrived { display: flex; align-items: center; justify-content: center; gap: 10px; color: #0f9d58; font-size: 1.15rem; }
+.nav-turn { position: absolute; left: 12px; right: 12px; top: max(12px, env(safe-area-inset-top)); z-index: 2; display: flex; align-items: center; gap: 14px; padding: 16px 18px;
+  border-radius: 26px; color: #fff; background: linear-gradient(135deg, #0f9d58, #12b886); box-shadow: 0 18px 40px -16px rgba(15, 157, 88, 0.8); }
+.nav-turn-arrow { flex: none; width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.2); transition: transform 0.3s var(--ease); }
+.nav-turn .grow { display: flex; flex-direction: column; min-width: 0; }
+.nav-turn b { font-size: 1.7rem; line-height: 1.05; }
+.nav-turn span span, .nav-turn .grow > span { font-size: 1rem; font-weight: 600; }
+.nav-me { position: relative; }
+.nav-me-dot { position: absolute; left: 12px; top: 12px; width: 20px; height: 20px; border-radius: 50%; background: #2f6bff; border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(47, 107, 255, 0.22), 0 4px 10px rgba(0, 0, 0, 0.3); z-index: 1; }
+.nav-me-cone { position: absolute; left: 7px; top: -8px; width: 30px; height: 30px; transform-origin: 15px 30px;
+  background: radial-gradient(circle at 50% 100%, rgba(47, 107, 255, 0.45), transparent 70%); clip-path: polygon(50% 100%, 0 0, 100% 0); }
+.nav-pin span { display: block; width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: linear-gradient(135deg, #ff6fa8, #e5484d);
+  border: 3px solid #fff; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35); }
+.nav-screen .leaflet-control-attribution { font-size: 10px; margin-bottom: 150px; }
+.nav-screen.is-going .leaflet-control-attribution { margin-bottom: 120px; }
+
+/* Mahliyo's "take me to …": the place and a button to the way */
+.ai-card.ai-nav { display: flex; align-items: center; gap: 12px; padding: 14px; text-decoration: none; color: var(--ink); }
+.ai-nav-ico { flex: none; width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, #0f9d58, #2f6bff); }
+.ai-nav .grow { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ai-nav .grow span { font-size: 0.82em; color: var(--ink-2); }
+.ai-nav-go { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 99px; color: #fff; font-weight: 700; font-size: 0.86em; background: linear-gradient(135deg, #0f9d58, #12b886); }

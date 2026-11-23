@@ -98,7 +98,7 @@ export const ROWS: Row[] = [
   { id: 'exams', icon: 'book', cells: ['limit', 'limit', 'limit'], limit: 'exam' },
   { id: 'courses', icon: 'layers', cells: ['free', 'standard', 'all'] },
   { id: 'workspace', icon: 'select', cells: [false, false, true] },
-  { id: 'navigate', icon: 'compass', cells: [false, false, true], soon: true },
+  { id: 'navigate', icon: 'compass', cells: [false, false, true] },
   { id: 'telegram', icon: 'share', cells: [false, false, true], soon: true },
   { id: 'widgets', icon: 'grid', cells: [false, true, true] },
   { id: 'speed', icon: 'flash', cells: [false, true, true] }

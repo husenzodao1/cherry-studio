@@ -319,6 +319,18 @@ const time = (s: number) => (Number.isFinite(s) ? `${Math.floor(s / 60)}:${Strin
  * made at once by Lyria (kept on the phone afterwards); while it is made, three lines with a light sweeping
  * over them say what is happening.
  */
+/** "Take me to …": the place she named, and a button that opens "Маро бубар" with it */
+function NavigateCard({ block, style }: { block: Extract<AiBlock, { type: 'navigate' }>; style: CSSProperties }) {
+  const { t } = usePrefs()
+  return (
+    <Link className="ai-card ai-nav" style={style} href={`/navigate?to=${encodeURIComponent(block.place)}`}>
+      <span className="ai-nav-ico" aria-hidden="true"><Icon name="compass" size={24} /></span>
+      <span className="grow"><b>{block.place}</b><span>{t('nav.title')} · {t(block.mode === 'car' ? 'nav.car' : 'nav.foot')}</span></span>
+      <span className="ai-nav-go">{t('nav.go')}<Icon name="forward" size={14} /></span>
+    </Link>
+  )
+}
+
 function MusicCard({ block, style }: { block: Extract<AiBlock, { type: 'music' }>; style: CSSProperties }) {
   const { t } = usePrefs()
   const [song, setSong] = useState<MadeSong | SongProblem | null>(null)
@@ -625,6 +637,8 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk, onSend }: {
             return <ClarifyCard key={i} block={b} onAsk={onAsk} style={style} />
           case 'music':
             return <MusicCard key={i} block={b} style={style} />
+          case 'navigate':
+            return <NavigateCard key={i} block={b} style={style} />
           case 'file':
             return <FileCard key={i} block={b} style={style} onSend={onSend} />
           case 'follow':

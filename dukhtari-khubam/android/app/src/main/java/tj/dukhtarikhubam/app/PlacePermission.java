@@ -23,7 +23,11 @@ import com.getcapacitor.annotation.PermissionCallback;
  */
 @CapacitorPlugin(
     name = "DkPlace",
-    permissions = { @Permission(alias = "place", strings = { Manifest.permission.ACCESS_COARSE_LOCATION }) }
+    permissions = {
+        @Permission(alias = "place", strings = { Manifest.permission.ACCESS_COARSE_LOCATION }),
+        // "Маро бубар" follows her on the street: the precise place
+        @Permission(alias = "precise", strings = { Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION })
+    }
 )
 public class PlacePermission extends Plugin {
 
@@ -48,9 +52,37 @@ public class PlacePermission extends Plugin {
         call.resolve(stateNow());
     }
 
+    /** the precise place, for the way on the street (asked only when she starts "Маро бубар") */
+    @PluginMethod
+    public void askPrecise(PluginCall call) {
+        if (getPermissionState("precise") == PermissionState.GRANTED) {
+            call.resolve(stateNow());
+            return;
+        }
+        requestPermissionForAlias("precise", call, "asked");
+    }
+
+    /** the phone's own location switch, in its settings (it cannot be turned on for her) */
+    @PluginMethod
+    public void locationSettings(PluginCall call) {
+        try {
+            android.content.Intent i = new android.content.Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(i);
+        } catch (Exception e) {
+            // no such screen on this phone: the app's own settings
+            android.content.Intent i = new android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                android.net.Uri.fromParts("package", getContext().getPackageName(), null));
+            i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(i);
+        }
+        call.resolve();
+    }
+
     private JSObject stateNow() {
         JSObject r = new JSObject();
         r.put("place", getPermissionState("place").toString());
+        r.put("precise", getPermissionState("precise").toString());
         r.put("services", servicesOn());
         return r;
     }

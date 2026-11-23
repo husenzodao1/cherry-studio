@@ -17,7 +17,7 @@ const ITEMS: { href: string; key: 'nav.home' | 'nav.schools' | 'nav.saved' | 'na
 ]
 
 /** Screens without the tab bar (reading, tests, signing in, the panel, Mahliyo's full screen). */
-export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|admin|support|mahliyo|premium)(\/|$)/.test(path)
+export const noDock = (path: string) => /^\/(lesson|quiz|review|start|welcome|admin|support|mahliyo|premium|navigate)(\/|$)/.test(path)
 
 /**
  * Floating tab bar in clear, refracting glass; the current tab sits in a raised glass circle. In the

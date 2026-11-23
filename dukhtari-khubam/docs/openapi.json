@@ -4824,6 +4824,128 @@
         }
       }
     },
+    "/nav/places": {
+      "get": {
+        "tags": [
+          "Navigation"
+        ],
+        "summary": "Places named like her words, near her first",
+        "operationId": "getNavPlaces",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 160
+            }
+          },
+          {
+            "name": "near",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?\\d{1,3}(\\.\\d+)?,-?\\d{1,3}(\\.\\d+)?$"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "tg",
+              "type": "string",
+              "pattern": "^[a-z]{2,3}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/nav/route": {
+      "get": {
+        "tags": [
+          "Navigation"
+        ],
+        "summary": "The way from here to there, on foot or by car, with every turn",
+        "operationId": "getNavRoute",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?\\d{1,3}(\\.\\d+)?,-?\\d{1,3}(\\.\\d+)?$"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^-?\\d{1,3}(\\.\\d+)?,-?\\d{1,3}(\\.\\d+)?$"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "foot",
+              "type": "string",
+              "enum": [
+                "foot",
+                "car"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/admin/schools": {
       "get": {
         "tags": [

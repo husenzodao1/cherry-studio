@@ -167,6 +167,11 @@ export default function Settings() {
           <span className="grow"><b>{t('ws.title')}</b><span className="row-sub">{t('ws.add')} · PDF · Word</span></span>
           <Icon name="forward" size={16} />
         </Link>
+        <Link className="glass ws-row" href="/navigate">
+          <span className="ws-row-ico is-nav" aria-hidden="true"><Icon name="compass" size={22} /></span>
+          <span className="grow"><b>{t('nav.title')}</b><span className="row-sub">{t('nav.foot')} · {t('nav.car')}</span></span>
+          <Icon name="forward" size={16} />
+        </Link>
         {native ? <Notifications /> : null}
         <LanguagePicker />
         <ModePicker />
