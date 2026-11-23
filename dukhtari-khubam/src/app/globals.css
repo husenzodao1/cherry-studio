@@ -3004,6 +3004,12 @@ html.scrolling .bd-mosaic, html.is-scrolling .bd-mosaic { animation-play-state: 
 .sp-slide.head-under .sp-title::after, .sp-slide.head-bar .sp-title::after { content: ''; display: block; width: 7cqw; height: 0.5cqw; margin-top: 1.6cqw; background: var(--ac); border-radius: 1cqw; }
 .sp-slide.head-center .sp-title::after { content: ''; display: block; width: 1.1cqw; height: 1.1cqw; margin: 1.4cqw auto 0; border-radius: 50%; background: var(--ac); }
 .sp-body { padding: 2.4cqw 7cqw 0 6cqw; font-size: 2.05cqw; line-height: 1.45; }
+/* a slide with a real picture: its points on the left, the picture on the right, framed, with its caption */
+.sp-slide.has-pic .sp-body { padding-right: 44cqw; }
+.sp-pic { position: absolute; right: 5cqw; top: 17cqw; bottom: 6cqw; width: 36cqw; margin: 0; display: flex; flex-direction: column; gap: 1cqw;
+  animation: sp-in 0.6s 0.25s var(--ease) both; }
+.sp-pic img { flex: 1; min-height: 0; width: 100%; object-fit: cover; border-radius: 1.6cqw; box-shadow: 0 1.4cqw 3cqw -1.2cqw rgba(0, 0, 0, 0.45); border: 0.5cqw solid var(--ac); background: rgba(0, 0, 0, 0.06); }
+.sp-pic figcaption { font-size: 1.5cqw; opacity: 0.75; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sp-slide.head-top .sp-body { padding-top: 5cqw; }
 .sp-sub { margin: 0 0 1.2cqw; font-style: italic; opacity: 0.75; }
 .sp-body ul { margin: 0; padding: 0; list-style: none; }

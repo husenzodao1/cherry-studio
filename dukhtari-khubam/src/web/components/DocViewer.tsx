@@ -290,7 +290,7 @@ function SlideView({ slide, n, style, shown }: { slide: Slide; n: number; style?
   const c = innerColours(style)
   const head = innerHeader(style)
   return (
-    <div className={`sp-slide head-${head}`} style={{ background: c.paper, color: c.ink, ['--ac' as string]: style.accent, ['--mk' as string]: c.mark, ['--hb' as string]: style.bg, ['--hf' as string]: style.fg }}>
+    <div className={`sp-slide head-${head}${slide.image ? ' has-pic' : ''}`} style={{ background: c.paper, color: c.ink, ['--ac' as string]: style.accent, ['--mk' as string]: c.mark, ['--hb' as string]: style.bg, ['--hf' as string]: style.fg }}>
       <h3 className="sp-title" data-part={slide.title} style={{ fontFamily: `'${style.font}', sans-serif`, color: head === 'top' ? style.fg : c.title }}>{slide.title}</h3>
       <div className="sp-body" style={{ fontFamily: `'${bodyFont(style)}', sans-serif` }}>
         {slide.subtitle ? <p className="sp-sub">{slide.subtitle}</p> : null}
@@ -307,6 +307,13 @@ function SlideView({ slide, n, style, shown }: { slide: Slide; n: number; style?
           </table>
         ) : null}
       </div>
+      {slide.image ? (
+        <figure className="sp-pic" data-part={slide.image.caption || slide.title}>
+          <img src={slide.image.url} alt={slide.image.caption} referrerPolicy="no-referrer" decoding="async"
+            onError={(e) => { e.currentTarget.closest('.sp-slide')?.classList.remove('has-pic'); e.currentTarget.parentElement!.hidden = true }} />
+          {slide.image.caption ? <figcaption>{slide.image.caption}</figcaption> : null}
+        </figure>
+      ) : null}
     </div>
   )
 }

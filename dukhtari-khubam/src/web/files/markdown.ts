@@ -98,15 +98,26 @@ export function parseMarkdown(text: string): MdBlock[] {
   return out
 }
 
-/** One slide: its title, the line under it, its points, a table, and the speaker's notes. */
-export interface Slide { title: string; subtitle: string; points: { text: Run[]; level: number }[]; table: { head: string[]; rows: string[][] } | null; notes: string }
+/** One slide: its title, the line under it, its points, a table, a picture, and the speaker's notes. */
+export interface Slide {
+  title: string; subtitle: string; points: { text: Run[]; level: number }[]; table: { head: string[]; rows: string[][] } | null; notes: string
+  /** a real picture (from Wikipedia), written `![caption](https://…)` on a line of its own */
+  image: { url: string; caption: string } | null
+}
+const PICTURE = /^\s*!\[([^\]\n]*)\]\((https:\/\/[^)\s]+)\)\s*$/
 
 /** Slides written as Markdown, separated by "---" lines. */
 export function parseSlides(text: string): Slide[] {
-  return text.replace(/\r\n?/g, '\n').split(/\n\s*---+\s*\n/).map((part) => {
-    const slide: Slide = { title: '', subtitle: '', points: [], table: null, notes: '' }
+  return text.replace(/\r\n?/g, '\n').split(/\n\s*---+\s*\n/).map((whole) => {
+    const slide: Slide = { title: '', subtitle: '', points: [], table: null, notes: '', image: null }
     const notes: string[] = []
     const rest: string[] = []
+    // its picture (the first), taken out of its text
+    const part = whole.split('\n').filter((line) => {
+      const m = PICTURE.exec(line)
+      if (m && !slide.image) slide.image = { caption: m[1].trim(), url: m[2] }
+      return !m
+    }).join('\n')
     for (const b of parseMarkdown(part)) {
       if (b.t === 'h' && !slide.title) slide.title = plain(b.runs)
       else if (b.t === 'h' || (b.t === 'p' && !slide.subtitle && !slide.points.length)) {

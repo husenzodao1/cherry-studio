@@ -10,6 +10,7 @@ import { evaluate, formatNumber } from '@/lib/calc'
 import { ABOUT } from './mahliyoAbout'
 import { askCompatible, type ActiveModel, type BookPassage } from './aiModels'
 import { needsWeb, searchWeb, wantsPictures, type WebSource } from './webSearch'
+import { withWikiPictures } from './wikiImages'
 
 /**
  * Mahliyo AI: the app's teacher answers learners' questions (in the language they write in; Tajik first), about the app, about what its
@@ -987,7 +988,7 @@ const FILE_WRITER = `You are Mahliyo, writing a FILE the learner asked for in th
 const FILE_RULES: Record<FileKind, string> = {
   pdf: 'THIS IS A DOCUMENT TO READ (an essay, report, article, letter…), NOT A PRESENTATION: write flowing, connected prose — every section is made of real paragraphs of 3–6 sentences that lead into each other; use a list only where a list is natural (steps, items), never pages of short bullet points, never "---" slide separators, never speaker notes. An essay («иншо», «эссе») is prose from start to end: an introduction, the body in several paragraphs, a conclusion — no lists at all. FORMAT: Markdown. Start with "# Title", then a subtitle line in *italics*; then sections with "## " (and "### "): an introduction, the main parts, a conclusion. Paragraphs of 3–6 sentences; "- " and "1. " lists; GitHub tables with a header row; "> " for quotations and sayings; **bold** for key terms. Formulas in plain Unicode (x², √, π, ≤, →, H₂O), not LaTeX. No HTML, no images, no code fences.',
   docx: '',
-  pptx: 'FORMAT: Markdown slides, separated by a line with only "---". Slide 1: "# Title" and one subtitle line. Every other slide: "# Slide title", then 3–6 "- " points, each at most about 15 words ("  - " for a sub-point), or a small GitHub table; at the end of the slide "> " lines with the speaker\'s notes (what to say, 2–4 sentences). When she gave the number of slides, exactly that many (the title slide counts); otherwise 10–12. The topic in a logical order, definitions, examples, facts and numbers, a summary slide and a "Questions" slide. Formulas in plain Unicode (x², √, π, H₂O), not LaTeX. No HTML, no images.',
+  pptx: 'FORMAT: Markdown slides, separated by a line with only "---". Slide 1: "# Title" and one subtitle line. Every other slide: "# Slide title", then 3–6 "- " points, each at most about 15 words ("  - " for a sub-point), or a small GitHub table; at the end of the slide "> " lines with the speaker\'s notes (what to say, 2–4 sentences). When she gave the number of slides, exactly that many (the title slide counts); otherwise 10–12. The topic in a logical order, definitions, examples, facts and numbers, a summary slide and a "Questions" slide. Formulas in plain Unicode (x², √, π, H₂O), not LaTeX. No HTML. A real photo where it truly helps (a person, a place, a building, an animal or plant, an artwork, an object or event that has its own Wikipedia article — never for abstract ideas, lists or the Questions slide): at most one per slide, on about a third of the slides, a line on its own after the slide\'s points: ![a short caption in her language](wiki:the exact title of the ENGLISH Wikipedia article), e.g. ![Рӯдакӣ](wiki:Rudaki), ![Кӯҳҳои Помир](wiki:Pamir Mountains), ![Фотосинтез дар барг](wiki:Leaf). Only articles you are sure exist; the picture is the article\'s own lead picture.',
   text: 'FORMAT: the exact content of the file, complete and working. Code: the whole program with every import, a clear structure, comments in her language, checks of the input and an example of use; it must run as it is. HTML: one self-contained, modern, responsive and beautiful page with its CSS and JavaScript inside. CSV/TSV: a header row. JSON: valid JSON only. Markdown: well formatted. No explanations outside the file (comments inside code are fine).'
 }
 FILE_RULES.docx = FILE_RULES.pdf
@@ -1028,7 +1029,8 @@ async function writeFile(file: { name: string; title: string; about: string; sty
     text += part.text
     if (!part.more || !part.text || text.length >= FILE_CAP) break
   }
-  return cleanFileText(text)
+  // a presentation's `wiki:` pictures: the real ones, from Wikipedia
+  return kind === 'pptx' ? withWikiPictures(cleanFileText(text)) : cleanFileText(text)
 }
 
 /** A file's text without fences around the whole of it, at most FILE_CAP long. */
