@@ -91,6 +91,13 @@ export async function dispatch(routes: AnyRoute[], req: Request, path: string): 
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors })
   const response = await handle(routes, req, path)
   for (const [k, v] of Object.entries(cors)) response.headers.set(k, v)
+  // a public answer the CDN keeps is shared by every caller: whoever asked first (the website, without an
+  // Origin) must not leave it without CORS for the app — so it is open to any origin (no cookies are used)
+  if (response.headers.get('cache-control')?.startsWith('public')) {
+    response.headers.set('access-control-allow-origin', '*')
+    response.headers.set('access-control-expose-headers', 'etag')
+  }
+  response.headers.set('vary', 'origin')
   response.headers.set('x-content-type-options', 'nosniff')
   return response
 }

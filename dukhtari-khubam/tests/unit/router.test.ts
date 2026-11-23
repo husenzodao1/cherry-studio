@@ -7,6 +7,7 @@ import { dispatch, route } from '@/lib/router'
 const routes = [
   route({ method: 'GET', path: '/things/:id', access: 'public', tag: 't', summary: 's', handler: async ({ params }) => ({ id: params.id }) }),
   route({ method: 'POST', path: '/things', access: 'user', tag: 't', summary: 's', body: z.strictObject({ name: z.string().min(1) }), handler: async ({ body }) => body }),
+  route({ method: 'GET', path: '/kept', access: 'public', tag: 't', summary: 's', cache: 300, handler: async () => ({ ready: true }) }),
   route({ method: 'GET', path: '/boom', access: 'public', tag: 't', summary: 's', handler: async () => { throw fromDatabase({ code: 'P0001', message: 'premium_required' }) } })
 ]
 const req = (method: string, path: string, init: RequestInit = {}) => new Request(`https://x.test/api/v1${path}`, { method, ...init })
@@ -17,6 +18,12 @@ describe('router', () => {
     expect(res.status).toBe(200)
     expect(await res.json()).toEqual({ id: '42' })
     expect(res.headers.get('cache-control')).toBe('private, no-store')
+  })
+  it('a public answer the CDN keeps is readable by the app, even when the website asked for it first', async () => {
+    const res = await dispatch(routes, req('GET', '/kept'), '/kept')
+    expect(res.headers.get('cache-control')).toMatch(/^public/)
+    expect(res.headers.get('access-control-allow-origin')).toBe('*')
+    expect(res.headers.get('vary')).toBe('origin')
   })
   it('returns 404, 405, 401 and 422 with the error model', async () => {
     expect((await dispatch(routes, req('GET', '/nope'), '/nope')).status).toBe(404)
