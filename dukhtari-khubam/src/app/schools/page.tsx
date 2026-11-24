@@ -25,7 +25,7 @@ export default function Schools() {
       </Link>
       {/* study tools: the ММТ, the red pen, flashcards */}
       <nav className="tools-grid" aria-label={t('nav.schools')}>
-        {([['/mmt', '🎓', 'mmt-ico', 'mmt.title'], ['/check', '🖍️', 'check-ico', 'check.title'], ['/cards', '🗂️', 'cards-ico', 'cards.title']] as const).map(([href, emoji, ico, key]) => (
+        {([['/mmt', '🎓', 'mmt-ico', 'mmt.title'], ['/check', '🖍️', 'check-ico', 'check.title'], ['/cards', '🗂️', 'cards-ico', 'cards.title'], ['/podcast', '🎧', 'pod-ico', 'pod.title']] as const).map(([href, emoji, ico, key]) => (
           <Link key={href} href={href} className="glass tool-tile">
             <span className={`lib-entry-ico ${ico}`} aria-hidden="true">{emoji}</span>
             <b>{t(key)}</b>

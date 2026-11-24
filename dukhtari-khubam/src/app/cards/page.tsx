@@ -8,6 +8,7 @@ import { localDay } from '@/lib/progress'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { showToast } from '@/web/components/Toast'
+import { lessonText, photoData } from '@/web/files/studyInput'
 import { useContent } from '@/web/offline/content'
 import { addDeck, allDecks, answerCard, CardsError, LESSONS, makeCards, newToday, removeCard, removeDeck, syncDecks, useDecks } from '@/web/offline/decks'
 import { useLearner } from '@/web/offline/learner'
@@ -17,29 +18,6 @@ import { usePrefs } from '@/web/prefs'
 type Source = 'text' | 'photo' | 'lesson' | 'manual'
 const COUNTS = [10, 20, 30]
 const RATINGS: [Rating, string][] = [[AGAIN, 'cards.again'], [HARD, 'cards.hard'], [GOOD, 'cards.good'], [EASY, 'cards.easy']]
-
-/** the words of a lesson (its blocks' texts), for the AI to make cards from */
-function lessonText(blocks: unknown): string {
-  const out: string[] = []
-  const walk = (x: unknown, key?: string) => {
-    if (typeof x === 'string') { if (x.length > 15 && !/^(id|type|url|src|href|asset_id|variant|kind)$/.test(key ?? '')) out.push(x) }
-    else if (Array.isArray(x)) x.forEach((v) => walk(v, key))
-    else if (x && typeof x === 'object') for (const [k, v] of Object.entries(x)) walk(v, k)
-  }
-  walk(blocks)
-  return out.join('\n').slice(0, 30_000)
-}
-
-async function photoData(file: File): Promise<{ mime: string; data: string }> {
-  const bitmap = await createImageBitmap(file)
-  const k = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height))
-  const c = document.createElement('canvas')
-  c.width = Math.round(bitmap.width * k)
-  c.height = Math.round(bitmap.height * k)
-  c.getContext('2d')!.drawImage(bitmap, 0, 0, c.width, c.height)
-  const url = c.toDataURL('image/jpeg', 0.85)
-  return { mime: 'image/jpeg', data: url.slice(url.indexOf(',') + 1) }
-}
 
 /**
  * Flashcards: her decks, made by the AI from a text, a photo of a page or a finished lesson (or typed by
@@ -175,7 +153,7 @@ function Make({ bundle, done, locale, onBack, onPlan, onMade }: { bundle: Return
           {source === 'text' ? <textarea className="input" rows={7} value={text} maxLength={30_000} placeholder={t('cards.text_ph')} aria-label={t('cards.src_text')} onChange={(e) => setText(e.target.value)} /> : null}
           {source === 'photo' ? (
             <label className="btn btn-soft btn-block"><Icon name="camera" size={18} /> {photo ? t('cards.photo_ok') : t('cards.photo')}
-              <input type="file" accept="image/*" hidden aria-label={t('cards.photo')} onChange={(e) => { const f = e.target.files?.[0]; if (f) void photoData(f).then(setPhoto) }} /></label>
+              <input type="file" accept="image/*" hidden aria-label={t('cards.photo')} onChange={(e) => { const f = e.target.files?.[0]; if (f) void photoData(f).then(({ mime, data }) => setPhoto({ mime, data })) }} /></label>
           ) : null}
           {source === 'lesson' ? (
             lessons.length ? (

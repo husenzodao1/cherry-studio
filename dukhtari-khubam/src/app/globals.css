@@ -3827,6 +3827,21 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .flashcard-btn.is-3 { background: #22a06b; }
 .flashcard-btn.is-4 { background: #3b82f6; }
 .lib-entry-ico.cards-ico { background: linear-gradient(135deg, #bfdbfe, #3b82f6); }
-.tools-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
-.tool-tile { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 6px; border-radius: 22px; text-decoration: none; color: var(--ink); text-align: center; }
-.tool-tile b { font-size: 0.8rem; line-height: 1.2; }
+.tools-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.tool-tile { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 20px; text-decoration: none; color: var(--ink); min-width: 0; }
+.tool-tile .lib-entry-ico { width: 40px; height: 40px; border-radius: 13px; font-size: 1.2rem; }
+.tool-tile b { font-size: 0.82rem; line-height: 1.2; min-width: 0; }
+
+/* the lecture podcast (app/podcast) */
+.lib-entry-ico.pod-ico { background: linear-gradient(135deg, #fbcfe8, #db2777); }
+.pod-hero { display: flex; align-items: center; gap: 12px; }
+.pod-hero > span:first-child { font-size: 2.2rem; }
+.pod-player { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.pod-disc { width: 110px; height: 110px; border-radius: 50%; display: grid; place-items: center; font-size: 3rem; background: radial-gradient(circle, #fff 18%, #fbcfe8 19%, #f9a8d4 60%, #db2777); box-shadow: var(--glass-shadow); }
+.pod-disc.is-on { animation: pod-spin 6s linear infinite; }
+@keyframes pod-spin { to { transform: rotate(360deg); } }
+.pod-play { width: 64px; height: 64px; border-radius: 50%; padding: 0; display: grid; place-items: center; }
+.pod-line { margin: 0; line-height: 1.5; opacity: 0.55; transition: opacity 0.3s; }
+.pod-line.is-now { opacity: 1; }
+.pod-line b { color: var(--primary); margin-inline-end: 4px; }
+.pod-line.is-B b { color: #db2777; }

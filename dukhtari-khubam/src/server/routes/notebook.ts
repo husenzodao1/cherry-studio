@@ -5,6 +5,8 @@ import { route, type AnyRoute } from '@/lib/router'
 
 import { geminiKeys } from '../mahliyo'
 import { checkNotebook, makeCards } from '../notebook'
+import { partsOf, signedPart, voicePart, writeScript } from '../podcast'
+import { serverReady } from '../aiModels'
 import { limitReached, onTrial, planOf, planSettings, use, useTrial, whoOf, type PlanCtx } from '../plans'
 import { codeHash, Token } from './offline'
 
@@ -50,6 +52,41 @@ export const notebookRoutes: AnyRoute[] = [
       const cards = await makeCards({ text: body.text, image: body.image, lang: body.lang, count: body.count })
       if (!cards) throw new ApiError(503, 'unavailable', 'The cards could not be made now')
       return { cards }
+    }
+  }),
+  route({
+    method: 'POST', path: '/study/podcast', access: 'public', tag: 'Study',
+    summary: 'A podcast script from a lecture (Mahliyo explains, Sitora asks), in signed parts to be voiced; counted like a generated document',
+    body: z.strictObject({
+      token: Token, session: z.string().max(4000).optional(),
+      text: z.string().trim().min(80).max(40_000).optional(),
+      image: z.strictObject({ mime: z.enum(['image/jpeg', 'image/png', 'image/webp']), data: z.string().min(100).max(8_000_000).regex(/^[A-Za-z0-9+/=]+$/) }).optional(),
+      lang: z.enum(['tg', 'ru', 'en', 'uz', 'tr', 'fa', 'prs']).default('tg'),
+      minutes: z.union([z.literal(3), z.literal(5), z.literal(8)]).default(5)
+    }).refine((b) => b.text || b.image, 'text_or_image'),
+    handler: async ({ sb, body }) => {
+      if (!geminiKeys().length || !serverReady()) throw new ApiError(503, 'not_configured', 'The podcasts are not connected')
+      const plan = await planOf(body.session)
+      const ctx: PlanCtx = { sb: sb(), who: whoOf(body.session, codeHash(body.token)), plan, ...(await planSettings(sb())) }
+      if (onTrial(ctx)) { if (!(await useTrial(ctx, 'gen'))) throw limitReached('gen', plan) }
+      else if (!(await use(ctx, 'doc'))) throw limitReached('doc', plan)
+      const script = await writeScript({ text: body.text, image: body.image, lang: body.lang, minutes: body.minutes })
+      if (!script) throw new ApiError(503, 'unavailable', 'The podcast could not be written now')
+      return { title: script.title, parts: partsOf(script.lines) }
+    }
+  }),
+  route({
+    method: 'POST', path: '/study/podcast/voice', access: 'public', tag: 'Study',
+    summary: 'One signed part of a podcast voiced by two speakers (a WAV, base64)',
+    body: z.strictObject({
+      lang: z.enum(['tg', 'ru', 'en', 'uz', 'tr', 'fa', 'prs']).default('tg'),
+      part: z.strictObject({ lines: z.array(z.strictObject({ who: z.enum(['A', 'B']), text: z.string().min(1).max(600) })).min(1).max(40), exp: z.number().int(), sig: z.string().max(64) })
+    }),
+    handler: async ({ body }) => {
+      if (!signedPart(body.part)) throw new ApiError(403, 'forbidden', 'Not a part of a podcast written here, or too old')
+      const wav = await voicePart(body.part.lines, body.lang)
+      if (!wav) throw new ApiError(503, 'unavailable', 'The voices are not available now')
+      return { wav }
     }
   })
 ]

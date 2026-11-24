@@ -7658,6 +7658,215 @@
         }
       }
     },
+    "/study/podcast": {
+      "post": {
+        "tags": [
+          "Study"
+        ],
+        "summary": "A podcast script from a lecture (Mahliyo explains, Sitora asks), in signed parts to be voiced; counted like a generated document",
+        "operationId": "postStudyPodcast",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "session": {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 80,
+                    "maxLength": 40000
+                  },
+                  "image": {
+                    "type": "object",
+                    "properties": {
+                      "mime": {
+                        "type": "string",
+                        "enum": [
+                          "image/jpeg",
+                          "image/png",
+                          "image/webp"
+                        ]
+                      },
+                      "data": {
+                        "type": "string",
+                        "minLength": 100,
+                        "maxLength": 8000000,
+                        "pattern": "^[A-Za-z0-9+/=]+$"
+                      }
+                    },
+                    "required": [
+                      "mime",
+                      "data"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "lang": {
+                    "default": "tg",
+                    "type": "string",
+                    "enum": [
+                      "tg",
+                      "ru",
+                      "en",
+                      "uz",
+                      "tr",
+                      "fa",
+                      "prs"
+                    ]
+                  },
+                  "minutes": {
+                    "default": 5,
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "const": 3
+                      },
+                      {
+                        "type": "number",
+                        "const": 5
+                      },
+                      {
+                        "type": "number",
+                        "const": 8
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "token"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/study/podcast/voice": {
+      "post": {
+        "tags": [
+          "Study"
+        ],
+        "summary": "One signed part of a podcast voiced by two speakers (a WAV, base64)",
+        "operationId": "postStudyPodcastVoice",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lang": {
+                    "default": "tg",
+                    "type": "string",
+                    "enum": [
+                      "tg",
+                      "ru",
+                      "en",
+                      "uz",
+                      "tr",
+                      "fa",
+                      "prs"
+                    ]
+                  },
+                  "part": {
+                    "type": "object",
+                    "properties": {
+                      "lines": {
+                        "minItems": 1,
+                        "maxItems": 40,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "who": {
+                              "type": "string",
+                              "enum": [
+                                "A",
+                                "B"
+                              ]
+                            },
+                            "text": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 600
+                            }
+                          },
+                          "required": [
+                            "who",
+                            "text"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "exp": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "sig": {
+                        "type": "string",
+                        "maxLength": 64
+                      }
+                    },
+                    "required": [
+                      "lines",
+                      "exp",
+                      "sig"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "part"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/schools": {
       "get": {
         "tags": [
