@@ -32,8 +32,27 @@ export const geminiKeys = () => [process.env.GEMINI_API_KEY, process.env.GEMINI_
   .map((k) => k?.trim()).filter((k): k is string => !!k)
 export const configured = () => provider() !== null
 
-/** The most capable model (the owner asked for the best Tajik); MAHLIYO_MODEL may name another. */
-export const MODEL = process.env.MAHLIYO_MODEL || 'claude-fable-5-2'
+/**
+ * Claude's two models: the quick, cheap one for everyday questions (most of them), and the deeper one for
+ * problems, essays, files, pictures and the study tasks (MAHLIYO_LIGHT_MODEL / MAHLIYO_MODEL may name others).
+ */
+export const LIGHT_MODEL = process.env.MAHLIYO_LIGHT_MODEL || 'claude-haiku-5-5'
+export const MODEL = process.env.MAHLIYO_MODEL || 'claude-sonnet-5-5'
+
+/** how hard a question is: "light" for everyday talk and questions, "deep" for what needs real thinking */
+export type Tier = 'light' | 'deep'
+const DEEP_MODES = new Set(['science', 'math', 'code', 'writer', 'lawyer', 'exam', 'mmt', 'precise', 'factcheck'])
+const DEEP_TASKS = new Set(['problem', 'essay', 'composition', 'exam'])
+const DEEP_WORDS = /(презентат|pdf|word|docx|эссе|иншо|реферат|курсов|сочинен|доклад|essay|report|программ|python|javascript|code|script|таҳлил|анализ|analy[sz])/i
+export function tierOf(question: string, files: number, me: Learner): Tier {
+  // a free account while the plans are on: the quick model only
+  if (premiumLive() && (me.plan ?? 'free') === 'free') return 'light'
+  if (files > 0) return 'deep'
+  if (me.study && DEEP_TASKS.has(me.study.task)) return 'deep'
+  if (me.mode && DEEP_MODES.has(me.mode)) return 'deep'
+  if (isProblem(question) || question.length > 600 || DEEP_WORDS.test(question)) return 'deep'
+  return 'light'
+}
 
 /**
  * Gemini models, tried in turn: on the free tier a model is now and then too busy to answer. The quick one
@@ -902,7 +921,32 @@ async function ask(turns: Turn[], appName: string, material: string, me: Learner
     }
   }
   if (!configured()) throw new Error('no AI')
-  return provider() === 'gemini' ? askGemini(turns, appName, material, me, files) : askClaude(turns, appName, material, me, files)
+  // the model by how hard the question is: Claude's quick model for everyday questions, the deeper ones for
+  // the rest (Gemini's first when its key is set: cheaper; MAHLIYO_DEEP=claude prefers Claude); the other
+  // provider answers when the first one cannot
+  const tier = tierOf(turns[turns.length - 1]?.content ?? '', files.length, me)
+  const claude = !!process.env.ANTHROPIC_API_KEY
+  const gemini = geminiKeys().length > 0
+  const lite = GEMINI_MODELS.filter((m) => m.includes('lite'))
+  const geminiDeep = [...GEMINI_MODELS.filter((m) => !m.includes('lite')), ...lite]
+  const tries: (() => Promise<string | null>)[] = tier === 'light'
+    ? [...(claude ? [() => askClaude(turns, appName, material, me, files, { model: LIGHT_MODEL, light: true })] : []),
+      ...(gemini ? [() => askGemini(turns, appName, material, me, files, { keys: geminiKeys(), models: GEMINI_MODELS, light: true })] : [])]
+    : process.env.MAHLIYO_DEEP?.trim() === 'claude' || !gemini
+      ? [...(claude ? [() => askClaude(turns, appName, material, me, files, { model: MODEL })] : []),
+        ...(gemini ? [() => askGemini(turns, appName, material, me, files, { keys: geminiKeys(), models: geminiDeep })] : [])]
+      : [() => askGemini(turns, appName, material, me, files, { keys: geminiKeys(), models: geminiDeep }),
+        ...(claude ? [() => askClaude(turns, appName, material, me, files, { model: MODEL })] : [])]
+  let failure: unknown = new Error('no AI')
+  for (const attempt of tries) {
+    try {
+      return await attempt()
+    } catch (e) {
+      failure = e
+      console.warn('[mahliyo]', tier, 'model failed; the next one answers:', e instanceof Error ? e.message.slice(0, 200) : String(e))
+    }
+  }
+  throw failure
 }
 /** for the models without a schema of their own (OpenAI-compatible): her answer's shape */
 const JSON_SHAPE = `ANSWER FORMAT: reply with one JSON object only, nothing around it: {"tajik": true, "blocks": [ … ], "sources": [numbers]}. Each block is one of: {"type":"text","text":"…"} · {"type":"steps","title":"…","items":["…"]} · {"type":"screen","spot":"<a SPOT id>","caption":"…"} · {"type":"link","to":"…","label":"…"} · {"type":"reminder","at":"<ISO 8601 with offset>","title":"…","text":"…","daily":false} · {"type":"quiz","title":"…","intro":"…","questions":[{"question":"…","options":["…","…"],"answer":0,"explanation":"…"}],"comment":"","task":""} · {"type":"choices","title":"…","intro":"…","items":[{"name":"…","badge":"…","tone":"best|good|risk|neutral","points":["…"],"note":"…"}]} · {"type":"callout","tone":"danger|warning|tip|info","title":"…","text":"…"} · {"type":"calc","title":"…","note":"…","inputs":[{"id":"price","label":"…","value":40,"min":0,"max":100,"step":5,"unit":"…","options":[]}],"outputs":[{"label":"…","formula":"price*2","unit":"…","tone":"best","big":true}]} · {"type":"clarify","question":"…","options":["…","…"]} · {"type":"follow","items":["…","…"]} · {"type":"music","title":"…","genre":"…","prompt":"…","lyrics":"…","instrumental":false} · {"type":"navigate","place":"…","mode":"foot|car"} · {"type":"play","query":"…","title":"…"} · {"type":"file","name":"Модар.pdf","title":"…","about":"…","look":{"bg":"","fg":"","accent":"","layout":"","motif":"","font":""}} · {"type":"premium","title":"…","text":"…"} · {"type":"warning","text":"","rule":0}.`
@@ -976,22 +1020,26 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
 }
 
 /** Claude's answer as JSON text, or null when it declined. */
-async function askClaude(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[], over?: { key: string; model: string }): Promise<string | null> {
-  const c = over ? new Anthropic({ apiKey: over.key }) : (client ??= new Anthropic())
+async function askClaude(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[], over?: { key?: string; model: string; light?: boolean }): Promise<string | null> {
+  const c = over?.key ? new Anthropic({ apiKey: over.key }) : (client ??= new Anthropic())
+  const model = over?.model ?? MODEL
+  // the staff's own model is used as it is; the app's deeper model has a fallback for a declined question
+  // (the quick model has none: a declined question goes to the next provider)
+  const fallback = !over?.key && !over?.light && /^claude-(sonnet-5-5|opus-5|fable-5)/.test(model)
   const response = await c.beta.messages.create({
-    model: over?.model ?? MODEL,
+    model,
     // her thinking counts towards this as well as her answer
     max_tokens: 8000,
-    // the default model: a declined question is retried on the model Anthropic recommends for it
-    ...(over ? {} : { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const }),
+    ...(fallback ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),
     // a chat: quick answers; the model's best Tajik either way
     output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
     system: [
+      // the rules, the guide and the app's description are the same for every question: cached (read at a
+      // tenth of the price, and sooner) — the cache ends here, before anything that changes
       { type: 'text', text: rules(appName) },
-      // the guide and the course material change rarely: cached between questions
-      { type: 'text', text: `${GUIDE}\n\n${ABOUT}\n\n${knowledge}`, cache_control: { type: 'ephemeral' } },
-      // after the cached part: different for every learner and every question
-      { type: 'text', text: `${learnerNote(me)}\n\n${languageNote(turns)}` }
+      { type: 'text', text: `${GUIDE}\n\n${ABOUT}`, cache_control: { type: 'ephemeral' } },
+      // after the cached part: the material for this question, the learner, her language
+      { type: 'text', text: `${knowledge}\n\n${learnerNote(me)}\n\n${languageNote(turns)}` }
     ],
     // the pictures and files go with the last question, before its words
     messages: turns.map((t, i) => (i === turns.length - 1 && files.length ? {
@@ -1176,10 +1224,10 @@ const clientOf = (key: string) => {
  * Gemini's answer as JSON text, or null when it was blocked. Requests go out as described at HEDGE_MS;
  * when none answers in time, the last error (the route says she cannot answer now).
  */
-async function askGemini(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[], over?: { keys: string[]; models: string[] }): Promise<string | null> {
+async function askGemini(turns: Turn[], appName: string, knowledge: string, me: Learner, files: Attachment[], over?: { keys: string[]; models: string[]; light?: boolean }): Promise<string | null> {
   const keys = over?.keys ?? geminiKeys()
-  // a Premium learner: the deeper model first (the quick one is only the last resort)
-  const models = over?.models ?? (me.premium ? [...GEMINI_MODELS.filter((m) => !m.includes('lite')), ...GEMINI_MODELS.filter((m) => m.includes('lite'))] : GEMINI_MODELS)
+  // the router's order: the quick model first for everyday questions, the deeper ones first for the rest
+  const models = over?.models ?? GEMINI_MODELS
   const started = Date.now()
   const first = nextKey++ % keys.length
   const question = turns[turns.length - 1]?.content ?? ''
@@ -1234,7 +1282,7 @@ async function askGemini(turns: Turn[], appName: string, knowledge: string, me: 
           systemInstruction: system,
           responseMimeType: 'application/json',
           responseJsonSchema: SCHEMA,
-          thinkingConfig: { thinkingLevel: thinkingOf(t.model, problem || !!me.premium) },
+          thinkingConfig: { thinkingLevel: thinkingOf(t.model, problem || !over?.light) },
           maxOutputTokens: 8000,
           abortSignal: stop.signal,
           httpOptions: { timeout: Math.max(MIN_WAIT_MS, Math.min(WAIT_MS, left)) }

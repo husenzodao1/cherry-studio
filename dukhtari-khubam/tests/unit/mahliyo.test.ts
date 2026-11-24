@@ -10,7 +10,7 @@ vi.mock('@anthropic-ai/sdk', () => ({ default: class { beta = { messages: { crea
 const generate = vi.fn()
 vi.mock('@google/genai', () => ({ GoogleGenAI: class { models = { generateContent: generate } }, ThinkingLevel: { LOW: 'LOW', MINIMAL: 'MINIMAL', MEDIUM: 'MEDIUM' } }))
 
-const { answer, cleanBlocks, configured, fixLatex, GEMINI_MODELS, isProblem, knowledgeOf, knowledgePartsOf, knowledgeText, KNOWLEDGE_CAP, languageOf, learnerNote, MODEL, plainOf, provider, quizText, reminderAsked, SORRY } = await import('@/server/mahliyo')
+const { answer, cleanBlocks, configured, fixLatex, GEMINI_MODELS, isProblem, knowledgeOf, knowledgePartsOf, knowledgeText, KNOWLEDGE_CAP, languageOf, learnerNote, LIGHT_MODEL, MODEL, tierOf, plainOf, provider, quizText, reminderAsked, SORRY } = await import('@/server/mahliyo')
 
 const bundle = {
   ui: { 'app.name': 'LifeHub' },
@@ -113,14 +113,17 @@ describe('asking Mahliyo', () => {
   afterEach(() => vi.unstubAllEnvs())
   const turns = [{ role: 'user' as const, content: 'Тести марҳила чист?' }]
 
-  it('asks the most capable model with fallbacks, cached guide and material, the learner after the cache; reads her blocks', async () => {
+  it('an everyday question: the quick model, the guide cached, the material and the learner after the cache; reads her blocks', async () => {
     create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'thinking', thinking: '' }, { type: 'text', text: JSON.stringify({ tajik: true, blocks: [{ type: 'text', text: 'Тести охири марҳила…' }, { type: 'link', to: '/garden', label: 'Харита' }] }) }] })
     const a = await answer(turns, 'LifeHub', 'ДОНИШ', { me: 'Name: Малика', now: '2026-11-21T20:00:00+05:00' })
     expect(a.blocks).toEqual([{ type: 'text', text: 'Тести охири марҳила…' }, { type: 'link', to: '/garden', label: 'Харита' }])
     expect(a).toMatchObject({ tajik: true, reply: 'Тести охири марҳила…\n\n[Пайванд: Харита → /garden]' })
     const req = create.mock.calls[0][0]
-    expect(MODEL).toBe('claude-fable-5-2')
-    expect(req).toMatchObject({ model: MODEL, fallbacks: 'default', betas: ['server-side-fallback-2026-07-01'], output_config: { effort: 'low', format: { type: 'json_schema' } } })
+    expect(LIGHT_MODEL).toBe('claude-haiku-5-5')
+    expect(MODEL).toBe('claude-sonnet-5-5')
+    // the quick model has no server-side fallback (another provider answers when it cannot)
+    expect(req).toMatchObject({ model: LIGHT_MODEL, output_config: { effort: 'low', format: { type: 'json_schema' } } })
+    expect(req.fallbacks).toBeUndefined()
     expect(req.thinking).toBeUndefined()
     expect(req.system[0].text).toContain('«LifeHub»')
     expect(req.system[0].text).toContain('It was earlier called «Гулдухтар»')
@@ -134,10 +137,12 @@ describe('asking Mahliyo', () => {
     expect(req.system[0].text).not.toMatch(/runs on|\{ENGINE\}/)
     expect(req.system[0].text).toContain('- settings.pin:')
     expect(req.system[0].text).not.toMatch(/\{(APP|SPOTS|ROUTES)\}/)
+    // the cache ends after what is the same for every question (the guide, the app's description)
     expect(req.system[1]).toMatchObject({ cache_control: { type: 'ephemeral' } })
-    expect(req.system[1].text).toContain('ДОНИШ')
     expect(req.system[1].text).toContain('Ҳусейнзода Руслани Анвар')
+    expect(req.system[1].text).not.toContain('ДОНИШ')
     expect(req.system[2].cache_control).toBeUndefined()
+    expect(req.system[2].text).toContain('ДОНИШ')
     expect(req.system[2].text).toContain('Name: Малика')
     expect(generate).not.toHaveBeenCalled()
     expect(req.messages).toEqual([{ role: 'user', content: 'Тести марҳила чист?' }])
@@ -162,7 +167,7 @@ describe('asking Mahliyo', () => {
     // in Latin letters: the model knows it is word 2
     create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{"tajik":true,"blocks":[{"type":"warning","text":"","rule":2}]}' }] })
     expect(await answer([{ role: 'user', content: 'tu beaql!' }], 'Г', '', {}, [], { warnings })).toEqual(red('Ман беақл нестам'))
-    expect(create.mock.calls[0][0].system[1].text).toContain('RED REPLIES')
+    expect(create.mock.calls[0][0].system[2].text).toContain('RED REPLIES')
     // another insult: a general one
     create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{"tajik":true,"blocks":[{"type":"warning","text":"","rule":0}]}' }] })
     expect(await answer([{ role: 'user', content: 'ту бад' }], 'Г', '', {}, [], { warnings })).toEqual(red('Бас кунед'))
@@ -303,8 +308,9 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
       { text: 'Нафаҳмидам' }
     ])
     expect(req.config.systemInstruction).toContain('Pictures and files she sends')
-    // and to Claude
+    // and to Claude (preferred for the deeper questions)
     vi.stubEnv('ANTHROPIC_API_KEY', 'k')
+    vi.stubEnv('MAHLIYO_DEEP', 'claude')
     create.mockResolvedValue({ stop_reason: 'end_turn', content: [{ type: 'text', text: '{"tajik":true,"blocks":[{"type":"text","text":"Ҳа"}]}' }] })
     await answer(turns, 'Г', '', me, files)
     const msgs = create.mock.calls[0][0].messages
@@ -359,7 +365,9 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
     expect(isProblem('Пин-кодро чӣ тавр иваз кунам?')).toBe(false)
     generate.mockResolvedValue(ok([{ type: 'text', text: '$$x=\frac{1}{2}$$' }]))
     await answer([{ role: 'user', content: 'Ҳал кунед: 2x=1' }], 'Г', '', me)
-    expect(generate.mock.calls[0][0].config.thinkingConfig.thinkingLevel).toBe('LOW')
+    // a problem: a deeper model first, thinking more
+    expect(generate.mock.calls[0][0].model).not.toContain('lite')
+    expect(generate.mock.calls[0][0].config.thinkingConfig.thinkingLevel).toBe('MEDIUM')
     expect(fixLatex('$\u000crac{1}{2} \u0009imes 3$')).toBe('$\\frac{1}{2} \\times 3$')
   })
 
@@ -450,5 +458,19 @@ describe('songs (Lyria 3)', () => {
     expect(songOf({ steps: [] })).toBeNull()
     expect(songPrompt({ title: 'T', prompt: 'calm', instrumental: true })).toContain('Instrumental only, no vocals.')
     expect(songPrompt({ title: 'T', prompt: 'calm', lyrics: '[Chorus]\nla' })).toContain('Sing exactly these lyrics:\n[Chorus]\nla')
+  })
+})
+
+describe('which model answers', () => {
+  it('everyday questions are light; problems, files, essays, study tasks and the deep modes are deep', () => {
+    expect(tierOf('Салом, чӣ хабар?', 0, {})).toBe('light')
+    expect(tierOf('Пин-кодро чӣ тавр иваз кунам?', 0, {})).toBe('light')
+    expect(tierOf('Ҳал кунед: 2x+3=7', 0, {})).toBe('deep')
+    expect(tierOf('Ин расмро бин', 1, {})).toBe('deep')
+    expect(tierOf('Иншо дар бораи Ватан нависед', 0, {})).toBe('deep')
+    expect(tierOf('Презентатсия дар бораи об', 0, {})).toBe('deep')
+    expect(tierOf('Саволи оддӣ', 0, { mode: 'lawyer' })).toBe('deep')
+    expect(tierOf('Саволи оддӣ', 0, { study: { task: 'problem' } })).toBe('deep')
+    expect(tierOf('Саволи оддӣ', 0, { study: { task: 'explain' } })).toBe('light')
   })
 })
