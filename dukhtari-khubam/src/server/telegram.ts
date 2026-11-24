@@ -24,7 +24,9 @@ try { setDefaultResultOrder('ipv4first') } catch { /* an older runtime */ }
 export const tgReady = () => !!process.env.TELEGRAM_BOT_TOKEN?.trim() && serverReady()
 
 /** the secret Telegram sends with every update (made from the server's own secret: nothing more to set) */
-export const webhookSecret = () => createHash('sha256').update(`telegram:${secret()}`).digest('hex').slice(0, 48)
+export const webhookSecret = () => process.env.TELEGRAM_WEBHOOK_SECRET?.trim()
+  // or one of the staff's own (TELEGRAM_WEBHOOK_SECRET), when they point the bot themselves
+  || createHash('sha256').update(`telegram:${secret()}`).digest('hex').slice(0, 48)
 
 type Fetch = typeof fetch
 export async function tg<T = unknown>(method: string, body: unknown, fetcher: Fetch = fetch, again = true): Promise<T> {
