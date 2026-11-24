@@ -88,6 +88,8 @@ export type AiBlock =
   /** the card that opens the Premium screen (a free learner asked for a Premium part) */
   | { type: 'music'; title: string; genre: string; prompt: string; lyrics: string; instrumental: boolean }
   | { type: 'navigate'; place: string; mode: 'foot' | 'car' }
+  /** a song to find on YouTube and play in the app */
+  | { type: 'play'; query: string; title: string }
   | { type: 'premium'; title: string; text: string }
   /** insults or pressure: only this, in red — one of the staff's words, chosen at random */
   /** `rule`: which of the staff's red replies the model matched (1, 2 …; 0 none) — the server's only */

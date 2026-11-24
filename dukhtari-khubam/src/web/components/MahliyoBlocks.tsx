@@ -19,6 +19,7 @@ import { AiMarkdown, isMarkdown } from './AiMarkdown'
 import { DocViewer, OpenChoice } from './DocViewer'
 import { emojify } from './Emoji'
 import { Icon } from './Icon'
+import { SongPlayer } from './SongPlayer'
 import { showToast } from './Toast'
 
 /**
@@ -639,6 +640,8 @@ export function AnswerBlocks({ blocks, fresh, id, onQuiz, onAsk, onSend }: {
             return <MusicCard key={i} block={b} style={style} />
           case 'navigate':
             return <NavigateCard key={i} block={b} style={style} />
+          case 'play':
+            return <div key={i} className="ai-card ai-play" style={style}><SongPlayer query={b.query} title={b.title} /></div>
           case 'file':
             return <FileCard key={i} block={b} style={style} onSend={onSend} />
           case 'follow':

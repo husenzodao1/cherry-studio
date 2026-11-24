@@ -79,3 +79,14 @@ describe('her name as the phone hears it', () => {
     expect(commandOf('эй моҳи соат чанд шуд')).toEqual({ kind: 'time' })
   })
 })
+
+describe('a song to play', () => {
+  it('in Tajik, Russian, English', () => {
+    expect(commandOf('эй маҳлиё суруди шабнам сурайё ватанро гузор')).toEqual({ kind: 'play', query: 'шабнам сурайё ватан' })
+    expect(commandOf('мусиқии тоҷикии ором гузор')).toEqual({ kind: 'play', query: 'мусиқии тоҷикии ором' })
+    expect(commandOf('включи песню кино группа крови')).toEqual({ kind: 'play', query: 'кино группа крови' })
+    expect(commandOf('play shape of you')).toEqual({ kind: 'play', query: 'shape of you' })
+    // a timer is still a timer
+    expect(commandOf('таймер панҷ дақиқа гузор')).toMatchObject({ kind: 'timer' })
+  })
+})

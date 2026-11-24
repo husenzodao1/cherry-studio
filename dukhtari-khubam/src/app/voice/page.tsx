@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { commandOf, matchContacts, type VoiceCommand } from '@/lib/voiceCommands'
 import { api } from '@/web/api'
 import { Icon } from '@/web/components/Icon'
+import { SongPlayer } from '@/web/components/SongPlayer'
 import { useContent } from '@/web/offline/content'
 import { hereOnce } from '@/web/offline/follow'
 import { hey, native, skyKey, speakable, voiceLang, weatherAt } from '@/web/offline/hey'
@@ -46,6 +47,8 @@ export default function VoicePage() {
   /** a conversation going on in this screen (her questions and Mahliyo's answers kept together) */
   const talking = useRef(false)
   const [headset, setHeadset] = useState(false)
+  /** a song asked for: found on YouTube and played here, on the screen */
+  const [song, setSong] = useState<string | null>(null)
   const [loud, setLoud] = useState(false)
   const locked = live && plan === 'free'
 
@@ -120,6 +123,11 @@ export default function VoicePage() {
         await speak(t('voice.calling').replace('{n}', found[0].name))
         return p.callNumber({ number: found[0].number })
       }
+      case 'play':
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) return speak(t('voice.offline'))
+        await speak(t('voice.playing').replace('{q}', c.query))
+        setSong(c.query)
+        return undefined
       case 'navigate':
         await speak(t('voice.leading').replace('{p}', c.place))
         return router.push(`/navigate?to=${encodeURIComponent(c.place)}`)
@@ -253,6 +261,7 @@ export default function VoicePage() {
           ))}
         </div>
       ) : null}
+      {song ? <div className="voice-song"><SongPlayer query={song} /></div> : null}
       {shown ? (
         <div className="voice-watch">
           <b>{shown}</b>

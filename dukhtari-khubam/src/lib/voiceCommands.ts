@@ -12,6 +12,7 @@ export type VoiceCommand =
   | { kind: 'weather'; when: 'now' | 'tomorrow' }
   | { kind: 'call'; name: string; number?: string }
   | { kind: 'navigate'; place: string }
+  | { kind: 'play'; query: string }
   | { kind: 'ask'; text: string }
 
 const UNITS: Record<string, number> = {
@@ -204,6 +205,15 @@ export function commandOf(said: string): VoiceCommand {
     const number = phoneOf(name)
     return number ? { kind: 'call', name, number } : { kind: 'call', name }
   }
+  // a song to play: "суруди Шабнам-ро гузор", "включи песню …", "play …"
+  m = /^(?:суруд(?:и)?|сурудҳои)\s+(.+?)(?:\s*-?\s*ро)?\s+(?:гузор|гузоред|мон|монед|пахш\s+кун(?:ед)?|ёб)$/.exec(t)
+    // a kind of music: its words as they are ("мусиқии тоҷикии ором")
+    ?? /^((?:мусиқ(?:ӣ|ии)|оҳанг(?:и|ҳои)?)\s+.+?)(?:\s*-?\s*ро)?\s+(?:гузор|гузоред|мон|монед|пахш\s+кун(?:ед)?)$/.exec(t)
+    ?? /^(.+?)\s*-?\s*ро\s+(?:гузор|гузоред|пахш\s+кун(?:ед)?)$/.exec(t)
+    ?? /^(?:включи(?:те)?|поставь(?:те)?|сыграй|найди\s+и\s+включи)\s+(?:(?:песню|музыку|трек|песни)\s+)?(.+)$/.exec(t)
+    ?? /^play\s+(?:(?:the\s+)?(?:song|music)\s+)?(.+)$/.exec(t) ?? /^(.+?)\s+(?:qo'shig'ini|musiqasini)\s+qo'y$/.exec(t)
+    ?? /^(.+?)\s+(?:şarkısını\s+)?(?:çal|aç)$/.exec(t) ?? /^(.+?)\s+را\s+پخش\s+کن$/.exec(t)
+  if (m) return { kind: 'play', query: m[1].replace(/^(суруди|песню|song)\s+/, '').trim() }
   m = /^маро\s+ба\s+(.+?)\s+(?:бубар|бар|расон)$/.exec(t) ?? /^роҳ(?:и)?\s+(?:то|ба)\s+(.+?)(?:\s+(?:нишон деҳ|ро нишон деҳ))?$/.exec(t)
     ?? /^(?:проводи меня|отведи меня|маршрут)\s+(?:до|в|к|на)\s+(.+)$/.exec(t) ?? /^как\s+(?:дойти|доехать|добраться)\s+(?:до|в|к)\s+(.+)$/.exec(t)
     ?? /^(?:take me to|navigate to|directions to)\s+(.+)$/.exec(t) ?? /^meni\s+(.+?)(?:ga|ka)\s+olib bor$/.exec(t) ?? /^beni\s+(.+?)(?:'?[ae])?\s+götür$/.exec(t)
