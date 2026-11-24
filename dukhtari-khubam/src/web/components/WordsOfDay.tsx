@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { fitQuote, type Fit, SIZES, windowRem } from '@/lib/wordsFit'
 import { useContent } from '../offline/content'
+import { apiUrl } from '../offline/base'
 import { usePrefs } from '../prefs'
 
 /** words meant for girls (Tajik, Russian, English): not shown to a boy */
@@ -154,8 +155,72 @@ function Quote({ body, author, source, active, onTime }: { body: string; author:
  * in. Up to four lines are shown; long words never hide under the author: they get smaller, and longer
  * ones (a whole poem) scroll upward line by line until the end has been read. With none published yet, the app's own line is shown.
  */
+/** a piece of news from the panel: its picture, title and words */
+interface News { id: string; title: string; body: string; image: string | null; at: string }
+const NEWS_KEY = 'dk.news'
+const SHOW_KEY = 'dk.words-show'
+
+/** the news in her language (kept on the phone for when it is offline) */
+function useNews(on: boolean, locale: string, boys: boolean): News[] | null {
+  const [items, setItems] = useState<News[] | null>(null)
+  useEffect(() => {
+    if (!on) return
+    try { const kept = JSON.parse(localStorage.getItem(NEWS_KEY) ?? 'null') as { locale: string; items: News[] } | null; if (kept?.locale === locale) setItems(kept.items) } catch { /* none kept */ }
+    let alive = true
+    fetch(apiUrl(`/news?locale=${locale}&audience=${boys ? 'boys' : 'girls'}`)).then((r) => (r.ok ? r.json() as Promise<{ items: News[] }> : null)).then((d) => {
+      if (!alive || !d) return
+      setItems(d.items)
+      try { localStorage.setItem(NEWS_KEY, JSON.stringify({ locale, items: d.items })) } catch { /* only for now */ }
+    }).catch(() => setItems((x) => x ?? []))
+    return () => { alive = false }
+  }, [on, locale, boys])
+  return items
+}
+
+/**
+ * The block's other side: the news. Each with its picture over the whole card and, at the bottom over a soft
+ * shadow, its title and its words (they scroll when long); one after another, as the words of the day.
+ */
+function NewsTrack({ items }: { items: News[] }) {
+  const { t } = usePrefs()
+  const [at, setAt] = useState(0)
+  const [held, setHeld] = useState(false)
+  const count = items.length
+  useEffect(() => setAt(0), [count])
+  useEffect(() => {
+    if (count < 2 || held) return
+    const timer = setTimeout(() => setAt((n) => (n + 1) % count), 7000)
+    return () => clearTimeout(timer)
+  }, [at, count, held])
+  if (!count) return <p className="news-empty">{t('home.news_none')}</p>
+  return (
+    <>
+      <div className="news-track" onPointerDown={() => setHeld(true)} onPointerUp={() => setTimeout(() => setHeld(false), 6000)}>
+        {items.map((n, i) => (
+          <article key={n.id} className={`news-item${i === at ? ' is-in' : ''}${n.image ? ' has-image' : ''}`} aria-hidden={i !== at}>
+            {n.image ? <img src={n.image} alt="" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" /> : null}
+            <div className="news-info">
+              <b>{n.title}</b>
+              {n.body ? <p>{n.body}</p> : null}
+            </div>
+          </article>
+        ))}
+      </div>
+      {count > 1 ? <div className="words-dots" aria-hidden="true">{items.map((n, i) => <span key={n.id} className={i === at ? 'is-on' : ''} />)}</div> : null}
+    </>
+  )
+}
+
 export function WordsOfDay() {
-  const { t, mode } = usePrefs()
+  const { t, mode, locale } = usePrefs()
+  // the small switch at the left of the title: the words of the day, or the news (kept on the phone)
+  const [news, setNewsState] = useState(false)
+  useEffect(() => { try { setNewsState(localStorage.getItem(SHOW_KEY) === 'news') } catch { /* words */ } }, [])
+  const setNews = (on: boolean) => {
+    setNewsState(on)
+    try { localStorage.setItem(SHOW_KEY, on ? 'news' : 'words') } catch { /* only for now */ }
+  }
+  const newsItems = useNews(news, locale, mode === 'boy')
   const { bundle } = useContent()
   const all = bundle?.inspirations?.length ? bundle.inspirations : bundle?.inspiration ? [bundle.inspiration] : []
   // boys' mode: words written to or about girls (beauties, moon-faced ones, flowers, a girl's pride) are left out
@@ -177,9 +242,22 @@ export function WordsOfDay() {
   }, [at, count, stay])
 
   const prev = (at - 1 + count) % count
+  const toggle = (
+    <button type="button" role="switch" aria-checked={news} className={`words-switch${news ? ' is-news' : ''}`} aria-label={t('home.news')} onClick={() => setNews(!news)}>
+      <span aria-hidden="true" />
+    </button>
+  )
+  if (news) {
+    return (
+      <section className="words is-news" aria-roledescription="carousel" aria-label={t('home.news')}>
+        <span className="words-label">{toggle}{t('home.news')}</span>
+        {newsItems === null ? <div className="news-track skeleton" /> : <NewsTrack items={newsItems} />}
+      </section>
+    )
+  }
   return (
     <section className="words" aria-roledescription="carousel" aria-label={t('home.words')}>
-      <span className="words-label">{t('home.words')}</span>
+      <span className="words-label">{toggle}{t('home.words')}</span>
       <div className="words-track" aria-live="polite">
         {items.map((q, n) => (
           <figure key={n} className={`words-item${n === at ? ' is-in' : count > 1 && n === prev ? ' is-out' : ''}`} aria-hidden={n !== at}>

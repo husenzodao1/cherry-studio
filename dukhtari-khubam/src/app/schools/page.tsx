@@ -18,6 +18,11 @@ export default function Schools() {
       <Link href="/search" className="glass search-bar" style={{ marginTop: 18 }}>
         <Icon name="search" /> <span>{t('search.placeholder')}</span>
       </Link>
+      <Link href="/library" className="glass lib-entry">
+        <span className="lib-entry-ico" aria-hidden="true">📚</span>
+        <span className="grow"><b>{t('lib.title')}</b><span>{t('lib.sub')}</span></span>
+        <Icon name="forward" size={18} />
+      </Link>
       <section className="section">
         {bundle ? (
           <SchoolGrid schools={bundle.schools} cols={2} count poem />

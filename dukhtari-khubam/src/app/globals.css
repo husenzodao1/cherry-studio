@@ -3558,3 +3558,61 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .study-chip { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 11px; border-radius: 99px; border: 1px solid rgba(15, 143, 107, 0.22);
   background: rgba(255, 255, 255, 0.6); font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--ink); cursor: pointer; }
 .study-chip[aria-pressed='true'] { color: #fff; background: linear-gradient(135deg, #1fb487, #0f8f6b); border-color: transparent; }
+
+/* the small switch at the left of the block's title: the words of the day, or the news */
+.words-label { display: inline-flex; align-items: center; gap: 8px; }
+.words-switch { position: relative; flex: none; width: 30px; height: 17px; padding: 0; border: 0; border-radius: 99px; cursor: pointer;
+  background: color-mix(in srgb, var(--plum) 22%, transparent); transition: background 0.25s var(--ease); }
+.words-switch span { position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); transition: transform 0.25s var(--ease); }
+.words-switch.is-news { background: var(--plum); }
+.words-switch.is-news span { transform: translateX(13px); }
+/* the news: the picture over the whole card, the title and words at the bottom over a soft shadow */
+.words.is-news .words-label { color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45); }
+.words.is-news .words-switch:not(.is-news) { background: rgba(255, 255, 255, 0.4); }
+.news-track { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; }
+.news-item { position: absolute; inset: 0; opacity: 0; transform: translateX(8%); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+  background: linear-gradient(135deg, #8b5cf6, #ec4899); pointer-events: none; }
+.news-item.is-in { opacity: 1; transform: none; pointer-events: auto; }
+.news-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.news-info { position: absolute; left: 0; right: 0; bottom: 0; max-height: 72%; display: flex; flex-direction: column; gap: 4px; padding: 34px 16px 20px; color: #fff;
+  background: linear-gradient(to top, rgba(10, 6, 20, 0.86) 0%, rgba(10, 6, 20, 0.6) 55%, transparent 100%); }
+.news-item:not(.has-image) .news-info { top: 0; max-height: none; justify-content: flex-end; background: linear-gradient(to top, rgba(10, 6, 20, 0.35), transparent); }
+.news-info b { font-size: 1.05rem; line-height: 1.25; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4); }
+.news-info p { margin: 0; font-size: 0.86rem; line-height: 1.4; opacity: 0.92; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none; min-height: 0; }
+.news-info p::-webkit-scrollbar { display: none; }
+.words.is-news .words-dots span { background: #fff; opacity: 0.55; }
+.news-empty { position: absolute; inset: 40px 18px 16px; margin: 0; display: grid; place-items: center; text-align: center; color: var(--ink-2); font-size: 0.92rem; }
+
+/* the Library: books standing on shelves by category; a tapped book comes forward, its cover large */
+.lib-search input { border: 0; outline: 0; background: transparent; font: inherit; color: var(--ink); min-width: 0; }
+.lib { display: flex; flex-direction: column; gap: 22px; }
+.lib-shelf { position: relative; }
+.lib-shelf-title { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 1.02rem; font-weight: 700; color: var(--ink); }
+.lib-shelf-title .muted { margin-inline-start: auto; font-size: 0.8rem; font-weight: 600; }
+.lib-row { display: flex; align-items: flex-end; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 10px 6px 0; margin: 0 -6px; perspective: 900px; }
+.lib-row::-webkit-scrollbar { display: none; }
+.lib-book { flex: none; width: 86px; aspect-ratio: 2 / 3; padding: 0; border: 0; border-radius: 3px 8px 8px 3px; overflow: hidden; cursor: pointer; background: #ddd;
+  transform: rotateY(18deg); transform-origin: left center; box-shadow: -6px 0 0 -2px rgba(0, 0, 0, 0.18) inset, 6px 10px 16px -6px rgba(40, 20, 60, 0.45);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease); animation: lib-stand 0.5s var(--ease) both; animation-delay: calc(min(var(--i), 8) * 0.05s); }
+.lib-book:active, .lib-book:focus-visible { transform: rotateY(0) translateY(-8px) scale(1.04); box-shadow: 0 18px 28px -10px rgba(40, 20, 60, 0.55); }
+.lib-book img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lib-book-plain { width: 100%; height: 100%; display: grid; place-items: center; padding: 8px; text-align: center; font-size: 0.72rem; font-weight: 700; color: #fff;
+  background: linear-gradient(160deg, #8b5cf6, #ec4899); }
+@keyframes lib-stand { from { opacity: 0; transform: rotateY(18deg) translateY(14px); } to { opacity: 1; transform: rotateY(18deg); } }
+.lib-plank { height: 14px; margin: 0 -4px; border-radius: 4px 4px 10px 10px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 30%, #fff) 0%, color-mix(in srgb, var(--plum) 18%, #fff) 45%, color-mix(in srgb, var(--plum) 30%, #fff) 100%);
+  box-shadow: 0 10px 18px -8px rgba(60, 30, 90, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.9); }
+.lib-veil { position: fixed; inset: 0; z-index: 110; display: grid; place-items: center; padding: 24px; background: rgba(20, 10, 30, 0.55); backdrop-filter: blur(8px); animation: fade-in 0.25s var(--ease) both; }
+.lib-open { width: min(100%, 360px); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0 18px 18px; border-radius: 28px; text-align: center;
+  background: color-mix(in srgb, var(--bg) 70%, #fff); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5); }
+.lib-open-cover { width: 150px; aspect-ratio: 2 / 3; margin-top: -60px; border-radius: 4px 10px 10px 4px; overflow: hidden; box-shadow: 0 24px 40px -14px rgba(40, 20, 60, 0.7);
+  animation: lib-forward 0.55s var(--ease) both; }
+.lib-open-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@keyframes lib-forward { from { transform: perspective(900px) rotateY(28deg) translateY(60px) scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+.lib-open-title { margin-top: 6px; font-size: 1.15rem; line-height: 1.25; }
+.lib-open-author { color: var(--ink-2); font-size: 0.9rem; }
+.lib-open-about { margin: 4px 0 8px; max-height: 30vh; overflow-y: auto; font-size: 0.9rem; line-height: 1.45; color: var(--ink); text-align: start; }
+.lib-entry { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 22px; text-decoration: none; color: var(--ink); margin-top: 12px; }
+.lib-entry .grow { display: flex; flex-direction: column; }
+.lib-entry .grow span { font-size: 0.84rem; color: var(--ink-2); }
+.lib-entry-ico { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font-size: 1.4rem; background: linear-gradient(135deg, #fde68a, #f59e0b); }
