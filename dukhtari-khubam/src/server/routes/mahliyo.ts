@@ -163,7 +163,7 @@ export const mahliyoRoutes: AnyRoute[] = [
       // her rough place, only when she allowed it ("38.6, 68.8": one decimal, about 10 km)
       place: z.string().regex(/^-?\d{1,2}(\.\d)?, -?\d{1,3}(\.\d)?$/).optional(),
       // the way she asked to be answered (the attach sheet's modes)
-      mode: z.enum(['precise', 'science', 'friendly', 'girly', 'exam', 'mmt', 'facts', 'lawyer', 'music', 'math', 'translate', 'writer', 'nutrition', 'career', 'code', 'history', 'calm', 'language', 'factcheck']).optional(),
+      mode: z.enum(['precise', 'science', 'friendly', 'girly', 'exam', 'mmt', 'facts', 'lawyer', 'music', 'math', 'translate', 'writer', 'nutrition', 'career', 'code', 'history', 'calm', 'language', 'factcheck', 'grants']).optional(),
       // a girl or a boy (the app's mode): a boy is spoken to as a young man
       gender: z.enum(['girl', 'boy']).optional(),
       // her conversation (the app's id for it): a free account's trial counts conversations and their messages

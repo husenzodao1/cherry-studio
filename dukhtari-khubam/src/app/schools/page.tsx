@@ -9,6 +9,12 @@ import { Empty, Skeleton } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
 import { usePrefs } from '@/web/prefs'
 
+/** the study tools under the Library: where each opens, its sign, its short name */
+const TOOLS = [
+  ['/mmt', 'cap', 'tools.mmt'], ['/cards', 'layers', 'tools.cards'], ['/check', 'pen', 'tools.check'],
+  ['/podcast', 'headphones', 'tools.podcast'], ['/grants', 'globe', 'tools.grants'], ['/sos', 'shield', 'tools.sos']
+] as const
+
 export default function Schools() {
   const { t } = usePrefs()
   const { bundle, offlineEmpty } = useContent()
@@ -19,16 +25,16 @@ export default function Schools() {
         <Icon name="search" /> <span>{t('search.placeholder')}</span>
       </Link>
       <Link href="/library" className="glass lib-entry">
-        <span className="lib-entry-ico" aria-hidden="true">📚</span>
+        <span className="tool-ico is-lg" aria-hidden="true"><Icon name="book" size={22} /></span>
         <span className="grow"><b>{t('lib.title')}</b><span>{t('lib.sub')}</span></span>
         <Icon name="forward" size={18} />
       </Link>
-      {/* study tools: the ММТ, the red pen, flashcards */}
-      <nav className="tools-grid" aria-label={t('nav.schools')}>
-        {([['/mmt', '🎓', 'mmt-ico', 'mmt.title'], ['/check', '🖍️', 'check-ico', 'check.title'], ['/cards', '🗂️', 'cards-ico', 'cards.title'], ['/podcast', '🎧', 'pod-ico', 'pod.title']] as const).map(([href, emoji, ico, key]) => (
-          <Link key={href} href={href} className="glass tool-tile">
-            <span className={`lib-entry-ico ${ico}`} aria-hidden="true">{emoji}</span>
-            <b>{t(key)}</b>
+      {/* study tools: quiet line icons in soft circles, one card, two even rows */}
+      <nav className="glass tools" aria-label={t('tools.title')}>
+        {TOOLS.map(([href, icon, key]) => (
+          <Link key={href} href={href} className="tool">
+            <span className="tool-ico" aria-hidden="true"><Icon name={icon} size={20} /></span>
+            <span className="tool-name">{t(key)}</span>
           </Link>
         ))}
       </nav>

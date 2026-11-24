@@ -21,6 +21,7 @@ export const AI_MODES: { id: AiMode; icon: IconName; color: string }[] = [
   { id: 'language', icon: 'speech', color: '#4f46e5' },
   { id: 'history', icon: 'scroll', color: '#92400e' },
   { id: 'career', icon: 'compass', color: '#0369a1' },
+  { id: 'grants', icon: 'globe', color: '#0f766e' },
   { id: 'code', icon: 'code', color: '#334155' },
   { id: 'nutrition', icon: 'apple', color: '#16a34a' },
   { id: 'calm', icon: 'leaf', color: '#059669' },

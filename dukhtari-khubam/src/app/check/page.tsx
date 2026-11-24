@@ -90,7 +90,7 @@ export default function CheckPage() {
       <div className="section stack" style={{ gap: 14 }}>
         {!photo ? (
           <section className="glass card-pad stack check-start">
-            <span className="check-pen" aria-hidden="true">🖍️</span>
+            <span className="tool-ico is-lg" aria-hidden="true"><Icon name="pen" size={24} /></span>
             <b>{t('check.title')}</b>
             <span className="muted">{t('check.sub')}</span>
             <label className="btn btn-block"><Icon name="camera" size={18} /> {t('check.camera')}

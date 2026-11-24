@@ -33,7 +33,7 @@ import { WidgetBridge } from './WidgetBridge'
 import { MfaGate } from './MfaGate'
 
 /** Pages a visitor may open before choosing a name or entering a code. */
-const OPEN = /^\/(start|admin|page|support|where|u)(\/|$)/
+const OPEN = /^\/(start|admin|page|support|where|u|parent)(\/|$)/
 
 /** Sends a first-time visitor to /start (name → code, or code → restore). */
 function Gate({ children }: { children: ReactNode }) {

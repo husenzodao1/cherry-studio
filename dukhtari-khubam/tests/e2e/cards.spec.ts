@@ -15,7 +15,7 @@ test('flashcards: the AI makes a deck from a text, she reviews it with FSRS, the
   await page.goto('/schools')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
   await page.screenshot({ path: 'test-results/schools-tools.png' })
-  await page.locator('.tool-tile[href="/cards"]').click()
+  await page.locator('.tool[href="/cards"]').click()
   await expect(page.getByText('Имрӯз корт нест — офарин!')).toBeVisible()
   await page.getByRole('button', { name: 'Кортҳои нав бо AI' }).click()
   await page.getByLabel('Номи маҷмӯа (ихтиёрӣ)').fill('Химия')
@@ -44,6 +44,9 @@ test('flashcards: the AI makes a deck from a text, she reviews it with FSRS, the
   await page.locator('.flashcard').click()
   await page.locator('.flashcard-btn.is-3').click()
   await expect(page.getByText('Тайёр! 3 ҷавоб')).toBeVisible()
+  await page.getByRole('button', { name: 'Тайёр' }).click()
+  await expect(page.locator('.cards-deck')).toHaveCount(1)
+  await page.screenshot({ path: 'test-results/cards-home.png' })
 
   // backed up by her code, the memory states with it
   type Put = { p_code: string; p_title: string; p_cards: { f: string; st?: { due: string } }[] }

@@ -60,13 +60,15 @@ export default function CardsPage() {
             <span><b>{st.fresh}</b>{t('cards.new')}</span><span><b>{st.due}</b>{t('cards.due')}</span><span><b>{st.learnt}</b>{t('cards.learnt')}</span>
           </section>
           <button type="button" className="btn btn-block" onClick={() => start(deck.id)}>{t('cards.study')}</button>
+          <section className="glass menu">
           {deck.cards.filter((c) => !c.del).map((c) => (
-            <div key={c.id} className="glass card-pad cards-row">
+            <div key={c.id} className="menu-row cards-row">
               <span className="grow"><b>{c.f}</b><span>{c.b}</span></span>
               {c.st ? <span className="muted" style={{ fontSize: '0.75em' }}>{c.st.due}</span> : <span className="tag">{t('cards.new')}</span>}
               <button type="button" className="icon-btn" aria-label={t('sos.remove')} onClick={() => removeCard(deck.id, c.id)}><Icon name="x" size={16} /></button>
             </div>
           ))}
+          </section>
           <button type="button" className="link-btn" style={{ color: '#e5484d' }} onClick={() => { if (window.confirm(t('cards.remove_q'))) { removeDeck(deck.id); setView('home') } }}>{t('cards.remove')}</button>
         </div>
       </>
@@ -77,23 +79,32 @@ export default function CardsPage() {
     <>
       <Header back="/schools" title={t('cards.title')} />
       <div className="section stack" style={{ gap: 14 }}>
-        <section className="glass card-pad cards-today">
-          <span className="cards-stack" aria-hidden="true">🗂️</span>
-          <b>{due.length ? t('cards.today').replace('{n}', String(due.length)) : t('cards.none_today')}</b>
-          <span className="muted" style={{ fontSize: '0.84em' }}>{t('cards.how')}</span>
-          {due.length ? <button type="button" className="btn btn-block" onClick={() => start()}>{t('cards.study')}</button> : null}
+        {/* today at a glance: how many, and one button */}
+        <section className="glass card-pad tool-hero">
+          <span className="tool-ico is-lg" aria-hidden="true"><Icon name="layers" size={24} /></span>
+          <span className="grow tool-hero-text">
+            <b>{due.length ? t('cards.today').replace('{n}', String(due.length)) : t('cards.none_today')}</b>
+            <span>{t('cards.how')}</span>
+          </span>
         </section>
-        <button type="button" className="btn btn-soft btn-block" onClick={() => setView('make')}><Icon name="sparkle" size={18} /> {t('cards.make')}</button>
-        {mine.map((d) => {
-          const st = deckStats(d, today)
-          return (
-            <button key={d.id} type="button" className="glass card-pad cards-deck" onClick={() => setView(d.id)}>
-              <span className="grow"><b>{d.title}</b><span>{t('cards.count').replace('{n}', String(st.total))} · {t('cards.learnt')}: {st.learnt}</span></span>
-              {st.due + Math.min(st.fresh, 15) ? <span className="review-badge">{st.due + Math.min(st.fresh, 15)}</span> : null}
-              <Icon name="forward" size={16} />
-            </button>
-          )
-        })}
+        {due.length ? <button type="button" className="btn btn-block" onClick={() => start()}><Icon name="play" size={16} /> {t('cards.study')}</button> : null}
+        {mine.length ? (
+          <section className="glass menu">
+            {mine.map((d) => {
+              const st = deckStats(d, today)
+              const now = st.due + Math.min(st.fresh, 15)
+              return (
+                <button key={d.id} type="button" className="menu-row cards-deck" onClick={() => setView(d.id)}>
+                  <Icon name="layers" size={20} />
+                  <span className="grow"><b>{d.title}</b><span>{t('cards.count').replace('{n}', String(st.total))} · {t('cards.learnt')} {st.learnt}</span></span>
+                  {now ? <span className="review-badge">{now}</span> : null}
+                  <Icon name="forward" size={16} />
+                </button>
+              )
+            })}
+          </section>
+        ) : null}
+        <button type="button" className="btn btn-soft btn-block" onClick={() => setView('make')}><Icon name="sparkle" size={16} /> {t('cards.make')}</button>
       </div>
     </>
   )

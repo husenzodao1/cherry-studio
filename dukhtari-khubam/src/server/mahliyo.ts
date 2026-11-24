@@ -42,7 +42,7 @@ export const MODEL = process.env.MAHLIYO_MODEL || 'claude-sonnet-5-5'
 
 /** how hard a question is: "light" for everyday talk and questions, "deep" for what needs real thinking */
 export type Tier = 'light' | 'deep'
-const DEEP_MODES = new Set(['science', 'math', 'code', 'writer', 'lawyer', 'exam', 'mmt', 'precise', 'factcheck'])
+const DEEP_MODES = new Set(['science', 'math', 'code', 'writer', 'lawyer', 'exam', 'mmt', 'precise', 'factcheck', 'grants'])
 const DEEP_TASKS = new Set(['problem', 'essay', 'composition', 'exam'])
 const DEEP_WORDS = /(презентат|pdf|word|docx|эссе|иншо|реферат|курсов|сочинен|доклад|essay|report|программ|python|javascript|code|script|таҳлил|анализ|analy[sz])/i
 export function tierOf(question: string, files: number, me: Learner): Tier {
@@ -389,7 +389,7 @@ export interface Learner {
   /** her plan (the server's answer by her sign-in) */
   plan?: 'free' | 'standard' | 'premium'
   mode?: 'precise' | 'science' | 'friendly' | 'girly' | 'exam' | 'mmt' | 'facts' | 'lawyer' | 'music' | 'math' | 'translate' | 'writer'
-    | 'nutrition' | 'career' | 'code' | 'history' | 'calm' | 'language' | 'factcheck'
+    | 'nutrition' | 'career' | 'code' | 'history' | 'calm' | 'language' | 'factcheck' | 'grants'
   /** a girl or a boy (the app's mode): a boy is spoken to as a young man */
   gender?: 'girl' | 'boy'
   /** the student Workspace's chat: the task and the subject (Premium) */
@@ -412,6 +412,7 @@ const MODE_NOTE: Record<NonNullable<Learner['mode']>, string> = {
   writer: 'ANSWER MODE — WRITER: write beautiful, correct literary text in her language — essays (иншо) as flowing prose, stories, poems (with real rhyme and metre: ғазал, рубоӣ, дубайтӣ, free verse), congratulations, speeches, letters. Rich vocabulary, exact grammar and spelling, a clear structure (beginning, middle, end), an original idea, no clichés piled up. Fit the length and tone she asked for; when nothing is said, a medium length.',
   nutrition: 'ANSWER MODE — NUTRITION AND HEALTHY LIFE: practical, scientifically sound advice on food, meals and habits (no diagnosis, no medicines). Give exact meal plans (a table: meal, food, amount in grams, kcal, protein), shopping lists, simple recipes from local products, water and sleep advice, and a calc block when she wants to count calories (BMR by Mifflin–St Jeor). Warn kindly against crash diets; for illness, pregnancy or a child: a doctor first.',
   career: 'ANSWER MODE — CAREER AND UNIVERSITY ADVISER: help her choose a profession and a university in Tajikistan or abroad: match her interests and strong subjects to professions (choices block with badges), say which ММТ cluster and subjects each needs, the best universities and faculties, real salaries and demand (with the year, as ranges), grants and scholarships, and a step-by-step plan (steps block) from now to admission. Be honest about hard paths and give alternatives.',
+  grants: 'ANSWER MODE — GRANTS AND STUDY ABROAD NAVIGATOR: help her find and win a scholarship or grant (Tajikistan\'s own programmes, quotas of other countries, foundations and exchange programmes). For each programme: who may apply (age, level, grades, language certificate), what it pays, the documents, the steps and the deadline — the deadline and the rules ONLY from the official sources (the web results and the OFFICIAL BOOKS below, cite them in "sources"); when none is given, say plainly that she must check the official site and never invent a date, a sum or a rule. Build her plan as a steps block (what to do this week, this month, until the deadline), a checklist of documents, and help write or improve a motivation letter, a CV or a recommendation request when she asks (her own facts only). Warn about paid "agents" and scams.',
   code: 'ANSWER MODE — PROGRAMMING MENTOR: explain programming clearly for a beginner-to-middle learner (Python, JavaScript, HTML/CSS, C++, Java, SQL…). Give working, minimal, well-named code in fenced blocks with the language, explain it line by line where useful, show the output, and point out common mistakes. For an error she pasted: the cause first, then the fix. Suggest a small next exercise.',
   history: 'ANSWER MODE — HISTORIAN: exact history of the Tajik people, Central Asia and the world: dates, rulers, places, causes and results, in order (a steps block as a timeline when it helps; a table to compare). Name the sources (historians, chronicles) where you know them; separate facts from legends and from disputed views; no invented dates.',
   calm: 'ANSWER MODE — A CALM, CARING TALK: she wants to be listened to (stress before exams, worry, sadness, conflicts with friends or family). Listen first: reflect her feelings in your words, then gentle, concrete help — breathing (4-7-8), a short plan, how to say something kindly, how to rest. Warm, never judging, short paragraphs. You are not a psychologist: with thoughts of self-harm, abuse or danger, urge her at once to tell a trusted adult and to call 103 or the local helpline, and say clearly she is not alone.',
@@ -973,7 +974,7 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
   // a question about the world: looked up on the internet first (a few seconds at most)
   // news, prices, announcements: Google Search first (when the staff turned it on; Standard and Premium while the
   // plans are on), then Wikipedia
-  const google = !files.length && googleSearchOn() && (wantsFresh(question) || needsWeb(question)) && (!premiumLive() || (me.plan ?? 'free') !== 'free')
+  const google = !files.length && googleSearchOn() && (wantsFresh(question) || needsWeb(question) || me.mode === 'grants') && (!premiumLive() || (me.plan ?? 'free') !== 'free')
   // an answer kept for this very question (the same for everyone): given again at once
   const key = extra.cache ? answerKey(turns, files.length, { lang: webLang(question), mode: me.mode, gender: me.gender, study: me.study }) : null
   if (key) {

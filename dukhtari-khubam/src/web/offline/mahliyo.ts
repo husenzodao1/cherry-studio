@@ -258,7 +258,7 @@ export interface AiState {
 export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string; mode?: AiMode; gender?: 'girl' | 'boy'; study?: Study }
 /** how she asks to be answered (the attach sheet's modes) */
 export type AiMode = 'precise' | 'science' | 'friendly' | 'girly' | 'exam' | 'mmt' | 'facts' | 'lawyer' | 'music' | 'math' | 'translate'
-  | 'writer' | 'nutrition' | 'career' | 'code' | 'history' | 'calm' | 'language' | 'factcheck'
+  | 'writer' | 'nutrition' | 'career' | 'code' | 'history' | 'calm' | 'language' | 'factcheck' | 'grants'
 
 const PENDING_KEY = 'dk.ai-pending'
 /** how long she may take before the question counts as unanswered (the server gives up after 5 minutes) */

@@ -86,9 +86,9 @@ export default function PodcastPage() {
     <>
       <Header back="/schools" title={t('pod.title')} />
       <div className="section stack" style={{ gap: 12 }}>
-        <section className="glass card-pad pod-hero">
-          <span aria-hidden="true">🎧</span>
-          <span className="muted">{t('pod.sub')}</span>
+        <section className="glass card-pad tool-hero">
+          <span className="tool-ico is-lg" aria-hidden="true"><Icon name="headphones" size={24} /></span>
+          <span className="grow tool-hero-text"><span>{t('pod.sub')}</span></span>
         </section>
         <div className="segmented" role="tablist">
           {(['text', 'photo', 'lesson'] as Source[]).map((s) => (
@@ -110,14 +110,13 @@ export default function PodcastPage() {
           <div className="sos-chips">
             {MINUTES.map((m) => <button key={m} type="button" className="chip" aria-pressed={minutes === m} onClick={() => setMinutes(m)}>{t('sos.minutes').replace('{n}', String(m))}</button>)}
           </div>
-          <button type="button" className="btn" disabled={!ready || busy} onClick={() => void make()}>{busy ? t('pod.writing') : `🎙️ ${t('pod.make')}`}</button>
+          <button type="button" className="btn" disabled={!ready || busy} onClick={() => void make()}>{busy ? t('pod.writing') : t('pod.make')}</button>
         </section>
         {saved.length ? (
-          <section className="glass card-pad stack" style={{ gap: 4 }}>
-            <b>{t('pod.saved')}</b>
+          <section className="glass menu">
             {saved.map((s) => (
-              <button key={s.id} type="button" className="cards-deck" style={{ padding: '10px 0', background: 'none' }} onClick={() => setPlaying(s)}>
-                <span aria-hidden="true">🎧</span>
+              <button key={s.id} type="button" className="menu-row cards-deck" onClick={() => setPlaying(s)}>
+                <Icon name="headphones" size={20} />
                 <span className="grow"><b>{s.title}</b><span>{new Date(s.at).toLocaleDateString()}</span></span>
                 <Icon name="play" size={16} />
               </button>
@@ -184,7 +183,7 @@ function Player({ item, onBack }: { item: Saved & { parts?: Part[] }; onBack: ()
       <div className="section stack" style={{ gap: 12 }}>
         <audio ref={audio} onEnded={() => setIndex((i) => i + 1)} hidden />
         <section className="glass card-pad pod-player">
-          <span className={`pod-disc${!paused && !done && ready[index] ? ' is-on' : ''}`} aria-hidden="true">🎧</span>
+          <span className={`pod-disc${!paused && !done && ready[index] ? ' is-on' : ''}`} aria-hidden="true"><Icon name="headphones" size={34} /></span>
           <span className="muted">{failed ? t('pod.no_voice') : done ? t('pod.done') : ready[index] ? `${index + 1} / ${item.lines.length}` : t('pod.voicing')}</span>
           <div className="row" style={{ gap: 10 }}>
             <button type="button" className="icon-btn" aria-label={t('action.back')} disabled={index === 0} onClick={() => setIndex((i) => Math.max(0, i - 1))}><Icon name="back" /></button>

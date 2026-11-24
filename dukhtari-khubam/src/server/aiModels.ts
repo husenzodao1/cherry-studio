@@ -66,7 +66,7 @@ const STOP = new Set(['чист', 'кист', 'барои', 'дар', 'бора�
 
 /** the books' shelves: the mode's own shelf is searched first (the ММТ books for ММТ, the laws for the lawyer) */
 export type BookShelf = 'general' | 'mmt' | 'law' | 'grants'
-export const SHELF_OF: Partial<Record<string, BookShelf>> = { mmt: 'mmt', exam: 'mmt', lawyer: 'law', career: 'grants' }
+export const SHELF_OF: Partial<Record<string, BookShelf>> = { mmt: 'mmt', exam: 'mmt', lawyer: 'law', career: 'grants', grants: 'grants' }
 
 /** the passages of the staff's books nearest a question (a few milliseconds; nothing when there are none) */
 export async function bookPassages(sb: SupabaseClient, question: string, limit = 4, shelf?: BookShelf): Promise<BookPassage[]> {

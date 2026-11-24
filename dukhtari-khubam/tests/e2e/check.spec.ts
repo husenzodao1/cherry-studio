@@ -17,7 +17,7 @@ test('the red pen: a notebook photo, the mistakes circled with the fix beside, a
   })
   await page.goto('/schools')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  await page.locator('.tool-tile[href="/check"]').click()
+  await page.locator('.tool[href="/check"]').click()
   await expect(page).toHaveURL(/\/check/)
   await page.getByLabel('Аз галерея').setInputFiles('public/assets/paywall/tg/chat.webp')
   await expect(page.locator('.check-page img')).toBeVisible()

@@ -25,10 +25,10 @@ test('a podcast from a lecture: the script in two voices, played part by part, k
   })
   await page.goto('/schools')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  await page.locator('.tool-tile[href="/podcast"]').click()
+  await page.locator('.tool[href="/podcast"]').click()
   await page.getByLabel('Матн', { exact: true }).fill('Фотосинтез — раванде, ки дар он растаниҳо бо ёрии нури офтоб аз об ва гази карбонат моддаҳои органикӣ месозанд ва оксиген хориҷ мекунанд.')
   await page.getByRole('button', { name: '3 дақ' }).click()
-  await page.getByRole('button', { name: '🎙️ Сохтани подкаст' }).click()
+  await page.getByRole('button', { name: 'Сохтани подкаст' }).click()
   expect(asked).toMatchObject({ lang: 'tg', minutes: 3 })
 
   // the first part voiced, the next one asked for while it plays

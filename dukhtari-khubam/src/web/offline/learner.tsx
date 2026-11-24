@@ -184,6 +184,8 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
         if (!res.conflict) {
           writeJson(`${SYNCED_KEY}:${l.code}`, res.updated_at)
           setSync('synced')
+          // her parents' summary, when she gave them a link (web/offline/family.ts)
+          if (localStorage.getItem('dk.parent.on') === '1') void import('./family').then((f) => f.pushSummary(l.code, data)).catch(() => undefined)
           return
         }
         // another phone (or an older backup) wrote meanwhile: take both, then send the merge

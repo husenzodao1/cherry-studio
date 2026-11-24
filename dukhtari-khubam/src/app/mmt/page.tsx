@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import { nextQuestion, rankPrograms, studyPlan, subjectScore, type Answered, type MmtProgram, type MmtQuestion } from '@/lib/mmt'
 import { Header } from '@/web/components/Header'
@@ -37,6 +38,8 @@ export default function MmtPage() {
   const [per, setPer] = useState(10)
   const [busy, setBusy] = useState(false)
   const [all, setAll] = useState(false)
+  const [sheet, setSheet] = useState<'cluster' | 'exam' | null>(null)
+  const [week, setWeek] = useState(false)
   const [hist, setHist] = useState<Answered[]>([])
   const [tries, setTries] = useState<Attempt[]>([])
 
@@ -73,6 +76,7 @@ export default function MmtPage() {
     try {
       const pool = await drawExam(chosen, per)
       if (!pool.length) { showToast(t('mmt.no_questions'), 'alert'); return }
+      setSheet(null)
       setView({ kind: 'exam', pool, per, subjects: chosen })
     } catch (e) {
       if (e instanceof MmtError && e.status === 402) open('mmt')
@@ -138,7 +142,7 @@ export default function MmtPage() {
             <button type="button" className="btn btn-soft btn-block" onClick={() => {
               addToDeck(t('mmt.cards_deck'), 'mmt', wrong.map((w) => ({ front: w.q.question, back: `${w.q.options[w.q.answer]}${w.q.explanation ? `\n${w.q.explanation}` : ''}` })))
               showToast(t('mmt.cards_added').replace('{n}', String(wrong.length)), 'check')
-            }}>🗂️ {t('mmt.to_cards')}</button>
+            }}><Icon name="layers" size={16} /> {t('mmt.to_cards')}</button>
           ) : null}
           <button type="button" className="btn btn-block" onClick={() => setView({ kind: 'home' })}>{t('mmt.done')}</button>
         </div>
@@ -146,73 +150,46 @@ export default function MmtPage() {
     )
   }
 
+  const days = cat?.exam_date && plan.daysLeft !== null ? plan.daysLeft : null
   return (
     <>
       <Header back="/schools" title={t('mmt.title')} />
-      <div className="section stack" style={{ gap: 14 }}>
-        {failed ? <div className="glass card-pad muted">{t('state.offline')}</div> : !cat ? <div className="skeleton" style={{ height: 200, borderRadius: 24 }} /> : (
+      <div className="section stack" style={{ gap: 12 }}>
+        {failed ? <div className="glass card-pad muted">{t('state.offline')}</div> : !cat ? <div className="skeleton" style={{ height: 160, borderRadius: 24 }} /> : (
           <>
-            <section className="glass card-pad stack" style={{ gap: 10 }}>
-              <b>{t('mmt.cluster')}</b>
-              <div className="sos-chips">
-                {CLUSTERS.map((c) => (
-                  <button key={c} type="button" className="chip" aria-pressed={cluster === c} onClick={() => setCluster(c)}>{t('mmt.cluster_n').replace('{n}', String(c))}</button>
-                ))}
+            {/* her estimate at a glance, the cluster chosen in a small sheet */}
+            <section className="glass card-pad mmt-hero">
+              <Ring value={practiced ? total : 0} max={totalMax || 1} />
+              <div className="mmt-hero-text">
+                <span className="eyebrow">{t('mmt.predicted')}</span>
+                <b className="mmt-big">{practiced ? Math.round(total) : '—'}{practiced ? <small> / {totalMax}</small> : null}</b>
+                <button type="button" className={`mmt-cluster${cluster ? '' : ' is-empty'}`} onClick={() => setSheet('cluster')}>
+                  {cluster ? t('mmt.cluster_n').replace('{n}', String(cluster)) : t('mmt.cluster_pick')}<Icon name="down" size={14} />
+                </button>
               </div>
-              {cat.exam_date && plan.daysLeft !== null ? <span className="muted">{t('mmt.days_left').replace('{n}', String(plan.daysLeft))}</span> : null}
+              {days !== null ? <span className="mmt-days"><b>{days}</b>{t('mmt.days')}</span> : null}
             </section>
 
-            {cluster ? (
+            {cluster && !subjects.length ? <div className="glass card-pad muted">{t('mmt.no_subjects')}</div> : null}
+
+            {cluster && subjects.length ? (
               <>
-                {!subjects.length ? <div className="glass card-pad muted">{t('mmt.no_subjects')}</div> : (
-                  <section className="glass card-pad mmt-score">
-                    <span className="eyebrow">{t('mmt.predicted')}</span>
-                    {practiced ? <b className="mmt-big">{Math.round(total)}<small> / {totalMax}</small></b> : <span className="muted">{t('mmt.no_practice')}</span>}
-                    {practiced ? predicted.map((s) => <Bar key={s.id} label={s.name} value={s.score} max={s.max_points} />) : null}
-                    {tries.length > 1 ? <span className="muted" style={{ fontSize: '0.8em' }}>{t('mmt.trend').replace('{a}', String(Math.round(tries[tries.length - 2].total))).replace('{b}', String(Math.round(tries[tries.length - 1].total)))}</span> : null}
-                    <span className="muted" style={{ fontSize: '0.78em' }}>{t('mmt.estimate_note')}</span>
-                  </section>
-                )}
-
-                {subjects.length ? (
+                {practiced ? (
                   <section className="glass card-pad stack" style={{ gap: 10 }}>
-                    <b>📝 {t('mmt.mock')}</b>
-                    <div className="stack" style={{ gap: 6 }}>
-                      {subjects.map((s) => (
-                        <label key={s.id} className="row mmt-subject">
-                          <input type="checkbox" disabled={!s.questions} checked={chosen.includes(s.id)}
-                            onChange={(e) => setChosen(e.target.checked ? [...chosen, s.id] : chosen.filter((x) => x !== s.id))} />
-                          <span className="grow">{s.name}</span>
-                          <span className="muted" style={{ fontSize: '0.8em' }}>{s.questions ? t('mmt.n_questions').replace('{n}', String(s.questions)) : t('mmt.soon')}</span>
-                        </label>
-                      ))}
-                    </div>
-                    <div className="sos-chips">
-                      {PER.map((n) => <button key={n} type="button" className="chip" aria-pressed={per === n} onClick={() => setPer(n)}>{t('mmt.per').replace('{n}', String(n))}</button>)}
-                    </div>
-                    <button type="button" className="btn" disabled={!chosen.length || busy} onClick={() => void start()}>{busy ? '…' : t('mmt.start')}</button>
+                    {predicted.map((s) => <Bar key={s.id} label={s.name} value={s.score} max={s.max_points} />)}
+                    {tries.length > 1 ? <span className="muted" style={{ fontSize: '0.78em' }}>{t('mmt.trend').replace('{a}', String(Math.round(tries[tries.length - 2].total))).replace('{b}', String(Math.round(tries[tries.length - 1].total)))}</span> : null}
                   </section>
-                ) : null}
+                ) : <p className="muted mmt-hint">{t('mmt.no_practice')}</p>}
 
-                {ranked.length ? (
-                  <section className="glass card-pad stack" style={{ gap: 6 }}>
-                    <b>🎓 {t('mmt.chances')}</b>
-                    {!practiced ? <span className="muted" style={{ fontSize: '0.84em' }}>{t('mmt.chances_first')}</span> : null}
-                    {(all ? ranked : ranked.slice(0, 8)).map((p) => (
-                      <div key={p.id} className="mmt-program">
-                        <span className="grow"><b>{p.specialty}</b><span>{p.university}{p.city ? `, ${p.city}` : ''} · {t(`mmt.form_${p.form}` as 'mmt.form_budget')}</span></span>
-                        <span className="mmt-cut">{Number(p.min_score)}<small>{p.year}</small></span>
-                        {practiced ? <span className={`mmt-chance is-${p.chance}`}>{t(`mmt.chance_${p.chance}` as 'mmt.chance_high')}</span> : null}
-                      </div>
-                    ))}
-                    {ranked.length > 8 ? <button type="button" className="link-btn" onClick={() => setAll(!all)}>{all ? t('mmt.less') : t('mmt.all').replace('{n}', String(ranked.length))}</button> : null}
-                  </section>
-                ) : null}
+                <button type="button" className="btn btn-block" onClick={() => setSheet('exam')}><Icon name="play" size={16} /> {t('mmt.mock')}</button>
 
                 {practiced && plan.days.length ? (
-                  <section className="glass card-pad stack" style={{ gap: 8 }}>
-                    <b>🗓 {t('mmt.plan')}</b>
-                    {plan.days.slice(0, 7).map((d) => (
+                  <section className="glass menu">
+                    <div className="menu-row mmt-plan-head">
+                      <Icon name="chart" size={20} /><span className="grow">{t('mmt.plan')}</span>
+                      <button type="button" className="link-btn" style={{ padding: 0 }} onClick={() => setWeek(!week)}>{week ? t('mmt.less') : t('mmt.week')}</button>
+                    </div>
+                    {plan.days.slice(0, week ? 7 : 1).map((d) => (
                       <div key={d.day} className="mmt-day">
                         <span className="mmt-day-n">{d.day === 1 ? t('mmt.today') : d.date.slice(5).split('-').reverse().join('.')}</span>
                         <span className="grow">
@@ -222,18 +199,84 @@ export default function MmtPage() {
                               {tp.topic}
                             </button>
                           ))}
-                          <span className="muted" style={{ fontSize: '0.78em' }}>{t('mmt.q_a_day').replace('{n}', String(d.questions))}</span>
                         </span>
                       </div>
                     ))}
                   </section>
                 ) : null}
+
+                {ranked.length ? (
+                  <section className="glass menu">
+                    <div className="menu-row mmt-plan-head"><Icon name="cap" size={20} /><span className="grow">{t('mmt.chances')}</span></div>
+                    {(all ? ranked : ranked.slice(0, 5)).map((p) => (
+                      <div key={p.id} className="menu-row mmt-program">
+                        {practiced ? <span className={`mmt-dot is-${p.chance}`} title={t(`mmt.chance_${p.chance}` as 'mmt.chance_high')} aria-label={t(`mmt.chance_${p.chance}` as 'mmt.chance_high')} /> : null}
+                        <span className="grow"><b>{p.specialty}</b><span>{p.university} · {t(`mmt.form_${p.form}` as 'mmt.form_budget')}</span></span>
+                        <span className="mmt-cut">{Number(p.min_score)}<small>{p.year}</small></span>
+                      </div>
+                    ))}
+                    {ranked.length > 5 ? <button type="button" className="link-btn" style={{ width: '100%' }} onClick={() => setAll(!all)}>{all ? t('mmt.less') : t('mmt.all').replace('{n}', String(ranked.length))}</button> : null}
+                  </section>
+                ) : null}
+                <p className="muted mmt-hint">{t('mmt.estimate_note')}</p>
               </>
             ) : null}
           </>
         )}
       </div>
+
+      {sheet === 'cluster' ? createPortal(
+        <div className="sheet-scrim" onClick={() => setSheet(null)}>
+          <div className="sheet glass" role="dialog" aria-label={t('mmt.cluster')} onClick={(e) => e.stopPropagation()}>
+            <span className="sheet-grip" aria-hidden="true" />
+            {CLUSTERS.map((c) => {
+              const names = (cat?.subjects ?? []).filter((x) => x.clusters.includes(c)).map((x) => x.name).join(', ')
+              return (
+                <button key={c} type="button" className="sheet-row" aria-pressed={cluster === c} onClick={() => { setCluster(c); setSheet(null) }}>
+                  <span className="sheet-icon"><b>{c}</b></span>
+                  <span className="grow mmt-sheet-text"><span>{t('mmt.cluster_n').replace('{n}', String(c))}</span>{names ? <small>{names}</small> : null}</span>
+                  {cluster === c ? <Icon name="check" size={18} /> : null}
+                </button>
+              )
+            })}
+          </div>
+        </div>,
+        document.body
+      ) : null}
+
+      {sheet === 'exam' ? createPortal(
+        <div className="sheet-scrim" onClick={() => setSheet(null)}>
+          <div className="sheet glass mmt-exam-sheet" role="dialog" aria-label={t('mmt.mock')} onClick={(e) => e.stopPropagation()}>
+            <span className="sheet-grip" aria-hidden="true" />
+            <span className="eyebrow">{t('mmt.subjects')}</span>
+            <div className="sos-chips">
+              {subjects.map((x) => (
+                <button key={x.id} type="button" className="chip" aria-pressed={chosen.includes(x.id)} disabled={!x.questions}
+                  onClick={() => setChosen(chosen.includes(x.id) ? chosen.filter((y) => y !== x.id) : [...chosen, x.id])}>{x.name}</button>
+              ))}
+            </div>
+            <span className="eyebrow">{t('mmt.per_subject')}</span>
+            <div className="segmented">
+              {PER.map((n) => <button key={n} type="button" aria-pressed={per === n} onClick={() => setPer(n)}>{n}</button>)}
+            </div>
+            <button type="button" className="btn btn-block" disabled={!chosen.length || busy} onClick={() => void start()}>{busy ? '…' : t('mmt.start')}</button>
+          </div>
+        </div>,
+        document.body
+      ) : null}
     </>
+  )
+}
+
+/** her estimate as a ring: the share of the cluster's whole points */
+function Ring({ value, max }: { value: number; max: number }) {
+  const r = 34
+  const c = 2 * Math.PI * r
+  return (
+    <svg className="mmt-ring" viewBox="0 0 80 80" aria-hidden="true">
+      <circle cx="40" cy="40" r={r} className="mmt-ring-track" />
+      <circle cx="40" cy="40" r={r} className="mmt-ring-fill" strokeDasharray={c} strokeDashoffset={c * (1 - Math.min(1, value / max))} />
+    </svg>
   )
 }
 
