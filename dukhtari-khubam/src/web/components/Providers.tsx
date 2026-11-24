@@ -30,6 +30,7 @@ import { NotifyBridge } from './NotifyBridge'
 import { SupportWatch } from './SupportWatch'
 import { showToast, Toaster } from './Toast'
 import { WidgetBridge } from './WidgetBridge'
+import { MfaGate } from './MfaGate'
 
 /** Pages a visitor may open before choosing a name or entering a code. */
 const OPEN = /^\/(start|admin|page|support)(\/|$)/
@@ -182,6 +183,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <PullSignature />
               <WidgetBridge />
               <PlanNudge />
+              <MfaGate />
               <HeyWake />
               <Toaster />
               <Mascot />

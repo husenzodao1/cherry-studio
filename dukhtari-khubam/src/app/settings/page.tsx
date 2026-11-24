@@ -191,6 +191,11 @@ export default function Settings() {
       <Header back="/profile" title={t('settings.title')} />
       <div className="section stagger solid-glass">
         <PlanRow />
+        <Link className="glass ws-row" href="/security">
+          <span className="ws-row-ico is-mfa" aria-hidden="true"><Icon name="shield" size={22} /></span>
+          <span className="grow"><b>{t('mfa.title')}</b><span className="row-sub">{t('mfa.row_sub')}</span></span>
+          <Icon name="forward" size={16} />
+        </Link>
         <Link className="glass ws-row" href="/workspace">
           <span className="ws-row-ico" aria-hidden="true"><Icon name="cap" size={22} /></span>
           <span className="grow"><b>{t('ws.title')}</b><span className="row-sub">{t('ws.add')} · PDF · Word</span></span>
