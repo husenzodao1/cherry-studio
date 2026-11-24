@@ -32,7 +32,9 @@ export function NavMap({ line, me, heading, to, following, recenter = 0 }: { lin
     })
     return () => {
       gone = true
-      map.current?.remove()
+      // a zoom or pan still moving when the map goes: stopped first (Leaflet would finish it on a removed map)
+      const m = map.current
+      if (m) { m.stop(); m.off(); m.remove() }
       map.current = null
       parts.current = {}
     }
