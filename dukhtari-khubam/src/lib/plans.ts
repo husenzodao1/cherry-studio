@@ -100,6 +100,7 @@ export const ROWS: Row[] = [
   { id: 'workspace', icon: 'select', cells: [false, false, true] },
   { id: 'navigate', icon: 'compass', cells: [false, false, true] },
   { id: 'telegram', icon: 'share', cells: [false, false, true] },
+  { id: 'hey', icon: 'mic', cells: [false, true, true] },
   { id: 'widgets', icon: 'grid', cells: [false, true, true] },
   { id: 'speed', icon: 'flash', cells: [false, true, true] }
 ]

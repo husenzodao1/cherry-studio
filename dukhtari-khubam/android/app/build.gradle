@@ -58,6 +58,9 @@ dependencies {
     implementation project(':capacitor-android')
     // Premium through Google Play (PlayBilling.java)
     implementation "com.android.billingclient:billing:8.0.0"
+    // "Эй Маҳлиё": offline Tajik speech and speaker recognition (HeyMahliyo.java)
+    implementation 'com.alphacephei:vosk-android:0.3.75'
+    implementation 'net.java.dev.jna:jna:5.18.1@aar'
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"

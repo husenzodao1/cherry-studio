@@ -20,7 +20,7 @@ test('the plans: their screen with the app at work, two plans with crowns and pr
   await expect(page.locator('.pw-plan')).toHaveCount(2)
   await expect(page.locator('.pw-plan.is-premium')).toContainText('99')
   await expect(page.locator('.pw-plan.is-standard')).toContainText('Моҳи аввал 25 сомонӣ')
-  await expect(page.locator('.pw-tr')).toHaveCount(1 + 19)
+  await expect(page.locator('.pw-tr')).toHaveCount(1 + 20)
   await expect(page.locator('.pw-tr', { hasText: 'Саволҳо ба Маҳлиё' })).toContainText('15/рӯз')
   await expect(page.locator('.pw-tr', { hasText: 'Сохтани мусиқӣ' }).locator('.pw-td.is-premium')).toContainText('20/моҳ')
   await page.waitForTimeout(900)

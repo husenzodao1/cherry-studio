@@ -137,11 +137,16 @@ function MoreFeatures() {
     <>
       <button type="button" className="glass ws-row more-row" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         <span className="ws-row-ico is-more" aria-hidden="true"><Icon name="grid" size={22} /></span>
-        <span className="grow"><b>{t('set.more')}</b><span className="row-sub">{t('nav.title')}</span></span>
+        <span className="grow"><b>{t('set.more')}</b><span className="row-sub">{t('hey.title')} · {t('nav.title')}</span></span>
         <span className={`more-chev${open ? ' is-open' : ''}`} aria-hidden="true"><Icon name="down" size={16} /></span>
       </button>
       {open ? (
         <div className="more-list">
+          <Link className="glass ws-row" href="/hey">
+            <span className="ws-row-ico is-hey" aria-hidden="true"><Icon name="mic" size={22} /></span>
+            <span className="grow"><b>{t('hey.title')}</b><span className="row-sub">Standard · Premium</span></span>
+            <Icon name="forward" size={16} />
+          </Link>
           <Link className="glass ws-row" href="/navigate">
             <span className="ws-row-ico is-nav" aria-hidden="true"><Icon name="compass" size={22} /></span>
             <span className="grow"><b>{t('nav.title')}</b><span className="row-sub">{t('nav.foot')} · {t('nav.car')}</span></span>

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- the phone's voice (TextToSpeech), the clock's timer and the phone's call screen, seen on Android 11+ -->
+    <queries>
+        <intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>
+        <intent><action android:name="android.intent.action.SET_TIMER" /></intent>
+        <intent><action android:name="android.intent.action.CALL" /></intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -23,7 +29,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="@string/custom_url_scheme" android:host="open" />
             </intent-filter>
+            <!-- the phone's assistant (a long press of the power or home button), when LifeHub is chosen as it -->
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VOICE_COMMAND" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
+        <!-- "Эй Маҳлиё" (HeyMahliyo.java): listens for her name with its notification on -->
+        <service android:name=".HeyMahliyo$Service" android:exported="false" android:foregroundServiceType="microphone" />
         <!-- Mahliyo's calls (MahliyoCall.java): the alarm, "Decline", and the calls planned again after a restart -->
         <receiver android:name=".MahliyoCall$Receiver" android:exported="true">
             <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
@@ -194,6 +211,16 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- "Эй Маҳлиё": the microphone, listened to by a foreground service; the phone woken and the app shown at her name -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- "call …" by voice: her contacts and the call; "a timer of …": the phone's clock -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <!-- her voice on the call line: the earpiece, or the speaker -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <!-- a screenshot or a recording of a lesson is noticed (it shows black: the lessons stay private) -->

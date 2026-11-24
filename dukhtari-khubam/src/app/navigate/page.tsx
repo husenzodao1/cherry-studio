@@ -11,6 +11,7 @@ import { CrownSpin } from '@/web/components/CrownSpin'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { follow, hereOnce, openLocationSettings, readyToFollow, type Ready } from '@/web/offline/follow'
+import { hey, native } from '@/web/offline/hey'
 import { usePlan } from '@/web/plans'
 import { usePrefs } from '@/web/prefs'
 
@@ -116,6 +117,11 @@ export default function NavigatePage() {
   // the words of a turn: on the screen, with a buzz, and in a voice when the phone has one for her language
   const say = useCallback((text: string) => {
     try { navigator.vibrate?.([120, 60, 120]) } catch { /* no vibration */ }
+    // in the phone app: the phone's own voice (the web view has none); in a browser: its voice, when it has one for her language
+    if (native()) {
+      void hey().then(({ p }) => p.speak({ text, lang: locale === 'prs' ? 'fa' : locale })).catch(() => undefined)
+      return
+    }
     try {
       const synth = window.speechSynthesis
       if (!synth) return

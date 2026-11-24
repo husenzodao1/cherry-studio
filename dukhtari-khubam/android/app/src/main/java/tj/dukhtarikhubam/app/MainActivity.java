@@ -31,10 +31,12 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
         registerPlugin(ScreenGuard.class);
         registerPlugin(PlayBilling.class);
         registerPlugin(PlacePermission.class);
+        registerPlugin(HeyMahliyo.HeyPlugin.class);
         super.onCreate(savedInstanceState);
         // her words play as soon as her call is answered (also when answered from the notification)
         if (getBridge() != null && getBridge().getWebView() != null) getBridge().getWebView().getSettings().setMediaPlaybackRequiresUserGesture(false);
         fromCall(getIntent());
+        fromName(getIntent());
     }
 
     @Override
@@ -68,6 +70,7 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         fromCall(intent);
+        fromName(intent);
     }
 
     /** Opened by her call: over the lock screen, the screen on, until the call ends (MahliyoCall.done). */
@@ -75,6 +78,19 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
         if (intent == null || !intent.hasExtra(MahliyoCall.EXTRA)) return;
         overLock(true);
         MahliyoCall.openedBy(this, intent);
+    }
+
+    /** Opened by "Эй Маҳлиё" (HeyMahliyo): over the lock screen, the screen on; the web layer listens. */
+    private void fromName(Intent intent) {
+        if (intent == null) return;
+        String a = intent.getAction();
+        boolean assistant = Intent.ACTION_ASSIST.equals(a) || Intent.ACTION_VOICE_COMMAND.equals(a);
+        if (!assistant && !intent.hasExtra(HeyMahliyo.EXTRA_WAKE)) return;
+        intent.removeExtra(HeyMahliyo.EXTRA_WAKE);
+        if (assistant) intent.setAction(Intent.ACTION_MAIN);
+        overLock(true);
+        HeyMahliyo.woke = true;
+        if (HeyMahliyo.HeyPlugin.instance != null && getBridge() != null) HeyMahliyo.HeyPlugin.instance.tellWake();
     }
 
     void overLock(boolean on) {

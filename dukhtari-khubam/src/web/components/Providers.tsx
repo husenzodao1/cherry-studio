@@ -19,6 +19,7 @@ import { Permissions } from './Permissions'
 import { Splash } from './Splash'
 import { Mascot } from './Mascot'
 import { PullSignature } from './PullSignature'
+import { HeyWake } from './HeyWake'
 import { PlanNudge, PlanProvider } from '../plans'
 import { ScreenFit } from './ScreenFit'
 import { Butterflies } from './Butterfly'
@@ -181,6 +182,7 @@ export function Providers({ children }: { children: ReactNode }) {
               <PullSignature />
               <WidgetBridge />
               <PlanNudge />
+              <HeyWake />
               <Toaster />
               <Mascot />
             </ForAge>
