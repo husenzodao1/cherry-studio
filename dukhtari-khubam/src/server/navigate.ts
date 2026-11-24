@@ -32,16 +32,60 @@ const get = async (url: string, fetcher: typeof fetch) => {
   return res.json() as Promise<unknown>
 }
 
-/** places named like her words, the nearest to her first when she gave where she is */
-export async function findPlaces(q: string, near: [number, number] | null, lang: string, fetcher: typeof fetch = fetch): Promise<Place[]> {
+/** her words as a map may know them: as said, in Russian letters, "бозор" as "базар", without the city part */
+export function variantsOf(q: string): string[] {
+  const base = q.replace(/\s+/g, ' ').trim()
+  const toRu = (s: string) => s.replace(/ҳ/g, 'х').replace(/Ҳ/g, 'Х').replace(/қ/g, 'к').replace(/Қ/g, 'К').replace(/ҷ/g, 'дж').replace(/Ҷ/g, 'Дж')
+    .replace(/ғ/g, 'г').replace(/Ғ/g, 'Г').replace(/ӣ/g, 'и').replace(/Ӣ/g, 'И').replace(/ӯ/g, 'у').replace(/Ӯ/g, 'У')
+  const bazaar = (s: string) => s.replace(/бозор/gi, 'базар')
+  const firstPart = base.split(',')[0].trim()
+  const out = [base, toRu(base), bazaar(toRu(base)), firstPart, bazaar(toRu(firstPart))]
+  return [...new Set(out.filter((v) => v.length >= 2))]
+}
+
+interface PhotonFeature { geometry: { coordinates: [number, number] }; properties: { name?: string; street?: string; city?: string; district?: string; county?: string; country?: string } }
+
+/** Photon (komoot): forgiving with words and typos, the nearest to her first */
+async function photon(q: string, near: [number, number] | null, fetcher: typeof fetch): Promise<Place[]> {
+  const params = new URLSearchParams({ q, limit: '7' })
+  if (near) { params.set('lat', String(near[0])); params.set('lon', String(near[1])) }
+  const d = (await get(`https://photon.komoot.io/api/?${params}`, fetcher)) as { features?: PhotonFeature[] }
+  return (d.features ?? []).map((f) => {
+    const p = f.properties
+    return { name: p.name ?? p.street ?? q, address: [p.street, p.district, p.city ?? p.county, p.country].filter(Boolean).join(', '), lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0] }
+  }).filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon))
+}
+
+/** Nominatim (OpenStreetMap's own search), in her language first, around her (about 60 km) */
+async function nominatim(q: string, near: [number, number] | null, lang: string, fetcher: typeof fetch): Promise<Place[]> {
   const params = new URLSearchParams({ q, format: 'jsonv2', limit: '7', addressdetails: '0', 'accept-language': `${lang},ru,en` })
-  // around her (about 60 km), not only there
   if (near) params.set('viewbox', [near[1] - 0.6, near[0] + 0.5, near[1] + 0.6, near[0] - 0.5].join(','))
   const rows = (await get(`https://nominatim.openstreetmap.org/search?${params}`, fetcher)) as { lat: string; lon: string; name?: string; display_name: string }[]
   return rows.map((r) => {
     const parts = r.display_name.split(', ')
-    return { name: r.name || parts[0], address: parts.slice(r.name ? 1 : 1, 4).join(', '), lat: Number(r.lat), lon: Number(r.lon) }
+    return { name: r.name || parts[0], address: parts.slice(1, 4).join(', '), lat: Number(r.lat), lon: Number(r.lon) }
   }).filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon))
+}
+
+const far = (a: [number, number], p: Place) => Math.hypot(a[0] - p.lat, (a[1] - p.lon) * Math.cos((a[0] * Math.PI) / 180))
+
+/**
+ * Places named like her words, near her first: Photon, then OpenStreetMap's own search, each tried with the
+ * words as said and as a map may know them (Russian letters, "базар", without the city), until one is found.
+ */
+export async function findPlaces(q: string, near: [number, number] | null, lang: string, fetcher: typeof fetch = fetch): Promise<Place[]> {
+  for (const v of variantsOf(q)) {
+    const found = [...(await photon(v, near, fetcher).catch(() => [] as Place[])), ...(await nominatim(v, near, lang, fetcher).catch(() => [] as Place[]))]
+    const seen = new Set<string>()
+    const unique = found.filter((p) => {
+      const k = `${p.lat.toFixed(3)},${p.lon.toFixed(3)}`
+      if (seen.has(k)) return false
+      seen.add(k)
+      return true
+    })
+    if (unique.length) return (near ? unique.sort((a, b) => far(near, a) - far(near, b)) : unique).slice(0, 7)
+  }
+  return []
 }
 
 interface OsrmStep { distance: number; duration: number; name: string; maneuver: { type: string; modifier?: string; location: [number, number]; exit?: number } }

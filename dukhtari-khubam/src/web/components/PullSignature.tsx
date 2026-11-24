@@ -4,6 +4,9 @@ import { useEffect, useRef } from 'react'
 
 import { STILL_PATHS } from './ScreenFit'
 
+/** screens where a pull down is the screen's own (the map is moved by it; the voice screen is spoken to) */
+const NO_PULL = /^\/(navigate|voice)(\/|$)/
+
 /**
  * Pulling a screen of the app down at its top opens a small space above it; the page's edge below it becomes a
  * row of soft scallops in the page's own colour. In that space the studio's
@@ -147,7 +150,7 @@ export function PullSignature() {
     }
     const start = (e: TouchEvent) => {
       if (!playing) app = document.querySelector<HTMLElement>('main.app') ?? app
-      pulling = !playing && window.scrollY <= 0 && !STILL_PATHS.test(location.pathname) && !root.classList.contains('locked') && !document.querySelector('.pin-screen, .sheet-scrim, .crop')
+      pulling = !playing && window.scrollY <= 0 && !STILL_PATHS.test(location.pathname) && !NO_PULL.test(location.pathname) && !root.classList.contains('locked') && !document.querySelector('.pin-screen, .sheet-scrim, .crop')
         && !blocked(e.target)
       y0 = e.touches[0].clientY
       x0 = e.touches[0].clientX

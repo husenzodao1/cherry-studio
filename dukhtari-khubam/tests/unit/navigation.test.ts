@@ -49,17 +49,29 @@ describe('"Маро бубар": the way and its turns', () => {
     expect(leftFrom(route, 1, 0).metres).toBeGreaterThan(3000)
   })
 
+  it('tries the words as a map may know them; a place nobody knows gives nothing (so she is asked)', async () => {
+    const { variantsOf } = await import('@/server/navigate')
+    expect(variantsOf('Афғонбозор, Хуҷанд')).toEqual(['Афғонбозор, Хуҷанд', 'Афгонбозор, Худжанд', 'Афгонбазар, Худжанд', 'Афғонбозор', 'Афгонбазар'])
+    const get = vi.fn(async (url: string) => res(url.includes('photon') && decodeURIComponent(url).includes('Панҷшанбе')
+      ? { features: [{ geometry: { coordinates: [69.63, 40.28] }, properties: { name: 'Бозори Панҷшанбе', city: 'Хуҷанд' } }] }
+      : url.includes('photon') ? { features: [] } : []))
+    expect((await findPlaces('Панҷшанбе', [40.28, 69.62], 'tg', get as unknown as typeof fetch))[0]).toMatchObject({ name: 'Бозори Панҷшанбе', address: 'Хуҷанд' })
+    expect(await findPlaces('Афғонбозор, Хуҷанд', [40.28, 69.62], 'tg', get as unknown as typeof fetch)).toEqual([])
+  })
+
   it('asks the free map services by name, near her first; a silent service is an error, no route is null', async () => {
     const get = vi.fn(async (url: string, _init?: RequestInit) => res(url.includes('nominatim')
       ? [{ lat: '38.5755', lon: '68.7864', name: 'Донишгоҳи миллии Тоҷикистон', display_name: 'Донишгоҳи миллии Тоҷикистон, хиёбони Рӯдакӣ, Душанбе, Тоҷикистон' }]
-      : osrm))
+      : url.includes('photon') ? { features: [] } : osrm))
     const places = await findPlaces('донишгоҳи миллӣ', [38.56, 68.78], 'tg', get as unknown as typeof fetch)
     expect(places).toEqual([{ name: 'Донишгоҳи миллии Тоҷикистон', address: 'хиёбони Рӯдакӣ, Душанбе, Тоҷикистон', lat: 38.5755, lon: 68.7864 }])
-    expect(get.mock.calls[0][0]).toContain('accept-language=tg%2Cru%2Cen')
-    expect(get.mock.calls[0][0]).toContain('viewbox=')
+    const nominatimUrl = get.mock.calls.map((c) => c[0]).find((u) => u.includes('nominatim'))!
+    expect(nominatimUrl).toContain('accept-language=tg%2Cru%2Cen')
+    expect(nominatimUrl).toContain('viewbox=')
     expect(get.mock.calls[0][1]?.headers).toMatchObject({ 'user-agent': expect.stringContaining('LifeHub') })
+    get.mockClear()
     const way = await findRoute([38.57, 68.78], [38.56, 68.79], 'foot', get as unknown as typeof fetch)
-    expect(get.mock.calls[1][0]).toContain('routing.openstreetmap.de/routed-foot/route/v1/driving/68.78,38.57;68.79,38.56')
+    expect(get.mock.calls[0][0]).toContain('routing.openstreetmap.de/routed-foot/route/v1/driving/68.78,38.57;68.79,38.56')
     expect(way?.steps.length).toBe(route.steps.length)
     await expect(findRoute([38.57, 68.78], [38.56, 68.79], 'car', (async () => res({}, false)) as unknown as typeof fetch)).rejects.toThrow()
   })

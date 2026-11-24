@@ -40,12 +40,11 @@ test('"Маро бубар": the place found near her, the way drawn, each turn 
   await page.route('**/api/v1/nav/places**', (r) => { asked.push(r.request().url()); return r.fulfill(json({ places: [{ name: 'Донишгоҳи миллии Тоҷикистон', address: 'хиёбони Рӯдакӣ, Душанбе', lat: ROUTE.line.at(-1)![0], lon: ROUTE.line.at(-1)![1] }] })) })
   await page.route('**/api/v1/nav/route**', (r) => { routes++; return r.fulfill(json(ROUTE)) })
 
-  // Mahliyo's "take me to …" opens it with the place
+  // Mahliyo's "take me to …" opens it with the place: the nearest one found is taken at once
   await page.goto('/navigate?to=Донишгоҳи%20миллӣ')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  await expect(page.locator('.nav-search input')).toHaveValue('Донишгоҳи миллӣ')
-  await page.locator('.nav-place').first().click()
-  expect(asked[0]).toContain('near=')
+  await expect(page.locator('.nav-search input')).toHaveValue('Донишгоҳи миллии Тоҷикистон')
+  expect(asked.some((u) => u.includes('near='))).toBe(true)
   // the way: its time and length; on foot first
   await expect(page.locator('.nav-left b')).toHaveText(/дақ/)
   await expect(page.locator('.leaflet-overlay-pane path')).toHaveCount(2)
@@ -76,6 +75,28 @@ test('"Маро бубар": the place found near her, the way drawn, each turn 
   // at the place: arrived
   await page.evaluate((p) => (window as unknown as { __walk: (p: [number, number]) => void }).__walk(p), ROUTE.line.at(-1)!)
   await expect(page.locator('.nav-arrived')).toContainText('Шумо расидед!')
+  expect(errors).toEqual([])
+})
+
+test('"Маро бубар": a place the map does not know — she is asked which well-known place it is near, and it is found by it', async ({ page, server: _, errors }) => {
+  await setUp(page)
+  const asked: string[] = []
+  await page.route('**/api/v1/nav/places**', (r) => {
+    const url = decodeURIComponent(r.request().url())
+    asked.push(url)
+    if (url.includes('q=бозори Панҷшанбе')) return r.fulfill(json({ places: [{ name: 'Бозори Панҷшанбе', address: 'Хуҷанд', lat: 40.2846, lon: 69.6234 }] }))
+    if (url.includes('q=Афғонбозор') && url.includes('near=40.2846')) return r.fulfill(json({ places: [{ name: 'Афғонбозор', address: 'кӯчаи Ленин, Хуҷанд', lat: 40.2861, lon: 69.6301 }] }))
+    return r.fulfill(json({ places: [] }))
+  })
+  await page.route('**/api/v1/nav/route**', (r) => r.fulfill(json(ROUTE)))
+  await page.goto('/navigate?to=Афғонбозор')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect(page.locator('.nav-ask')).toContainText('Ин ҷой дар харита ёфт нашуд')
+  await page.locator('.nav-ask input').fill('бозори Панҷшанбе')
+  await page.screenshot({ path: 'test-results/navigate-ask.png' })
+  await page.locator('.nav-ask button[type=submit]').click()
+  await page.getByRole('option', { name: /Афғонбозор/ }).click()
+  await expect(page.locator('.nav-left b')).toHaveText(/дақ/)
   expect(errors).toEqual([])
 })
 

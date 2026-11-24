@@ -53,6 +53,11 @@ export default function NavigatePage() {
   const [heading, setHeading] = useState<number | null>(null)
   const [arrived, setArrived] = useState(false)
   const [recenter, setRecenter] = useState(0)
+  /** nothing found: the well-known place near it she names, and what was found by it */
+  const [landmark, setLandmark] = useState('')
+  const [byLandmark, setByLandmark] = useState<{ places: Place[]; itself: boolean } | null>(null)
+  /** came from Mahliyo ("take me to …"): the nearest place found is taken at once */
+  const fromAsk = useRef(false)
   const said = useRef(new Set<string>())
   const offCount = useRef(0)
   const rerouting = useRef(0)
@@ -73,24 +78,47 @@ export default function NavigatePage() {
   // came with a place to go to (Mahliyo: "take me to …")
   useEffect(() => {
     const asked = new URLSearchParams(window.location.search).get('to')
-    if (asked) setQ(asked.slice(0, 160))
+    if (asked) { fromAsk.current = true; setQ(asked.slice(0, 160)) }
   }, [])
+
+  const search = useCallback(async (words: string, near: LatLon | null) => {
+    const at = near ? `&near=${near[0].toFixed(4)},${near[1].toFixed(4)}` : ''
+    return (await api<{ places: Place[] }>(`/nav/places?q=${encodeURIComponent(words.trim())}&lang=${locale}${at}`)).places
+  }, [locale])
 
   // places named like her words, near her, as she stops typing
   useEffect(() => {
+    setByLandmark(null)
     if (to || q.trim().length < 2) { setPlaces(null); return }
     const timer = setTimeout(async () => {
       try {
-        const near = here ? `&near=${here[0].toFixed(4)},${here[1].toFixed(4)}` : ''
-        const r = await api<{ places: Place[] }>(`/nav/places?q=${encodeURIComponent(q.trim())}&lang=${locale}${near}`)
-        setPlaces(r.places)
+        const found = await search(q, here)
+        // asked by Mahliyo: the nearest one is the way at once (she can still pick another by typing)
+        if (fromAsk.current && found.length) { fromAsk.current = false; choose(found[0]); return }
+        setPlaces(found)
       } catch (e) {
         if (e instanceof ApiFailure && e.code === 'plan_limit') open('navigate')
         setPlaces([])
       }
     }, 650)
     return () => clearTimeout(timer)
-  }, [q, here, to, locale, open])
+  }, [q, here, to, search, open]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // not found: the place searched again near the well-known place she names; else that place itself
+  const askLandmark = async () => {
+    if (landmark.trim().length < 2) return
+    setBusy(true)
+    try {
+      const marks = await search(landmark, here)
+      const near = marks[0] ? [marks[0].lat, marks[0].lon] as LatLon : null
+      const found = near ? await search(q, near) : []
+      setByLandmark(found.length ? { places: found, itself: false } : { places: marks, itself: true })
+    } catch {
+      setByLandmark({ places: [], itself: true })
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const findWay = useCallback(async (from: LatLon, place: Place, how: Mode) => {
     setBusy(true)
@@ -113,6 +141,8 @@ export default function NavigatePage() {
     if (here) void findWay(here, p, mode)
   }
   useEffect(() => { if (to && here && !going) void findWay(here, to, mode) }, [mode]) // eslint-disable-line react-hooks/exhaustive-deps
+  // the place was taken before she was found: the way as soon as she is
+  useEffect(() => { if (to && here && !route && !busy && !going) void findWay(here, to, mode) }, [here !== null, to]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // the words of a turn: on the screen, with a buzz, and in a voice when the phone has one for her language
   const say = useCallback((text: string) => {
@@ -247,13 +277,24 @@ export default function NavigatePage() {
           ) : null}
           {places ? (
             <div className="nav-places glass" role="listbox" aria-label={t('nav.where')}>
-              {places.length ? places.map((p) => (
+              {(byLandmark?.places.length ? byLandmark.places : places).map((p) => (
                 <button key={`${p.lat},${p.lon}`} type="button" role="option" aria-selected={false} className="nav-place" onClick={() => choose(p)}>
                   <Icon name="compass" size={18} />
                   <span className="grow"><b>{p.name}</b><span>{p.address}</span></span>
                   {here ? <span className="nav-place-far">{distanceText(metres(here, [p.lat, p.lon]), units)}</span> : null}
                 </button>
-              )) : <span className="muted" style={{ padding: 12 }}>{t('nav.none')}</span>}
+              ))}
+              {!places.length ? (
+                <form className="nav-ask" onSubmit={(e) => { e.preventDefault(); void askLandmark() }}>
+                  <b>{byLandmark ? (byLandmark.places.length ? t('nav.landmark_itself') : t('nav.none')) : t('nav.not_found')}</b>
+                  <span className="muted">{t('nav.near_what')}</span>
+                  <div className="row" style={{ gap: 8 }}>
+                    <input className="input grow" value={landmark} placeholder={t('nav.landmark_ph')} aria-label={t('nav.near_what')} maxLength={120}
+                      onChange={(e) => setLandmark(e.target.value)} />
+                    <button type="submit" className="btn" disabled={busy || landmark.trim().length < 2}><Icon name="search" size={16} /></button>
+                  </div>
+                </form>
+              ) : null}
             </div>
           ) : null}
         </div>
