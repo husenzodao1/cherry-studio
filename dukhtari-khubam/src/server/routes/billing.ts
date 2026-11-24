@@ -141,6 +141,7 @@ export const billingRoutes: AnyRoute[] = [
     body: z.discriminatedUnion('key', [
       z.strictObject({ key: z.enum(['premium_consultant', 'plans_live', 'classes_enabled']), value: z.boolean() }),
       z.strictObject({ key: z.literal('plan_limits'), value: z.record(z.enum(['free', 'standard', 'premium']), z.record(z.string().max(20), z.number().int().min(-1).max(100_000))) }),
+      z.strictObject({ key: z.literal('mmt_exam_date'), value: z.iso.date().nullable() }),
       z.strictObject({ key: z.literal('paddle'), value: z.strictObject({ standard: z.string().max(80).optional(), premium: z.string().max(80).optional(), standard_discount: z.string().max(80).optional() }) })
     ]),
     handler: async ({ sb, body }) => {

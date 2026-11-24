@@ -7,7 +7,7 @@ import { ApiError } from '@/lib/http'
 import { route, type AnyRoute } from '@/lib/router'
 
 import { answer, ATTACHMENT_MIMES, premiumLive, setPlansLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type RedReply, type Turn } from '../mahliyo'
-import { activeModel, bookPassages, forgetActive, minePassages, searchesBooks, sealKey, serverReady } from '../aiModels'
+import { activeModel, bookPassages, forgetActive, minePassages, searchesBooks, sealKey, serverReady, SHELF_OF } from '../aiModels'
 import { makeSong } from '../music'
 import { limitReached, MODE_LIMIT, onTrial, planOf, planSettings, trialMessage, use, useTrial, whoOf, withinPlan, type PlanCtx } from '../plans'
 import { call } from '../util'
@@ -46,7 +46,7 @@ const materialFor = (k: Knowledge, turns: Turn[]) => knowledgeText(k, turns.filt
 
 /** Her answer to a conversation from outside the app (her Telegram bot): the same material, books and rules. */
 export async function answerTurns(sb: SupabaseClient, turns: Turn[], me: Learner) {
-  const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns, !!me.premium)])
+  const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns, !!me.premium, undefined, me.mode)])
   return answer(turns, k.app, materialFor(k.parts, turns), me, [], extra)
 }
 
@@ -83,11 +83,11 @@ async function warningsOf(sb: SupabaseClient): Promise<RedReply[]> {
   redReplies = { at: Date.now(), list }
   return list
 }
-async function extraFor(sb: SupabaseClient, turns: Turn[], premium = false, session?: string) {
+async function extraFor(sb: SupabaseClient, turns: Turn[], premium = false, session?: string, mode?: string) {
   const question = turns[turns.length - 1].content
   // before Premium is sold, the books answer everyone (as they always did); her own Workspace: the database
   // gives its passages only to her, and only with Premium
-  const [active, books, warnings, mine] = await Promise.all([activeModel(sb), premium || !premiumLive() ? bookPassages(sb, question) : Promise.resolve([]),
+  const [active, books, warnings, mine] = await Promise.all([activeModel(sb), premium || !premiumLive() ? bookPassages(sb, question, 4, mode ? SHELF_OF[mode] : undefined) : Promise.resolve([]),
     warningsOf(sb), minePassages(session, question)])
   return { active, books, warnings, mine, cache: dbCache(sb) }
 }
@@ -107,7 +107,7 @@ const anyone = async (sb: SupabaseClient) => configured() || !!(await activeMode
 
 async function answerInto(sb: SupabaseClient, id: string, turns: Turn[], me: Learner, files: Attachment[], plan: PlanCtx, session?: string) {
   try {
-    const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns, !!me.premium, session)])
+    const [k, extra] = await Promise.all([knowledge(sb), extraFor(sb, turns, !!me.premium, session, me.mode)])
     const a = await answer(turns, k.app, materialFor(k.parts, turns), me, files, extra)
     a.blocks = await withinPlan(a.blocks, plan)
     await call(sb, 'api_mahliyo_answer', { p_id: id, p_answer: a.reply, p_tajik: a.tajik, p_blocks: a.blocks })
@@ -204,7 +204,7 @@ export const mahliyoRoutes: AnyRoute[] = [
         // her books have something on this question: when her answer takes a while, the app says she searches them
         return { id, books: (premium || !premiumLive()) && await searchesBooks(client, question) }
       }
-      const [k, extra] = await Promise.all([knowledge(sb()), extraFor(sb(), turns, premium, body.session)])
+      const [k, extra] = await Promise.all([knowledge(sb()), extraFor(sb(), turns, premium, body.session, body.mode)])
       let a
       try {
         a = await answer(turns, k.app, materialFor(k.parts, turns), me, files, extra)
@@ -313,8 +313,8 @@ export const mahliyoRoutes: AnyRoute[] = [
   }),
   route({
     method: 'POST', path: '/admin/books/start', access: 'staff', tag: 'Admin · Mahliyo AI', summary: 'A new book (its text follows in pieces)',
-    body: z.strictObject({ title: z.string().trim().min(1).max(300), file: z.string().max(300).optional(), pages: z.number().int().min(0).max(100_000).optional() }),
-    handler: async ({ sb, body }) => ({ id: await call<string>(sb(), 'admin_book_start', { p_title: body.title, p_file: body.file ?? null, p_pages: body.pages ?? null }) })
+    body: z.strictObject({ title: z.string().trim().min(1).max(300), file: z.string().max(300).optional(), pages: z.number().int().min(0).max(100_000).optional(), shelf: z.enum(['general', 'mmt', 'law', 'grants']).default('general') }),
+    handler: async ({ sb, body }) => ({ id: await call<string>(sb(), 'admin_book_start', { p_title: body.title, p_file: body.file ?? null, p_pages: body.pages ?? null, p_shelf: body.shelf }) })
   }),
   route({
     method: 'POST', path: '/admin/books/chunks', access: 'staff', tag: 'Admin · Mahliyo AI', summary: "A batch of a book's passages",

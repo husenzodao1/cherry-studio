@@ -10,6 +10,7 @@ import { NewsLibrary } from '@/web/admin/NewsLibrary'
 import { Support } from '@/web/admin/Support'
 import { Plans } from '@/web/admin/Plans'
 import { WhatsApp } from '@/web/admin/WhatsApp'
+import { Mmt } from '@/web/admin/Mmt'
 import { Texts } from '@/web/admin/Texts'
 import { Pages } from '@/web/admin/Pages'
 import { STATUS_LABEL } from '@/web/admin/ui'
@@ -27,9 +28,9 @@ import { useApi } from '@/web/useApi'
  * as the apps; the database checks the signed-in user's role for each read and write.
  */
 
-type Tab = 'home' | 'support' | 'ai' | 'content' | 'plans' | 'whatsapp' | 'news' | 'media' | 'texts' | 'pages' | 'users'
+type Tab = 'home' | 'support' | 'ai' | 'content' | 'plans' | 'whatsapp' | 'mmt' | 'news' | 'media' | 'texts' | 'pages' | 'users'
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'home', label: 'Панел' }, { id: 'support', label: 'Дастгирӣ' }, { id: 'ai', label: 'Маҳлиё AI' }, { id: 'content', label: 'Мундариҷа' }, { id: 'plans', label: '👑 Обунаҳо' }, { id: 'whatsapp', label: '🆘 SOS ва дӯстон' }, { id: 'news', label: '📰 Хабар ва китобхона' }, { id: 'media', label: 'Медиа' },
+  { id: 'home', label: 'Панел' }, { id: 'support', label: 'Дастгирӣ' }, { id: 'ai', label: 'Маҳлиё AI' }, { id: 'content', label: 'Мундариҷа' }, { id: 'plans', label: '👑 Обунаҳо' }, { id: 'whatsapp', label: '🆘 SOS ва дӯстон' }, { id: 'mmt', label: '🎓 ММТ' }, { id: 'news', label: '📰 Хабар ва китобхона' }, { id: 'media', label: 'Медиа' },
   { id: 'texts', label: 'Матнҳо' }, { id: 'pages', label: 'Саҳифаҳо' }, { id: 'users', label: 'Корбарон' }
 ]
 
@@ -83,7 +84,7 @@ export default function AdminPage() {
           <button key={t.id} type="button" role="tab" className="chip" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </nav>
-      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'ai' ? <AiAdmin /> : tab === 'content' ? <Content audience={audience} /> : tab === 'plans' ? <Plans /> : tab === 'whatsapp' ? <WhatsApp /> : tab === 'news' ? <NewsLibrary /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
+      {tab === 'home' ? <Dashboard onGo={setTab} /> : tab === 'support' ? <Support /> : tab === 'ai' ? <AiAdmin /> : tab === 'content' ? <Content audience={audience} /> : tab === 'plans' ? <Plans /> : tab === 'whatsapp' ? <WhatsApp /> : tab === 'mmt' ? <Mmt /> : tab === 'news' ? <NewsLibrary /> : tab === 'media' ? <MediaLibrary /> : tab === 'texts' ? <Texts /> : tab === 'pages' ? <Pages /> : <Users />}
     </div>
   )
 }

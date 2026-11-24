@@ -64,12 +64,16 @@ export function bookQuery(question: string): string {
 /** words every question has (written with Russian letters, as above) */
 const STOP = new Set(['чист', 'кист', 'барои', 'дар', 'бораи', 'аст', 'мебошад', 'чанд', 'кадом', 'ман', 'шумо', 'мумкин', 'метавонам', 'лутфан', 'бигуед', 'гуед', 'чи', 'что', 'как', 'для', 'это', 'про', 'the', 'what', 'how', 'and', 'for', 'who'])
 
+/** the books' shelves: the mode's own shelf is searched first (the ММТ books for ММТ, the laws for the lawyer) */
+export type BookShelf = 'general' | 'mmt' | 'law' | 'grants'
+export const SHELF_OF: Partial<Record<string, BookShelf>> = { mmt: 'mmt', exam: 'mmt', lawyer: 'law', career: 'grants' }
+
 /** the passages of the staff's books nearest a question (a few milliseconds; nothing when there are none) */
-export async function bookPassages(sb: SupabaseClient, question: string, limit = 4): Promise<BookPassage[]> {
+export async function bookPassages(sb: SupabaseClient, question: string, limit = 4, shelf?: BookShelf): Promise<BookPassage[]> {
   const q = bookQuery(question)
   if (!serverReady() || !q) return []
   try {
-    return await call<BookPassage[]>(sb, 'api_books_search', { p_proof: secret(), p_query: q, p_limit: limit })
+    return await call<BookPassage[]>(sb, 'api_books_search', { p_proof: secret(), p_query: q, p_limit: limit, ...(shelf ? { p_shelf: shelf } : {}) })
   } catch (e) {
     console.warn('[mahliyo] the books could not be searched:', e instanceof Error ? e.message : String(e))
     return []

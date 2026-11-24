@@ -113,7 +113,10 @@ function ModelBox({ provider, model, note, hasKey, on, onSaved, onUse }: {
   )
 }
 
-interface Book { id: string; title: string; file: string | null; pages: number | null; chunks: number; status: 'loading' | 'ready'; at: string }
+interface Book { id: string; title: string; file: string | null; pages: number | null; chunks: number; status: 'loading' | 'ready'; shelf?: Shelf; at: string }
+/** the books' shelves: each answer mode reads its own shelf first */
+type Shelf = 'general' | 'mmt' | 'law' | 'grants'
+const SHELVES: [Shelf, string][] = [['general', '📚 Умумӣ'], ['mmt', '🎓 ММТ (китобҳои тест, барномаҳо)'], ['law', '⚖️ Қонунҳо (ҳуқуқшинос)'], ['grants', '🌍 Грантҳо ва ҳуҷҷатҳо']]
 
 /**
  * Mahliyo in Telegram: the bot made with @BotFather (its token is TELEGRAM_BOT_TOKEN on the server); this
@@ -152,6 +155,7 @@ function Books() {
   const [progress, setProgress] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [title, setTitle] = useState('')
+  const [shelf, setShelf] = useState<Shelf>('general')
   const learn = async (file: File) => {
     setError(null)
     try {
@@ -159,7 +163,7 @@ function Books() {
       const pages = await pagesOf(file)
       const passages = passagesOf(pages)
       if (!passages.length) throw new Error('Дар ин файл матн ёфт нашуд (шояд расми скан аст — матни онро ҳамчун PDF-и матнӣ ё Word гузоред).')
-      const { id } = await api<{ id: string }>('/admin/books/start', { method: 'POST', body: { title: title.trim() || file.name.replace(/\.[^.]+$/, ''), file: file.name, pages: pages.length } })
+      const { id } = await api<{ id: string }>('/admin/books/start', { method: 'POST', body: { title: title.trim() || file.name.replace(/\.[^.]+$/, ''), file: file.name, pages: pages.length, shelf } })
       for (let i = 0; i < passages.length; i += 200) {
         setProgress(`Омӯзиш: ${Math.min(i + 200, passages.length)} аз ${passages.length} қисм…`)
         await api('/admin/books/chunks', { method: 'POST', body: { book: id, chunks: passages.slice(i, i + 200) } })
@@ -185,6 +189,9 @@ function Books() {
           ҷойҳои наздиктаринро меёбад, баъд аз онҳо ҷавоб медиҳад ва номи китобро ҳамчун манбаъ нишон медиҳад.
         </span>
         <input className="input" placeholder="Номи китоб (ихтиёрӣ)" value={title} onChange={(e) => setTitle(e.target.value)} aria-label="Номи китоб" />
+        <select className="input" value={shelf} onChange={(e) => setShelf(e.target.value as Shelf)} aria-label="Раф">
+          {SHELVES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+        </select>
         <input type="file" accept=".pdf,.docx,.txt,application/pdf,text/plain" disabled={!!progress} aria-label="Файли китоб"
           onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void learn(f) }} />
         {progress ? <p role="status" style={{ margin: 0 }}>{progress}</p> : null}
@@ -198,6 +205,10 @@ function Books() {
               {b.status === 'ready' ? `${b.chunks} қисм${b.pages ? ` · ${b.pages} саҳифа` : ''}` : 'Нотамом (бори дигар бор кунед)'}{b.file ? ` · ${b.file}` : ''}
             </span>
           </div>
+          <select className="input" style={{ width: 'auto', minHeight: 40 }} value={b.shelf ?? 'general'} aria-label={`Рафи «${b.title}»`}
+            onChange={(e) => void api('/admin/books/shelf', { method: 'POST', body: { book: b.id, shelf: e.target.value } }).then(list.reload)}>
+            {SHELVES.map(([id, label]) => <option key={id} value={id}>{label.split(' ')[0]}</option>)}
+          </select>
           <button type="button" className="btn btn-soft" onClick={() => { if (confirm(`«${b.title}» бардошта шавад?`)) void api('/admin/books/remove', { method: 'POST', body: { book: b.id } }).then(list.reload) }}>Бардоштан</button>
         </div>
       )) : <p className="muted" style={{ textAlign: 'center' }}>Ҳанӯз китоб нест</p>}
