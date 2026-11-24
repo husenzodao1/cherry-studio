@@ -26,11 +26,14 @@ begin
   return v;
 end $$;
 
--- a free login from a name: the name itself, else with a number after it
+-- a free login from a name: the name itself, else with a number after it. Two phones registering the same name
+-- at the same moment take turns (a lock on the name), and each look sees what the other just saved (volatile:
+-- a fresh view of the table for every query), so two profiles never get the same login.
 create or replace function private.free_login(p_name text, p_self text default null) returns text
-language plpgsql stable security definer set search_path = '' as $$
+language plpgsql volatile security definer set search_path = '' as $$
 declare v_base text := private.login_from(p_name); v text := v_base; n int := 1;
 begin
+  perform pg_advisory_xact_lock(hashtext('login:' || v_base));
   while exists (select 1 from public.device_profiles where username = v and code_hash is distinct from p_self) loop
     n := n + 1;
     v := left(v_base, 28) || n::text;
@@ -47,8 +50,15 @@ end $$;
 drop trigger if exists device_profiles_login on public.device_profiles;
 create trigger device_profiles_login before insert or update on public.device_profiles
   for each row execute function private.profile_login();
--- the profiles already there get theirs
-update public.device_profiles set username = private.free_login(name, code_hash) where username is null;
+-- the profiles already there get theirs one at a time, oldest first (so several "Ruslan"s become ruslan,
+-- ruslan2, ruslan3 and a login someone already chose is never taken)
+do $$
+declare r record;
+begin
+  for r in select code_hash from public.device_profiles where username is null order by created_at, code_hash loop
+    update public.device_profiles set username = private.free_login(name, code_hash) where code_hash = r.code_hash;
+  end loop;
+end $$;
 
 -- the classes (a teacher and her students): who may write to whom under 16
 create table if not exists public.classes (
