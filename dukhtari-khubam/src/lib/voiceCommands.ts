@@ -10,7 +10,7 @@ export type VoiceCommand =
   | { kind: 'timer'; seconds: number }
   | { kind: 'stopwatch' }
   | { kind: 'weather'; when: 'now' | 'tomorrow' }
-  | { kind: 'call'; name: string }
+  | { kind: 'call'; name: string; number?: string }
   | { kind: 'navigate'; place: string }
   | { kind: 'ask'; text: string }
 
@@ -26,6 +26,105 @@ const UNITS: Record<string, number> = {
   zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, fifteen: 15, twenty: 20, thirty: 30,
   forty: 40, fifty: 50, sixty: 60
 }
+/** hundreds said as one word: "нӯҳсад", "девятьсот" */
+const HUNDREDS: Record<string, number> = {
+  сто: 100, двести: 200, триста: 300, четыреста: 400, пятьсот: 500, шестьсот: 600, семьсот: 700, восемьсот: 800, девятьсот: 900
+}
+function wordValue(w: string): number | undefined {
+  if (UNITS[w] !== undefined) return UNITS[w]
+  if (HUNDREDS[w] !== undefined) return HUNDREDS[w]
+  const bare = w.replace(/(у|ю)$/, '')
+  if (UNITS[bare] !== undefined) return UNITS[bare]
+  // "нӯҳсад", "дусаду": a unit and "сад"
+  const h = /^(.+?)сад$/.exec(bare)
+  if (h && UNITS[h[1]] !== undefined && UNITS[h[1]] < 10) return UNITS[h[1]] * 100
+  return undefined
+}
+
+/**
+ * A phone number said aloud, as digits: "нӯҳсаду ду бисту се чилу панҷ" → "902 23 45" → "9022345". Each group
+ * is read as its own number ("девятьсот два" is 902; a smaller word fills the zeros of the one before it,
+ * anything else starts a new group); digits said one by one are kept as they are. Null when it is not a number.
+ */
+export function phoneOf(text: string): string | null {
+  const words = text.toLowerCase().replace(/[+()-]/g, ' ').replace(/[.,!?]/g, ' ').split(/\s+/).filter(Boolean)
+  let out = ''
+  let group: number | null = null
+  // what may still be added to the group: below 100 after "нӯҳсад", below 10 after "бист"
+  let room = 0
+  let numbers = 0
+  const roomAfter = (n: number) => (n >= 100 && n % 100 === 0 ? 100 : n % 10 === 0 ? 10 : 0)
+  const close = () => { if (group !== null) out += String(group); group = null; room = 0 }
+  for (const w of words) {
+    if (/^\d+$/.test(w)) { close(); out += w; numbers++; continue }
+    const n = wordValue(w)
+    if (n === undefined) continue
+    numbers++
+    if (n === 0) { close(); out += '0'; continue }
+    if (group !== null && n < room) { group += n; room = roomAfter(n); continue }
+    close()
+    group = n
+    room = roomAfter(n)
+  }
+  close()
+  return out.length >= 3 && numbers > 0 && out.length <= 15 ? out : null
+}
+
+/** a name as letters only, Tajik and Latin letters brought to Russian ones (contacts are saved either way) */
+export function nameKey(s: string): string {
+  const lat: [RegExp, string][] = [[/sh/g, 'ш'], [/ch/g, 'ч'], [/zh/g, 'ж'], [/kh/g, 'х'], [/yo/g, 'ё'], [/yu/g, 'ю'], [/ya/g, 'я'], [/j/g, 'дж'], [/o'/g, 'у'], [/g'/g, 'г']]
+  let t = s.toLowerCase()
+  for (const [a, b] of lat) t = t.replace(a, b)
+  const one: Record<string, string> = { a: 'а', b: 'б', c: 'к', d: 'д', e: 'е', f: 'ф', g: 'г', h: 'х', i: 'и', k: 'к', l: 'л', m: 'м', n: 'н', o: 'о', p: 'п', q: 'к', r: 'р', s: 'с', t: 'т', u: 'у', v: 'в', w: 'в', x: 'х', y: 'й', z: 'з',
+    ҳ: 'х', қ: 'к', ҷ: 'дж', ғ: 'г', ӣ: 'и', ӯ: 'у', ё: 'е', э: 'е', ы: 'и', ъ: '', ь: '' }
+  return [...t].map((c) => one[c] ?? c).join('').replace(/[^а-яё]/g, '')
+}
+
+const distance = (a: string, b: string) => {
+  const d = Array.from({ length: b.length + 1 }, (_, i) => i)
+  for (let i = 1; i <= a.length; i++) {
+    let prev = d[0]
+    d[0] = i
+    for (let j = 1; j <= b.length; j++) {
+      const keep = d[j]
+      d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1))
+      prev = keep
+    }
+  }
+  return d[b.length]
+}
+
+/** the words of a heard name without what is said around it: "Маликаро", "Малика-ҷон", "ба апаи Малика" */
+function bareName(heard: string): string[] {
+  return heard.toLowerCase().split(/\s+/).map((w) => w.replace(/(ро|ра|ҷон|джон|жон|га|ге|ке|ya|ga|ni|ро\b)$/u, ''))
+    .filter((w) => w.length >= 2 && !/^(ба|к|to|апа|ака|апаи|акаи|модар|падар)$/.test(w))
+}
+
+/**
+ * Her contacts that sound like the name she said, best first: each word of the name against each word of a
+ * contact (letters brought together, a typo or two allowed in a long name); "мама", "папа"… match as they are.
+ */
+export function matchContacts<T extends { name: string }>(heard: string, contacts: T[]): T[] {
+  const want = bareName(heard).map(nameKey).filter(Boolean)
+  if (!want.length) return []
+  const scored = contacts.map((c) => {
+    const words = c.name.split(/[\s,.()-]+/).map(nameKey).filter(Boolean)
+    let score = 0
+    for (const w of want) {
+      let best = 0
+      for (const x of words) {
+        if (x === w) best = Math.max(best, 3)
+        else if (x.startsWith(w) || w.startsWith(x)) best = Math.max(best, Math.min(x.length, w.length) >= 3 ? 2 : 0)
+        else if (Math.min(x.length, w.length) >= 4 && distance(x, w) <= (w.length >= 7 ? 2 : 1)) best = Math.max(best, 1.5)
+      }
+      score += best
+    }
+    return { c, score: score / want.length }
+  }).filter((x) => x.score >= 1.5)
+  const top = Math.max(0, ...scored.map((x) => x.score))
+  return scored.filter((x) => x.score === top).map((x) => x.c)
+}
+
 /** "and" joining number words: "бисту панҷ" (бист-у), "сию се" */
 const JOINED = /^(.+?)(?:у|ю)$/
 
@@ -86,15 +185,21 @@ export function commandOf(said: string): VoiceCommand {
     const seconds = durationOf(t)
     if (seconds > 0) return { kind: 'timer', seconds }
   }
-  if (/(соат чанд|вақт чанд|чанд соат шуд|соатро гӯй|который час|сколько времени|what time)/.test(t)) return { kind: 'time' }
+  if (/(соат чанд|вақт чанд|чанд соат шуд|соатро гӯй|который час|сколько времени|what time|soat necha|saat kaç|ساعت چند)/.test(t)) return { kind: 'time' }
   if (/(имрӯз чанд|имрӯз кадом|чандуми|санаи имрӯз|рӯзи ҳафта|какое .*число|какой .*день|what('s| is) the date|what day)/.test(t)) return { kind: 'date' }
-  if (/(обу ?ҳаво|ҳаво чӣ|ҳаво чи|погода|weather)/.test(t)) return { kind: 'weather', when: /(фардо|завтра|tomorrow)/.test(t) ? 'tomorrow' : 'now' }
+  if (/(обу ?ҳаво|ҳаво чӣ|ҳаво чи|погода|weather|ob-?havo|hava durumu|آب و هوا|هوا چطور)/.test(t)) return { kind: 'weather', when: /(фардо|завтра|tomorrow|ertaga|yarın|فردا)/.test(t) ? 'tomorrow' : 'now' }
   let m = /^(?:ба\s+)?(.+?)\s+занг\s+(?:зан|занед|задан)(?=\s|$)/.exec(t) ?? /^занг\s+(?:зан|занед)\s+(?:ба\s+)?(.+)$/.exec(t)
     ?? /^(?:позвони(?:те)?|набери(?:те)?)\s+(.+)$/.exec(t) ?? /^call\s+(.+)$/.exec(t)
-  if (m) return { kind: 'call', name: m[1].replace(/^(ба|к|to)\s+/, '').trim() }
+    ?? /^(.+?)(?:ga|ge|ya|e|a)?\s+(?:qo'ng'iroq qil|qongiroq qil|ara|arayın)(?=\s|$)/.exec(t) ?? /^(?:به\s+)?(.+?)\s+زنگ\s+بزن/.exec(t)
+  if (m) {
+    const name = m[1].replace(/^(ба|к|to)\s+/, '').replace(/^(номер|рақам|рақами|number)\s+/, '').trim()
+    const number = phoneOf(name)
+    return number ? { kind: 'call', name, number } : { kind: 'call', name }
+  }
   m = /^маро\s+ба\s+(.+?)\s+(?:бубар|бар|расон)$/.exec(t) ?? /^роҳ(?:и)?\s+(?:то|ба)\s+(.+?)(?:\s+(?:нишон деҳ|ро нишон деҳ))?$/.exec(t)
     ?? /^(?:проводи меня|отведи меня|маршрут)\s+(?:до|в|к|на)\s+(.+)$/.exec(t) ?? /^как\s+(?:дойти|доехать|добраться)\s+(?:до|в|к)\s+(.+)$/.exec(t)
-    ?? /^(?:take me to|navigate to|directions to)\s+(.+)$/.exec(t)
+    ?? /^(?:take me to|navigate to|directions to)\s+(.+)$/.exec(t) ?? /^meni\s+(.+?)(?:ga|ka)\s+olib bor$/.exec(t) ?? /^beni\s+(.+?)(?:'?[ae])?\s+götür$/.exec(t)
+    ?? /^مرا\s+به\s+(.+?)\s+ببر$/.exec(t)
   if (m) return { kind: 'navigate', place: m[1].trim() }
   return { kind: 'ask', text: t }
 }

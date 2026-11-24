@@ -59,15 +59,32 @@ import java.util.zip.ZipInputStream;
  * as Android asks) listens: when the words have "маҳлиё" in them and the voice is hers, the phone wakes and the
  * app opens over the lock screen, listening for what she wants (the web layer: /voice).
  *
- * The models (about 66 MB) are downloaded once, when she turns it on, into the app's own files.
+ * The models (about 66 MB, and 37–53 MB for each other language she chooses) are downloaded once, in the
+ * background, into the app's own files.
  */
 public final class HeyMahliyo {
     private HeyMahliyo() {}
 
     static final int RATE = 16000;
     static final String PREFS = "hey_mahliyo";
-    static final String TG_URL = "https://alphacephei.com/vosk/models/vosk-model-small-tg-0.22.zip";
     static final String SPK_URL = "https://alphacephei.com/vosk/models/vosk-model-spk-0.4.zip";
+    static final long SPK_SIZE = 13_869_103L;
+    /**
+     * The speech models she may choose (language, address, size): Tajik is always there (her name is heard by
+     * it); the others hear her questions in their language when the phone is offline.
+     */
+    static final String[][] MODELS = {
+        { "tg", "https://alphacephei.com/vosk/models/vosk-model-small-tg-0.22.zip", "51879043" },
+        { "ru", "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip", "46236750" },
+        { "en", "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip", "41205931" },
+        { "uz", "https://alphacephei.com/vosk/models/vosk-model-small-uz-0.22.zip", "51061189" },
+        { "tr", "https://alphacephei.com/vosk/models/vosk-model-small-tr-0.3.zip", "36855784" },
+        { "fa", "https://alphacephei.com/vosk/models/vosk-model-small-fa-0.42.zip", "53431220" }
+    };
+    static String[] modelOf(String lang) {
+        for (String[] m : MODELS) if (m[0].equals(lang)) return m;
+        return null;
+    }
     static final String EXTRA_WAKE = "hey_mahliyo_wake";
     /** the app was opened by her name: the web layer takes it once (takeWake) */
     static volatile boolean woke = false;
@@ -75,14 +92,24 @@ public final class HeyMahliyo {
     // ---------------------------------------------------------------- the models
 
     static File dir(Context c, String name) { return new File(new File(c.getFilesDir(), "vosk"), name); }
-    static boolean ready(Context c) { return new File(dir(c, "tg"), "ok").exists() && new File(dir(c, "spk"), "ok").exists(); }
-
-    private static Model tg;
-    private static SpeakerModel spk;
-    static synchronized Model tg(Context c) throws java.io.IOException {
-        if (tg == null) tg = new Model(dir(c, "tg").getAbsolutePath());
-        return tg;
+    static boolean has(Context c, String name) { return new File(dir(c, name), "ok").exists(); }
+    static boolean ready(Context c) { return has(c, "tg") && has(c, "spk"); }
+    static JSArray installed(Context c) {
+        JSArray a = new JSArray();
+        for (String[] m : MODELS) if (has(c, m[0])) a.put(m[0]);
+        return a;
     }
+
+    private static final java.util.Map<String, Model> models = new java.util.HashMap<>();
+    private static SpeakerModel spk;
+    /** the model of her language when it is there, else the Tajik one */
+    static synchronized Model model(Context c, String lang) throws java.io.IOException {
+        String l = lang != null && modelOf(lang) != null && has(c, lang) ? lang : "tg";
+        Model m = models.get(l);
+        if (m == null) { m = new Model(dir(c, l).getAbsolutePath()); models.put(l, m); }
+        return m;
+    }
+    static Model tg(Context c) throws java.io.IOException { return model(c, "tg"); }
     static synchronized SpeakerModel spk(Context c) throws java.io.IOException {
         if (spk == null) spk = new SpeakerModel(dir(c, "spk").getAbsolutePath());
         return spk;
@@ -185,6 +212,27 @@ public final class HeyMahliyo {
 
     static boolean mic(Context c) {
         return ContextCompat.checkSelfPermission(c, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /** headphones on (wired, USB or Bluetooth): her voice goes there only */
+    static boolean headset(Context c) {
+        android.media.AudioManager am = (android.media.AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
+        if (am == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false;
+        for (android.media.AudioDeviceInfo d : am.getDevices(android.media.AudioManager.GET_DEVICES_OUTPUTS)) {
+            int t = d.getType();
+            if (t == android.media.AudioDeviceInfo.TYPE_WIRED_HEADSET || t == android.media.AudioDeviceInfo.TYPE_WIRED_HEADPHONES
+                || t == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP || t == android.media.AudioDeviceInfo.TYPE_USB_HEADSET
+                || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && t == android.media.AudioDeviceInfo.TYPE_BLE_HEADSET)) return true;
+        }
+        return false;
+    }
+
+    /** a recording as a WAV file (16 kHz, mono, 16-bit), for the server's AI to hear */
+    static byte[] wav(byte[] pcm) {
+        java.nio.ByteBuffer b = java.nio.ByteBuffer.allocate(44 + pcm.length).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+        b.put("RIFF".getBytes()).putInt(36 + pcm.length).put("WAVE".getBytes()).put("fmt ".getBytes()).putInt(16).putShort((short) 1).putShort((short) 1)
+            .putInt(RATE).putInt(RATE * 2).putShort((short) 2).putShort((short) 16).put("data".getBytes()).putInt(pcm.length).put(pcm);
+        return b.array();
     }
 
     static AudioRecord recorder() {
@@ -353,6 +401,107 @@ public final class HeyMahliyo {
         }
     }
 
+    // ---------------------------------------------------------------- the models' download
+
+    /**
+     * The models downloaded in the background (a foreground service, so leaving the app does not stop it), with
+     * the progress in the notification panel; at the end a notification says it is ready (or that it failed).
+     * The texts come from the app, in her language.
+     */
+    public static class Download extends android.app.Service {
+        static final String CHANNEL = "hey_mahliyo_models";
+        static final int ID = 7703;
+        static volatile boolean busy = false;
+        static volatile int percent = 0;
+        interface Told { void progress(String part, int percent); void done(boolean ok); }
+        static volatile Told told;
+
+        @Override public IBinder onBind(Intent intent) { return null; }
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            if (intent == null || busy) return START_NOT_STICKY;
+            String[] langs = intent.getStringArrayExtra("langs");
+            String title = intent.getStringExtra("title");
+            String doneText = intent.getStringExtra("done");
+            String failText = intent.getStringExtra("failed");
+            channel();
+            busy = true;
+            percent = 0;
+            Notification first = bar(title, 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) startForeground(ID, first, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+            else startForeground(ID, first);
+            new Thread(() -> {
+                boolean ok = false;
+                try {
+                    java.util.List<String[]> parts = new java.util.ArrayList<>();
+                    if (!has(this, "spk")) parts.add(new String[] { "spk", SPK_URL, String.valueOf(SPK_SIZE) });
+                    java.util.LinkedHashSet<String> want = new java.util.LinkedHashSet<>();
+                    want.add("tg");
+                    if (langs != null) java.util.Collections.addAll(want, langs);
+                    for (String l : want) { String[] m = modelOf(l); if (m != null && !has(this, l)) parts.add(m); }
+                    long total = 0;
+                    for (String[] m : parts) total += Long.parseLong(m[2]);
+                    final long all = Math.max(1, total);
+                    final long[] before = { 0 };
+                    NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    for (String[] m : parts) {
+                        fetch(this, m[1], m[0], (part, done, size) -> {
+                            int p = (int) Math.min(99, (before[0] + done) * 100 / all);
+                            if (p == percent) return;
+                            percent = p;
+                            if (nm != null) nm.notify(ID, bar(title, p));
+                            Told t = told;
+                            if (t != null) t.progress(part, p);
+                        });
+                        before[0] += Long.parseLong(m[2]);
+                    }
+                    ok = true;
+                } catch (Exception ignored) {
+                    // the parts already whole stay; the next download goes on from the next part
+                } finally {
+                    busy = false;
+                    percent = ok ? 100 : 0;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) stopForeground(STOP_FOREGROUND_REMOVE);
+                    else stopForeground(true);
+                    NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    if (nm != null) nm.notify(ID + 1, new NotificationCompat.Builder(this, CHANNEL)
+                        .setSmallIcon(R.drawable.ic_stat_notify).setColor(0xFF7A4FD8)
+                        .setContentTitle(title).setContentText(ok ? doneText : failText).setAutoCancel(true)
+                        .setContentIntent(PendingIntent.getActivity(this, 2, new Intent(this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
+                        .build());
+                    Told t = told;
+                    if (t != null) t.done(ok);
+                    stopSelf();
+                }
+            }, "hey-mahliyo-download").start();
+            return START_NOT_STICKY;
+        }
+
+        private Notification bar(String title, int p) {
+            return new NotificationCompat.Builder(this, CHANNEL)
+                .setSmallIcon(android.R.drawable.stat_sys_download)
+                .setColor(0xFF7A4FD8)
+                .setContentTitle(title)
+                .setContentText(p + "%")
+                .setProgress(100, p, p == 0)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setContentIntent(PendingIntent.getActivity(this, 2, new Intent(this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE))
+                .build();
+        }
+
+        void channel() { channelOf(this); }
+        static void channelOf(Context c) {
+            NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || nm == null || nm.getNotificationChannel(CHANNEL) != null) return;
+            NotificationChannel ch = new NotificationChannel(CHANNEL, "«Эй Маҳлиё» — моделҳо ва омӯзиш", NotificationManager.IMPORTANCE_LOW);
+            ch.setShowBadge(false);
+            nm.createNotificationChannel(ch);
+        }
+    }
+
     // ---------------------------------------------------------------- the plugin
 
     @CapacitorPlugin(name = "HeyMahliyo", permissions = {
@@ -385,6 +534,10 @@ public final class HeyMahliyo {
             r.put("running", Service.running);
             r.put("mic", getPermissionState("mic") == PermissionState.GRANTED);
             r.put("overlay", Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || Settings.canDrawOverlays(c));
+            r.put("langs", installed(c));
+            r.put("downloading", Download.busy);
+            r.put("percent", Download.percent);
+            r.put("headset", headset(c));
             call.resolve(r);
         }
 
@@ -405,28 +558,64 @@ public final class HeyMahliyo {
             call.resolve();
         }
 
-        /** the two models downloaded (once); "progress" events: { part, done, total } */
+        private PluginCall preparing;
+
+        /**
+         * The models downloaded in the background (the speaker model, Tajik, and the languages she chose: `langs`),
+         * shown in the notification panel; "progress" events { part, percent }; resolves when all are there. A
+         * download already going on is joined.
+         */
         @PluginMethod
         public void prepare(PluginCall call) {
+            Context c = getContext();
+            if (preparing != null && preparing != call) { preparing.setKeepAlive(false); bridge.releaseCall(preparing); }
             call.setKeepAlive(true);
-            new Thread(() -> {
-                try {
-                    Progress p = (part, done, total) -> {
-                        JSObject e = new JSObject();
-                        e.put("part", part); e.put("done", done); e.put("total", total);
-                        notifyListeners("progress", e);
-                    };
-                    fetch(getContext(), SPK_URL, "spk", p);
-                    fetch(getContext(), TG_URL, "tg", p);
-                    JSObject r = new JSObject();
-                    r.put("models", true);
-                    call.resolve(r);
-                } catch (Exception e) {
-                    call.reject("download_failed", e);
-                } finally {
-                    call.setKeepAlive(false);
+            preparing = call;
+            Download.told = new Download.Told() {
+                @Override public void progress(String part, int percent) {
+                    JSObject e = new JSObject();
+                    e.put("part", part); e.put("percent", percent); e.put("done", percent); e.put("total", 100);
+                    notifyListeners("progress", e);
                 }
-            }, "hey-mahliyo-models").start();
+                @Override public void done(boolean ok) {
+                    PluginCall p = preparing;
+                    preparing = null;
+                    notifyListeners("prepared", new JSObject().put("ok", ok));
+                    if (p == null) return;
+                    if (ok) { JSObject r = new JSObject(); r.put("models", true); r.put("langs", installed(c)); p.resolve(r); }
+                    else p.reject("download_failed");
+                    p.setKeepAlive(false);
+                }
+            };
+            if (Download.busy) return;
+            JSArray langs = call.getArray("langs", new JSArray());
+            String[] want = new String[langs.length()];
+            for (int i = 0; i < langs.length(); i++) want[i] = langs.optString(i);
+            Intent i = new Intent(c, Download.class)
+                .putExtra("langs", want)
+                .putExtra("title", call.getString("title", "«Эй Маҳлиё»"))
+                .putExtra("done", call.getString("done", "Тайёр"))
+                .putExtra("failed", call.getString("failed", "Боргирӣ қатъ шуд"));
+            try {
+                ContextCompat.startForegroundService(c, i);
+            } catch (Exception e) {
+                preparing = null;
+                call.setKeepAlive(false);
+                call.reject("download_failed", e);
+            }
+        }
+
+        /** a downloaded language taken away (Tajik stays: her name is heard by it) */
+        @PluginMethod
+        public void removeLang(PluginCall call) {
+            String lang = call.getString("lang", "");
+            if (lang == null || "tg".equals(lang) || modelOf(lang) == null) { call.reject("kept"); return; }
+            synchronized (HeyMahliyo.class) {
+                Model m = models.remove(lang);
+                if (m != null) m.close();
+            }
+            deleteAll(dir(getContext(), lang));
+            state(call);
         }
 
         /**
@@ -441,6 +630,9 @@ public final class HeyMahliyo {
             if (listening) { call.reject("busy"); return; }
             int seconds = Math.max(2, Math.min(30, call.getInt("seconds", 10)));
             boolean whole = call.getBoolean("whole", false);
+            String lang = call.getString("lang", "tg");
+            // the recording too (for the server's AI, which hears all seven languages well), at most 20 seconds
+            boolean keepAudio = call.getBoolean("audio", false);
             listening = true;
             stopListening = false;
             if (Service.running) Service.send(c, Service.ACTION_PAUSE);
@@ -450,15 +642,21 @@ public final class HeyMahliyo {
                 String text = "";
                 JSONArray spkVec = null;
                 try {
-                    r = new Recognizer(tg(c), RATE, spk(c));
+                    r = new Recognizer(model(c, lang), RATE, spk(c));
                     rec = recorder();
                     rec.startRecording();
                     short[] buf = new short[RATE / 10];
+                    java.io.ByteArrayOutputStream pcm = keepAudio ? new java.io.ByteArrayOutputStream() : null;
+                    byte[] bytes = new byte[buf.length * 2];
                     long until = System.currentTimeMillis() + seconds * 1000L;
                     StringBuilder all = new StringBuilder();
                     while (!stopListening && System.currentTimeMillis() < until) {
                         int n = rec.read(buf, 0, buf.length);
                         if (n <= 0) continue;
+                        if (pcm != null && pcm.size() < RATE * 2 * 20) {
+                            for (int k = 0; k < n; k++) { bytes[2 * k] = (byte) buf[k]; bytes[2 * k + 1] = (byte) (buf[k] >> 8); }
+                            pcm.write(bytes, 0, n * 2);
+                        }
                         if (r.acceptWaveForm(buf, n)) {
                             JSONObject res = new JSONObject(r.getResult());
                             String t = res.optString("text");
@@ -482,6 +680,7 @@ public final class HeyMahliyo {
                     JSObject out = new JSObject();
                     out.put("text", text);
                     out.put("spk", spkVec != null ? new JSArray(spkVec.toString()) : null);
+                    if (pcm != null && !text.isEmpty()) out.put("wav", android.util.Base64.encodeToString(wav(pcm.toByteArray()), android.util.Base64.NO_WRAP));
                     call.resolve(out);
                 } catch (Exception e) {
                     call.reject("listen_failed", e);
@@ -519,6 +718,16 @@ public final class HeyMahliyo {
                 JSONArray keep = new JSONArray();
                 for (float x : avg) keep.put(x);
                 prefs(getContext()).edit().putString("print", keep.toString()).putFloat("threshold", bar).apply();
+                // "her voice is learnt", in the notification panel too (the text from the app, in her language)
+                String note = call.getString("note");
+                if (note != null) {
+                    Context c = getContext();
+                    Download.channelOf(c);
+                    NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+                    if (nm != null) nm.notify(Download.ID + 2, new NotificationCompat.Builder(c, Download.CHANNEL)
+                        .setSmallIcon(R.drawable.ic_stat_notify).setColor(0xFF7A4FD8).setContentTitle("«Эй Маҳлиё»").setContentText(note)
+                        .setAutoCancel(true).setTimeoutAfter(60_000).build());
+                }
                 JSObject r = new JSObject();
                 r.put("threshold", bar);
                 r.put("least", least);
@@ -584,11 +793,30 @@ public final class HeyMahliyo {
                 if (ok == android.speech.tts.TextToSpeech.LANG_MISSING_DATA || ok == android.speech.tts.TextToSpeech.LANG_NOT_SUPPORTED) tts.setLanguage(new java.util.Locale("ru"));
                 tts.setSpeechRate(1.02f);
                 tts.setPitch(1.08f);
+                // with headphones on, her voice is in them only (the assistant's sound goes where media goes);
+                // "speaker" chosen: the phone's speaker, as on a phone call
+                boolean loud = call.getBoolean("speaker", false) && headset(getContext());
+                android.media.AudioManager am = (android.media.AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+                if (loud && am != null) {
+                    am.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        for (android.media.AudioDeviceInfo d : am.getAvailableCommunicationDevices())
+                            if (d.getType() == android.media.AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) { am.setCommunicationDevice(d); break; }
+                    } else am.setSpeakerphoneOn(true);
+                }
+                tts.setAudioAttributes(new android.media.AudioAttributes.Builder()
+                    .setUsage(loud ? android.media.AudioAttributes.USAGE_VOICE_COMMUNICATION : android.media.AudioAttributes.USAGE_ASSISTANT)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH).build());
+                Runnable back = () -> {
+                    if (!loud || am == null) return;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) am.clearCommunicationDevice(); else am.setSpeakerphoneOn(false);
+                    am.setMode(android.media.AudioManager.MODE_NORMAL);
+                };
                 String id = "say-" + System.currentTimeMillis();
                 tts.setOnUtteranceProgressListener(new android.speech.tts.UtteranceProgressListener() {
                     @Override public void onStart(String u) {}
-                    @Override public void onDone(String u) { if (id.equals(u)) call.resolve(); }
-                    @Override public void onError(String u) { if (id.equals(u)) call.resolve(); }
+                    @Override public void onDone(String u) { if (id.equals(u)) { back.run(); call.resolve(); } }
+                    @Override public void onError(String u) { if (id.equals(u)) { back.run(); call.resolve(); } }
                 });
                 tts.speak(text.length() > 3900 ? text.substring(0, 3900) : text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, id);
             };
@@ -626,21 +854,18 @@ public final class HeyMahliyo {
             call.resolve(r);
         }
 
-        /** her contacts named like the words (each with its number), best first */
+        /** all her contacts with a number (the app finds the one that sounds like the name she said) */
         @PluginMethod
-        public void findContacts(PluginCall call) {
+        public void contacts(PluginCall call) {
             if (getPermissionState("calls") != PermissionState.GRANTED) { call.reject("no_permission"); return; }
-            String q = call.getString("name", "").trim();
             JSArray out = new JSArray();
-            if (q.isEmpty()) { JSObject r = new JSObject(); r.put("contacts", out); call.resolve(r); return; }
             android.net.Uri uri = android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
             String[] cols = { android.provider.ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER };
-            try (android.database.Cursor cur = getContext().getContentResolver().query(uri, cols,
-                    android.provider.ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " LIKE ?", new String[] { "%" + q + "%" }, null)) {
+            try (android.database.Cursor cur = getContext().getContentResolver().query(uri, cols, null, null, null)) {
                 java.util.HashSet<String> seen = new java.util.HashSet<>();
-                while (cur != null && cur.moveToNext() && out.length() < 8) {
+                while (cur != null && cur.moveToNext() && out.length() < 5000) {
                     String name = cur.getString(0), number = cur.getString(1);
-                    if (number == null || !seen.add(name + number.replaceAll("\\D", ""))) continue;
+                    if (name == null || number == null || !seen.add(name + number.replaceAll("\\D", ""))) continue;
                     JSObject c = new JSObject();
                     c.put("name", name); c.put("number", number);
                     out.put(c);

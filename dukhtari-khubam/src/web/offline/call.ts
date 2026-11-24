@@ -23,6 +23,7 @@ interface NativeCalls {
   done(): Promise<void>
   /** her words on the call line: the earpiece, or the speaker */
   voice(o: { src: string; speaker: boolean }): Promise<void>
+  say(o: { text: string; lang: string; speaker: boolean }): Promise<void>
   speaker(o: { on: boolean }): Promise<void>
   hush(): Promise<void>
   /** whether her call may cover the lock screen (Android 14+ asks the learner) */
@@ -144,6 +145,8 @@ export function openAppSettings() {
  */
 export interface CallLine {
   play(src: string, ended: () => void): Promise<void>
+  /** her words in another language, said by the phone's own voice */
+  say(text: string, lang: string, ended: () => void): Promise<void>
   speaker(on: boolean): void
   stop(): void
 }
@@ -157,6 +160,11 @@ export function callLine(): CallLine {
         await handle?.remove()
         handle = await Native.addListener('voiceEnded', ended)
         await Native.voice({ src, speaker: loud })
+      },
+      async say(text, lang, ended) {
+        await handle?.remove()
+        handle = await Native.addListener('voiceEnded', ended)
+        await Native.say({ text, lang, speaker: loud })
       },
       speaker(on) { loud = on; void Native.speaker({ on }).catch(() => undefined) },
       stop() { void handle?.remove(); void Native.hush().catch(() => undefined) }
@@ -172,7 +180,22 @@ export function callLine(): CallLine {
       audio.onerror = ended
       await audio.play()
     },
+    async say(text, lang, ended) {
+      audio?.pause()
+      const synth = typeof speechSynthesis !== 'undefined' ? speechSynthesis : null
+      const voice = synth?.getVoices().find((v) => v.lang.toLowerCase().startsWith(lang === 'prs' ? 'fa' : lang))
+      // no voice for her language here: the words stay on the screen as long as they would take to say
+      if (!synth || !voice) { setTimeout(ended, Math.max(2500, text.length * 70)); return }
+      const u = new SpeechSynthesisUtterance(text)
+      u.voice = voice
+      u.lang = voice.lang
+      u.volume = loud ? 1 : EARPIECE_VOLUME
+      u.onend = ended
+      u.onerror = ended
+      synth.cancel()
+      synth.speak(u)
+    },
     speaker(on) { loud = on; if (audio) audio.volume = on ? 1 : EARPIECE_VOLUME },
-    stop() { audio?.pause(); audio = null }
+    stop() { audio?.pause(); audio = null; try { speechSynthesis?.cancel() } catch { /* none */ } }
   }
 }

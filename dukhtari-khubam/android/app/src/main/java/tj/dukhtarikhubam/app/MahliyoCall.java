@@ -436,20 +436,65 @@ public final class MahliyoCall {
             call.resolve();
         }
 
+        /**
+         * Her voice where a phone call's would be: headphones when they are on (wired, USB or Bluetooth), else the
+         * earpiece; the speaker when it is turned on (as on a phone, also over headphones).
+         */
         private void route(AudioManager am, boolean speaker) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                int want = speaker ? AudioDeviceInfo.TYPE_BUILTIN_SPEAKER : AudioDeviceInfo.TYPE_BUILTIN_EARPIECE;
+                AudioDeviceInfo chosen = null;
                 for (AudioDeviceInfo d : am.getAvailableCommunicationDevices()) {
-                    if (d.getType() == want) {
-                        am.setCommunicationDevice(d);
-                        return;
-                    }
+                    int t = d.getType();
+                    boolean headset = t == AudioDeviceInfo.TYPE_WIRED_HEADSET || t == AudioDeviceInfo.TYPE_WIRED_HEADPHONES || t == AudioDeviceInfo.TYPE_USB_HEADSET
+                        || t == AudioDeviceInfo.TYPE_BLUETOOTH_SCO || t == AudioDeviceInfo.TYPE_BLE_HEADSET;
+                    if (speaker ? t == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER : headset) { chosen = d; break; }
+                    if (!speaker && t == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE && chosen == null) chosen = d;
                 }
+                if (chosen != null) { am.setCommunicationDevice(chosen); return; }
             }
             am.setSpeakerphoneOn(speaker);
         }
 
+        private android.speech.tts.TextToSpeech tts;
+
+        /**
+         * Her words in the learner's own language, said by the phone's voice on the call line (her recordings are
+         * Tajik only): the earpiece or headphones, or the speaker. "voiceEnded" when said.
+         */
+        @PluginMethod
+        public void say(PluginCall call) {
+            String text = call.getString("text", "");
+            String lang = call.getString("lang", "ru");
+            boolean speaker = call.getBoolean("speaker", false);
+            Context ctx = getContext();
+            release();
+            AudioManager am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
+            am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            route(am, speaker);
+            Runnable go = () -> {
+                java.util.Locale want = new java.util.Locale("prs".equals(lang) ? "fa" : lang);
+                int ok = tts.setLanguage(want);
+                if (ok == android.speech.tts.TextToSpeech.LANG_MISSING_DATA || ok == android.speech.tts.TextToSpeech.LANG_NOT_SUPPORTED) tts.setLanguage(new java.util.Locale("ru"));
+                tts.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
+                tts.setPitch(1.08f);
+                String id = "call-" + System.currentTimeMillis();
+                tts.setOnUtteranceProgressListener(new android.speech.tts.UtteranceProgressListener() {
+                    @Override public void onStart(String u) {}
+                    @Override public void onDone(String u) { notifyListeners("voiceEnded", new JSObject()); }
+                    @Override public void onError(String u) { notifyListeners("voiceEnded", new JSObject()); }
+                });
+                tts.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, id);
+                call.resolve();
+            };
+            if (tts != null) { go.run(); return; }
+            tts = new android.speech.tts.TextToSpeech(ctx, (status) -> {
+                if (status == android.speech.tts.TextToSpeech.SUCCESS) go.run();
+                else { tts = null; call.reject("no voice"); }
+            });
+        }
+
         private void release() {
+            if (tts != null) tts.stop();
             if (player != null) {
                 try { player.stop(); } catch (Exception ignored) { /* not playing */ }
                 player.release();
@@ -465,6 +510,7 @@ public final class MahliyoCall {
         @Override
         protected void handleOnDestroy() {
             release();
+            if (tts != null) { tts.shutdown(); tts = null; }
         }
 
         /** The call is over: the app no longer shows over the lock screen. */

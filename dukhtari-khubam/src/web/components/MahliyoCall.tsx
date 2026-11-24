@@ -25,16 +25,17 @@ import { Icon } from './Icon'
  */
 
 /** `girls`: said to a girl ("Эй духтарак"), never in boys' mode */
-type Clip = { src: string; lines: [number, string][]; girls?: boolean }
+type Clip = { src: string; lines: [number, string][]; girls?: boolean; key?: string }
 /** her recorded lines, with when each sentence starts (seconds) */
 const VOICES: Clip[] = [
-  { src: '/assets/call/voice-1.mp3', girls: true, lines: [[0, 'Ау! Эй духтарак, шумо ҳамин ҷоед?'], [4.2, 'Лутфан баргардед, дарсҳо шуморо интизоранд.']] },
-  { src: '/assets/call/voice-2.mp3', lines: [[0, 'Салом, дӯстам! Шумо маро водор карда будед, ки занг занам.'], [4.1, 'Лутфан ба дарс баргардед.'], [6.1, 'Шуморо мавзӯъҳои нав интизоранд.']] },
-  { src: '/assets/call/voice-3.mp3', lines: [[0, 'Салом, дӯстам! Шумо маро водор карда будед, ки занг занам.'], [4.1, 'Лутфан ба дарс баргардед, шуморо мавзӯъҳои нав интизоранд.']] }
+  { src: '/assets/call/voice-1.mp3', key: 'call.v1', girls: true, lines: [[0, 'Ау! Эй духтарак, шумо ҳамин ҷоед?'], [4.2, 'Лутфан баргардед, дарсҳо шуморо интизоранд.']] },
+  { src: '/assets/call/voice-2.mp3', key: 'call.v2', lines: [[0, 'Салом, дӯстам! Шумо маро водор карда будед, ки занг занам.'], [4.1, 'Лутфан ба дарс баргардед.'], [6.1, 'Шуморо мавзӯъҳои нав интизоранд.']] },
+  { src: '/assets/call/voice-3.mp3', key: 'call.v2', lines: [[0, 'Салом, дӯстам! Шумо маро водор карда будед, ки занг занам.'], [4.1, 'Лутфан ба дарс баргардед, шуморо мавзӯъҳои нав интизоранд.']] }
 ]
 /** her menu, said again and again until a key is pressed */
 const MENU: Clip = {
   src: '/assets/call/menu.mp3',
+  key: 'call.menu',
   lines: [[0, 'Барои ба дарс баргаштан 1-ро пахш кунед.'], [2.8, 'Барои бо ман ҳамоҳанг шудан 0-ро пахш кунед.'], [5.75, 'Барои дарсро рад кардан 3-ро пахш кунед.'], [8.75, 'Интизори ҷавоби шумоям!']]
 }
 const RING_FOR = 30_000
@@ -113,7 +114,7 @@ function beep(key: string) {
 }
 
 function CallScreen({ info }: { info: CallInfo }) {
-  const { t, mode } = usePrefs()
+  const { t, mode, locale } = usePrefs()
   const router = useRouter()
   const { bundle } = useContent()
   const { progress } = useLearner()
@@ -170,6 +171,13 @@ function CallScreen({ info }: { info: CallInfo }) {
     const wire = sound.current
     if (!wire || over.current) return
     if (words.current) clearInterval(words.current)
+    // another language than Tajik (her recordings are Tajik): her words in it, said by the phone's voice
+    if (locale !== 'tg' && clip.key) {
+      const text = t(clip.key as 'call.menu')
+      setLine(text)
+      wire.say(text, locale, () => { if (!over.current) next() }).catch(() => next())
+      return
+    }
     const started = Date.now()
     words.current = setInterval(() => {
       const at = (Date.now() - started) / 1000

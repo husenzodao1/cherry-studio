@@ -41,3 +41,32 @@ describe('"Эй Маҳлиё": what she said, as what to do', () => {
     expect(commandOf('эй маҳлиё фотосинтез чист')).toEqual({ kind: 'ask', text: 'фотосинтез чист' })
   })
 })
+
+describe('calls by name or number', () => {
+  it('reads a phone number said in words, group by group', async () => {
+    const { phoneOf } = await import('@/lib/voiceCommands')
+    expect(phoneOf('нӯҳсаду ду бисту се чилу панҷ шасту ҳафт')).toBe('902234567')
+    expect(phoneOf('девятьсот два двадцать три сорок пять шестьдесят семь')).toBe('902234567')
+    expect(phoneOf('нуль девять три')).toBeNull()
+    expect(phoneOf('ноль девять три')).toBe('093')
+    expect(phoneOf('900 11 22 33')).toBe('900112233')
+    expect(phoneOf('малика')).toBeNull()
+  })
+
+  it('turns "call" with a number into the number, in several languages', () => {
+    expect(commandOf('эй маҳлиё ба нӯҳсаду ду бисту се чилу панҷ шасту ҳафт занг зан')).toEqual({ kind: 'call', name: 'нӯҳсаду ду бисту се чилу панҷ шасту ҳафт', number: '902234567' })
+    expect(commandOf('позвони маме')).toEqual({ kind: 'call', name: 'маме' })
+    expect(commandOf('call 900 11 22 33')).toMatchObject({ kind: 'call', number: '900112233' })
+    expect(commandOf("malikaga qo'ng'iroq qil")).toMatchObject({ kind: 'call', name: 'malika' })
+  })
+
+  it('finds the contact that sounds like the name: Tajik, Russian or Latin letters, endings, a typo', async () => {
+    const { matchContacts } = await import('@/lib/voiceCommands')
+    const book = [{ name: 'Малика Каримова' }, { name: 'Шахноза' }, { name: 'Malika Univer' }, { name: 'Мама' }, { name: 'Фаррух ака' }]
+    expect(matchContacts('Маликаро', book).map((c) => c.name)).toEqual(['Малика Каримова', 'Malika Univer'])
+    expect(matchContacts('Шаҳноза-ҷон', book).map((c) => c.name)).toEqual(['Шахноза'])
+    expect(matchContacts('мама', book).map((c) => c.name)).toEqual(['Мама'])
+    expect(matchContacts('Фарух', book).map((c) => c.name)).toEqual(['Фаррух ака'])
+    expect(matchContacts('Зарина', book)).toEqual([])
+  })
+})

@@ -8,30 +8,45 @@ import type { LatLon } from '@/lib/navigation'
  * tools (a timer, a call). Only in the phone app; in a browser it is not there (`native()` is false).
  */
 
-export interface HeyState { models: boolean; enrolled: boolean; enabled: boolean; running: boolean; mic: boolean; overlay: boolean }
-export interface Heard { text: string; spk: number[] | null }
+export interface HeyState {
+  models: boolean; enrolled: boolean; enabled: boolean; running: boolean; mic: boolean; overlay: boolean
+  /** the speech models on the phone (Tajik always, once downloaded), a download going on, headphones on */
+  langs?: string[]; downloading?: boolean; percent?: number; headset?: boolean
+}
+/** `wav`: the recording (asked with `audio`), for the server's AI */
+export interface Heard { text: string; spk: number[] | null; wav?: string }
+
+/** the speech models she can choose, with their size (MB) and name */
+export const VOICE_LANGS: { lang: string; mb: number; name: string }[] = [
+  { lang: 'tg', mb: 66, name: 'Тоҷикӣ' }, { lang: 'ru', mb: 46, name: 'Русский' }, { lang: 'en', mb: 41, name: 'English' },
+  { lang: 'uz', mb: 51, name: "O'zbekcha" }, { lang: 'tr', mb: 37, name: 'Türkçe' }, { lang: 'fa', mb: 53, name: 'فارسی / دری' }
+]
+/** the app's language as a speech model's (Dari is heard by the Persian one) */
+export const voiceLang = (locale: string) => (locale === 'prs' ? 'fa' : locale)
 interface Listener { remove(): Promise<void> }
 interface HeyPlugin {
   state(): Promise<HeyState>
   askMic(): Promise<HeyState>
   askOverlay(): Promise<void>
-  prepare(): Promise<{ models: boolean }>
-  listen(o: { seconds?: number; whole?: boolean }): Promise<Heard>
+  prepare(o?: { langs?: string[]; title?: string; done?: string; failed?: string }): Promise<{ models: boolean; langs?: string[] }>
+  removeLang(o: { lang: string }): Promise<HeyState>
+  listen(o: { seconds?: number; whole?: boolean; lang?: string; audio?: boolean }): Promise<Heard>
   stopListening(): Promise<void>
-  saveVoice(o: { prints: number[][] }): Promise<{ threshold: number; least: number }>
+  saveVoice(o: { prints: number[][]; note?: string }): Promise<{ threshold: number; least: number }>
   forgetVoice(): Promise<void>
   start(): Promise<void>
   stop(): Promise<void>
   resume(): Promise<void>
   takeWake(): Promise<{ woke: boolean }>
-  speak(o: { text: string; lang: string }): Promise<void>
+  speak(o: { text: string; lang: string; speaker?: boolean }): Promise<void>
   stopSpeaking(): Promise<void>
   setTimer(o: { seconds: number; label?: string }): Promise<void>
   askCalls(): Promise<{ granted: boolean }>
-  findContacts(o: { name: string }): Promise<{ contacts: { name: string; number: string }[] }>
+  contacts(): Promise<{ contacts: { name: string; number: string }[] }>
   callNumber(o: { number: string }): Promise<void>
   assistantSettings(): Promise<void>
-  addListener(event: 'progress', f: (e: { part: string; done: number; total: number }) => void): Promise<Listener>
+  addListener(event: 'progress', f: (e: { part: string; done: number; total: number; percent?: number }) => void): Promise<Listener>
+  addListener(event: 'prepared', f: (e: { ok: boolean }) => void): Promise<Listener>
   addListener(event: 'partial', f: (e: { text: string }) => void): Promise<Listener>
   addListener(event: 'wake', f: () => void): Promise<Listener>
 }

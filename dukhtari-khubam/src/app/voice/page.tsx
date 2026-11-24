@@ -3,11 +3,12 @@
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { commandOf, type VoiceCommand } from '@/lib/voiceCommands'
+import { commandOf, matchContacts, type VoiceCommand } from '@/lib/voiceCommands'
+import { api } from '@/web/api'
 import { Icon } from '@/web/components/Icon'
 import { useContent } from '@/web/offline/content'
 import { hereOnce } from '@/web/offline/follow'
-import { hey, native, skyKey, speakable, weatherAt } from '@/web/offline/hey'
+import { hey, native, skyKey, speakable, voiceLang, weatherAt } from '@/web/offline/hey'
 import { useLearner } from '@/web/offline/learner'
 import { aboutMe, ask as askMahliyo, copyOf, newChat, useMahliyo } from '@/web/offline/mahliyo'
 import { placeNote } from '@/web/offline/place'
@@ -16,9 +17,12 @@ import { usePrefs } from '@/web/prefs'
 
 /**
  * "Эй Маҳлиё" listening: opened by her name (over the lock screen), by the phone's assistant button, or from
- * the app. What she says shows as it is heard; then it is done — the time, the date, a timer, a stopwatch,
- * the weather, a call, the way somewhere — or asked of Mahliyo, whose answer is spoken. Then the phone
- * listens for her name again.
+ * the app. What she says shows as it is heard (the phone's own model, in her language when it is downloaded);
+ * online, the recording is heard again by the server's AI, which knows all seven languages well. Then it is
+ * done — the time, the date, a timer, a stopwatch, the weather, a call (a contact by name, or a number said
+ * aloud), the way somewhere — or, online, asked of Mahliyo: her answer is spoken, and she listens again, as
+ * in a conversation, until she is thanked or nothing more is said. With headphones on, her voice is in them;
+ * "Speaker" puts it on the phone's speaker. Then the phone listens for her name again.
  */
 
 type Phase = 'listening' | 'thinking' | 'speaking' | 'idle'
@@ -37,18 +41,29 @@ export default function VoicePage() {
   const [choices, setChoices] = useState<Contact[] | null>(null)
   const [watch, setWatch] = useState<{ from: number; at: number; on: boolean } | null>(null)
   const waitingFor = useRef<number | null>(null)
+  /** a conversation going on in this screen (her questions and Mahliyo's answers kept together) */
+  const talking = useRef(false)
+  const [headset, setHeadset] = useState(false)
+  const [loud, setLoud] = useState(false)
   const locked = live && plan === 'free'
 
-  const lang = locale === 'prs' ? 'fa' : locale === 'tg' ? 'tg' : locale
+  const lang = voiceLang(locale)
 
   const speak = useCallback(async (text: string) => {
     setAnswer(text)
     if (!native()) return
     setPhase('speaking')
     const { p } = await hey()
-    try { await p.speak({ text: speakable(text), lang }) } catch { /* no voice on this phone */ }
+    try { await p.speak({ text: speakable(text), lang, speaker: loud }) } catch { /* no voice on this phone */ }
     setPhase('idle')
-  }, [lang])
+  }, [lang, loud])
+  useEffect(() => {
+    if (!native()) return
+    const look = () => void hey().then(({ p }) => p.state()).then((s) => setHeadset(!!s.headset)).catch(() => undefined)
+    look()
+    const every = setInterval(look, 4000)
+    return () => clearInterval(every)
+  }, [])
 
   const finish = useCallback(async () => {
     if (!native()) return
@@ -92,19 +107,28 @@ export default function VoicePage() {
         const { p } = await hey()
         const { granted } = await p.askCalls()
         if (!granted) return speak(t('voice.no_contacts'))
-        const { contacts } = await p.findContacts({ name: c.name })
-        if (!contacts.length) return speak(t('voice.nobody').replace('{n}', c.name))
-        if (contacts.length > 1) { setChoices(contacts); return speak(t('voice.which')) }
-        await speak(t('voice.calling').replace('{n}', contacts[0].name))
-        return p.callNumber({ number: contacts[0].number })
+        // a number said aloud: called as it is
+        if (c.number) {
+          await speak(t('voice.calling').replace('{n}', c.number.replace(/(\d{3})(?=\d)/g, '$1 ')))
+          return p.callNumber({ number: c.number })
+        }
+        const found = matchContacts(c.name, (await p.contacts()).contacts)
+        if (!found.length) return speak(t('voice.nobody').replace('{n}', c.name))
+        if (found.length > 1) { setChoices(found.slice(0, 6)); return speak(t('voice.which')) }
+        await speak(t('voice.calling').replace('{n}', found[0].name))
+        return p.callNumber({ number: found[0].number })
       }
       case 'navigate':
         await speak(t('voice.leading').replace('{p}', c.place))
         return router.push(`/navigate?to=${encodeURIComponent(c.place)}`)
       case 'ask': {
         if (!c.text) return speak(t('voice.didnt_hear'))
+        // offline: the phone's own tasks only
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) return speak(t('voice.offline'))
         setPhase('thinking')
-        newChat()
+        // the first question here starts a new conversation; the next ones go on with it
+        if (!talking.current) newChat()
+        talking.current = true
         waitingFor.current = Date.now()
         const who = { code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email, place: placeNote() }
         await askMahliyo(c.text, who)
@@ -113,26 +137,42 @@ export default function VoicePage() {
     }
   }, [t, locale, speak, router, learner, progress, bundle])
 
-  // her answer came in the chat: spoken
+  const listenRef = useRef<(again?: boolean) => Promise<void>>(async () => undefined)
+  // her answer came in the chat: spoken; then she is listened to again (a conversation)
   useEffect(() => {
     if (waitingFor.current === null || pending) return
     const last = turns[turns.length - 1]
     if (last?.role !== 'assistant') return
     waitingFor.current = null
-    void speak(copyOf(last)).then(finish)
-  }, [turns, pending, speak, finish])
+    void speak(copyOf(last)).then(() => listenRef.current(true))
+  }, [turns, pending, speak])
 
-  const listen = useCallback(async () => {
+  /** what she said: the phone's model at once; online, the server's AI hears the recording again (better) */
+  const hearOnline = async (wav: string | undefined, local: string) => {
+    if (!wav || !navigator.onLine) return local
+    try {
+      const r = await api<{ text: string }>('/voice/hear', { method: 'POST', body: { wav, lang: locale }, signal: AbortSignal.timeout(14_000) })
+      return r.text.trim() || local
+    } catch {
+      return local
+    }
+  }
+
+  const listen = useCallback(async (again = false) => {
     if (!native()) return
     const { p } = await hey()
     setChoices(null)
-    setAnswer('')
+    if (!again) setAnswer('')
     setHeard('')
     setPhase('listening')
     const l = await p.addListener('partial', (e) => setHeard(e.text))
     let text = ''
     try {
-      text = (await p.listen({ seconds: 9 })).text
+      const r = await p.listen({ seconds: again ? 8 : 12, lang, audio: navigator.onLine })
+      if (r.text || r.wav) {
+        setPhase('thinking')
+        text = await hearOnline(r.wav, r.text)
+      }
     } catch {
       setPhase('idle')
       return
@@ -140,10 +180,17 @@ export default function VoicePage() {
       void l.remove()
     }
     setHeard(text)
+    // in a conversation: silence or "thank you" ends it
+    if (again && (!text.trim() || /^(раҳмат|рахмат|ташаккур|бас|хайр|спасибо|хватит|стоп|thanks?( you)?|stop|bye|rahmat|teşekkürler|مرسی|ممنون)\b/i.test(text.trim()))) {
+      setPhase('idle')
+      talking.current = false
+      return finish()
+    }
     const c = commandOf(text)
     await act(c)
     if (c.kind !== 'ask') await finish()
-  }, [act, finish])
+  }, [act, finish, lang, locale]) // eslint-disable-line react-hooks/exhaustive-deps
+  listenRef.current = listen
 
   // opened: she is listened to at once
   useEffect(() => {
@@ -182,6 +229,11 @@ export default function VoicePage() {
 
   return (
     <div className={`voice-screen is-${phase}`}>
+      {headset ? (
+        <button type="button" className={`voice-out${loud ? ' is-on' : ''}`} aria-pressed={loud} onClick={() => setLoud(!loud)}>
+          <Icon name={loud ? 'volume' : 'headphones'} size={16} /> {loud ? t('ai.call_speaker') : t('voice.headphones')}
+        </button>
+      ) : null}
       <button type="button" className="voice-x" aria-label={t('action.close')} onClick={() => (history.length > 1 ? router.back() : router.push('/'))}><Icon name="x" size={22} /></button>
       <div className="voice-orb" aria-hidden="true"><span /><span /><span /></div>
       <p className="voice-state" role="status">{phase === 'listening' ? t('hey.listening') : phase === 'thinking' ? t('ai.thinking') : phase === 'speaking' ? t('voice.speaking') : ' '}</p>

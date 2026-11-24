@@ -41,6 +41,7 @@
         </activity>
         <!-- "Эй Маҳлиё" (HeyMahliyo.java): listens for her name with its notification on -->
         <service android:name=".HeyMahliyo$Service" android:exported="false" android:foregroundServiceType="microphone" />
+        <service android:name=".HeyMahliyo$Download" android:exported="false" android:foregroundServiceType="dataSync" />
         <!-- Mahliyo's calls (MahliyoCall.java): the alarm, "Decline", and the calls planned again after a restart -->
         <receiver android:name=".MahliyoCall$Receiver" android:exported="true">
             <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
@@ -215,6 +216,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- "call …" by voice: her contacts and the call; "a timer of …": the phone's clock -->

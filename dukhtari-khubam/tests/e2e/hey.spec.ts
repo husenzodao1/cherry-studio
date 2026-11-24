@@ -34,14 +34,14 @@ async function asPhone(page: Page) {
           const text = hear.shift() ?? ''
           emit('partial', { text: text.split(' ').slice(0, 2).join(' ') })
           await new Promise((r) => setTimeout(r, 150))
-          return { text, spk: text ? Array.from({ length: 128 }, (_, i) => Math.sin(i)) : null }
+          return { text, spk: text ? Array.from({ length: 128 }, (_, i) => Math.sin(i)) : null, ...(o.audio && text ? { wav: 'UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YQAAAAA=' } : {}) }
         }
         if (key === 'HeyMahliyo.saveVoice') { log.prints = (o.prints as unknown[]).length; state.enrolled = true; return { threshold: 0.5, least: 0.7 } }
         if (key === 'HeyMahliyo.start') { log.started = true; state.enabled = true; state.running = true; return {} }
         if (key === 'HeyMahliyo.speak') { log.said.push(String(o.text)); return {} }
         if (key === 'HeyMahliyo.setTimer') { log.timers.push(Number(o.seconds)); return {} }
         if (key === 'HeyMahliyo.askCalls') return { granted: true }
-        if (key === 'HeyMahliyo.findContacts') return { contacts: String(o.name).includes('малика') ? [{ name: 'Малика', number: '+992900000001' }] : [] }
+        if (key === 'HeyMahliyo.contacts') return { contacts: [{ name: 'Малика Каримова', number: '+992900000001' }, { name: 'Шахноза', number: '+992900000002' }, { name: 'Мама', number: '+992900000003' }] }
         if (key === 'HeyMahliyo.callNumber') { log.calls.push(String(o.number)); return {} }
         if (key === 'HeyMahliyo.takeWake') return { woke: false }
         if (key === 'LocalNotifications.checkPermissions') return { display: 'granted' }
@@ -63,7 +63,11 @@ test('"Эй Маҳлиё" set up: the Tajik model, the microphone, three phrases
   await asPhone(page)
   await page.goto('/hey')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  await page.getByRole('button', { name: 'Боргирӣ' }).click()
+  // Tajik always (her name is heard by it), and another language chosen
+  await expect(page.getByRole('checkbox', { name: /Тоҷикӣ/ })).toBeDisabled()
+  await page.getByRole('checkbox', { name: /Русский/ }).click()
+  await page.screenshot({ path: 'test-results/hey-langs.png' })
+  await page.getByRole('button', { name: /Боргирӣ · 112 МБ/ }).click()
   await page.getByRole('button', { name: 'Иҷозат додан' }).click()
   await expect(page.locator('.hey-phrase')).toHaveText('«Эй Маҳлиё, имрӯз обу ҳаво чӣ гуна аст?»')
   // heard badly: asked again, the step stays
@@ -101,9 +105,29 @@ test('"Эй Маҳлиё" listening: the time and a timer said, a contact called
   await expect.poll(async () => (await log(page)).timers).toEqual([1500])
   await expect(page.locator('.voice-answer')).toHaveText('Таймер ба 25 дақ гузошта шуд.')
 
-  await hear(page, 'ба малика занг зан')
+  // a contact by name, as said (an ending, Tajik letters against Russian ones)
+  await hear(page, 'ба шаҳнозаро занг зан')
   await page.getByRole('button', { name: 'Гап задан' }).click()
-  await expect.poll(async () => (await log(page)).calls).toEqual(['+992900000001'])
-  expect((await log(page)).said).toContain('Ба Малика занг мезанам.')
+  await expect.poll(async () => (await log(page)).calls).toEqual(['+992900000002'])
+  expect((await log(page)).said).toContain('Ба Шахноза занг мезанам.')
+  // a number said aloud
+  await hear(page, 'ба нӯҳсаду ду бисту се чилу панҷ шасту ҳафт занг зан')
+  await page.getByRole('button', { name: 'Гап задан' }).click()
+  await expect.poll(async () => (await log(page)).calls).toEqual(['+992900000002', '902234567'])
+  expect(errors).toEqual([])
+})
+
+test('"Эй Маҳлиё" online: the recording is heard again by the server\'s AI, in her language', async ({ page, server: _, errors }) => {
+  await signedIn(page)
+  await asPhone(page)
+  const sent: { lang: string; wav: string }[] = []
+  await page.route('**/api/v1/voice/hear', (r) => { sent.push(r.request().postDataJSON()); return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ text: 'эй маҳлиё таймер даҳ дақиқа' }) }) })
+  // the phone's small model heard it badly
+  await page.addInitScript(() => (window as unknown as { __hear: string[] }).__hear.push('эй маҳлиё тайм даҳ дақ'))
+  await page.goto('/voice')
+  await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+  await expect.poll(async () => (await log(page)).timers).toEqual([600])
+  await expect(page.locator('.voice-said')).toHaveText('эй маҳлиё таймер даҳ дақиқа')
+  expect(sent[0]).toMatchObject({ lang: 'tg' })
   expect(errors).toEqual([])
 })
