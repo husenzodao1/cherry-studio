@@ -13,6 +13,7 @@ import { showToast } from '@/web/components/Toast'
 import { pagesOf, passagesOf } from '@/web/files/bookText'
 import { usePlan } from '@/web/plans'
 import { usePrefs } from '@/web/prefs'
+import { markTried } from '@/web/offline/tried'
 
 /**
  * The student's Workspace (Premium): she adds her own study materials — lectures, textbooks, syllabi,
@@ -27,6 +28,7 @@ const ACCEPT = '.pdf,.docx,.txt,.md,application/pdf,text/plain,text/markdown,app
 const BATCH = 200
 
 export default function WorkspacePage() {
+  useEffect(() => markTried('workspace'), [])
   const { t } = usePrefs()
   const { session } = useAuth()
   const { open } = usePlan()

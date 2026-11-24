@@ -9,6 +9,7 @@ import { acknowledgePlay, grantOf, notificationToken, PLAY_PRODUCTS, playAccount
 import { fillTranslations, MT_LOCALES, translateBundle, type MtLocale } from '../translate'
 import { grantFromEvent, paddleReady, paddleSigned, type PaddlePrices } from '../paddle'
 import { forgetPlanSettings, planSettings } from '../plans'
+import { somoniRates } from '../rates'
 import { call } from '../util'
 import { DEFAULT_LIMITS, GIFT_DAYS, planRank, PRICES } from '@/lib/plans'
 import { buildBundle } from './offline'
@@ -165,6 +166,8 @@ export const billingRoutes: AnyRoute[] = [
       const prices = (settings.paddle ?? {}) as PaddlePrices
       return {
         live, prices: PRICES, gift_days: GIFT_DAYS, limits: limits ?? DEFAULT_LIMITS,
+        // a somoni in other currencies: the prices are shown in hers too
+        rates: await somoniRates(),
         consultant: settings.premium_consultant !== false,
         paddle: process.env.PADDLE_CLIENT_TOKEN && prices.standard && prices.premium
           ? { token: process.env.PADDLE_CLIENT_TOKEN, sandbox: process.env.PADDLE_ENV === 'sandbox', standard: prices.standard, premium: prices.premium, standard_discount: prices.standard_discount ?? null }

@@ -11,6 +11,7 @@ import { ABOUT } from './mahliyoAbout'
 import { askCompatible, type ActiveModel, type BookPassage } from './aiModels'
 import { needsWeb, searchWeb, wantsPictures, type WebSource } from './webSearch'
 import { withWikiPictures } from './wikiImages'
+import { studyNote, type Study } from '@/lib/study'
 
 /**
  * Mahliyo AI: the app's teacher answers learners' questions (in the language they write in; Tajik first), about the app, about what its
@@ -369,6 +370,8 @@ export interface Learner {
     | 'nutrition' | 'career' | 'code' | 'history' | 'calm' | 'language' | 'factcheck'
   /** a girl or a boy (the app's mode): a boy is spoken to as a young man */
   gender?: 'girl' | 'boy'
+  /** the student Workspace's chat: the task and the subject (Premium) */
+  study?: Study
 }
 
 /** what each answering mode asks of her */
@@ -754,6 +757,7 @@ export function learnerNote(me: Learner, serverNow = new Date(), only = { privat
     ...(premiumLive() ? [planNote(!!me.premium, me.plan)] : []),
     ...(me.gender === 'boy' ? [me.mode === 'girly' ? BOY_GIRLY_NOTE : BOY_NOTE] : []),
     ...(me.mode && !(me.gender === 'boy' && me.mode === 'girly') ? [MODE_NOTE[me.mode]] : []),
+    ...(me.study ? [studyNote(me.study)] : []),
     about || 'Nothing is known yet: she has not read lessons on this phone.'
   ].join('\n')
 }

@@ -25,6 +25,8 @@ export interface PlansInfo {
   limits: Record<Plan, Limits>
   consultant: boolean
   paddle: { token: string; sandbox: boolean; standard: string; premium: string; standard_discount: string | null } | null
+  /** a somoni in other currencies (the prices shown in hers) */
+  rates?: Record<string, number>
 }
 export interface MyPlan {
   plan: Plan; staff?: boolean; ends_at?: string | null; forever?: boolean; source?: string | null; auto_renew?: boolean | null
@@ -100,7 +102,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     <PlanContext.Provider value={value}>
       {children}
       {over && typeof document !== 'undefined' ? createPortal(
-        <div className="pw-over" role="dialog" aria-modal="true"><PlansScreen onClose={() => setOver(null)} /></div>, document.body) : null}
+        <div className="pw-over" role="dialog" aria-modal="true"><PlansScreen from={over} onClose={() => setOver(null)} /></div>, document.body) : null}
     </PlanContext.Provider>
   )
 }

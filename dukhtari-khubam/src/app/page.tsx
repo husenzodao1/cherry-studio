@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { ART } from '@/web/art'
 import { Avatar } from '@/web/components/Header'
+import { TryAlso } from '@/web/components/TryAlso'
 import { Icon } from '@/web/components/Icon'
 import { InstallButton } from '@/web/components/InstallButton'
 import { RainDrop } from '@/web/components/RainDrop'
@@ -155,6 +156,8 @@ export default function Home() {
           {review.today ? <span className="review-badge">{review.today}</span> : null}
         </Link>
       ) : null}
+
+      <TryAlso />
 
       <WordsOfDay />
 

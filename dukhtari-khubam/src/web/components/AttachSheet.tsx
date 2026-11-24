@@ -56,10 +56,12 @@ const MAKE: { command: string; tone: string; key: 'ai.make_slides' | 'ai.make_pd
 /** the photos picked and not sent yet (kept while the app is open) */
 let keptPicks: string[] = []
 
-export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: {
+export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose, onStudy }: {
   max: number
   mode: AiMode | null
   onMode: (m: AiMode | null) => void
+  /** the student Workspace's chat */
+  onStudy?: () => void
   /** a file to make was chosen: its ready command */
   onCommand: (title: string) => void
   onFiles: (files: File[]) => void
@@ -261,6 +263,7 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose }: 
           {MAKE.map((m) => (
             <button key={m.command} type="button" onClick={() => onCommand(m.command)}><span className={`attach-ico tone-${m.tone}`}>{m.glyph()}</span>{t(m.key)}</button>
           ))}
+          {onStudy ? <button type="button" className="attach-study" onClick={onStudy}><span className="attach-ico tone-study"><Icon name="cap" size={24} /></span>{t('ai.study')}</button> : null}
         </div>
         {/* how she answers: quiet chips in a row */}
         <div className="attach-modes" role="group" aria-label={t('ai.modes')}>

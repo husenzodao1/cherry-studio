@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { currencyOf, moneyText } from '@/lib/money'
 import { planRank, ROWS, type Cell, type Limits, type Plan } from '@/lib/plans'
 import { api } from '../api'
 import { useAuth } from '../auth'
@@ -20,7 +21,10 @@ import { usePrefs } from '../prefs'
  */
 
 /** the pictures at the top: the app at work in her language (public/assets/paywall/<locale>) */
-const SHOTS = ['chat', 'slides', 'song', 'quiz', 'lawyer', 'mmt', 'call'] as const
+const SHOTS = ['chat', 'workspace', 'navigate', 'hey', 'slides', 'song', 'quiz', 'lawyer', 'mmt', 'call'] as const
+/** opened by the app itself (not by her): the prices are shown after this long, and, untouched, it closes */
+const TO_PRICES_MS = 3000
+const CLOSE_MS = 7000
 type Shot = (typeof SHOTS)[number]
 
 declare global {
@@ -45,7 +49,7 @@ function paddle(token: string, sandbox: boolean, onDone: () => void): Promise<an
   })
 }
 
-export function PlansScreen({ onClose }: { onClose: () => void }) {
+export function PlansScreen({ onClose, from }: { onClose: () => void; from?: string | null }) {
   const { t, locale } = usePrefs()
   const { session } = useAuth()
   const p = usePlan()
@@ -54,6 +58,23 @@ export function PlansScreen({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false)
   const [code, setCode] = useState('')
   const has = p.plan
+  const currency = useMemo(() => { try { return currencyOf(Intl.DateTimeFormat().resolvedOptions().timeZone) } catch { return 'TJS' } }, [])
+  const money = (n: number) => moneyText(n, { currency, rates: p.info.rates ?? {}, tag: locale === 'tg' ? 'ru' : locale === 'prs' ? 'fa' : locale, somoniWord: t('pw.somoni') })
+  // a moment after it opens: down to the two plans, both coming forward at once; opened by the app and
+  // not touched, it closes after a while (she was only shown what is there)
+  const root = useRef<HTMLDivElement>(null)
+  const plans = useRef<HTMLDivElement>(null)
+  const [pop, setPop] = useState(false)
+  const touched = useRef(false)
+  useEffect(() => {
+    const down = setTimeout(() => {
+      if (touched.current || !plans.current) return
+      plans.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setPop(true)
+    }, TO_PRICES_MS)
+    const close = from === 'open' ? setTimeout(() => { if (!touched.current) onClose() }, CLOSE_MS) : undefined
+    return () => { clearTimeout(down); clearTimeout(close) }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   // after a purchase: her plan is looked at again until it changes
   const waiting = useRef<number | null>(null)
   useEffect(() => () => { if (waiting.current) clearInterval(waiting.current) }, [])
@@ -126,7 +147,7 @@ export function PlansScreen({ onClose }: { onClose: () => void }) {
   const ends = p.me?.ends_at ? new Date(p.me.ends_at).toLocaleDateString(locale === 'tg' ? 'ru' : locale) : null
 
   return (
-    <div className="pw">
+    <div className="pw" ref={root} onPointerDown={() => { touched.current = true }} onWheel={() => { touched.current = true }} onKeyDown={() => { touched.current = true }}>
       <button type="button" className="pw-close" aria-label={t('pin.cancel')} onClick={onClose}><Icon name="x" size={20} /></button>
       <header className="pw-hero">
         <CrownSpin plan="premium" size={150} />
@@ -161,13 +182,13 @@ export function PlansScreen({ onClose }: { onClose: () => void }) {
 
       {has !== 'premium' ? (
         <>
-          <div className="pw-plans" role="radiogroup" aria-label={t('pw.choose')}>
+          <div ref={plans} className={`pw-plans${pop ? ' is-pop' : ''}`} role="radiogroup" aria-label={t('pw.choose')}>
             {(['standard', 'premium'] as const).filter((k) => planRank(k) > planRank(has)).map((k) => (
               <button key={k} type="button" role="radio" aria-checked={pick === k} className={`pw-plan is-${k}${pick === k ? ' is-on' : ''}`} onClick={() => setPick(k)}>
-                {k === 'premium' ? <span className="pw-best">{t('pw.best')}</span> : <span className="pw-best is-deal">{t('pw.first_month').replace('{n}', String(p.info.prices.standardFirst))}</span>}
+                {k === 'premium' ? <span className="pw-best">{t('pw.best')}</span> : <span className="pw-best is-deal">{t('pw.first_month').replace('{n}', money(p.info.prices.standardFirst))}</span>}
                 <CrownSpin plan={k} size={74} />
                 <b className="pw-plan-name">{k === 'premium' ? 'Premium' : 'Standard'}</b>
-                <span className="pw-plan-price"><b>{k === 'premium' ? p.info.prices.premium : p.info.prices.standard}</b> {t('pw.per_month_price')}</span>
+                <span className="pw-plan-price"><b>{money(k === 'premium' ? p.info.prices.premium : p.info.prices.standard)}</b> {t('pw.per_month_price')}</span>
                 <span className="pw-plan-line">{t(k === 'premium' ? 'pw.premium_line' : 'pw.standard_line')}</span>
                 <span className="pw-radio" aria-hidden="true">{pick === k ? <Icon name="check" size={14} /> : null}</span>
               </button>
@@ -175,9 +196,9 @@ export function PlansScreen({ onClose }: { onClose: () => void }) {
           </div>
           <button type="button" className="pw-cta" disabled={busy} onClick={() => void buy()}>
             <Icon name="crown" size={20} />
-            {pick === 'premium' ? t('pw.cta_premium').replace('{n}', String(p.info.prices.premium)) : t('pw.cta_standard').replace('{n}', String(p.me?.standard_since ? p.info.prices.standard : p.info.prices.standardFirst))}
+            {pick === 'premium' ? t('pw.cta_premium').replace('{n}', money(p.info.prices.premium)) : t('pw.cta_standard').replace('{n}', money(p.me?.standard_since ? p.info.prices.standard : p.info.prices.standardFirst))}
           </button>
-          <p className="pw-fine">{pick === 'premium' ? t('pw.fine_premium').replace('{n}', String(p.info.gift_days)) : t('pw.fine_standard').replace('{n}', String(p.info.prices.standard))}</p>
+          <p className="pw-fine">{pick === 'premium' ? t('pw.fine_premium').replace('{n}', String(p.info.gift_days)) : t('pw.fine_standard').replace('{n}', money(p.info.prices.standard))}</p>
         </>
       ) : null}
 

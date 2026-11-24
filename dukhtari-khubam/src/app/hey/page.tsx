@@ -10,6 +10,7 @@ import { showToast } from '@/web/components/Toast'
 import { hey, native, PHRASES, phraseHeard, VOICE_LANGS, voiceLang, type HeyState } from '@/web/offline/hey'
 import { usePlan } from '@/web/plans'
 import { usePrefs } from '@/web/prefs'
+import { markTried } from '@/web/offline/tried'
 
 /**
  * "Эй Маҳлиё" set up (Standard and Premium): the speech models downloaded once — Tajik (her name is heard by it)
@@ -18,6 +19,7 @@ import { usePrefs } from '@/web/prefs'
  * turned on. From then on Mahliyo wakes at her name in her voice, even with the screen off.
  */
 export default function HeyPage() {
+  useEffect(() => markTried('hey'), [])
   const { t, locale } = usePrefs()
   const router = useRouter()
   const { live, plan, open } = usePlan()

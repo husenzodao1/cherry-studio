@@ -12,6 +12,7 @@ import { makeSong } from '../music'
 import { limitReached, MODE_LIMIT, planOf, planSettings, use, whoOf, withinPlan, type PlanCtx } from '../plans'
 import { call } from '../util'
 import { buildBundle, Code, codeHash, Token } from './offline'
+import { STUDY_TASKS, SUBJECT_IDS } from '@/lib/study'
 
 /**
  * Mahliyo AI (server/mahliyo.ts): whether she is there (the AI key is set on the server), a question to
@@ -163,7 +164,9 @@ export const mahliyoRoutes: AnyRoute[] = [
       // the way she asked to be answered (the attach sheet's modes)
       mode: z.enum(['precise', 'science', 'friendly', 'girly', 'exam', 'mmt', 'facts', 'lawyer', 'music', 'math', 'translate', 'writer', 'nutrition', 'career', 'code', 'history', 'calm', 'language', 'factcheck']).optional(),
       // a girl or a boy (the app's mode): a boy is spoken to as a young man
-      gender: z.enum(['girl', 'boy']).optional()
+      gender: z.enum(['girl', 'boy']).optional(),
+      // the student Workspace's chat (Premium): the task and the subject
+      study: z.strictObject({ task: z.enum(STUDY_TASKS), subject: z.enum(SUBJECT_IDS).optional() }).optional()
     }),
     handler: async ({ sb, body, req }) => {
       if (!(await anyone(sb()))) throw new ApiError(503, 'not_configured', 'Маҳлиё ҳоло дастрас нест.')
@@ -186,7 +189,9 @@ export const mahliyoRoutes: AnyRoute[] = [
       })
       // where she is: her rough place if she allowed it; her country and city as her connection shows them
       const ipPlace = [req.headers.get('x-vercel-ip-city'), req.headers.get('x-vercel-ip-country')].filter(Boolean).map((v) => decodeURIComponent(v!)).join(', ')
-      const me = { me: body.me, now: body.now, tz: body.tz, premium, plan, place: body.place, region: ipPlace || undefined, mode: body.mode, gender: body.gender }
+      const me = { me: body.me, now: body.now, tz: body.tz, premium, plan, place: body.place, region: ipPlace || undefined, mode: body.mode, gender: body.gender,
+        // the student chat is Premium's (anyone's while the plans are off)
+        study: premium || !settings.live ? body.study : undefined }
       if (body.background) {
         const client = sb()
         after(() => answerInto(client, id, turns, me, files, { ...ctx, sb: client }, body.session))

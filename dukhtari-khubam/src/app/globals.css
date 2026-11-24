@@ -2694,7 +2694,7 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
   display: grid; place-items: center; color: #fff; border: 2px solid #fff; background: rgba(0, 0, 0, 0.18); }
 .attach-photo.is-on img { transform: scale(0.86); border-radius: 6px; }
 .attach-photo.is-on i { background: var(--primary); }
-.attach-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px 2px; padding: 6px 0 2px; }
+.attach-actions { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px 2px; padding: 6px 0 2px; }
 .attach-actions button { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 0.72rem;
   font-weight: 500; color: var(--ink-2); cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
 /* little app icons: a soft squircle of colour, a white glyph, a glow of its own colour beneath */
@@ -2709,6 +2709,7 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
 .attach-ico.tone-slides { --ga: #ffb05c; --gb: #f0521f; }
 .attach-ico.tone-pdf { --ga: #ff7a8a; --gb: #d81f3c; }
 .attach-ico.tone-word { --ga: #5f9bff; --gb: #1d4fc4; }
+.attach-ico.tone-study { --ga: #4fd1a5; --gb: #0f8f6b; }
 /* the ways of answering: quiet chips, the chosen one filled */
 .attach-modes { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0 4px; margin: 0 -14px; padding-inline: 14px; }
 .attach-modes::-webkit-scrollbar { display: none; }
@@ -3521,3 +3522,39 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
   border: 0; border-radius: 99px; color: #fff; background: rgba(255, 255, 255, 0.12); font: inherit; font-size: 0.86em; cursor: pointer; }
 .voice-out.is-on { background: rgba(255, 255, 255, 0.28); }
 .hey-lang .btn-sm { min-height: 34px; padding: 0 12px; font-size: 0.84em; gap: 4px; }
+
+/* the plans' prices in her money; a moment after the plans open, both cards come forward at once */
+.pw-plan-price b { display: block; font-size: clamp(1.05rem, 5.2vw, 1.5rem); white-space: nowrap; }
+.pw-plans.is-pop .pw-plan { animation: pw-pop 0.9s var(--ease) both; }
+@keyframes pw-pop {
+  0% { transform: none; }
+  45% { transform: translateY(-10px) scale(1.06); box-shadow: 0 26px 50px -22px rgba(122, 79, 216, 0.6); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .pw-plans.is-pop .pw-plan { animation: none; } }
+
+/* "Also try the new features": the plan's features she has not opened yet */
+.try-also { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 22px; }
+.try-also b { font-size: 0.92rem; }
+.try-also-x { width: 28px; height: 28px; border: 0; border-radius: 50%; display: grid; place-items: center; color: var(--ink-2); background: rgba(0, 0, 0, 0.05); cursor: pointer; }
+.try-also-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -14px; padding: 0 14px 2px; }
+.try-also-row::-webkit-scrollbar { display: none; }
+.try-also-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 99px; font-size: 0.86rem; font-weight: 600; color: var(--ink);
+  text-decoration: none; background: linear-gradient(135deg, rgba(122, 79, 216, 0.14), rgba(255, 111, 168, 0.14)); border: 1px solid rgba(122, 79, 216, 0.22); }
+
+/* the student Workspace's chat: its bar over the conversation — her materials (what Mahliyo learnt from), the task, the subject */
+.study-bar { margin: 0 12px 6px; padding: 10px 12px; border-radius: 20px; display: flex; flex-direction: column; gap: 8px;
+  background: linear-gradient(135deg, rgba(79, 209, 165, 0.16), rgba(47, 107, 255, 0.12)); border: 1px solid rgba(15, 143, 107, 0.25); }
+.study-head { display: flex; align-items: center; gap: 10px; }
+.study-head .grow { display: flex; flex-direction: column; min-width: 0; }
+.study-head b { font-size: 0.95rem; }
+.study-head span { font-size: 0.78rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.study-ico { flex: none; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, #4fd1a5, #0f8f6b); }
+.study-train { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 7px 11px; border-radius: 99px; font-size: 0.78rem; font-weight: 700;
+  color: #0f8f6b; background: rgba(255, 255, 255, 0.75); text-decoration: none; }
+.study-x { flex: none; width: 30px; height: 30px; border: 0; border-radius: 50%; display: grid; place-items: center; background: rgba(0, 0, 0, 0.06); color: var(--ink-2); cursor: pointer; }
+.study-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -12px; padding: 0 12px; }
+.study-row::-webkit-scrollbar { display: none; }
+.study-chip { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 11px; border-radius: 99px; border: 1px solid rgba(15, 143, 107, 0.22);
+  background: rgba(255, 255, 255, 0.6); font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--ink); cursor: pointer; }
+.study-chip[aria-pressed='true'] { color: #fff; background: linear-gradient(135deg, #1fb487, #0f8f6b); border-color: transparent; }

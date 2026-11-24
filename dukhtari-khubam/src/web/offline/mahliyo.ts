@@ -10,6 +10,7 @@ import { journeyOf } from './journey'
 import { hasPin } from './pin'
 import { reviewStats } from './review'
 import { supportToken } from './support'
+import type { Study } from '@/lib/study'
 
 /**
  * Mahliyo AI client: whether she can answer (the server has the AI set up), the conversation kept on
@@ -254,7 +255,7 @@ export interface AiState {
   /** the open chat is temporary: never kept in the history, gone after a new chat or another one is opened */
   temp?: boolean
 }
-export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string; mode?: AiMode; gender?: 'girl' | 'boy' }
+export interface Who { code?: string; name?: string; me?: string; account?: string; place?: string; mode?: AiMode; gender?: 'girl' | 'boy'; study?: Study }
 /** how she asks to be answered (the attach sheet's modes) */
 export type AiMode = 'precise' | 'science' | 'friendly' | 'girly' | 'exam' | 'mmt' | 'facts' | 'lawyer' | 'music' | 'math' | 'translate'
   | 'writer' | 'nutrition' | 'career' | 'code' | 'history' | 'calm' | 'language' | 'factcheck'

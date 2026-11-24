@@ -31,6 +31,8 @@ import { alphaVideo, CLIPS } from '@/web/mahliyo'
 import { placeNote, refreshPlace } from '@/web/offline/place'
 import { usePrefs } from '@/web/prefs'
 import { usePlan } from '@/web/plans'
+import { STUDY_TASKS, SUBJECTS, type StudyTask, type SubjectId } from '@/lib/study'
+import { api } from '@/web/api'
 
 const FACE = '/assets/mascot/face.webp'
 const FACE_THINK = '/assets/mascot/face-think.webp'
@@ -77,7 +79,7 @@ export default function MahliyoPage() {
   const { learner, progress } = useLearner()
   const { session } = useAuth()
   // her plan: a paid plan keeps its chats and has no limit of questions in one chat
-  const { plan, me: myPlan, open: openPlans } = usePlan()
+  const { plan, me: myPlan, open: openPlans, live: plansLive } = usePlan()
   const paid = plan !== 'free'
   useEffect(() => { if (myPlan || !session) keepChatsForever(paid) }, [myPlan, session, paid])
   const { bundle } = useContent()
@@ -218,7 +220,30 @@ export default function MahliyoPage() {
   const startNew = () => {
     newChat()
     setFiles([])
+    setStudy(null)
   }
+  /** the student Workspace's chat (Premium): a new chat, Mahliyo as her tutor, from her own materials */
+  const [study, setStudyState] = useState<{ chat: string; task: StudyTask; subject?: SubjectId } | null>(null)
+  const setStudy = (s: { chat: string; task: StudyTask; subject?: SubjectId } | null) => {
+    setStudyState(s)
+    try { if (s) localStorage.setItem('dk.ai.study', JSON.stringify(s)); else localStorage.removeItem('dk.ai.study') } catch { /* only for now */ }
+  }
+  useEffect(() => { try { const s = JSON.parse(localStorage.getItem('dk.ai.study') ?? 'null'); if (s?.task) setStudyState(s) } catch { /* none */ } }, [])
+  const studying = study && (study.chat === chat || !turns.length) ? study : null
+  const [materials, setMaterials] = useState<number | null>(null)
+  const openStudy = () => {
+    setSheet(false)
+    if (plansLive && plan !== 'premium') { openPlans('workspace'); return }
+    newChat()
+    setFiles([])
+    setStudy({ chat: '', task: 'homework' })
+  }
+  useEffect(() => {
+    if (!studying) return
+    void api<{ docs: unknown[] }>('/me/workspace').then((r) => setMaterials(r.docs.length)).catch(() => setMaterials(null))
+  }, [!!studying]) // eslint-disable-line react-hooks/exhaustive-deps
+  // the student chat follows its conversation (its id comes with the first question)
+  useEffect(() => { if (study && !study.chat && chat && turns.length) setStudy({ ...study, chat }) }, [chat, turns.length]) // eslint-disable-line react-hooks/exhaustive-deps
   // opened from a lesson's circle ("what is unclear here?"): a new chat with the question begun in the box
   useEffect(() => {
     let asked: string | null = null
@@ -371,7 +396,8 @@ export default function MahliyoPage() {
     el.style.height = `${Math.min(el.scrollHeight, 132)}px`
   }, [text])
 
-  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email, place: placeNote(), ...(mode ? { mode } : {}), ...(appMode === 'boy' ? { gender: 'boy' as const } : {}) })
+  const who = () => ({ code: learner?.code, name: learner?.name, me: aboutMe(learner?.name, progress, bundle), account: learner?.code || learner?.email, place: placeNote(), ...(mode ? { mode } : {}), ...(appMode === 'boy' ? { gender: 'boy' as const } : {}),
+    ...(studying ? { study: { task: studying.task, ...(studying.subject ? { subject: studying.subject } : {}) } } : {}) })
   const send = (question: string, withFiles: AiUpload[] = []) => {
     // a picture alone asks her to look at it
     const said = question.trim() || (withFiles.length ? t('ai.look') : '')
@@ -464,6 +490,30 @@ export default function MahliyoPage() {
       ) : null}
 
       {shot && current && !temp ? <ShotShare chat={current} onClose={closeShot} /> : null}
+      {studying ? (
+        <section className="study-bar" aria-label={t('ai.study')}>
+          <div className="study-head">
+            <span className="study-ico" aria-hidden="true"><Icon name="cap" size={20} /></span>
+            <span className="grow">
+              <b>{t('ai.study')}</b>
+              <span>{materials ? t('ai.study_learnt').replace('{n}', String(materials)) : t('ai.study_none')}</span>
+            </span>
+            <Link href="/workspace" className="study-train"><Icon name="plus" size={13} />{t('ai.study_train')}</Link>
+            <button type="button" className="study-x" aria-label={t('action.close')} onClick={() => setStudy(null)}><Icon name="x" size={14} /></button>
+          </div>
+          <div className="study-row" role="group" aria-label={t('ai.study_task')}>
+            {STUDY_TASKS.map((k) => (
+              <button key={k} type="button" className="study-chip" aria-pressed={studying.task === k} onClick={() => setStudy({ ...studying, task: k })}>{t(`study.${k}` as 'study.homework')}</button>
+            ))}
+          </div>
+          <div className="study-row" role="group" aria-label={t('ai.study_subject')}>
+            {SUBJECTS.map((x) => (
+              <button key={x.id} type="button" className="study-chip" aria-pressed={studying.subject === x.id}
+                onClick={() => setStudy({ ...studying, subject: studying.subject === x.id ? undefined : x.id })}><span aria-hidden="true">{x.emoji}</span>{t(`study.sub_${x.id}` as 'study.sub_math')}</button>
+            ))}
+          </div>
+        </section>
+      ) : null}
       {temp ? <p className="ai-temp-note" role="status"><Icon name="ghostChat" size={16} /><span>{t('ai.temp_on')}</span></p> : null}
       {online ? null : (
         <p className="ai-offline" role="status"><Icon name="globe" size={18} /><span>{t('ai.offline')}{busy ? ` ${t('ai.offline_wait')}` : ''}</span></p>
@@ -612,7 +662,7 @@ export default function MahliyoPage() {
         ) : null}
         {slash !== null ? <SlashMenu query={slash} onPick={pickCommand} /> : null}
         {slides ? <SlidesSetup onClose={() => setSlides(false)} onSend={(q) => { setSlides(false); send(q) }} /> : null}
-        {sheet ? <AttachSheet max={MAX_FILES - files.length} mode={mode} onMode={(m) => { setMode(m); setSheet(false) }} onCommand={(c) => { setSheet(false); pickCommand(c) }} onFiles={(f) => void pick(f)} onClose={() => setSheet(false)} /> : null}
+        {sheet ? <AttachSheet max={MAX_FILES - files.length} mode={mode} onMode={(m) => { setMode(m); setSheet(false) }} onCommand={(c) => { setSheet(false); pickCommand(c) }} onFiles={(f) => void pick(f)} onClose={() => setSheet(false)} onStudy={openStudy} /> : null}
         <div className="ai-composer-row">
           <input ref={picker} type="file" hidden multiple accept="image/*,application/pdf,text/plain" onChange={(e) => void pick(e.target.files)} />
           <button type="button" className="ai-attach" aria-label={t('ai.attach')} disabled={ready === false || !!pending || files.length >= MAX_FILES}

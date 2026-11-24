@@ -14,6 +14,7 @@ import { aboutMe, ask as askMahliyo, copyOf, newChat, useMahliyo } from '@/web/o
 import { placeNote } from '@/web/offline/place'
 import { usePlan } from '@/web/plans'
 import { usePrefs } from '@/web/prefs'
+import { markTried } from '@/web/offline/tried'
 
 /**
  * "Эй Маҳлиё" listening: opened by her name (over the lock screen), by the phone's assistant button, or from
@@ -29,6 +30,7 @@ type Phase = 'listening' | 'thinking' | 'speaking' | 'idle'
 interface Contact { name: string; number: string }
 
 export default function VoicePage() {
+  useEffect(() => markTried('hey'), [])
   const { t, locale } = usePrefs()
   const router = useRouter()
   const { live, plan, open } = usePlan()
@@ -192,11 +194,14 @@ export default function VoicePage() {
   }, [act, finish, lang, locale]) // eslint-disable-line react-hooks/exhaustive-deps
   listenRef.current = listen
 
-  // opened: she is listened to at once
+  // opened: she is listened to at once (once her plan is known to allow it: it may come a moment later)
+  const began = useRef(false)
   useEffect(() => {
-    if (!locked) void listen()
-    return () => { void hey().then(({ p }) => { void p.stopListening(); void p.stopSpeaking(); void p.resume() }).catch(() => undefined) }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (locked || began.current) return
+    began.current = true
+    void listen()
+  }, [locked]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { void hey().then(({ p }) => { void p.stopListening(); void p.stopSpeaking(); void p.resume() }).catch(() => undefined) }, [])
   // opened again by her name while here
   useEffect(() => {
     if (!native()) return

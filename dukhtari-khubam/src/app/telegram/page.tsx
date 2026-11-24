@@ -11,6 +11,7 @@ import { Icon } from '@/web/components/Icon'
 import { showToast } from '@/web/components/Toast'
 import { usePlan } from '@/web/plans'
 import { usePrefs } from '@/web/prefs'
+import { markTried } from '@/web/offline/tried'
 
 /**
  * Mahliyo in Telegram (Premium): her Telegram linked by a one-time link to the bot (her account's e-mail is
@@ -20,6 +21,7 @@ import { usePrefs } from '@/web/prefs'
 interface Status { linked: boolean; name?: string | null; allowed: boolean; bot: string | null; ready: boolean }
 
 export default function TelegramPage() {
+  useEffect(() => markTried('telegram'), [])
   const { t } = usePrefs()
   const { session } = useAuth()
   const { open } = usePlan()

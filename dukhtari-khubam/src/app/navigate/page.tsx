@@ -14,6 +14,7 @@ import { follow, hereOnce, openLocationSettings, readyToFollow, type Ready } fro
 import { hey, native } from '@/web/offline/hey'
 import { usePlan } from '@/web/plans'
 import { usePrefs } from '@/web/prefs'
+import { markTried } from '@/web/offline/tried'
 
 /**
  * "Маро бубар" (Premium): she says where she wants to go; the place is found near her, the way there is drawn
@@ -35,6 +36,7 @@ const CATS = [
 ]
 
 export default function NavigatePage() {
+  useEffect(() => markTried('navigate'), [])
   const { t, locale } = usePrefs()
   const { session } = useAuth()
   const { live, plan, open } = usePlan()
