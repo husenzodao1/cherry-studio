@@ -2821,6 +2821,11 @@
                       "boy"
                     ]
                   },
+                  "chat": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  },
                   "study": {
                     "type": "object",
                     "properties": {
@@ -5048,6 +5053,99 @@
                 "required": [
                   "wav"
                 ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voice/live": {
+      "post": {
+        "tags": [
+          "Voice"
+        ],
+        "summary": "A one-use token for a two-minute part of a live voice conversation with Mahliyo (Gemini Live), counted against her minutes",
+        "operationId": "postVoiceLive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lang": {
+                    "default": "tg",
+                    "type": "string",
+                    "enum": [
+                      "tg",
+                      "ru",
+                      "en",
+                      "uz",
+                      "tr",
+                      "fa",
+                      "prs"
+                    ]
+                  },
+                  "mode": {
+                    "default": "assistant",
+                    "type": "string",
+                    "enum": [
+                      "assistant",
+                      "camera",
+                      "coach"
+                    ]
+                  },
+                  "scenario": {
+                    "type": "string",
+                    "enum": [
+                      "ielts",
+                      "english",
+                      "russian",
+                      "interview"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "me": {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  "now": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "boy": {
+                    "type": "boolean"
+                  },
+                  "handle": {
+                    "type": "string",
+                    "maxLength": 4000
+                  }
+                },
+                "additionalProperties": false
               }
             }
           }
