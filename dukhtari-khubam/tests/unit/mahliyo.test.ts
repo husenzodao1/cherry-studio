@@ -474,3 +474,20 @@ describe('which model answers', () => {
     expect(tierOf('Саволи оддӣ', 0, { study: { task: 'explain' } })).toBe('light')
   })
 })
+
+describe('answers kept for everyone', () => {
+  beforeEach(() => { vi.stubEnv('ANTHROPIC_API_KEY', ''); vi.stubEnv('GEMINI_API_KEY', 'g') })
+  afterEach(() => vi.unstubAllEnvs())
+  it('a general question asked again is answered from the kept answer at once, with the new learner\'s name', async () => {
+    const store = new Map<string, unknown>()
+    const cache = { get: async <T,>(kind: string, key: string) => (store.get(`${kind}|${key}`) as T) ?? null, put: async (kind: string, key: string, v: unknown) => { store.set(`${kind}|${key}`, v) } }
+    generate.mockClear()
+    generate.mockResolvedValue({ text: JSON.stringify({ tajik: true, blocks: [{ type: 'text', text: 'Малика, ҳуҷайра воҳиди ҳаёт аст.' }] }), candidates: [{ finishReason: 'STOP' }] })
+    const q = [{ role: 'user' as const, content: 'Ҳуҷайра чист?' }]
+    expect((await answer(q, 'Г', '', { me: 'Name: Малика' }, [], { cache })).blocks[0]).toEqual({ type: 'text', text: 'Малика, ҳуҷайра воҳиди ҳаёт аст.' })
+    expect(generate).toHaveBeenCalledTimes(1)
+    const again = await answer([{ role: 'user', content: 'ҳуҷайра чист' }], 'Г', '', { me: 'Name: Зарина' }, [], { cache })
+    expect(again.blocks[0]).toEqual({ type: 'text', text: 'Зарина, ҳуҷайра воҳиди ҳаёт аст.' })
+    expect(generate).toHaveBeenCalledTimes(1)
+  })
+})

@@ -13,6 +13,7 @@ import { googleSearchOn, searchGoogle, wantsFresh } from './googleSearch'
 import { needsWeb, searchWeb, wantsPictures, type WebSource } from './webSearch'
 import { withWikiPictures } from './wikiImages'
 import { studyNote, type Study } from '@/lib/study'
+import { answerKey, normalQuestion, storable, type Cache } from './aiCache'
 
 /**
  * Mahliyo AI: the app's teacher answers learners' questions (in the language they write in; Tajik first), about the app, about what its
@@ -906,7 +907,15 @@ const webLang = (question: string): 'tg' | 'ru' | 'en' => {
 }
 
 /** What the server adds to a question: the model the staff chose, and the passages of their books for it. */
-export interface Extra { active?: ActiveModel | null; books?: BookPassage[]; warnings?: RedReply[]; mine?: BookPassage[] }
+export interface Extra { active?: ActiveModel | null; books?: BookPassage[]; warnings?: RedReply[]; mine?: BookPassage[]; cache?: Cache }
+
+/** a kept answer for this learner: {ном} as her name in every word of it */
+function named<T>(value: T, name: string): T {
+  if (typeof value === 'string') return withName(value, name) as T
+  if (Array.isArray(value)) return value.map((v) => named(v, name)) as T
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, named(v, name)])) as T
+  return value
+}
 
 /** The answer as JSON text from the model the staff chose; when it fails, from the app's own default. */
 async function ask(turns: Turn[], appName: string, material: string, me: Learner, files: Attachment[], chosen?: ActiveModel | null): Promise<string | null> {
@@ -965,8 +974,18 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
   // news, prices, announcements: Google Search first (when the staff turned it on; Standard and Premium while the
   // plans are on), then Wikipedia
   const google = !files.length && googleSearchOn() && (wantsFresh(question) || needsWeb(question)) && (!premiumLive() || (me.plan ?? 'free') !== 'free')
-  let web = google ? await searchGoogle(question, webLang(question)) : []
+  // an answer kept for this very question (the same for everyone): given again at once
+  const key = extra.cache ? answerKey(turns, files.length, { lang: webLang(question), mode: me.mode, gender: me.gender, study: me.study }) : null
+  if (key) {
+    const hit = await extra.cache!.get<Answer>('answer', key, 30)
+    if (hit?.blocks?.length) return named(hit, name)
+  }
+  // the internet's results for this question, kept a week
+  const webKey = `${webLang(question)}|${google ? 'g' : 'w'}|${normalQuestion(question)}`
+  const kept = (google || (!files.length && needsWeb(question))) && extra.cache ? await extra.cache.get<WebSource[]>('web', webKey, 7) : null
+  let web = kept ?? (google ? await searchGoogle(question, webLang(question)) : [])
   if (!web.length && !files.length && needsWeb(question)) web = await searchWeb(question, webLang(question))
+  if (!kept && web.length && extra.cache) await extra.cache.put('web', webKey, web)
   const refs = refsOf(extra.books ?? [], web, extra.mine ?? [])
   const material = [knowledge, refs.length ? webNote(refs) : '', redNote(extra.warnings)].filter(Boolean).join('\n\n')
   // the same words pushed a third time in a row (each answered already): her warning, without asking the AI
@@ -1012,7 +1031,13 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
       if (!made.some((b) => b.type === 'file')) return sorry()
       blocks.splice(0, blocks.length, ...made)
     }
-    if (blocks.length) return { tajik: true, blocks, reply: plainOf(blocks).slice(0, 6000) }
+    if (blocks.length) {
+      const a: Answer = { tajik: true, blocks, reply: plainOf(blocks).slice(0, 6000) }
+      // kept for the next one who asks the same (only what is the same for everyone)
+      const keep = key ? storable(a, name) : null
+      if (keep) await extra.cache!.put('answer', key!, keep)
+      return a
+    }
   } catch {
     /* fall through */
   }

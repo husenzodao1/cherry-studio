@@ -13,6 +13,7 @@ import { limitReached, MODE_LIMIT, onTrial, planOf, planSettings, trialMessage, 
 import { call } from '../util'
 import { buildBundle, Code, codeHash, Token } from './offline'
 import { STUDY_TASKS, SUBJECT_IDS } from '@/lib/study'
+import { dbCache } from '../aiCache'
 
 /**
  * Mahliyo AI (server/mahliyo.ts): whether she is there (the AI key is set on the server), a question to
@@ -88,7 +89,7 @@ async function extraFor(sb: SupabaseClient, turns: Turn[], premium = false, sess
   // gives its passages only to her, and only with Premium
   const [active, books, warnings, mine] = await Promise.all([activeModel(sb), premium || !premiumLive() ? bookPassages(sb, question) : Promise.resolve([]),
     warningsOf(sb), minePassages(session, question)])
-  return { active, books, warnings, mine }
+  return { active, books, warnings, mine, cache: dbCache(sb) }
 }
 /** whether the learner who asks has Premium (her session, checked by the database; never what the phone says) */
 /** how much of the conversation she reads: a free learner's last 12 turns, a Premium learner's last 40 */
