@@ -10,6 +10,8 @@ import { Empty } from '@/web/components/States'
 import { useContent } from '@/web/offline/content'
 import { gradeQuestion, shuffled, type Answer } from '@/web/offline/grade'
 import { useLearner } from '@/web/offline/learner'
+import { AGAIN, GOOD } from '@/lib/fsrs'
+import { allDecks, answerLessonQuestion, LESSONS, syncDecks, useDecks } from '@/web/offline/decks'
 import { dueToday, reviewStats, type ReviewItem } from '@/web/offline/review'
 import { usePrefs } from '@/web/prefs'
 import { emojify } from '@/web/components/Emoji'
@@ -18,11 +20,17 @@ import { emojify } from '@/web/components/Emoji'
 export default function ReviewPage() {
   const { t } = usePrefs()
   const { bundle } = useContent()
-  const { progress, recordReview } = useLearner()
+  const { progress, recordReview, learner } = useLearner()
+  // her questions' memory states (FSRS), backed up with her decks
+  const decks = useDecks()
+  const fsrs = useMemo(() => Object.fromEntries((decks[LESSONS]?.cards ?? []).filter((c) => c.st).map((c) => [c.id, c.st!])), [decks])
+  useEffect(() => { if (learner?.code) void syncDecks(learner.code) }, [learner?.code])
   // the session is fixed when it starts, so answering does not reshuffle what is left
   const [session, setSession] = useState<ReviewItem[] | null>(null)
   useEffect(() => {
-    if (bundle && session === null) setSession(dueToday(bundle, progress).map((it) => ({ ...it, question: { ...it.question, options: shuffled(it.question.options) } })))
+    // the states read from the phone itself (the first render may not have them yet)
+    const states = Object.fromEntries((allDecks()[LESSONS]?.cards ?? []).filter((c) => c.st).map((c) => [c.id, c.st!]))
+    if (bundle && session === null) setSession(dueToday(bundle, progress, undefined, undefined, states).map((it) => ({ ...it, question: { ...it.question, options: shuffled(it.question.options) } })))
   }, [bundle, progress, session])
   // the session is fixed once: she invites to the review when there is something to repeat
   useEffect(() => { if (session?.length) say('review') }, [session])
@@ -30,7 +38,7 @@ export default function ReviewPage() {
   const [answer, setAnswer] = useState<Answer | undefined>()
   const [checked, setChecked] = useState<boolean | null>(null)
   const [right, setRight] = useState(0)
-  const stats = useMemo(() => (bundle ? reviewStats(bundle, progress) : null), [bundle, progress])
+  const stats = useMemo(() => (bundle ? reviewStats(bundle, progress, undefined, fsrs) : null), [bundle, progress, fsrs])
 
   if (!session || !stats) return <Header back="/" title={t('review.title')} />
   const finished = index >= session.length
@@ -71,6 +79,7 @@ export default function ReviewPage() {
     setChecked(ok)
     if (ok) setRight((n) => n + 1)
     recordReview(question.id, ok)
+    answerLessonQuestion(question.id, ok ? GOOD : AGAIN)
   }
   const next = () => {
     setIndex((i) => i + 1)

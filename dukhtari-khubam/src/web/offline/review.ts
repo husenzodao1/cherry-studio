@@ -65,12 +65,16 @@ export function reviewPool(bundle: Bundle, progress: ProgressData): ReviewItem[]
   return out
 }
 
-/** Today's questions: overdue and due ones first (oldest first), then a few new ones. */
-export function dueToday(bundle: Bundle, progress: ProgressData, today = localDay(), limit = DAILY_LIMIT): ReviewItem[] {
+/**
+ * Today's questions: overdue and due ones first (oldest first), then a few new ones. `fsrs`: the memory states
+ * of the questions she answered since the scheduler became FSRS (their day wins over the Leitner box's).
+ */
+export function dueToday(bundle: Bundle, progress: ProgressData, today = localDay(), limit = DAILY_LIMIT, fsrs: Record<string, { due: string }> = {}): ReviewItem[] {
   const pool = reviewPool(bundle, progress)
+  const dueOf = (id: string) => fsrs[id]?.due ?? progress.review[id]?.due
   const due = pool
-    .filter((it) => progress.review[it.question.id] && progress.review[it.question.id].due <= today)
-    .sort((a, b) => progress.review[a.question.id].due.localeCompare(progress.review[b.question.id].due)
+    .filter((it) => progress.review[it.question.id] && dueOf(it.question.id)! <= today)
+    .sort((a, b) => dueOf(a.question.id)!.localeCompare(dueOf(b.question.id)!)
       || progress.review[a.question.id].box - progress.review[b.question.id].box)
   const seenToday = Object.values(progress.review).filter((r) => r.at.slice(0, 10) === today && r.box === 1).length
   const fresh = pool.filter((it) => !progress.review[it.question.id]).slice(0, Math.max(0, NEW_PER_DAY - seenToday))
@@ -78,12 +82,12 @@ export function dueToday(bundle: Bundle, progress: ProgressData, today = localDa
 }
 
 /** How the review stands: questions in each box and how many wait today. */
-export function reviewStats(bundle: Bundle, progress: ProgressData, today = localDay()) {
+export function reviewStats(bundle: Bundle, progress: ProgressData, today = localDay(), fsrs: Record<string, { due: string }> = {}) {
   const pool = reviewPool(bundle, progress)
   const boxes = [0, 0, 0, 0, 0]
   for (const it of pool) {
     const r = progress.review[it.question.id]
     if (r) boxes[r.box - 1]++
   }
-  return { total: pool.length, boxes, today: dueToday(bundle, progress, today).length }
+  return { total: pool.length, boxes, today: dueToday(bundle, progress, today, DAILY_LIMIT, fsrs).length }
 }

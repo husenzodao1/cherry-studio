@@ -32,3 +32,13 @@ describe('the red pen', () => {
     expect(rules('xx')).toContain('in Tajik')
   })
 })
+
+describe('flashcards by the AI', async () => {
+  const { cardRules } = await import('@/server/notebook')
+  it('only from the material, short sides, her language', () => {
+    const r = cardRules('ru', 12)
+    expect(r).toContain('up to 12 cards')
+    expect(r).toContain('ONLY what the material says')
+    expect(r).toContain('Write in Russian')
+  })
+})

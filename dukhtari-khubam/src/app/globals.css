@@ -3801,3 +3801,32 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .check-detail.is-ok { border: 1.5px solid rgba(22, 163, 74, 0.4); }
 .check-next { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 4px; }
 .lib-entry-ico.check-ico { background: linear-gradient(135deg, #fecaca, #ef4444); }
+
+/* flashcards (app/cards) */
+.cards-today { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.cards-stack { font-size: 2.4rem; }
+.cards-deck { display: flex; align-items: center; gap: 10px; text-align: start; border: 0; font: inherit; color: var(--ink); cursor: pointer; width: 100%; }
+.cards-deck .grow, .cards-row .grow { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.cards-deck .grow span, .cards-row .grow span { font-size: 0.8rem; color: var(--ink-2); }
+.cards-row { display: flex; align-items: center; gap: 8px; }
+.cards-stats { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+.cards-stats span { display: flex; flex-direction: column; font-size: 0.78rem; color: var(--ink-2); }
+.cards-stats b { font-size: 1.5rem; color: var(--ink); }
+.flashcard {
+  min-height: 300px; border: 0; border-radius: 28px; padding: 28px 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 18px;
+  text-align: center; font: inherit; color: var(--ink); cursor: pointer; animation: rise 0.4s var(--ease) both;
+}
+.flashcard-front { font-size: 1.35rem; font-weight: 700; line-height: 1.35; white-space: pre-wrap; }
+.flashcard-back { font-size: 1.1rem; line-height: 1.45; padding-top: 16px; border-top: 1.5px dashed var(--glass-edge); width: 100%; white-space: pre-wrap; animation: rise 0.35s var(--ease) both; }
+.flashcard-hint { font-size: 0.85em; }
+.flashcard-rate { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.flashcard-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 4px; border-radius: 18px; border: 0; font: inherit; color: #fff; cursor: pointer; }
+.flashcard-btn span { font-size: 0.72rem; opacity: 0.9; }
+.flashcard-btn.is-1 { background: #e5484d; }
+.flashcard-btn.is-2 { background: #f59e0b; }
+.flashcard-btn.is-3 { background: #22a06b; }
+.flashcard-btn.is-4 { background: #3b82f6; }
+.lib-entry-ico.cards-ico { background: linear-gradient(135deg, #bfdbfe, #3b82f6); }
+.tools-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.tool-tile { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 6px; border-radius: 22px; text-decoration: none; color: var(--ink); text-align: center; }
+.tool-tile b { font-size: 0.8rem; line-height: 1.2; }

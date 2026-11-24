@@ -7561,6 +7561,103 @@
         }
       }
     },
+    "/study/cards": {
+      "post": {
+        "tags": [
+          "Study"
+        ],
+        "summary": "Flashcards made by the AI from a text (a lesson, her notes) or a photo of a page, counted like tests",
+        "operationId": "postStudyCards",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "session": {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 40,
+                    "maxLength": 30000
+                  },
+                  "image": {
+                    "type": "object",
+                    "properties": {
+                      "mime": {
+                        "type": "string",
+                        "enum": [
+                          "image/jpeg",
+                          "image/png",
+                          "image/webp"
+                        ]
+                      },
+                      "data": {
+                        "type": "string",
+                        "minLength": 100,
+                        "maxLength": 8000000,
+                        "pattern": "^[A-Za-z0-9+/=]+$"
+                      }
+                    },
+                    "required": [
+                      "mime",
+                      "data"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "lang": {
+                    "default": "tg",
+                    "type": "string",
+                    "enum": [
+                      "tg",
+                      "ru",
+                      "en",
+                      "uz",
+                      "tr",
+                      "fa",
+                      "prs"
+                    ]
+                  },
+                  "count": {
+                    "default": 15,
+                    "type": "integer",
+                    "minimum": 3,
+                    "maximum": 40
+                  }
+                },
+                "required": [
+                  "token"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/schools": {
       "get": {
         "tags": [

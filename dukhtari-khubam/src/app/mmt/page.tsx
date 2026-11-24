@@ -7,6 +7,7 @@ import { nextQuestion, rankPrograms, studyPlan, subjectScore, type Answered, typ
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
 import { showToast } from '@/web/components/Toast'
+import { addToDeck } from '@/web/offline/decks'
 import { askMahliyo, attempts, catalog, drawExam, history, keepAttempt, MmtError, programs as loadPrograms, saveCluster, savedCluster, type Attempt, type Catalog } from '@/web/offline/mmt'
 import { usePlan } from '@/web/plans'
 import { usePrefs } from '@/web/prefs'
@@ -132,6 +133,12 @@ export default function MmtPage() {
                 </div>
               ))}
             </section>
+          ) : null}
+          {wrong.length ? (
+            <button type="button" className="btn btn-soft btn-block" onClick={() => {
+              addToDeck(t('mmt.cards_deck'), 'mmt', wrong.map((w) => ({ front: w.q.question, back: `${w.q.options[w.q.answer]}${w.q.explanation ? `\n${w.q.explanation}` : ''}` })))
+              showToast(t('mmt.cards_added').replace('{n}', String(wrong.length)), 'check')
+            }}>🗂️ {t('mmt.to_cards')}</button>
           ) : null}
           <button type="button" className="btn btn-block" onClick={() => setView({ kind: 'home' })}>{t('mmt.done')}</button>
         </div>

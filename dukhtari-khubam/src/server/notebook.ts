@@ -89,3 +89,38 @@ export async function checkNotebook(image: { mime: string; data: string }, o: { 
   }
   return null
 }
+
+// ---------------------------------------------------------------- flashcards made by the AI
+
+const CARD_SCHEMA = { type: 'array', items: { type: 'object', properties: { front: { type: 'string' }, back: { type: 'string' } }, required: ['front', 'back'] } }
+
+export function cardRules(lang: string, count: number) {
+  return `You make study flashcards from the material given (text of a lesson or her notes, or a photo of a textbook or notebook page).
+Make up to ${count} cards of the most important facts, terms, rules, formulas, dates and definitions — ONLY what the material says, never invented.
+Each card: "front" — a short, clear question or term (at most 120 characters); "back" — the exact answer, short (at most 250 characters), with the key number, formula or word.
+One idea per card; no "true or false"; no card answered by another card's front. Write in ${LANGS[lang] ?? 'Tajik'} unless the material is a foreign-language lesson (then keep its words on the front). Return a JSON array.`
+}
+
+/** flashcards from her material; null when no AI could answer */
+export async function makeCards(o: { text?: string; image?: { mime: string; data: string }; lang: string; count: number }, keys = geminiKeys()): Promise<{ front: string; back: string }[] | null> {
+  const parts = [
+    ...(o.image ? [{ inlineData: { mimeType: o.image.mime, data: o.image.data } }] : []),
+    { text: o.text ? `MATERIAL:\n${o.text}` : 'Make the cards from the photo.' }
+  ]
+  for (const model of MODELS) {
+    for (const key of keys) {
+      try {
+        const r = await new GoogleGenAI({ apiKey: key, httpOptions: { retryOptions: { attempts: 1 } } }).models.generateContent({
+          model, contents: [{ role: 'user', parts }],
+          config: { systemInstruction: cardRules(o.lang, o.count), responseMimeType: 'application/json', responseJsonSchema: CARD_SCHEMA, temperature: 0.3, httpOptions: { timeout: 90_000 } }
+        })
+        const out = JSON.parse(r.text ?? '[]') as unknown
+        if (!Array.isArray(out)) continue
+        return out.filter((c): c is { front: string; back: string } => !!c && typeof c.front === 'string' && typeof c.back === 'string').slice(0, o.count)
+      } catch (e) {
+        console.warn('[cards]', model, String(e instanceof Error ? e.message : e).slice(0, 160))
+      }
+    }
+  }
+  return null
+}

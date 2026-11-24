@@ -27,7 +27,7 @@ test('ММТ: a cluster, an adaptive mock exam, the predicted score, chances aga
 
   await page.goto('/schools')
   await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
-  await page.locator('.lib-entry[href="/mmt"]').click()
+  await page.locator('.tool-tile[href="/mmt"]').click()
   await expect(page).toHaveURL(/\/mmt/)
   await page.getByRole('button', { name: 'Кластери 1' }).click()
   // only the cluster's subjects
