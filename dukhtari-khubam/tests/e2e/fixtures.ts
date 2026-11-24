@@ -54,6 +54,8 @@ export const test = base.extend<{ server: Server; errors: string[] }>({
     await page.route('**/rest/v1/rpc/api_google_profile**', (r) => r.fulfill(json(server.profile)))
     await page.route('**/rest/v1/rpc/api_rate_app**', (r) => { server.ratings.push(r.request().postDataJSON()); return r.fulfill(json(true)) })
     await page.route('**/rest/v1/rpc/api_google_link**', (r) => r.fulfill(json({})))
+    // her login (made from her name by the server) on the profile page
+    await page.route('**/rest/v1/rpc/api_social_me**', (r) => r.fulfill(json({ login: 'malika', links: {}, minor: false, requests: 0 })))
     await use(server)
   },
   errors: async ({ page, server }, use) => {

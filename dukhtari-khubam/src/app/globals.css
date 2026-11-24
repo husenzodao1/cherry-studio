@@ -3672,3 +3672,20 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .coach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .coach-card { padding: 14px 12px; border-radius: 18px; border: 1px solid rgba(122, 79, 216, 0.25); background: linear-gradient(135deg, rgba(122, 79, 216, 0.1), rgba(47, 107, 255, 0.08));
   font: inherit; font-weight: 700; font-size: 0.88rem; color: var(--ink); text-align: start; cursor: pointer; }
+
+/* WhatsApp, Telegram, Instagram on a profile: open for contacts, locked for the rest */
+.social-icons { display: flex; gap: 10px; justify-content: center; }
+.social-icon { position: relative; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--c); text-decoration: none;
+  box-shadow: 0 6px 14px -6px var(--c); }
+.social-icon.is-locked { opacity: 0.45; filter: saturate(0.6); }
+.social-icon i { position: absolute; right: -3px; bottom: -3px; font-size: 0.7rem; font-style: normal; }
+.login-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 99px; border: 0; background: rgba(122, 79, 216, 0.1); color: #6b47e8;
+  font: inherit; font-size: 0.86rem; font-weight: 700; cursor: pointer; }
+.friends-row { display: flex; align-items: center; gap: 10px; padding: 10px 4px; }
+.friends-row .grow { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.friends-row .grow span { font-size: 0.8rem; color: var(--ink-2); }
+.friends-ava { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: linear-gradient(135deg, #b18cff, #ff6fa8); }
+.public-head { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding-top: 6px; }
+.public-head .friends-ava { width: 88px; height: 88px; font-size: 2.2rem; }
+.public-stats { display: flex; gap: 18px; justify-content: center; color: var(--ink-2); font-size: 0.88rem; }
+.public-stats b { display: block; font-size: 1.2rem; color: var(--ink); }

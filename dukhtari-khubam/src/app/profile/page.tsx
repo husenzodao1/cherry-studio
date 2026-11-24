@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { streak } from '@/lib/progress'
 import { finalId, stageState } from '@/lib/stage'
@@ -12,6 +12,7 @@ import { LOCALE_LABELS } from '@/web/i18n'
 import { useContent } from '@/web/offline/content'
 import { courseProgress, useLearner } from '@/web/offline/learner'
 import { usePhoto } from '@/web/offline/photo'
+import { socialMe, type Me } from '@/web/offline/social'
 import { usePlan } from '@/web/plans'
 import { PhotoSheet } from '@/web/components/PhotoEditor'
 import { isDarkTheme, usePrefs } from '@/web/prefs'
@@ -65,6 +66,10 @@ export default function Profile() {
   const { bundle } = useContent()
   const { learner, progress } = useLearner()
   const { plan } = usePlan()
+  // her login (made from her name on the server) and the contact requests waiting for her; nothing offline
+  const [me, setMe] = useState<Me | null>(null)
+  const code = learner?.code
+  useEffect(() => { if (code) void socialMe(code).then(setMe).catch(() => setMe(null)) }, [code])
   if (!learner) return null
 
   const courseIds = Object.keys(bundle?.courses ?? {})
@@ -110,6 +115,7 @@ export default function Profile() {
           {t('profile.tagline')}
           {plan !== 'free' ? <b>{plan === 'premium' ? 'Premium' : 'Standard'}</b> : null}
         </span>
+        {me ? <Link href="/friends" className="login-pill">@{me.login}</Link> : null}
       </div>
 
       <div className="stats stagger" style={{ marginTop: 22 }}>
@@ -123,6 +129,7 @@ export default function Profile() {
       </div>
 
       <div className="glass menu" style={{ marginTop: 18 }}>
+        <Link href="/friends" className="menu-row"><Icon name="smile" /><span className="grow">{t('social.title')}</span>{me?.requests ? <span className="tag">{me.requests}</span> : null}<Icon name="forward" size={18} /></Link>
         <Link href="/garden" className="menu-row"><Icon name="sparkle" /><span className="grow">{t('garden.title')}</span><Icon name="forward" size={18} /></Link>
         <Link href="/review" className="menu-row"><Icon name="check" /><span className="grow">{t('review.title')}</span><Icon name="forward" size={18} /></Link>
         <Link href="/schools" className="menu-row"><Icon name="chart" /><span className="grow">{t('profile.my_progress')}</span><Icon name="forward" size={18} /></Link>
