@@ -3772,3 +3772,32 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .mmt-bad { color: #b91c1c; }
 .mmt-good { color: #15803d; }
 .lib-entry-ico.mmt-ico { background: linear-gradient(135deg, #c4b5fd, #7c3aed); }
+
+/* the red pen (app/check) */
+.check-start { align-items: center; text-align: center; gap: 10px; }
+.check-start label { display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.check-pen { font-size: 2.6rem; }
+.check-page { position: relative; border-radius: 18px; overflow: hidden; box-shadow: var(--glass-shadow); background: #fff; }
+.check-page img { display: block; width: 100%; height: auto; }
+.check-mark { position: absolute; padding: 0; border: 0; background: none; cursor: pointer; }
+.check-mark.is-error { border: 2.5px solid #e11d2e; border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%; transform: rotate(-1.5deg); box-shadow: 0 0 0 1px rgba(225, 29, 46, 0.15); }
+.check-mark.is-note { border-bottom: 2.5px dashed #d97706; }
+.check-mark.is-ok { border: 0; }
+.check-mark.is-picked { background: rgba(225, 29, 46, 0.1); }
+.check-mark.is-ok.is-picked { background: rgba(22, 163, 74, 0.1); }
+.check-tick { position: absolute; right: -6px; top: 50%; transform: translateY(-50%) rotate(-8deg); color: #16a34a; font: 700 1.5rem/1 'Segoe Print', 'Comic Sans MS', cursive; }
+.check-fix {
+  position: absolute; left: 0; bottom: 100%; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis;
+  color: #e11d2e; font: 600 0.95rem/1.1 'Segoe Print', 'Comic Sans MS', cursive; transform: rotate(-3deg); transform-origin: left bottom;
+  background: rgba(255, 255, 255, 0.75); padding: 0 3px; border-radius: 4px;
+}
+.check-grade {
+  position: absolute; top: 10px; right: 12px; width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%;
+  border: 3px solid #e11d2e; color: #e11d2e; font: 700 2rem/1 'Segoe Print', 'Comic Sans MS', cursive; transform: rotate(-10deg); background: rgba(255, 255, 255, 0.85);
+}
+.check-scan { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, rgba(225, 29, 46, 0.18) 48%, transparent 52%); background-size: 100% 200%; animation: check-scan 1.6s linear infinite; }
+@keyframes check-scan { from { background-position: 0 -100%; } to { background-position: 0 100%; } }
+.check-detail.is-error { border: 1.5px solid rgba(225, 29, 46, 0.4); }
+.check-detail.is-ok { border: 1.5px solid rgba(22, 163, 74, 0.4); }
+.check-next { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 4px; }
+.lib-entry-ico.check-ico { background: linear-gradient(135deg, #fecaca, #ef4444); }

@@ -28,6 +28,11 @@ export default function Schools() {
         <span className="grow"><b>{t('mmt.title')}</b><span>{t('mmt.sub')}</span></span>
         <Icon name="forward" size={18} />
       </Link>
+      <Link href="/check" className="glass lib-entry">
+        <span className="lib-entry-ico check-ico" aria-hidden="true">🖍️</span>
+        <span className="grow"><b>{t('check.title')}</b><span>{t('check.short')}</span></span>
+        <Icon name="forward" size={18} />
+      </Link>
       <section className="section">
         {bundle ? (
           <SchoolGrid schools={bundle.schools} cols={2} count poem />

@@ -4,6 +4,7 @@ import { adminRoutes } from './admin'
 import { billingRoutes } from './billing'
 import { mahliyoRoutes } from './mahliyo'
 import { mmtRoutes } from './mmt'
+import { notebookRoutes } from './notebook'
 import { navigateRoutes } from './navigate'
 import { musicFindRoutes } from './music'
 import { newsRoutes } from './news'
@@ -14,4 +15,4 @@ import { voiceRoutes } from './voice'
 import { telegramRoutes } from './telegram'
 import { workspaceRoutes } from './workspace'
 
-export const routes: AnyRoute[] = [...readerRoutes, ...offlineRoutes, ...mahliyoRoutes, ...billingRoutes, ...workspaceRoutes, ...navigateRoutes, ...voiceRoutes, ...newsRoutes, ...musicFindRoutes, ...telegramRoutes, ...sosRoutes, ...mmtRoutes, ...adminRoutes]
+export const routes: AnyRoute[] = [...readerRoutes, ...offlineRoutes, ...mahliyoRoutes, ...billingRoutes, ...workspaceRoutes, ...navigateRoutes, ...voiceRoutes, ...newsRoutes, ...musicFindRoutes, ...telegramRoutes, ...sosRoutes, ...mmtRoutes, ...notebookRoutes, ...adminRoutes]

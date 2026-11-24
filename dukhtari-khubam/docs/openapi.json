@@ -7466,6 +7466,101 @@
         }
       }
     },
+    "/study/check": {
+      "post": {
+        "tags": [
+          "Study"
+        ],
+        "summary": "A photo of a notebook page checked with a red pen: the mistakes marked on the photo, corrections, a mark and what to practise",
+        "operationId": "postStudyCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "session": {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  "image": {
+                    "type": "object",
+                    "properties": {
+                      "mime": {
+                        "type": "string",
+                        "enum": [
+                          "image/jpeg",
+                          "image/png",
+                          "image/webp"
+                        ]
+                      },
+                      "data": {
+                        "type": "string",
+                        "minLength": 100,
+                        "maxLength": 8000000,
+                        "pattern": "^[A-Za-z0-9+/=]+$"
+                      }
+                    },
+                    "required": [
+                      "mime",
+                      "data"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "lang": {
+                    "default": "tg",
+                    "type": "string",
+                    "enum": [
+                      "tg",
+                      "ru",
+                      "en",
+                      "uz",
+                      "tr",
+                      "fa",
+                      "prs"
+                    ]
+                  },
+                  "subject": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "task": {
+                    "type": "string",
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "token",
+                  "image"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/schools": {
       "get": {
         "tags": [
