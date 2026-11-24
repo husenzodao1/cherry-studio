@@ -9,6 +9,7 @@ import { evaluate, formatNumber } from '@/lib/calc'
 
 import { ABOUT } from './mahliyoAbout'
 import { askCompatible, type ActiveModel, type BookPassage } from './aiModels'
+import { googleSearchOn, searchGoogle, wantsFresh } from './googleSearch'
 import { needsWeb, searchWeb, wantsPictures, type WebSource } from './webSearch'
 import { withWikiPictures } from './wikiImages'
 import { studyNote, type Study } from '@/lib/study'
@@ -917,7 +918,11 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
     return { tajik: true, blocks: [{ type: 'warning', text }], reply: text }
   }
   // a question about the world: looked up on the internet first (a few seconds at most)
-  const web = !files.length && needsWeb(question) ? await searchWeb(question, webLang(question)) : []
+  // news, prices, announcements: Google Search first (when the staff turned it on; Standard and Premium while the
+  // plans are on), then Wikipedia
+  const google = !files.length && googleSearchOn() && (wantsFresh(question) || needsWeb(question)) && (!premiumLive() || (me.plan ?? 'free') !== 'free')
+  let web = google ? await searchGoogle(question, webLang(question)) : []
+  if (!web.length && !files.length && needsWeb(question)) web = await searchWeb(question, webLang(question))
   const refs = refsOf(extra.books ?? [], web, extra.mine ?? [])
   const material = [knowledge, refs.length ? webNote(refs) : '', redNote(extra.warnings)].filter(Boolean).join('\n\n')
   // the same words pushed a third time in a row (each answered already): her warning, without asking the AI
@@ -929,7 +934,9 @@ export async function answer(turns: Turn[], appName: string, knowledge: string, 
     const blocks = forPlan(cleanBlocks(r.blocks), !!me.premium)
     // what she used (the books, the internet): as sources under her answer (and pictures, when asked for)
     const used = (Array.isArray(r.sources) ? r.sources : []).map((n) => refs[Number(n) - 1]).filter((w): w is Ref => !!w)
-    const cited = [...new Set(used)]
+    // Google's own search for the facts found: always shown with an answer that used them (Google asks it)
+    const googled = refs.filter((w) => w.site === 'google.com')
+    const cited = [...new Set([...used, ...(used.length || googled.length ? googled : [])])]
     if (blocks.length && wantsPictures(question)) {
       // only the pictures of what she used: another article's picture may show something else
       const pictures = cited.filter((w) => w.image).slice(0, 4)
