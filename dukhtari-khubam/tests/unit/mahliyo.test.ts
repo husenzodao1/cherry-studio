@@ -248,7 +248,7 @@ describe('Mahliyo on Gemini (only a Google AI Studio key set)', () => {
       { role: 'user', parts: [{ text: 'Нафаҳмидам' }] }
     ])
     expect(req.config).toMatchObject({ responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'MINIMAL' } })
-    expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(16)
+    expect(req.config.responseJsonSchema.properties.blocks.items.anyOf).toHaveLength(17)
     // a test question (Premium) and the card that opens the Premium screen are among her blocks
     expect(req.config.responseJsonSchema.properties.blocks.items.anyOf.map((b: { properties: { type: { enum: string[] } } }) => b.properties.type.enum[0])).toEqual(expect.arrayContaining(['quiz', 'premium', 'warning']))
     const system = req.config.systemInstruction as string
