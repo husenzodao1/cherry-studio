@@ -12,6 +12,7 @@ import { LOCALE_LABELS } from '@/web/i18n'
 import { useContent } from '@/web/offline/content'
 import { courseProgress, useLearner } from '@/web/offline/learner'
 import { usePhoto } from '@/web/offline/photo'
+import { usePlan } from '@/web/plans'
 import { PhotoSheet } from '@/web/components/PhotoEditor'
 import { isDarkTheme, usePrefs } from '@/web/prefs'
 import { emojify } from '@/web/components/Emoji'
@@ -63,6 +64,7 @@ export default function Profile() {
   const { t } = prefs
   const { bundle } = useContent()
   const { learner, progress } = useLearner()
+  const { plan } = usePlan()
   if (!learner) return null
 
   const courseIds = Object.keys(bundle?.courses ?? {})
@@ -104,7 +106,10 @@ export default function Profile() {
         <span className="studio-ghost" aria-hidden="true">Gratorslab</span>
         <ProfilePhoto name={learner.name} />
         <h1 className="h-page" style={{ marginTop: 10 }}>{emojify(learner.name)}</h1>
-        <span className="tag">{t('profile.tagline')}</span>
+        <span className={`tag plan-pill is-${plan}`}>
+          {t('profile.tagline')}
+          {plan !== 'free' ? <b>{plan === 'premium' ? 'Premium' : 'Standard'}</b> : null}
+        </span>
       </div>
 
       <div className="stats stagger" style={{ marginTop: 22 }}>

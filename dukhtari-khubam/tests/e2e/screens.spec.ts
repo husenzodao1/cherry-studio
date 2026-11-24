@@ -244,17 +244,35 @@ test('the "new version" note stays inside the screen, centred (it used to slide 
   expect(errors).toEqual([])
 })
 
-test('every profile picture wears the little gold crown, tilted to one side', async ({ page, server: _, errors }) => {
+test('the crown is worn with a plan only; the profile names the plan beside LifeHub', async ({ page, server: _, errors }) => {
   await signedIn(page)
+  for (const path of ['/', '/profile']) {
+    await page.goto(path)
+    await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
+    await expect(page.locator('.avatar-crowned').first()).toBeVisible()
+    await expect(page.locator('.avatar-crown')).toHaveCount(0)
+  }
+  await expect(page.locator('.plan-pill')).toHaveText('LifeHub')
+
+  // Premium: the crown, slipped to the left of the head and tilted, and "LifeHub Premium"
+  const json = (body: unknown) => ({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+  const user = { id: '00000000-0000-0000-0000-0000000000cd', aud: 'authenticated', role: 'authenticated', email: 'm@gmail.com', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' }
+  const b = (o: unknown) => Buffer.from(JSON.stringify(o)).toString('base64url')
+  const token = `${b({ alg: 'HS256', typ: 'JWT' })}.${b({ sub: user.id, role: 'authenticated', aud: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 })}.sig`
+  const session = { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'r', user }
+  await page.addInitScript((s) => localStorage.setItem('sb-dqavtyrdipwwgeckxxhr-auth-token', JSON.stringify(s)), session)
+  await page.route('**/auth/v1/user**', (r) => r.fulfill(json(user)))
+  await page.route('**/api/v1/me/plan', (r) => r.fulfill(json({ plan: 'premium' })))
   for (const path of ['/', '/profile']) {
     await page.goto(path)
     await expect(page.locator('#splash')).toBeHidden({ timeout: 10_000 })
     const crown = page.locator('.avatar-crown').first()
     await expect(crown).toBeVisible()
     await expect.poll(() => crown.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth)).toBeGreaterThan(300)
-    // slipped to the left of the head and tilted, not straight on top
     await expect.poll(() => crown.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).b)).toBeLessThan(-0.3)
   }
+  await expect(page.locator('.plan-pill')).toHaveText('LifeHubPremium')
+  await page.locator('.profile-head').screenshot({ path: 'test-results/profile-premium.png' })
   expect(errors).toEqual([])
 })
 

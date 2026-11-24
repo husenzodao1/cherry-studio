@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { usePhoto } from '../offline/photo'
+import { usePlan } from '../plans'
 import { usePrefs } from '../prefs'
 import { Icon } from './Icon'
 import { emojify } from './Emoji'
@@ -26,17 +27,19 @@ export function Header({ back, onBack, title, end }: { back?: string; onBack?: (
 
 /**
  * The learner's photo (kept on this phone only), or her initial on a soft glass disc, with a small
- * gold crown resting on it, slipped a little to one side.
+ * gold crown resting on it (with a plan), slipped a little to one side.
  */
 export function Avatar({ name, size = 52 }: { name?: string | null; size?: number }) {
   const photo = usePhoto()
+  // the crown is worn with a plan (Standard or Premium) only
+  const { plan } = usePlan()
   const letter = (name ?? '').trim().charAt(0).toUpperCase() || '✿'
   return (
     <span className="avatar-crowned" style={{ ['--avatar' as string]: `${size}px` }} aria-hidden="true">
       <span className="avatar" style={{ width: size, height: size, fontSize: size * 0.42 }}>
         {photo ? <img src={photo} alt="" /> : letter}
       </span>
-      <img className="avatar-crown" src="/assets/3d/crown.webp" alt="" />
+      {plan !== 'free' ? <img className="avatar-crown" src="/assets/3d/crown.webp" alt="" /> : null}
     </span>
   )
 }
