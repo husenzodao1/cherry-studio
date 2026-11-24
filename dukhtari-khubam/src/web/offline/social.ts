@@ -10,7 +10,7 @@ import { browserSupabase } from '../supabase-browser'
 
 export type Network = 'whatsapp' | 'telegram' | 'instagram'
 export type Links = Partial<Record<Network, string>>
-export interface Me { login: string; links: Links; minor: boolean; requests: number }
+export interface Me { login: string; links: Links; minor: boolean; requests: number; classes?: boolean }
 export interface Profile {
   login: string; name: string; since: string; achievements: number; lessons: number
   has: Network[]; links: Links | null; status: 'none' | 'sent' | 'received' | 'contact' | 'me'; can_request: boolean

@@ -4285,7 +4285,8 @@
                         "type": "string",
                         "enum": [
                           "premium_consultant",
-                          "plans_live"
+                          "plans_live",
+                          "classes_enabled"
                         ]
                       },
                       "value": {
@@ -6239,6 +6240,358 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/sos/start": {
+      "post": {
+        "tags": [
+          "SOS"
+        ],
+        "summary": "Opens an SOS or a walk home and writes to her people on WhatsApp with the live map",
+        "operationId": "postSosStart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]{14}$"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "sos",
+                      "walk",
+                      "late"
+                    ]
+                  },
+                  "lat": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "lng": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "accuracy": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100000
+                  },
+                  "minutes": {
+                    "type": "integer",
+                    "minimum": 5,
+                    "maximum": 180
+                  },
+                  "lang": {
+                    "default": "tg",
+                    "type": "string",
+                    "enum": [
+                      "tg",
+                      "ru",
+                      "en",
+                      "uz",
+                      "tr",
+                      "fa",
+                      "prs"
+                    ]
+                  }
+                },
+                "required": [
+                  "code",
+                  "kind",
+                  "lat",
+                  "lng"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sos/update": {
+      "post": {
+        "tags": [
+          "SOS"
+        ],
+        "summary": "Her place while the alert is open",
+        "operationId": "postSosUpdate",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]{14}$"
+                  },
+                  "token": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{24}$"
+                  },
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "lng": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "accuracy": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100000
+                  },
+                  "battery": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "code",
+                  "token",
+                  "lat",
+                  "lng"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sos/stop": {
+      "post": {
+        "tags": [
+          "SOS"
+        ],
+        "summary": "\"I am safe\" / \"I arrived\": the map closes and her people are told",
+        "operationId": "postSosStop",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]{14}$"
+                  },
+                  "token": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{24}$"
+                  },
+                  "lang": {
+                    "default": "tg",
+                    "type": "string",
+                    "enum": [
+                      "tg",
+                      "ru",
+                      "en",
+                      "uz",
+                      "tr",
+                      "fa",
+                      "prs"
+                    ]
+                  }
+                },
+                "required": [
+                  "code",
+                  "token"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/whatsapp": {
+      "get": {
+        "tags": [
+          "Admin · WhatsApp"
+        ],
+        "summary": "Whether the owner's WhatsApp number is linked",
+        "operationId": "getAdminWhatsapp",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database."
+      }
+    },
+    "/admin/whatsapp/pair": {
+      "post": {
+        "tags": [
+          "Admin · WhatsApp"
+        ],
+        "summary": "A pairing code to link the owner's number (typed on that phone: WhatsApp → Linked devices → Link with phone number)",
+        "operationId": "postAdminWhatsappPair",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "type": "string",
+                    "minLength": 9,
+                    "maxLength": 20
+                  }
+                },
+                "required": [
+                  "phone"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/whatsapp/logout": {
+      "post": {
+        "tags": [
+          "Admin · WhatsApp"
+        ],
+        "summary": "Unlinks the owner's number",
+        "operationId": "postAdminWhatsappLogout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "Requires a staff role; permissions are enforced in the database."
       }
     },
     "/admin/schools": {

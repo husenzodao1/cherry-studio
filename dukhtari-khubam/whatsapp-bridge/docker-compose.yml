@@ -1,0 +1,21 @@
+# The bridge behind Caddy (automatic HTTPS). On the server: put the domain in Caddyfile, then
+#   BRIDGE_SECRET=... docker compose up -d
+services:
+  bridge:
+    build: .
+    restart: unless-stopped
+    environment:
+      BRIDGE_SECRET: ${BRIDGE_SECRET:?set BRIDGE_SECRET}
+    volumes:
+      - wa-auth:/data
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on: [bridge]
+volumes:
+  wa-auth:
+  caddy-data:

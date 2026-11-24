@@ -10,7 +10,7 @@ const push = (code: string, name: string, born?: number) =>
   as(db, null, (tx) => rpc(tx, 'api_profile_push', { p_code: code, p_name: name, p_data: { v: '1', ...(born ? { born } : {}), achievements: { a1: {}, a2: {} }, lessons: { l1: {} } } }))
 const call = <T = any>(fn: string, args: Record<string, unknown>) => as(db, null, (tx) => rpc<T>(tx, fn, args))
 
-const MALIKA = '111111111111111', MALIKA2 = '222222222222222', ZARINA = '333333333333333', SITORA = '444444444444444', TEACHER = '555555555555555'
+const MALIKA = '111111111111111', MALIKA2 = '222222222222222', ZARINA = '333333333333333', SITORA = '444444444444444', TEACHER = '555555555555555', PEER = '666666666666666'
 
 describe('logins, profiles and contacts', () => {
   it('a login made from the name, Tajik letters in Latin, a number when taken; she may change it', async () => {
@@ -46,7 +46,15 @@ describe('logins, profiles and contacts', () => {
     const sitora = (await call('api_social_me', { p_code: SITORA })).login
     expect((await call('api_social_profile', { p_login: sitora, p_code: ZARINA })).can_request).toBe(false)
     await expectError(call('api_social_request', { p_code: ZARINA, p_login: sitora }), 'not_allowed')
-    // the teacher makes a class, Sitora joins it: the teacher may write to her
+    // classes (the teacher feature) are off by default: none can be made; under 16, only peers under 16 may write
+    await expectError(call('api_class_create', { p_code: TEACHER, p_name: '9 «А»' }), 'not_allowed')
+    expect((await call('api_social_me', { p_code: SITORA })).classes).toBe(false)
+    await push(PEER, 'Мадина', 2013)
+    expect((await call('api_social_profile', { p_login: sitora, p_code: PEER })).can_request).toBe(true)
+    expect((await call('api_social_profile', { p_login: sitora, p_code: TEACHER })).can_request).toBe(false)
+    // the panel turns classes on: the teacher makes a class, Sitora joins it, the teacher may write to her
+    await db.query(`update public.app_settings set value = 'true'::jsonb where key = 'classes_enabled'`)
+    expect((await call('api_social_profile', { p_login: sitora, p_code: PEER })).can_request).toBe(false)
     const cls = await call('api_class_create', { p_code: TEACHER, p_name: '9 «А»' })
     expect(cls.join_code).toMatch(/^[A-Z0-9]{6}$/)
     await call('api_class_join', { p_code: SITORA, p_join: cls.join_code.toLowerCase() })

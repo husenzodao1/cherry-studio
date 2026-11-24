@@ -1,0 +1,4 @@
+# Replace with your bridge's domain (an A record pointing to this server).
+wa.example.com {
+	reverse_proxy bridge:8080
+}

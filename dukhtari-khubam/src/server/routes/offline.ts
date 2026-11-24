@@ -226,8 +226,9 @@ export const offlineRoutes: AnyRoute[] = [
   route({
     method: 'GET', path: '/profile/username', access: 'public', tag: 'Offline app',
     summary: 'Whether a login is free to take',
-    query: z.strictObject({ username: z.string().max(64) }),
-    handler: async ({ sb, query }) => ({ free: await call<boolean>(sb(), 'api_profile_username_free', { p_username: query.username }) })
+    // her code's hash: the login made from her name counts as hers, not as taken
+    query: z.strictObject({ username: z.string().max(64), code_hash: z.string().regex(/^[0-9a-f]{64}$/).optional() }),
+    handler: async ({ sb, query }) => ({ free: await call<boolean>(sb(), 'api_profile_username_free', { p_username: query.username, p_code_hash: query.code_hash ?? null }) })
   }),
   route({
     method: 'POST', path: '/profile/login-set', access: 'public', tag: 'Offline app',

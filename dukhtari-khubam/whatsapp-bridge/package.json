@@ -1,0 +1,16 @@
+{
+  "name": "lifehub-whatsapp-bridge",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Sends LifeHub's SOS messages from the owner's own WhatsApp number (linked by a pairing code)",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "pino": "9.7.0"
+  }
+}

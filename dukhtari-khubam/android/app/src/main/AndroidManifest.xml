@@ -42,6 +42,11 @@
         <!-- "Эй Маҳлиё" (HeyMahliyo.java): listens for her name with its notification on -->
         <service android:name=".HeyMahliyo$Service" android:exported="false" android:foregroundServiceType="microphone" />
         <service android:name=".HeyMahliyo$Download" android:exported="false" android:foregroundServiceType="dataSync" />
+        <!-- SOS (SosGuard.java): the power-button guard, her place sent while an alert is open, its return after a restart -->
+        <service android:name=".SosGuard$Service" android:exported="false" android:foregroundServiceType="location" />
+        <receiver android:name=".SosGuard$Boot" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
+        </receiver>
         <!-- Mahliyo's calls (MahliyoCall.java): the alarm, "Decline", and the calls planned again after a restart -->
         <receiver android:name=".MahliyoCall$Receiver" android:exported="true">
             <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
@@ -217,6 +222,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- SOS: her place sent from the background while an alert is open, and an SMS when there is no internet -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- "call …" by voice: her contacts and the call; "a timer of …": the phone's clock -->

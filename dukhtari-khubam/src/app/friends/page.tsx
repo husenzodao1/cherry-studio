@@ -132,7 +132,8 @@ export default function FriendsPage() {
               ))}
             </section>
 
-            <section className="glass card-pad stack" style={{ gap: 8 }}>
+            {/* classes (the teacher feature): only when the panel turned them on */}
+            {me.classes ? <section className="glass card-pad stack" style={{ gap: 8 }}>
               <b>{t('social.class')}</b>
               <span className="muted" style={{ fontSize: '0.84em' }}>{t('social.class_sub')}</span>
               <div className="row" style={{ gap: 8 }}>
@@ -143,7 +144,7 @@ export default function FriendsPage() {
                 <input className="input grow" value={className} maxLength={80} placeholder={t('social.class_name')} aria-label={t('social.class_make')} onChange={(e) => setClassName(e.target.value)} />
                 <button type="button" className="btn btn-soft" disabled={!className.trim()} onClick={() => void make()}>{t('social.class_make')}</button>
               </div>
-            </section>
+            </section> : null}
           </>
         )}
       </div>

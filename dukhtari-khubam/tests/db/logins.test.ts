@@ -19,7 +19,9 @@ beforeAll(async () => {
 
 describe('learner login and password', () => {
   it('sets a unique login for the profile whose code the caller knows', async () => {
-    expect(await as(db, null, (tx) => rpc(tx, 'api_profile_username_free', { p_username: 'Malika' }))).toBe(true)
+    // the login made from her name is hers to take; to anyone else it is taken
+    expect(await as(db, null, (tx) => rpc(tx, 'api_profile_username_free', { p_username: 'Malika', p_code_hash: hash(code) }))).toBe(true)
+    expect(await as(db, null, (tx) => rpc(tx, 'api_profile_username_free', { p_username: 'Malika' }))).toBe(false)
     const r = await as(db, null, (tx) => rpc(tx, 'api_profile_set_login', { p_code_hash: hash(code), p_username: ' Malika ', p_password: 'gul-123', p_code_enc: 'v1.enc' }))
     expect(r.username).toBe('malika')
     expect(await as(db, null, (tx) => rpc(tx, 'api_profile_username_free', { p_username: 'MALIKA' }))).toBe(false)

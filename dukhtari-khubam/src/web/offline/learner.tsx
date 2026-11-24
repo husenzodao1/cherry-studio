@@ -280,7 +280,9 @@ export function LearnerProvider({ children }: { children: ReactNode }) {
       if (!isUsername(u)) return 'invalid'
       if (isOffline()) return 'offline'
       try {
-        const res = await fetch(apiUrl(`/profile/username?username=${encodeURIComponent(u)}`))
+        const mine = latest.current.learner?.code
+        const hash = mine ? Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(mine)))).map((b) => b.toString(16).padStart(2, '0')).join('') : ''
+        const res = await fetch(apiUrl(`/profile/username?username=${encodeURIComponent(u)}${hash ? `&code_hash=${hash}` : ''}`))
         if (!res.ok) return 'offline'
         return ((await res.json()) as { free: boolean }).free ? 'free' : 'taken'
       } catch {

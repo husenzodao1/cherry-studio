@@ -31,6 +31,7 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
         registerPlugin(ScreenGuard.class);
         registerPlugin(PlayBilling.class);
         registerPlugin(PlacePermission.class);
+        registerPlugin(SosGuard.SosPlugin.class);
         registerPlugin(HeyMahliyo.HeyPlugin.class);
         super.onCreate(savedInstanceState);
         // her words play as soon as her call is answered (also when answered from the notification)

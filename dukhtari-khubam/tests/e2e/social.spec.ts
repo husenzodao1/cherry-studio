@@ -64,7 +64,9 @@ test('friends: her login from her name, links only for contacts, a request accep
   await expect.poll(() => s.me.login).toBe('malika.r')
 
   // under 16: the links are for her accepted classmates and teachers only
-  await expect(page.getByText('Инҳоро танҳо ҳамсинфону муаллимоне мебинанд')).toBeVisible()
+  await expect(page.getByText('дархост танҳо аз ҳамсолон меояд')).toBeVisible()
+  // the teacher feature (classes) is off unless the panel turns it on
+  await expect(page.getByText('Синфи ман')).toHaveCount(0)
   await page.getByLabel('telegram').fill('@malika_r')
   await page.getByRole('button', { name: 'Нигоҳ доштан' }).nth(1).click()
   await expect.poll(() => s.me.links.telegram).toBe('@malika_r')

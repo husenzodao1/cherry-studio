@@ -129,6 +129,7 @@ export default function Profile() {
       </div>
 
       <div className="glass menu" style={{ marginTop: 18 }}>
+        <Link href="/sos" className="menu-row"><Icon name="shield" /><span className="grow">{t('sos.title')}</span><Icon name="forward" size={18} /></Link>
         <Link href="/friends" className="menu-row"><Icon name="smile" /><span className="grow">{t('social.title')}</span>{me?.requests ? <span className="tag">{me.requests}</span> : null}<Icon name="forward" size={18} /></Link>
         <Link href="/garden" className="menu-row"><Icon name="sparkle" /><span className="grow">{t('garden.title')}</span><Icon name="forward" size={18} /></Link>
         <Link href="/review" className="menu-row"><Icon name="check" /><span className="grow">{t('review.title')}</span><Icon name="forward" size={18} /></Link>
