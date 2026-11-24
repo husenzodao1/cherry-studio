@@ -273,6 +273,15 @@ export default function HeyPage() {
                 </>
               ) : null}
             </div>
+            <div className="glass card-pad stack" style={{ gap: 8 }}>
+              <b>{t('live.coach')}</b>
+              <span className="muted" style={{ fontSize: '0.84em' }}>{t('live.coach_sub')}</span>
+              <div className="coach-grid">
+                {(['ielts', 'english', 'russian', 'interview'] as const).map((sc) => (
+                  <button key={sc} type="button" className="coach-card" onClick={() => router.push(`/voice?mode=coach&scenario=${sc}`)}>{t(`live.sc_${sc}` as 'live.sc_ielts')}</button>
+                ))}
+              </div>
+            </div>
             <div className="glass card-pad stack" style={{ gap: 6 }}>
               <span className="eyebrow">{t('hey.examples')}</span>
               <ul className="tg-steps">

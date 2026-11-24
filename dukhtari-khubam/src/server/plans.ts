@@ -92,6 +92,25 @@ export async function trialMessage(ctx: PlanCtx, chat: string | undefined): Prom
   return null
 }
 
+/**
+ * One two-minute part of a live voice conversation, counted against her month's minutes (Standard 30,
+ * Premium 90 by default); { ok, left } in minutes. The plans not on yet: no count.
+ */
+export async function useLiveChunk(ctx: PlanCtx, chunkMinutes = 2): Promise<{ ok: boolean; left: number }> {
+  if (!ctx.live) return { ok: true, left: -1 }
+  const minutes = ctx.limits[ctx.plan].live
+  if (minutes === 0) return { ok: false, left: 0 }
+  if (minutes < 0 || !serverReady()) return { ok: true, left: -1 }
+  const chunks = Math.floor(minutes / chunkMinutes)
+  try {
+    const r = await call<{ ok: boolean; used: number }>(ctx.sb, 'api_plan_use', { p_proof: secret(), p_who: ctx.who, p_kind: 'live', p_period: periodOf('live'), p_limit: chunks, p_count: true })
+    return { ok: r.ok, left: Math.max(0, (chunks - r.used) * chunkMinutes) }
+  } catch (e) {
+    console.warn('[plans] live count failed', e instanceof Error ? e.message : String(e))
+    return { ok: true, left: -1 }
+  }
+}
+
 /** the answer when a limit is reached: the app opens the plans' screen */
 export const limitReached = (kind: LimitKind | TrialKind | 'chat_messages', plan: Plan) =>
   new ApiError(402, 'plan_limit', 'Маҳдудияти нақшаи шумо ба охир расид.', { kind, plan })

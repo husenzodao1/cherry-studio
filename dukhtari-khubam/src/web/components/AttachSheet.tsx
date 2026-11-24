@@ -264,6 +264,7 @@ export function AttachSheet({ max, mode, onMode, onCommand, onFiles, onClose, on
             <button key={m.command} type="button" onClick={() => onCommand(m.command)}><span className={`attach-ico tone-${m.tone}`}>{m.glyph()}</span>{t(m.key)}</button>
           ))}
           {onStudy ? <button type="button" className="attach-study" onClick={onStudy}><span className="attach-ico tone-study"><Icon name="cap" size={24} /></span>{t('ai.study')}</button> : null}
+          <a className="attach-live" href="/voice?mode=camera"><span className="attach-ico tone-live"><Icon name="camera" size={24} /></span>{t('live.show_ask')}</a>
         </div>
         {/* how she answers: quiet chips in a row */}
         <div className="attach-modes" role="group" aria-label={t('ai.modes')}>

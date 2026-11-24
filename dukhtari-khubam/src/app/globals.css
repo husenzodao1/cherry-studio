@@ -2694,7 +2694,7 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
   display: grid; place-items: center; color: #fff; border: 2px solid #fff; background: rgba(0, 0, 0, 0.18); }
 .attach-photo.is-on img { transform: scale(0.86); border-radius: 6px; }
 .attach-photo.is-on i { background: var(--primary); }
-.attach-actions { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px 2px; padding: 6px 0 2px; }
+.attach-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 2px; padding: 6px 0 2px; }
 .attach-actions button { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 0.72rem;
   font-weight: 500; color: var(--ink-2); cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
 /* little app icons: a soft squircle of colour, a white glyph, a glow of its own colour beneath */
@@ -2710,6 +2710,8 @@ html.is-scrolling .wave-ch, html.is-scrolling .ai-wave-ch { animation-play-state
 .attach-ico.tone-pdf { --ga: #ff7a8a; --gb: #d81f3c; }
 .attach-ico.tone-word { --ga: #5f9bff; --gb: #1d4fc4; }
 .attach-ico.tone-study { --ga: #4fd1a5; --gb: #0f8f6b; }
+.attach-ico.tone-live { --ga: #ff8a65; --gb: #e5484d; }
+.attach-actions a { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 4px 0; font-size: 0.72rem; color: var(--ink); text-decoration: none; text-align: center; }
 /* the ways of answering: quiet chips, the chosen one filled */
 .attach-modes { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0 4px; margin: 0 -14px; padding-inline: 14px; }
 .attach-modes::-webkit-scrollbar { display: none; }
@@ -3652,3 +3654,21 @@ button.ai-file-doc { border: 0; font: inherit; cursor: pointer; }
 .song-other .grow span { font-size: 0.74rem; color: var(--ink-2); }
 .song-none { margin: 0; padding: 10px 4px; color: var(--ink-2); font-size: 0.9rem; }
 .voice-song { width: min(100%, 420px); padding: 10px; border-radius: 22px; background: rgba(255, 255, 255, 0.92); color: #2a1a3a; }
+
+/* Mahliyo live: the camera behind (when on), the conversation's words, the call's buttons */
+.live-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.live-screen.has-camera .live-video { opacity: 1; }
+.live-screen.has-camera::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(10, 6, 20, 0.15), rgba(10, 6, 20, 0.7)); pointer-events: none; }
+.live-screen.has-camera .voice-orb { transform: scale(0.45); margin: -60px 0; }
+.live-screen > * { position: relative; }
+.live-screen > .voice-x { position: absolute; }
+.live-tools { display: flex; gap: 14px; justify-content: center; margin-top: auto; padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+.live-tool { display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; background: none; color: #fff; font: inherit; font-size: 0.78rem; cursor: pointer; }
+.live-tool svg { width: 58px; height: 58px; padding: 17px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); }
+.live-tool.is-on svg { background: #fff; color: #2a1a3a; }
+.live-tool.is-end svg { background: #e5484d; transform: rotate(135deg); }
+
+/* the speaking coach's scenarios */
+.coach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.coach-card { padding: 14px 12px; border-radius: 18px; border: 1px solid rgba(122, 79, 216, 0.25); background: linear-gradient(135deg, rgba(122, 79, 216, 0.1), rgba(47, 107, 255, 0.08));
+  font: inherit; font-weight: 700; font-size: 0.88rem; color: var(--ink); text-align: start; cursor: pointer; }

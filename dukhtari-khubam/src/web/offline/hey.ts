@@ -37,6 +37,7 @@ interface HeyPlugin {
   start(): Promise<void>
   stop(): Promise<void>
   resume(): Promise<void>
+  pause(): Promise<void>
   takeWake(): Promise<{ woke: boolean }>
   speak(o: { text: string; lang: string; speaker?: boolean }): Promise<void>
   stopSpeaking(): Promise<void>

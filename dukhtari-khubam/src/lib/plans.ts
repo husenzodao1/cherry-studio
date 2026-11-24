@@ -33,6 +33,8 @@ export interface Limits {
   lawyer: number
   /** songs a month */
   music: number
+  /** minutes of live voice conversation with Mahliyo (Gemini Live) a month */
+  live: number
   /** exam preparation answers a month */
   exam: number
   /** how many turns of the conversation she reads */
@@ -41,7 +43,7 @@ export interface Limits {
   keep: number
 }
 export type LimitKind = Exclude<keyof Limits, 'context' | 'keep'>
-export const PERIOD: Record<LimitKind, 'd' | 'm'> = { message: 'd', slides: 'm', doc: 'm', file: 'm', quiz: 'm', mmt: 'm', lawyer: 'm', music: 'm', exam: 'm' }
+export const PERIOD: Record<LimitKind, 'd' | 'm'> = { message: 'd', slides: 'm', doc: 'm', file: 'm', quiz: 'm', mmt: 'm', lawyer: 'm', music: 'm', exam: 'm', live: 'm' }
 
 /**
  * A free account (while the plans are on) may try everything twice in all, never again after that: two
@@ -54,9 +56,9 @@ export type TrialKind = 'chat' | 'gen' | 'action' | 'func'
 export const LIFE = 'life'
 
 export const DEFAULT_LIMITS: Record<Plan, Limits> = {
-  free: { message: 15, slides: 1, doc: 1, file: 2, quiz: 3, mmt: 1, lawyer: 2, music: 0, exam: 2, context: 12, keep: 7 },
-  standard: { message: 40, slides: 3, doc: 4, file: 10, quiz: 20, mmt: 10, lawyer: 10, music: 0, exam: 20, context: 24, keep: 31 },
-  premium: { message: 140, slides: 40, doc: 60, file: 100, quiz: -1, mmt: -1, lawyer: -1, music: 20, exam: -1, context: 40, keep: 366 }
+  free: { message: 15, slides: 1, doc: 1, file: 2, quiz: 3, mmt: 1, lawyer: 2, music: 0, exam: 2, live: 0, context: 12, keep: 7 },
+  standard: { message: 40, slides: 3, doc: 4, file: 10, quiz: 20, mmt: 10, lawyer: 10, music: 0, exam: 20, live: 30, context: 24, keep: 31 },
+  premium: { message: 140, slides: 40, doc: 60, file: 100, quiz: -1, mmt: -1, lawyer: -1, music: 20, exam: -1, live: 90, context: 40, keep: 366 }
 }
 
 /** the staff's limits over the defaults (only numbers they set; anything else is ignored) */
@@ -111,6 +113,7 @@ export const ROWS: Row[] = [
   { id: 'navigate', icon: 'compass', cells: [false, false, true] },
   { id: 'telegram', icon: 'share', cells: [false, false, true] },
   { id: 'hey', icon: 'mic', cells: [false, true, true] },
+  { id: 'live', icon: 'speech', cells: ['limit', 'limit', 'limit'], limit: 'live' },
   { id: 'widgets', icon: 'grid', cells: [false, true, true] },
   { id: 'speed', icon: 'flash', cells: [false, true, true] }
 ]

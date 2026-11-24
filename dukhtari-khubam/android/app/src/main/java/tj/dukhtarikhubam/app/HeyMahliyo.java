@@ -782,6 +782,13 @@ public final class HeyMahliyo {
             call.resolve();
         }
 
+        /** the app takes the microphone (a live conversation): the service stops listening until resume */
+        @PluginMethod
+        public void pause(PluginCall call) {
+            if (Service.running) Service.send(getContext(), Service.ACTION_PAUSE);
+            call.resolve();
+        }
+
         /** the app's own listening is over: the service listens for her name again */
         @PluginMethod
         public void resume(PluginCall call) {

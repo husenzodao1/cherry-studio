@@ -5,7 +5,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { commandOf, matchContacts, type VoiceCommand } from '@/lib/voiceCommands'
 import { api } from '@/web/api'
+import { useAuth } from '@/web/auth'
 import { Icon } from '@/web/components/Icon'
+import { LiveScreen } from '@/web/components/LiveScreen'
 import { SongPlayer } from '@/web/components/SongPlayer'
 import { useContent } from '@/web/offline/content'
 import { hereOnce } from '@/web/offline/follow'
@@ -51,6 +53,21 @@ export default function VoicePage() {
   const [song, setSong] = useState<string | null>(null)
   const [loud, setLoud] = useState(false)
   const locked = live && plan === 'free'
+  const { session } = useAuth()
+  /**
+   * The way she is listened to: live with Gemini (online, with an account), or the phone's own listening and
+   * commands (offline, or when the live voice is not there). ?mode=camera|coach&scenario=… opens it ready.
+   */
+  const [way, setWay] = useState<'pending' | 'live' | 'phone'>('pending')
+  const [liveMode, setLiveMode] = useState<{ mode: 'assistant' | 'camera' | 'coach'; scenario?: 'ielts' | 'english' | 'russian' | 'interview' }>({ mode: 'assistant' })
+  useEffect(() => {
+    if (locked) return
+    const q = new URLSearchParams(window.location.search)
+    const m = q.get('mode')
+    const sc = q.get('scenario')
+    setLiveMode({ mode: m === 'camera' || m === 'coach' ? m : 'assistant', ...(sc === 'ielts' || sc === 'english' || sc === 'russian' || sc === 'interview' ? { scenario: sc } : {}) })
+    setWay(navigator.onLine && session ? 'live' : 'phone')
+  }, [locked, !!session]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const lang = voiceLang(locale)
 
@@ -205,10 +222,10 @@ export default function VoicePage() {
   // opened: she is listened to at once (once her plan is known to allow it: it may come a moment later)
   const began = useRef(false)
   useEffect(() => {
-    if (locked || began.current) return
+    if (locked || way !== 'phone' || began.current) return
     began.current = true
     void listen()
-  }, [locked]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [locked, way]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => { void hey().then(({ p }) => { void p.stopListening(); void p.stopSpeaking(); void p.resume() }).catch(() => undefined) }, [])
   // opened again by her name while here
   useEffect(() => {
@@ -238,6 +255,10 @@ export default function VoicePage() {
         <button type="button" className="btn btn-lg" onClick={() => open('hey')}>{t('pw.settings_cta')}</button>
       </div>
     )
+  }
+
+  if (way === 'live') {
+    return <LiveScreen mode={liveMode.mode} scenario={liveMode.scenario} name={learner?.name ?? undefined} me={aboutMe(learner?.name, progress, bundle)} onFallback={() => setWay('phone')} />
   }
 
   return (
