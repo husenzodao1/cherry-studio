@@ -5918,6 +5918,60 @@
         "description": "Requires a staff role; permissions are enforced in the database."
       }
     },
+    "/music/find": {
+      "get": {
+        "tags": [
+          "Music"
+        ],
+        "summary": "Songs on YouTube for her words (kept a week for everyone)",
+        "operationId": "getMusicFind",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "tg",
+              "type": "string",
+              "enum": [
+                "tg",
+                "ru",
+                "en",
+                "uz",
+                "tr",
+                "fa",
+                "prs"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/telegram/webhook": {
       "post": {
         "tags": [
