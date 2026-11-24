@@ -9,7 +9,7 @@ import { route, type AnyRoute } from '@/lib/router'
 import { answer, ATTACHMENT_MIMES, premiumLive, setPlansLive, configured, knowledgePartsOf, knowledgeText, type Attachment, type Knowledge, type Learner, type RedReply, type Turn } from '../mahliyo'
 import { activeModel, bookPassages, forgetActive, minePassages, searchesBooks, sealKey, serverReady } from '../aiModels'
 import { makeSong } from '../music'
-import { limitReached, MODE_LIMIT, planOf, planSettings, use, whoOf, withinPlan, type PlanCtx } from '../plans'
+import { limitReached, MODE_LIMIT, onTrial, planOf, planSettings, trialMessage, use, useTrial, whoOf, withinPlan, type PlanCtx } from '../plans'
 import { call } from '../util'
 import { buildBundle, Code, codeHash, Token } from './offline'
 import { STUDY_TASKS, SUBJECT_IDS } from '@/lib/study'
@@ -165,6 +165,8 @@ export const mahliyoRoutes: AnyRoute[] = [
       mode: z.enum(['precise', 'science', 'friendly', 'girly', 'exam', 'mmt', 'facts', 'lawyer', 'music', 'math', 'translate', 'writer', 'nutrition', 'career', 'code', 'history', 'calm', 'language', 'factcheck']).optional(),
       // a girl or a boy (the app's mode): a boy is spoken to as a young man
       gender: z.enum(['girl', 'boy']).optional(),
+      // her conversation (the app's id for it): a free account's trial counts conversations and their messages
+      chat: z.string().max(64).regex(/^[A-Za-z0-9_-]+$/).optional(),
       // the student Workspace's chat (Premium): the task and the subject
       study: z.strictObject({ task: z.enum(STUDY_TASKS), subject: z.enum(SUBJECT_IDS).optional() }).optional()
     }),
@@ -176,7 +178,10 @@ export const mahliyoRoutes: AnyRoute[] = [
       const settings = await planSettings(sb())
       setPlansLive(settings.live)
       const ctx: PlanCtx = { sb: sb(), who: whoOf(body.session, codeHash(body.token)), plan, ...settings }
-      if (!(await use(ctx, 'message'))) throw limitReached('message', plan)
+      // a free account: two conversations in all, ten messages each; everyone else: the day's questions
+      const trialLimit = await trialMessage(ctx, body.chat)
+      if (trialLimit) throw limitReached(trialLimit, plan)
+      if (!onTrial(ctx) && !(await use(ctx, 'message'))) throw limitReached('message', plan)
       const skill = body.mode ? MODE_LIMIT[body.mode] : undefined
       if (skill && skill !== 'music' && !(await use(ctx, skill))) throw limitReached(skill, plan)
       const turns = settings.live ? turnsFor(body.turns as Turn[], premium, settings.limits[plan].context) : turnsFor(body.turns as Turn[], premium)
@@ -224,7 +229,9 @@ export const mahliyoRoutes: AnyRoute[] = [
       const plan = await planOf(body.session)
       const premium = plan === 'premium'
       const settings = await planSettings(sb())
-      if (!(await use({ sb: sb(), who: whoOf(body.session, codeHash(body.token)), plan, ...settings }, 'music'))) throw limitReached('music', plan)
+      const ctx: PlanCtx = { sb: sb(), who: whoOf(body.session, codeHash(body.token)), plan, ...settings }
+      // a free account: two songs in all (its trial); a plan: its month's songs
+      if (onTrial(ctx) ? !(await useTrial(ctx, 'gen')) : !(await use(ctx, 'music'))) throw limitReached(onTrial(ctx) ? 'gen' : 'music', plan)
       const song = await makeSong({ title: body.title, prompt: body.prompt, genre: body.genre, lyrics: body.lyrics, instrumental: body.instrumental, long: !!body.long && premium })
       return new Response(JSON.stringify(song), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' } })
     }

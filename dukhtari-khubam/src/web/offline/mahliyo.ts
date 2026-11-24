@@ -417,6 +417,8 @@ export async function ask(question: string, who: Who, editFrom?: number, files: 
     const { account: _account, ...asker } = who
     const { id, books } = await post<{ id: string; books?: boolean }>('/mahliyo/ask', {
       token: supportToken(), ...asker, session: await sessionToken(), now: localIso(), tz: tz?.slice(0, 64), background: true,
+      // the conversation (a free account's trial counts conversations and their messages)
+      ...(/^[A-Za-z0-9_-]{1,64}$/.test(chat) ? { chat } : {}),
       // an earlier question's pictures are named, not sent again
       turns: recent.map((t, i) => ({
         role: t.role,

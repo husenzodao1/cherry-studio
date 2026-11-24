@@ -7,7 +7,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { AiBlock as Block } from '@/lib/aiCatalog'
 import { ApiError } from '@/lib/http'
-import { fileLimitKind, limitsFrom, periodOf, type LimitKind, type Limits, type Plan } from '@/lib/plans'
+import { fileLimitKind, LIFE, limitsFrom, periodOf, TRIAL, type LimitKind, type Limits, type Plan, type TrialKind } from '@/lib/plans'
 import { supabaseFor, tokenSubject } from '@/lib/supabase'
 
 import { secret, serverReady } from './aiModels'
@@ -58,8 +58,42 @@ export async function use(ctx: PlanCtx, kind: LimitKind): Promise<boolean> {
   }
 }
 
+/** a free account on the trial: everything twice in all (while the plans are on) */
+export const onTrial = (ctx: PlanCtx) => ctx.live && ctx.plan === 'free'
+
+async function count(ctx: PlanCtx, kind: string, limit: number): Promise<{ ok: boolean; used: number }> {
+  if (!serverReady()) return { ok: true, used: 0 }
+  try {
+    const r = await call<{ ok: boolean; used: number }>(ctx.sb, 'api_plan_use', { p_proof: secret(), p_who: ctx.who, p_kind: kind, p_period: LIFE, p_limit: limit, p_count: true })
+    return { ok: r.ok, used: r.used }
+  } catch (e) {
+    console.warn('[plans] trial count failed', e instanceof Error ? e.message : String(e))
+    return { ok: true, used: 0 }
+  }
+}
+
+/** one use of the trial (true for everyone not on it) */
+export async function useTrial(ctx: PlanCtx, kind: TrialKind): Promise<boolean> {
+  if (!onTrial(ctx)) return true
+  return (await count(ctx, `trial:${kind}`, TRIAL[kind])).ok
+}
+
+/**
+ * A message in a conversation on the trial: at most ten in one, and a new conversation is one of the two.
+ * Returns the limit reached, or null. Without the conversation's id (an older app) each message counts alone.
+ */
+export async function trialMessage(ctx: PlanCtx, chat: string | undefined): Promise<'chat' | 'chat_messages' | null> {
+  if (!onTrial(ctx)) return null
+  if (!chat) return (await useTrial(ctx, 'chat')) ? null : 'chat'
+  const inChat = await count(ctx, `trial:c:${chat.slice(0, 64)}`, TRIAL.chatMessages)
+  if (!inChat.ok) return 'chat_messages'
+  // its first message: a new conversation
+  if (inChat.used === 1 && !(await useTrial(ctx, 'chat'))) return 'chat'
+  return null
+}
+
 /** the answer when a limit is reached: the app opens the plans' screen */
-export const limitReached = (kind: LimitKind, plan: Plan) =>
+export const limitReached = (kind: LimitKind | TrialKind | 'chat_messages', plan: Plan) =>
   new ApiError(402, 'plan_limit', 'Маҳдудияти нақшаи шумо ба охир расид.', { kind, plan })
 
 /** the skills counted by their own limit */
@@ -72,8 +106,19 @@ export const MODE_LIMIT: Partial<Record<string, LimitKind>> = { lawyer: 'lawyer'
 export async function withinPlan(blocks: Block[], ctx: PlanCtx): Promise<Block[]> {
   if (!ctx.live) return blocks
   const out: Block[] = []
-  let held: LimitKind | null = null
+  let held: LimitKind | TrialKind | null = null
   for (const b of blocks) {
+    // the trial: files are its eight "functional" messages, a song played or a way shown its two things done
+    if (onTrial(ctx)) {
+      // (a song is counted when it is made: /mahliyo/music)
+      if (b.type === 'music') { out.push(b); continue }
+      const trial: TrialKind | null = b.type === 'file' ? 'func' : b.type === 'play' || b.type === 'navigate' ? 'action' : null
+      if (trial) {
+        if (!(await useTrial(ctx, trial))) { held ??= trial; continue }
+        out.push(b)
+        continue
+      }
+    }
     const kind: LimitKind | null = b.type === 'file' ? fileLimitKind(b.name) : b.type === 'quiz' ? 'quiz' : b.type === 'music' ? 'music' : null
     if (kind && !(await use(ctx, kind))) { held ??= kind; continue }
     out.push(b)

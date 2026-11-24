@@ -43,6 +43,16 @@ export interface Limits {
 export type LimitKind = Exclude<keyof Limits, 'context' | 'keep'>
 export const PERIOD: Record<LimitKind, 'd' | 'm'> = { message: 'd', slides: 'm', doc: 'm', file: 'm', quiz: 'm', mmt: 'm', lawyer: 'm', music: 'm', exam: 'm' }
 
+/**
+ * A free account (while the plans are on) may try everything twice in all, never again after that: two
+ * conversations with Mahliyo (each up to ten messages), two songs made, two things done (a song played, the
+ * way shown…), eight messages that make presentations and documents. Then a plan is needed.
+ */
+export const TRIAL = { chat: 2, chatMessages: 10, gen: 2, action: 2, func: 8 } as const
+export type TrialKind = 'chat' | 'gen' | 'action' | 'func'
+/** the period of a trial: the whole life of the account */
+export const LIFE = 'life'
+
 export const DEFAULT_LIMITS: Record<Plan, Limits> = {
   free: { message: 15, slides: 1, doc: 1, file: 2, quiz: 3, mmt: 1, lawyer: 2, music: 0, exam: 2, context: 12, keep: 7 },
   standard: { message: 40, slides: 3, doc: 4, file: 10, quiz: 20, mmt: 10, lawyer: 10, music: 0, exam: 20, context: 24, keep: 31 },
@@ -83,17 +93,17 @@ export function fileLimitKind(name: string): 'slides' | 'doc' | 'file' {
 export type Cell = boolean | 'limit' | string
 export interface Row { id: string; icon: string; cells: [Cell, Cell, Cell]; limit?: LimitKind | 'keep'; soon?: boolean }
 export const ROWS: Row[] = [
-  { id: 'messages', icon: 'speech', cells: ['limit', 'limit', 'limit'], limit: 'message' },
+  { id: 'messages', icon: 'speech', cells: ['trial_chat', 'limit', 'limit'], limit: 'message' },
   { id: 'model', icon: 'sparkle', cells: ['lite', 'omuzgor', 'tajthinker'] },
   { id: 'memory', icon: 'archive', cells: ['limit', 'limit', 'limit'], limit: 'keep' },
-  { id: 'slides', icon: 'grid', cells: ['limit', 'limit', 'limit'], limit: 'slides' },
-  { id: 'docs', icon: 'file', cells: ['limit', 'limit', 'limit'], limit: 'doc' },
-  { id: 'files', icon: 'code', cells: ['limit', 'limit', 'limit'], limit: 'file' },
+  { id: 'slides', icon: 'grid', cells: ['trial_func', 'limit', 'limit'], limit: 'slides' },
+  { id: 'docs', icon: 'file', cells: ['trial_func', 'limit', 'limit'], limit: 'doc' },
+  { id: 'files', icon: 'code', cells: ['trial_func', 'limit', 'limit'], limit: 'file' },
   { id: 'quiz', icon: 'check', cells: ['limit', 'limit', 'limit'], limit: 'quiz' },
   { id: 'mmt', icon: 'cap', cells: ['limit', 'limit', 'limit'], limit: 'mmt' },
   { id: 'mmt_course', icon: 'target', cells: [false, false, true] },
   { id: 'lawyer', icon: 'scale', cells: ['limit', 'limit', 'limit'], limit: 'lawyer' },
-  { id: 'music', icon: 'music', cells: ['limit', 'limit', 'limit'], limit: 'music' },
+  { id: 'music', icon: 'music', cells: ['trial_two', 'limit', 'limit'], limit: 'music' },
   { id: 'calls', icon: 'phone', cells: [false, false, true] },
   { id: 'exams', icon: 'book', cells: ['limit', 'limit', 'limit'], limit: 'exam' },
   { id: 'courses', icon: 'layers', cells: ['free', 'standard', 'all'] },
