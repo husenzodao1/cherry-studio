@@ -173,8 +173,16 @@ export function durationOf(text: string): number {
 
 /** her name and the call words taken off the front */
 export function withoutName(text: string): string {
-  return text.toLowerCase().replace(/[!?.,]/g, ' ').replace(/\s+/g, ' ').trim()
+  const t = text.toLowerCase().replace(/[!?.,]/g, ' ').replace(/\s+/g, ' ').trim()
     .replace(/^((эй|ҳей|хей|ҳой|hey|эй)\s+)?(маҳлиё|махлиё|mahliyo|маҳ лиё)\s*/, '').trim()
+  // her name as a small model hears it ("эй моҳи …", "махлие …"): by its consonants
+  const m = /^(?:(?:эй|ей|ҳей|хей|ай|hey)\s+)?(\S+)\s*(.*)$/.exec(t)
+  if (m) {
+    const k = m[1].replace(/ҳ/g, 'х').replace(/[аоуэеиёюяыӣӯьъй]/g, '')
+    const afterHey = /^(эй|ей|ҳей|хей|ай|hey)\s/.test(t)
+    if (k === 'мхл' || k === 'млх' || (afterHey && k === 'мх')) return m[2].trim()
+  }
+  return t
 }
 
 export function commandOf(said: string): VoiceCommand {

@@ -62,17 +62,39 @@ export async function hey(): Promise<{ p: HeyPlugin }> {
 /** the enrolment: three phrases with her name, said in her own voice */
 export const PHRASES = ['Эй Маҳлиё, имрӯз обу ҳаво чӣ гуна аст?', 'Эй Маҳлиё, соат чанд шуд?', 'Эй Маҳлиё, маро ба хона бубар.']
 
-const words = (s: string) => s.toLowerCase().replace(/[^\p{L}\s]/gu, ' ').replace(/х/g, 'ҳ').split(/\s+/).filter(Boolean)
+const words = (s: string) => s.toLowerCase().replace(/[^\p{L}\s]/gu, ' ').split(/\s+/).filter(Boolean)
 /**
- * Whether a phrase was said well enough to learn her voice from: her name heard, and at least half of its
- * other words.
+ * A word by its consonants only ("маҳлиё" → "мхл", "моро" → "мр"): the phone's small model often hears the
+ * vowels wrong ("моро" for "маро", "бо" for "ба"), rarely the consonants. Tajik letters as Russian ones.
+ */
+export const skeleton = (w: string) => w.toLowerCase().replace(/ҳ/g, 'х').replace(/қ/g, 'к').replace(/ҷ/g, 'ч').replace(/ғ/g, 'г')
+  .replace(/[аоуэеиёюяыӣӯьъйa-z]/g, '')
+const near = (a: string, b: string) => {
+  if (a === b) return true
+  if (Math.abs(a.length - b.length) > 1) return false
+  // one letter more, less or different
+  let i = 0
+  while (i < a.length && i < b.length && a[i] === b[i]) i++
+  return a.slice(i + 1) === b.slice(i + 1) || a.slice(i) === b.slice(i + 1) || a.slice(i + 1) === b.slice(i)
+}
+/** her name, as a small model may hear it: "маҳлиё", "махлие", "моҳи" … (м-х-л, or м-х after "эй") */
+export function nameHeard(heard: string): boolean {
+  const ws = words(heard)
+  return ws.some((w, i) => {
+    const k = skeleton(w)
+    return k === 'мхл' || k === 'млх' || (k === 'мх' && /^(эй|ей|ҳей|хей|ай|hey)$/.test(ws[i - 1] ?? '')) || /^mah?l/.test(w)
+  })
+}
+/**
+ * Whether a phrase was said well enough to learn her voice from: her name heard (as a small model hears it),
+ * and at least half of its other words alike in their consonants.
  */
 export function phraseHeard(phrase: string, heard: string): boolean {
-  const said = new Set(words(heard))
-  const want = words(phrase)
-  if (!said.has('маҳлиё')) return false
-  const rest = want.filter((w) => w !== 'эй' && w !== 'маҳлиё')
-  return rest.filter((w) => said.has(w)).length >= Math.ceil(rest.length / 2)
+  if (!nameHeard(heard)) return false
+  const said = words(heard).map(skeleton).filter(Boolean)
+  const rest = words(phrase).filter((w) => !/^(эй|маҳлиё)$/.test(w)).map(skeleton).filter(Boolean)
+  const found = rest.filter((k) => said.some((s) => near(k, s))).length
+  return found >= Math.ceil(rest.length / 2)
 }
 
 /** the weather where she is now (Open-Meteo, no key): degrees, wind, and what the sky does */

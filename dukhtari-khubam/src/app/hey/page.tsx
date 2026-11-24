@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { api } from '@/web/api'
 import { CrownSpin } from '@/web/components/CrownSpin'
 import { Header } from '@/web/components/Header'
 import { Icon } from '@/web/components/Icon'
@@ -87,9 +88,15 @@ export default function HeyPage() {
     setHeard('')
     partial.current = await p.addListener('partial', (e) => setHeard(e.text))
     try {
-      const r = await p.listen({ seconds: 8 })
+      const r = await p.listen({ seconds: 8, lang: 'tg', audio: navigator.onLine })
       setHeard(r.text)
-      if (r.spk && phraseHeard(PHRASES[step], r.text)) {
+      // the phone's small model heard it too badly: online, the server's (Chirp 2) hears the recording again
+      let ok = phraseHeard(PHRASES[step], r.text)
+      if (!ok && r.wav) {
+        const server = await api<{ text: string }>('/voice/hear', { method: 'POST', body: { wav: r.wav, lang: 'tg' }, signal: AbortSignal.timeout(14_000) }).catch(() => null)
+        if (server?.text) { setHeard(server.text); ok = phraseHeard(PHRASES[step], server.text) }
+      }
+      if (r.spk && ok) {
         const next = [...prints, r.spk]
         setPrints(next)
         setMiss(0)

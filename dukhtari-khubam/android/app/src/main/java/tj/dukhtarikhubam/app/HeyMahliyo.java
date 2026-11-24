@@ -204,10 +204,25 @@ public final class HeyMahliyo {
     }
 
     /** her name heard in the words (also as two words, or with the Russian "х") */
+    /** a word by its consonants ("маҳлиё" → "мхл", "моҳи" → "мх"): the small model hears vowels wrong, rarely these */
+    static String skeleton(String w) {
+        return w.toLowerCase().replace('ҳ', 'х').replace('қ', 'к').replace('ҷ', 'ч').replace('ғ', 'г')
+            .replaceAll("[аоуэеиёюяыӣӯьъй]", "");
+    }
+
+    /**
+     * Her name in what was heard, as a small model hears it: "маҳлиё", "махлие", "моҳи" after "эй"… (the same rule
+     * as the app's nameHeard). A word near it is let through here; her voiceprint decides.
+     */
     static boolean named(String text) {
         if (text == null) return false;
-        String t = " " + text.toLowerCase().replace('х', 'ҳ') + " ";
-        return t.contains("маҳлиё") || t.contains("маҳ лиё") || t.contains("маҳ лия");
+        String[] ws = text.toLowerCase().trim().split("\\s+");
+        for (int i = 0; i < ws.length; i++) {
+            String k = skeleton(ws[i]);
+            if (k.equals("мхл") || k.equals("млх")) return true;
+            if (k.equals("мх") && i > 0 && ws[i - 1].matches("эй|ей|ҳей|хей|ай")) return true;
+        }
+        return false;
     }
 
     static boolean mic(Context c) {

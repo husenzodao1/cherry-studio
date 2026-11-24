@@ -1,13 +1,48 @@
 import { GoogleGenAI } from '@google/genai'
 
+import { cloudCredentials, cloudToken } from './googleCloud'
 import { GEMINI_MODELS, geminiKeys } from './mahliyo'
 
 /**
- * "Эй Маҳлиё" online: what she said, heard by the server's AI (Gemini hears speech in all the app's seven
- * languages, Tajik too, much better than the phone's small offline models). The phone sends a short WAV
- * (16 kHz mono); the words come back in her language's own script. Without a key, or when no model answers,
- * the phone keeps what its own model heard.
+ * "Эй Маҳлиё" online: what she said, heard by the server. First Google Cloud Speech-to-Text (Chirp 2: it knows
+ * Tajik, tg-TJ, and the app's other languages), when its service account is set; else Gemini (it hears speech
+ * in the seven languages too). The phone sends a short WAV (16 kHz mono); the words come back in her
+ * language's own script. When neither answers, the phone keeps what its own model heard.
  */
+
+/** the app's languages as Speech-to-Text names them (Dari is heard by the Persian model) */
+export const STT_LANG: Record<string, string> = { tg: 'tg-TJ', ru: 'ru-RU', en: 'en-US', uz: 'uz-UZ', tr: 'tr-TR', fa: 'fa-IR', prs: 'fa-IR' }
+
+/** Google Cloud Speech-to-Text v2, Chirp 2 (europe-west4 unless GOOGLE_STT_REGION says otherwise) */
+export async function chirp(wav: string, lang: string, fetcher: typeof fetch = fetch): Promise<string | null> {
+  const c = cloudCredentials()
+  if (!c) return null
+  const token = await cloudToken(fetcher)
+  const region = process.env.GOOGLE_STT_REGION?.trim() || 'europe-west4'
+  const res = await fetcher(`https://${region}-speech.googleapis.com/v2/projects/${c.project_id}/locations/${region}/recognizers/_:recognize`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      config: { autoDecodingConfig: {}, languageCodes: [STT_LANG[lang] ?? 'tg-TJ'], model: 'chirp_2', features: { enableAutomaticPunctuation: true } },
+      content: wav
+    }),
+    signal: AbortSignal.timeout(15_000)
+  })
+  const d = (await res.json()) as { results?: { alternatives?: { transcript?: string }[] }[]; error?: { message?: string } }
+  if (!res.ok) throw new Error(`chirp ${res.status}: ${d.error?.message ?? ''}`)
+  return (d.results ?? []).map((r) => r.alternatives?.[0]?.transcript ?? '').join(' ').replace(/\s+/g, ' ').trim()
+}
+
+/** her words: Chirp 2 first, then Gemini; null when neither could hear them */
+export async function hear(wav: string, lang: string): Promise<string | null> {
+  try {
+    const t = await chirp(wav, lang)
+    if (t !== null) return t
+  } catch (e) {
+    console.warn('[speech] chirp failed:', String(e instanceof Error ? e.message : e).slice(0, 200))
+  }
+  return transcribe(wav, lang)
+}
 
 const LANGS: Record<string, string> = {
   tg: 'Tajik (written in Tajik Cyrillic: ҳ, қ, ҷ, ғ, ӣ, ӯ)', ru: 'Russian', en: 'English', uz: 'Uzbek (Latin script)',

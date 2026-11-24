@@ -4,7 +4,7 @@ import { ApiError } from '@/lib/http'
 import { route, type AnyRoute } from '@/lib/router'
 
 import { planSettings } from '../plans'
-import { transcribe } from '../speech'
+import { hear } from '../speech'
 import { call } from '../util'
 
 /** "Эй Маҳлиё" (Standard and Premium): what she said, heard by the server's AI (see ../speech.ts). */
@@ -19,7 +19,7 @@ export const voiceRoutes: AnyRoute[] = [
         const mine = await call<{ plan?: string }>(sb(), 'api_my_plan').catch(() => ({ plan: 'free' }))
         if (mine.plan === 'free' || !mine.plan) throw new ApiError(402, 'plan_limit', 'Standard or Premium', { kind: 'hey' })
       }
-      const text = await transcribe(body.wav, body.lang)
+      const text = await hear(body.wav, body.lang)
       if (text === null) throw new ApiError(503, 'unavailable', 'Speech could not be heard now')
       return { text }
     }

@@ -70,3 +70,12 @@ describe('calls by name or number', () => {
     expect(matchContacts('Зарина', book)).toEqual([])
   })
 })
+
+describe('her name as the phone hears it', () => {
+  it('is taken off the front however it was spelt', () => {
+    expect(withoutName('эй моҳи соат чанд')).toBe('соат чанд')
+    expect(withoutName('махлие таймер панҷ дақиқа')).toBe('таймер панҷ дақиқа')
+    expect(withoutName('моҳи январ сард аст')).toBe('моҳи январ сард аст')
+    expect(commandOf('эй моҳи соат чанд шуд')).toEqual({ kind: 'time' })
+  })
+})
